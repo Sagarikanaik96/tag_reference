@@ -15,6 +15,8 @@ echo -e "frappe\nerpnext\ntag_workflow" >> /home/erpuser/frappe-bench/sites/apps
 chmod 644 /home/erpuser/frappe-bench/sites/apps.txt
 cat /home/erpuser/frappe-bench/sites/apps.txt
 ls -l /home/erpuser/frappe-bench/sites/
+bench migrate
+bench update
 bench build --app tag_workflow
 sudo supervisorctl restart all
 bench --site site1.local install-app tag_workflow
