@@ -1,0 +1,42 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Organization Type",
+  "modified": "2021-11-01 15:52:46.521647",
+  "name": "TAG",
+  "organization": "TAG",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Organization Type",
+  "modified": "2021-11-01 15:52:55.209805",
+  "name": "Hiring",
+  "organization": "Hiring",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Organization Type",
+  "modified": "2021-11-01 15:53:03.624388",
+  "name": "Staffing",
+  "organization": "Staffing",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Organization Type",
+  "modified": "2021-11-01 15:53:26.531990",
+  "name": "Exclusive Hiring",
+  "organization": "Exclusive Hiring",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ }
+]

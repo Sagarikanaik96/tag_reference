@@ -11,7 +11,7 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-
+fixtures = ["Organization Type"]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/tag_workflow/css/tag_workflow.css"
 # app_include_js = "/assets/tag_workflow/js/tag_workflow.js"
