@@ -9,13 +9,15 @@ sudo chown -R erpuser:erpuser /home/erpuser/frappe-bench/apps/tag_workflow/
 sudo python3 -m pip install -U -e tag_workflow
 bench update
 bench setup requirements
+bench build --app tag_workflow
 sudo rm /home/erpuser/frappe-bench/sites/apps.txt
 touch /home/erpuser/frappe-bench/sites/apps.txt
 echo -e "frappe\nerpnext\ntag_workflow" >> /home/erpuser/frappe-bench/sites/apps.txt
 chmod 644 /home/erpuser/frappe-bench/sites/apps.txt
 cat /home/erpuser/frappe-bench/sites/apps.txt
 ls -l /home/erpuser/frappe-bench/sites/
-bench build --app tag_workflow
+bench setup requirements
+bench migrate
 sudo supervisorctl restart all
 bench --site site1.local install-app tag_workflow
 sudo apt-get install jq -y
