@@ -11,10 +11,14 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-fixtures = ["Organization Type"]
+#fixtures = ["Custom DocPerm"]
+on_session_creation = [
+        "tag_workflow.utils.trigger_session.on_session_creation"
+]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/tag_workflow/css/tag_workflow.css"
 # app_include_js = "/assets/tag_workflow/js/tag_workflow.js"
+
 
 # include js, css files in header of web template
 # web_include_css = "/assets/tag_workflow/css/tag_workflow.css"
@@ -31,7 +35,10 @@ fixtures = ["Organization Type"]
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+        "User" : "public/js/controllers/user.js",
+        "Company": "public/js/controllers/company.js"
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -67,7 +74,7 @@ fixtures = ["Organization Type"]
 
 # before_install = "tag_workflow.install.before_install"
 # after_install = "tag_workflow.install.after_install"
-
+after_migrate = ["tag_workflow.utils.organization.setup_data"]
 # Desk Notifications
 # ------------------
 # See frappe.core.notifications.get_notification_config
@@ -98,14 +105,11 @@ fixtures = ["Organization Type"]
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
-
+doc_events = {
+        "*":{
+            "validate": "tag_workflow.controllers.base_controller.validate_controller"
+        }
+}
 # Scheduled Tasks
 # ---------------
 
