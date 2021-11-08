@@ -1,0 +1,320 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2021-11-01 14:30:14.296881",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "naming_series",
+  "column_break_4",
+  "posting_date_time",
+  "amended_from",
+  "section_break_7",
+  "resumes_required",
+  "column_break_9",
+  "require_staff_to_wear_face_mask",
+  "section_break_11",
+  "select_job",
+  "job_title",
+  "job_site",
+  "no_of_workers",
+  "worker_filled",
+  "column_break_15",
+  "job_duration",
+  "estimated_hour",
+  "extra_price_increase",
+  "extra_notes",
+  "additional_addons_section",
+  "drug_screen",
+  "background_check",
+  "column_break_24",
+  "driving_record",
+  "shovel",
+  "bill_rate_section",
+  "per_hour",
+  "column_break_29",
+  "flat_rate",
+  "address_info_section",
+  "address",
+  "data_33",
+  "email",
+  "phone_number",
+  "e_signature_for_order_request_section",
+  "html_37",
+  "e_signature_full_name",
+  "agree_to_contract",
+  "age_reqiured",
+  "apply_for_quotation_section",
+  "create_quotation"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "JO-"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "now",
+   "fieldname": "posting_date_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Posting Date TIme",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Job Order",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "resumes_required",
+   "fieldtype": "Check",
+   "label": "Resumes Required"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "require_staff_to_wear_face_mask",
+   "fieldtype": "Check",
+   "label": "Require staff to wear face mask"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break",
+   "label": "Job Info"
+  },
+  {
+   "fieldname": "select_job",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Select Job",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "select_job.item_name",
+   "fetch_if_empty": 1,
+   "fieldname": "job_title",
+   "fieldtype": "Data",
+   "label": "Job Title"
+  },
+  {
+   "fieldname": "job_site",
+   "fieldtype": "Link",
+   "label": "Job Site",
+   "options": "Job Site"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_of_workers",
+   "fieldtype": "Int",
+   "label": "No. of workers",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "worker_filled",
+   "fieldtype": "Int",
+   "label": "Worker Filled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "job_duration",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Job Duration",
+   "options": "N/A\n1 Day\n2 Day\n3 Day\n4 Day\n5 Day\n6 Day\n1 Week\n2 Week\n3 Week\n4 Week\n5 Week\n6 Week\n1 Month\n2 Month\n3 Month\n4 Month\n5 Month\n6 Month\nTemp to Hire"
+  },
+  {
+   "default": "0",
+   "fieldname": "estimated_hour",
+   "fieldtype": "Float",
+   "label": "Estimated Hour"
+  },
+  {
+   "default": "0",
+   "fieldname": "extra_price_increase",
+   "fieldtype": "Float",
+   "label": "Extra Price Increase"
+  },
+  {
+   "fieldname": "extra_notes",
+   "fieldtype": "Small Text",
+   "label": "Extra Notes"
+  },
+  {
+   "fieldname": "additional_addons_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Addons:(optional)"
+  },
+  {
+   "fieldname": "drug_screen",
+   "fieldtype": "Select",
+   "label": "Drug Screen",
+   "options": "None\n$0.50/hour per person\n$15 flat per person"
+  },
+  {
+   "fieldname": "background_check",
+   "fieldtype": "Select",
+   "label": "Background Check",
+   "options": "None\n$0.60/hour per person\n$20 flat per person"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "driving_record",
+   "fieldtype": "Select",
+   "label": "Driving Record",
+   "options": "None\n$0.40/hour per person\n$10 flat per person"
+  },
+  {
+   "fieldname": "shovel",
+   "fieldtype": "Select",
+   "label": "Shovel",
+   "options": "None\n$0.15/hour per person\n$5 flat per person"
+  },
+  {
+   "fieldname": "bill_rate_section",
+   "fieldtype": "Section Break",
+   "label": "Bill Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_hour",
+   "fieldtype": "Float",
+   "label": "Per Hour"
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "flat_rate",
+   "fieldtype": "Float",
+   "label": "Flat Rate"
+  },
+  {
+   "fieldname": "address_info_section",
+   "fieldtype": "Section Break",
+   "label": "Address Info"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "data_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "e_signature_for_order_request_section",
+   "fieldtype": "Section Break",
+   "label": "E Signature for Order Request"
+  },
+  {
+   "fieldname": "html_37",
+   "fieldtype": "HTML",
+   "options": "<b>Important Note Regarding Signature</b> By typing your full name below and submitting this agreement. You acknowledge and agree that your typed name represents your signed name(signature) and that you intend for this electronic signature to have the same force and effects as a manual(handwritten) signature.<br>\n"
+  },
+  {
+   "fieldname": "e_signature_full_name",
+   "fieldtype": "Signature",
+   "label": "E-Signature Full Name"
+  },
+  {
+   "default": "0",
+   "fieldname": "agree_to_contract",
+   "fieldtype": "Check",
+   "label": "Agree To Contract"
+  },
+  {
+   "default": "0",
+   "fieldname": "age_reqiured",
+   "fieldtype": "Check",
+   "label": "Check if age 18+ are required for this order"
+  },
+  {
+   "fieldname": "apply_for_quotation_section",
+   "fieldtype": "Section Break",
+   "label": "Apply for Quotation"
+  },
+  {
+   "fieldname": "create_quotation",
+   "fieldtype": "Button",
+   "label": "Create Quotation",
+   "permlevel": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "migration_hash": "0b309516a495ef69f3ca1ff9fd41d604",
+ "modified": "2021-11-08 12:04:44.823736",
+ "modified_by": "Administrator",
+ "module": "Tag Workflow",
+ "name": "Job Order",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
