@@ -33,3 +33,7 @@ class MasterController(base_controller.BaseController):
                     self.doc.module_profile = "Staffing"
             else:
                 frappe.throw(_("Please select <b>Organization Type</b> and <b>TAG User Type</b> before saving the User."))
+        elif(self.dt == "Item"):
+            if not frappe.db.exists("Activity Type", {"name": self.doc.name}):
+                item = frappe.get_doc(dict(doctype = "Activity Type", activity_type = self.doc.name))
+                item.save()
