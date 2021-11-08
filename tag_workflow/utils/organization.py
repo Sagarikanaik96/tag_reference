@@ -29,6 +29,7 @@ def setup_data():
         frappe.db.commit()
     except Exception as e:
         print(e)
+        frappe.log_error(e, "Master")
         #frappe.db.rollback()
 
 def update_organization():
@@ -45,6 +46,7 @@ def update_organization():
                     custom_doc.save()
     except Exception as e:
         print(e)
+        frappe.log_error(e, "update_organization")
 
 def update_organization_data():
     try:
@@ -55,6 +57,7 @@ def update_organization_data():
             org_doc.save()
     except Exception as e:
         print(e)
+        frappe.log_error(e, "update_organization_data")
 
 
 def update_roles():
@@ -66,6 +69,7 @@ def update_roles():
                 role_doc.save()
     except Exception as e:
         print(e)
+        frappe.log_error(e, "update_roles")
 
 def update_role_profile():
     try:
@@ -87,6 +91,7 @@ def update_role_profile():
             profile_doc.save()
     except Exception as e:
         print(e)
+        frappe.log_error(e, "update_role_profile")
 
 def update_module_profile():
     try:
@@ -112,6 +117,7 @@ def update_module_profile():
             module_doc.save()
     except Exception as e:
         print(e)
+        frappe.log_error(e, "update_module_profile")
 
 
 def update_permissions():
@@ -119,7 +125,7 @@ def update_permissions():
         print("*------updating permissions-----------------*\n")
         frappe.db.sql(""" delete from `tabCustom DocPerm` """)
         FILE_PATH = str(Path(__file__).resolve().parent) + "/role_permission.json"
-        #refactor_permission_data(FILE_PATH)
+        refactor_permission_data(FILE_PATH)
 
         with open(FILE_PATH, 'r') as data_file:
             permissions = json.load(data_file)
@@ -129,6 +135,7 @@ def update_permissions():
             permission_doc.save()
     except Exception as e:
         print(e)
+        frappe.log_error(e, "update_permissions")
 
 
 def refactor_permission_data(FILE):
@@ -144,3 +151,4 @@ def refactor_permission_data(FILE):
             data = json.dump(data, data_file)
     except Exception as e:
         print(e)
+        frappe.log_error(e, "refactor_permission_data")
