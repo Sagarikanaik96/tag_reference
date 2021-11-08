@@ -37,7 +37,8 @@ on_session_creation = [
 # include js in doctype views
 doctype_js = {
         "User" : "public/js/controllers/user.js",
-        "Company": "public/js/controllers/company.js"
+        "Company": "public/js/controllers/company.js",
+        "Item": "public/js/controllers/item.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}

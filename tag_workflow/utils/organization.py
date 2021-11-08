@@ -10,6 +10,7 @@ from pathlib import Path
 
 ALL_ROLES = [role.name for role in frappe.db.get_list("Role") or []]
 ADD_ORGANIZATION = ["Company", "User"]
+ADD_ORGANIZATION_DATA = ["TAG", "Hiring", "Staffing", "Exclusive Hiring"]
 ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag Admin", "CRM User", "Staff"]
 
 ROLE_PROFILE = [{"Staffing Admin": ["Accounts User", "Report Manager", "Sales User", "Staffing Admin", "Website Manager", "CRM User", "Employee"]}, {"Staffing User": ["Accounts User", "Sales User", "Website Manager", "CRM User", "Employee", "Staffing User"]}, {"Hiring Admin": ["Hiring Admin", "Report Manager", "Website Manager", "CRM User", "Employee", "Projects User"]}, {"Hiring User": ["Website Manager", "CRM User", "Employee", "Hiring User", "Projects User"]}, {"Tag Admin": ALL_ROLES}]
@@ -20,6 +21,7 @@ MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", "Tag Workflow", "Accounts", "
 def setup_data():
     try:
         update_organization()
+        update_organization_data()
         update_roles()
         update_role_profile()
         update_module_profile()
@@ -27,7 +29,7 @@ def setup_data():
         frappe.db.commit()
     except Exception as e:
         print(e)
-        frappe.db.rollback()
+        #frappe.db.rollback()
 
 def update_organization():
     try:
@@ -38,9 +40,19 @@ def update_organization():
                 custom_doc.save()
 
             if(docs == "User"):
-                if not frappe.db.exists("Custom Field", {"dt": docs, "fieldname": "TAG User Type"}):
+                if not frappe.db.exists("Custom Field", {"dt": docs, "label": "TAG User Type"}):
                     custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt = docs, label = "TAG User Type", fieldtype = "Select", options = "\nHiring Admin\nHiring User\nStaffing Admin\nStaffing User", mandatory_depends_on="eval: doc.organization_type", depends_on = "eval: doc.organization_type"))
                     custom_doc.save()
+    except Exception as e:
+        print(e)
+
+def update_organization_data():
+    try:
+        print("*------updating organization data-----------*\n")
+        frappe.db.sql(""" delete from `tabOrganization Type` """)
+        for data in ADD_ORGANIZATION_DATA:
+            org_doc = frappe.get_doc(dict(doctype = "Organization Type", organization = data))
+            org_doc.save()
     except Exception as e:
         print(e)
 

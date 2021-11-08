@@ -6,7 +6,7 @@
 import frappe, json
 from frappe import _, msgprint, throw
 
-MASTER = ["Company", "User"]
+MASTER = ["Company", "User", "Item"]
 
 def validate_controller(doc, method):
     doctype = doc.meta.get("name")
