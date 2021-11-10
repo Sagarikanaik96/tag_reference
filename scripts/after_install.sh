@@ -23,3 +23,4 @@ bench --site site1.local install-app tag_workflow
 sudo apt-get install jq -y
 echo $(jq '.maintenance_mode |= 0' /home/erpuser/frappe-bench/sites/common_site_config.json) > /home/erpuser/frappe-bench/sites/common_site_config.json
 sudo supervisorctl restart all
+bench migrate
