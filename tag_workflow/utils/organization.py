@@ -9,14 +9,16 @@ import json, os
 from pathlib import Path
 
 ALL_ROLES = [role.name for role in frappe.db.get_list("Role") or []]
-ADD_ORGANIZATION = ["Company", "User"]
-ADD_ORGANIZATION_DATA = ["TAG", "Hiring", "Staffing", "Exclusive Hiring"]
-ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag Admin", "CRM User", "Staff"]
 
+ADD_ORGANIZATION = ["Company", "User", "Quotation", "Lead"]
+ADD_ORGANIZATION_DATA = ["TAG", "Hiring", "Staffing", "Exclusive Hiring"]
+
+ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag Admin", "CRM User", "Staff"]
 ROLE_PROFILE = [{"Staffing Admin": ["Accounts User", "Report Manager", "Sales User", "Staffing Admin", "Website Manager", "CRM User", "Employee"]}, {"Staffing User": ["Accounts User", "Sales User", "Website Manager", "CRM User", "Employee", "Staffing User"]}, {"Hiring Admin": ["Hiring Admin", "Report Manager", "Website Manager", "CRM User", "Employee", "Projects User"]}, {"Hiring User": ["Website Manager", "CRM User", "Employee", "Hiring User", "Projects User"]}, {"Tag Admin": ALL_ROLES}]
 
 MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", "Tag Workflow", "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", "Tag Workflow", "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", "Tag Workflow", "Selling"]}]
 
+SPACE_PROFILE = ["CRM", "HR", "Projects", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings"]
 #-------setup data for TAG -------------#
 def setup_data():
     try:
@@ -26,6 +28,7 @@ def setup_data():
         update_role_profile()
         update_module_profile()
         update_permissions()
+        set_workspace()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -36,13 +39,26 @@ def update_organization():
     try:
         print("*------updating organization field----------*\n")
         for docs in ADD_ORGANIZATION:
-            if not frappe.db.exists("Custom Field", {"dt": docs, "label": "Organization Type"}):
-                custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt = docs, label = "Organization Type", fieldtype = "Link", options = "Organization Type",reqd=1))
-                custom_doc.save()
+            if(docs in ["Company", "User"]):
+                if not frappe.db.exists("Custom Field", {"dt": docs, "label": "Organization Type"}):
+                    custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt=docs, label="Organization Type", fieldtype="Link", options="Organization Type",reqd=1))
+                    custom_doc.save()
 
-            if(docs == "User"):
-                if not frappe.db.exists("Custom Field", {"dt": docs, "label": "TAG User Type"}):
-                    custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt = docs, label = "TAG User Type", fieldtype = "Select", options = "\nHiring Admin\nHiring User\nStaffing Admin\nStaffing User", mandatory_depends_on="eval: doc.organization_type", depends_on = "eval: doc.organization_type"))
+                if(docs == "User"):
+                    if not frappe.db.exists("Custom Field", {"dt": docs, "label": "TAG User Type"}):
+                        custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt = docs, label = "TAG User Type", fieldtype = "Select", options = "\nHiring Admin\nHiring User\nStaffing Admin\nStaffing User\nTag Admin\nTag User", mandatory_depends_on="eval: doc.organization_type", depends_on = "eval: doc.organization_type"))
+                        custom_doc.save()
+            elif(docs in ["Quotation"]):
+                if not frappe.db.exists("Custom Field", {"dt": docs, "label": "Job Order"}):
+                    custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt=docs, label="Job Order", fieldtype="Link", options="Job Order",reqd=1))
+                    custom_doc.save()
+            elif(docs in ["Lead"]):
+                if not frappe.db.exists("Custom Field", {"dt": docs, "label": "Signature Section"}):
+                    custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt=docs, label="Signature Section", fieldtype="Section Break", insert_after="title"))
+                    custom_doc.save()
+
+                if not frappe.db.exists("Custom Field", {"dt": docs, "label": "Signature"}):
+                    custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt=docs, label="Signature", fieldtype="Signature",reqd=0, insert_after="Signature Section", mandatory_depends_on="eval: doc.status=='Close'"))
                     custom_doc.save()
     except Exception as e:
         print(e)
@@ -152,3 +168,15 @@ def refactor_permission_data(FILE):
     except Exception as e:
         print(e)
         frappe.log_error(e, "refactor_permission_data")
+
+
+# workspace update
+def set_workspace():
+    try:
+        print("*------updating workspace-----------------*\n")
+        workspace = frappe.get_list("Workspace", ['name'])
+        for space in workspace:
+            if(space.name not in SPACE_PROFILE):
+                frappe.delete_doc("Workspace", space.name)
+    except Exception as e:
+        print(e)
