@@ -18,6 +18,7 @@ ROLE_PROFILE = [{"Staffing Admin": ["Accounts User", "Report Manager", "Sales Us
 
 MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", "Tag Workflow", "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", "Tag Workflow", "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", "Tag Workflow", "Selling"]}]
 
+SPACE_PROFILE = ["CRM", "HR", "Projects", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings"]
 #-------setup data for TAG -------------#
 def setup_data():
     try:
@@ -27,6 +28,7 @@ def setup_data():
         update_role_profile()
         update_module_profile()
         update_permissions()
+        set_workspace()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -166,3 +168,15 @@ def refactor_permission_data(FILE):
     except Exception as e:
         print(e)
         frappe.log_error(e, "refactor_permission_data")
+
+
+# workspace update
+def set_workspace():
+    try:
+        print("*------updating workspace-----------------*\n")
+        workspace = frappe.get_list("Workspace", ['name'])
+        for space in workspace:
+            if(space.name not in SPACE_PROFILE):
+                frappe.delete_doc("Workspace", space.name)
+    except Exception as e:
+        print(e)
