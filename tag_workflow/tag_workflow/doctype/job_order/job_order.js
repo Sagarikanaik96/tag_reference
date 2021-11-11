@@ -116,14 +116,14 @@ frappe.ui.form.on("Quotation",{
 			frappe.call({
 				method:"tag_workflow.tag_data.submit_values",
 				args:{
-					'job_order_name':cur_frm.doc.job_order
+					'job_order_name':cur_frm.doc.job_order,
+					'quotation_number':cur_frm.doc.name
 				},
 				callback:function(r){
 					if(r.message!="success")
 					{
 						msgprint("One Quotation is already submitted");
 						frappe.validated = false;
-
 
 					}
 				}
@@ -139,23 +139,40 @@ frappe.ui.form.on("Quotation",{
 		
 	}
 })
-frappe.ui.form.on("Quotation",{
-	after_save: function(frm){
-		console.log('hello')
-		if(cur_frm.doc.job_order)
-		{
-			frappe.call({
-				method:"tag_workflow.tag_data.assign_quotation",
-				args:{
-					'quotation_name':cur_frm.doc.name,
-					'job_order_name':cur_frm.doc.job_order
-				},
-				callback:function(r){
-					console.log(r.message)
-				}
-			})
-		}
-	}
+// frappe.ui.form.on("Quotation",{
+// 	after_save: function(frm){
+// 		console.log('hello')
+// 		if(cur_frm.doc.job_order)
+// 		{
+// 			frappe.call({
+// 				method:"tag_workflow.tag_data.assign_quotation",
+// 				args:{
+// 					'quotation_name':cur_frm.doc.name,
+// 					'job_order_name':cur_frm.doc.job_order
+// 				},
+// 				callback:function(r){
+// 					console.log(r.message)
+// 				}
+// 			})
+// 		}
+// 	}
 	
 
+// })
+frappe.ui.form.on("Quotation",{
+	"on_submit":function(frm)
+	{
+		console.log('fadhubhfvghvdasx')
+		console.log(cur_frm.doc.name)
+		frappe.call({
+			method:"tag_workflow.tag_data.update_job_order",
+			args:{
+				'quotation_name':cur_frm.doc.name,
+				'job_order_name':cur_frm.doc.job_order
+			},
+			callback:function(r){
+				console.log(r.message)
+			}
+		})
+	}
 })
