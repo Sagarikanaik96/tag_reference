@@ -39,7 +39,9 @@ doctype_js = {
         "User" : "public/js/controllers/user.js",
         "Company": "public/js/controllers/company.js",
         "Item": "public/js/controllers/item.js",
-        "Timesheet": "public/js/controllers/timesheet.js"
+        "Timesheet": "public/js/controllers/timesheet.js",
+        "Quotation": "public/js/controllers/quotation.js",
+        "Sales Order": "public/js/controllers/sales_order.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}

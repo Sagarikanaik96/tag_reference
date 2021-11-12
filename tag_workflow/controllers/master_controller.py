@@ -71,8 +71,9 @@ def make_update_comp_perm(docname):
     try:
         doc = frappe.get_doc("Company", docname)
         if doc.organization_type == "Exclusive Hiring":
-            perm = frappe.get_doc(dict(doctype = "User Permission", user = frappe.session.user, allow = "Company", for_value = doc.name, apply_to_all_doctypes = 1))
-            perm.save(ignore_permissions=True)
+            if not frappe.db.exists("User Permission", {"user":frappe.session.user, "allow":"Company", "for_value": doc.name, "apply_to_all_doctypes": 1}):
+                perm = frappe.get_doc(dict(doctype = "User Permission", user = frappe.session.user, allow = "Company", for_value = doc.name, apply_to_all_doctypes = 1))
+                perm.save(ignore_permissions=True)
         elif doc.organization_type != "Staffing":
             user_list = get_user_list()
             enqueue("tag_workflow.controllers.master_controller.update_user_permission", user_list=user_list, company=doc.name)
