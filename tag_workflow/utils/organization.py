@@ -7,6 +7,7 @@ from frappe import _
 from frappe.config import get_modules_from_all_apps
 import json, os
 from pathlib import Path
+from tag_workflow.controllers.master_controller import make_update_comp_perm
 
 ALL_ROLES = [role.name for role in frappe.db.get_list("Role") or []]
 
@@ -18,7 +19,7 @@ ROLE_PROFILE = [{"Staffing Admin": ["Accounts User", "Report Manager", "Sales Us
 
 MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", "Tag Workflow", "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", "Tag Workflow", "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", "Tag Workflow", "Selling"]}]
 
-SPACE_PROFILE = ["CRM", "HR", "Projects", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings"]
+SPACE_PROFILE = ["CRM", "HR", "Projects", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings", "Home"]
 #-------setup data for TAG -------------#
 def setup_data():
     try:
@@ -29,6 +30,7 @@ def setup_data():
         update_module_profile()
         update_permissions()
         set_workspace()
+        setup_company_permission()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -173,10 +175,20 @@ def refactor_permission_data(FILE):
 # workspace update
 def set_workspace():
     try:
-        print("*------updating workspace-----------------*\n")
+        print("*------updating workspace-------------------*\n")
         workspace = frappe.get_list("Workspace", ['name'])
         for space in workspace:
             if(space.name not in SPACE_PROFILE):
                 frappe.delete_doc("Workspace", space.name)
     except Exception as e:
+        frappe.log_error(e, "set_workspace")
+
+# permission for various purpose
+def setup_company_permission():
+    try:
+        companies = frappe.get_list("Company", ["name"])
+        for com in companies:
+            make_update_comp_perm(com.name)
+    except Exception as e:
+        frappe.log_error(e, "setup_company_permission")
         print(e)
