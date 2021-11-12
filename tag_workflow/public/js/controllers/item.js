@@ -6,5 +6,9 @@ frappe.ui.form.on("Item", {
 			cur_frm.set_value("include_item_in_manufacturing", 0);
 			cur_frm.set_value("stock_uom", "Nos");
 		}
+	},
+
+	before_save: function(frm){
+		frappe.call({"method": "tag_workflow.controllers.master_controller.check_item_group"});
 	}
 });

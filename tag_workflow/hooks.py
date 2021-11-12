@@ -11,7 +11,7 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-fixtures = [{"dt":"Workspace", "filters": [["module", "in", ("CRM")]]}]
+fixtures = [{"dt":"Workspace", "filters": [["module", "in", ("CRM")]]}, "Website Settings"]
 on_session_creation = [
         "tag_workflow.utils.trigger_session.on_session_creation"
 ]

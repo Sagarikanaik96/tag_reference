@@ -78,3 +78,13 @@ def make_update_comp_perm(docname):
             enqueue("tag_workflow.controllers.master_controller.update_user_permission", user_list=user_list, company=doc.name)
     except Exception as e:
         frappe.error_log(e, "Quotation and Job Order Permission")
+
+
+@frappe.whitelist()
+def check_item_group():
+    try:
+        if not frappe.db.exists("Item Group", {"name": "Services"}):
+            group = frappe.get_doc(dict(doctype="Item Group", item_group_name="Services", is_group=0))
+            group.save(ignore_permissions=True)
+    except Exception as e:
+        frappe.error_log(e, "Item Group")
