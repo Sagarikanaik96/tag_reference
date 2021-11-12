@@ -38,7 +38,8 @@ on_session_creation = [
 doctype_js = {
         "User" : "public/js/controllers/user.js",
         "Company": "public/js/controllers/company.js",
-        "Item": "public/js/controllers/item.js"
+        "Item": "public/js/controllers/item.js",
+        "Timesheet": "public/js/controllers/timesheet.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}

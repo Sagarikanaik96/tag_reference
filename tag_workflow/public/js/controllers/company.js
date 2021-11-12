@@ -32,5 +32,9 @@ frappe.ui.form.on("Company", {
 				}
 			}
 		});
+	},
+
+	after_save: function(frm){
+		frappe.call({"method": "tag_workflow.controllers.master_controller.make_update_comp_perm","args": {"docname": frm.doc.name}});
 	}
 });

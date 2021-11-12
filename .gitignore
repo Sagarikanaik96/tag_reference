@@ -1,1 +1,5 @@
 *.pyc
+tag_workflow/__pycache__/*.pyc
+tag_workflow/controllers/__pycache__/*.pyc
+tag_workflow/tag_workflow/doctype/*.pyc
+tag_workflow/utils/*.pyc

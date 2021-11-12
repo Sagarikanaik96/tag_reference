@@ -15,7 +15,7 @@ def validate_controller(doc, method):
 
     try:
         if doctype in MASTER:
-            from tag_workflow.controllers.master_controller import MasterController
+            from tag_workflow.controllers.master_controller import MasterController 
             if method == "validate":
                 MasterController(doc, doctype, method).validate_master()
         elif doctype in CRM:
