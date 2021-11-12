@@ -33,6 +33,8 @@
   "column_break_24",
   "driving_record",
   "shovel",
+  "section_break_27",
+  "employee_details",
   "bill_rate_section",
   "per_hour",
   "column_break_29",
@@ -47,6 +49,7 @@
   "e_signature_full_name",
   "agree_to_contract",
   "age_reqiured",
+  "quotation_submitted",
   "apply_for_quotation_section",
   "create_quotation"
  ],
@@ -289,12 +292,29 @@
    "fieldtype": "Button",
    "label": "Create Quotation",
    "permlevel": 1
+  },
+  {
+   "fieldname": "section_break_27",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.quotation_submitted",
+   "fieldname": "employee_details",
+   "fieldtype": "Table",
+   "label": "Employee Details",
+   "options": "Job Card Time Log"
+  },
+  {
+   "fieldname": "quotation_submitted",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Quotation Submitted"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "migration_hash": "0b309516a495ef69f3ca1ff9fd41d604",
- "modified": "2021-11-08 12:04:44.823736",
+ "migration_hash": "36658079c9baa49aca00afb2f02c4592",
+ "modified": "2021-11-12 12:16:40.430087",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
