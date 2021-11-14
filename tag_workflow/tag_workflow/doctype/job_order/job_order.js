@@ -176,3 +176,16 @@ frappe.ui.form.on("Quotation",{
 		})
 	}
 })
+
+
+frappe.ui.form.on("Job Order", "refresh", function(frm) {
+	console.log(frappe.defaults.get_user_default("company"))
+	cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
+		return {
+			filters:[
+				['company', '=', frappe.defaults.get_user_default("company")]
+			]
+		}
+	}
+});
+
