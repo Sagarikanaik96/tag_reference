@@ -20,7 +20,7 @@ ROLE_PROFILE = [{"Staffing Admin": ["Accounts User", "Report Manager", "Sales Us
 
 MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", "Tag Workflow", "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", "Tag Workflow", "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", "Tag Workflow", "Selling"]}]
 
-SPACE_PROFILE = ["CRM", "HR", "Projects", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings", "Home"]
+SPACE_PROFILE = ["CRM", "HR", "Projects", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings", "Home", "My Activities"]
 #-------setup data for TAG -------------#
 def setup_data():
     try:
