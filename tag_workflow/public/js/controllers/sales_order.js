@@ -1,7 +1,7 @@
 frappe.provide("tag_workflow.controllers");
 
 
-tag_workflow.controllers.Quotation = Class.extend({
+tag_workflow.controllers.SalesOrderController = Class.extend({
 	init: function(args){
 		$.extend(this, args);
 	},
@@ -19,5 +19,5 @@ tag_workflow.controllers.Quotation = Class.extend({
 		}
 	},
 });
-var controller = tag_workflow.controllers.Quotation.extend();
+var controller = tag_workflow.controllers.SalesOrderController.extend();
 cur_frm.script_manager.make(controller);
