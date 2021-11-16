@@ -21,24 +21,12 @@ class MasterController(base_controller.BaseController):
                 customer = frappe.get_doc(dict(doctype = "Customer", customer_name = self.doc.name, customer_type = "Company", territory = "All Territories", customer_group = "All Customer Groups", ))
                 customer.insert(ignore_permissions=True)
         elif(self.dt == "User"):
-            if(self.doc.tag_user_type and self.doc.organization_type):
-                if(self.doc.tag_user_type in ["Hiring Admin", "Hiring User"]):
-                    self.doc.role_profile_name = "Hiring Admin" if self.doc.tag_user_type == "Hiring Admin" else "Hiring User"
-                    self.doc.module_profile = "Hiring"
-
-                elif(self.doc.tag_user_type in ["Staffing Admin", "Staffing User"]):
-                    self.doc.role_profile_name = "Staffing Admin" if self.doc.tag_user_type == "Staffing Admin" else "Staffing User"
-                    self.doc.module_profile = "Staffing"
-
-                elif(self.doc.tag_user_type in ["Tag Admin", "Tag User"]):
-                    self.doc.role_profile_name = "Tag Admin" if self.doc.tag_user_type == "Tag Admin" else "Tag User"
-                    self.doc.module_profile = "Tag Admin"
-            else:
+            if not self.doc.tag_user_type or not self.doc.organization_type:
                 frappe.throw(_("Please select <b>Organization Type</b> and <b>TAG User Type</b> before saving the User."))
         elif(self.dt == "Item"):
             if not frappe.db.exists("Activity Type", {"name": self.doc.name}):
                 item = frappe.get_doc(dict(doctype = "Activity Type", activity_type = self.doc.name))
-                item.save()
+                item.save(ignore_permissions=True)
 
     def check_mandatory_field(self):
         if not frappe.db.exists("Territory", {"name": "All Territories"}):
