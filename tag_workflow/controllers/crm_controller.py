@@ -8,7 +8,6 @@ from tag_workflow.controllers import base_controller
 
 class CRMController(base_controller.BaseController):
     def validate_crm(self):
-        super(CRMController, self).validate()
         self.check_lead_closing()
 
     def check_lead_closing(self):

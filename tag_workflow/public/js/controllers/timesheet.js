@@ -9,7 +9,6 @@ frappe.ui.form.on("Timesheet", {
 		check_update_timesheet(frm);
 	},
 	setup: function(frm){
-		//frm.set_df_property("job_details", "options", "");
 		job_order_details(frm);
 		frm.set_query("job_order_detail", function(){
 			return {
