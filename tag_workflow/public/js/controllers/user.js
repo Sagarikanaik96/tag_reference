@@ -8,7 +8,7 @@ frappe.ui.form.on("User", {
 			let sys_field = ["organization_type", "tag_user_type"];
 			for(let s=0;s<sys_field.length;s++)
 				field_display(sys_field[s], 0);
-                }
+    }
 		set_options(frm);
 	},
 	setup: function(frm){
