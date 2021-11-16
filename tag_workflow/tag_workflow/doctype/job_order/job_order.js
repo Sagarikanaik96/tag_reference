@@ -41,9 +41,7 @@ frappe.ui.form.on('Job Order', {
 
 	shovel: function(frm){
 		update_flat_rate(frm);
-	},
-
-	
+	},	
 });
 
 
