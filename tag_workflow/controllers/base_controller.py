@@ -40,4 +40,5 @@ class BaseController():
         self.method = method
 
     def validate(self):
-        pass
+        doc = self.doc
+

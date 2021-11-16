@@ -10,16 +10,17 @@ from pathlib import Path
 from tag_workflow.controllers.master_controller import make_update_comp_perm
 
 ALL_ROLES = [role.name for role in frappe.db.get_list("Role") or []]
+All_ROLES = [role.name for role in frappe.db.get_list("Role") or [] if role.name != "System Manager"]
 
 ADD_ORGANIZATION = ["Company", "User", "Quotation", "Lead"]
 ADD_ORGANIZATION_DATA = ["TAG", "Hiring", "Staffing", "Exclusive Hiring"]
 
 ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag Admin", "CRM User", "Staff"]
-ROLE_PROFILE = [{"Staffing Admin": ["Accounts User", "Report Manager", "Sales User", "Staffing Admin", "Website Manager", "CRM User", "Employee"]}, {"Staffing User": ["Accounts User", "Sales User", "Website Manager", "CRM User", "Employee", "Staffing User"]}, {"Hiring Admin": ["Hiring Admin", "Report Manager", "Website Manager", "CRM User", "Employee", "Projects User"]}, {"Hiring User": ["Website Manager", "CRM User", "Employee", "Hiring User", "Projects User"]}, {"Tag Admin": ALL_ROLES}]
+ROLE_PROFILE = [{"Staffing Admin": ["Accounts User", "Report Manager", "Sales User", "Staffing Admin", "Website Manager", "CRM User", "Employee"]}, {"Staffing User": ["Accounts User", "Sales User", "Website Manager", "CRM User", "Employee", "Staffing User"]}, {"Hiring Admin": ["Hiring Admin", "Report Manager", "Website Manager", "CRM User", "Employee", "Projects User"]}, {"Hiring User": ["Website Manager", "CRM User", "Employee", "Hiring User", "Projects User"]}, {"Tag Admin": ALL_ROLES}, {"Tag User": All_ROLES}]
 
 MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", "Tag Workflow", "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", "Tag Workflow", "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", "Tag Workflow", "Selling"]}]
 
-SPACE_PROFILE = ["CRM", "HR", "Projects", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings", "Home"]
+SPACE_PROFILE = ["CRM", "HR", "Projects", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings", "Home", "My Activities"]
 #-------setup data for TAG -------------#
 def setup_data():
     try:
@@ -47,8 +48,8 @@ def update_organization():
                     custom_doc.save()
 
                 if(docs == "User"):
-                    if not frappe.db.exists("Custom Field", {"dt": docs, "label": "TAG User Type"}):
-                        custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt = docs, label = "TAG User Type", fieldtype = "Select", options = "\nHiring Admin\nHiring User\nStaffing Admin\nStaffing User\nTag Admin\nTag User", mandatory_depends_on="eval: doc.organization_type", depends_on = "eval: doc.organization_type"))
+                    if not frappe.db.exists("Custom Field", {"dt": docs, "label": "User Type"}):
+                        custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt = docs, label = "User Type", fieldtype = "Select", options = "\nHiring Admin\nHiring User\nStaffing Admin\nStaffing User\nTag Admin\nTag User", mandatory_depends_on="eval: doc.organization_type", depends_on = "eval: doc.organization_type", fieldname = "tag_user_type"))
                         custom_doc.save()
             elif(docs in ["Quotation"]):
                 if not frappe.db.exists("Custom Field", {"dt": docs, "label": "Job Order"}):
@@ -186,6 +187,7 @@ def set_workspace():
 # permission for various purpose
 def setup_company_permission():
     try:
+        print("*------company permission-------------------*\n")
         companies = frappe.get_list("Company", ["name"])
         for com in companies:
             make_update_comp_perm(com.name)
