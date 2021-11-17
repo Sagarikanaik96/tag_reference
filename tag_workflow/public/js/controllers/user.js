@@ -48,16 +48,47 @@ frappe.ui.form.on("User", {
 	},
 
 	tag_user_type: function(frm){
-		setup_profile(frm);
-	},
 
-	before_save: function(frm){
-		setup_profile(frm);
+		var type = frm.doc.tag_user_type;
+		if(type == "Hiring Admin"){
+			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "role_profile_name", "Hiring Admin");
+                    	frappe.model.set_value(frm.doc.doctype, frm.doc.name, "module_profile", "Hiring");
+		}else if(type == "Hiring User"){
+			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "role_profile_name", "Hiring User");
+			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "module_profile", "Hiring");
+		}else if(type == "Staffing Admin"){
+			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "role_profile_name", "Staffing Admin");
+			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "module_profile", "Staffing");
+		}else if(type == "Staffing User"){
+			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "role_profile_name", "Staffing User");
+			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "module_profile", "Staffing");
+		}
 	},
+	first_name:function(frm){
+		if(cur_frm.doc.first_name){
+			var first_name=cur_frm.doc.first_name
+			const arr =first_name.split(" ");
+			for (var i = 0; i < arr.length; i++) {
+				arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+			
+			}
+			const firstname = arr.join(" ");
+			cur_frm.set_value("first_name",firstname)
+	
+		}},
+		
+	last_name:function(frm){
+		if(cur_frm.doc.last_name){
+			var last_name=cur_frm.doc.last_name
+			const arr = last_name.split(" ");
+			for (var i = 0; i < arr.length; i++) {
+				arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+			}
+			const lastname = arr.join(" ");
+			cur_frm.set_value("last_name",lastname)
+			}
+		}
 
-	after_save: function(frm){
-		update_employee(frm);
-	}
 });
 
 /*--------perpare field display-----------*/

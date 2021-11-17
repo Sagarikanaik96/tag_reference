@@ -23,11 +23,3 @@ def update_job_order(job_order_name=None,quotation_name=None):
 
     return "success"
     
-
-
-def employee_creation(doc,method):
-    print('heijjisjuhd')
-    print("dsbjhchbhdbhcbhdbhbhbhjcbhjdbjbchjbhd")
-    #print(doc.name)
-    print(doc.email)
-    print("wdbjhbdhbhdbhbhrfbfbbudnueueunenu")
