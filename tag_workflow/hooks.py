@@ -16,6 +16,9 @@ on_session_creation = [
         "tag_workflow.utils.trigger_session.on_session_creation"
 ]
 
+# include custom scss in every website theme (without file extension ".scss")
+# website_theme_scss = "tag_workflow/public/scss/website"
+
 app_include_css = [
     "/assets/tag_workflow/css/tag.css"
 ]
