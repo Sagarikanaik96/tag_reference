@@ -1,7 +1,8 @@
 {
+ "cards_label": " My Activities",
  "category": "Modules",
  "charts": [],
- "creation": "2021-11-17 11:42:03.367903",
+ "creation": "2021-11-17 19:45:48.459410",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
@@ -51,23 +52,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Employee",
-   "link_to": "Employee",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "TAG Card",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Job Site",
    "link_to": "Job Site",
    "link_type": "DocType",
@@ -77,8 +61,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Job Card",
-   "link_to": "Job Card",
+   "label": "Job Order",
+   "link_to": "Job Order",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -91,9 +75,18 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Invoice",
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2021-11-17 11:59:52.182733",
+ "modified": "2021-11-17 19:57:20.956646",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "My Activities",

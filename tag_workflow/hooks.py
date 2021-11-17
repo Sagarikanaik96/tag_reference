@@ -12,7 +12,9 @@ app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.png"
 
 # Includes in <head>
 # ------------------
-fixtures = ["Workspace", "Website Settings", "Web Page"]
+
+fixtures = ["Workspace", "Website Settings", "Web Page", "Translation"]
+
 on_session_creation = [
         "tag_workflow.utils.trigger_session.on_session_creation"
 ]
