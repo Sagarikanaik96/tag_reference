@@ -51,7 +51,7 @@
   "age_reqiured",
   "quotation_submitted",
   "apply_for_quotation_section",
-  "create_quotation"
+  "assign_employees"
  ],
  "fields": [
   {
@@ -267,7 +267,7 @@
   },
   {
    "fieldname": "e_signature_full_name",
-   "fieldtype": "Signature",
+   "fieldtype": "Data",
    "label": "E-Signature Full Name"
   },
   {
@@ -288,12 +288,6 @@
    "label": "Apply for Quotation"
   },
   {
-   "fieldname": "create_quotation",
-   "fieldtype": "Button",
-   "label": "Create Quotation",
-   "permlevel": 1
-  },
-  {
    "fieldname": "section_break_27",
    "fieldtype": "Section Break"
   },
@@ -309,16 +303,20 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Quotation Submitted"
+  },
+  {
+   "fieldname": "assign_employees",
+   "fieldtype": "Button",
+   "label": "Assign Employees",
+   "permlevel": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "migration_hash": "36658079c9baa49aca00afb2f02c4592",
- "modified": "2021-11-12 12:16:40.430087",
+ "modified": "2021-11-17 16:57:52.387569",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
