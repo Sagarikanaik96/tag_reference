@@ -4374,8 +4374,8 @@
     "hidden": 0,
     "icon": null,
     "is_query_report": 0,
-    "label": "Job Card",
-    "link_to": "Job Card",
+    "label": "Job Order",
+    "link_to": "Job Order",
     "link_type": "DocType",
     "onboard": 0,
     "only_for": null,
@@ -4400,7 +4400,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2021-11-17 11:59:52.182733",
+  "modified": "2021-11-17 18:25:23.673119",
   "module": "Tag Workflow",
   "name": "My Activities",
   "onboarding": null,

@@ -11,7 +11,7 @@ app_license = "MIT"
 app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.png"
 # Includes in <head>
 # ------------------
-fixtures = ["Workspace", "Website Settings"]
+fixtures = ["Workspace", "Website Settings", "Web Page"]
 on_session_creation = [
         "tag_workflow.utils.trigger_session.on_session_creation"
 ]
@@ -26,11 +26,15 @@ on_session_creation = [
 # website_theme_scss = "tag_workflow/public/scss/website"
 
 app_include_css = [
-    "/assets/tag_workflow/css/tag.css"
+        "/assets/tag_workflow/css/tag.css"
 ]
 
 app_include_js = [
         "/assets/tag_workflow/js/tag.js",
+]
+
+web_include_css = [
+        "/assets/tag_workflow/css/web_tag.css"
 ]
 
 # include js in doctype views
