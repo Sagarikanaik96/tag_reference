@@ -5,7 +5,7 @@
   "app_name": "TAG",
   "banner_html": null,
   "banner_image": null,
-  "brand_html": "SourceFuse",
+  "brand_html": "<img class=\"app-logo\" src=\"/assets/tag_workflow/images/TAG-Logo.png\">",
   "call_to_action": null,
   "call_to_action_url": null,
   "chat_enable": 0,
@@ -33,7 +33,7 @@
   "home_page": "home",
   "indexing_authorization_code": null,
   "indexing_refresh_token": null,
-  "modified": "2021-11-12 12:25:27.433103",
+  "modified": "2021-11-17 12:01:24.255347",
   "name": "Website Settings",
   "navbar_search": 0,
   "navbar_template": null,
@@ -46,41 +46,7 @@
   "show_language_picker": 0,
   "subdomain": null,
   "title_prefix": null,
-  "top_bar_items": [
-   {
-    "icon": null,
-    "label": "Contact",
-    "open_in_new_tab": 0,
-    "parent": "Website Settings",
-    "parent_label": null,
-    "parentfield": "top_bar_items",
-    "parenttype": "Website Settings",
-    "right": 0,
-    "url": "/contact"
-   },
-   {
-    "icon": null,
-    "label": "Blog",
-    "open_in_new_tab": 0,
-    "parent": "Website Settings",
-    "parent_label": null,
-    "parentfield": "top_bar_items",
-    "parenttype": "Website Settings",
-    "right": 0,
-    "url": "/blog"
-   },
-   {
-    "icon": null,
-    "label": "Products",
-    "open_in_new_tab": 0,
-    "parent": "Website Settings",
-    "parent_label": null,
-    "parentfield": "top_bar_items",
-    "parenttype": "Website Settings",
-    "right": 0,
-    "url": "/all-products"
-   }
-  ],
+  "top_bar_items": [],
   "website_theme": "Standard",
   "website_theme_image_link": null
  }

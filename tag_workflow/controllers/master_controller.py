@@ -11,6 +11,7 @@ from frappe import enqueue
 GROUP = "All Customer Groups"
 TERRITORY = "All Territories"
 PERMISSION = "User Permission"
+EMP = "Employee"
 
 class MasterController(base_controller.BaseController):
     def validate_master(self):
@@ -83,3 +84,24 @@ def check_item_group():
             group.save(ignore_permissions=True)
     except Exception as e:
         frappe.error_log(e, item_group)
+
+
+# remove message on user creation
+@frappe.whitelist()
+def check_employee(name, first_name, last_name, company, gender, date_of_birth, date_of_joining):
+    if not frappe.db.exists(EMP, {"user_id": name}):
+        emp = frappe.get_doc(dict(doctype=EMP, first_name=first_name, last_name=last_name, company=company, status="Active", gender=gender, date_of_birth=date_of_birth, date_of_joining=date_of_joining, user_id=name, create_user_permission=1))
+        emp.save(ignore_permissions=True)
+    else:
+        emp = frappe.get_doc(EMP, {"user_id": name})
+
+        if company != emp.company:
+            frappe.db.sql(""" delete from `tabUser Permission` where user = %s """, name)
+        emp.first_name=first_name
+        emp.last_name=last_name
+        emp.company=company
+        emp.gender=gender
+        emp.date_of_birth=date_of_birth
+        emp.date_of_joining=date_of_joining
+        emp.create_user_permission=1
+        emp.save(ignore_permissions=True)

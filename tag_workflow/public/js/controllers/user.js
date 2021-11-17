@@ -1,15 +1,20 @@
 frappe.ui.form.on("User", {
 	refresh: function(frm){
-		var fields = ["sb1", "document_follow_notifications_section", "email_settings", "sb_allow_modules", "sb2", "sb3", "third_party_authentication", "api_access", "full_name", "language", "time_zone", "middle_name", "username", "interest", "bio", "banner_image", "mute_sounds", "desk_theme", "phone"];
-		for(var f=0;f<fields.length;f++)
-			field_toggle(fields[f], 0);
-
-		if(frappe.user_roles.includes("System Manager") || cur_frm.is_dirty() == false){
-			let sys_field = ["organization_type", "tag_user_type"];
-			for(let s=0;s<sys_field.length;s++)
-				field_display(sys_field[s], 0);
-    }
 		set_options(frm);
+		field_reqd(frm);
+		init_values(frm);
+		var fields = ["sb1", "document_follow_notifications_section", "email_settings", "sb_allow_modules", "sb2", "sb3", "third_party_authentication", "api_access", "full_name", "language", "time_zone", "middle_name", "username", "interest", "bio", "banner_image", "mute_sounds", "desk_theme", "phone"];
+
+		for(let field in fields){
+			field_toggle(fields[field], 0);
+		}
+
+		if(!frappe.user_roles.includes("System Manager") && cur_frm.is_dirty() == false){
+			let sys_field = ["organization_type", "tag_user_type"];
+			for(let field in sys_field){
+				field_display(sys_field[field], 0);
+			}
+		}
 	},
 	setup: function(frm){
 		let roles = frappe.user_roles;
@@ -39,14 +44,19 @@ frappe.ui.form.on("User", {
 
 	organization_type: function(frm){
 		set_options(frm);
+		init_values(frm);
 	},
 
 	tag_user_type: function(frm){
 		setup_profile(frm);
 	},
 
-	before_save(frm){
+	before_save: function(frm){
 		setup_profile(frm);
+	},
+
+	after_save: function(frm){
+		update_employee(frm);
 	}
 });
 
@@ -57,6 +67,28 @@ function field_toggle(field, value){
 
 function field_display(field, value){
 	cur_frm.toggle_enable(field, value);
+}
+
+function field_reqd(frm){
+	cur_frm.fields_dict["short_bio"].collapse();
+	var data = ["company", "gender", "birth_date", "date_of_joining"];
+	for(let value in data){
+		cur_frm.toggle_reqd(data[value], 1);
+	}
+}
+
+function init_values(frm){
+	if(cur_frm.doc.__islocal == 1){
+		var values = ["new_password", "username", "email", "first_name", "last_name", "company", "gender", "birth_date", "date_of_joining", "tag_user_type"];
+		for(var val in values){
+			cur_frm.set_value(values[val], "");
+		}
+	}else{
+		var values = ["email", "company"];
+		for(var val in values){
+			cur_frm.toggle_enable(values[val], 0);
+		}
+	}
 }
 
 /*--------setup option-------------*/
@@ -99,4 +131,10 @@ function setup_profile(frm){
 		frappe.model.set_value(frm.doc.doctype, frm.doc.name, role_profile, "Tag User");
 		frappe.model.set_value(frm.doc.doctype, frm.doc.name, module_profile, "Tag Admin");
 	}
+}
+
+
+/*------------update employee--------------*/
+function update_employee(frm){
+	frappe.call({"method": "tag_workflow.controllers.master_controller.check_employee","args": {"name": frm.doc.name, "first_name": frm.doc.first_name, "last_name": frm.doc.last_name || '', "company": frm.doc.company, "gender": frm.doc.gender, "date_of_birth": frm.doc.birth_date, "date_of_joining": frm.doc.date_of_joining}});
 }
