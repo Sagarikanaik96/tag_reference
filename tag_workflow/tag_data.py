@@ -23,3 +23,7 @@ def update_job_order(job_order_name=None,quotation_name=None):
 
     return "success"
     
+@frappe.whitelist()
+def update_timesheet(job_order_detail):
+    value = frappe.db.sql('''select select_job,posting_date_time from `tabJob Order` where name = "{}" '''.format(job_order_detail),as_dict = 1)
+    return value[0]['select_job'],value[0]['posting_date_time']
