@@ -45,23 +45,6 @@ frappe.ui.form.on("User", {
 		set_options(frm);
 		init_values(frm);
 	},
-	tag_user_type: function(frm){
-
-		var type = frm.doc.tag_user_type;
-		if(type == "Hiring Admin"){
-			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "role_profile_name", "Hiring Admin");
-                    	frappe.model.set_value(frm.doc.doctype, frm.doc.name, "module_profile", "Hiring");
-		}else if(type == "Hiring User"){
-			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "role_profile_name", "Hiring User");
-			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "module_profile", "Hiring");
-		}else if(type == "Staffing Admin"){
-			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "role_profile_name", "Staffing Admin");
-			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "module_profile", "Staffing");
-		}else if(type == "Staffing User"){
-			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "role_profile_name", "Staffing User");
-			frappe.model.set_value(frm.doc.doctype, frm.doc.name, "module_profile", "Staffing");
-		}
-	},
 	first_name:function(frm){
 		if(cur_frm.doc.first_name){
 			var first_name = cur_frm.doc.first_name;
@@ -76,7 +59,6 @@ frappe.ui.form.on("User", {
 			cur_frm.set_value("last_name",last_name);
 		}
 	},
-
 	tag_user_type: function(frm){
 		setup_profile(frm);
 	},
