@@ -39,7 +39,8 @@ doctype_js = {
         "Timesheet": "public/js/controllers/timesheet.js",
         "Quotation": "public/js/controllers/quotation.js",
         "Sales Order": "public/js/controllers/sales_order.js",
-        "Employee": "public/js/controllers/employee.js"
+        "Employee": "public/js/controllers/employee.js",
+        "Sales Invoice": "public/js/controllers/sales_invoice.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]
@@ -55,4 +56,10 @@ doc_events = {
 website_context = {
         "favicon": "/assets/tag_workflow/images/TAG-Logo-Emblem.png",
         "splash_image": "/assets/tag_workflow/images/TAG-Logo.png"
+}
+
+override_doctype_dashboards = {
+        "Item": "tag_workflow.dashboard_data.item_dashboard.get_data",
+        "Company": "tag_workflow.dashboard_data.company_dashboard.get_data",
+        "Sales Invoice": "tag_workflow.dashboard_data.sales_invoice_dashboard.get_data"
 }
