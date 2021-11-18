@@ -1,7 +1,8 @@
 {
+ "cards_label": " My Activities",
  "category": "Modules",
  "charts": [],
- "creation": "2021-11-11 12:56:23.811753",
+ "creation": "2021-11-17 19:45:48.459410",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
@@ -12,8 +13,80 @@
  "is_default": 0,
  "is_standard": 1,
  "label": "My Activities",
- "links": [],
- "modified": "2021-11-11 12:57:12.483003",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "TAG Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item",
+   "link_to": "Item",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "User",
+   "link_to": "User",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Company",
+   "link_to": "Company",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Job Site",
+   "link_to": "Job Site",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Job Order",
+   "link_to": "Job Order",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Timesheet",
+   "link_to": "Timesheet",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Invoice",
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2021-11-17 19:57:20.956646",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "My Activities",
@@ -29,9 +102,10 @@
   },
   {
    "doc_view": "List",
-   "label": "Timesheet",
-   "link_to": "Timesheet",
+   "label": "Job Site",
+   "link_to": "Job Site",
    "type": "DocType"
   }
- ]
+ ],
+ "shortcuts_label": "Shortcuts"
 }

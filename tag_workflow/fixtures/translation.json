@@ -1,0 +1,50 @@
+[
+ {
+  "context": null,
+  "contributed": 0,
+  "contribution_docname": null,
+  "contribution_status": "",
+  "docstatus": 0,
+  "doctype": "Translation",
+  "language": "en",
+  "modified": "2021-11-17 19:53:31.280091",
+  "name": "60a115cd1f",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "source_text": "Sales Invoice",
+  "translated_text": "Invoice"
+ },
+ {
+  "context": null,
+  "contributed": 0,
+  "contribution_docname": null,
+  "contribution_status": "",
+  "docstatus": 0,
+  "doctype": "Translation",
+  "language": "en",
+  "modified": "2021-11-17 19:54:21.044661",
+  "name": "3eab1f312b",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "source_text": "Company",
+  "translated_text": "Organization"
+ },
+ {
+  "context": null,
+  "contributed": 0,
+  "contribution_docname": null,
+  "contribution_status": "",
+  "docstatus": 0,
+  "doctype": "Translation",
+  "language": "en",
+  "modified": "2021-11-17 19:54:51.896748",
+  "name": "be6bd4f1ef",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "source_text": "Item",
+  "translated_text": "Service Type"
+ }
+]

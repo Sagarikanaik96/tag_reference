@@ -24,7 +24,7 @@
   "worker_filled",
   "column_break_15",
   "job_duration",
-  "estimated_hour",
+  "estimated_hours_per_day",
   "extra_price_increase",
   "extra_notes",
   "additional_addons_section",
@@ -51,7 +51,7 @@
   "age_reqiured",
   "quotation_submitted",
   "apply_for_quotation_section",
-  "create_quotation"
+  "assign_employees"
  ],
  "fields": [
   {
@@ -145,6 +145,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.__islocal!=1",
    "fieldname": "worker_filled",
    "fieldtype": "Int",
    "label": "Worker Filled",
@@ -160,12 +161,6 @@
    "in_list_view": 1,
    "label": "Job Duration",
    "options": "N/A\n1 Day\n2 Day\n3 Day\n4 Day\n5 Day\n6 Day\n1 Week\n2 Week\n3 Week\n4 Week\n5 Week\n6 Week\n1 Month\n2 Month\n3 Month\n4 Month\n5 Month\n6 Month\nTemp to Hire"
-  },
-  {
-   "default": "0",
-   "fieldname": "estimated_hour",
-   "fieldtype": "Float",
-   "label": "Estimated Hour"
   },
   {
    "default": "0",
@@ -267,7 +262,7 @@
   },
   {
    "fieldname": "e_signature_full_name",
-   "fieldtype": "Signature",
+   "fieldtype": "Data",
    "label": "E-Signature Full Name"
   },
   {
@@ -288,12 +283,6 @@
    "label": "Apply for Quotation"
   },
   {
-   "fieldname": "create_quotation",
-   "fieldtype": "Button",
-   "label": "Create Quotation",
-   "permlevel": 1
-  },
-  {
    "fieldname": "section_break_27",
    "fieldtype": "Section Break"
   },
@@ -309,16 +298,26 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Quotation Submitted"
+  },
+  {
+   "fieldname": "assign_employees",
+   "fieldtype": "Button",
+   "label": "Assign Employees",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "estimated_hours_per_day",
+   "fieldtype": "Float",
+   "label": "Estimated Hours Per Day"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "migration_hash": "36658079c9baa49aca00afb2f02c4592",
- "modified": "2021-11-12 12:16:40.430087",
+ "modified": "2021-11-18 12:23:20.192338",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

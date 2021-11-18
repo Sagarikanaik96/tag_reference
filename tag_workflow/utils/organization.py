@@ -1,5 +1,5 @@
 '''
-    TAG MAster Data
+    TAG Master Data
 '''
 
 import frappe
@@ -9,19 +9,29 @@ import json, os
 from pathlib import Path
 from tag_workflow.controllers.master_controller import make_update_comp_perm
 
+
 ALL_ROLES = [role.name for role in frappe.db.get_list("Role") or []]
 All_ROLES = [role.name for role in frappe.db.get_list("Role") or [] if role.name != "System Manager"]
 
 ADD_ORGANIZATION = ["Company", "User", "Quotation", "Lead"]
 ADD_ORGANIZATION_DATA = ["TAG", "Hiring", "Staffing", "Exclusive Hiring"]
 
-ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag Admin", "CRM User", "Staff"]
-ROLE_PROFILE = [{"Staffing Admin": ["Accounts User", "Report Manager", "Sales User", "Staffing Admin", "Website Manager", "CRM User", "Employee"]}, {"Staffing User": ["Accounts User", "Sales User", "Website Manager", "CRM User", "Employee", "Staffing User"]}, {"Hiring Admin": ["Hiring Admin", "Report Manager", "Website Manager", "CRM User", "Employee", "Projects User"]}, {"Hiring User": ["Website Manager", "CRM User", "Employee", "Hiring User", "Projects User"]}, {"Tag Admin": ALL_ROLES}, {"Tag User": All_ROLES}]
+ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag Admin", "Tag User", "CRM User", "Staff"]
+
+ROLE_PROFILE = [{ROLES[3]: ["Accounts User", "Report Manager", "Sales User", ROLES[3], "Website Manager", ROLES[6], "Employee"]}, {ROLES[2]: ["Accounts User", "Sales User", "Website Manager", ROLES[6], "Employee", ROLES[2]]}, {ROLES[1]: [ROLES[1], "Report Manager", "Website Manager", ROLES[6], "Employee", "Projects User"]}, {ROLES[0]: ["Website Manager", ROLES[6], "Employee", ROLES[0], "Projects User"]}, {ROLES[4]: ALL_ROLES}, {ROLES[5]: All_ROLES}]
 
 MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", "Tag Workflow", "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", "Tag Workflow", "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", "Tag Workflow", "Selling"]}]
 
-SPACE_PROFILE = ["CRM", "HR", "Projects", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings", "Home", "My Activities"]
-#-------setup data for TAG -------------#
+SPACE_PROFILE = ["CRM", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings", "Home", "My Activities"]
+
+#-------setup variable for TAG -------------#
+Organization = "Organization Type"
+Module = "Module Profile"
+Role_Profile = "Role Profile"
+Sign_Label = "Signature Section"
+Job_Label = "Job Order"
+Custom_Label = "Custom Field"
+#------setup data for TAG -------------#
 def setup_data():
     try:
         update_organization()
@@ -38,47 +48,48 @@ def setup_data():
         frappe.log_error(e, "Master")
         #frappe.db.rollback()
 
+#--------org_field_update----------#
 def update_organization():
     try:
         print("*------updating organization field----------*\n")
         for docs in ADD_ORGANIZATION:
             if(docs in ["Company", "User"]):
-                if not frappe.db.exists("Custom Field", {"dt": docs, "label": "Organization Type"}):
-                    custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt=docs, label="Organization Type", fieldtype="Link", options="Organization Type",reqd=1))
+                if not frappe.db.exists(Custom_Label, {"dt": docs, "label": Organization}):
+                    custom_doc = frappe.get_doc(dict(doctype=Custom_Label, dt=docs, label=Organization, fieldtype="Link", options=Organization,reqd=1))
                     custom_doc.save()
 
-                if(docs == "User"):
-                    if not frappe.db.exists("Custom Field", {"dt": docs, "label": "User Type"}):
-                        custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt = docs, label = "User Type", fieldtype = "Select", options = "\nHiring Admin\nHiring User\nStaffing Admin\nStaffing User\nTag Admin\nTag User", mandatory_depends_on="eval: doc.organization_type", depends_on = "eval: doc.organization_type", fieldname = "tag_user_type"))
-                        custom_doc.save()
-            elif(docs in ["Quotation"]):
-                if not frappe.db.exists("Custom Field", {"dt": docs, "label": "Job Order"}):
-                    custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt=docs, label="Job Order", fieldtype="Link", options="Job Order",reqd=1))
-                    custom_doc.save()
-            elif(docs in ["Lead"]):
-                if not frappe.db.exists("Custom Field", {"dt": docs, "label": "Signature Section"}):
-                    custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt=docs, label="Signature Section", fieldtype="Section Break", insert_after="title"))
+                if(docs == "User" and not frappe.db.exists(Custom_Label, {"dt": docs, "label": "User Type"})):
+                    custom_doc = frappe.get_doc(dict(doctype=Custom_Label, dt = docs, label = "User Type", fieldtype = "Select", options = "\nHiring Admin\nHiring User\nStaffing Admin\nStaffing User\nTag Admin\nTag User", mandatory_depends_on="eval: doc.organization_type", depends_on = "eval: doc.organization_type", fieldname = "tag_user_type"))
                     custom_doc.save()
 
-                if not frappe.db.exists("Custom Field", {"dt": docs, "label": "Signature"}):
-                    custom_doc = frappe.get_doc(dict(doctype="Custom Field", dt=docs, label="Signature", fieldtype="Signature",reqd=0, insert_after="Signature Section", mandatory_depends_on="eval: doc.status=='Close'"))
+            elif(docs in ["Quotation"] and not frappe.db.exists(Custom_Label, {"dt": docs, "label": Job_Label})):
+                custom_doc = frappe.get_doc(dict(doctype=Custom_Label, dt=docs, label=Job_Label, fieldtype="Link", options=Job_Label,reqd=1))
+                custom_doc.save()
+
+            elif(docs in ["Lead"] and not frappe.db.exists(Custom_Label, {"dt": docs, "label": Sign_Label})):
+                custom_doc = frappe.get_doc(dict(doctype=Custom_Label, dt=docs, label=Sign_Label, fieldtype="Section Break", insert_after="title"))
+                custom_doc.save()
+
+                if not frappe.db.exists(Custom_Label, {"dt": docs, "label": "Signature"}):
+                    custom_doc = frappe.get_doc(dict(doctype=Custom_Label, dt=docs, label="Signature", fieldtype="Signature",reqd=0, insert_after=Sign_Label, mandatory_depends_on="eval: doc.status=='Close'"))
                     custom_doc.save()
     except Exception as e:
         print(e)
         frappe.log_error(e, "update_organization")
 
+#--------org_update----------#
 def update_organization_data():
     try:
         print("*------updating organization data-----------*\n")
         frappe.db.sql(""" delete from `tabOrganization Type` """)
         for data in ADD_ORGANIZATION_DATA:
-            org_doc = frappe.get_doc(dict(doctype = "Organization Type", organization = data))
+            org_doc = frappe.get_doc(dict(doctype = Organization, organization = data))
             org_doc.save()
     except Exception as e:
         print(e)
         frappe.log_error(e, "update_organization_data")
 
-
+#--------role_update----------#
 def update_roles():
     try:
         print("*------updating roles-----------------------*\n")
@@ -90,6 +101,7 @@ def update_roles():
         print(e)
         frappe.log_error(e, "update_roles")
 
+#--------role_profile_update----------#
 def update_role_profile():
     try:
         print("*------updating role profile----------------*\n")
@@ -97,13 +109,13 @@ def update_role_profile():
         for profile in profiles:
             profile_data = [role[profile] for role in ROLE_PROFILE if profile in role][0]
 
-            if not frappe.db.exists("Role Profile", {"name": profile}):
-                profile_doc = frappe.new_doc("Role Profile")
+            if not frappe.db.exists(Role_Profile, {"name": profile}):
+                profile_doc = frappe.new_doc(Role_Profile)
                 profile_doc.role_profile = profile 
                 for data in profile_data:
                     profile_doc.append("roles", {"role": data})
             else:
-                profile_doc = frappe.get_doc("Role Profile", {"name": profile})
+                profile_doc = frappe.get_doc(Role_Profile, {"name": profile})
                 profile_doc.roles = []
                 for data in profile_data:
                     profile_doc.append("roles", {"role": data})
@@ -112,6 +124,7 @@ def update_role_profile():
         print(e)
         frappe.log_error(e, "update_role_profile")
 
+#--------module_update----------#
 def update_module_profile():
     try:
         print("*------updating module profile--------------*\n")
@@ -121,24 +134,30 @@ def update_module_profile():
         for mods in modules:
             module_data = [profile[mods] for profile in MODULE_PROFILE if mods in profile][0]
 
-            if not frappe.db.exists("Module Profile", {"name": mods}):
-                module_doc = frappe.new_doc("Module Profile")
+            if not frappe.db.exists(Module, {"name": mods}):
+                module_doc = frappe.new_doc(Module)
                 module_doc.module_profile_name = mods
-                for data in all_modules:
-                    if(data not in module_data):
-                        module_doc.append("block_modules", {"module": data})
+                module_doc = module_data_update(all_modules, module_data, module_doc)
             else:
-                module_doc = frappe.get_doc("Module Profile", {"name": mods})
+                module_doc = frappe.get_doc(Module, {"name": mods})
                 module_doc.block_modules = []
-                for data in all_modules:
-                    if(data not in module_data):
-                        module_doc.append("block_modules", {"module": data})
+                module_doc = module_data_update(all_modules, module_data, module_doc)
             module_doc.save()
     except Exception as e:
         print(e)
         frappe.log_error(e, "update_module_profile")
 
+def module_data_update(all_modules, module_data, module_doc):
+    try:
+        for data in all_modules:
+            if(data not in module_data):
+                module_doc.append("block_modules", {"module": data})
+        return module_doc
+    except Exception as e:
+        print(e)
+        frappe.log_error(e, "module_data_update")
 
+#--------permissions_update----------#
 def update_permissions():
     try:
         print("*------updating permissions-----------------*\n")
@@ -157,16 +176,16 @@ def update_permissions():
         frappe.log_error(e, "update_permissions")
 
 
-def refactor_permission_data(FILE):
+def refactor_permission_data(file_path):
     try:
-        with open(FILE, 'r') as data_file:
+        with open(file_path, 'r') as data_file:
             data = json.load(data_file)
 
         for element in data:
             element.pop('name', '')
             element.pop('modified', '')
 
-        with open(FILE, 'w') as data_file:
+        with open(file_path, 'w') as data_file:
             data = json.dump(data, data_file)
     except Exception as e:
         print(e)

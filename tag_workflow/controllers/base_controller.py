@@ -11,7 +11,6 @@ CRM = ["Lead"]
 
 def validate_controller(doc, method):
     doctype = doc.meta.get("name")
-    controller = None
 
     try:
         if doctype in MASTER:
@@ -23,7 +22,7 @@ def validate_controller(doc, method):
             if method == "validate":
                 CRMController(doc, doctype, method).validate_crm()
     except Exception as e:
-        #frappe.throw(e)
+        frappe.throw(e)
         print("----"*10)
         print(frappe.get_traceback())
         print("----"*10)
@@ -38,7 +37,4 @@ class BaseController():
         self.dt = doctype
         self.doc = doc
         self.method = method
-
-    def validate(self):
-        doc = self.doc
 
