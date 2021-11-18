@@ -37,3 +37,4 @@ class BaseController():
         self.dt = doctype
         self.doc = doc
         self.method = method
+
