@@ -24,7 +24,7 @@
   "worker_filled",
   "column_break_15",
   "job_duration",
-  "estimated_hour",
+  "estimated_hours_per_day",
   "extra_price_increase",
   "extra_notes",
   "additional_addons_section",
@@ -145,6 +145,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.__islocal!=1",
    "fieldname": "worker_filled",
    "fieldtype": "Int",
    "label": "Worker Filled",
@@ -160,12 +161,6 @@
    "in_list_view": 1,
    "label": "Job Duration",
    "options": "N/A\n1 Day\n2 Day\n3 Day\n4 Day\n5 Day\n6 Day\n1 Week\n2 Week\n3 Week\n4 Week\n5 Week\n6 Week\n1 Month\n2 Month\n3 Month\n4 Month\n5 Month\n6 Month\nTemp to Hire"
-  },
-  {
-   "default": "0",
-   "fieldname": "estimated_hour",
-   "fieldtype": "Float",
-   "label": "Estimated Hour"
   },
   {
    "default": "0",
@@ -309,11 +304,17 @@
    "fieldtype": "Button",
    "label": "Assign Employees",
    "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "estimated_hours_per_day",
+   "fieldtype": "Float",
+   "label": "Estimated Hours Per Day"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-17 16:57:52.387569",
+ "modified": "2021-11-18 12:23:20.192338",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

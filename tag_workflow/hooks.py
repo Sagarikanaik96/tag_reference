@@ -10,6 +10,10 @@ app_email = "shadab.sutar@sourcefuse.com"
 app_license = "MIT"
 app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.png"
 
+website_context={
+        "favicon":"/assets/tag_workflow/images/TAG-Logo-Emblem.png",
+        "splash_image":"/assets/tag_workflow/images/TAG-Logo-Emblem.png"
+}
 # Includes in <head>
 # ------------------
 
