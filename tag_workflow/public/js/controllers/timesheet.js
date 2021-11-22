@@ -53,25 +53,21 @@ function hide_timesheet_field(fields){
 	for(let val in fields){
 		cur_frm.toggle_display(fields[val], 0);
 	}
+}
 
 function update_job_detail(frm){
 	if (cur_frm.doc.job_order_detail){
-				frappe.call({
-					method:"tag_workflow.tag_data.update_timesheet",
-					args:{
-
-						'job_order_detail':cur_frm.doc.job_order_detail,        
-						},
-					callback:function(r){
-						if(r.message)
-						{
-							cur_frm.get_field("time_logs").grid.grid_rows[0].doc.activity_type = r.message[0]
-							cur_frm.get_field("time_logs").grid.grid_rows[0].doc.from_time = r.message[1]
-							cur_frm.get_field("time_logs").grid.grid_rows[0].refresh_field("activity_type")
-							cur_frm.get_field("time_logs").grid.grid_rows[0].refresh_field("from_time")
-						}
-					}
-				})
-		}
-
+		frappe.call({
+			method:"tag_workflow.tag_data.update_timesheet",
+			args:{'job_order_detail':cur_frm.doc.job_order_detail},
+			callback:function(r){
+				if(r.message){
+					cur_frm.get_field("time_logs").grid.grid_rows[0].doc.activity_type = r.message[0];
+					cur_frm.get_field("time_logs").grid.grid_rows[0].doc.from_time = r.message[1];
+					cur_frm.get_field("time_logs").grid.grid_rows[0].refresh_field("activity_type");
+					cur_frm.get_field("time_logs").grid.grid_rows[0].refresh_field("from_time");
+				}
+			}
+		});
+	}
 }

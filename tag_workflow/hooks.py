@@ -40,7 +40,8 @@ doctype_js = {
         "Quotation": "public/js/controllers/quotation.js",
         "Sales Order": "public/js/controllers/sales_order.js",
         "Employee": "public/js/controllers/employee.js",
-        "Sales Invoice": "public/js/controllers/sales_invoice.js"
+        "Sales Invoice": "public/js/controllers/sales_invoice.js",
+        "Contact": "public/js/controllers/contact.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]

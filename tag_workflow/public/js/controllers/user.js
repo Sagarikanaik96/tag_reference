@@ -95,13 +95,14 @@ function field_reqd(frm){
 }
 
 function init_values(frm){
+	let values = [];
 	if(cur_frm.doc.__islocal == 1){
-		var values = ["new_password", "username", "email", "first_name", "last_name", "company", "gender", "birth_date", "date_of_joining", "tag_user_type", "location", "mobile_no"];
+		values = ["new_password", "username", "email", "first_name", "last_name", "company", "gender", "birth_date", "date_of_joining", "tag_user_type", "location", "mobile_no"];
 		for(var val in values){
 			cur_frm.set_value(values[val], "");
 		}
 	}else{
-		var values = ["email", "company"];
+		values = ["email", "company", "organization_type"];
 		for(var val in values){
 			cur_frm.toggle_enable(values[val], 0);
 		}
