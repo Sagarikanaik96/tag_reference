@@ -1,11 +1,7 @@
 frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
-		cur_frm.toggle_display("customer", 0);
-		cur_frm.toggle_display("status", 0);
-		cur_frm.toggle_enable("company", 0);
-		cur_frm.toggle_display("currency", 0);
-		cur_frm.toggle_display("exchange_rate", 0);
-		cur_frm.toggle_reqd("employee", 1);
+		var timesheet_fields = ["naming_series", "customer", "status", "company", "currency", "exchange_rate", "employee"];
+		hide_timesheet_field(timesheet_fields);
 		check_update_timesheet(frm);
 	},
 	setup: function(frm){
@@ -51,6 +47,13 @@ function check_update_timesheet(frm){
 	}
 }
 
+
+/*----------hide field----------------*/
+function hide_timesheet_field(fields){
+	for(let val in fields){
+		cur_frm.toggle_display(fields[val], 0);
+	}
+
 function update_job_detail(frm){
 	if (cur_frm.doc.job_order_detail){
 				frappe.call({
@@ -70,4 +73,5 @@ function update_job_detail(frm){
 					}
 				})
 		}
+
 }

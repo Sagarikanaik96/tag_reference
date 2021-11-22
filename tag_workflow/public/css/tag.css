@@ -1,21 +1,3 @@
-
-
-.navbar{
-    background-color: white;
-}
-/* .nav-link{
-    display: none;
-} */
-li.dropdown.dropdown.dropdown-help.dropdown-mobile {
-    display: none!important;
-    }
-.footer-powered{
-    display: none!important;
-}
-.app-logo{
-    width: 60px;
-    height: 60px;
-}
-.navbar-brand {
-    width: 50px;
+.widget.onboarding-widget-box {
+	display: none;
 }
