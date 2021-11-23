@@ -103,9 +103,9 @@ function field_check(frm){
 
 function init_values(frm){
 	if(cur_frm.doc.__islocal == 1){
-		let values = ["new_password", "username", "email", "first_name", "last_name", "company", "gender", "birth_date", "date_of_joining", "tag_user_type", "location", "mobile_no"];
-		for(var val in values){
-			cur_frm.set_value(values[val], "");
+		let hidden_values = ["new_password", "username", "email", "first_name", "last_name", "company", "gender", "birth_date", "date_of_joining", "tag_user_type", "location", "mobile_no"];
+		for(var val in hidden_values){
+			cur_frm.set_value(hidden_values[val], "");
 		}
 	}
 }
