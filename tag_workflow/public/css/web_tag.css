@@ -8,9 +8,6 @@ body {
 .btn.btn-primary {
 	background-color: #21B9E4 !important;
 }
-.web-footer {
-	display: none;
-}
 label {
 	color: #2A2E43;
 }
@@ -18,7 +15,13 @@ label {
 	text-align: -webkit-auto !important;
 	position: relative;
 }
-input:hover , input:focus , input:active , input:visited , input:visited { 
+input:hover { 
+	border: 1px solid#21B9E4 !important;	
+}
+input:active { 
+	border: 1px solid#21B9E4 !important;	
+}
+input:visited { 
 	border: 1px solid#21B9E4 !important;	
 }
 .for-login .page-card-head h4 {

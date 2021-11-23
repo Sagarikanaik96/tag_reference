@@ -1,3 +1,21 @@
 .widget.onboarding-widget-box {
 	display: none;
 }
+
+.navbar{
+    background-color: white;
+}
+li.dropdown.dropdown.dropdown-help.dropdown-mobile {
+    display: none!important;
+    }
+.footer-powered{
+    display: none!important;
+}
+.navbar-brand {
+    width: 50px;
+}
+.navbar-home .app-logo {
+	display: inline-block !important;
+    max-width: 150px !important;
+    max-height: 25px !important;
+}
