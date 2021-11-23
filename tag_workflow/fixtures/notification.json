@@ -1,0 +1,55 @@
+[
+ {
+  "attach_print": 0,
+  "channel": "Email",
+  "condition": "doc.workflow_state==\"Approval Request\"",
+  "date_changed": null,
+  "days_in_advance": 0,
+  "docstatus": 0,
+  "doctype": "Notification",
+  "document_type": "Timesheet",
+  "enabled": 1,
+  "event": "Value Change",
+  "is_standard": 0,
+  "message": "Company {{ doc.company }} has submitted a timesheet on {{doc.start_date }} for Job Order {{ doc.job_order_detail }} for approval. \n\nFor Reference click on\n\nTimesheet is <a href = \"http://192.168.0.102:8000/app/timesheet/{{doc.name}}\">{{doc.name}}</a>",
+  "method": null,
+  "modified": "2021-11-23 17:00:53.913620",
+  "module": null,
+  "name": "Timesheet",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "print_format": null,
+  "property_value": null,
+  "recipients": [
+   {
+    "bcc": null,
+    "cc": null,
+    "condition": null,
+    "parent": "Timesheet",
+    "parentfield": "recipients",
+    "parenttype": "Notification",
+    "receiver_by_document_field": "",
+    "receiver_by_role": "Staffing Admin"
+   },
+   {
+    "bcc": null,
+    "cc": null,
+    "condition": null,
+    "parent": "Timesheet",
+    "parentfield": "recipients",
+    "parenttype": "Notification",
+    "receiver_by_document_field": "",
+    "receiver_by_role": "Staffing User"
+   }
+  ],
+  "send_system_notification": 0,
+  "send_to_all_assignees": 0,
+  "sender": "Notifications",
+  "sender_email": "kanchan@korecent.com",
+  "set_property_after_alert": null,
+  "slack_webhook_url": null,
+  "subject": "Timesheet Approval",
+  "value_changed": "workflow_state"
+ }
+]
