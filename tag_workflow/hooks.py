@@ -10,10 +10,6 @@ app_email = "shadab.sutar@sourcefuse.com"
 app_license = "MIT"
 app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.png"
 
-website_context={
-        "favicon":"/assets/tag_workflow/images/TAG-Logo-Emblem.png",
-        "splash_image":"/assets/tag_workflow/images/TAG-Logo-Emblem.png"
-}
 # Includes in <head>
 # ------------------
 
@@ -44,7 +40,8 @@ doctype_js = {
         "Quotation": "public/js/controllers/quotation.js",
         "Sales Order": "public/js/controllers/sales_order.js",
         "Employee": "public/js/controllers/employee.js",
-        "Sales Invoice": "public/js/controllers/sales_invoice.js"
+        "Sales Invoice": "public/js/controllers/sales_invoice.js",
+        "Contact": "public/js/controllers/contact.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]

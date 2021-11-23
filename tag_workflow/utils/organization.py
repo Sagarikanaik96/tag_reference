@@ -9,28 +9,30 @@ import json, os
 from pathlib import Path
 from tag_workflow.controllers.master_controller import make_update_comp_perm
 
-
-ALL_ROLES = [role.name for role in frappe.db.get_list("Role") or []]
-All_ROLES = [role.name for role in frappe.db.get_list("Role") or [] if role.name != "System Manager"]
-
-ADD_ORGANIZATION = ["Company", "User", "Quotation", "Lead"]
-ADD_ORGANIZATION_DATA = ["TAG", "Hiring", "Staffing", "Exclusive Hiring"]
-
-ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag Admin", "Tag User", "CRM User", "Staff"]
-
-ROLE_PROFILE = [{ROLES[3]: ["Accounts User", "Report Manager", "Sales User", ROLES[3], "Website Manager", ROLES[6], "Employee"]}, {ROLES[2]: ["Accounts User", "Sales User", "Website Manager", ROLES[6], "Employee", ROLES[2]]}, {ROLES[1]: [ROLES[1], "Report Manager", "Website Manager", ROLES[6], "Employee", "Projects User"]}, {ROLES[0]: ["Website Manager", ROLES[6], "Employee", ROLES[0], "Projects User"]}, {ROLES[4]: ALL_ROLES}, {ROLES[5]: All_ROLES}]
-
-MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", "Tag Workflow", "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", "Tag Workflow", "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", "Tag Workflow", "Selling"]}]
-
-SPACE_PROFILE = ["CRM", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings", "Home", "My Activities"]
-
-#-------setup variable for TAG -------------#
+#-------setup variables for TAG -------------#
 Organization = "Organization Type"
 Module = "Module Profile"
 Role_Profile = "Role Profile"
 Sign_Label = "Signature Section"
 Job_Label = "Job Order"
 Custom_Label = "Custom Field"
+WEB_MAN = "Website Manager"
+USR, EMP = "User", "Employee"
+
+ALL_ROLES = [role.name for role in frappe.db.get_list("Role") or []]
+All_ROLES = [role.name for role in frappe.db.get_list("Role") or [] if role.name != "System Manager"]
+
+ADD_ORGANIZATION = ["Company", "Quotation", "Lead"]
+ADD_ORGANIZATION_DATA = ["TAG", "Hiring", "Staffing", "Exclusive Hiring"]
+
+ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag Admin", "Tag User", "CRM User", "Staff"]
+
+ROLE_PROFILE = [{ROLES[3]: ["Accounts User", "Report Manager", "Sales User", ROLES[3], WEB_MAN, ROLES[6], "Employee"]}, {ROLES[2]: ["Accounts User", "Sales User", WEB_MAN, ROLES[6], "Employee", ROLES[2]]}, {ROLES[1]: [ROLES[1], "Report Manager", WEB_MAN, ROLES[6], "Employee", "Projects User"]}, {ROLES[0]: [WEB_MAN, ROLES[6], "Employee", ROLES[0], "Projects User"]}, {ROLES[4]: ALL_ROLES}, {ROLES[5]: All_ROLES}]
+
+MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", "Tag Workflow", "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", "Tag Workflow", "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", "Tag Workflow", "Selling"]}]
+
+SPACE_PROFILE = ["CRM", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings", "Home", "My Activities"]
+
 #------setup data for TAG -------------#
 def setup_data():
     try:
@@ -42,6 +44,7 @@ def setup_data():
         update_permissions()
         set_workspace()
         setup_company_permission()
+        check_if_user_exists()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -53,13 +56,9 @@ def update_organization():
     try:
         print("*------updating organization field----------*\n")
         for docs in ADD_ORGANIZATION:
-            if(docs in ["Company", "User"]):
+            if(docs in ["Company"]):
                 if not frappe.db.exists(Custom_Label, {"dt": docs, "label": Organization}):
                     custom_doc = frappe.get_doc(dict(doctype=Custom_Label, dt=docs, label=Organization, fieldtype="Link", options=Organization,reqd=1))
-                    custom_doc.save()
-
-                if(docs == "User" and not frappe.db.exists(Custom_Label, {"dt": docs, "label": "User Type"})):
-                    custom_doc = frappe.get_doc(dict(doctype=Custom_Label, dt = docs, label = "User Type", fieldtype = "Select", options = "\nHiring Admin\nHiring User\nStaffing Admin\nStaffing User\nTag Admin\nTag User", mandatory_depends_on="eval: doc.organization_type", depends_on = "eval: doc.organization_type", fieldname = "tag_user_type"))
                     custom_doc.save()
 
             elif(docs in ["Quotation"] and not frappe.db.exists(Custom_Label, {"dt": docs, "label": Job_Label})):
@@ -213,3 +212,18 @@ def setup_company_permission():
     except Exception as e:
         frappe.log_error(e, "setup_company_permission")
         print(e)
+
+# check user employee data
+def check_if_user_exists():
+    try:
+        print("*------user update--------------------------*\n")
+        user_list = frappe.get_list(USR, ["name"])
+        for user in user_list:
+            if(frappe.db.exists(EMP, {"user_id": user.name})):
+                company, date_of_joining = frappe.db.get_value(EMP, {"user_id": user.name}, ["company", "date_of_joining"])
+                frappe.db.sql(""" UPDATE `tabUser` SET company = %s, date_of_joining = %s where name = %s """,(company, date_of_joining, user.name))
+
+    except Exception as e:
+        frappe.log_error(e, "user update")
+        print(e)
+

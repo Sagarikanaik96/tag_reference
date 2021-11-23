@@ -18,6 +18,51 @@ frappe.ui.form.on('Job Order', {
 			frappe.msgprint({message: __('No of workers already filled for this job order'), title: __('Worker Filled'), indicator: 'red'});
 		}
 	},	
+	onload:function(frm)
+   {
+       if(frappe.user_roles.includes("Hiring User") || frappe.user_roles.includes("Hiring Admin"))
+       {
+           var company_name=frappe.defaults.get_user_default("company")
+           frappe.call({
+               method:"tag_workflow.tag_data.company_details",
+               args:{
+                   'company_name':company_name,
+               },
+               callback:function(r){
+                   if (r.message!="success")
+                   {
+                       msgprint("You can't Create Job Order Unless Your Company Details are Complete");
+                       frappe.validated = false;
+                   }
+               }
+              
+           })
+       }
+ 
+   },
+   before_save:function(frm)
+   {
+       if(frappe.user_roles.includes("Hiring User") || frappe.user_roles.includes("Hiring Admin"))
+       {
+           var company_name=frappe.defaults.get_user_default("company")
+           frappe.call({
+               method:"tag_workflow.tag_data.company_details",
+               args:{
+                   'company_name':company_name,
+               },
+               callback:function(r){
+                   if (r.message!="success")
+                   {
+                       msgprint("You can't Create Job Order Unless Your Company Details are Complete");
+                       frappe.validated = false;
+                   }
+               }
+              
+           })
+       }
+ 
+   }
+
 });
 
 

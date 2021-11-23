@@ -1,11 +1,7 @@
 frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
-		cur_frm.toggle_display("customer", 0);
-		cur_frm.toggle_display("status", 0);
-		cur_frm.toggle_enable("company", 0);
-		cur_frm.toggle_display("currency", 0);
-		cur_frm.toggle_display("exchange_rate", 0);
-		cur_frm.toggle_reqd("employee", 1);
+		var timesheet_fields = ["naming_series", "customer", "status", "company", "currency", "exchange_rate", "employee"];
+		hide_timesheet_field(timesheet_fields);
 		check_update_timesheet(frm);
 	},
 	setup: function(frm){
@@ -21,6 +17,7 @@ frappe.ui.form.on("Timesheet", {
 
 	job_order_detail: function(frm){
 		job_order_details(frm);
+		update_job_detail(frm);
 	}
 });
 
@@ -47,5 +44,30 @@ function job_order_details(frm){
 function check_update_timesheet(frm){
 	if(frm.doc.workflow_state == "Approval Request"){
 		frappe.call({method: "tag_workflow.utils.timesheet.send_timesheet_for_approval",args: {"employee": frm.doc.employee, "docname": frm.doc.name}});
+	}
+}
+
+
+/*----------hide field----------------*/
+function hide_timesheet_field(fields){
+	for(let val in fields){
+		cur_frm.toggle_display(fields[val], 0);
+	}
+}
+
+function update_job_detail(frm){
+	if (cur_frm.doc.job_order_detail){
+		frappe.call({
+			method:"tag_workflow.tag_data.update_timesheet",
+			args:{'job_order_detail':cur_frm.doc.job_order_detail},
+			callback:function(r){
+				if(r.message){
+					cur_frm.get_field("time_logs").grid.grid_rows[0].doc.activity_type = r.message[0];
+					cur_frm.get_field("time_logs").grid.grid_rows[0].doc.from_time = r.message[1];
+					cur_frm.get_field("time_logs").grid.grid_rows[0].refresh_field("activity_type");
+					cur_frm.get_field("time_logs").grid.grid_rows[0].refresh_field("from_time");
+				}
+			}
+		});
 	}
 }
