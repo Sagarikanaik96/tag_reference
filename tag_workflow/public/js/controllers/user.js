@@ -1,20 +1,10 @@
 frappe.ui.form.on("User", {
 	refresh: function(frm){
 		set_options(frm);
+		field_toggle(frm);
 		field_reqd(frm);
-		init_values(frm);
-		var fields = ["sb1", "document_follow_notifications_section", "email_settings", "sb_allow_modules", "sb2", "sb3", "third_party_authentication", "api_access", "full_name", "language", "time_zone", "middle_name", "username", "interest", "bio", "banner_image", "mute_sounds", "desk_theme", "phone"];
-
-		for(let field in fields){
-			field_toggle(fields[field], 0);
-		}
-
-		if(!frappe.user_roles.includes("System Manager") && cur_frm.is_dirty() == false){
-			let sys_field = ["organization_type", "tag_user_type"];
-			for(let field in sys_field){
-				field_display(sys_field[field], 0);
-			}
-		}
+		field_check(frm);
+		field_display(frm);
 	},
 	setup: function(frm){
 		let roles = frappe.user_roles;
@@ -78,12 +68,20 @@ function name_update(string){
 }
 
 /*--------perpare field display-----------*/
-function field_toggle(field, value){
-	cur_frm.toggle_display(field, value);
+function field_toggle(frm){
+	var perm_dis_fields = ["sb1", "document_follow_notifications_section", "email_settings", "sb_allow_modules", "sb2", "sb3", "third_party_authentication", "api_access", "full_name", "language", "time_zone", "middle_name", "username", "interest", "bio", "banner_image", "mute_sounds", "desk_theme", "phone"];
+	for(let field in perm_dis_fields){
+		cur_frm.toggle_display(perm_dis_fields[field], 0);
+	}
 }
 
-function field_display(field, value){
-	cur_frm.toggle_enable(field, value);
+function field_display(frm){
+	if(!frappe.user_roles.includes("System Manager") && cur_frm.is_dirty()){
+		let sys_field = ["organization_type", "tag_user_type"];
+		for(let field in sys_field){
+			cur_frm.toggle_enable(sys_field[field], 0);
+		}
+	}
 }
 
 function field_reqd(frm){
@@ -94,17 +92,20 @@ function field_reqd(frm){
 	}
 }
 
+function field_check(frm){
+	let values = ["email", "company", "organization_type"];
+	if(!cur_frm.doc.__islocal){
+		for(var vals in values){
+			cur_frm.toggle_enable(values[vals], 0);
+		}
+	}
+}
+
 function init_values(frm){
-	let values = [];
 	if(cur_frm.doc.__islocal == 1){
-		values = ["new_password", "username", "email", "first_name", "last_name", "company", "gender", "birth_date", "date_of_joining", "tag_user_type", "location", "mobile_no"];
+		let values = ["new_password", "username", "email", "first_name", "last_name", "company", "gender", "birth_date", "date_of_joining", "tag_user_type", "location", "mobile_no"];
 		for(var val in values){
 			cur_frm.set_value(values[val], "");
-		}
-	}else{
-		values = ["email", "company", "organization_type"];
-		for(var val in values){
-			cur_frm.toggle_enable(values[val], 0);
 		}
 	}
 }
@@ -129,25 +130,27 @@ function setup_profile(frm){
 	let role_profile = "role_profile_name";
 	let module_profile = "module_profile";
 	var type = frm.doc.tag_user_type;
+	let doctype = frm.doc.doctype;
+	let docname = frm.doc.name;
 
 	if(type == "Hiring Admin"){
-		frappe.model.set_value(frm.doc.doctype, frm.doc.name, role_profile, "Hiring Admin");
-		frappe.model.set_value(frm.doc.doctype, frm.doc.name, module_profile, "Hiring");
+		frappe.model.set_value(doctype, docname, role_profile, "Hiring Admin");
+		frappe.model.set_value(doctype, docname, module_profile, "Hiring");
 	}else if(type == "Hiring User"){
-		frappe.model.set_value(frm.doc.doctype, frm.doc.name, role_profile, "Hiring User");
-		frappe.model.set_value(frm.doc.doctype, frm.doc.name, module_profile, "Hiring");
+		frappe.model.set_value(doctype, docname, role_profile, "Hiring User");
+		frappe.model.set_value(doctype, docname, module_profile, "Hiring");
 	}else if(type == "Staffing Admin"){
-		frappe.model.set_value(frm.doc.doctype, frm.doc.name, role_profile, "Staffing Admin");
-		frappe.model.set_value(frm.doc.doctype, frm.doc.name, module_profile, "Staffing");
+		frappe.model.set_value(doctype, docname, role_profile, "Staffing Admin");
+		frappe.model.set_value(doctype, docname, module_profile, "Staffing");
 	}else if(type == "Staffing User"){
-		frappe.model.set_value(frm.doc.doctype, frm.doc.name, role_profile, "Staffing User");
-		frappe.model.set_value(frm.doc.doctype, frm.doc.name, module_profile, "Staffing");
+		frappe.model.set_value(doctype, docname, role_profile, "Staffing User");
+		frappe.model.set_value(doctype, docname, module_profile, "Staffing");
 	}else if(type == "Tag Admin"){
-		frappe.model.set_value(frm.doc.doctype, frm.doc.name, role_profile, "Tag Admin");
-		frappe.model.set_value(frm.doc.doctype, frm.doc.name, module_profile, "Tag Admin");
+		frappe.model.set_value(doctype, docname, role_profile, "Tag Admin");
+		frappe.model.set_value(doctype, docname, module_profile, "Tag Admin");
 	}else if(type == "Tag User"){
-		frappe.model.set_value(frm.doc.doctype, frm.doc.name, role_profile, "Tag User");
-		frappe.model.set_value(frm.doc.doctype, frm.doc.name, module_profile, "Tag Admin");
+		frappe.model.set_value(doctype, docname, role_profile, "Tag User");
+		frappe.model.set_value(doctype, docname, module_profile, "Tag Admin");
 	}
 }
 
