@@ -1,0 +1,90 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2021-11-23 13:23:23.045988",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "job_order",
+  "no_of_employee_required",
+  "transaction_date",
+  "column_break_3",
+  "hiring_organization",
+  "staffing_organization",
+  "section_break_6",
+  "employee_details"
+ ],
+ "fields": [
+  {
+   "fieldname": "job_order",
+   "fieldtype": "Link",
+   "label": "Job Order",
+   "options": "Job Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "no_of_employee_required",
+   "fieldtype": "Int",
+   "label": "No. Of Employee Required",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hiring_organization",
+   "fieldtype": "Data",
+   "label": "Hiring Organization",
+   "read_only": 1
+  },
+  {
+   "fieldname": "staffing_organization",
+   "fieldtype": "Data",
+   "label": "Staffing Organization",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee_details",
+   "fieldtype": "Table",
+   "label": "Employee Details",
+   "options": "Assign Employee Details"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-11-23 13:25:17.551833",
+ "modified_by": "Administrator",
+ "module": "Tag Workflow",
+ "name": "Assign Employee",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
