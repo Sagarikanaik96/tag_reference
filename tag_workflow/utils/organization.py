@@ -226,3 +226,4 @@ def check_if_user_exists():
     except Exception as e:
         frappe.log_error(e, "user update")
         print(e)
+
