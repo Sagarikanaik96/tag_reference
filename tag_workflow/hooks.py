@@ -8,7 +8,7 @@ app_icon = "octicon octicon-file-directory"
 app_color = "grey"
 app_email = "shadab.sutar@sourcefuse.com"
 app_license = "MIT"
-app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.png"
+app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.svg"
 
 # Includes in <head>
 # ------------------
@@ -55,7 +55,7 @@ doc_events = {
 
 # logo
 website_context = {
-        "favicon": "/assets/tag_workflow/images/TAG-Logo-Emblem.png",
+        "favicon": "/assets/tag_workflow/images/TAG-Logo-Emblem.svg",
         "splash_image": "/assets/tag_workflow/images/TAG-Logo.png"
 }
 
