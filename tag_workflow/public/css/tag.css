@@ -3,19 +3,23 @@
 }
 
 .navbar{
-    background-color: white;
+	background-color: white;
 }
+
 li.dropdown.dropdown.dropdown-help.dropdown-mobile {
-    display: none!important;
-    }
+	display: none!important;
+}
+
 .footer-powered{
-    display: none!important;
+	display: none!important;
 }
+
 .navbar-brand {
-    width: 50px;
+	width: 55px;
 }
+
 .navbar-home .app-logo {
 	display: inline-block !important;
-    max-width: 150px !important;
-    max-height: 25px !important;
+	max-width: 55px !important;
+	max-height: 25px !important;
 }

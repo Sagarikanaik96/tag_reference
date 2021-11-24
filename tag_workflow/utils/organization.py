@@ -7,6 +7,7 @@ from frappe import _
 from frappe.config import get_modules_from_all_apps
 import json, os
 from pathlib import Path
+from tag_workflow.utils.trigger_session import share_company_with_user
 from tag_workflow.controllers.master_controller import make_update_comp_perm
 
 #-------setup variables for TAG -------------#
@@ -45,6 +46,7 @@ def setup_data():
         set_workspace()
         setup_company_permission()
         check_if_user_exists()
+        share_company_with_user()
         frappe.db.commit()
     except Exception as e:
         print(e)

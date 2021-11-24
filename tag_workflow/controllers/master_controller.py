@@ -7,6 +7,7 @@ import frappe
 from frappe import _, msgprint, throw
 from tag_workflow.controllers import base_controller
 from frappe import enqueue
+from tag_workflow.utils.trigger_session import share_company_with_user
 
 GROUP = "All Customer Groups"
 TERRITORY = "All Territories"
@@ -89,6 +90,8 @@ def check_item_group():
 # remove message on user creation
 @frappe.whitelist()
 def check_employee(name, first_name, last_name, company, gender, date_of_birth, date_of_joining):
+    users = [{"name": name, "company": company}]
+    share_company_with_user(users)
     if not frappe.db.exists(EMP, {"user_id": name}):
         emp = frappe.get_doc(dict(doctype=EMP, first_name=first_name, last_name=last_name, company=company, status="Active", gender=gender, date_of_birth=date_of_birth, date_of_joining=date_of_joining, user_id=name, create_user_permission=1))
         emp.save(ignore_permissions=True)

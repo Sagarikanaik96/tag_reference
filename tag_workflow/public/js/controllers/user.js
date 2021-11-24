@@ -61,18 +61,15 @@ frappe.ui.form.on("User", {
 	after_save: function(frm){
 		update_employee(frm);
 	},
-	company:function(frm)
-	{
+	company: function(frm){
 		cur_frm.fields_dict['branches'].grid.get_field('branch_name').get_query = function(doc, cdt, cdn) {
-		return {
-			filters:[
-				['organization_name', '=', cur_frm.doc.company]
-			]
+			return {
+				filters:[
+					['organization_name', '=', cur_frm.doc.company]
+				]
+			}
 		}
 	}
-	}
- 
-
 });
 
 /*-------first_and_last_name--------------*/

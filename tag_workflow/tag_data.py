@@ -38,3 +38,22 @@ def update_timesheet(job_order_detail):
     value = frappe.db.sql('''select select_job,posting_date_time from `tabJob Order` where name = "{}" '''.format(job_order_detail),as_dict = 1)
     return value[0]['select_job'],value[0]['posting_date_time']
 
+
+@frappe.whitelist()
+def send_email_staffing_user(email_list=None,subject = None,body=None,additional_email = None):
+    import json
+    from frappe.core.doctype.communication.email import make
+    email = json.loads(email_list)
+    l = [i['email'] for i in email]
+    if additional_email:
+        v = additional_email.split(',')
+        for i in v:
+            l.append(i)
+    try:
+        make(subject = subject, content=body, recipients= l,send_email=True)
+        frappe.msgprint("Email Send Succesfully")
+        return 1
+    except:
+        frappe.msgprint("Could Not Send")
+        return 0
+
