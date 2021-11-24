@@ -34,6 +34,7 @@ frappe.ui.form.on("User", {
 	organization_type: function(frm){
 		set_options(frm);
 		init_values(frm);
+		setup_company_value(frm);
 	},
 	first_name:function(frm){
 		if(cur_frm.doc.first_name){
@@ -59,7 +60,19 @@ frappe.ui.form.on("User", {
 
 	after_save: function(frm){
 		update_employee(frm);
+	},
+	company:function(frm)
+	{
+		cur_frm.fields_dict['branches'].grid.get_field('branch_name').get_query = function(doc, cdt, cdn) {
+		return {
+			filters:[
+				['organization_name', '=', cur_frm.doc.company]
+			]
+		}
 	}
+	}
+ 
+
 });
 
 /*-------first_and_last_name--------------*/
@@ -158,4 +171,15 @@ function setup_profile(frm){
 /*------------update employee--------------*/
 function update_employee(frm){
 	frappe.call({"method": "tag_workflow.controllers.master_controller.check_employee","args": {"name": frm.doc.name, "first_name": frm.doc.first_name, "last_name": frm.doc.last_name || '', "company": frm.doc.company, "gender": frm.doc.gender, "date_of_birth": frm.doc.birth_date, "date_of_joining": frm.doc.date_of_joining}});
+}
+
+
+function setup_company_value(frm){
+	cur_frm.fields_dict['company'].get_query = function(doc) {
+		return {
+			filters: {
+				"organization_type": cur_frm.doc.organization_type
+			}
+		}
+	}
 }
