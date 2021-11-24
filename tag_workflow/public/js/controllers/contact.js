@@ -1,6 +1,7 @@
 frappe.ui.form.on("Contact", {
 	refresh: function(frm){
 		init_fields(frm);
+		make_field_mandatory(frm);
 	}
 });
 
@@ -10,5 +11,13 @@ function init_fields(frm){
 
 	for(var field in contact_field){
 		cur_frm.toggle_display(contact_field[field], 0);
+	}
+}
+
+/*--------mandatory field------------*/
+function make_field_mandatory(frm){
+	let reqd = ["company_name", "phone_number", "email_address"];
+	for(let r in reqd){
+		cur_frm.toggle_reqd(reqd[r], 1);
 	}
 }
