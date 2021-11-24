@@ -1,5 +1,29 @@
+a {
+    color: #78849E;
+}
 .widget.onboarding-widget-box {
 	display: none;
+}
+.form-control:focus {
+    box-shadow: 0 0 0 2px rgb(33 185 128 / 25%);
+    transition: .5 ease-in-out;
+}
+input[type="checkbox"]:checked {
+    background-color:#21b9e4 !important; 
+}
+.indicator-pill.green {
+    background: #E8FCF6;
+    color:#414141;
+}
+.indicator-pill.green::before {
+    background: #21E4AE;
+}
+.indicator-pill {
+    padding: 4px;
+    border-radius: 4px;
+}
+input[type="checkbox"]:checked {
+    background-color: #21b9e4 !important; 
 }
 
 .navbar{
@@ -22,4 +46,56 @@ li.dropdown.dropdown.dropdown-help.dropdown-mobile {
 	display: inline-block !important;
 	max-width: 55px !important;
 	max-height: 25px !important;
+}
+.btn.btn-primary {
+	background-color: #21B9E4 !important;
+}
+input:hover { 
+	border: 1px solid#21B9E4 !important;	
+}
+input:active { 
+	border: 1px solid#21B9E4 !important;	
+}
+input:visited { 
+	border: 1px solid#21B9E4 !important;	
+}
+/* user management */
+.standard-sidebar-item.selected, .desk-sidebar .standard-sidebar-item:hover  {
+    background-color: #e8f8fc !important;
+    border-left: 2px solid #21b9e4 !important;
+    border-radius: 0px;
+    color: #000000;
+    transition: .2s ease-in-out ;
+}
+.layout-main .layout-side-section {
+    border-right: 1px solid #ECECF1;
+}
+[data-page-route="Workspaces"] .layout-main .layout-side-section {
+    padding-right: 0px;
+    background: #fff;
+    padding-left: 0;
+}
+.desk-sidebar .standard-sidebar-section .standard-sidebar-label {
+    padding-left:15px ;
+}
+.layout-main-section .frappe-list .list-row-head  {
+    background: #F0F8FF;
+}
+.layout-main-section .frappe-list .list-row-head  span {
+    color: #454F63;
+    font-weight: 500;
+}
+.list-sidebar .sidebar-action a , .btn-primary-light {
+    color:#21B9E4 !important;
+}
+.filter-icon.active use {
+    stroke: #21B9E4;
+}
+.layout-main-section .frappe-list .list-row {
+    padding: 25px 15px 25px 0px;
+    height: 60px;
+}
+/* user management */
+#page-User .layout-main .layout-side-section {
+    border-right: none;
 }
