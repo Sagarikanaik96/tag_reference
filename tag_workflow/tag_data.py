@@ -34,3 +34,13 @@ def send_email_staffing_user(email_list=None,subject = None,body=None,additional
         frappe.msgprint("Could Not Send")
         return 0
 
+ 
+@frappe.whitelist()
+def update_job_order(job_name=None,employee_filled=None):
+   print("ebdch snvjdnx")
+   print(job_name,employee_filled)
+   x=frappe.get_doc("Job Order",job_name)
+   print(x.worker_filled)
+   x.worker_filled=int(employee_filled)+int(x.worker_filled)
+   x.save()
+   return "success"

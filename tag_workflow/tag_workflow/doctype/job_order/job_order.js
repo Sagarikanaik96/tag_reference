@@ -92,7 +92,7 @@ function redirect_quotation(frm){
 	doc.transaction_date = frappe.datetime.now_date();
 	doc.staffing_organization = staff_company[0]  ;
 	doc.job_order = frm.doc.name;
-	doc.no_of_employee_required=frm.doc.no_of_workers;
+	doc.no_of_employee_required=frm.doc.no_of_workers-frm.doc.worker_filled;
 	doc.hiring_organization = frm.doc.company;
 	frappe.set_route("Form", "Assign Employee", doc.name);
  }
