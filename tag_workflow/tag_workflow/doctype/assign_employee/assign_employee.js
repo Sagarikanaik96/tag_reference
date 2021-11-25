@@ -23,7 +23,20 @@ frappe.ui.form.on('Assign Employee', {
 			
 		}
   
-  
+	},
+	after_save:function(frm){
+		frappe.call({
+			method:"tag_workflow.tag_data.receive_hiring_notification",
+			args:{
+				hiring_org:cur_frm.doc.hiring_organization,
+				job_order:cur_frm.doc.job_order,
+				staffing_org:cur_frm.doc.staffing_organization,
+				emp_detail:cur_frm.doc.employee_details,
+				doc_name :cur_frm.doc.name
+			},
+			
+
+		})
 	}
  });
  
