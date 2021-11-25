@@ -4,7 +4,6 @@ frappe.ui.form.on("User", {
 		field_toggle(frm);
 		field_reqd(frm);
 		field_check(frm);
-		field_display(frm);
 	},
 	setup: function(frm){
 		let roles = frappe.user_roles;
@@ -82,15 +81,6 @@ function field_toggle(frm){
 	var perm_dis_fields = ["sb1", "document_follow_notifications_section", "email_settings", "sb_allow_modules", "sb2", "sb3", "third_party_authentication", "api_access", "full_name", "language", "time_zone", "middle_name", "username", "interest", "bio", "banner_image", "mute_sounds", "desk_theme", "phone"];
 	for(let field in perm_dis_fields){
 		cur_frm.toggle_display(perm_dis_fields[field], 0);
-	}
-}
-
-function field_display(frm){
-	if(!frappe.user_roles.includes("System Manager") && cur_frm.is_dirty()){
-		let sys_field = ["organization_type", "tag_user_type"];
-		for(let field in sys_field){
-			cur_frm.toggle_enable(sys_field[field], 0);
-		}
 	}
 }
 
