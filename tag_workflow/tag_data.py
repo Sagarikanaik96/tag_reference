@@ -1,28 +1,5 @@
 import frappe
-
-
-@frappe.whitelist()
-def submit_values(job_order_name=None,quotation_number=None):
-    print(job_order_name)
-    q = frappe.db.sql(
-        """ select docstatus from `tabQuotation` where job_order='{}'; """.format(job_order_name),as_list=1)
-    print(q)
-    for i in range(len(q)):
-        if q[i][0]==1:
-            print(q[i][0])
-            break
-    else:        
-        return "success"
-        
-@frappe.whitelist()
-def update_job_order(job_order_name=None,quotation_name=None):
-    print(job_order_name,quotation_name)
-    d=frappe.get_doc("Job Order",job_order_name)
-    d.quotation_submitted=quotation_name
-    d.save()
-
-    return "success"
-    
+  
 @frappe.whitelist()
 
 def company_details(company_name=None):
@@ -57,3 +34,13 @@ def send_email_staffing_user(email_list=None,subject = None,body=None,additional
         frappe.msgprint("Could Not Send")
         return 0
 
+ 
+@frappe.whitelist()
+def update_job_order(job_name=None,employee_filled=None):
+   print("ebdch snvjdnx")
+   print(job_name,employee_filled)
+   x=frappe.get_doc("Job Order",job_name)
+   print(x.worker_filled)
+   x.worker_filled=int(employee_filled)+int(x.worker_filled)
+   x.save()
+   return "success"

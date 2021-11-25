@@ -7,12 +7,12 @@
 // 	// }
 // });
 frappe.ui.form.on('Job Order', {	
-	create_quotation: function(frm){
+	assign_employees: function(frm){
 		if(frm.doc.__islocal != 1 && cur_frm.doc.owner != frappe.session.user && frm.doc.worker_filled < frm.doc.no_of_workers){
 			if(cur_frm.is_dirty()){
 				frappe.msgprint({message: __('Please save the form before creating Quotation'), title: __('Save Job Order'), indicator: 'red'});
 			}else{
-				make_quotation(frm);
+				assign_employe(frm);
 			}
 		}else if(frm.doc.worker_filled >= frm.doc.no_of_workers){
 			frappe.msgprint({message: __('No of workers already filled for this job order'), title: __('Worker Filled'), indicator: 'red'});
@@ -68,7 +68,7 @@ frappe.ui.form.on('Job Order', {
 
 
 /*----------------prepare quote--------------*/
-function make_quotation(frm){
+function assign_employe(frm){
 	var company = frappe.defaults.get_user_default("company") || '';
 	if(company){
 		frappe.db.get_value("Quotation", {"company": company, "job_order": frm.doc.name}, ["name", "docstatus"], function(r){
@@ -86,83 +86,14 @@ function make_quotation(frm){
 }
 
 function redirect_quotation(frm){
-	var doc = frappe.model.get_new_doc("Quotation");
-	var child = frappe.model.get_new_doc("Quotation Item", doc, "items");
-	doc.quotation_to = "Customer";
-	doc.party_name = frm.doc.company;
+	var doc = frappe.model.get_new_doc("Assign Employee");
+	var staff_company=frappe.defaults.get_user_defaults("company")
+	console.log(staff_company[0])
 	doc.transaction_date = frappe.datetime.now_date();
-	doc.order_type = "Sales";
-	doc.company =  frappe.defaults.get_user_default("company") || '';
+	doc.staffing_organization = staff_company[0]  ;
 	doc.job_order = frm.doc.name;
-	doc.naming_series = "SAL-QTN-.YYYY.-";
-	doc.selling_price_list = "Standard Selling";
-
-	$.extend(child, {
-		"item_code": frm.doc.select_job,
-		"item_name": frm.doc.select_job,
-		"qty": frm.doc.no_of_workers - frm.doc.worker_filled,
-		"description": frm.doc.select_job,
-		"uom": "Nos",
-		"conversion_factor": 1,
-		"stock_qty": 1
-	});
-
-	frappe.set_route("app", "quotation", doc.name);
-}
-
-
-frappe.ui.form.on("Quotation",{
-	before_submit: function(frm){
-		if(frappe.user_roles.includes("Hiring Admin") || frappe.user_roles.includes("Hiring User"))
-		{
-			frappe.call({
-				method:"tag_workflow.tag_data.submit_values",
-				args:{
-					'job_order_name':cur_frm.doc.job_order,
-					'quotation_number':cur_frm.doc.name
-				},
-				callback:function(r){
-					if(r.message!="success")
-					{
-						msgprint("One Quotation is already submitted");
-						frappe.validated = false;
-
-					}
-				}
-			})
-		}
-		else if(frappe.user.has_role!="Hiring Admin" || frappe.user.has_role!="Hiring User"){
-			msgprint("You Don't have permission to submit the quotation");
-			frappe.validated = false;
-		}
-	}
-})
-
-frappe.ui.form.on("Quotation",{
-	"on_submit":function(frm)
-	{
-		frappe.call({
-			method:"tag_workflow.tag_data.update_job_order",
-			args:{
-				'quotation_name':cur_frm.doc.name,
-				'job_order_name':cur_frm.doc.job_order
-			},
-			callback:function(r){
-				console.log(r.message)
-			}
-		})
-	}
-})
-
-
-frappe.ui.form.on("Job Order", "refresh", function(frm) {
-	console.log(frappe.defaults.get_user_default("company"))
-	cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
-		return {
-			filters:[
-				['company', '=', frappe.defaults.get_user_default("company")]
-			]
-		}
-	}
-});
+	doc.no_of_employee_required=frm.doc.no_of_workers-frm.doc.worker_filled;
+	doc.hiring_organization = frm.doc.company;
+	frappe.set_route("Form", "Assign Employee", doc.name);
+ }
 

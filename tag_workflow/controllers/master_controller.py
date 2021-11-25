@@ -93,7 +93,7 @@ def check_employee(name, first_name, last_name, company, gender, date_of_birth, 
     users = [{"name": name, "company": company}]
     share_company_with_user(users)
     if not frappe.db.exists(EMP, {"user_id": name}):
-        emp = frappe.get_doc(dict(doctype=EMP, first_name=first_name, last_name=last_name, company=company, status="Active", gender=gender, date_of_birth=date_of_birth, date_of_joining=date_of_joining, user_id=name, create_user_permission=1))
+        emp = frappe.get_doc(dict(doctype=EMP, first_name=first_name, last_name=last_name, company=company, status="Active", gender=gender, date_of_birth=date_of_birth, date_of_joining=date_of_joining, user_id=name, create_user_permission=0))
         emp.save(ignore_permissions=True)
     else:
         emp = frappe.get_doc(EMP, {"user_id": name})
