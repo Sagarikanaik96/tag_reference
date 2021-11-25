@@ -4,7 +4,7 @@ import frappe
 
 def company_details(company_name=None):
    x=frappe.db.sql(""" select FEIN,Title,Address,City,State,Zip,contact_name,email,phone_no,primary_language,accounts_payable_contact_name,accounts_payable_email,accounts_payable_phone_number,Industry from `tabCompany` where name="{}" """.format(company_name),as_list=1)
-   print(x)
+   
    for i in range(len(x[0])):
        if x[0][i]==None:
            break
@@ -45,10 +45,7 @@ def send_email_staffing_user(email_list=None,subject = None,body=None,additional
  
 @frappe.whitelist()
 def update_job_order(job_name=None,employee_filled=None):
-   print("ebdch snvjdnx")
-   print(job_name,employee_filled)
    x=frappe.get_doc("Job Order",job_name)
-   print(x.worker_filled)
    x.worker_filled=int(employee_filled)+int(x.worker_filled)
    x.save()
    return "success"
@@ -66,6 +63,10 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
         s += i['employee_name'] + ','
 
     l = [l[0] for l in user_list]
+    from frappe.share import add
+    for user in l:
+        add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
+
     msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["job_title"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim <a href="/app/assign-employee/{doc_name}">Assign Employee</a> .'
     return send_email(None,msg,l)
 
