@@ -447,6 +447,30 @@
     "property_type": "Check",
     "row_name": null,
     "value": "0"
+   },
+   {
+    "_assign": null,
+    "_comments": null,
+    "_liked_by": null,
+    "_user_tags": null,
+    "creation": "2021-11-16 11:25:10.993004",
+    "default_value": null,
+    "doc_type": "User",
+    "docstatus": 0,
+    "doctype_or_field": "DocField",
+    "field_name": "change_password",
+    "idx": 0,
+    "modified": "2021-11-16 11:25:10.993004",
+    "modified_by": "Administrator",
+    "name": "Company-change_password-depends_on",
+    "owner": "Administrator",
+    "parent": null,
+    "parentfield": null,
+    "parenttype": null,
+    "property": "depends_on",
+    "property_type": "Data",
+    "row_name": null,
+    "value": ""
    }
   ],
   "sync_on_migrate": 1

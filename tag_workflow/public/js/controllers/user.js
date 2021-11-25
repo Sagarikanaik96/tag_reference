@@ -94,18 +94,22 @@ function field_reqd(frm){
 
 function field_check(frm){
 	let values = ["email", "company", "organization_type"];
+	let pass = "new_password";
 	if(!cur_frm.doc.__islocal){
 		for(var vals in values){
 			cur_frm.toggle_enable(values[vals], 0);
 		}
+	}else{
+		cur_frm.toggle_reqd(pass, 1);
+		cur_frm.set_value(pass, "Entry@123");
 	}
 }
 
 function init_values(frm){
 	if(cur_frm.doc.__islocal == 1){
-		let hidden_values = ["new_password", "username", "email", "first_name", "last_name", "company", "gender", "birth_date", "date_of_joining", "tag_user_type", "location", "mobile_no"];
-		for(var val in hidden_values){
-			cur_frm.set_value(hidden_values[val], "");
+		let clear_values = ["username", "email", "first_name", "last_name", "company", "gender", "birth_date", "date_of_joining", "tag_user_type", "location", "mobile_no"];
+		for(var val in clear_values){
+			cur_frm.set_value(clear_values[val], "");
 		}
 	}
 }
