@@ -10,8 +10,5 @@ def validate_username(self):
 
     # strip space and @
     self.username = self.username.strip(" @")
-    if self.username_exists():
-        if self.user_type == 'System User':
-            #frappe.msgprint(_("Username {0} already exists. sahil is here").format(self.username))
-            #self.suggest_username()
-            self.username = self.username+"-1"
+    if self.username_exists() and self.user_type == 'System User':
+        self.username = self.username+"-1"
