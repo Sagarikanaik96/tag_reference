@@ -70,3 +70,24 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
     msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["job_title"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim <a href="/app/assign-employee/{doc_name}">Assign Employee</a> .'
     return send_email(None,msg,l)
 
+@frappe.whitelist()
+def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None):
+    from frappe.share import add
+
+    org_type=frappe.db.sql('''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org),as_list=1)
+    if(org_type[0][0]=='Hiring'):
+        user_list=frappe.db.sql(''' select email from `tabUser` where organization_type='staffing' ''',as_list=1)
+        l = [l[0] for l in user_list]
+        for user in l:
+            add("Job Order", job_order, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
+        message=f'New Work Order for {job_order_title} has been created by {hiring_org}.<a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
+        return send_email("New Work Order",message,l)
+    elif org_type[0][0]=="Exclusive Hiring":
+        owner_info=frappe.db.sql(''' select owner from `tabCompany` where organization_type="Exclusive Hiring" and name="{}" '''.format(hiring_org),as_list=1)
+        company_info=frappe.db.sql(''' select company from `tabUser` where name='{}' '''.format(owner_info[0][0]),as_list=1)
+        user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(company_info[0][0]),as_list=1)        
+        l = [l[0] for l in user_list]
+        for user in l:
+            add("Job Order", job_order, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
+        message=f'New Work Order for {job_order_title} has been created by {hiring_org}. <a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
+        return send_email("New Work Order",message,l)
