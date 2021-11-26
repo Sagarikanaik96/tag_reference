@@ -11,6 +11,7 @@
   "naming_series",
   "column_break_4",
   "posting_date_time",
+  "order_status",
   "amended_from",
   "section_break_7",
   "resumes_required",
@@ -42,6 +43,9 @@
   "address_info_section",
   "address",
   "data_33",
+  "bid",
+  "claim",
+  "staff_org_claimed",
   "email",
   "phone_number",
   "e_signature_for_order_request_section",
@@ -310,11 +314,37 @@
    "fieldname": "estimated_hours_per_day",
    "fieldtype": "Float",
    "label": "Estimated Hours Per Day"
+  },
+  {
+   "default": "0",
+   "fieldname": "bid",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Bid Received"
+  },
+  {
+   "fieldname": "claim",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Claimed By"
+  },
+  {
+   "fieldname": "staff_org_claimed",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Staffing Org Claimed"
+  },
+  {
+   "depends_on": "eval:doc.__islocal!=1",
+   "fieldname": "order_status",
+   "fieldtype": "Select",
+   "label": "Order Status",
+   "options": "\nCompleted\nOngoing\nUpcoming"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-18 12:23:20.192338",
+ "modified": "2021-11-26 20:21:32.714391",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

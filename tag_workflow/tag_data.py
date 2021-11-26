@@ -48,11 +48,11 @@ def update_job_order(job_name=None,employee_filled=None,staffing_org=None,hiring
     user_list = frappe.db.sql(''' select email from `tabUser` where company = "{}"'''.format(staffing_org),as_list=1)
     l = [l[0] for l in user_list]
     from frappe.share import add
-    print(user_list)
     for user in l:
         add("Job Order", job_name, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
     x=frappe.get_doc("Job Order",job_name)
     x.worker_filled=int(employee_filled)+int(x.worker_filled)
+    x.staff_org_claimed=str(x.staff_org_claimed)+staffing_org
     x.save()
     sub=f'New Message regarding {job_name} from {hiringorg} is available'
     msg = f'Your Employees has been approved for Work Order {job_name}'
@@ -62,6 +62,11 @@ def update_job_order(job_name=None,employee_filled=None,staffing_org=None,hiring
 @frappe.whitelist()
 def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc_name):
     import json
+    bid_receive=frappe.get_doc("Job Order",job_order)
+    bid_receive.bid=1+int(bid_receive.bid)
+    bid_receive.claim=str(bid_receive.claim)+str(",")+staffing_org
+    bid_receive.save(ignore_permissions=True)
+
     job_detail = frappe.db.sql('''select job_title,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order),as_dict=1)
     user_list = frappe.db.sql(''' select email from `tabUser` where company = "{}"'''.format(hiring_org),as_list=1)
     
