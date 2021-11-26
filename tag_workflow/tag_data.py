@@ -44,11 +44,19 @@ def send_email_staffing_user(email_list=None,subject = None,body=None,additional
         return 0
  
 @frappe.whitelist()
-def update_job_order(job_name=None,employee_filled=None):
-   x=frappe.get_doc("Job Order",job_name)
-   x.worker_filled=int(employee_filled)+int(x.worker_filled)
-   x.save()
-   return "success"
+def update_job_order(job_name=None,employee_filled=None,staffing_org=None,hiringorg=None):
+    user_list = frappe.db.sql(''' select email from `tabUser` where company = "{}"'''.format(staffing_org),as_list=1)
+    l = [l[0] for l in user_list]
+    from frappe.share import add
+    print(user_list)
+    for user in l:
+        add("Job Order", job_name, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
+    x=frappe.get_doc("Job Order",job_name)
+    x.worker_filled=int(employee_filled)+int(x.worker_filled)
+    x.save()
+    sub=f'New Message regarding {job_name} from {hiringorg} is available'
+    msg = f'Your Employees has been approved for Work Order {job_name}'
+    y= send_email(sub,msg,l)
 
 
 @frappe.whitelist()
