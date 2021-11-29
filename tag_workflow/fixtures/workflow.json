@@ -4,7 +4,7 @@
   "doctype": "Workflow",
   "document_type": "Assign Employee",
   "is_active": 1,
-  "modified": "2021-11-23 22:42:44.316496",
+  "modified": "2021-11-29 17:13:43.998294",
   "name": "Employee assign",
   "override_status": 0,
   "parent": null,
@@ -13,7 +13,7 @@
   "send_email_alert": 0,
   "states": [
    {
-    "allow_edit": "Hiring Admin",
+    "allow_edit": "Staffing Admin",
     "doc_status": "0",
     "is_optional_state": 0,
     "message": null,
@@ -23,11 +23,24 @@
     "parenttype": "Workflow",
     "state": "Open",
     "update_field": null,
-    "update_value": null
+    "update_value": "Open"
+   },
+   {
+    "allow_edit": "Staffing Admin",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Employee assign",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Approval Request",
+    "update_field": null,
+    "update_value": "Approval Request"
    },
    {
     "allow_edit": "Hiring Admin",
-    "doc_status": "1",
+    "doc_status": "0",
     "is_optional_state": 0,
     "message": null,
     "next_action_email_template": null,
@@ -36,10 +49,21 @@
     "parenttype": "Workflow",
     "state": "Approved",
     "update_field": null,
-    "update_value": null
+    "update_value": "Approved"
    }
   ],
   "transitions": [
+   {
+    "action": "Approval Request",
+    "allow_self_approval": 1,
+    "allowed": "Staffing Admin",
+    "condition": null,
+    "next_state": "Approval Request",
+    "parent": "Employee assign",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Open"
+   },
    {
     "action": "Approve",
     "allow_self_approval": 1,
@@ -49,11 +73,11 @@
     "parent": "Employee assign",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "Open"
+    "state": "Approval Request"
    }
   ],
   "workflow_name": "Employee assign",
-  "workflow_state_field": "workflow_state"
+  "workflow_state_field": "tag_status"
  },
  {
   "docstatus": 0,

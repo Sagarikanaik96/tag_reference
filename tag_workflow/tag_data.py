@@ -4,13 +4,13 @@ jobOrder = "Job Order"
 
 @frappe.whitelist()
 def company_details(company_name=None):
-   x=frappe.db.sql(""" select FEIN,Title,Address,City,State,Zip,contact_name,email,phone_no,primary_language,accounts_payable_contact_name,accounts_payable_email,accounts_payable_phone_number,Industry from `tabCompany` where name="{}" """.format(company_name),as_list=1)
-   
-   for i in range(len(x[0])):
-       if x[0][i]==None:
-           break
-   else:
-       return "success"
+    company_info = frappe.db.sql(""" select fein, title, address, city, state, zip, contact_name, email, phone_no, primary_language, accounts_payable_contact_name, accounts_payable_email, accounts_payable_phone_number, industry from `tabCompany` where name="{}" """.format(company_name),as_list=1)
+    is_ok = "success"
+    for i in range(len(company_info[0])):
+        if company_info[0][i]==None:
+            is_ok = "failed"
+    return is_ok
+
 
 def update_timesheet(job_order_detail):
     value = frappe.db.sql('''select select_job,posting_date_time from `tabJob Order` where name = "{}" '''.format(job_order_detail),as_dict = 1)
