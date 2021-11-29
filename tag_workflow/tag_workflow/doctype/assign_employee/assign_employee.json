@@ -1,19 +1,23 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2021-11-23 13:23:23.045988",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "job_order",
   "no_of_employee_required",
   "transaction_date",
   "column_break_3",
+  "tag_status",
   "hiring_organization",
   "staffing_organization",
   "section_break_6",
-  "employee_details"
+  "employee_details",
+  "amended_from"
  ],
  "fields": [
   {
@@ -60,12 +64,37 @@
    "fieldtype": "Table",
    "label": "Employee Details",
    "options": "Assign Employee Details"
+  },
+  {
+   "default": "AE-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "naming_series",
+   "options": "AE-"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Assign Employee",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "Open",
+   "fieldname": "tag_status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Open\nApproval Request\nApproved",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-23 13:25:17.551833",
+ "modified": "2021-11-29 15:48:33.332850",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",
