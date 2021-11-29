@@ -1,7 +1,8 @@
 import frappe
-  
-@frappe.whitelist()
 
+jobOrder = "Job Order"
+
+@frappe.whitelist()
 def company_details(company_name=None):
    x=frappe.db.sql(""" select FEIN,Title,Address,City,State,Zip,contact_name,email,phone_no,primary_language,accounts_payable_contact_name,accounts_payable_email,accounts_payable_phone_number,Industry from `tabCompany` where name="{}" """.format(company_name),as_list=1)
    
@@ -22,7 +23,8 @@ def send_email(subject = None,content = None,recipients = None):
         make(subject = subject, content=content, recipients= recipients,send_email=True)
         frappe.msgprint("Email Send Succesfully")
         return True
-    except:
+    except Exception as e:
+        frappe.log_error(e, "Doc Share Error")
         frappe.msgprint("Could Not Send")
         return False
 
@@ -49,14 +51,14 @@ def update_job_order(job_name=None,employee_filled=None,staffing_org=None,hiring
     l = [l[0] for l in user_list]
     from frappe.share import add
     for user in l:
-        add("Job Order", job_name, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
-    x=frappe.get_doc("Job Order",job_name)
+        add(jobOrder, job_name, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
+    x=frappe.get_doc(jobOrder,job_name)
     x.worker_filled=int(employee_filled)+int(x.worker_filled)
     x.staff_org_claimed=str(x.staff_org_claimed)+staffing_org
     x.save()
     sub=f'New Message regarding {job_name} from {hiringorg} is available'
     msg = f'Your Employees has been approved for Work Order {job_name}'
-    y= send_email(sub,msg,l)
+    return send_email(sub,msg,l)
 
 
 @frappe.whitelist()
@@ -92,7 +94,7 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
         user_list=frappe.db.sql(''' select email from `tabUser` where organization_type='staffing' ''',as_list=1)
         l = [l[0] for l in user_list]
         for user in l:
-            add("Job Order", job_order, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
+            add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
         message=f'New Work Order for {job_order_title} has been created by {hiring_org}.<a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
         return send_email("New Work Order",message,l)
     elif org_type[0][0]=="Exclusive Hiring":
@@ -101,6 +103,17 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
         user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(company_info[0][0]),as_list=1)        
         l = [l[0] for l in user_list]
         for user in l:
-            add("Job Order", job_order, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
+            add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
         message=f'New Work Order for {job_order_title} has been created by {hiring_org}. <a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
         return send_email("New Work Order",message,l)
+
+
+@frappe.whitelist()
+def update_exclusive_org(exclusive_email,staffing_email,staffing_comapny,exclusive_company):
+    from frappe.share import add
+    try:
+        add("Company",staffing_comapny,exclusive_email,write = 0,read = 1,share = 0,everyone=0,notify=1,flags={"ignore_share_permission": 1})
+        add("Company",exclusive_company,exclusive_email,write = 0,read = 1,share = 0,everyone=0,notify=1,flags={"ignore_share_permission": 1})
+
+    except Exception as e:
+         frappe.log_error(e, "doc share error")

@@ -21,3 +21,13 @@ function make_field_mandatory(frm){
 		cur_frm.toggle_reqd(reqd[r], 1);
 	}
 }
+
+
+frappe.listview_settings['Contact'] = {
+	onload: function(listview) {
+			frappe.route_options = {
+				"owner": ["=", frappe.session.user]
+			};
+		
+	}
+};
