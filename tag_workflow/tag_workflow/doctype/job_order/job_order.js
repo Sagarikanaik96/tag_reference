@@ -70,5 +70,21 @@ function redirect_quotation(frm){
 	doc.job_order = frm.doc.name;
 	doc.no_of_employee_required = frm.doc.no_of_workers-frm.doc.worker_filled;
 	doc.hiring_organization = frm.doc.company;
-	frappe.set_route("Form", "Assign Employee", doc.name);
+	frappe.call({
+		method:"tag_workflow.tag_data.staff_org_details",
+		args: {
+			company_details:frappe.defaults.get_user_defaults('Company')[0]
+		},
+		callback:function(r)
+		{
+			if(r.message=="failed"){
+				msgprint("You can't Assign Employees Unless Your Company Details are Complete");
+				frappe.validated = false;
+			}
+			else{
+					frappe.set_route("Form", "Assign Employee", doc.name);
+			}
+			
+		}
+		})
 }
