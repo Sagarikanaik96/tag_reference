@@ -104,3 +104,14 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
             add("Job Order", job_order, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
         message=f'New Work Order for {job_order_title} has been created by {hiring_org}. <a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
         return send_email("New Work Order",message,l)
+
+
+@frappe.whitelist()
+def update_exclusive_org(exclusive_email,staffing_email,staffing_comapny,exclusive_company):
+    from frappe.share import add
+    try:
+        add("Company",staffing_comapny,exclusive_email,write = 0,read = 1,share = 0,everyone=0,notify=1,flags={"ignore_share_permission": 1})
+        add("Company",exclusive_company,exclusive_email,write = 0,read = 1,share = 0,everyone=0,notify=1,flags={"ignore_share_permission": 1})
+
+    except Exception as e:
+         frappe.log_error(e, "doc share error")
