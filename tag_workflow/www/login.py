@@ -15,7 +15,7 @@ from frappe.integrations.oauth2_logins import decoder_compat
 from frappe.website.utils import get_home_page
 
 no_cache = True
-
+social_login_key = "Social Login Key"
 def get_context(context):
 	redirect_to = frappe.local.request.args.get("redirect-to")
 
@@ -40,14 +40,14 @@ def get_context(context):
 		frappe.get_hooks("app_logo_url")[-1])
 	context["app_name"] = (frappe.db.get_single_value('Website Settings', 'app_name') or
 		frappe.get_system_settings("app_name") or _("Frappe"))
-	providers = [i.name for i in frappe.get_all("Social Login Key", filters={"enable_social_login":1}, order_by="name")]
+	providers = [i.name for i in frappe.get_all(social_login_key, filters={"enable_social_login":1}, order_by="name")]
 	for provider in providers:
-		client_id, base_url = frappe.get_value("Social Login Key", provider, ["client_id", "base_url"])
-		client_secret = get_decrypted_password("Social Login Key", provider, "client_secret")
-		provider_name = frappe.get_value("Social Login Key", provider, "provider_name")
+		client_id, base_url = frappe.get_value(social_login_key, provider, ["client_id", "base_url"])
+		client_secret = get_decrypted_password(social_login_key, provider, "client_secret")
+		provider_name = frappe.get_value(social_login_key, provider, "provider_name")
 
 		icon = None
-		icon_url = frappe.get_value("Social Login Key", provider, "icon")
+		icon_url = frappe.get_value(social_login_key, provider, "icon")
 		if icon_url:
 			if provider_name != "Custom":
 				icon = "<img src='{0}' alt={1}>".format(icon_url, provider_name)

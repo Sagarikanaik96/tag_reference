@@ -11,12 +11,12 @@ frappe.ui.form.on('Assign Employee', {
 				frappe.call({
 					method:"tag_workflow.tag_data.update_job_order",
 					args:{
+
 						job_name:cur_frm.doc.job_order,
-						employee_filled:cur_frm.doc.employee_details.length
+						employee_filled:cur_frm.doc.employee_details.length,
+						staffing_org:cur_frm.doc.staffing_organization,
+						hiringorg:cur_frm.doc.hiring_organization
 					},
-					callback:function(r){
-						console.log(r.message)
-					}
 
 				})
 			}

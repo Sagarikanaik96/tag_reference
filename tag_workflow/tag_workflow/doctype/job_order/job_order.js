@@ -61,7 +61,19 @@ frappe.ui.form.on('Job Order', {
            })
        }
  
-   }
+   },
+   after_save:function(frm){
+    frappe.call({
+        method:"tag_workflow.tag_data.staff_email_notification",
+        args:{
+            hiring_org:cur_frm.doc.company,
+            job_order:cur_frm.doc.name,
+            job_order_title:cur_frm.doc.job_title,
+           },
+       
+        })
+    }
+ 
 
 });
 
@@ -88,7 +100,6 @@ function assign_employe(frm){
 function redirect_quotation(frm){
 	var doc = frappe.model.get_new_doc("Assign Employee");
 	var staff_company=frappe.defaults.get_user_defaults("company")
-	console.log(staff_company[0])
 	doc.transaction_date = frappe.datetime.now_date();
 	doc.staffing_organization = staff_company[0]  ;
 	doc.job_order = frm.doc.name;

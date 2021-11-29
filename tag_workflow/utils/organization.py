@@ -10,6 +10,8 @@ from pathlib import Path
 from tag_workflow.utils.trigger_session import share_company_with_user
 from tag_workflow.controllers.master_controller import make_update_comp_perm
 
+tag_workflow= "Tag Workflow"
+
 #-------setup variables for TAG -------------#
 Organization = "Organization Type"
 Module = "Module Profile"
@@ -30,9 +32,9 @@ ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag 
 
 ROLE_PROFILE = [{ROLES[3]: ["Accounts User", "Report Manager", "Sales User", ROLES[3], WEB_MAN, ROLES[6], "Employee"]}, {ROLES[2]: ["Accounts User", "Sales User", WEB_MAN, ROLES[6], "Employee", ROLES[2]]}, {ROLES[1]: [ROLES[1], "Report Manager", WEB_MAN, ROLES[6], "Employee", "Projects User"]}, {ROLES[0]: [WEB_MAN, ROLES[6], "Employee", ROLES[0], "Projects User"]}, {ROLES[4]: ALL_ROLES}, {ROLES[5]: All_ROLES}]
 
-MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", "Tag Workflow", "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", "Tag Workflow", "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", "Tag Workflow", "Selling"]}]
+MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", tag_workflow, "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", tag_workflow, "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", tag_workflow, "Selling"]}]
 
-SPACE_PROFILE = ["CRM", "Users", "Tag Workflow", "Integrations", "ERPNext Integrations Settings", "Settings", "Home", "My Activities"]
+SPACE_PROFILE = ["CRM", "Users", tag_workflow, "Integrations", "ERPNext Integrations Settings", "Settings", "Home", "My Activities"]
 
 #------setup data for TAG -------------#
 def setup_data():
