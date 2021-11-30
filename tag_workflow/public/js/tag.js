@@ -70,7 +70,6 @@ frappe.ui.form.States = Class.extend({
 	show_actions: function(state) {
 		var added = false;
 		var me = this;
-
 		this.frm.page.clear_actions_menu();
 
 		// if the loaded doc is dirty, don't show workflow buttons

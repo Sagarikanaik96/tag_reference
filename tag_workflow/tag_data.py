@@ -6,6 +6,7 @@ jobOrder = "Job Order"
 def company_details(company_name=None):
     company_info = frappe.db.sql(""" select fein, title, address, city, state, zip, contact_name, email, phone_no, primary_language, accounts_payable_contact_name, accounts_payable_email, accounts_payable_phone_number, industry from `tabCompany` where name="{}" """.format(company_name),as_list=1)
     is_ok = "success"
+
     for i in range(len(company_info[0])):
         if company_info[0][i]==None:
             is_ok = "failed"
@@ -117,3 +118,15 @@ def update_exclusive_org(exclusive_email,staffing_email,staffing_comapny,exclusi
 
     except Exception as e:
          frappe.log_error(e, "doc share error")
+
+@frappe.whitelist()
+def staff_org_details(company_details=None):
+    comp_data=frappe.get_doc('Company',company_details)
+    company_info = frappe.db.sql(""" select fein, title, address, city, state, zip, contact_name, email, phone_no, primary_language,accounts_receivable_rep_email,accounts_receivable_name,accounts_receivable_phone_number, cert_of_insurance,safety_manual,w9 from `tabCompany` where name="{}" """.format(company_details),as_list=1)
+    is_ok = "failed"
+    if None in company_info[0]:
+        return is_ok
+    if(len(comp_data.branch)==0 or len(comp_data.industry_type)==0 or len(comp_data.employees)==0):
+        return is_ok
+    return "success"
+
