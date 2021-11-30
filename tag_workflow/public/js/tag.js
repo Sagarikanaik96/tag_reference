@@ -34,8 +34,8 @@ frappe.ui.form.States = Class.extend({
 					+ frappe.workflow.workflows[me.frm.doctype].name
 			})
 			var next_html = $.map(frappe.workflow.get_transitions(me.frm.doctype, state),
-				function(d) {
-					return d.action.bold() + __(" by Role ") + d.allowed;
+				function(r) {
+					return r.action.bold() + __(" by Role ") + r.allowed;
 				}).join(", ") || __("None: End of Workflow").bold();
 
 			$(d.body).html("<p>"+__("Current status")+": " + state.bold() + "</p>"
@@ -68,9 +68,8 @@ frappe.ui.form.States = Class.extend({
 	},
 
 	show_actions: function(state) {
-		var added = false,
-			me = this;
-
+		var added = false;
+		var me = this;
 		this.frm.page.clear_actions_menu();
 
 		// if the loaded doc is dirty, don't show workflow buttons
@@ -85,7 +84,7 @@ frappe.ui.form.States = Class.extend({
 					me.frm.page.add_action_item(__(d.action), function() {
 						var action = d.action;
 						// capture current state
-						if(d.action  == "Reject"){
+						if(action  == "Reject"){
 							me.frm.doc.__tran_state = d;
 						}else{
 							var doc_before_action = copy_dict(me.frm.doc);
@@ -112,7 +111,7 @@ frappe.ui.form.States = Class.extend({
 
 							// success - add a comment
 							var success = function() {
-								console.log("sahil is here");//me.frm.timeline.insert_comment("Workflow", next_state);
+								console.log("sahil is here");
 							}
 
 							me.frm.doc.__tran_state = d;
@@ -133,7 +132,7 @@ frappe.ui.form.States = Class.extend({
 								return false;
 							}
 						}
-						return false;
+						return 0;
 					});
 				}
 			});
@@ -163,6 +162,7 @@ frappe.ui.form.States = Class.extend({
 	bind_action: function() {
 		var me = this;
 		this.dropdown.on("click", "[data-action]", function() {
+			me._bind = '0'
 		})
 	},
 

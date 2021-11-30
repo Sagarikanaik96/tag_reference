@@ -1,9 +1,10 @@
 frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
-		var timesheet_fields = ["naming_series", "customer", "status", "company", "currency", "exchange_rate", "employee"];
+		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
 		hide_timesheet_field(timesheet_fields);
 		check_update_timesheet(frm);
 	},
+
 	setup: function(frm){
 		job_order_details(frm);
 		frm.set_query("job_order_detail", function(){
@@ -13,11 +14,28 @@ frappe.ui.form.on("Timesheet", {
 				]
 			}
 		});
+
+		frm.set_query('employee', function(doc) {
+			return {
+				query: "tag_workflow.utils.timesheet.get_timesheet_employee",
+				filters: {
+					'job_order': doc.job_order_detail
+				}
+			}
+		});
 	},
 
 	job_order_detail: function(frm){
 		job_order_details(frm);
 		update_job_detail(frm);
+	},
+
+	no_show: function(frm){
+		trigger_email(frm, "no_show", frm.doc.no_show, "No Show");
+	},
+
+	non_satisfactory: function(frm){
+		trigger_email(frm, "non_satisfactory", frm.doc.non_satisfactory, "Non Satisfactory");
 	}
 });
 
@@ -69,5 +87,23 @@ function update_job_detail(frm){
 				}
 			}
 		});
+	}
+}
+
+/*-----------trigger email-----------*/
+function trigger_email(frm, key, value, type){
+	let order = frm.doc.job_order_detail;
+	let local = cur_frm.doc.__islocal;
+	if(order && local != 1){
+		frappe.call({
+			"method": "tag_workflow.utils.timesheet.notify_email",
+			"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation}
+		});
+	}else if(order && local && value){
+		frappe.update_msgprint({message: __('Please save timesheet first'), title: __('Timesheet'), indicator: 'red'});
+		cur_frm.set_value(key, 0);
+	}else if(!order && value){
+		frappe.update_msgprint({message: __('Please select Job Order'), title: __('Job Order'), indicator: 'red'});
+		cur_frm.set_value(key, 0);
 	}
 }
