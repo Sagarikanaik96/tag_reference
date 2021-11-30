@@ -19,7 +19,7 @@ frappe.ui.form.on('Job Order', {
 	before_save:function(frm){
 		check_company_detail(frm);
 	},
-	after_insert:function(frm){
+	after_save:function(frm){
 		frappe.call({
 			method:"tag_workflow.tag_data.staff_email_notification",
 			args: {

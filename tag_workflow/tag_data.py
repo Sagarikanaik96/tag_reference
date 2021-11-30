@@ -4,13 +4,18 @@ jobOrder = "Job Order"
 
 @frappe.whitelist()
 def company_details(company_name=None):
-    company_info = frappe.db.sql(""" select fein, title, address, city, state, zip, contact_name, email, phone_no, primary_language, accounts_payable_contact_name, accounts_payable_email, accounts_payable_phone_number, industry from `tabCompany` where name="{}" """.format(company_name),as_list=1)
-    is_ok = "success"
+    if frappe.session.user != 'Administrator':
+        comp_data=frappe.get_doc('Company',company_name)
+        company_info = frappe.db.sql(""" select fein, title, address, city, state, zip, contact_name, email, phone_no, primary_language, accounts_payable_contact_name, accounts_payable_email, accounts_payable_phone_number from `tabCompany` where name="{}" """.format(company_name),as_list=1)
+        is_ok = "failed"
+        if None in company_info[0]:
+            return is_ok
+        print(comp_data.industry_type)
+        if(len(comp_data.industry_type)==0):
+            return is_ok
+        return "success"
 
-    for i in range(len(company_info[0])):
-        if company_info[0][i]==None:
-            is_ok = "failed"
-    return is_ok
+
 
 @frappe.whitelist()
 def update_timesheet(job_order_detail):
@@ -129,4 +134,16 @@ def staff_org_details(company_details=None):
     if(len(comp_data.branch)==0 or len(comp_data.industry_type)==0 or len(comp_data.employees)==0):
         return is_ok
     return "success"
+
+
+@frappe.whitelist()
+def update_staffing_user_with_exclusive(company,company_name):
+    from frappe.share import add
+    a = frappe.db.sql('''select name from `tabUser` where company = "{}" and tag_user_type = 'Staffing User' '''.format(company),as_list=1)
+    try:
+        for i in a:
+            add("Company",company_name,i[0],write = 0,read = 1,share = 0,notify=1,flags={"ignore_share_permission": 1})
+
+    except Exception as e:
+         frappe.log_error(e, "doc share error")
 

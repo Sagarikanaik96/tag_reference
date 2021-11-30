@@ -32,6 +32,15 @@ frappe.ui.form.on("Company", {
 
 	after_save: function(frm){
 		frappe.call({"method": "tag_workflow.controllers.master_controller.make_update_comp_perm","args": {"docname": frm.doc.name}});
+		if (frm.doc.organization_type == 'Exclusive Hiring'){
+			frappe.call({
+				"method":"tag_workflow.tag_data.update_staffing_user_with_exclusive",
+				"args":{
+					company:frappe.defaults.get_user_defaults("Company")[0],
+					company_name:cur_frm.doc.name
+				}
+			})
+		}
 	},
 });
 
