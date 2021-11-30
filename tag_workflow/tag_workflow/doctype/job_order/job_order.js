@@ -14,34 +14,10 @@ frappe.ui.form.on('Job Order', {
 		}
 	},
 	onload:function(frm){
-		if(frappe.user_roles.includes("Hiring User") || frappe.user_roles.includes("Hiring Admin")){
-			var company_name=frappe.defaults.get_user_default("company");
-			frappe.call({
-				method: "tag_workflow.tag_data.company_details",
-				args: {'company_name':company_name},
-				callback:function(r){
-					if(r.message!="success"){
-						msgprint("You can't Create Job Order Unless Your Company Details are Complete");
-						frappe.validated = false;
-					}
-				}
-			});
-		}
+		check_company_detail(frm);
 	},
 	before_save:function(frm){
-		if(frappe.user_roles.includes("Hiring User") || frappe.user_roles.includes("Hiring Admin")){
-			var company_name=frappe.defaults.get_user_default("company");
-			frappe.call({
-				method:"tag_workflow.tag_data.company_details",
-				args: {'company_name':company_name},
-				callback:function(r){
-					if(r.message!="success"){
-						msgprint("You can't Create Job Order Unless Your Company Details are Complete");
-						frappe.validated = false;
-					}
-				}
-			});
-		}
+		check_company_detail(frm);
 	},
 	after_insert:function(frm){
 		frappe.call({
@@ -55,8 +31,23 @@ frappe.ui.form.on('Job Order', {
 	}
 });
 
-
-
+/*-------check company details---------*/
+function check_company_detail(frm){
+	let roles = frappe.user_roles;
+	if(roles.includes("Hiring User") || roles.includes("Hiring Admin")){
+		var company_name = frappe.defaults.get_user_default("company");
+		frappe.call({
+			method:"tag_workflow.tag_data.company_details",
+			args: {'company_name':company_name},
+			callback:function(r){
+				if(r.message!="success"){
+					msgprint("You can't Create Job Order Unless Your Company Details are Complete");
+					frappe.validated = false;
+				}
+			}
+		});
+	}
+}
 /*----------------prepare quote--------------*/
 function assign_employe(frm){
 	redirect_quotation(frm);

@@ -11,7 +11,7 @@ def company_details(company_name=None):
             is_ok = "failed"
     return is_ok
 
-
+@frappe.whitelist()
 def update_timesheet(job_order_detail):
     value = frappe.db.sql('''select select_job,posting_date_time from `tabJob Order` where name = "{}" '''.format(job_order_detail),as_dict = 1)
     return value[0]['select_job'],value[0]['posting_date_time']
@@ -51,7 +51,7 @@ def update_job_order(job_name=None,employee_filled=None,staffing_org=None,hiring
     l = [l[0] for l in user_list]
     from frappe.share import add
     for user in l:
-        add(jobOrder, job_name, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
+        add(jobOrder, job_name, user, read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
     x=frappe.get_doc(jobOrder,job_name)
     x.worker_filled=int(employee_filled)+int(x.worker_filled)
     x.staff_org_claimed=str(x.staff_org_claimed)+staffing_org
