@@ -10,7 +10,6 @@ def company_details(company_name=None):
         is_ok = "failed"
         if None in company_info[0]:
             return is_ok
-        print(comp_data.industry_type)
         if(len(comp_data.industry_type)==0):
             return is_ok
         return "success"
@@ -94,9 +93,12 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
 @frappe.whitelist()
 def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None):
     from frappe.share import add
+    x = frappe.get_doc(jobOrder,job_order)
 
     org_type=frappe.db.sql('''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org),as_list=1)
     if(org_type[0][0]=='Hiring'):
+        x.company_type = 'Non Exclusive'
+        x.save(ignore_permissions = True)
         user_list=frappe.db.sql(''' select email from `tabUser` where organization_type='staffing' ''',as_list=1)
         l = [l[0] for l in user_list]
         for user in l:
@@ -104,6 +106,8 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
         message=f'New Work Order for {job_order_title} has been created by {hiring_org}.<a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
         return send_email("New Work Order",message,l)
     elif org_type[0][0]=="Exclusive Hiring":
+        x.company_type = 'Exclusive'
+        x.save(ignore_permissions = True)
         owner_info=frappe.db.sql(''' select owner from `tabCompany` where organization_type="Exclusive Hiring" and name="{}" '''.format(hiring_org),as_list=1)
         company_info=frappe.db.sql(''' select company from `tabUser` where name='{}' '''.format(owner_info[0][0]),as_list=1)
         user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(company_info[0][0]),as_list=1)        
