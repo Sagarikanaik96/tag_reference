@@ -11,6 +11,7 @@
   "job_order",
   "no_of_employee_required",
   "transaction_date",
+  "job_category",
   "column_break_3",
   "tag_status",
   "hiring_organization",
@@ -89,12 +90,18 @@
    "label": "Status",
    "options": "Open\nApproval Request\nApproved",
    "read_only": 1
+  },
+  {
+   "fieldname": "job_category",
+   "fieldtype": "Data",
+   "label": "Job Category",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-29 15:48:33.332850",
+ "modified": "2021-12-01 11:23:22.088507",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",

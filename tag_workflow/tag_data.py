@@ -151,3 +151,22 @@ def update_staffing_user_with_exclusive(company,company_name):
     except Exception as e:
          frappe.log_error(e, "doc share error")
 
+@frappe.whitelist()
+def check_assign_employee(total_employee_required,employee_detail = None):
+    import json
+    total = int(total_employee_required)
+    try:
+        if employee_detail:
+            v = json.loads(employee_detail)
+            total_employee = [i['employee_name'] for i in v]
+            unique_employee = set(total_employee)
+            
+            if len(total_employee) == len(unique_employee):
+                if len(total_employee) > total:
+                    return 'exceeds'
+            else:
+                return 'duplicate'
+        else:
+            return 'insert'
+    except:
+        return 0

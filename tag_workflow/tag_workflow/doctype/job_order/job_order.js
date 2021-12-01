@@ -62,6 +62,7 @@ function redirect_quotation(frm){
 	doc.job_order = frm.doc.name;
 	doc.no_of_employee_required = frm.doc.no_of_workers-frm.doc.worker_filled;
 	doc.hiring_organization = frm.doc.company;
+	doc.job_category = frm.doc.select_job;
 
 	frappe.call({
 		method:"tag_workflow.tag_data.staff_org_details",
