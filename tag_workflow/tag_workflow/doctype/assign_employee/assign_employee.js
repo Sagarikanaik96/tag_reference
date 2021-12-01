@@ -24,7 +24,6 @@ frappe.ui.form.on('Assign Employee', {
 				employee_detail:frm.doc.employee_details
 			},
 			callback:function(r){
-				console.log(r)
 				if (r.message == 'exceeds'){
 					msgprint("No of Employee Exceeds as per Requirements")
 					frappe.validated = false;
