@@ -18,7 +18,7 @@ class CRMController(base_controller.BaseController):
 
 
 @frappe.whitelist()
-def onboard_org(exclusive, staffing, email, user, person_name):
+def onboard_org(exclusive, staffing, email, person_name):
     try:
         from tag_workflow.controllers.master_controller import make_update_comp_perm
         is_company, is_user = 1, 1
