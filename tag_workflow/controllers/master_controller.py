@@ -13,13 +13,14 @@ GROUP = "All Customer Groups"
 TERRITORY = "All Territories"
 PERMISSION = "User Permission"
 EMP = "Employee"
+COM = "Company"
 
 class MasterController(base_controller.BaseController):
     def validate_master(self):
         self.update_master_data()
 
     def update_master_data(self):
-        if(self.dt == "Company"):
+        if(self.dt == COM):
             self.check_mandatory_field()
 
             if not frappe.db.exists("Customer", {"name": self.doc.name}): 
@@ -47,28 +48,40 @@ class MasterController(base_controller.BaseController):
 
 
 #-----------after company insert update-------------#
-def get_user_list():
-    return frappe.db.sql(""" select name from `tabUser` where enabled = 1 and tag_user_type in ("Staffing Admin", "Staffing User")""", as_dict=1)
+def get_user_list(company=None):
+    if company:
+        return frappe.db.sql(""" select name from `tabUser` where enabled = 1 and tag_user_type in ("Staffing Admin", "Staffing User") and company = %s """,company, as_dict=1)
+    else:
+        return frappe.db.sql(""" select name from `tabUser` where enabled = 1 and tag_user_type in ("Staffing Admin", "Staffing User")""", as_dict=1)
+
 
 def update_user_permission(user_list, company):
     try:
         permission = ["Job Order"]
         for perm in permission:
             for user in user_list:
-                if not frappe.db.exists(PERMISSION,{"user": user.name,"allow": "Company","applicable_for": perm,"for_value": company,"apply_to_all_doctypes":0}):
-                    perm_doc = frappe.get_doc(dict(doctype=PERMISSION,user=user.name,allow="Company",for_value=company,applicable_for=perm,apply_to_all_doctypes=0))
+                if not frappe.db.exists(PERMISSION,{"user": user.name,"allow": COM,"applicable_for": perm,"for_value": company,"apply_to_all_doctypes":0}):
+                    perm_doc = frappe.get_doc(dict(doctype=PERMISSION,user=user.name,allow=COM,for_value=company,applicable_for=perm,apply_to_all_doctypes=0))
                     perm_doc.save(ignore_permissions=True)
     except Exception as e:
         frappe.error_log(e, "Quotation and Job Order Permission")
 
+def update_exclusive_perm(user_list, company):
+    try:
+        for user in user_list:
+            if not frappe.db.exists(PERMISSION, {"user": user.name, "allow":COM, "for_value": company, "apply_to_all_doctypes": 1}):
+                perm = frappe.get_doc(dict(doctype=PERMISSION, user=user.name, allow=COM, for_value=company, apply_to_all_doctypes = 1))
+                perm.save(ignore_permissions=True)
+    except Exception as e:
+        frappe.error_log(e, "Exclusive Permission")
+
 @frappe.whitelist()
 def make_update_comp_perm(docname):
     try:
-        doc = frappe.get_doc("Company", docname)
+        doc = frappe.get_doc(COM, docname)
         if doc.organization_type == "Exclusive Hiring":
-            if not frappe.db.exists(PERMISSION, {"user":frappe.session.user, "allow":"Company", "for_value": doc.name, "apply_to_all_doctypes": 1}):
-                perm = frappe.get_doc(dict(doctype=PERMISSION, user = frappe.session.user, allow = "Company", for_value = doc.name, apply_to_all_doctypes = 1))
-                perm.save(ignore_permissions=True)
+            user_list = get_user_list(doc.parent_staffing)
+            enqueue("tag_workflow.controllers.master_controller.update_exclusive_perm", user_list=user_list, company=doc.name)
         elif doc.organization_type != "Staffing":
             user_list = get_user_list()
             enqueue("tag_workflow.controllers.master_controller.update_user_permission", user_list=user_list, company=doc.name)
@@ -89,7 +102,7 @@ def check_item_group():
 
 # remove message on user creation
 @frappe.whitelist()
-def check_employee(name, first_name, last_name, company, gender, date_of_birth, date_of_joining):
+def check_employee(name, first_name, company, last_name=None, gender=None, date_of_birth=None, date_of_joining=None):
     users = [{"name": name, "company": company}]
     share_company_with_user(users)
     if not frappe.db.exists(EMP, {"user_id": name}):
@@ -99,7 +112,7 @@ def check_employee(name, first_name, last_name, company, gender, date_of_birth, 
         emp = frappe.get_doc(EMP, {"user_id": name})
 
         if company != emp.company:
-            frappe.db.sql(""" delete from `tabUser Permission` where user = %s """, name)
+            frappe.db.sql(""" delete from `tabUser Permission` where user = %s and company = %s """, name, emp.company)
         emp.first_name=first_name
         emp.last_name=last_name
         emp.company=company

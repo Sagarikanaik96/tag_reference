@@ -12,6 +12,7 @@
   "column_break_4",
   "posting_date_time",
   "order_status",
+  "company_type",
   "amended_from",
   "section_break_7",
   "resumes_required",
@@ -34,8 +35,6 @@
   "column_break_24",
   "driving_record",
   "shovel",
-  "section_break_27",
-  "employee_details",
   "bill_rate_section",
   "per_hour",
   "column_break_29",
@@ -53,7 +52,6 @@
   "e_signature_full_name",
   "agree_to_contract",
   "age_reqiured",
-  "quotation_submitted",
   "apply_for_quotation_section",
   "assign_employees"
  ],
@@ -61,7 +59,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -122,7 +119,6 @@
   {
    "fieldname": "select_job",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Select Job",
    "options": "Item",
    "reqd": 1
@@ -137,6 +133,7 @@
   {
    "fieldname": "job_site",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Job Site",
    "options": "Job Site"
   },
@@ -144,6 +141,7 @@
    "default": "0",
    "fieldname": "no_of_workers",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "No. of workers",
    "reqd": 1
   },
@@ -162,7 +160,6 @@
   {
    "fieldname": "job_duration",
    "fieldtype": "Select",
-   "in_list_view": 1,
    "label": "Job Duration",
    "options": "N/A\n1 Day\n2 Day\n3 Day\n4 Day\n5 Day\n6 Day\n1 Week\n2 Week\n3 Week\n4 Week\n5 Week\n6 Week\n1 Month\n2 Month\n3 Month\n4 Month\n5 Month\n6 Month\nTemp to Hire"
   },
@@ -287,23 +284,6 @@
    "label": "Apply for Quotation"
   },
   {
-   "fieldname": "section_break_27",
-   "fieldtype": "Section Break"
-  },
-  {
-   "depends_on": "eval:doc.quotation_submitted",
-   "fieldname": "employee_details",
-   "fieldtype": "Table",
-   "label": "Employee Details",
-   "options": "Job Card Time Log"
-  },
-  {
-   "fieldname": "quotation_submitted",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Quotation Submitted"
-  },
-  {
    "fieldname": "assign_employees",
    "fieldtype": "Button",
    "label": "Assign Employees",
@@ -340,11 +320,19 @@
    "fieldtype": "Select",
    "label": "Order Status",
    "options": "\nCompleted\nOngoing\nUpcoming"
+  },
+  {
+   "fieldname": "company_type",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Company Type",
+   "options": "\nExclusive\nNon Exclusive"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-26 20:21:32.714391",
+ "modified": "2021-11-30 15:49:02.952540",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

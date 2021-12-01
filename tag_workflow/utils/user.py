@@ -8,7 +8,20 @@ def validate_username(self):
     if not self.username:
         return
 
-    # strip space and @
-    self.username = self.username.strip(" @")
-    if self.username_exists() and self.user_type == 'System User':
-        self.username = self.username+"-1"
+    username = self.suggest_username()
+    self.username = username
+
+def suggest_username(self):
+    def _check_suggestion(suggestion):
+        if self.username != suggestion and not self.username_exists(suggestion):
+            return suggestion
+        return None
+
+    # @firstname
+    username = _check_suggestion(frappe.scrub(self.first_name))
+
+    if not username:
+        # @firstname_last_name
+        username = _check_suggestion(frappe.scrub("{0} {1}".format(self.first_name, self.last_name or "")))
+
+    return username
