@@ -22,7 +22,7 @@ def onboard_org(exclusive, staffing, email, person_name):
     try:
         from tag_workflow.controllers.master_controller import make_update_comp_perm
         is_company, is_user = 1, 1
-        company_doc, user_doc = "", ""
+        company_doc, user = "", ""
         if not frappe.db.exists("Company", exclusive):
             exclusive = make_company(exclusive, staffing)
             is_company = 0
@@ -32,7 +32,7 @@ def onboard_org(exclusive, staffing, email, person_name):
             is_user = 0
 
         make_update_comp_perm(exclusive)
-        return is_company, is_user, company_doc, user_doc
+        return is_company, is_user, company_doc, user
     except Exception as e:
         frappe.db.rollback()
         frappe.throw(e)

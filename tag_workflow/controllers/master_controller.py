@@ -108,11 +108,11 @@ def make_employee_permission(user, emp, company):
         perms = [COM, EMP]
         data = [company, emp]
         for per in range(0, len(perms)):
-            if not frappe.db.exists("User Permission",{"user": user,"allow": perms[per],"apply_to_all_doctypes":1, "for_value": data[per]}):
-                perm_doc = frappe.get_doc(dict(doctype="User Permission",user=user, allow=perms[per], for_value=data[per], apply_to_all_doctypes=1))
+            if not frappe.db.exists(PERMISSION,{"user": user,"allow": perms[per],"apply_to_all_doctypes":1, "for_value": data[per]}):
+                perm_doc = frappe.get_doc(dict(doctype=PERMISSION,user=user, allow=perms[per], for_value=data[per], apply_to_all_doctypes=1))
                 perm_doc.save(ignore_permissions=True)
     except Exception as e:
-        frappe.error_log(e, "User Permission")
+        frappe.error_log(e, PERMISSION)
 
 @frappe.whitelist()
 def check_employee(name, first_name, company, last_name=None, gender=None, date_of_birth=None, date_of_joining=None):
