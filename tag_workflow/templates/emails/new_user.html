@@ -1,5 +1,5 @@
 {% if onboard %}
-	<html lang="en">
+	<html>
 		<head>
 			<meta charset="utf-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -27,7 +27,7 @@
 			<div class="container"> 
 				<div class="main-div text-center"> 
 					<div class="logo py-4 my-4"> 
-						<img src="TAG-Logo-Emblem.svg">
+						<img src="TAG-Logo-Emblem.svg" alt="logo-img">
 					</div>
 					<div class="inner-div bg-white py-5"> 
 						<h2> {{company}} invited you to </h2>
@@ -46,23 +46,15 @@
 		</body>
 	</html>
 {% else %}
-	<p>
-		{{_("Hello")}} {{ first_name }}{% if last_name %} {{ last_name}}{% endif %},
-	</p>
-		{% set site_link = "<a href='" + site_url + "'>" + site_url + "</a>" %}
-		<p>{{_("A new account has been created for you at {0}").format(site_link)}}.</p>
-		<p>{{_("Your login id is")}}: <b>{{ user }}</b>
-		<p>{{_("Click on the link below to complete your registration and set a new password")}}.</p>
-		<p style="margin: 15px 0px;"><a href="{{ link }}" rel="nofollow" class="btn btn-primary">{{ _("Complete Registration") }}</a></p>
-		{% if created_by != "Administrator" %}
-			<br>
-			<p style="margin-top: 15px">
-				{{_("Thanks")}},<br>
-				{{ created_by }}
-			</p>
-		{% endif %}
-		<br>
-		<p>{{_("You can also copy-paste following link in your browser")}}<br>
-		<a href="{{ link }}">{{ link }}</a>
-	</p>
+	<p>{{_("Hello")}} {{ first_name }}{% if last_name %} {{ last_name}}{% endif %},</p>
+	{% set site_link = "<a href='" + site_url + "'>" + site_url + "</a>" %}
+	<p>{{_("A new account has been created for you at {0}").format(site_link)}}.</p>
+	<p>{{_("Your login id is")}}: <b>{{ user }}</b></p>
+	<p>{{_("Click on the link below to complete your registration and set a new password")}}.</p>
+	<p style="margin: 15px 0px;"><a href="{{ link }}" rel="nofollow" class="btn btn-primary">{{ _("Complete Registration") }}</a></p>
+	{% if created_by != "Administrator" %}
+		<br><p style="margin-top: 15px">{{_("Thanks")}},<br>{{ created_by }}</p>
+	{% endif %}
+	<br>
+	<p>{{_("You can also copy-paste following link in your browser")}}<br><a href="{{ link }}">{{ link }}</a></p>
 {% endif %}
