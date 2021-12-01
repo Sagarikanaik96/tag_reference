@@ -53,7 +53,7 @@ def make_user(exclusive, staffing, email, person_name):
         from tag_workflow.controllers.master_controller import check_employee
         user = frappe.get_doc(dict(doctype="User",organization_type="Exclusive Hiring",tag_user_type="Hiring Admin",company=exclusive,email=email,first_name=person_name))
         user.save(ignore_permissions=True)
-        check_employee(user.name, person_name, exclusive, last_name=None, gender=None, date_of_birth=None, date_of_joining=None)
+        check_employee(user.name, person_name, exclusive, last_name=None, gender=None, date_of_birth=None, date_of_joining=None, organization_type="Exclusive Hiring")
         return user.name
     except Exception as e:
         frappe.throw(e)
