@@ -18,19 +18,21 @@ class CRMController(base_controller.BaseController):
 
 
 @frappe.whitelist()
-def onboard_org(exclusive, staffing, email, user, person_name):
+def onboard_org(exclusive, staffing, email, person_name):
     try:
+        from tag_workflow.controllers.master_controller import make_update_comp_perm
         is_company, is_user = 1, 1
-        company_doc, user_doc = "", ""
+        company_doc, user = "", ""
         if not frappe.db.exists("Company", exclusive):
-            company_doc = make_company(exclusive, staffing)
+            exclusive = make_company(exclusive, staffing)
             is_company = 0
 
         if not frappe.db.exists("User", email):
-            user_doc = make_user(exclusive, staffing, email, person_name)
+            user = make_user(exclusive, staffing, email, person_name)
             is_user = 0
 
-        return is_company, is_user, company_doc, user_doc
+        make_update_comp_perm(exclusive)
+        return is_company, is_user, company_doc, user
     except Exception as e:
         frappe.db.rollback()
         frappe.throw(e)
@@ -39,10 +41,8 @@ def onboard_org(exclusive, staffing, email, user, person_name):
 # add orgs
 def make_company(exclusive, staffing):
     try:
-        from tag_workflow.controllers.master_controller import make_update_comp_perm
         company = frappe.get_doc(dict(doctype="Company", organization_type="Exclusive Hiring", parent_staffing=staffing, company_name=exclusive, default_currency="USD", country="United States", create_chart_of_accounts_based_on="Standard Template", chart_of_accounts= "Standard with Numbers"))
         company.save(ignore_permissions=True)
-        make_update_comp_perm(company.name)
         return company.name
     except Exception as e:
         frappe.throw(e)
@@ -51,7 +51,7 @@ def make_company(exclusive, staffing):
 def make_user(exclusive, staffing, email, person_name):
     try:
         from tag_workflow.controllers.master_controller import check_employee
-        user = frappe.get_doc(dict(doctype="User", organization_type="Exclusive Hiring", tag_user_type="Hiring Admin", company=exclusive, email=email, first_name=person_name))
+        user = frappe.get_doc(dict(doctype="User",organization_type="Exclusive Hiring",tag_user_type="Hiring Admin",company=exclusive,email=email,first_name=person_name))
         user.save(ignore_permissions=True)
         check_employee(user.name, person_name, exclusive, last_name=None, gender=None, date_of_birth=None, date_of_joining=None)
         return user.name

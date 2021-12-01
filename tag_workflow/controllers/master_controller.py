@@ -4,6 +4,7 @@
 '''
 
 import frappe
+from frappe.share import add
 from frappe import _, msgprint, throw
 from tag_workflow.controllers import base_controller
 from frappe import enqueue
@@ -70,6 +71,7 @@ def update_exclusive_perm(user_list, company):
     try:
         for user in user_list:
             if not frappe.db.exists(PERMISSION, {"user": user.name, "allow":COM, "for_value": company, "apply_to_all_doctypes": 1}):
+                add(COM, company, user.name, write=1, read=1, share=0, everyone=0, notify=1, flags={"ignore_share_permission": 1})
                 perm = frappe.get_doc(dict(doctype=PERMISSION, user=user.name, allow=COM, for_value=company, apply_to_all_doctypes = 1))
                 perm.save(ignore_permissions=True)
     except Exception as e:
@@ -101,12 +103,23 @@ def check_item_group():
 
 
 # remove message on user creation
+def make_employee_permission(user, emp, company):
+    try:
+        perms = [COM, EMP]
+        data = [company, emp]
+        for per in range(0, len(perms)):
+            if not frappe.db.exists(PERMISSION,{"user": user,"allow": perms[per],"apply_to_all_doctypes":1, "for_value": data[per]}):
+                perm_doc = frappe.get_doc(dict(doctype=PERMISSION,user=user, allow=perms[per], for_value=data[per], apply_to_all_doctypes=1))
+                perm_doc.save(ignore_permissions=True)
+    except Exception as e:
+        frappe.error_log(e, PERMISSION)
+
 @frappe.whitelist()
 def check_employee(name, first_name, company, last_name=None, gender=None, date_of_birth=None, date_of_joining=None):
     users = [{"name": name, "company": company}]
     share_company_with_user(users)
     if not frappe.db.exists(EMP, {"user_id": name}):
-        emp = frappe.get_doc(dict(doctype=EMP, first_name=first_name, last_name=last_name, company=company, status="Active", gender=gender, date_of_birth=date_of_birth, date_of_joining=date_of_joining, user_id=name, create_user_permission=0))
+        emp = frappe.get_doc(dict(doctype=EMP, first_name=first_name, last_name=last_name, company=company, status="Active", gender=gender, date_of_birth=date_of_birth, date_of_joining=date_of_joining, user_id=name, create_user_permission=1, email=name))
         emp.save(ignore_permissions=True)
     else:
         emp = frappe.get_doc(EMP, {"user_id": name})
@@ -121,3 +134,4 @@ def check_employee(name, first_name, company, last_name=None, gender=None, date_
         emp.date_of_joining=date_of_joining
         emp.create_user_permission=1
         emp.save(ignore_permissions=True)
+    make_employee_permission(name, emp.name, company)

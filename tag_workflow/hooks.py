@@ -56,7 +56,7 @@ doc_events = {
 
 # logo
 website_context = {
-        "favicon": "/assets/tag_workflow/images/TAG-Logo-Emblem.svg",
+        "favicon": "/assets/tag_workflow/images/TAG-Logo-Emblem.png",
         "splash_image": "/assets/tag_workflow/images/TAG-Logo.png"
 }
 

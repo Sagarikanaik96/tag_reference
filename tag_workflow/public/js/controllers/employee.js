@@ -2,6 +2,18 @@ frappe.ui.form.on("Employee", {
 	refresh: function(frm){
 		trigger_hide(frm);
 		required_field(frm);
+	},
+	decrypt_ssn: function(frm) {
+		frappe.call({
+			method: "tag_workflow.tag_data.api_sec",
+			args: {
+				'frm': frm.doc.name,
+			},
+			callback: function(r) {
+				frm.set_value('decrypted_ssn', r.message)
+				refresh_field('decrypted_ssn')
+			}
+		})
 	}
 });
 
