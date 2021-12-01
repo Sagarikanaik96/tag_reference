@@ -7,40 +7,41 @@ frappe.ui.form.on("Company", {
 	},
 	setup: function(frm){
 		init_values(frm);
+
+		let ORG = "Organization Type";
 		frm.set_query("organization_type", function(doc){
 			if(frappe.user_roles.includes('Tag Admin')){
 				return {
 					filters: [
-						["Organization Type", "name", "not in", ["Exclusive Hiring", "TAG"]]
+						[ORG, "name", "not in", ["Exclusive Hiring", "TAG"]]
 					]
 				}
 			}else if(frappe.user_roles.includes('Staffing Admin')){
 				return {
 					filters: [
-						["Organization Type", "name", "=", "Exclusive Hiring"]
+						[ORG, "name", "=", "Exclusive Hiring"]
 					]
 				}
 			}else if(frappe.user_roles.includes('Hiring Admin')){
 				return {
 					filters: [
-						["Organization Type", "name", "=", "Hiring"]
+						[ORG, "name", "=", "Hiring"]
 					]
 				}
+			}
+		});
+
+		frm.set_query("parent_staffing", function(doc){
+			return {
+				filters: [
+					["Company", "organization_type", "=", "Staffing"]
+				]
 			}
 		});
 	},
 
 	after_save: function(frm){
 		frappe.call({"method": "tag_workflow.controllers.master_controller.make_update_comp_perm","args": {"docname": frm.doc.name}});
-		if (frm.doc.organization_type == 'Exclusive Hiring'){
-			frappe.call({
-				"method":"tag_workflow.tag_data.update_staffing_user_with_exclusive",
-				"args":{
-					company:frappe.defaults.get_user_defaults("Company")[0],
-					company_name:cur_frm.doc.name
-				}
-			})
-		}
 	},
 });
 
@@ -77,7 +78,7 @@ function label_change(frm){
 function update_company_fields(frm){
 	let roles = frappe.user_roles;
 	let is_local = cur_frm.doc.__islocal;
-	let company_fields = ['organization_type', 'country', 'fein', 'title', 'primary_language', 'industry', 'accounts_payable_contact_name', 'accounts_payable_email', 'accounts_payable_phone_number', 'address', 'state', 'zip', 'city', 'branch', 'default_currency'];
+	let company_fields = ['organization_type', 'country', 'fein', 'title', 'primary_language', 'industry', 'accounts_payable_contact_name', 'accounts_payable_email', 'accounts_payable_phone_number', 'address', 'state', 'zip', 'city', 'branch', 'default_currency', 'parent_staffing'];
 
 	if(roles.includes('System Manager') && !is_local && cur_frm.doc.organization_type != 'TAG'){
 		for(let f in company_fields){

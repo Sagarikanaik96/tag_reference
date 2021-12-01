@@ -99,6 +99,7 @@ function trigger_email(frm, key, value, type){
 			"method": "tag_workflow.utils.timesheet.notify_email",
 			"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation}
 		});
+		if(value == 1){	frappe.confirm('You are about to update this employee <b>'+frm.doc.employee_name+'</b> to <b>'+type+'</b>. Do you want to continue?',function(){frappe.msgprint('Employee '+frm.doc.employee_name+' updated as '+type+'.')},function(){cur_frm.set_value(key, 0)});}
 	}else if(order && local && value){
 		frappe.update_msgprint({message: __('Please save timesheet first'), title: __('Timesheet'), indicator: 'red'});
 		cur_frm.set_value(key, 0);

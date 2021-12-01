@@ -5,7 +5,7 @@ from frappe.core.doctype.session_default_settings.session_default_settings impor
 
 USR = "User"
 
-def on_session_creation(login_manager):
+def on_session_creation():
     try:
         company = frappe.db.get_value(USR, {"name": frappe.session.user}, "company") or ""
         default_values = {"company": company}
