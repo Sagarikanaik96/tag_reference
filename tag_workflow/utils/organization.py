@@ -10,9 +10,8 @@ from pathlib import Path
 from tag_workflow.utils.trigger_session import share_company_with_user
 from tag_workflow.controllers.master_controller import make_update_comp_perm
 
-tag_workflow= "Tag Workflow"
-
 #-------setup variables for TAG -------------#
+tag_workflow= "Tag Workflow"
 Organization = "Organization Type"
 Module = "Module Profile"
 Role_Profile = "Role Profile"
