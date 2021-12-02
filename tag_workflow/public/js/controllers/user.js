@@ -101,7 +101,7 @@ function field_check(frm){
 		}
 	}else{
 		cur_frm.toggle_reqd(pass, 1);
-		cur_frm.set_value(pass, "Entry@123");
+		cur_frm.set_value(pass, "");
 	}
 }
 
