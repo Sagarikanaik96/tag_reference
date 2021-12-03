@@ -32,7 +32,7 @@ ROLE_PROFILE = [{ROLES[3]: ["Accounts User", "Report Manager", "Sales User", ROL
 
 MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", tag_workflow, "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", tag_workflow, "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", tag_workflow, "Selling"]}]
 
-SPACE_PROFILE = ["CRM", "Users", tag_workflow, "Integrations", "ERPNext Integrations Settings", "Settings", "Home", "My Activities"]
+SPACE_PROFILE = ["CRM", "Users", tag_workflow, "Settings", "Home", "My Activities"]
 
 #------setup data for TAG -------------#
 def setup_data():
@@ -200,7 +200,7 @@ def set_workspace():
         workspace = frappe.get_list("Workspace", ['name'])
         for space in workspace:
             if(space.name not in SPACE_PROFILE):
-                frappe.delete_doc("Workspace", space.name)
+                frappe.delete_doc("Workspace", space.name, force=1)
     except Exception as e:
         frappe.log_error(e, "set_workspace")
 
