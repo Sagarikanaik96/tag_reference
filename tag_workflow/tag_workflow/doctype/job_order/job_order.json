@@ -7,6 +7,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_break_1",
+  "time_remaining_for_make_edits",
+  "section_break_3",
   "company",
   "naming_series",
   "column_break_4",
@@ -328,11 +331,25 @@
    "in_standard_filter": 1,
    "label": "Company Type",
    "options": "\nExclusive\nNon Exclusive"
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "time_remaining_for_make_edits",
+   "fieldtype": "HTML",
+   "label": "Time Remaining For Make Edits"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-30 15:49:02.952540",
+ "modified": "2021-12-02 20:41:57.366352",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

@@ -14,8 +14,22 @@ frappe.ui.form.on('Job Order', {
 		}
 	},
 	onload:function(frm){
-		check_company_detail(frm);
+		if(cur_frm.doc.__islocal==1){
+			check_company_detail(frm);
+			frm.set_df_property("time_remaining_for_make_edits", "options"," ");
+		}  
 	},
+	refresh:function(frm){
+		if(cur_frm.doc.__islocal==1){
+			check_company_detail(frm);
+		}
+		else
+		{
+			timer_value(frm)	   
+	}
+	},
+ 
+ 
 	before_save:function(frm){
 		check_company_detail(frm);
 	},
@@ -84,3 +98,54 @@ function redirect_quotation(frm){
 		})
 
 }
+ 
+function set_read_fields(frm){
+	var myStringArray = ["phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
+			var arrayLength = myStringArray.length;
+			for (var i = 0; i < arrayLength; i++) {
+				frm.set_df_property(myStringArray[i], "read_only", 1);
+			}
+ }
+  
+  
+function timer_value(frm){
+	var time=frappe.datetime.get_hour_diff(cur_frm.doc.posting_date_time,frappe.datetime.now_datetime())
+	if(time<24)
+		{
+			var myStringArray = ["company","posting_date_time","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
+			var arrayLength = myStringArray.length;
+			for (var i = 0; i < arrayLength; i++) {
+				frm.set_df_property(myStringArray[i], "read_only", 1);
+			}
+			frm.set_df_property("time_remaining_for_make_edits", "options"," ");
+		}
+	else
+		{
+			set_read_fields(frm)
+			time_value(frm)
+			setTimeout(function()
+			{
+				time_value(frm)
+				cur_frm.refresh()
+			},60000);  
+		}
+ 	}
+function time_value(frm){
+	var entry_datetime = frappe.datetime.now_datetime().split(" ")[1];
+	var exit_datetime = cur_frm.doc.posting_date_time.split(" ")[1];
+	var splitEntryDatetime= entry_datetime.split(':');
+	var splitExitDatetime= exit_datetime.split(':');
+	var totalMinsOfEntry= splitEntryDatetime[0] * 60 + parseInt(splitEntryDatetime[1]) + splitEntryDatetime[0] / 60;
+	var totalMinsOfExit= splitExitDatetime[0] * 60 + parseInt(splitExitDatetime[1]) + splitExitDatetime[0] / 60;
+	var entry_date = new Date(frappe.datetime.now_datetime().split(" ")[0]);
+	var exit_date = new Date(cur_frm.doc.posting_date_time.split(" ")[0]);
+	var diffTime = Math.abs(exit_date - entry_date);
+	var diffDays = Math.ceil(diffTime/ (1000 * 60 * 60 * 24));
+	var x=parseInt(((diffDays*(24*60)) +totalMinsOfExit) - totalMinsOfEntry)
+	let data1= Math.floor(x/24/60)-1 + " Days:" + Math.floor(x/60%24) + ' Hours:' + x%60+' Minutes'
+	let data = `
+			<p><b>Time Remaining for Make Edits: </b> ${[data1]}</p>
+		`;
+	frm.set_df_property("time_remaining_for_make_edits", "options",data);
+ }
+ 
