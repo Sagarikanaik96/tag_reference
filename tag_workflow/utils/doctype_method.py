@@ -2,6 +2,8 @@ import frappe
 from frappe import _
 from frappe.utils import (cint, flt, has_gravatar, escape_html, format_datetime, now_datetime, get_formatted_email, today)
 
+
+# user method update
 STANDARD_USERS = ("Guest", "Administrator")
 
 def validate_username(self):
@@ -64,3 +66,10 @@ def send_login_mail(self, subject, template, add_args, now=None):
 
     sender = frappe.session.user not in STANDARD_USERS and get_formatted_email(frappe.session.user) or None
     frappe.sendmail(recipients=self.email, sender=sender, subject=subject, template=template, args=args, header="", delayed=(not now) if now!=None else self.flags.delay_emails, retry=3)
+
+# document method update
+def raise_no_permission_to(self, perm_type):
+    """Raise `frappe.PermissionError`."""
+    if(not self.doctype == "Company" and not self.parent_staffing):
+        frappe.flags.error_message = _('Insufficient Permission for {0}, {1}').format(self.doctype, self.owner)
+        raise frappe.PermissionError

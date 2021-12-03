@@ -119,10 +119,6 @@ input:visited{
 #page-User .layout-main .layout-side-section {
 	border-right: none;
 }
-#page-User .layout-main-section-wrapper .layout-main-section , #page-Company .layout-main-section-wrapper .layout-main-section  {
-    width: 50%;
-    margin-left: 13rem;
-}
 /* notification */
 .notifications-list .notification-item-tabs .notifications-category.active {
     font-size: 14px;
