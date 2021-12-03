@@ -8,7 +8,7 @@ from frappe.config import get_modules_from_all_apps
 import json, os
 from pathlib import Path
 from tag_workflow.utils.trigger_session import share_company_with_user
-from tag_workflow.controllers.master_controller import make_update_comp_perm
+from tag_workflow.controllers.master_controller import make_update_comp_perm, check_user_data
 
 #-------setup variables for TAG -------------#
 tag_workflow= "Tag Workflow"
@@ -22,14 +22,13 @@ WEB_MAN = "Website Manager"
 USR, EMP = "User", "Employee"
 
 ALL_ROLES = [role.name for role in frappe.db.get_list("Role") or []]
-All_ROLES = [role.name for role in frappe.db.get_list("Role") or [] if role.name != "System Manager"]
 
 ADD_ORGANIZATION = ["Company", "Quotation", "Lead"]
 ADD_ORGANIZATION_DATA = ["TAG", "Hiring", "Staffing", "Exclusive Hiring"]
 
 ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag Admin", "Tag User", "CRM User", "Staff"]
 
-ROLE_PROFILE = [{ROLES[3]: ["Accounts User", "Report Manager", "Sales User", ROLES[3], WEB_MAN, ROLES[6], "Employee"]}, {ROLES[2]: ["Accounts User", "Sales User", WEB_MAN, ROLES[6], "Employee", ROLES[2]]}, {ROLES[1]: [ROLES[1], "Report Manager", WEB_MAN, ROLES[6], "Employee", "Projects User"]}, {ROLES[0]: [WEB_MAN, ROLES[6], "Employee", ROLES[0], "Projects User"]}, {ROLES[4]: ALL_ROLES}, {ROLES[5]: All_ROLES}]
+ROLE_PROFILE = [{ROLES[3]: ["Accounts User", "Report Manager", "Sales User", ROLES[3], WEB_MAN, ROLES[6], "Employee"]}, {ROLES[2]: ["Accounts User", "Sales User", WEB_MAN, ROLES[6], "Employee", ROLES[2]]}, {ROLES[1]: [ROLES[1], "Report Manager", WEB_MAN, ROLES[6], "Employee", "Projects User"]}, {ROLES[0]: [WEB_MAN, ROLES[6], "Employee", ROLES[0], "Projects User"]}, {ROLES[4]: ALL_ROLES}, {ROLES[5]: ALL_ROLES}]
 
 MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", tag_workflow, "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", tag_workflow, "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", tag_workflow, "Selling"]}]
 
@@ -220,12 +219,14 @@ def setup_company_permission():
 def check_if_user_exists():
     try:
         print("*------user update--------------------------*\n")
-        user_list = frappe.get_list(USR, ["name"])
+        user_list = frappe.get_list(USR, ["name", "organization_type", "company"])
         for user in user_list:
             if(frappe.db.exists(EMP, {"user_id": user.name})):
                 company, date_of_joining = frappe.db.get_value(EMP, {"user_id": user.name}, ["company", "date_of_joining"])
                 frappe.db.sql(""" UPDATE `tabUser` SET company = %s, date_of_joining = %s where name = %s """,(company, date_of_joining, user.name))
 
+            if(user.company):
+                check_user_data(user.name, user.company, user.organization_type)
     except Exception as e:
         frappe.log_error(e, "user update")
         print(e)

@@ -79,7 +79,7 @@
 	<section class='for-login'>
 		<div class="login-content page-card">
 			{{ logo_section() }}
-			<form class="form-signin form-login" role="form">
+			<form class="form-signin form-login" role="form" aria-label="login-form">
 				{%- if social_login -%}
 				<div class="page-card-body">
 					<div class="social-logins text-center">
@@ -118,7 +118,7 @@
 	<section class='for-email-login'>
 		<div class="login-content page-card">
 			{{ logo_section() }}
-			<form class="form-signin form-login" role="form">
+			<form class="form-signin form-login" role="form" aria-label="signin-form">
 			{{ email_login_body() }}
 			</form>
 		</div>
@@ -134,7 +134,7 @@
 		<div class="login-content page-card">
 			{{ logo_section() }}
 			{%- if not disable_signup -%}
-			<form class="form-signin form-signup hide" role="form">
+			<form class="form-signin form-signup hide" role="form" aria-label="signup-form">
 				<div class="page-card-body">
 					<div class="form-group">
 						<label class="form-label sr-only" for="signup_fullname">Full Name</label>
@@ -169,7 +169,7 @@
 
 	<section class='for-forgot'>
 		<div class="login-content page-card">
-			<form class="form-signin form-forgot hide" role="form">
+			<form class="form-signin form-forgot hide" role="form" aria-label="forgot-form"> 
 				<div class="page-card-head">
 					<h4>{{ _('Forgot Password') }}</h4>
 				</div>

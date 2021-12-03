@@ -6,6 +6,9 @@ import frappe
 from frappe import _, msgprint, throw
 from tag_workflow.controllers import base_controller
 
+#
+EXC = "Exclusive Hiring"
+
 class CRMController(base_controller.BaseController):
     def validate_crm(self):
         self.check_lead_closing()
@@ -41,7 +44,7 @@ def onboard_org(exclusive, staffing, email, person_name):
 # add orgs
 def make_company(exclusive, staffing):
     try:
-        company = frappe.get_doc(dict(doctype="Company", organization_type="Exclusive Hiring", parent_staffing=staffing, company_name=exclusive, default_currency="USD", country="United States", create_chart_of_accounts_based_on="Standard Template", chart_of_accounts= "Standard with Numbers"))
+        company = frappe.get_doc(dict(doctype="Company", organization_type=EXC, parent_staffing=staffing, company_name=exclusive, default_currency="USD", country="United States", create_chart_of_accounts_based_on="Standard Template", chart_of_accounts= "Standard with Numbers"))
         company.save(ignore_permissions=True)
         return company.name
     except Exception as e:
@@ -51,9 +54,9 @@ def make_company(exclusive, staffing):
 def make_user(exclusive, staffing, email, person_name):
     try:
         from tag_workflow.controllers.master_controller import check_employee
-        user = frappe.get_doc(dict(doctype="User",organization_type="Exclusive Hiring",tag_user_type="Hiring Admin",company=exclusive,email=email,first_name=person_name))
+        user = frappe.get_doc(dict(doctype="User",organization_type=EXC,tag_user_type="Hiring Admin",company=exclusive,email=email,first_name=person_name))
         user.save(ignore_permissions=True)
-        check_employee(user.name, person_name, exclusive, last_name=None, gender=None, date_of_birth=None, date_of_joining=None)
+        check_employee(user.name, person_name, exclusive, last_name=None, gender=None, date_of_birth=None, date_of_joining=None, organization_type=EXC)
         return user.name
     except Exception as e:
         frappe.throw(e)

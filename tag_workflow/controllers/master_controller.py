@@ -70,9 +70,9 @@ def update_user_permission(user_list, company):
 def update_exclusive_perm(user_list, company):
     try:
         for user in user_list:
-            if not frappe.db.exists(PERMISSION, {"user": user.name, "allow":COM, "for_value": company, "apply_to_all_doctypes": 1}):
-                add(COM, company, user.name, write=1, read=1, share=0, everyone=0, notify=1, flags={"ignore_share_permission": 1})
-                perm = frappe.get_doc(dict(doctype=PERMISSION, user=user.name, allow=COM, for_value=company, apply_to_all_doctypes = 1))
+            if not frappe.db.exists(PERMISSION, {"user": user['name'], "allow":COM, "for_value": company, "apply_to_all_doctypes": 1}):
+                add(COM, company, user['name'], write=1, read=1, share=0, everyone=0, notify=0, flags={"ignore_share_permission": 1})
+                perm = frappe.get_doc(dict(doctype=PERMISSION, user=user['name'], allow=COM, for_value=company, apply_to_all_doctypes = 1))
                 perm.save(ignore_permissions=True)
     except Exception as e:
         frappe.error_log(e, "Exclusive Permission")
@@ -114,8 +114,29 @@ def make_employee_permission(user, emp, company):
     except Exception as e:
         frappe.error_log(e, PERMISSION)
 
+def check_user_data(user, company, organization_type=None):
+    try:
+        if not organization_type:
+            organization_type = frappe.db.get_value("User", user, "organization_type")
+
+        if(organization_type == "Staffing"):
+            exclusive = frappe.get_list("Company", {"parent_staffing": company}, "name")
+            for ex in exclusive:
+                update_exclusive_perm([{"name": user}], ex.name)
+    except Exception as e:
+        frappe.error_log(e, "check_user_data")
+
+def remove_tag_permission(user, emp, company):
+    try:
+        perms = frappe.db.sql(""" select name from `tabUser Permission` where user = %s and (for_value in (%s, %s)) """,(user, emp, company), as_dict=1)
+        for per in perms:
+            frappe.delete_doc(PERMISSION, per.name)
+    except Exception as e:
+        frappe.error_log(e, "remove_tag_permission")
+
+
 @frappe.whitelist()
-def check_employee(name, first_name, company, last_name=None, gender=None, date_of_birth=None, date_of_joining=None):
+def check_employee(name, first_name, company, last_name=None, gender=None, date_of_birth=None, date_of_joining=None, organization_type=None):
     users = [{"name": name, "company": company}]
     share_company_with_user(users)
     if not frappe.db.exists(EMP, {"user_id": name}):
@@ -134,4 +155,10 @@ def check_employee(name, first_name, company, last_name=None, gender=None, date_
         emp.date_of_joining=date_of_joining
         emp.create_user_permission=1
         emp.save(ignore_permissions=True)
-    make_employee_permission(name, emp.name, company)
+
+    if(organization_type != "TAG"):
+        make_employee_permission(name, emp.name, company)
+        enqueue("tag_workflow.controllers.master_controller.check_user_data", user=name, company=company, organization_type=None)
+    elif(organization_type == "TAG"):
+        remove_tag_permission(name, emp.name, company)
+

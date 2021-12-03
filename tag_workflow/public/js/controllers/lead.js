@@ -36,7 +36,7 @@ function onboard_orgs(exclusive, staffing, email, person_name){
 		frappe.call({
 			"method": "tag_workflow.controllers.crm_controller.onboard_org",
 			"freeze": true,
-			"freeze_message": "<p>Please wait while we are preparing Organization for onboarding</p>",
+			"freeze_message": "<p><b>Please wait while we are preparing Organization for onboarding</b></p>",
 			"args": {"exclusive": exclusive, "staffing": staffing, "email": email, "person_name": person_name},
 			"callback": function(r){
 				console.log(r);

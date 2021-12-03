@@ -1,5 +1,8 @@
 import frappe
 from frappe import _
+from frappe.utils import (cint, flt, has_gravatar, escape_html, format_datetime, now_datetime, get_formatted_email, today)
+
+STANDARD_USERS = ("Guest", "Administrator")
 
 def validate_username(self):
     if not self.username and self.is_new() and self.first_name:
@@ -25,3 +28,39 @@ def suggest_username(self):
         username = _check_suggestion(frappe.scrub("{0} {1}".format(self.first_name, self.last_name or "")))
 
     return username
+
+
+def send_login_mail(self, subject, template, add_args, now=None):
+    """send mail with login details"""
+    from frappe.utils.user import get_user_fullname
+    from frappe.utils import get_url
+
+    created_by = get_user_fullname(frappe.session['user'])
+    if created_by == "Guest":
+        created_by = "Administrator"
+
+    args = {
+            'first_name': self.first_name or self.last_name or "user",
+            'user': self.name,
+            'title': subject,
+            'login_url': get_url(),
+            'created_by': created_by
+    }
+
+    args.update(add_args)
+
+    onboard = 0
+    company, email = "", ""
+    parent = frappe.db.get_value("Company", self.company, "parent_staffing")
+    if(parent):
+        onboard = 1
+        company = parent
+        email = self.name
+        subject = "Notification from TAG"
+    else:
+        subject = "Welcome to TAG! Account Verification"
+
+    args.update({"onboard": onboard, "company": company, "email": email})
+
+    sender = frappe.session.user not in STANDARD_USERS and get_formatted_email(frappe.session.user) or None
+    frappe.sendmail(recipients=self.email, sender=sender, subject=subject, template=template, args=args, header="", delayed=(not now) if now!=None else self.flags.delay_emails, retry=3)

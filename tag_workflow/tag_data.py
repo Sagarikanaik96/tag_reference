@@ -168,7 +168,7 @@ def check_assign_employee(total_employee_required,employee_detail = None):
                 return 'duplicate'
         else:
             return 'insert'
-    except:
+    except Exception:
         return 0
 
 @frappe.whitelist()
@@ -177,5 +177,5 @@ def api_sec(frm=None):
         emp = frappe.get_doc("Employee",frm)
         ssn_decrypt = emp.get_password('ssn')
         return ssn_decrypt
-    except:
+    except Exception:
         frappe.log_error("No Employee in Database", "Warning")
