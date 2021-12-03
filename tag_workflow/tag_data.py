@@ -179,3 +179,11 @@ def api_sec(frm=None):
         return ssn_decrypt
     except Exception:
         frappe.log_error("No Employee in Database", "Warning")
+    
+
+@frappe.whitelist()
+def org_type(org_name=None):
+    x=frappe.get_doc('Company',org_name)
+    for i in range(len(x.industry_type)):
+        if x.industry_type[i].industry_type=="Construction":
+            return "success"

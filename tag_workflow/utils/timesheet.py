@@ -20,7 +20,7 @@ def send_timesheet_for_approval(employee, docname):
 @frappe.validate_and_sanitize_search_inputs
 def get_timesheet_employee(doctype, txt, searchfield, start, page_len, filters):
     job_order = filters.get('job_order')
-    return frappe.db.sql(""" select employee from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = %(job_order)s and tag_status = "Approved") """, { 'job_order': job_order})
+    return frappe.db.sql(""" select employee,employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = %(job_order)s and tag_status = "Approved") """, { 'job_order': job_order})
 
 
 @frappe.whitelist()
