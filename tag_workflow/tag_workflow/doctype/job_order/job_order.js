@@ -17,6 +17,17 @@ frappe.ui.form.on('Job Order', {
 		if(cur_frm.doc.__islocal==1){
 			check_company_detail(frm);
 			frm.set_df_property("time_remaining_for_make_edits", "options"," ");
+			frappe.call({
+				method:"tag_workflow.tag_data.org_type",
+				args: {
+					org_name:cur_frm.doc.company,
+				},
+				callback:function(r){
+					if(r.message!="success"){
+						frm.set_df_property("shovel", "hidden",1);
+					}
+				}
+			});
 		}  
 	},
 	refresh:function(frm){
