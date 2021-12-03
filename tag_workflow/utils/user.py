@@ -57,6 +57,8 @@ def send_login_mail(self, subject, template, add_args, now=None):
         company = parent
         email = self.name
         subject = "Notification from TAG"
+    else:
+        subject = "Welcome to TAG! Account Verification"
 
     args.update({"onboard": onboard, "company": company, "email": email})
 
