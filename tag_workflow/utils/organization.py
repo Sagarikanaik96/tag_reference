@@ -22,14 +22,13 @@ WEB_MAN = "Website Manager"
 USR, EMP = "User", "Employee"
 
 ALL_ROLES = [role.name for role in frappe.db.get_list("Role") or []]
-All_ROLES = [role.name for role in frappe.db.get_list("Role") or [] if role.name != "System Manager"]
 
 ADD_ORGANIZATION = ["Company", "Quotation", "Lead"]
 ADD_ORGANIZATION_DATA = ["TAG", "Hiring", "Staffing", "Exclusive Hiring"]
 
 ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag Admin", "Tag User", "CRM User", "Staff"]
 
-ROLE_PROFILE = [{ROLES[3]: ["Accounts User", "Report Manager", "Sales User", ROLES[3], WEB_MAN, ROLES[6], "Employee"]}, {ROLES[2]: ["Accounts User", "Sales User", WEB_MAN, ROLES[6], "Employee", ROLES[2]]}, {ROLES[1]: [ROLES[1], "Report Manager", WEB_MAN, ROLES[6], "Employee", "Projects User"]}, {ROLES[0]: [WEB_MAN, ROLES[6], "Employee", ROLES[0], "Projects User"]}, {ROLES[4]: ALL_ROLES}, {ROLES[5]: All_ROLES}]
+ROLE_PROFILE = [{ROLES[3]: ["Accounts User", "Report Manager", "Sales User", ROLES[3], WEB_MAN, ROLES[6], "Employee"]}, {ROLES[2]: ["Accounts User", "Sales User", WEB_MAN, ROLES[6], "Employee", ROLES[2]]}, {ROLES[1]: [ROLES[1], "Report Manager", WEB_MAN, ROLES[6], "Employee", "Projects User"]}, {ROLES[0]: [WEB_MAN, ROLES[6], "Employee", ROLES[0], "Projects User"]}, {ROLES[4]: ALL_ROLES}, {ROLES[5]: ALL_ROLES}]
 
 MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", tag_workflow, "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", tag_workflow, "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", tag_workflow, "Selling"]}]
 
