@@ -54,7 +54,7 @@ def make_company(exclusive, staffing):
 def make_user(exclusive, staffing, email, person_name):
     try:
         from tag_workflow.controllers.master_controller import check_employee
-        user = frappe.get_doc(dict(doctype="User",organization_type=EXC,tag_user_type="Hiring Admin",company=exclusive,email=email,first_name=person_name))
+        user = frappe.get_doc(dict(doctype="User",organization_type=EXC,tag_user_type="Hiring Admin",company=exclusive,email=email,first_name=person_name,module_profile="Hiring",role_profile_name="Hiring Admin"))
         user.save(ignore_permissions=True)
         check_employee(user.name, person_name, exclusive, last_name=None, gender=None, date_of_birth=None, date_of_joining=None, organization_type=EXC)
         return user.name
