@@ -38,7 +38,7 @@ function check_employee_data(frm){
 	let table = frm.doc.employee_details || [];
 	let employees = [];
 
-	(table.length > Number(frm.doc.no_of_employee_required)) ? msg = 'Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)' : msg = "";
+	(table.length > Number(frm.doc.no_of_employee_required)) ? msg = 'Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)' : console.log("TAG");
 
 	for(var e in table){(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg = 'Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details';}
 
