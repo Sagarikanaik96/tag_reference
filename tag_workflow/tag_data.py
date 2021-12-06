@@ -1,4 +1,8 @@
 import frappe
+from frappe import _
+from frappe.share import add
+from frappe import enqueue
+from tag_workflow.utils.notification import sendmail
 
 jobOrder = "Job Order"
 
@@ -49,21 +53,41 @@ def send_email_staffing_user(email_list=None,subject = None,body=None,additional
         return 1
     else:
         return 0
+
+
+#----------assign data------------#
+def assign_employee_data(hiringorg, name):
+    try:
+        emps = frappe.db.sql(""" select employee from `tabAssign Employee Details` where parent = %s """,(name), as_dict=1)
+        users = frappe.db.get_list("User", {"company": hiringorg}, "name")
+
+        for usr in users:
+            for emp in emps:
+                if not frappe.db.exists("DocShare", {"user": usr.name, "share_doctype": "Employee", "share_name": emp.employee}):
+                    add("Employee", emp.employee, usr.name, read=1, write = 0, share = 0, everyone = 0,notify = 0, flags={"ignore_share_permission": 1})
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.error_log(e, "employee share")
+        frappe.throw(e)
  
 @frappe.whitelist()
-def update_job_order(job_name=None,employee_filled=None,staffing_org=None,hiringorg=None):
-    user_list = frappe.db.sql(''' select email from `tabUser` where company = "{}"'''.format(staffing_org),as_list=1)
-    l = [l[0] for l in user_list]
-    from frappe.share import add
-    for user in l:
-        add(jobOrder, job_name, user, read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
-    x=frappe.get_doc(jobOrder,job_name)
-    x.worker_filled=int(employee_filled)+int(x.worker_filled)
-    x.staff_org_claimed=str(x.staff_org_claimed)+staffing_org
-    x.save()
-    sub=f'New Message regarding {job_name} from {hiringorg} is available'
-    msg = f'Your Employees has been approved for Work Order {job_name}'
-    return send_email(sub,msg,l)
+def update_job_order(job_name, employee_filled, staffing_org, hiringorg, name):
+    try:
+        job = frappe.get_doc(jobOrder, job_name)
+        claimed = job.staff_org_claimed if job.staff_org_claimed else ""
+        frappe.db.set_value(jobOrder, job_name, "worker_filled", (int(employee_filled)+int(job.worker_filled)))
+        frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
+
+        sub = f'New Message regarding {job_name} from {hiringorg} is available'
+        msg = f'Your Employees has been approved for Work Order {job_name}'
+        user_list = frappe.db.sql(""" select email from `tabUser` where company = %s """,(staffing_org), as_dict=1)
+        users = [usr['email'] for usr in user_list]
+        enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name)
+        return sendmail(users, msg, sub, "Assign Employee", name)
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.error_log(e, "final_notification")
+        frappe.throw(e)
 
 
 @frappe.whitelist()
@@ -83,7 +107,6 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
         s += i['employee_name'] + ','
 
     l = [l[0] for l in user_list]
-    from frappe.share import add
     for user in l:
         add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
 

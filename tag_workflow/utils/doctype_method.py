@@ -70,6 +70,6 @@ def send_login_mail(self, subject, template, add_args, now=None):
 # document method update
 def raise_no_permission_to(self, perm_type):
     """Raise `frappe.PermissionError`."""
-    if(not self.doctype == "Company" and not self.parent_staffing):
+    if(not self.doctype in ["Company", "Assign Employee"]):
         frappe.flags.error_message = _('Insufficient Permission for {0}, {1}').format(self.doctype, self.owner)
         raise frappe.PermissionError

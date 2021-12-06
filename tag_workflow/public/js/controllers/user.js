@@ -161,7 +161,7 @@ function setup_profile(frm){
 
 /*------------update employee--------------*/
 function update_employee(frm){
-	frappe.call({"method": "tag_workflow.controllers.master_controller.check_employee","args": {"name": frm.doc.name, "first_name": frm.doc.first_name, "last_name": frm.doc.last_name || '', "company": frm.doc.company, "gender": frm.doc.gender, "date_of_birth": frm.doc.birth_date, "date_of_joining": frm.doc.date_of_joining, "organization_type": frm.doc.organization_type}});
+	frappe.call({"method": "tag_workflow.controllers.master_controller.check_employee","args": {"name": frm.doc.name, "first_name": frm.doc.first_name, "last_name": frm.doc.last_name || '', "company": frm.doc.company, "gender": frm.doc.gender, "date_of_birth": frm.doc.birth_date, "date_of_joining": frm.doc.date_of_joining, "organization_type": frm.doc.organization_type}, "callback": function(r){cur_frm.reload_doc();}});
 }
 
 
