@@ -15,6 +15,7 @@ TERRITORY = "All Territories"
 PERMISSION = "User Permission"
 EMP = "Employee"
 COM = "Company"
+JOB = "Job Order"
 
 class MasterController(base_controller.BaseController):
     def validate_master(self):
@@ -29,7 +30,7 @@ class MasterController(base_controller.BaseController):
                 customer.insert(ignore_permissions=True)
         elif(self.dt == "User"):
             if not self.doc.tag_user_type or not self.doc.organization_type:
-                frappe.throw(_("Please select <b>Organization Type</b> and <b>TAG User Type</b> before saving the User."))
+                frappe.msgprint(_("Please select <b>Organization Type</b> and <b>TAG User Type</b> before saving the User."))
         elif(self.dt == "Item"):
             self.check_activity_type()
 
@@ -48,35 +49,7 @@ class MasterController(base_controller.BaseController):
             item.save(ignore_permissions=True)
 
 
-#-----------after company insert update-------------#
-def get_user_list(company=None):
-    if company:
-        return frappe.db.sql(""" select name from `tabUser` where enabled = 1 and tag_user_type in ("Staffing Admin", "Staffing User") and company = %s """,company, as_dict=1)
-    else:
-        return frappe.db.sql(""" select name from `tabUser` where enabled = 1 and tag_user_type in ("Staffing Admin", "Staffing User")""", as_dict=1)
-
-
-def update_user_permission(user_list, company):
-    try:
-        permission = ["Job Order"]
-        for perm in permission:
-            for user in user_list:
-                if not frappe.db.exists(PERMISSION,{"user": user.name,"allow": COM,"applicable_for": perm,"for_value": company,"apply_to_all_doctypes":0}):
-                    perm_doc = frappe.get_doc(dict(doctype=PERMISSION,user=user.name,allow=COM,for_value=company,applicable_for=perm,apply_to_all_doctypes=0))
-                    perm_doc.save(ignore_permissions=True)
-    except Exception as e:
-        frappe.error_log(e, "Quotation and Job Order Permission")
-
-def update_exclusive_perm(user_list, company):
-    try:
-        for user in user_list:
-            if not frappe.db.exists(PERMISSION, {"user": user['name'], "allow":COM, "for_value": company, "apply_to_all_doctypes": 1}):
-                add(COM, company, user['name'], write=1, read=1, share=0, everyone=0, notify=0, flags={"ignore_share_permission": 1})
-                perm = frappe.get_doc(dict(doctype=PERMISSION, user=user['name'], allow=COM, for_value=company, apply_to_all_doctypes = 1))
-                perm.save(ignore_permissions=True)
-    except Exception as e:
-        frappe.error_log(e, "Exclusive Permission")
-
+#-----------data update--------------#
 @frappe.whitelist()
 def make_update_comp_perm(docname):
     try:
@@ -86,7 +59,7 @@ def make_update_comp_perm(docname):
             enqueue("tag_workflow.controllers.master_controller.update_exclusive_perm", user_list=user_list, company=doc.name)
         elif doc.organization_type != "Staffing":
             user_list = get_user_list()
-            enqueue("tag_workflow.controllers.master_controller.update_user_permission", user_list=user_list, company=doc.name)
+            enqueue("tag_workflow.controllers.master_controller.update_job_order_permission", user_list=user_list, company=doc.name)
     except Exception as e:
         frappe.error_log(e, "Quotation and Job Order Permission")
 
@@ -102,43 +75,78 @@ def check_item_group():
         frappe.error_log(e, item_group)
 
 
+#-----------after company insert update-------------#
+def get_user_list(company=None):
+    if company:
+        return frappe.db.sql(""" select name from `tabUser` where enabled = 1 and tag_user_type in ("Staffing Admin", "Staffing User") and company = %s """,company, as_dict=1)
+    else:
+        return frappe.db.sql(""" select name from `tabUser` where enabled = 1 and tag_user_type in ("Staffing Admin", "Staffing User")""", as_dict=1)
+
+
+def update_job_order_permission(user_list, company):
+    try:
+        for user in user_list:
+            if not frappe.db.exists(PERMISSION,{"user": user['name'],"allow": COM,"applicable_for": JOB,"for_value": company,"apply_to_all_doctypes":0}):
+                perm_doc = frappe.get_doc(dict(doctype=PERMISSION, user=user['name'], allow=COM, for_value=company, applicable_for=JOB, apply_to_all_doctypes=0))
+                perm_doc.save(ignore_permissions=True)
+    except Exception as e:
+        frappe.error_log(e, "Quotation and Job Order Permission")
+
+def update_exclusive_perm(user_list, company):
+    try:
+        for user in user_list:
+            if not frappe.db.exists(PERMISSION, {"user": user['name'], "allow":COM, "for_value": company, "apply_to_all_doctypes": 1}):
+                add(COM, company, user['name'], write=1, read=1, share=0, everyone=0, notify=0, flags={"ignore_share_permission": 1})
+                perm = frappe.get_doc(dict(doctype=PERMISSION, user=user['name'], allow=COM, for_value=company, apply_to_all_doctypes = 1))
+                perm.save(ignore_permissions=True)
+    except Exception as e:
+        frappe.error_log(e, "Exclusive Permission")
+
+
 # remove message on user creation
 def make_employee_permission(user, emp, company):
     try:
-        perms = [COM, EMP]
-        data = [company, emp]
-        for per in range(0, len(perms)):
-            if not frappe.db.exists(PERMISSION,{"user": user,"allow": perms[per],"apply_to_all_doctypes":1, "for_value": data[per]}):
-                perm_doc = frappe.get_doc(dict(doctype=PERMISSION,user=user, allow=perms[per], for_value=data[per], apply_to_all_doctypes=1))
-                perm_doc.save(ignore_permissions=True)
+        if not frappe.db.exists(PERMISSION,{"user": user,"allow": COM,"apply_to_all_doctypes":1, "for_value": company}):
+            perm_doc = frappe.get_doc(dict(doctype=PERMISSION,user=user, allow=COM, for_value=company, apply_to_all_doctypes=1))
+            perm_doc.save(ignore_permissions=True)
     except Exception as e:
         frappe.error_log(e, PERMISSION)
 
-def check_user_data(user, company, organization_type=None):
+# user permission for order and exclusive
+def new_user_job_perm(user):
+    try:
+        user_list = [{"name": user}]
+        company = frappe.db.get_list(COM, {"organization_type": "Hiring"}, "name")
+        for com in company:
+            update_job_order_permission(user_list, com['name'])
+    except Exception as e:
+        frappe.error_log(e, "new_user_job_perm")
+
+def user_exclusive_perm(user, company, organization_type=None):
     try:
         if not organization_type:
             organization_type = frappe.db.get_value("User", user, "organization_type")
 
         if(organization_type == "Staffing"):
+            new_user_job_perm(user)
             exclusive = frappe.get_list("Company", {"parent_staffing": company}, "name")
             for ex in exclusive:
                 update_exclusive_perm([{"name": user}], ex.name)
+        frappe.db.sql(""" delete from `tabUser Permission` where user = %s and allow = "Employee" """,(user))
     except Exception as e:
-        frappe.error_log(e, "check_user_data")
+        frappe.error_log(e, "user_exclusive_permission")
 
 def remove_tag_permission(user, emp, company):
     try:
         perms = frappe.db.sql(""" select name from `tabUser Permission` where user = %s and (for_value in (%s, %s)) """,(user, emp, company), as_dict=1)
         for per in perms:
-            frappe.delete_doc(PERMISSION, per.name)
+            frappe.delete_doc(PERMISSION, per.name, force=1)
     except Exception as e:
         frappe.error_log(e, "remove_tag_permission")
-
 
 @frappe.whitelist()
 def check_employee(name, first_name, company, last_name=None, gender=None, date_of_birth=None, date_of_joining=None, organization_type=None):
     users = [{"name": name, "company": company}]
-    share_company_with_user(users)
     if not frappe.db.exists(EMP, {"user_id": name}):
         emp = frappe.get_doc(dict(doctype=EMP, first_name=first_name, last_name=last_name, company=company, status="Active", gender=gender, date_of_birth=date_of_birth, date_of_joining=date_of_joining, user_id=name, create_user_permission=1, email=name))
         emp.save(ignore_permissions=True)
@@ -158,7 +166,7 @@ def check_employee(name, first_name, company, last_name=None, gender=None, date_
 
     if(organization_type != "TAG"):
         make_employee_permission(name, emp.name, company)
-        enqueue("tag_workflow.controllers.master_controller.check_user_data", user=name, company=company, organization_type=None)
+        enqueue("tag_workflow.controllers.master_controller.user_exclusive_perm", user=name, company=company, organization_type=None)
+        enqueue("tag_workflow.utils.trigger_session.share_company_with_user", users=users)
     elif(organization_type == "TAG"):
         remove_tag_permission(name, emp.name, company)
-

@@ -15,7 +15,7 @@
   "column_break_3",
   "tag_status",
   "hiring_organization",
-  "staffing_organization",
+  "company",
   "job_location",
   "job_order_email",
   "section_break_6",
@@ -26,9 +26,11 @@
   {
    "fieldname": "job_order",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Job Order",
    "options": "Job Order",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "no_of_employee_required",
@@ -49,13 +51,8 @@
   {
    "fieldname": "hiring_organization",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Hiring Organization",
-   "read_only": 1
-  },
-  {
-   "fieldname": "staffing_organization",
-   "fieldtype": "Data",
-   "label": "Staffing Organization",
    "read_only": 1
   },
   {
@@ -66,7 +63,8 @@
    "fieldname": "employee_details",
    "fieldtype": "Table",
    "label": "Employee Details",
-   "options": "Assign Employee Details"
+   "options": "Assign Employee Details",
+   "reqd": 1
   },
   {
    "default": "AE-",
@@ -110,12 +108,21 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Job Order Email"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Staffing Organization",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-12-01 16:39:18.327555",
+ "modified": "2021-12-05 21:58:11.224131",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",

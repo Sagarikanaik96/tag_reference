@@ -80,10 +80,10 @@ function update_job_detail(frm){
 			args:{'job_order_detail':cur_frm.doc.job_order_detail},
 			callback:function(r){
 				if(r.message){
-					cur_frm.get_field("time_logs").grid.grid_rows[0].doc.activity_type = r.message[0];
-					cur_frm.get_field("time_logs").grid.grid_rows[0].doc.from_time = r.message[1];
-					cur_frm.get_field("time_logs").grid.grid_rows[0].refresh_field("activity_type");
-					cur_frm.get_field("time_logs").grid.grid_rows[0].refresh_field("from_time");
+					cur_frm.clear_table("time_logs");
+					let child = frappe.model.get_new_doc("Timesheet Detail", cur_frm.doc, "time_logs");
+					$.extend(child, {"activity_type": r.message[0], "from_time": r.message[1]});
+					cur_frm.refresh_field("time_logs");
 				}
 			}
 		});

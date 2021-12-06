@@ -17,32 +17,7 @@ frappe.ui.form.on('Assign Employee', {
 		}
 	},
 	before_save:function(frm){
-		frappe.call({
-			method:"tag_workflow.tag_data.check_assign_employee",
-			args:{
-				total_employee_required:frm.doc.no_of_employee_required,
-				employee_detail:frm.doc.employee_details
-			},
-			callback:function(r){
-				console.log(r);
-				if (r.message == 'exceeds'){
-					msgprint("No of Employee Exceeds as per Requirements")
-					frappe.validated = false;
-				}
-				else if (r.message == 'duplicate'){
-					msgprint(" Duplicate Employee Entry")
-					frappe.validated = false;
-				}
-				else if(r.message == 'insert'){
-					msgprint("please Insert employee")
-					frappe.validated = false;
-				}
-				/*else if(r.message == 0){
-					msgprint('Something Went Wrong PLease Try again')
-					frappe.validated = false;
-				}*/
-			}
-		})
+		check_employee_data(frm);
 	}
 });
 
@@ -51,25 +26,21 @@ function make_hiring_notification(frm){
 	let state = cur_frm.doc.tag_status;
 	console.log(state);
 	if(state == "Approval Request"){
-		frappe.call({
-			method:"tag_workflow.tag_data.receive_hiring_notification",
-			args:{
-				hiring_org:cur_frm.doc.hiring_organization,
-				job_order:cur_frm.doc.job_order,
-				staffing_org:cur_frm.doc.staffing_organization,
-				emp_detail:cur_frm.doc.employee_details,
-				doc_name :cur_frm.doc.name
-			},
-		});
+		frappe.call({method:"tag_workflow.tag_data.receive_hiring_notification", args:{"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order, "staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name}});
 	}else if(state == "Approved"){
-		frappe.call({
-			method:"tag_workflow.tag_data.update_job_order",
-			args:{
-				job_name:cur_frm.doc.job_order,
-				employee_filled:cur_frm.doc.employee_details.length,
-				staffing_org:cur_frm.doc.staffing_organization,
-				hiringorg:cur_frm.doc.hiring_organization
-			},
-		});
+		frappe.call({method:"tag_workflow.tag_data.update_job_order", args:{"job_name" : cur_frm.doc.job_order, "employee_filled" : cur_frm.doc.employee_details.length, "staffing_org" : cur_frm.doc.company, "hiringorg" : cur_frm.doc.hiring_organization, "name": frm.doc.name}});
 	}
+}
+
+/*---------employee data--------------*/
+function check_employee_data(frm){
+	let msg = ""
+	let table = frm.doc.employee_details || [];
+	let employees = [];
+
+	(table.length > Number(frm.doc.no_of_employee_required)) ? msg = 'Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)' : msg = "";
+
+	for(var e in table){(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg = 'Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details';}
+
+	if(msg){frappe.msgprint({message: msg, title: __('Warning'), indicator: 'red'});frappe.validated = false;}
 }

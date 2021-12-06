@@ -8,7 +8,7 @@ from frappe.config import get_modules_from_all_apps
 import json, os
 from pathlib import Path
 from tag_workflow.utils.trigger_session import share_company_with_user
-from tag_workflow.controllers.master_controller import make_update_comp_perm, check_user_data
+from tag_workflow.controllers.master_controller import make_update_comp_perm, user_exclusive_perm
 
 #-------setup variables for TAG -------------#
 tag_workflow= "Tag Workflow"
@@ -226,7 +226,7 @@ def check_if_user_exists():
                 frappe.db.sql(""" UPDATE `tabUser` SET company = %s, date_of_joining = %s where name = %s """,(company, date_of_joining, user.name))
 
             if(user.company):
-                check_user_data(user.name, user.company, user.organization_type)
+                user_exclusive_perm(user.name, user.company, user.organization_type)
     except Exception as e:
         frappe.log_error(e, "user update")
         print(e)
