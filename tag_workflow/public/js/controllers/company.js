@@ -1,9 +1,10 @@
 frappe.ui.form.on("Company", {
 	refresh: function(frm){
-		label_change(frm);
+		cur_frm.clear_custom_buttons();
 		init_values(frm);
 		hide_details(frm);
 		update_company_fields(frm);
+		jazzhr_data(frm);
 	},
 	setup: function(frm){
 		init_values(frm);
@@ -43,6 +44,10 @@ frappe.ui.form.on("Company", {
 	after_save: function(frm){
 		frappe.call({"method": "tag_workflow.controllers.master_controller.make_update_comp_perm","args": {"docname": frm.doc.name}});
 	},
+
+	before_save: function(frm){
+		validate_phone_and_zip(frm);
+	}
 });
 
 
@@ -67,13 +72,6 @@ function init_values(frm){
 	}
 }
 
-/*--------label change-----------*/
-function label_change(frm){
-	var abbr = "abbr";
-	cur_frm.fields_dict[abbr].df.label = "Abbreviation";
-	cur_frm.fields_dict[abbr].refresh();
-}
-
 /*----update field properity-----*/
 function update_company_fields(frm){
 	let roles = frappe.user_roles;
@@ -94,5 +92,41 @@ function update_company_fields(frm){
 		}else{
 			cur_frm.toggle_display(company_fields[0], 0);
 		}
+	}
+}
+
+/*--------phone and zip validation----------*/
+function validate_phone_and_zip(frm){
+	let phone = frm.doc.phone_no;
+	let zip = frm.doc.zip;
+	let is_valid = 1;
+	if(phone && phone.length!=10 && !isNaN(phone)){is_valid=0; frappe.msgprint({message: __('Phone No. is not valid'), title: __('Phone Number'), indicator: 'red'});}
+	if(zip && zip.length!=5 && !isNaN(zip)){is_valid = 0; frappe.msgprint({message: __('Enter valid zip'), title: __('ZIP'), indicator: 'red'});}
+	(is_valid == 0) ? frappe.validated = false : '';
+}
+
+/*--------jazzhr------------*/
+function jazzhr_data(frm){
+	frm.add_custom_button("Get data from JazzHR", function() {
+		(cur_frm.is_dirty() == 1) ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm);
+	}).addClass("btn-primary");
+}
+
+function make_jazzhr_request(frm){
+	if(frm.doc.jazzhr_api_key){
+		frappe.call({
+			"method": "tag_workflow.utils.whitelisted.make_jazzhr_request",
+			"args": {"api_key": frm.doc.jazzhr_api_key, "company": frm.doc.name},
+			"freeze": true,
+			"freeze_message": "<p><b>sending request to JazzHR...</b></p>",
+			"callback": function(r){
+				if(r && r.message){
+					frappe.msgprint(r.message);
+				}
+			}
+		});
+	}else{
+		cur_frm.scroll_to_field("jazzhr_api_key");
+		frappe.msgprint("<b>JazzHR API Key</b> is required");
 	}
 }

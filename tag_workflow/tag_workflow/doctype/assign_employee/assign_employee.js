@@ -26,9 +26,25 @@ function make_hiring_notification(frm){
 	let state = cur_frm.doc.tag_status;
 	console.log(state);
 	if(state == "Approval Request"){
-		frappe.call({method:"tag_workflow.tag_data.receive_hiring_notification", args:{"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order, "staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name}});
+		frappe.call({
+			"method":"tag_workflow.tag_data.receive_hiring_notification",
+			"freeze": true,
+			"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
+			"args":{
+				"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
+				"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name
+			}
+		});
 	}else if(state == "Approved"){
-		frappe.call({method:"tag_workflow.tag_data.update_job_order", args:{"job_name" : cur_frm.doc.job_order, "employee_filled" : cur_frm.doc.employee_details.length, "staffing_org" : cur_frm.doc.company, "hiringorg" : cur_frm.doc.hiring_organization, "name": frm.doc.name}});
+		frappe.call({
+			method:"tag_workflow.tag_data.update_job_order",
+			"freeze": true,
+			"freeze_message": "<p><b>preparing notification for Staffing orgs...</b></p>",
+			args:{
+				"job_name" : cur_frm.doc.job_order, "employee_filled" : cur_frm.doc.employee_details.length,
+				"staffing_org" : cur_frm.doc.company, "hiringorg" : cur_frm.doc.hiring_organization, "name": frm.doc.name
+			}
+		});
 	}
 }
 
