@@ -2,6 +2,7 @@ frappe.ui.form.on("Employee", {
 	refresh: function(frm){
 		trigger_hide(frm);
 		required_field(frm);
+		blocked_from(frm);
 	},
 	decrypt_ssn: function(frm) {
 		frappe.call({
@@ -32,4 +33,12 @@ function required_field(frm){
 	for(var fld in reqd_fields){
 		cur_frm.toggle_reqd(reqd_fields[fld], 1);
 	}
+}
+function blocked_from(frm){
+	frm.set_query("blocked_from", "block_from", function(frm) {
+		
+		return {
+		       "filters":[ ['Company', "organization_type", "=", "Hiring"] ]
+		};
+	});
 }
