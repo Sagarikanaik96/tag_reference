@@ -1,4 +1,5 @@
 import frappe
+import requests, json
 from frappe import _, msgprint, throw
 from frappe.utils import cint, cstr, flt, now_datetime, getdate, nowdate
 from frappe.model.mapper import get_mapped_doc
@@ -89,3 +90,36 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=True):
     update_timesheet(source_name, doclist, target_doc)
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
     return doclist
+
+
+#------------JazzHR-----------#
+def preparing_employee_data(data, company):
+    try:
+        is_emp,is_exists,total = 0,0,0
+        total += 1
+        if not frappe.db.exists("Employee", {"first_name": data['first_name'], "last_name": data['last_name'], "company": company}):
+            employee = frappe.get_doc(dict(doctype="Employee", first_name=data['first_name'], last_name=data['last_name'], company=company, status="Active"))
+            employee.save(ignore_permissions=True)
+            is_emp += 1
+        else:
+            is_exists += 1
+        return "Total <b>"+str(total)+"</b> records found, out of these newly created recored are <b>"+str(is_emp)+"</b> and <b>"+str(is_exists)+"</b> already exists."
+    except Exception as e:
+        frappe.throw(e)
+
+
+@frappe.whitelist()
+def make_jazzhr_request(api_key, company):
+    try:
+        url = "https://api.resumatorapi.com/v1/applicants?apikey="+api_key
+        response = requests.get(url)
+        if(response.status_code == 200):
+            data = response.json()
+            result = preparing_employee_data(data, company)
+            return result
+        else:
+            error = json.loads(response.text)['error']
+            frappe.throw(_("{0}").format(error))
+    except Exception as e:
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)

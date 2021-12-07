@@ -103,6 +103,8 @@ function field_check(frm){
 		cur_frm.toggle_reqd(pass, 1);
 		cur_frm.set_value(pass, "Entry@123");
 	}
+
+	(cur_frm.doc.__islocal === undefined && (!frappe.user_roles.includes("System Manager"))) ? cur_frm.toggle_enable("tag_user_type", 0) : '';
 }
 
 function init_values(frm){
