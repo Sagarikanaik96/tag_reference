@@ -102,7 +102,7 @@ function validate_phone_and_zip(frm){
 	let is_valid = 1;
 	if(phone && phone.length!=10 && !isNaN(phone)){is_valid=0; frappe.msgprint({message: __('Phone No. is not valid'), title: __('Phone Number'), indicator: 'red'});}
 	if(zip && zip.length!=5 && !isNaN(zip)){is_valid = 0; frappe.msgprint({message: __('Enter valid zip'), title: __('ZIP'), indicator: 'red'});}
-	(is_valid == 0) ? frappe.validated = false : '';
+	(is_valid == 0) ? frappe.validated = 0 : console.log("TAG");
 }
 
 /*--------jazzhr------------*/
