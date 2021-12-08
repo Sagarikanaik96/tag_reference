@@ -101,7 +101,7 @@ input:visited{
 }
 
 .list-sidebar .sidebar-action a , 
-.btn-primary-light , .form-section .section-head ,
+.btn-primary-light , 
 .notification-list-body .panel-notifications .full-log-btn {
 	color:#21B9E4 !important;
 }
@@ -114,10 +114,26 @@ input:visited{
 	padding: 25px 15px 25px 0px;
 	height: 60px;
 }
+.form-section .section-head {
+	font-size: 18px;
+    font-weight: 600;
+	color:#21B9E4 !important;
+}
+#page-User .layout-main-section-wrapper .layout-main-section , 
+#page-Company .layout-main-section-wrapper .layout-main-section,
+#page-Lead .layout-main-section-wrapper .layout-main-section ,
+#page-Timesheet .layout-main-section-wrapper .layout-main-section 
+{
+    width: 50%;
+    margin-left: 13rem;
+}
 
 /* user management */
 #page-User .layout-main .layout-side-section {
 	border-right: none;
+}
+.form-section.card-section {
+	padding: 20px;
 }
 /* notification */
 .notifications-list .notification-item-tabs .notifications-category.active {
@@ -134,9 +150,29 @@ input:visited{
 
 /* notification */
 
+input::-webkit-credentials-auto-fill-button { 
+	visibility: hidden;
+	display: none !important;
+	pointer-events: none;
+	position: absolute;
+	right: 0;
+}
+
 @media (max-width:768px) {
-    #page-User .layout-main-section-wrapper .layout-main-section , #page-Company .layout-main-section-wrapper .layout-main-section {
+    #page-User .layout-main-section-wrapper .layout-main-section , 
+	#page-Company .layout-main-section-wrapper .layout-main-section ,
+	#page-Lead .layout-main-section-wrapper .layout-main-section ,
+	#page-Timesheet .layout-main-section-wrapper .layout-main-section 
+	{
         width: 100%;
 		margin-left: 0;
     }
+}
+
+
+@media (min-width: 768px) {
+	.layout-main .form-column.col-sm-12 > form > .input-max-width {
+		max-width: 100%;
+		padding-right: 0px;
+	}
 }
