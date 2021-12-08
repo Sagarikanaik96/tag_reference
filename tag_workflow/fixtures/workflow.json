@@ -4,7 +4,7 @@
   "doctype": "Workflow",
   "document_type": "Assign Employee",
   "is_active": 1,
-  "modified": "2021-11-29 17:13:43.998294",
+  "modified": "2021-12-08 04:54:48.014809",
   "name": "Employee assign",
   "override_status": 0,
   "parent": null,
@@ -22,7 +22,20 @@
     "parentfield": "states",
     "parenttype": "Workflow",
     "state": "Open",
-    "update_field": null,
+    "update_field": "tag_status",
+    "update_value": "Open"
+   },
+   {
+    "allow_edit": "Staffing User",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Employee assign",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Open",
+    "update_field": "tag_status",
     "update_value": "Open"
    },
    {
@@ -35,8 +48,34 @@
     "parentfield": "states",
     "parenttype": "Workflow",
     "state": "Approval Request",
-    "update_field": null,
+    "update_field": "tag_status",
     "update_value": "Approval Request"
+   },
+   {
+    "allow_edit": "Staffing User",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Employee assign",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Approval Request",
+    "update_field": "tag_status",
+    "update_value": "Approval Request"
+   },
+   {
+    "allow_edit": "Hiring User",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Employee assign",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Approved",
+    "update_field": "tag_status",
+    "update_value": "Approved"
    },
    {
     "allow_edit": "Hiring Admin",
@@ -48,7 +87,7 @@
     "parentfield": "states",
     "parenttype": "Workflow",
     "state": "Approved",
-    "update_field": null,
+    "update_field": "tag_status",
     "update_value": "Approved"
    }
   ],
@@ -63,6 +102,28 @@
     "parentfield": "transitions",
     "parenttype": "Workflow",
     "state": "Open"
+   },
+   {
+    "action": "Approval Request",
+    "allow_self_approval": 1,
+    "allowed": "Staffing User",
+    "condition": null,
+    "next_state": "Approval Request",
+    "parent": "Employee assign",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Open"
+   },
+   {
+    "action": "Approve",
+    "allow_self_approval": 1,
+    "allowed": "Hiring User",
+    "condition": null,
+    "next_state": "Approved",
+    "parent": "Employee assign",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Approval Request"
    },
    {
     "action": "Approve",
@@ -84,7 +145,7 @@
   "doctype": "Workflow",
   "document_type": "Timesheet",
   "is_active": 1,
-  "modified": "2021-11-12 16:59:28.191164",
+  "modified": "2021-12-08 05:07:26.801556",
   "name": "Timesheet",
   "override_status": 0,
   "parent": null,
@@ -106,7 +167,33 @@
     "update_value": "Open"
    },
    {
+    "allow_edit": "Hiring User",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Timesheet",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Open",
+    "update_field": null,
+    "update_value": "Open"
+   },
+   {
     "allow_edit": "Hiring Admin",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Timesheet",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Approval Request",
+    "update_field": null,
+    "update_value": "Approval Request"
+   },
+   {
+    "allow_edit": "Hiring User",
     "doc_status": "0",
     "is_optional_state": 0,
     "message": null,
@@ -132,7 +219,33 @@
     "update_value": "Approved"
    },
    {
+    "allow_edit": "Staffing User",
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Timesheet",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Approved",
+    "update_field": null,
+    "update_value": "Approved"
+   },
+   {
     "allow_edit": "Hiring Admin",
+    "doc_status": "2",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Timesheet",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Cancelled",
+    "update_field": null,
+    "update_value": "Cancelled"
+   },
+   {
+    "allow_edit": "Hiring User",
     "doc_status": "2",
     "is_optional_state": 0,
     "message": null,
@@ -158,6 +271,17 @@
     "state": "Open"
    },
    {
+    "action": "Approval Request",
+    "allow_self_approval": 1,
+    "allowed": "Hiring User",
+    "condition": null,
+    "next_state": "Approval Request",
+    "parent": "Timesheet",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Open"
+   },
+   {
     "action": "Approve",
     "allow_self_approval": 1,
     "allowed": "Staffing Admin",
@@ -169,9 +293,31 @@
     "state": "Approval Request"
    },
    {
+    "action": "Approve",
+    "allow_self_approval": 1,
+    "allowed": "Staffing User",
+    "condition": null,
+    "next_state": "Approved",
+    "parent": "Timesheet",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Approval Request"
+   },
+   {
     "action": "Cancel",
     "allow_self_approval": 1,
     "allowed": "Staffing Admin",
+    "condition": null,
+    "next_state": "Cancelled",
+    "parent": "Timesheet",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Approved"
+   },
+   {
+    "action": "Cancel",
+    "allow_self_approval": 1,
+    "allowed": "Staffing User",
     "condition": null,
     "next_state": "Cancelled",
     "parent": "Timesheet",

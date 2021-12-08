@@ -24,7 +24,6 @@ frappe.ui.form.on('Assign Employee', {
 /*-----------hiring notification--------------*/
 function make_hiring_notification(frm){
 	let state = cur_frm.doc.tag_status;
-	console.log(state);
 	if(state == "Approval Request"){
 		frappe.call({
 			"method":"tag_workflow.tag_data.receive_hiring_notification",
@@ -53,6 +52,12 @@ function check_employee_data(frm){
 	let msg = [];
 	let table = frm.doc.employee_details || [];
 	let employees = [];
+
+	for(var d in table){
+		if(table[i].job_category != frm.doc.job_category){
+			msg.push('Employee(<b>'+table[i]/employee+'</b>) job category not matched with Job Order job category');
+		}
+	}
 
 	(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 
