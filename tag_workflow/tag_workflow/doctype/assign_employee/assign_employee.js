@@ -54,8 +54,8 @@ function check_employee_data(frm){
 	let employees = [];
 
 	for(var d in table){
-		if(table[i].job_category != frm.doc.job_category){
-			msg.push('Employee(<b>'+table[i]/employee+'</b>) job category not matched with Job Order job category');
+		if(table[d].job_category != frm.doc.job_category){
+			msg.push('Employee(<b>'+table[d]/employee+'</b>) job category not matched with Job Order job category');
 		}
 	}
 
