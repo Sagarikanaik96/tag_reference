@@ -9,10 +9,12 @@ frappe.ui.form.on('Assign Employee', {
 	onload:function(frm){
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
 			return {
-				filters:[
-					['company', '=', frappe.defaults.get_user_default("company")],
-					['job_category', '=' , cur_frm.doc.job_category]
-				]
+				query: "tag_workflow.tag_data.filter_blocked_employee",
+				filters: {
+					company: doc.hiring_organization,
+					emp_company: frappe.defaults.get_user_default("company"),
+					job_category: doc.job_category,
+				  },
 			}
 		}
 	},

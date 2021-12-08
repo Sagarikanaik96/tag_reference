@@ -13,6 +13,7 @@
   "company",
   "naming_series",
   "column_break_4",
+  "category",
   "posting_date_time",
   "order_status",
   "company_type",
@@ -55,6 +56,9 @@
   "e_signature_full_name",
   "agree_to_contract",
   "age_reqiured",
+  "column_break_49",
+  "view_contract",
+  "contract_add_on",
   "apply_for_quotation_section",
   "assign_employees"
  ],
@@ -141,7 +145,7 @@
    "options": "Job Site"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "no_of_workers",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -205,6 +209,7 @@
    "options": "None\n$0.40/hour per person\n$10 flat per person"
   },
   {
+   "depends_on": "eval:doc.category=='Construction'",
    "fieldname": "shovel",
    "fieldtype": "Select",
    "label": "Shovel",
@@ -219,13 +224,15 @@
    "default": "0",
    "fieldname": "per_hour",
    "fieldtype": "Float",
-   "label": "Per Hour"
+   "label": "Per Hour",
+   "precision": "2"
   },
   {
    "fieldname": "column_break_29",
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "flat_rate",
    "fieldtype": "Float",
    "label": "Flat Rate"
@@ -345,11 +352,34 @@
   {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_49",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.agree_to_contract==1",
+   "fieldname": "view_contract",
+   "fieldtype": "Button",
+   "label": "View Contract",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "contract_add_on",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Contract Add On"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "label": "Category",
+   "options": "Industry Type"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-02 20:41:57.366352",
+ "modified": "2021-12-08 19:48:15.235229",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

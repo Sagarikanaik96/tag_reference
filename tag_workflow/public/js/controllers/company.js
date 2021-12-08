@@ -40,6 +40,51 @@ frappe.ui.form.on("Company", {
 			}
 		});
 	},
+	set_primary_contact_as_account_receivable_contact:function(frm){
+		if(cur_frm.doc.set_primary_contact_as_account_receivable_contact==1)
+		{
+			if((cur_frm.doc.contact_name) && (cur_frm.doc.phone_no) && (cur_frm.doc.email))
+			{
+				console.log("working")
+				cur_frm.set_value("accounts_receivable_name",cur_frm.doc.contact_name );
+				cur_frm.set_value("accounts_receivable_rep_email",cur_frm.doc.email);
+				cur_frm.set_value("accounts_receivable_phone_number", cur_frm.doc.phone_no);
+			}
+			else
+			{
+				msgprint("You Can't set Primary Contact unless your value are filled")
+				cur_frm.set_value("set_primary_contact_as_account_receivable_contact",0);
+			}
+		}
+		else
+		{
+			cur_frm.set_value("accounts_receivable_name",'' );
+			cur_frm.set_value("accounts_receivable_rep_email",'');
+			cur_frm.set_value("accounts_receivable_phone_number", '');
+		}
+	},
+	set_primary_contact_as_account_payable_contact:function(frm){
+		if(cur_frm.doc.set_primary_contact_as_account_payable_contact==1)
+		{
+			if((cur_frm.doc.contact_name) && (cur_frm.doc.phone_no) && (cur_frm.doc.email))
+			{
+				cur_frm.set_value("accounts_payable_contact_name",cur_frm.doc.contact_name );
+				cur_frm.set_value("accounts_payable_email",cur_frm.doc.email);
+				cur_frm.set_value("accounts_payable_phone_number", cur_frm.doc.phone_no);
+			}
+			else
+			{
+				msgprint("You Can't set Primary Contact unless your value are filled")
+				cur_frm.set_value("set_primary_contact_as_account_payable_contact",0);
+			}
+		}
+		else{
+			cur_frm.set_value("accounts_payable_contact_name",'' );
+			cur_frm.set_value("accounts_payable_email",'');
+			cur_frm.set_value("accounts_payable_phone_number", '');
+		}
+	},
+ 
 
 	after_save: function(frm){
 		frappe.call({"method": "tag_workflow.controllers.master_controller.make_update_comp_perm","args": {"docname": frm.doc.name}});
@@ -100,8 +145,8 @@ function validate_phone_and_zip(frm){
 	let phone = frm.doc.phone_no;
 	let zip = frm.doc.zip;
 	let is_valid = 1;
-	if(phone && phone.length<=10 && !isNaN(phone)){is_valid=0; frappe.msgprint({message: __('Phone No. is not valid'), title: __('Phone Number'), indicator: 'red'});}
-	if(zip && zip.length<=5 && !isNaN(zip)){is_valid = 0; frappe.msgprint({message: __('Enter valid zip'), title: __('ZIP'), indicator: 'red'});}
+	if(phone && phone.length!=10 && !isNaN(phone)){is_valid=0; frappe.msgprint({message: __('Phone No. is not valid'), title: __('Phone Number'), indicator: 'red'});}
+	if(zip && zip.length!=5 && !isNaN(zip)){is_valid = 0; frappe.msgprint({message: __('Enter valid zip'), title: __('ZIP'), indicator: 'red'});}
 	if(is_valid == 0){frappe.validated = false;}
 }
 
