@@ -1,6 +1,8 @@
 #!/bin/bash
 
 ls /home/erpuser
+cd /home/erpuser/frappe-bench/apps
+sudo rm -rf /home/erpuser/frappe-bench/apps/tag_workflow
 mkdir /home/erpuser/frappe-bench/apps/tag_workflow/
 mv /home/erpuser/tag-workflow/* /home/erpuser/frappe-bench/apps/tag_workflow/
 mv /home/erpuser/tag-workflow/.* /home/erpuser/frappe-bench/apps/tag_workflow/
