@@ -86,8 +86,6 @@ frappe.ui.form.on('Job Order', {
 				}
 			}
 		});
-		
-		
 	},
 	refresh:function(frm){
 		if(cur_frm.doc.__islocal==1){
@@ -96,7 +94,7 @@ frappe.ui.form.on('Job Order', {
 		else
 		{
 			timer_value(frm)	   
-	}
+		}
 	},
  
  
@@ -104,60 +102,33 @@ frappe.ui.form.on('Job Order', {
 		check_company_detail(frm);
 		var total_per_hour=cur_frm.doc.extra_price_increase+cur_frm.doc.per_hour
 		var total_flat_rate=cur_frm.doc.flat_rate
-		var shovel_view=cur_frm.get_docfield('shovel').hidden
-    	if(cur_frm.doc.category!="Construction"){
-        	if(cur_frm.doc.drug_screen=="$0.50/hour per person"){
-    			total_per_hour=total_per_hour+.50
-           	}
-           	else if(cur_frm.doc.drug_screen=="$15 flat per person")
-           	{
-            	total_flat_rate=total_flat_rate+15
-           	}
-           	if(cur_frm.doc.background_check=="$0.60/hour per person"){
-            	total_per_hour=total_per_hour+.60
-           	}
-           	else if(cur_frm.doc.background_check=="$20 flat per person")
-           	{
-            	total_flat_rate=total_flat_rate+20
-           	}      
-           	if(cur_frm.doc.driving_record=="$0.40/hour per person"){
-            	total_per_hour=total_per_hour+.40
-           	}
-           	else if(cur_frm.doc.driving_record=="$10 flat per person")
-           	{
-            	total_flat_rate=total_flat_rate+10
-           	}
-       	}
-       	else{
-        	if(cur_frm.doc.drug_screen=="$0.50/hour per person"){
-            	total_per_hour=total_per_hour+.50
-           	}
-           	else if(cur_frm.doc.drug_screen=="$15 flat per person")
-           	{
-            	total_flat_rate=total_flat_rate+15
-           	}
-           	if(cur_frm.doc.background_check=="$0.60/hour per person"){
-            	total_per_hour=total_per_hour+.60
-           	}
-           	else if(cur_frm.doc.background_check=="$20 flat per person")
-           	{
-            	total_flat_rate=total_flat_rate+20
-           	}      
-           	if(cur_frm.doc.driving_record=="$0.40/hour per person"){
-            	total_per_hour=total_per_hour+.40
-           	}
-           	else if(cur_frm.doc.driving_record=="$10 flat per person")
-           	{
-            	total_flat_rate=total_flat_rate+10
-           	}
-           	if(cur_frm.doc.shovel=="$0.15/hour per person"){
+		if(cur_frm.doc.drug_screen=="$0.50/hour per person"){
+			total_per_hour=total_per_hour+.50
+		}
+		else if(cur_frm.doc.drug_screen=="$15 flat per person"){
+			total_flat_rate=total_flat_rate+15
+		}
+		if(cur_frm.doc.background_check=="$0.60/hour per person"){
+			total_per_hour=total_per_hour+.60
+		}
+		else if(cur_frm.doc.background_check=="$20 flat per person"){
+			total_flat_rate=total_flat_rate+20
+		}      
+		if(cur_frm.doc.driving_record=="$0.40/hour per person"){
+			total_per_hour=total_per_hour+.40
+		}
+		else if(cur_frm.doc.driving_record=="$10 flat per person"){
+			total_flat_rate=total_flat_rate+10
+		}
+    	if(cur_frm.doc.category=="Construction"){
+			if(cur_frm.doc.shovel=="$0.15/hour per person"){
             	total_per_hour=total_per_hour+.15
            	}
            	else if(cur_frm.doc.shovel=="$5 flat per person")
            	{
             	total_flat_rate=total_flat_rate+5
-           	}
-		}
+           	}	
+       	}
 		cur_frm.set_value("flat_rate",total_flat_rate)
 		cur_frm.set_value("per_hour",total_per_hour)
 	},
