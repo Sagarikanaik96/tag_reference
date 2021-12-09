@@ -205,8 +205,26 @@ def api_sec(frm=None):
     
 
 @frappe.whitelist()
-def org_type(org_name=None):
-    x=frappe.get_doc('Company',org_name)
-    for i in range(len(x.industry_type)):
-        if x.industry_type[i].industry_type=="Construction":
-            return "success"
+def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters):
+    emp_company = filters.get('emp_company')
+    job_category = filters.get('job_category')
+
+    company = filters.get('company_detailscompany')
+    print(emp_company,job_category,company)
+    return frappe.db.sql("""select name from `tabEmployee` where company=%(emp_company)s and job_category=%(job_category)s and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'job_category':job_category,'company':company})
+    
+    
+@frappe.whitelist()
+def get_org_site(doctype, txt, searchfield, page_len, start, filters):
+    company=filters.get('job_order_company')   
+    return frappe.db.sql(''' select job_site from `tabCompany Site` where parent=%(company)s''',{'company':company})
+    
+@frappe.whitelist()
+def hiring_category(doctype,txt,searchfield,page_len,start,filters):
+    company=filters.get('hiring_company')
+    return frappe.db.sql(''' select industry_type from `tabIndustry Types` where parent=%(company)s''',{'company':company})
+
+
+@frappe.whitelist()
+def org_industy_type(company=None):
+    return frappe.db.sql(''' select industry_type from `tabIndustry Types` where parent='{}' '''.format(company))

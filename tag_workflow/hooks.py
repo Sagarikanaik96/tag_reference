@@ -13,7 +13,7 @@ app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.svg"
 # Includes in <head>
 # ------------------
 
-fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow"]
+fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow", "Workflow State", "Workflow Action Master"]
 
 on_session_creation = [
         "tag_workflow.utils.trigger_session.on_session_creation"
@@ -43,6 +43,11 @@ doctype_js = {
         "Sales Invoice": "public/js/controllers/sales_invoice.js",
         "Contact": "public/js/controllers/contact.js",
         "Lead": "public/js/controllers/lead.js"
+}
+
+# doctype list
+doctype_list_js = {
+        "User": "public/js/doctype_list/user_list.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]

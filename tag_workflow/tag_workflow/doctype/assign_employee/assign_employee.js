@@ -9,10 +9,12 @@ frappe.ui.form.on('Assign Employee', {
 	onload:function(frm){
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
 			return {
-				filters:[
-					['company', '=', frappe.defaults.get_user_default("company")],
-					['job_category', '=' , cur_frm.doc.job_category]
-				]
+				query: "tag_workflow.tag_data.filter_blocked_employee",
+				filters: {
+					company: doc.hiring_organization,
+					emp_company: frappe.defaults.get_user_default("company"),
+					job_category: doc.job_category,
+				  },
 			}
 		}
 	},
@@ -24,7 +26,6 @@ frappe.ui.form.on('Assign Employee', {
 /*-----------hiring notification--------------*/
 function make_hiring_notification(frm){
 	let state = cur_frm.doc.tag_status;
-	console.log(state);
 	if(state == "Approval Request"){
 		frappe.call({
 			"method":"tag_workflow.tag_data.receive_hiring_notification",
@@ -53,6 +54,12 @@ function check_employee_data(frm){
 	let msg = [];
 	let table = frm.doc.employee_details || [];
 	let employees = [];
+
+	for(var d in table){
+		if(table[d].job_category != frm.doc.job_category){
+			msg.push('Employee(<b>'+table[d]/employee+'</b>) job category not matched with Job Order job category');
+		}
+	}
 
 	(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 

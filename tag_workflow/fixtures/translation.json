@@ -29,7 +29,7 @@
   "parentfield": null,
   "parenttype": null,
   "source_text": "Item",
-  "translated_text": "Service Type"
+  "translated_text": "Job Title"
  },
  {
   "context": null,
@@ -45,7 +45,7 @@
   "parentfield": null,
   "parenttype": null,
   "source_text": "Item",
-  "translated_text": "Service Type"
+  "translated_text": "Job Title"
  },
  {
   "context": null,

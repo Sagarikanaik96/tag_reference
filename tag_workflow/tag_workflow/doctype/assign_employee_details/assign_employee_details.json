@@ -7,7 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
-  "employee_name"
+  "employee_name",
+  "job_category"
  ],
  "fields": [
   {
@@ -23,12 +24,18 @@
    "fieldtype": "Read Only",
    "in_list_view": 1,
    "label": "Employee Name"
+  },
+  {
+   "fetch_from": "employee.job_category",
+   "fieldname": "job_category",
+   "fieldtype": "Read Only",
+   "label": "Job Category"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-12-07 05:36:42.972673",
+ "modified": "2021-12-08 05:27:58.397023",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee Details",
