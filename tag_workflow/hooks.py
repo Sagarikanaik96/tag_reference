@@ -45,6 +45,11 @@ doctype_js = {
         "Lead": "public/js/controllers/lead.js"
 }
 
+# doctype list
+doctype_list_js = {
+        "User": "public/js/doctype_list/user_list.js"
+}
+
 after_migrate = ["tag_workflow.utils.organization.setup_data"]
 
 # Hook on document methods and events
