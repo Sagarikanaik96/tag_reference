@@ -17,7 +17,6 @@ frappe.ui.form.on('Job Order', {
 		if(cur_frm.doc.__islocal==1){
 			check_company_detail(frm);
 			frm.set_df_property("time_remaining_for_make_edits", "options"," ");
-
 			frappe.call({
 				method:"tag_workflow.tag_data.org_industy_type",
 				args: {
@@ -40,43 +39,41 @@ frappe.ui.form.on('Job Order', {
 				}
 				}
 			});
-
-			if(cur_frm.doc.company!='' && cur_frm.doc.company!='undefined'){
+			if(cur_frm.doc.company!='undefined'){
 				frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','shovel','mvr','contract_addendums'], function(r){
-				   
-					if(r.contract_addendums!="undefined"){
+					var flat_rate_person='Flat rate person'
+					var per_hour_person='Hour per person'
+				    if(r.contract_addendums!="undefined"){
 						cur_frm.set_value("contract_add_on",r.contract_addendums)
 					}
-					if(r.background_check=="Flat rate person"){
+					if(r.background_check==flat_rate_person){
 						cur_frm.set_value("background_check","$20 flat per person");
 					}
-					else if(r.background_check=='Hour per person'){
+					else if(r.background_check==per_hour_person){
 						cur_frm.set_value("background_check","$0.60/hour per person");
 					}
-					if(r.drug_screen=="Flat rate person"){
+					if(r.drug_screen==flat_rate_person){
 						cur_frm.set_value("drug_screen","$15 flat per person");
 					}
-					else if(r.drug_screen=='Hour per person'){
+					else if(r.drug_screen==per_hour_person){
 						cur_frm.set_value("drug_screen","$0.50/hour per person");
 					}
-					if(r.shovel=="Flat rate person"){
+					if(r.shovel==flat_rate_person){
 						cur_frm.set_value("shovel","$5 flat per person");
 					}
-					else if(r.shovel=='Hour per person'){
+					else if(r.shovel==per_hour_person){
 						cur_frm.set_value("shovel","$0.15/hour per person");
 					}
-					if(r.mvr=="Flat rate person"){
+					if(r.mvr==flat_rate_person){
 						cur_frm.set_value("driving_record","$10 flat per person");
 					}
-					else if(r.mvr=='Hour per person'){
+					else if(r.mvr==per_hour_person){
 						cur_frm.set_value("driving_record","$0.40/hour per person");
 					}
 				})
 			}
- 
 		}  
 	},
-
 	setup: function(frm){
 		frm.set_query('job_site', function(doc) {
 			return {
@@ -96,8 +93,6 @@ frappe.ui.form.on('Job Order', {
 			timer_value(frm)	   
 		}
 	},
- 
- 
 	before_save:function(frm){
 		check_company_detail(frm);
 		var total_per_hour=cur_frm.doc.extra_price_increase+cur_frm.doc.per_hour
@@ -132,7 +127,6 @@ frappe.ui.form.on('Job Order', {
 		cur_frm.set_value("flat_rate",total_flat_rate)
 		cur_frm.set_value("per_hour",total_per_hour)
 	},
-	
 	after_save:function(frm){
 		frappe.call({
 			method:"tag_workflow.tag_data.staff_email_notification",
@@ -175,7 +169,6 @@ frappe.ui.form.on('Job Order', {
 			contract.show();
 		}
 	}
- 
 });
 
 /*-------check company details---------*/
@@ -280,5 +273,5 @@ function time_value(frm){
 			<p><b>Time Remaining for Make Edits: </b> ${[data1]}</p>
 		`;
 	frm.set_df_property("time_remaining_for_make_edits", "options",data);
- }
+}
  
