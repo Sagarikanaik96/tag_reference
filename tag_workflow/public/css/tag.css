@@ -91,13 +91,10 @@ input:visited{
 	padding-left:15px ;
 }
 
-.layout-main-section .frappe-list .list-row-head  {
-	background: #F0F8FF;
-}
-
 .layout-main-section .frappe-list .list-row-head  span {
-	color: #454F63;
+	color: #8D9CBC;
 	font-weight: 500;
+	font-size:12px
 }
 
 .list-sidebar .sidebar-action a , 
@@ -112,7 +109,10 @@ input:visited{
 
 .layout-main-section .frappe-list .list-row {
 	padding: 25px 15px 25px 0px;
-	height: 60px;
+    /* height: 60px; */
+    background: #fff;
+    border-radius: 8px;
+    margin: 7px 0;
 }
 .form-section .section-head {
 	font-size: 18px;
@@ -157,6 +157,20 @@ input::-webkit-credentials-auto-fill-button {
 	position: absolute;
 	right: 0;
 }
+
+/* Table UI update  */
+.page-container {
+    background-color: #fafbfc;
+}
+.layout-main-section.frappe-card {
+	border-radius: 0;
+    box-shadow: none;
+    background-color: transparent;
+}
+.layout-main-section .frappe-list .list-row .ellipsis a {
+	font-weight: normal;
+}
+/* Table UI update  */
 
 @media (max-width:768px) {
     #page-User .layout-main-section-wrapper .layout-main-section , 

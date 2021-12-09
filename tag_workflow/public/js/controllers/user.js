@@ -110,7 +110,7 @@ function field_check(frm){
 
 function init_values(frm){
 	if(cur_frm.doc.__islocal == 1){
-		let clear_values = ["username", "email", "first_name", "last_name", "company", "gender", "birth_date", "date_of_joining", "tag_user_type", "location", "mobile_no"];
+		let clear_values = ["username", "email", "first_name", "last_name", "company", "gender", "birth_date", "tag_user_type", "location", "mobile_no"];
 		for(var val in clear_values){
 			cur_frm.set_value(clear_values[val], "");
 		}

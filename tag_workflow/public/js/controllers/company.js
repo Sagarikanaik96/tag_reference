@@ -108,7 +108,7 @@ function hide_details(frm){
 /*----------init values-----------*/
 function init_values(frm){
 	if(cur_frm.doc.__islocal == 1){
-		var company_data = {"default_currency": "USD", "country": "United States", "create_chart_of_accounts_based_on": "Standard Template", "chart_of_accounts": "Standard with Numbers"};
+		var company_data = {"default_currency": "USD", "country": "United States", "create_chart_of_accounts_based_on": "Standard Template", "chart_of_accounts": "Standard with Numbers", "parent_staffing": ""};
 		var keys = Object.keys(company_data);
 		for(var val in keys){
 			cur_frm.set_value(keys[val], company_data[keys[val]]);
@@ -135,7 +135,7 @@ function update_company_fields(frm){
 		if(is_local == 1){
 			cur_frm.toggle_display(company_fields[0], 1);
 		}else{
-			cur_frm.toggle_display(company_fields[0], 0);
+			cur_frm.toggle_enable(company_fields[0], 0);
 		}
 	}
 }
