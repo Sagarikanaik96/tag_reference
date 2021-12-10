@@ -134,6 +134,13 @@ input:visited{
 .form-section.card-section {
 	padding: 20px;
 }
+#page-User .user-bg ,
+#page-Lead .user-bg 
+{
+	background: url("/assets/tag_workflow/images/background.jpg");
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+}
 /* notification */
 .notifications-list .notification-item-tabs .notifications-category.active {
     font-size: 14px;
