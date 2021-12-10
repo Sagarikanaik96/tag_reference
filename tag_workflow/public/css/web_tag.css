@@ -26,7 +26,7 @@ input:visited {
 }
 .for-login .page-card-head h4 {
 	font-weight: bold !important;
-    font-size: 28px !important;
+    font-size: 32px !important;
 }
 input::-webkit-credentials-auto-fill-button { 
 	visibility: hidden;
@@ -34,4 +34,28 @@ input::-webkit-credentials-auto-fill-button {
 	pointer-events: none;
 	position: absolute;
 	right: 0;
+}
+ .login-image {
+	background: #E8F8FC;
+    height: calc(100vh - 80px);
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+.for-login, .for-forgot, .for-signup, .for-email-login {
+    padding: 0 !important;
+}
+.for-login .page-card, .for-forgot .page-card, .for-signup .page-card, .for-email-login .page-card {
+ max-width: inherit !important;
+    border-radius: 0!important;
+    box-shadow: none!important;
+    height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+	padding:0 !important;
+}
+.for-login .page-card form, .for-forgot .page-card form, .for-signup .page-card form, .for-email-login .page-card form {
+    max-width: none;
+    min-width: 342px;
 }
