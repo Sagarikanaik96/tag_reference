@@ -84,7 +84,6 @@ input:visited{
 	min-height: 1px;
 	border-radius: var(--border-radius-md);
 	box-shadow: var(--card-shadow);
-	/*background-color: var(--card-bg);*/
 }
 
 .desk-sidebar .standard-sidebar-section .standard-sidebar-label {
@@ -170,6 +169,7 @@ input::-webkit-credentials-auto-fill-button {
 .layout-main-section .frappe-list .list-row .ellipsis a {
 	font-weight: normal;
 }
+
 /* Table UI update  */
 
 @media (max-width:768px) {
