@@ -4,26 +4,24 @@
 			<div id="listview" title="User Info">
 				<input id="myInput" type="text" placeholder="Search..">
 
-							<table class="sortable" style="background-color: #f9f9f9;font-size: 18px;">
+							<table id="sorting" style="background-color: #f9f9f9;font-size: 18px;">
 								<thead>
 									<tr class="filters">
-									<th>Sr No.</th>
-									<th style="width: 200px;">Company Name</th>
-									<th>Address</th>
-									<th>City</th>
-									<th>State</th>
-									<th>Zip Code</th>
-									<th>Average Rating</th>
-
+									<th onclick="sorted(0)">Sr No.</th>
+									<th style="width: 200px;" onclick="sorted(1)">Company Name</th>
+									<th onclick="sorted(2)">Address</th>
+									<th onclick="sorted(3)">City</th>
+									<th onclick="sorted(4)">State</th>
+									<th onclick="sorted(5)">Zip Code</th>
+									<th onclick="sorted(6)">Average Rating</th>
 									</tr>
 								</thead>
 								<tbody id="myTable">
-
 								</tbody>
+								</table>
 			</div>
 	</div>
 </div>
-
 
 <script>
 	$(document).ready(function(){
