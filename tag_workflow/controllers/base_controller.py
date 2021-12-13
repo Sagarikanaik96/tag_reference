@@ -25,6 +25,7 @@ def validate_controller(doc, method):
                 CRMController(doc, doctype, method).validate_crm()
     except Exception as e:
         frappe.throw("")
+        print(e)
         print("----"*10)
         print(frappe.get_traceback())
         print("----"*10)

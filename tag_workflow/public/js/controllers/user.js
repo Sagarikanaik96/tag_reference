@@ -203,7 +203,7 @@ function multi_company_setup(frm){
 }
 
 function make_multicompany(frm){
-	let data = get_data(frm);
+	let org_data = get_data(frm);
 	let table_fields = [
 		{
 			fieldname: "company", fieldtype: "Link", in_list_view: 1, label: "Organisation", options: "Company", reqd: 1,
@@ -219,14 +219,14 @@ function make_multicompany(frm){
 		title: 'Multi-Organisarion Setup',
 		fields: [
 			{label: "Current User", fieldname: "user", fieldtype: "Link", options: "User", default: cur_frm.doc.name, read_only: 1},
-			{fieldname: "company", fieldtype: "Table", label: "", cannot_add_rows: false, in_place_edit: true, reqd: 1, data: data,fields: table_fields},
+			{fieldname:"company", fieldtype:"Table", label:"", cannot_add_rows:false, in_place_edit:true, reqd:1, data:org_data, fields:table_fields},
 			{label: 'Assigned Organisation', fieldname: 'assigned',	fieldtype: 'HTML'}
 		],
 		primary_action_label: 'Submit',
 		primary_action(values) {
 			let data = values.company || [];
 			let company = [];
-			for(var d in data){(data[d].company) ? company.push(data[d].company) : console.log(".")};
+			for(var d in data){(data[d].company) ? company.push(data[d].company) : console.log(".")}
 
 			if(company.length > 0){
 				frappe.call({
