@@ -6,7 +6,6 @@ frappe.pages['staff_company_list'].on_page_load = function(wrapper) {
 	});
 	wrapper.face_recognition = new frappe.FaceRecognition(wrapper, page);
 }
-
 frappe.FaceRecognition = Class.extend({
 		init: function(wrapper, page) {
 			var me = this;
@@ -16,7 +15,6 @@ frappe.FaceRecognition = Class.extend({
 				me.setup(wrapper, page);
 			}, 0);
 		},
-	
 		setup: function(wrapper, page){
 			var me = this;
 			this.body = $('<div></div>').appendTo(this.page.main);
@@ -24,7 +22,6 @@ frappe.FaceRecognition = Class.extend({
 			me.show_profile(wrapper,page);
 		},
 		show_profile: function(wrapper, page){
-			var me = this;
 			frappe.call({
 				method:"tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.comp",
 				
@@ -32,26 +29,17 @@ frappe.FaceRecognition = Class.extend({
 				{
 					var comp_data=r.message
 					const profile_html = `
-					
-	
 									${comp_data.map((l,p) => `<tr>
 										<td>${p+1}</td>
 										<td><a href='${l.name}'>${l.name}</a></td>
-
 										<td>${l.address}</td>
-
 										<td>${l.city}</td>
 										<td>${l.state}</td>
 										<td>${l.zip}</td>	
 										<td>${l.average_rating}</td>				
-				
-					
-									</tr>`).join('')}
-							`
+									</tr>`).join('')}`
 					$("#myTable").html(profile_html);
-
 				}
-
 				})
 		},
 	})
