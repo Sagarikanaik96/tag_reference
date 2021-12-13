@@ -95,37 +95,48 @@ frappe.ui.form.on('Job Order', {
 	},
 	before_save:function(frm){
 		check_company_detail(frm);
-		var total_per_hour=cur_frm.doc.extra_price_increase+cur_frm.doc.per_hour
-		var total_flat_rate=cur_frm.doc.flat_rate
-		if(cur_frm.doc.drug_screen=="$0.50/hour per person"){
-			total_per_hour=total_per_hour+.50
+		if(cur_frm.doc.__islocal==1){
+			var total_per_hour=cur_frm.doc.extra_price_increase+cur_frm.doc.per_hour
+			var total_flat_rate=cur_frm.doc.flat_rate
+			if(cur_frm.doc.drug_screen=="$0.50/hour per person"){
+				total_per_hour=total_per_hour+.50
+			}
+			else if(cur_frm.doc.drug_screen=="$15 flat per person"){
+				total_flat_rate=total_flat_rate+15
+			}
+			if(cur_frm.doc.background_check=="$0.60/hour per person"){
+				total_per_hour=total_per_hour+.60
+			}
+			else if(cur_frm.doc.background_check=="$20 flat per person"){
+				total_flat_rate=total_flat_rate+20
+			}      
+			if(cur_frm.doc.driving_record=="$0.40/hour per person"){
+				total_per_hour=total_per_hour+.40
+			}
+			else if(cur_frm.doc.driving_record=="$10 flat per person"){
+				total_flat_rate=total_flat_rate+10
+			}
+			if(cur_frm.doc.category=="Construction"){
+				if(cur_frm.doc.shovel=="$0.15/hour per person"){
+					total_per_hour=total_per_hour+.15
+				}
+				else if(cur_frm.doc.shovel=="$5 flat per person")
+				{
+					total_flat_rate=total_flat_rate+5
+				}	
+			}
+			cur_frm.set_value("flat_rate",total_flat_rate)
+			cur_frm.set_value("per_hour",total_per_hour)
 		}
-		else if(cur_frm.doc.drug_screen=="$15 flat per person"){
-			total_flat_rate=total_flat_rate+15
+		if(cur_frm.doc.posting_date_time>frappe.datetime.now_datetime()){
+			cur_frm.set_value("order_status","Upcoming")
 		}
-		if(cur_frm.doc.background_check=="$0.60/hour per person"){
-			total_per_hour=total_per_hour+.60
+		else if(cur_frm.doc.posting_date_time<frappe.datetime.now_datetime()){
+			cur_frm.set_value("order_status","Ongoing")
 		}
-		else if(cur_frm.doc.background_check=="$20 flat per person"){
-			total_flat_rate=total_flat_rate+20
-		}      
-		if(cur_frm.doc.driving_record=="$0.40/hour per person"){
-			total_per_hour=total_per_hour+.40
+		else{
+			cur_frm.set_value("order_status","Completed")
 		}
-		else if(cur_frm.doc.driving_record=="$10 flat per person"){
-			total_flat_rate=total_flat_rate+10
-		}
-    	if(cur_frm.doc.category=="Construction"){
-			if(cur_frm.doc.shovel=="$0.15/hour per person"){
-            	total_per_hour=total_per_hour+.15
-           	}
-           	else if(cur_frm.doc.shovel=="$5 flat per person")
-           	{
-            	total_flat_rate=total_flat_rate+5
-           	}	
-       	}
-		cur_frm.set_value("flat_rate",total_flat_rate)
-		cur_frm.set_value("per_hour",total_per_hour)
 	},
 	after_save:function(frm){
 		frappe.call({
@@ -238,7 +249,7 @@ function timer_value(frm){
 	var time=frappe.datetime.get_hour_diff(cur_frm.doc.posting_date_time,frappe.datetime.now_datetime())
 	if(time<24)
 		{
-			var myStringArray = ["company","posting_date_time","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
+			var myStringArray = ["company","posting_date_time","category","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
 			var arrayLength = myStringArray.length;
 			for (var i = 0; i < arrayLength; i++) {
 				frm.set_df_property(myStringArray[i], "read_only", 1);
