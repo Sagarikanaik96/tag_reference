@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+import re
 from frappe.utils import (cint, flt, has_gravatar, escape_html, format_datetime, now_datetime, get_formatted_email, today)
 
 
@@ -73,3 +74,41 @@ def raise_no_permission_to(self, perm_type):
     if(self.doctype not in ["Company", "Assign Employee"]):
         frappe.flags.error_message = _('Insufficient Permission for {0}, {1}').format(self.doctype, self.owner)
         raise frappe.PermissionError
+
+#validate_duplicate_user_id
+def validate_duplicate_user_id(self):
+    employee = frappe.db.sql_list("""select name from `tabEmployee` where user_id=%s and status='Active' and name!=%s""", (self.user_id, self.name))
+    print(employee)
+
+
+# abbr validation
+def append_number_if_name_exists(doctype, value, fieldname="abbr", separator="-", filters=None):
+    if not filters:
+        filters = dict()
+    filters.update({fieldname: value})
+    exists = frappe.db.exists(doctype, filters)
+    regex = "^{value}{separator}\\d+$".format(value=re.escape(value), separator=separator)
+    
+    if(exists):
+        last = frappe.db.sql("""SELECT `{fieldname}` FROM `tab{doctype}` WHERE `{fieldname}` {regex_character} %s ORDER BY length({fieldname}) DESC, `{fieldname}` DESC LIMIT 1""".format(doctype=doctype, fieldname=fieldname, regex_character=frappe.db.REGEX_CHARACTER), regex)
+
+        if last:
+            count = str(cint(last[0][0].rsplit(separator, 1)[1]) + 1)
+        else:
+            count = "1"
+
+        value = "{0}{1}{2}".format(value, separator, count)
+    return value
+
+
+def validate_abbr(self):
+    if not self.abbr:
+        self.abbr = ''.join(c[0] for c in self.company_name.split()).upper()
+
+    self.abbr = self.abbr.strip()
+
+    if not self.abbr.strip():
+        frappe.throw(_("Abbreviation is mandatory"))
+
+    if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
+        self.abbr = append_number_if_name_exists("Company", self.abbr, fieldname="abbr", separator="-", filters=None)

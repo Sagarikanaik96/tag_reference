@@ -17,15 +17,18 @@ def validate_controller(doc, method):
             from tag_workflow.controllers.master_controller import MasterController 
             if method == "validate":
                 MasterController(doc, doctype, method).validate_master()
+            elif method == "on_trash":
+                MasterController(doc, doctype, method).validate_trash()
         elif doctype in CRM:
             from tag_workflow.controllers.crm_controller import CRMController
             if method == "validate":
                 CRMController(doc, doctype, method).validate_crm()
     except Exception as e:
-        frappe.throw(e)
+        frappe.throw("")
         print("----"*10)
         print(frappe.get_traceback())
         print("----"*10)
+        frappe.db.rollback()
 
 
 '''

@@ -56,6 +56,9 @@ after_migrate = ["tag_workflow.utils.organization.setup_data"]
 doc_events = {
         "*":{
             "validate": "tag_workflow.controllers.base_controller.validate_controller"
+        },
+        "Company": {
+            "on_trash": "tag_workflow.controllers.base_controller.validate_controller"
         }
 }
 
