@@ -62,6 +62,40 @@ function job_order_details(frm){
 function check_update_timesheet(frm){
 	if(frm.doc.workflow_state == "Approval Request"){
 		frappe.call({method: "tag_workflow.utils.timesheet.send_timesheet_for_approval",args: {"employee": frm.doc.employee, "docname": frm.doc.name}});
+		if((frappe.user_roles.includes('Hiring Admin') || frappe.user_roles.includes('Hiring User')) && frappe.session.user!='Administrator'){
+			frappe.db.get_value("Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
+				if(r.rating){
+				}
+				else{
+					var pop_up = new frappe.ui.Dialog({
+						'fields': [
+							{'fieldname': 'Rating', 'fieldtype': 'Rating','label':'Rating'},
+							{'fieldname': 'Comment', 'fieldtype': 'Data','label':'Review'}
+						],
+						primary_action: function(){
+							pop_up.hide();
+							var comp_rating=pop_up.get_values()
+							frappe.call({
+								method:"tag_workflow.utils.timesheet.company_rating",
+								args:{
+									'hiring_company':cur_frm.doc.company,
+									'staffing_company':cur_frm.doc.employee_company,
+									'ratings':comp_rating,
+									'job_order':cur_frm.doc.job_order_detail
+								},
+								callback:function(r){
+									if(r.message=='success'){
+										frappe.msgprint('Review Submitted Successfully')
+									}
+								}
+							})
+						}
+					});
+					pop_up.show();	
+				}
+			})
+			
+		}
 	}
 }
 

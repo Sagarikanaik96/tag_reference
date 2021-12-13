@@ -1,0 +1,39 @@
+
+<div class="container-fluid form-section card-section visible-section" style="width: 100%; animation: animatop 1.7s cubic-bezier(0.425, 1.14, 0.47, 1.125) forwards;">
+	<div class="row">
+			<div id="listview" title="User Info">
+				<input id="myInput" type="text" placeholder="Search..">
+
+							<table class="sortable" style="background-color: #f9f9f9;font-size: 18px;">
+								<thead>
+									<tr class="filters">
+									<th>Sr No.</th>
+									<th style="width: 200px;">Company Name</th>
+									<th>Address</th>
+									<th>City</th>
+									<th>State</th>
+									<th>Zip Code</th>
+									<th>Average Rating</th>
+
+									</tr>
+								</thead>
+								<tbody id="myTable">
+
+								</tbody>
+			</div>
+	</div>
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+	$(document).ready(function(){
+	  $("#myInput").on("keyup", function() {
+		var value = $(this).val().toLowerCase();
+		$("#myTable tr").filter(function() {
+		  $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+		});
+	  });
+	});
+</script>
+<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
