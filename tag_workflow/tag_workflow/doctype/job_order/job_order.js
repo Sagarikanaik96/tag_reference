@@ -98,44 +98,39 @@ frappe.ui.form.on('Job Order', {
 		if(cur_frm.doc.__islocal==1){
 			var total_per_hour=cur_frm.doc.extra_price_increase+cur_frm.doc.per_hour
 			var total_flat_rate=cur_frm.doc.flat_rate
-			if(cur_frm.doc.drug_screen=="$0.50/hour per person"){
+			var drug_screen=cur_frm.doc.drug_screen
+			var background_check=cur_frm.doc.background_check
+			var driving_record=cur_frm.doc.driving_record
+			var shovel=cur_frm.doc.shovel
+			if(drug_screen=="$0.50/hour per person"){
 				total_per_hour=total_per_hour+.50
 			}
-			else if(cur_frm.doc.drug_screen=="$15 flat per person"){
+			else if(drug_screen=="$15 flat per person"){
 				total_flat_rate=total_flat_rate+15
 			}
-			if(cur_frm.doc.background_check=="$0.60/hour per person"){
+			if(background_check=="$0.60/hour per person"){
 				total_per_hour=total_per_hour+.60
 			}
-			else if(cur_frm.doc.background_check=="$20 flat per person"){
+			else if(background_check=="$20 flat per person"){
 				total_flat_rate=total_flat_rate+20
 			}      
-			if(cur_frm.doc.driving_record=="$0.40/hour per person"){
+			if(driving_record=="$0.40/hour per person"){
 				total_per_hour=total_per_hour+.40
 			}
-			else if(cur_frm.doc.driving_record=="$10 flat per person"){
+			else if(driving_record=="$10 flat per person"){
 				total_flat_rate=total_flat_rate+10
 			}
 			if(cur_frm.doc.category=="Construction"){
-				if(cur_frm.doc.shovel=="$0.15/hour per person"){
+				if(shovel=="$0.15/hour per person"){
 					total_per_hour=total_per_hour+.15
 				}
-				else if(cur_frm.doc.shovel=="$5 flat per person")
+				else if(shovel=="$5 flat per person")
 				{
 					total_flat_rate=total_flat_rate+5
 				}	
 			}
 			cur_frm.set_value("flat_rate",total_flat_rate)
 			cur_frm.set_value("per_hour",total_per_hour)
-		}
-		if(cur_frm.doc.posting_date_time>frappe.datetime.now_datetime()){
-			cur_frm.set_value("order_status","Upcoming")
-		}
-		else if(cur_frm.doc.posting_date_time<frappe.datetime.now_datetime()){
-			cur_frm.set_value("order_status","Ongoing")
-		}
-		else{
-			cur_frm.set_value("order_status","Completed")
 		}
 	},
 	after_save:function(frm){
