@@ -14,13 +14,13 @@ frappe.ui.form.on("Company", {
 			if(frappe.user_roles.includes('Tag Admin')){
 				return {
 					filters: [
-						[ORG, "name", "!=", "TAG"]
+						[ORG, "name", "not in", ["TAG", "Exclusive Hiring"]]
 					]
 				}
 			}else if(frappe.user_roles.includes('Staffing Admin')){
 				return {
 					filters: [
-						[ORG, "name", "=", "Exclusive Hiring"]
+						[ORG, "name", "=", "Staffing"]
 					]
 				}
 			}else if(frappe.user_roles.includes('Hiring Admin')){

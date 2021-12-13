@@ -3,6 +3,7 @@
 	Email sahil19893@Gmail.com
 '''
 
+import json
 import frappe
 from frappe.share import add
 from frappe import _, msgprint, throw
@@ -16,6 +17,7 @@ PERMISSION = "User Permission"
 EMP = "Employee"
 COM = "Company"
 JOB = "Job Order"
+USR = "User"
 
 class MasterController(base_controller.BaseController):
     def validate_master(self):
@@ -47,6 +49,10 @@ class MasterController(base_controller.BaseController):
         if not frappe.db.exists("Activity Type", {"name": self.doc.name}):
             item = frappe.get_doc(dict(doctype = "Activity Type", activity_type = self.doc.name))
             item.save(ignore_permissions=True)
+
+    def validate_trash(self):
+        if(self.dt == "Company"):
+            frappe.throw(_("User is not allowed to delete the organisation: <b>{0}</b>").format(self.doc.name))
 
 
 #-----------data update--------------#
@@ -146,27 +152,39 @@ def remove_tag_permission(user, emp, company):
 
 @frappe.whitelist()
 def check_employee(name, first_name, company, last_name=None, gender=None, date_of_birth=None, date_of_joining=None, organization_type=None):
-    users = [{"name": name, "company": company}]
-    if not frappe.db.exists(EMP, {"user_id": name}):
-        emp = frappe.get_doc(dict(doctype=EMP, first_name=first_name, last_name=last_name, company=company, status="Active", gender=gender, date_of_birth=date_of_birth, date_of_joining=date_of_joining, user_id=name, create_user_permission=1, email=name))
-        emp.save(ignore_permissions=True)
-    else:
-        emp = frappe.get_doc(EMP, {"user_id": name})
+    try:
+        users = [{"name": name, "company": company}]
+        if not frappe.db.exists(EMP, {"user_id": name, "company": company}):
+            emp = frappe.get_doc(dict(doctype=EMP, first_name=first_name, last_name=last_name, company=company, status="Active", gender=gender, date_of_birth=date_of_birth, date_of_joining=date_of_joining, user_id=name, create_user_permission=1, email=name))
+            emp.save(ignore_permissions=True)
+        else:
+            emp = frappe.get_doc(EMP, {"user_id": name, "company": company})
 
-        if company != emp.company:
-            frappe.db.sql(""" delete from `tabUser Permission` where user = %s and company = %s """, name, emp.company)
-        emp.first_name=first_name
-        emp.last_name=last_name
-        emp.company=company
-        emp.gender=gender
-        emp.date_of_birth=date_of_birth
-        emp.date_of_joining=date_of_joining
-        emp.create_user_permission=1
-        emp.save(ignore_permissions=True)
+            if company != emp.company:
+                frappe.db.sql(""" delete from `tabUser Permission` where user = %s and company = %s """, name, emp.company)
 
-    if(organization_type != "TAG"):
-        make_employee_permission(name, emp.name, company)
-        enqueue("tag_workflow.controllers.master_controller.user_exclusive_perm", user=name, company=company, organization_type=None)
-        enqueue("tag_workflow.utils.trigger_session.share_company_with_user", users=users)
-    elif(organization_type == "TAG"):
-        remove_tag_permission(name, emp.name, company)
+            emp.first_name=first_name
+            emp.last_name=last_name
+            emp.company=company
+            emp.gender=gender
+            emp.date_of_birth=date_of_birth
+            emp.date_of_joining=date_of_joining
+            emp.create_user_permission=1
+            emp.save(ignore_permissions=True)
+
+        if(organization_type != "TAG"):
+            make_employee_permission(name, emp.name, company)
+            enqueue("tag_workflow.controllers.master_controller.user_exclusive_perm", user=name, company=company, organization_type=None)
+            enqueue("tag_workflow.utils.trigger_session.share_company_with_user", users=users)
+        elif(organization_type == "TAG"):
+            remove_tag_permission(name, emp.name, company)
+    except Exception as e:
+        frappe.msgprint(e)
+        frappe.db.rollback()
+
+@frappe.whitelist()
+def multi_company_setup(user, company):
+    user = frappe.get_doc(USR, user)
+    company = company.split(",")
+    for com in company:
+        check_employee(user.name, user.first_name, com, user.last_name, user.gender, user.birth_date, user.date_of_joining, user.organization_type)
