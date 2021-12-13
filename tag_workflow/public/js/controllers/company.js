@@ -98,7 +98,7 @@ frappe.ui.form.on("Company", {
 
 /*---------hide details----------*/
 function hide_details(frm){
-	let fields = ["default_letter_head","default_holiday_list","default_finance_book","default_selling_terms","default_buying_terms","default_warehouse_for_sales_return","default_in_transit_warehouse","create_chart_of_accounts_based_on","chart_of_accounts","existing_company","tax_id","date_of_establishment","sales_settings","default_settings","section_break_22","auto_accounting_for_stock_settings","fixed_asset_defaults","non_profit_section","hra_section","budget_detail","company_logo","date_of_incorporation","address_html","date_of_commencement","fax","website","company_description","registration_info", "domain", "parent_company", "is_group"];
+	let fields = ["charts_section","sales_settings","default_settings","section_break_22","auto_accounting_for_stock_settings","fixed_asset_defaults","non_profit_section","hra_section","budget_detail","company_logo","date_of_incorporation","address_html","date_of_commencement","fax","website","company_description","registration_info", "domain", "parent_company", "is_group","industry"];
 	for(let data in fields){
 		cur_frm.toggle_display(fields[data], 0);
 	}
