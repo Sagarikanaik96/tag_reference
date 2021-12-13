@@ -25,6 +25,7 @@ app_include_css = [
 
 app_include_js = [
         "/assets/tag_workflow/js/tag.js",
+        "/assets/tag_workflow/js/controllers/sortable.js"
 ]
 
 web_include_css = [

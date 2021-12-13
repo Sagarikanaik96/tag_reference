@@ -64,9 +64,7 @@ function check_update_timesheet(frm){
 		frappe.call({method: "tag_workflow.utils.timesheet.send_timesheet_for_approval",args: {"employee": frm.doc.employee, "docname": frm.doc.name}});
 		if((frappe.user_roles.includes('Hiring Admin') || frappe.user_roles.includes('Hiring User')) && frappe.session.user!='Administrator'){
 			frappe.db.get_value("Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
-				if(r.rating){
-				}
-				else{
+				if(!r.rating){
 					var pop_up = new frappe.ui.Dialog({
 						'fields': [
 							{'fieldname': 'Rating', 'fieldtype': 'Rating','label':'Rating'},
@@ -83,16 +81,17 @@ function check_update_timesheet(frm){
 									'ratings':comp_rating,
 									'job_order':cur_frm.doc.job_order_detail
 								},
-								callback:function(r){
-									if(r.message=='success'){
+								callback:function(rm){
+									if(rm.message=='success'){
 										frappe.msgprint('Review Submitted Successfully')
 									}
 								}
 							})
 						}
 					});
-					pop_up.show();	
+					pop_up.show();
 				}
+				
 			})
 			
 		}
