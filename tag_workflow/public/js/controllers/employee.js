@@ -52,7 +52,11 @@ function render_orgs(child, frm){
 				let data = r.message;
 				let options = "";
 				for(var d in data){
-					(child.blocked_from == data[d].name) ? options += '<option value="'+data[d].name+'" selected>'+data[d].name+'</option>' : options += '<option value="'+data[d].name+'">'+data[d].name+'</option>';
+					if(child.blocked_from == data[d].name){
+						options += '<option value="'+data[d].name+'" selected>'+data[d].name+'</option>';
+					}else{
+						options += '<option value="'+data[d].name+'">'+data[d].name+'</option>';
+					}
 				}
 
 				const html = '<label for="option" class="option-format">Blocked From</label><select class="custom-select" required onchange="myFunction()" selected="myFunction()" onload="myFunction()" id="'+child.idx+'">'+options+'</select></div><script>function myFunction(){frappe.model.set_value("Blocked Employees", "'+child.name+'", "blocked_from", (document.getElementById("'+child.idx+'").length > 0 ? document.getElementById("'+child.idx+'").value : ""))}</script>';
