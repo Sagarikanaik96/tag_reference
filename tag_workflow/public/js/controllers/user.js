@@ -6,6 +6,8 @@ frappe.ui.form.on("User", {
 		field_toggle(frm);
 		field_reqd(frm);
 		field_check(frm);
+		cur_frm.dashboard.hide()
+
 	},
 	setup: function(frm){
 		let roles = frappe.user_roles;
