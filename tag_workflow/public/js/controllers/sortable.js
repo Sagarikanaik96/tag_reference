@@ -16,7 +16,7 @@ function sorted(n){
           shouldSwitch = true;
           break;
         }
-      } else if (dir == "desc") {
+      } else{
         if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
           shouldSwitch = true;
           break;
