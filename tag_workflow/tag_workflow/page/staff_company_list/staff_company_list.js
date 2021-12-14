@@ -18,7 +18,7 @@ frappe.FaceRecognition = Class.extend({
 		setup: function(wrapper, page){
 			var me = this;
 			this.body = $('<div></div>').appendTo(this.page.main);
-			var $container = $(frappe.render_template('staff_company_list', "")).appendTo(this.body);
+			$(frappe.render_template('staff_company_list', "")).appendTo(this.body);
 			me.show_profile(wrapper,page);
 		},
 		show_profile: function(wrapper, page){

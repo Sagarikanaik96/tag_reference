@@ -67,7 +67,7 @@ function check_update_timesheet(frm){
 				if(!r.rating){
 					var pop_up = new frappe.ui.Dialog({
 						'fields': [
-							{'fieldname': 'Rating', 'fieldtype': 'Rating','label':'Rating'},
+							{'fieldname': 'Rating', 'fieldtype': 'Rating','label':'Rating','reqd':1},
 							{'fieldname': 'Comment', 'fieldtype': 'Data','label':'Review'}
 						],
 						primary_action: function(){
@@ -82,9 +82,8 @@ function check_update_timesheet(frm){
 									'job_order':cur_frm.doc.job_order_detail
 								},
 								callback:function(rm){
-									if(rm.message=='success'){
 										frappe.msgprint('Review Submitted Successfully')
-									}
+									
 								}
 							})
 						}

@@ -49,30 +49,28 @@ def notify_email(job_order, employee, value, subject, company, employee_name, da
 @frappe.whitelist()
 def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_order=None):
     ratings = json.loads(ratings)
-    if 'Rating' in ratings.keys():
-        doc = frappe.new_doc('Company Review')
-        doc.staffing_company=staffing_company
-        doc.hiring_company=hiring_company
-        doc.job_order=job_order
-        doc.rating=ratings['Rating']
-        if 'Comment' in ratings.keys():
-            doc.comments=ratings['Comment']
-        doc.save(ignore_permissions=True)
-        staff_member=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(staffing_company),as_list=1)
-        for staff in staff_member:
-            add("Company Review", doc.name, staff[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
-        company_rate=frappe.db.sql(''' select average_rating from `tabCompany` where name='{}' '''.format(staffing_company),as_list=1)
-        if (company_rate[0][0]==None):
+    doc = frappe.new_doc('Company Review')
+    doc.staffing_company=staffing_company
+    doc.hiring_company=hiring_company
+    doc.job_order=job_order
+    doc.rating=ratings['Rating']
+    if 'Comment' in ratings.keys():
+        doc.comments=ratings['Comment']
+    doc.save(ignore_permissions=True)
+    staff_member=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(staffing_company),as_list=1)
+    for staff in staff_member:
+        add("Company Review", doc.name, staff[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
+    company_rate=frappe.db.sql(''' select average_rating from `tabCompany` where name='{}' '''.format(staffing_company),as_list=1)
+    if (company_rate[0][0]==None):
+        doc=frappe.get_doc('Company',staffing_company)
+        doc.average_rating=ratings['Rating']
+        doc.save()
+    else:
+        average_rate=frappe.db.sql(''' select rating from `tabCompany Review` where staffing_company='{}' '''.format(staffing_company),as_list=1)
+        if average_rate[0][0]!=None:
+            rating=[float(i) for i in average_rate[0]]
             doc=frappe.get_doc('Company',staffing_company)
-            doc.average_rating=ratings['Rating']
+            avg_rating=sum(rating)/len(rating)
+            doc.average_rating=str(avg_rating)
             doc.save()
-        else:
-            average_rate=frappe.db.sql(''' select rating from `tabCompany Review` where staffing_company='{}' '''.format(staffing_company),as_list=1)
-            if average_rate[0][0]!=None:
-                rating=[float(i) for i in average_rate[0]]
-                doc=frappe.get_doc('Company',staffing_company)
-                avg_rating=sum(rating)/len(rating)
-                doc.average_rating=str(avg_rating)
-                doc.save()
-
-        return "success"
+    return "success"
