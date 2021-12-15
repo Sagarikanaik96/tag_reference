@@ -6,21 +6,27 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "html",
   "blocked_from"
  ],
  "fields": [
   {
    "fieldname": "blocked_from",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Blocked From",
-   "options": "Company"
+   "read_only": 1
+  },
+  {
+   "fieldname": "html",
+   "fieldtype": "HTML",
+   "label": "Blocked From"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-12-07 11:56:28.589743",
+ "modified": "2021-12-14 04:43:24.319516",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Blocked Employees",
