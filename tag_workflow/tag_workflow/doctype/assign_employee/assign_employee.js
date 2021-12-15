@@ -20,6 +20,13 @@ frappe.ui.form.on('Assign Employee', {
 	},
 	before_save:function(frm){
 		check_employee_data(frm);
+	},
+	before_load:function(frm){
+		if (!frm.doc.resume_required){
+		var table=frappe.meta.get_docfield("Assign Employee Details", "resume",frm.doc.name);
+			table.hidden=1;
+			frm.refresh_fields();
+		}
 	}
 });
 

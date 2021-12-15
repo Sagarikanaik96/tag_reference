@@ -18,8 +18,11 @@
   "company",
   "job_location",
   "job_order_email",
+  "resume_required",
   "section_break_6",
   "employee_details",
+  "digital_sign",
+  "agree_contract",
   "amended_from"
  ],
  "fields": [
@@ -117,12 +120,32 @@
    "options": "Company",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "digital_sign",
+   "fieldtype": "Signature",
+   "label": "Digital Sign"
+  },
+  {
+   "default": "0",
+   "fieldname": "resume_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Resume Required",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Agree to Contract Mention in JOB ORDER",
+   "fieldname": "agree_contract",
+   "fieldtype": "Check",
+   "label": "Agree Contract"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-12-05 21:58:11.224131",
+ "modified": "2021-12-15 10:55:01.809692",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",

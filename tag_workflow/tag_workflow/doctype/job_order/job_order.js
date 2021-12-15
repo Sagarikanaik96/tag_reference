@@ -3,13 +3,18 @@
 
 frappe.ui.form.on('Job Order', {
 	assign_employees: function(frm){
-		if(frm.doc.__islocal != 1 && cur_frm.doc.owner != frappe.session.user && frm.doc.worker_filled < frm.doc.no_of_workers){
+		if(frm.doc.posting_date_time  < frappe.datetime.now_datetime()){
+			frappe.msgprint({message:__('Date has been past to claim this order'), title:__('Job Order filled'),indicator: 'blue'})
+		}
+		else if(frm.doc.__islocal != 1 && cur_frm.doc.owner != frappe.session.user && frm.doc.worker_filled < frm.doc.no_of_workers){
 			if(cur_frm.is_dirty()){
 				frappe.msgprint({message: __('Please save the form before creating Quotation'), title: __('Save Job Order'), indicator: 'red'});
-			}else{
+			}
+			else{
 				assign_employe(frm);
 			}
-		}else if(frm.doc.worker_filled >= frm.doc.no_of_workers){
+		}
+		else if(frm.doc.worker_filled >= frm.doc.no_of_workers){
 			frappe.msgprint({message: __('No of workers already filled for this job order'), title: __('Worker Filled'), indicator: 'red'});
 		}
 	},
@@ -208,9 +213,10 @@ function redirect_quotation(frm){
 	doc.job_order = frm.doc.name;
 	doc.no_of_employee_required = frm.doc.no_of_workers-frm.doc.worker_filled;
 	doc.hiring_organization = frm.doc.company;
-	doc.job_category = frm.doc.select_job;
+	doc.job_category = frm.doc.category;
 	doc.job_location = frm.doc.job_site;
 	doc.job_order_email = frm.doc.owner;
+	doc.resume_required = frm.doc.resumes_required;
 
 	frappe.call({
 		method:"tag_workflow.tag_data.staff_org_details",
