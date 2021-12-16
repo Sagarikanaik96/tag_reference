@@ -14,9 +14,27 @@ frappe.ui.form.on("Employee", {
 				refresh_field('decrypted_ssn')
 			}
 		})
+	},
+	resume:function(frm){
+		if (frm.doc.resume && !hasExtensions(frm.doc.resume, [".pdf", ".txt", ".docx"])){
+			var array = frm.doc.resume.split("/")
+			var file_name = array[array.length -1]
+			frappe.call({
+				method:"tag_workflow.tag_data.delete_file_data",
+				args:{
+					file_name:file_name
+				}
+			})
+			frm.set_value('resume', '')
+			refresh_field('resume');
+			frappe.msgprint("Upload Wrong File type in Resume");
+		}
 	}
 });
 
+function hasExtensions(filename, exts){
+    return new RegExp("(" + exts.join("|").replace(/\./g, '\\.') + ')$').test(filename);
+}
 
 /*----------hide field----------*/
 function trigger_hide(frm){

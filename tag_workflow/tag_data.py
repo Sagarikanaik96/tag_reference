@@ -228,3 +228,8 @@ def hiring_category(doctype,txt,searchfield,page_len,start,filters):
 @frappe.whitelist()
 def org_industy_type(company=None):
     return frappe.db.sql(''' select industry_type from `tabIndustry Types` where parent='{}' '''.format(company))
+
+
+@frappe.whitelist()
+def delete_file_data(file_name):
+    frappe.db.sql('''Delete from `tabFile` where file_name = "{}"'''.format(file_name))
