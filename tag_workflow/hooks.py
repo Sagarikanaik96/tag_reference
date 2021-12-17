@@ -25,6 +25,7 @@ app_include_css = [
 
 app_include_js = [
         "/assets/tag_workflow/js/tag.js",
+        "/assets/tag_workflow/js/controllers/sortable.js"
 ]
 
 web_include_css = [
@@ -47,7 +48,8 @@ doctype_js = {
 
 # doctype list
 doctype_list_js = {
-        "User": "public/js/doctype_list/user_list.js"
+        "User": "public/js/doctype_list/user_list.js",
+        "Employee": "public/js/doctype_list/employee_list.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]
@@ -56,6 +58,9 @@ after_migrate = ["tag_workflow.utils.organization.setup_data"]
 doc_events = {
         "*":{
             "validate": "tag_workflow.controllers.base_controller.validate_controller"
+        },
+        "Company": {
+            "on_trash": "tag_workflow.controllers.base_controller.validate_controller"
         }
 }
 

@@ -123,3 +123,19 @@ def make_jazzhr_request(api_key, company):
     except Exception as e:
         frappe.error_log(e, "JazzHR")
         frappe.throw(e)
+
+
+#--------get user data--------#
+@frappe.whitelist()
+def get_user_company_data(user, company):
+    try:
+        return frappe.db.get_list("Employee", {"user_id": user, "company": ('not in', (company))}, "company")
+    except Exception as e:
+        print(e)
+
+
+#--------hiring orgs data----#
+@frappe.whitelist(allow_guest=True)
+def get_orgs():
+    return frappe.db.sql(""" select name from `tabCompany` where organization_type = 'Hiring' """, as_dict=1)
+

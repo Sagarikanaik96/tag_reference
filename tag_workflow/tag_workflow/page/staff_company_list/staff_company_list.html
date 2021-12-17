@@ -1,0 +1,38 @@
+
+<div class="container form-section card-section visible-section" style="width: 100%; animation: animatop 1.7s cubic-bezier(0.425, 1.14, 0.47, 1.125) forwards;">
+	<div class="row">
+			<div id="listview" title="User Info">
+				<input id="myInput" type="text" placeholder="Search..">
+
+							<table id="sorting" style="background-color: #f9f9f9;font-size: 18px;">
+								<caption>Staffing Company List</caption>
+
+								<thead>
+									<tr class="filters">
+									<th onclick="sorted(0)" id="srno">Sr No.</th>
+									<th style="width: 200px;" onclick="sorted(1)" id="comp_name">Company Name</th>
+									<th onclick="sorted(2)" id="addr">Address</th>
+									<th onclick="sorted(3)" id="city">City</th>
+									<th onclick="sorted(4)" id="state">State</th>
+									<th onclick="sorted(5)" id="zip">Zip Code</th>
+									<th onclick="sorted(6)" id="avgrate">Average Rating</th>
+									</tr>
+								</thead>
+								<tbody id="myTable">
+								</tbody>
+								</table>
+			</div>
+	</div>
+</div>
+
+<script>
+	$(document).ready(function(){
+	  $("#myInput").on("keyup", function() {
+		var value = $(this).val().toLowerCase();
+		$("#myTable tr").filter(function() {
+		  $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+		});
+	  });
+	});
+</script>
+<script src="/assets/tag_workflow/js/controllers/sortable.js"></script>

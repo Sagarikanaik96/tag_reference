@@ -197,3 +197,7 @@ input::-webkit-credentials-auto-fill-button {
 		padding-right: 0px;
 	}
 }
+
+.page-title .title-area .title-text {
+	cursor: inherit !important;
+}

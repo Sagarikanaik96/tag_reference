@@ -20,7 +20,7 @@ frappe.ui.form.on("Company", {
 			}else if(frappe.user_roles.includes('Staffing Admin')){
 				return {
 					filters: [
-						[ORG, "name", "=", "Exclusive Hiring"]
+						[ORG, "name", "in", ["Staffing", "Exclusive Hiring"]]
 					]
 				}
 			}else if(frappe.user_roles.includes('Hiring Admin')){
@@ -98,7 +98,7 @@ frappe.ui.form.on("Company", {
 
 /*---------hide details----------*/
 function hide_details(frm){
-	let fields = ["charts_section","sales_settings","default_settings","section_break_22","auto_accounting_for_stock_settings","fixed_asset_defaults","non_profit_section","hra_section","budget_detail","company_logo","date_of_incorporation","address_html","date_of_commencement","fax","website","company_description","registration_info", "domain", "parent_company", "is_group","industry"];
+	let fields = ["charts_section","sales_settings","default_settings","section_break_22","auto_accounting_for_stock_settings","fixed_asset_defaults","non_profit_section","hra_section","budget_detail","company_logo","date_of_incorporation","address_html","date_of_commencement","fax","website","company_description","registration_info", "domain", "parent_company", "is_group","industry", 'abbr', 'change_abbr'];
 	for(let data in fields){
 		cur_frm.toggle_display(fields[data], 0);
 	}
@@ -152,9 +152,12 @@ function validate_phone_and_zip(frm){
 
 /*--------jazzhr------------*/
 function jazzhr_data(frm){
-	frm.add_custom_button("Get data from JazzHR", function() {
-		(cur_frm.is_dirty() == 1) ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm);
-	}).addClass("btn-primary");
+	let roles = frappe.user_roles;
+	if(roles.includes("Staffing Admin") || roles.includes("Staffing User")){
+		frm.add_custom_button("Get data from JazzHR", function() {
+			(cur_frm.is_dirty() == 1) ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm);
+		}).addClass("btn-primary");
+	}
 }
 
 function make_jazzhr_request(frm){

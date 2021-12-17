@@ -1,9 +1,13 @@
 frappe.ui.form.on("User", {
 	refresh: function(frm){
+		cur_frm.clear_custom_buttons();
+		multi_company_setup(frm);
 		set_options(frm);
 		field_toggle(frm);
 		field_reqd(frm);
 		field_check(frm);
+		cur_frm.dashboard.hide()
+
 	},
 	setup: function(frm){
 		let roles = frappe.user_roles;
@@ -164,17 +168,19 @@ function setup_profile(frm){
 
 /*------------update employee--------------*/
 function update_employee(frm){
-	frappe.call({"method": "tag_workflow.controllers.master_controller.check_employee","args": {"name": frm.doc.name, "first_name": frm.doc.first_name, "last_name": frm.doc.last_name || '', "company": frm.doc.company, "gender": frm.doc.gender, "date_of_birth": frm.doc.birth_date, "date_of_joining": frm.doc.date_of_joining, "organization_type": frm.doc.organization_type}, "callback": function(r){cur_frm.reload_doc();}});
-	if (cur_frm.doc.organization_type == 'Exclusive Hiring'){
-		frappe.call({
-			method:"tag_workflow.tag_data.update_exclusive_org",
-			"args":{
-				exclusive_email:cur_frm.doc.email,
-				staffing_email:cur_frm.doc.owner,
-				staffing_comapny:frappe.defaults.get_user_defaults("Company")[0],
-				exclusive_company:frm.doc.company
-			}
-		});
+	if(frm.doc.enabled == 1){
+		frappe.call({"method": "tag_workflow.controllers.master_controller.check_employee","args": {"name": frm.doc.name, "first_name": frm.doc.first_name, "last_name": frm.doc.last_name || '', "company": frm.doc.company, "gender": frm.doc.gender, "date_of_birth": frm.doc.birth_date, "date_of_joining": frm.doc.date_of_joining, "organization_type": frm.doc.organization_type}, "callback": function(r){cur_frm.reload_doc();}});
+		if (cur_frm.doc.organization_type == 'Exclusive Hiring'){
+			frappe.call({
+				method:"tag_workflow.tag_data.update_exclusive_org",
+				"args":{
+					exclusive_email:cur_frm.doc.email,
+					staffing_email:cur_frm.doc.owner,
+					staffing_comapny:frappe.defaults.get_user_defaults("Company")[0],
+					exclusive_company:frm.doc.company
+				}
+			});
+		}
 	}
 }
 
@@ -187,4 +193,77 @@ function setup_company_value(frm){
 			}
 		}
 	}
+}
+
+/*-------multi company--------*/
+function multi_company_setup(frm){
+	if(frappe.user_roles.includes("Tag Admin")){
+		frm.add_custom_button("Assign Multi Company", function() {
+			(cur_frm.doc.__islocal == 1) ? frappe.msgprint("Please save the form first") : make_multicompany(frm);
+		}).addClass("btn-primary");
+	}
+}
+
+function make_multicompany(frm){
+	let org_data = get_data(frm);
+	let table_fields = [
+		{
+			fieldname: "company", fieldtype: "Link", in_list_view: 1, label: "Organisation", options: "Company", reqd: 1,
+			get_query: function(){
+				return{
+					filters: [["Company", "name", "not in", cur_frm.doc.company], ["Company", "organization_type", "=", cur_frm.doc.organization_type]]
+				}
+			}
+		}
+	];
+
+	let dialog = new frappe.ui.Dialog({
+		title: 'Multi-Organisarion Setup',
+		fields: [
+			{label: "Current User", fieldname: "user", fieldtype: "Link", options: "User", default: cur_frm.doc.name, read_only: 1},
+			{fieldname:"company", fieldtype:"Table", label:"", cannot_add_rows:false, in_place_edit:true, reqd:1, data:org_data, fields:table_fields},
+			{label: 'Assigned Organisation', fieldname: 'assigned',	fieldtype: 'HTML'}
+		],
+		primary_action_label: 'Submit',
+		primary_action(values) {
+			let data = values.company || [];
+			let company = [];
+			for(var d in data){(data[d].company) ? company.push(data[d].company) : console.log(".")}
+
+			if(company.length > 0){
+				frappe.call({
+					method: "tag_workflow.controllers.master_controller.multi_company_setup",
+					args: {"user": frm.doc.name, "company": company.join(",")},
+					freeze: true,
+					freeze_message: "<p><b>preparing user for multi-Organisarion...</b></p>",
+					callback: function(r){
+						frappe.msgprint("User <b>"+frm.doc.name+"</b> has been assigned as <b>"+frm.doc.tag_user_type+"</b> for Organisation <b>"+company.join(",")+"</b>");
+						cur_frm.reload_doc();
+					}
+				});
+			}else{
+				frappe.msgprint("Please add organisation for multi-company setup");
+			}
+			dialog.hide();
+		}
+	});
+	dialog.show();
+}
+
+function get_data(frm){
+	let values = []
+	frappe.call({
+		method: "tag_workflow.utils.whitelisted.get_user_company_data",
+		args: {"user": frm.doc.name, "company": frm.doc.company},
+		async: 0,
+		callback: function(r){
+			if(r && r.message){
+				let data = r.message;
+				for(let i in data){
+					values.push({"company": data[i].company, "idx": i+1})
+				}
+			}
+		}
+	});
+	return values;
 }

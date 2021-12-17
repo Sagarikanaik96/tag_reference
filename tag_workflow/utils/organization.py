@@ -123,7 +123,7 @@ def update_role_profile():
             profile_doc.save()
     except Exception as e:
         print(e)
-        frappe.log_error(e, "update_role_profile")
+        frappe.log_error(frappe.get_traceback(), "update_role_profile")
 
 #--------module_update----------#
 def update_module_profile():
