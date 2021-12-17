@@ -1,9 +1,14 @@
 import frappe
 from frappe import _, msgprint
 from frappe.share import add
+import datetime
 from pymysql.constants.ER import NO
 from tag_workflow.utils.notification import sendmail, make_system_notification
 import json
+
+# global #
+JOB = "Job Order"
+
 @frappe.whitelist()
 def send_timesheet_for_approval(employee, docname):
     try:
@@ -40,11 +45,41 @@ def notify_email(job_order, employee, value, subject, company, employee_name, da
             users.append(user['name'])
 
         if users:
-            make_system_notification(users, message, "Job Order", job_order, subject)
-            sendmail(users, message, subject, "Job Order", job_order)
+            make_system_notification(users, message, JOB, job_order, subject)
+            sendmail(users, message, subject, JOB, job_order)
     except Exception as e:
         frappe.log_error(e, "Timesheet Email Error")
         frappe.throw(e)
+
+#-------assign employee----------#
+@frappe.whitelist()
+def check_employee_editable(job_order, name, creation):
+    try:
+        is_editable = 0
+        order = frappe.get_doc(Job Order, job_order)
+
+        time_format = '%Y-%m-%d %H:%M:%S'
+        from_date = datetime.datetime.strptime(str(order.from_date), time_format)
+        to_date = datetime.datetime.strptime(str(order.to_date), time_format)
+        creation = datetime.datetime.strptime(str(creation[0:19]), time_format)
+        today = datetime.datetime.now()
+
+        if(today.date() >= to_date.date()):
+            return is_editable
+
+        time_diff = creation - from_date
+        emp_list = frappe.db.sql(""" select no_show, non_satisfactory, dnr from `tabTimesheet` where docstatus != 1 and job_order_detail = %s and employee in (select employee from `tabAssign Employee Details` where parent = %s) """,(job_order, name), as_dict=1)
+
+        for emp in emp_list:
+            if((emp.no_show == 1 or emp.dnr == 1 or emp.non_satisfactory == 1) and (time_diff.seconds/60/60 > 2)):
+                is_editable = 1
+
+        return is_editable
+    except Exception as e:
+        print(e)
+        is_editable = 1
+        frappe.error_log(frappe.get_traceback(), "check_employee_editable")
+        return is_editable
 
 @frappe.whitelist()
 def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_order=None):

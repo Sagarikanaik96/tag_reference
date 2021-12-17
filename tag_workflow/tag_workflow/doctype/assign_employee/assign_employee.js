@@ -3,6 +3,9 @@
 
  
 frappe.ui.form.on('Assign Employee', {
+	refresh : function(frm){
+		render_table(frm);
+	},
 	tag_status: function(frm) {
 		make_hiring_notification(frm);
 	},
@@ -74,3 +77,41 @@ function check_employee_data(frm){
 
 	if(msg.length){frappe.msgprint({message: msg.join("\n\n"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
 }
+
+/*--------------child table------------------*/
+function render_table(frm){
+	if(frm.doc.tag_status == "Approved"){
+		cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = true;
+		cur_frm.fields_dict['employee_details'].refresh();
+		frappe.call({
+			"method": "tag_workflow.utils.timesheet.check_employee_editable",
+			"args": {"job_order": frm.doc.job_order, "name": frm.doc.name, "creation": frm.doc.creation},
+			"callback": function(r){
+				console.log(r);
+				if(r && r.message == 0){
+					cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = true;
+					cur_frm.fields_dict['employee_details'].refresh();
+				}else{
+					cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = false;
+					cur_frm.fields_dict['employee_details'].refresh();
+				}
+			}
+		});
+	}
+}
+
+frappe.ui.form.on("Assign Employee Details", {
+	before_employee_details_remove: function(frm, cdt, cdn){
+		let child = frappe.get_doc(cdt, cdn);
+		if(frm.doc.tag_status == "Approved" && child.__islocal != 1){
+			frappe.throw("You can't delete employee details once it's Approved.");
+		}
+	},
+
+	form_render: function(frm, cdt, cdn){
+		let child = frappe.get_doc(cdt, cdn);
+		if(frm.doc.tag_status == "Approved" && child.__islocal != 1){
+			cur_frm.fields_dict["employee_details"].grid.grid_rows_by_docname[child.name].toggle_editable("employee", 0);
+		}
+	}
+});

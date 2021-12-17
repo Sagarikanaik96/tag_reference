@@ -55,7 +55,8 @@ def send_login_mail(self, subject, template, add_args, now=None):
     onboard = 0
     company, email = "", ""
     parent = frappe.db.get_value("Company", self.company, "parent_staffing")
-    if(parent):
+    user_list = frappe.db.get_list("User", {"company": self.company}, "name")
+    if(parent and (len(user_list) <= 1)):
         onboard = 1
         company = parent
         email = self.name

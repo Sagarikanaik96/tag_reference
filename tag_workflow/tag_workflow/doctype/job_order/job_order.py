@@ -11,7 +11,7 @@ class JobOrder(Document):
 
 
 @frappe.whitelist()
-def joborder_notification(organizaton,doc_name,company,job_title,job_site,posting_date):
+def joborder_notification(organizaton,doc_name,company,job_title,posting_date,job_site=None):
 	
 	is_send_mail_required = False
 

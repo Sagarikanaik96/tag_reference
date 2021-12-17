@@ -23,12 +23,14 @@
   "column_break_9",
   "require_staff_to_wear_face_mask",
   "section_break_11",
+  "from_date",
   "select_job",
   "job_title",
   "job_site",
   "no_of_workers",
   "worker_filled",
   "column_break_15",
+  "to_date",
   "job_duration",
   "estimated_hours_per_day",
   "extra_price_increase",
@@ -80,14 +82,6 @@
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "now",
-   "fieldname": "posting_date_time",
-   "fieldtype": "Datetime",
-   "in_list_view": 1,
-   "label": "Posting Date TIme",
-   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -351,7 +345,8 @@
   },
   {
    "fieldname": "section_break_3",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Organization info"
   },
   {
    "fieldname": "column_break_49",
@@ -376,11 +371,33 @@
    "in_standard_filter": 1,
    "label": "Category",
    "options": "Industry Type"
+  },
+  {
+   "default": "Today",
+   "fieldname": "from_date",
+   "fieldtype": "Datetime",
+   "label": "Job Order From Date",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "to_date",
+   "fieldtype": "Datetime",
+   "label": "Job Order To Date",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date_time",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-09 15:11:17.007067",
+ "modified": "2021-12-16 00:34:34.639670",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

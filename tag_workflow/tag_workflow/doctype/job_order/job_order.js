@@ -88,13 +88,22 @@ frappe.ui.form.on('Job Order', {
 				}
 			}
 		});
+
+		frm.set_query("company", function(doc) {
+			return {
+				"filters":[ ['Company', "organization_type", "in", ["Hiring" , "Exclusive Hiring"]] ]
+			}
+		});
 	},
 	refresh:function(frm){
 		if(cur_frm.doc.__islocal==1){
 			check_company_detail(frm);
-		}
-		else
-		{
+			frappe.db.get_doc('Company', cur_frm.doc.company).then(doc => {
+				if (doc.organization_type === "Staffing") {
+					cur_frm.set_value('company', "")
+				}
+			});
+		}else{
 			timer_value(frm)	   
 		}
 	},
@@ -253,26 +262,23 @@ function set_read_fields(frm){
   
 function timer_value(frm){
 	var time=frappe.datetime.get_hour_diff(cur_frm.doc.posting_date_time,frappe.datetime.now_datetime())
-	if(time<24)
-		{
-			var myStringArray = ["company","posting_date_time","category","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
-			var arrayLength = myStringArray.length;
-			for (var i = 0; i < arrayLength; i++) {
-				frm.set_df_property(myStringArray[i], "read_only", 1);
-			}
-			frm.set_df_property("time_remaining_for_make_edits", "options"," ");
+	if(time<24){
+		var myStringArray = ["company","posting_date_time","category","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
+		var arrayLength = myStringArray.length;
+		for (var i = 0; i < arrayLength; i++) {
+			frm.set_df_property(myStringArray[i], "read_only", 1);
 		}
-	else
-		{
-			set_read_fields(frm)
+		frm.set_df_property("time_remaining_for_make_edits", "options"," ");
+	}else{
+		set_read_fields(frm)
+		time_value(frm)
+		setTimeout(function(){
 			time_value(frm)
-			setTimeout(function()
-			{
-				time_value(frm)
-				cur_frm.refresh()
-			},60000);  
-		}
- 	}
+			cur_frm.refresh()
+		},60000);  
+	}
+}
+
 function time_value(frm){
 	var entry_datetime = frappe.datetime.now_datetime().split(" ")[1];
 	var exit_datetime = cur_frm.doc.posting_date_time.split(" ")[1];
@@ -286,25 +292,22 @@ function time_value(frm){
 	var diffDays = Math.ceil(diffTime/ (1000 * 60 * 60 * 24));
 	var x=parseInt(((diffDays*(24*60)) +totalMinsOfExit) - totalMinsOfEntry)
 	let data1= Math.floor(x/24/60)-1 + " Days:" + Math.floor(x/60%24) + ' Hours:' + x%60+' Minutes'
-	let data = `
-			<p><b>Time Remaining for Make Edits: </b> ${[data1]}</p>
-		`;
+	let data = `<p><b>Time Remaining for Make Edits: </b> ${[data1]}</p>`;
 	frm.set_df_property("time_remaining_for_make_edits", "options",data);
 }
  
 function notification_joborder_change(frm){
 	frappe.call({
-		method:"tag_workflow.tag_workflow.doctype.job_order.job_order.joborder_notification",
+		"method":"tag_workflow.tag_workflow.doctype.job_order.job_order.joborder_notification",
 		"freeze": true,
 		"freeze_message": "<p><b>preparing notification for staffing orgs...</b></p>",
-		args:{
+		"args": {
 			organizaton:frm.doc.staff_org_claimed,
 			doc_name : frm.doc.name,
 			company:frm.doc.company,
 			job_title:frm.doc.job_title,
 			job_site:frm.doc.job_site,
 			posting_date:frm.doc.posting_date_time
-
 		}
-	})
+	});
 }

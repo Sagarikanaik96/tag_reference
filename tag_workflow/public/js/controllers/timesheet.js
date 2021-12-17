@@ -2,7 +2,6 @@ frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
 		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
 		hide_timesheet_field(timesheet_fields);
-		check_update_timesheet(frm);
 	},
 
 	setup: function(frm){
@@ -36,6 +35,14 @@ frappe.ui.form.on("Timesheet", {
 
 	non_satisfactory: function(frm){
 		trigger_email(frm, "non_satisfactory", frm.doc.non_satisfactory, "Non Satisfactory");
+	},
+
+	dnr: function(frm){
+		trigger_email(frm, "dnr", frm.doc.dnr, "DNR");
+	},
+
+	workflow_state: function(frm){
+		check_update_timesheet(frm);
 	}
 });
 
@@ -44,12 +51,12 @@ function job_order_details(frm){
 	if(frm.doc.job_order_detail){
 		frappe.db.get_value("Job Order", {"name": frm.doc.job_order_detail}, ["job_title", "job_site", "job_duration", "per_hour"], function(r){
 			if(r){
-				let data = `
+				let data = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
 					<p><b>Job Title: </b> ${r['job_title']}</p>
 					<p><b>Job Site: </b> ${r['job_site']}</p>
 					<p><b>Job Duration: </b> ${r['job_duration']}</p>
 					<p><b>Rate Per Hour: </b> ${r['per_hour']}</p>
-				`;
+				</div>`;
 				frm.set_df_property("job_details", "options", data);
 			}
 		});
@@ -127,11 +134,16 @@ function trigger_email(frm, key, value, type){
 	let order = frm.doc.job_order_detail;
 	let local = cur_frm.doc.__islocal;
 	if(order && local != 1){
-		frappe.call({
-			"method": "tag_workflow.utils.timesheet.notify_email",
-			"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation}
-		});
-		if(value == 1){	frappe.confirm('You are about to update this employee <b>'+frm.doc.employee_name+'</b> to <b>'+type+'</b>. Do you want to continue?',function(){frappe.msgprint('Employee '+frm.doc.employee_name+' updated as '+type+'.')},function(){cur_frm.set_value(key, 0)});}
+		frappe.confirm(
+			'You are about to update this employee <b>'+frm.doc.employee_name+'</b> to <b>'+type+'</b>. Do you want to continue?',
+			function(){
+				notify_email(frm, type, value);
+				frappe.msgprint('Employee <b>'+frm.doc.employee_name+'</b> updated as '+type+'.');
+			},function(){
+				cur_frm.doc[key] = (value == 1 ? 0 : 1);
+				cur_frm.fields_dict[key].refresh_input();
+			}
+		);
 	}else if(order && local && value){
 		frappe.update_msgprint({message: __('Please save timesheet first'), title: __('Timesheet'), indicator: 'red'});
 		cur_frm.set_value(key, 0);
@@ -139,4 +151,11 @@ function trigger_email(frm, key, value, type){
 		frappe.update_msgprint({message: __('Please select Job Order'), title: __('Job Order'), indicator: 'red'});
 		cur_frm.set_value(key, 0);
 	}
+}
+
+function notify_email(frm, type, value){
+	frappe.call({
+		"method": "tag_workflow.utils.timesheet.notify_email",
+		"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation}
+	});
 }

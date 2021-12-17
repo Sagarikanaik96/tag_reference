@@ -14,13 +14,13 @@ frappe.ui.form.on("Company", {
 			if(frappe.user_roles.includes('Tag Admin')){
 				return {
 					filters: [
-						[ORG, "name", "not in", ["TAG", "Exclusive Hiring"]]
+						[ORG, "name", "!=", "TAG"]
 					]
 				}
 			}else if(frappe.user_roles.includes('Staffing Admin')){
 				return {
 					filters: [
-						[ORG, "name", "=", "Staffing"]
+						[ORG, "name", "in", ["Staffing", "Exclusive Hiring"]]
 					]
 				}
 			}else if(frappe.user_roles.includes('Hiring Admin')){
@@ -152,9 +152,12 @@ function validate_phone_and_zip(frm){
 
 /*--------jazzhr------------*/
 function jazzhr_data(frm){
-	frm.add_custom_button("Get data from JazzHR", function() {
-		(cur_frm.is_dirty() == 1) ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm);
-	}).addClass("btn-primary");
+	let roles = frappe.user_roles;
+	if(roles.includes("Staffing Admin") || roles.includes("Staffing User")){
+		frm.add_custom_button("Get data from JazzHR", function() {
+			(cur_frm.is_dirty() == 1) ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm);
+		}).addClass("btn-primary");
+	}
 }
 
 function make_jazzhr_request(frm){

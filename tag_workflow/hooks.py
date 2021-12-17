@@ -48,7 +48,8 @@ doctype_js = {
 
 # doctype list
 doctype_list_js = {
-        "User": "public/js/doctype_list/user_list.js"
+        "User": "public/js/doctype_list/user_list.js",
+        "Employee": "public/js/doctype_list/employee_list.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]
