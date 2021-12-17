@@ -56,7 +56,7 @@ def notify_email(job_order, employee, value, subject, company, employee_name, da
 def check_employee_editable(job_order, name, creation):
     try:
         is_editable = 0
-        order = frappe.get_doc(Job Order, job_order)
+        order = frappe.get_doc(JOB, job_order)
 
         time_format = '%Y-%m-%d %H:%M:%S'
         from_date = datetime.datetime.strptime(str(order.from_date), time_format)
