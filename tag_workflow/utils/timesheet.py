@@ -56,7 +56,7 @@ def notify_email(job_order, employee, value, subject, company, employee_name, da
 def check_employee_editable(job_order, name, creation):
     try:
         is_editable = 0
-        order = frappe.get_doc(Job Order, job_order)
+        order = frappe.get_doc(JOB, job_order)
 
         time_format = '%Y-%m-%d %H:%M:%S'
         from_date = datetime.datetime.strptime(str(order.from_date), time_format)
@@ -96,7 +96,7 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
     for staff in staff_member:
         add("Company Review", doc.name, staff[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
     company_rate=frappe.db.sql(''' select average_rating from `tabCompany` where name='{}' '''.format(staffing_company),as_list=1)
-    if (company_rate[0][0]==None):
+    if (len(company_rate)==0 or company_rate[0][0]==None):
         doc=frappe.get_doc('Company',staffing_company)
         doc.average_rating=ratings['Rating']
         doc.save()

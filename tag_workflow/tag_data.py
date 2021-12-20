@@ -114,32 +114,43 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
     return send_email(None,msg,l)
 
 @frappe.whitelist()
-def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None):
+def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None,staff_company=None):
     from frappe.share import add
     x = frappe.get_doc(jobOrder,job_order)
-
-    org_type=frappe.db.sql('''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org),as_list=1)
-    if(org_type[0][0]=='Hiring'):
+    subject="New Work Order"
+    if staff_company:
+        print("staffing company is:",staff_company)
         x.company_type = 'Non Exclusive'
         x.save(ignore_permissions = True)
-        user_list=frappe.db.sql(''' select email from `tabUser` where organization_type='staffing' ''',as_list=1)
-        l = [l[0] for l in user_list]
-        for user in l:
-            add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
-        message=f'New Work Order for {job_order_title} has been created by {hiring_org}.<a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
-        return send_email("New Work Order",message,l)
-    elif org_type[0][0]=="Exclusive Hiring":
-        x.company_type = 'Exclusive'
-        x.save(ignore_permissions = True)
-        owner_info=frappe.db.sql(''' select owner from `tabCompany` where organization_type="Exclusive Hiring" and name="{}" '''.format(hiring_org),as_list=1)
-        company_info=frappe.db.sql(''' select company from `tabUser` where name='{}' '''.format(owner_info[0][0]),as_list=1)
-        user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(company_info[0][0]),as_list=1)        
+        user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(staff_company),as_list=1)        
         l = [l[0] for l in user_list]
         for user in l:
             add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
         message=f'New Work Order for {job_order_title} has been created by {hiring_org}. <a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
-        return send_email("New Work Order",message,l)
+        return send_email(subject,message,l)
 
+    else:
+        org_type=frappe.db.sql('''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org),as_list=1)
+        if(org_type[0][0]=='Hiring'):
+            x.company_type = 'Non Exclusive'
+            x.save(ignore_permissions = True)
+            user_list=frappe.db.sql(''' select email from `tabUser` where organization_type='staffing' ''',as_list=1)
+            l = [l[0] for l in user_list]
+            for user in l:
+                add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
+            message=f'New Work Order for {job_order_title} has been created by {hiring_org}.<a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
+            return send_email(subject,message,l)
+        elif org_type[0][0]=="Exclusive Hiring":
+            x.company_type = 'Exclusive'
+            x.save(ignore_permissions = True)
+            owner_info=frappe.db.sql(''' select owner from `tabCompany` where organization_type="Exclusive Hiring" and name="{}" '''.format(hiring_org),as_list=1)
+            company_info=frappe.db.sql(''' select company from `tabUser` where name='{}' '''.format(owner_info[0][0]),as_list=1)
+            user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(company_info[0][0]),as_list=1)        
+            l = [l[0] for l in user_list]
+            for user in l:
+                add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
+            message=f'New Work Order for {job_order_title} has been created by {hiring_org}. <a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
+            return send_email(subject,message,l)
 
 @frappe.whitelist()
 def update_exclusive_org(exclusive_email,staffing_email,staffing_comapny,exclusive_company):
@@ -209,10 +220,12 @@ def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters)
     emp_company = filters.get('emp_company')
     job_category = filters.get('job_category')
 
-    company = filters.get('company_detailscompany')
-    print(emp_company,job_category,company)
-    return frappe.db.sql("""select name from `tabEmployee` where company=%(emp_company)s and job_category=%(job_category)s and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'job_category':job_category,'company':company})
-    
+    company = filters.get('company')
+
+    if job_category is None:
+        return frappe.db.sql("""select name from `tabEmployee` where company=%(emp_company)s and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company})
+    else:
+        return frappe.db.sql("""select name from `tabEmployee` where company=%(emp_company)s and job_category = %(job_category)s or job_category IS NULL and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company,'job_category':job_category})
     
 @frappe.whitelist()
 def get_org_site(doctype, txt, searchfield, page_len, start, filters):

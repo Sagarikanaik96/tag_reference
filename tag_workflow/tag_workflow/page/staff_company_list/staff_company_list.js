@@ -31,7 +31,7 @@ frappe.FaceRecognition = Class.extend({
 					const profile_html = `
 									${comp_data.map((l,p) => `<tr>
 										<td>${p+1}</td>
-										<td><a href='${l.name}'>${l.name}</a></td>
+										<td ><a href=javascript:get_location(${p+1})>${l.name}</a></td>
 										<td>${l.address}</td>
 										<td>${l.city}</td>
 										<td>${l.state}</td>
@@ -43,7 +43,70 @@ frappe.FaceRecognition = Class.extend({
 				})
 		},
 	})
-	
 
 
+function get_location(name){
+	frappe.call({
+		method:"tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.comp",
+		args:{
 
+			"comp_id":name,
+		},	
+		callback:function(r)
+		{
+			let company_data=r.message[0][0]
+			let company_industry=r.message[1]
+			let company_member=r.message[2]
+			let company_review=r.message[3]
+			const data=`
+			<table>
+				<tr>
+					<td> 
+						<img src="${company_data['company_logo']}" style="height:50px;width:50px;">
+					</td>
+					<td>
+						<h3>${company_data['name']}</h3><h5>${company_data['address']}</h5><h4>${company_data['zip']}</h4>
+						</td>
+					<td>
+						<h3><span>&star;</span>${company_data['average_rating']}</h3>
+						<a href=javascript:new_job_order(${name})><button>Place Order</button></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan=3><h6>About</h6>
+						${company_data['about_organization']}
+					</td>
+				</tr>
+			</table>`
+
+			const industry=`<h4>Serving Industries</h4>
+				${company_industry.map((l) => `${l.industry_type}<br>`).join('')}`
+			
+			const team=`<h4>Team Member</h4>
+				${company_member.map((l) => `${l.first_name}${l.last_name}<br>`).join('')}`
+
+			const review=`<h4>Team Member</h4>
+			${company_review.map((l) => `${l.owner}<br>	
+										${l.rating}<br>	
+										${l.comments}<br>
+										${l.creation}<br>`).join('')}`
+			$("#listdata").html(data);
+			$("#industrydata").html(industry);
+			$("#teamdata").html(team);
+			$("#compreview").html(review);			
+		}
+	})
+}
+function new_job_order(nam){
+	frappe.call({
+		method:"tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.comp",
+		callback:function(r)
+		{
+			let doc = frappe.model.get_new_doc("Job Order");
+			doc.company = frappe.defaults.get_user_defaults('Company')[0]
+			doc.staff_company = r.message[nam-1]['name']
+			doc.posting_date_time = frappe.datetime.now_date();  
+			frappe.set_route("Form", doc.doctype, doc.name);
+		}
+	})
+}

@@ -12,6 +12,7 @@
   "section_break_3",
   "company",
   "naming_series",
+  "staff_company",
   "column_break_4",
   "category",
   "posting_date_time",
@@ -341,7 +342,8 @@
   {
    "fieldname": "time_remaining_for_make_edits",
    "fieldtype": "HTML",
-   "label": "Time Remaining For Make Edits"
+   "label": "Time Remaining For Make Edits",
+   "permlevel": 2
   },
   {
    "fieldname": "section_break_3",
@@ -393,11 +395,18 @@
    "in_list_view": 1,
    "label": "Posting Date",
    "reqd": 1
+  },
+  {
+   "fieldname": "staff_company",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Staff Company",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-16 00:34:34.639670",
+ "modified": "2021-12-17 15:46:24.927326",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

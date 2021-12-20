@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Job Order', {
 	assign_employees: function(frm){
-		if(frm.doc.posting_date_time  < frappe.datetime.now_datetime()){
+		if(frm.doc.to_date  < frappe.datetime.now_datetime()){
 			frappe.msgprint({message:__('Date has been past to claim this order'), title:__('Job Order filled'),indicator: 'blue'})
 		}
 		else if(frm.doc.__islocal != 1 && cur_frm.doc.owner != frappe.session.user && frm.doc.worker_filled < frm.doc.no_of_workers){
@@ -158,6 +158,8 @@ frappe.ui.form.on('Job Order', {
 					hiring_org:cur_frm.doc.company,
 					job_order:cur_frm.doc.name,
 					job_order_title:cur_frm.doc.job_title,
+					staff_company:cur_frm.doc.staff_company
+
 				}
 			});
 		}
@@ -261,9 +263,9 @@ function set_read_fields(frm){
   
   
 function timer_value(frm){
-	var time=frappe.datetime.get_hour_diff(cur_frm.doc.posting_date_time,frappe.datetime.now_datetime())
+	var time=frappe.datetime.get_hour_diff(cur_frm.doc.from_date,frappe.datetime.now_datetime())
 	if(time<24){
-		var myStringArray = ["company","posting_date_time","category","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
+		var myStringArray = ["company","posting_date_time","from_date","to_date","category","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
 		var arrayLength = myStringArray.length;
 		for (var i = 0; i < arrayLength; i++) {
 			frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -281,13 +283,13 @@ function timer_value(frm){
 
 function time_value(frm){
 	var entry_datetime = frappe.datetime.now_datetime().split(" ")[1];
-	var exit_datetime = cur_frm.doc.posting_date_time.split(" ")[1];
+	var exit_datetime = cur_frm.doc.from_date.split(" ")[1];
 	var splitEntryDatetime= entry_datetime.split(':');
 	var splitExitDatetime= exit_datetime.split(':');
 	var totalMinsOfEntry= splitEntryDatetime[0] * 60 + parseInt(splitEntryDatetime[1]) + splitEntryDatetime[0] / 60;
 	var totalMinsOfExit= splitExitDatetime[0] * 60 + parseInt(splitExitDatetime[1]) + splitExitDatetime[0] / 60;
 	var entry_date = new Date(frappe.datetime.now_datetime().split(" ")[0]);
-	var exit_date = new Date(cur_frm.doc.posting_date_time.split(" ")[0]);
+	var exit_date = new Date(cur_frm.doc.from_date.split(" ")[0]);
 	var diffTime = Math.abs(exit_date - entry_date);
 	var diffDays = Math.ceil(diffTime/ (1000 * 60 * 60 * 24));
 	var x=parseInt(((diffDays*(24*60)) +totalMinsOfExit) - totalMinsOfEntry)
@@ -307,7 +309,7 @@ function notification_joborder_change(frm){
 			company:frm.doc.company,
 			job_title:frm.doc.job_title,
 			job_site:frm.doc.job_site,
-			posting_date:frm.doc.posting_date_time
+			posting_date:frm.doc.from_date
 		}
 	});
 }

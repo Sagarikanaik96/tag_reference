@@ -1,11 +1,16 @@
 frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
+		cur_frm.set_value("employee"," ");
+
 		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
 		hide_timesheet_field(timesheet_fields);
+
 	},
 
 	setup: function(frm){
 		job_order_details(frm);
+		cur_frm.set_value("employee"," ");
+
 		frm.set_query("job_order_detail", function(){
 			return {
 				filters: [

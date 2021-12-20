@@ -100,12 +100,14 @@ function field_check(frm){
 	let values = ["email", "company", "organization_type"];
 	let pass = "new_password";
 	if(!cur_frm.doc.__islocal){
+		$(".page-title .title-area .title-text").css("cursor", "pointer");
 		for(var vals in values){
 			cur_frm.toggle_enable(values[vals], 0);
 		}
 	}else{
 		cur_frm.toggle_reqd(pass, 1);
 		cur_frm.set_value(pass, "Entry@123");
+		$(".page-title .title-area .title-text").css("cursor", "auto");
 	}
 
 	(cur_frm.doc.__islocal === undefined && (!frappe.user_roles.includes("System Manager"))) ? cur_frm.toggle_enable("tag_user_type", 0) : console.log("TAG");
@@ -197,7 +199,7 @@ function setup_company_value(frm){
 
 /*-------multi company--------*/
 function multi_company_setup(frm){
-	if(frappe.user_roles.includes("Tag Admin")){
+	if((frappe.user_roles.includes("Tag Admin") || frappe.user_roles.includes("Staffing Admin")) && cur_frm.doc.enabled == 1){
 		frm.add_custom_button("Assign Multi Company", function() {
 			(cur_frm.doc.__islocal == 1) ? frappe.msgprint("Please save the form first") : make_multicompany(frm);
 		}).addClass("btn-primary");

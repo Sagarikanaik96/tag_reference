@@ -108,12 +108,15 @@ function hide_details(frm){
 /*----------init values-----------*/
 function init_values(frm){
 	if(cur_frm.doc.__islocal == 1){
+		$(".page-title .title-area .title-text").css("cursor", "auto");
 		var company_data = {"default_currency": "USD", "country": "United States", "create_chart_of_accounts_based_on": "Standard Template", "chart_of_accounts": "Standard with Numbers", "parent_staffing": ""};
 		var keys = Object.keys(company_data);
 		for(var val in keys){
 			cur_frm.set_value(keys[val], company_data[keys[val]]);
 			cur_frm.toggle_enable(keys[val], 0);
 		}
+	}else{
+		$(".page-title .title-area .title-text").css("cursor", "pointer");
 	}
 }
 
