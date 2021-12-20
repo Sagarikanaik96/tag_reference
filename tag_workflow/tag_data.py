@@ -221,8 +221,11 @@ def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters)
     job_category = filters.get('job_category')
 
     company = filters.get('company')
-    return frappe.db.sql("""select name from `tabEmployee` where company=%(emp_company)s and job_category=%(job_category)s and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'job_category':job_category,'company':company})
-    
+
+    if job_category is None:
+        return frappe.db.sql("""select name from `tabEmployee` where company=%(emp_company)s and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company})
+    else:
+        return frappe.db.sql("""select name from `tabEmployee` where company=%(emp_company)s and job_category = %(job_category)s or job_category IS NULL and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company,'job_category':job_category})
     
 @frappe.whitelist()
 def get_org_site(doctype, txt, searchfield, page_len, start, filters):
