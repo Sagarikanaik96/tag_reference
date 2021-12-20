@@ -184,14 +184,12 @@
   {
    "fieldname": "drug_screen",
    "fieldtype": "Select",
-   "label": "Drug Screen",
-   "options": "None\n$0.50/hour per person\n$15 flat per person"
+   "label": "Drug Screen"
   },
   {
    "fieldname": "background_check",
    "fieldtype": "Select",
-   "label": "Background Check",
-   "options": "None\n$0.60/hour per person\n$20 flat per person"
+   "label": "Background Check"
   },
   {
    "fieldname": "column_break_24",
@@ -200,15 +198,13 @@
   {
    "fieldname": "driving_record",
    "fieldtype": "Select",
-   "label": "Driving Record",
-   "options": "None\n$0.40/hour per person\n$10 flat per person"
+   "label": "Driving Record"
   },
   {
    "depends_on": "eval:doc.category=='Construction'",
    "fieldname": "shovel",
    "fieldtype": "Select",
-   "label": "Shovel",
-   "options": "None\n$0.15/hour per person\n$5 flat per person"
+   "label": "Shovel"
   },
   {
    "fieldname": "bill_rate_section",
@@ -406,7 +402,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-17 15:46:24.927326",
+ "modified": "2021-12-20 16:59:58.162179",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
