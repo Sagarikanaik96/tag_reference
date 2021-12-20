@@ -96,7 +96,7 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
     for staff in staff_member:
         add("Company Review", doc.name, staff[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
     company_rate=frappe.db.sql(''' select average_rating from `tabCompany` where name='{}' '''.format(staffing_company),as_list=1)
-    if (company_rate[0][0]==None):
+    if (len(company_rate)==0 or company_rate[0][0]==None):
         doc=frappe.get_doc('Company',staffing_company)
         doc.average_rating=ratings['Rating']
         doc.save()
