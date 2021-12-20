@@ -46,8 +46,6 @@ frappe.ui.form.on('Job Order', {
 			});
 			if(cur_frm.doc.company!='undefined'){
 				frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','shovel','mvr','drug_screen_rate','background_check_rate','mvr_rate','shovel_rate','contract_addendums'], function(r){
-					var flat_rate_person='Flat rate person'
-					var per_hour_person='Hour per person'
 				    if(r.contract_addendums!="undefined"){
 						cur_frm.set_value("contract_add_on",r.contract_addendums)
 					}
