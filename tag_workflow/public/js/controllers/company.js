@@ -5,6 +5,9 @@ frappe.ui.form.on("Company", {
 		hide_details(frm);
 		update_company_fields(frm);
 		jazzhr_data(frm);
+		if(frappe.user.has_role('Tag Admin')) {
+			frm.set_df_property('employees', 'read_only' , 1);
+	   	}
 	},
 	setup: function(frm){
 		init_values(frm);
