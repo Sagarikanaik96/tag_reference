@@ -1,10 +1,29 @@
 frappe.ui.form.on("Lead", {
 	refresh: function(frm){
-		if(frm.doc.status == "Close"){
+		reqd_fields(frm);
+		hide_fields(frm);
+		let roles = frappe.user_roles;
+		if(frm.doc.status == "Close" && (roles.includes("Tag Admin") || roles.includes("Tag User") || roles.includes("Staffing Admin") || roles.includes("Staffing User"))){
 			onboard_org(frm);
 		}
 	}
 });
+
+/*------hide-----*/
+function hide_fields(frm){
+	let fields = ["organization_lead"];
+	for(let f in fields){
+		cur_frm.toggle_display(fields[f], 0);
+	}
+}
+
+/*-------reqd------*/
+function reqd_fields(frm){
+	let reqd = ["lead_name", "company_name", "email_id"];
+	for(let r in reqd){
+		cur_frm.toggle_reqd(reqd[r], 1);
+	}
+}
 
 /*------------onboard----------------*/
 function onboard_org(frm){

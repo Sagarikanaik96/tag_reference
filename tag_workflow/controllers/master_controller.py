@@ -18,6 +18,7 @@ EMP = "Employee"
 COM = "Company"
 JOB = "Job Order"
 USR = "User"
+STANDARD = ["Administrator", "Guest"]
 
 class MasterController(base_controller.BaseController):
     def validate_master(self):
@@ -153,6 +154,8 @@ def remove_tag_permission(user, emp, company):
 @frappe.whitelist()
 def check_employee(name, first_name, company, last_name=None, gender=None, date_of_birth=None, date_of_joining=None, organization_type=None):
     try:
+        if(name in STANDARD): return
+
         users = [{"name": name, "company": company}]
         if not frappe.db.exists(EMP, {"user_id": name, "company": company}):
             emp = frappe.get_doc(dict(doctype=EMP, first_name=first_name, last_name=last_name, company=company, status="Active", gender=gender, date_of_birth=date_of_birth, date_of_joining=date_of_joining, user_id=name, create_user_permission=1, email=name))

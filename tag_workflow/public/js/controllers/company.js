@@ -23,7 +23,7 @@ frappe.ui.form.on("Company", {
 			}else if(frappe.user_roles.includes('Staffing Admin')){
 				return {
 					filters: [
-						[ORG, "name", "in", ["Staffing", "Exclusive Hiring"]]
+						[ORG, "name", "=", "Exclusive Hiring"]
 					]
 				}
 			}else if(frappe.user_roles.includes('Hiring Admin')){
