@@ -40,7 +40,26 @@ def notify_email(job_order, employee, value, subject, company, employee_name, da
             message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
         else:
             message = f'<b>{employee_name}</b> has been unmarked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
-
+        
+        if(subject=='Non Satisfactory' and int(value)==1):
+            emp_doc = frappe.get_doc('Employee', employee)
+            y=emp_doc.unsatisfied_from
+            if len(emp_doc.unsatisfied_from)==0:
+                unsatisfied_organization(emp_doc,company)
+            else:
+                for i in emp_doc.unsatisfied_from:
+                    if(i['unsatisfied_organization_name']==company):
+                        break
+                else:
+                    unsatisfied_organization(emp_doc,company)
+        elif(subject=='Non Satisfactory' and int(value)==0):
+            emp_doc = frappe.get_doc('Employee', employee)
+            if len(emp_doc.unsatisfied_from)!=0:
+                for i in emp_doc.unsatisfied_from:
+                    if i.unsatisfied_organization_name == company:
+                        remove_row = i
+            emp_doc.remove(remove_row)
+            emp_doc.save(ignore_permissions=True)
         users = []
         for user in user_list:
             users.append(user['name'])
@@ -123,3 +142,9 @@ def approval_notification(job_order=None,staffing_company=None,date=None,hiring_
         hiring_user = [hiring_user[0] for hiring_user in user_list]
         make_system_notification(hiring_user,msg,'Timesheet',timesheet_name,subject)
         sendmail(hiring_user, msg, subject, 'Timesheet', timesheet_name)
+
+def unsatisfied_organization(emp_doc,company):
+    emp_doc.append('unsatisfied_from', {
+        'unsatisfied_organization_name': company,
+    })
+    emp_doc.save(ignore_permissions=True)
