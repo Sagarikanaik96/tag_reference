@@ -43,7 +43,6 @@ def notify_email(job_order, employee, value, subject, company, employee_name, da
         
         if(subject=='Non Satisfactory' and int(value)==1):
             emp_doc = frappe.get_doc('Employee', employee)
-            y=emp_doc.unsatisfied_from
             if len(emp_doc.unsatisfied_from)==0:
                 unsatisfied_organization(emp_doc,company)
             else:
