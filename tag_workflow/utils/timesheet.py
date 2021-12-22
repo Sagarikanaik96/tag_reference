@@ -5,6 +5,7 @@ import datetime
 from pymysql.constants.ER import NO
 from tag_workflow.utils.notification import sendmail, make_system_notification
 import json
+from frappe.utils import time_diff_in_seconds
 
 # global #
 JOB = "Job Order"
@@ -109,3 +110,16 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
             doc.average_rating=str(avg_rating)
             doc.save()
     return "success"
+
+@frappe.whitelist()
+def approval_notification(job_order=None,staffing_company=None,date=None,hiring_company=None,timesheet_name=None,timesheet_approved_time=None,current_time=None):
+    if(time_diff_in_seconds(current_time,timesheet_approved_time)<=5):
+        job_order_data=frappe.db.sql(''' select select_job,job_site,creation from `tabJob Order` where name='{}' '''.format(job_order),as_dict=1)
+        job_location=job_order_data[0].job_site
+        job_title=job_order_data[0].select_job
+        subject='Timesheet Approval'
+        msg=f'{staffing_company} has approved the {timesheet_name} timesheet for {job_title} at {job_location}'
+        user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(hiring_company),as_list=1)        
+        hiring_user = [hiring_user[0] for hiring_user in user_list]
+        make_system_notification(hiring_user,msg,'Timesheet',timesheet_name,subject)
+        sendmail(hiring_user, msg, subject, 'Timesheet', timesheet_name)

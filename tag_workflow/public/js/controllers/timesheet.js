@@ -1,7 +1,20 @@
 frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
-		cur_frm.set_value("employee"," ");
+		if(frm.doc.__islocal==1){
+			frm.set_value("employee","");
+			setTimeout(() => {
+				frm.set_value("employee","");
+				frm.set_df_property("job_details", "options", " ");
+			}, 700);	
+		}
+		if(cur_frm.doc.status=='Submitted' && frm.doc.workflow_state == "Approved"){
+			console.log()
+			frappe.call({
+				"method": "tag_workflow.utils.timesheet.approval_notification",
+				"args": {"job_order": frm.doc.job_order_detail,"hiring_company":frm.doc.company,"staffing_company": frm.doc.employee_company, "timesheet_name":cur_frm.doc.name,'timesheet_approved_time':frm.doc.modified,'current_time':frappe.datetime.now_datetime()}
+			});
 
+		}
 		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
 		hide_timesheet_field(timesheet_fields);
 
@@ -9,7 +22,6 @@ frappe.ui.form.on("Timesheet", {
 
 	setup: function(frm){
 		job_order_details(frm);
-		cur_frm.set_value("employee"," ");
 
 		frm.set_query("job_order_detail", function(){
 			return {
