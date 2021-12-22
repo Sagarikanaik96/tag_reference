@@ -374,14 +374,13 @@
    "default": "Today",
    "fieldname": "from_date",
    "fieldtype": "Datetime",
-   "label": "Job Order From Date",
+   "label": "Job Order Start Date",
    "reqd": 1
   },
   {
-   "default": "Today",
    "fieldname": "to_date",
    "fieldtype": "Datetime",
-   "label": "Job Order To Date",
+   "label": "Job Order End Date",
    "reqd": 1
   },
   {
@@ -402,7 +401,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-20 16:59:58.162179",
+ "modified": "2021-12-21 20:22:47.458422",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

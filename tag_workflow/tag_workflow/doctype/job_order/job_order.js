@@ -64,7 +64,7 @@ frappe.ui.form.on('Job Order', {
 					}	
 				})
 			}
-		}  
+		}
 	},
 	setup: function(frm){
 		frm.set_query('job_site', function(doc) {
@@ -90,12 +90,25 @@ frappe.ui.form.on('Job Order', {
 					cur_frm.set_value('company', "")
 				}
 			});
-		}else{
-			timer_value(frm)	   
+		}
+		else{
+			timer_value(frm)
+			let roles = frappe.user_roles;
+			if(roles.includes("Hiring User") || roles.includes("Hiring Admin")){
+		
+				if((frappe.datetime.now_datetime()>=cur_frm.doc.from_date) && (cur_frm.doc.to_date>=frappe.datetime.now_datetime())){
+					frm.set_df_property("no_of_workers", "read_only",0);
+				}	
+			}
 		}
 	},
 	before_save:function(frm){
 		check_company_detail(frm);
+		if(cur_frm.doc.no_of_workers<cur_frm.doc.worker_filled)
+		{
+			msgprint("No Of workers can't be less than"+cur_frm.doc.worker_filled);
+			frappe.validated = false;	
+		}
 		if(cur_frm.doc.__islocal==1){
 			var total_per_hour=cur_frm.doc.extra_price_increase+cur_frm.doc.per_hour
 			var total_flat_rate=cur_frm.doc.flat_rate
@@ -134,9 +147,8 @@ frappe.ui.form.on('Job Order', {
 				args: {
 					hiring_org:cur_frm.doc.company,
 					job_order:cur_frm.doc.name,
-					job_order_title:cur_frm.doc.job_title,
+					job_order_title:cur_frm.doc.select_job,
 					staff_company:cur_frm.doc.staff_company
-
 				}
 			});
 		}
