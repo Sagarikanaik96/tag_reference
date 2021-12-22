@@ -3,10 +3,12 @@
 '''
 
 import frappe
+from frappe import enqueue
 from frappe import _, msgprint, throw
 from tag_workflow.controllers import base_controller
+from tag_workflow.controllers.master_controller import check_employee
 
-#
+# global #
 EXC = "Exclusive Hiring"
 
 class CRMController(base_controller.BaseController):
@@ -23,9 +25,13 @@ class CRMController(base_controller.BaseController):
 @frappe.whitelist()
 def onboard_org(exclusive, staffing, email, person_name):
     try:
-        from tag_workflow.controllers.master_controller import make_update_comp_perm
         is_company, is_user = 1, 1
         company_doc, user = "", ""
+
+        if frappe.db.exists("User", email):
+            frappe.msgprint(_("User already exists with given email(<b>{0}</b>). Email must be unique for onboarding.").format(email))
+            return is_company, is_user, company_doc, user
+
         if not frappe.db.exists("Company", exclusive):
             exclusive = make_company(exclusive, staffing)
             is_company = 0
@@ -34,7 +40,7 @@ def onboard_org(exclusive, staffing, email, person_name):
             user = make_user(exclusive, staffing, email, person_name)
             is_user = 0
 
-        make_update_comp_perm(exclusive)
+        enqueue("tag_workflow.controllers.master_controller.make_update_comp_perm", docname=exclusive)
         return is_company, is_user, company_doc, user
     except Exception as e:
         frappe.db.rollback()
@@ -53,7 +59,6 @@ def make_company(exclusive, staffing):
 
 def make_user(exclusive, staffing, email, person_name):
     try:
-        from tag_workflow.controllers.master_controller import check_employee
         user = frappe.get_doc(dict(doctype="User",organization_type=EXC,tag_user_type="Hiring Admin",company=exclusive,email=email,first_name=person_name,module_profile="Hiring",role_profile_name="Hiring Admin"))
         user.save(ignore_permissions=True)
         check_employee(user.name, person_name, exclusive, last_name=None, gender=None, date_of_birth=None, date_of_joining=None, organization_type=EXC)

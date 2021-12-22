@@ -72,6 +72,10 @@ frappe.ui.form.on("User", {
 				]
 			}
 		}
+	},
+
+	birth_date: function(frm){
+		check_bd(frm);
 	}
 });
 
@@ -268,4 +272,13 @@ function get_data(frm){
 		}
 	});
 	return values;
+}
+
+/*------birth date-------*/
+function check_bd(frm){
+	let date = frm.doc.birth_date || "";
+	if(date && date >= frappe.datetime.now_date()){
+		frappe.msgprint({message: __('<b>Birth Date</b> Cannot be Today`s date or Future date'), title: __('Error'), indicator: 'orange'});
+		cur_frm.set_value("birth_date", "");
+	}
 }

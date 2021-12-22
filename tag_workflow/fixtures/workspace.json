@@ -1391,6 +1391,21 @@
     "hidden": 0,
     "icon": null,
     "is_query_report": 0,
+    "label": "Employee",
+    "link_to": "Employee",
+    "link_type": "DocType",
+    "onboard": 0,
+    "only_for": null,
+    "parent": "My Activities",
+    "parentfield": "links",
+    "parenttype": "Workspace",
+    "type": "Link"
+   },
+   {
+    "dependencies": null,
+    "hidden": 0,
+    "icon": null,
+    "is_query_report": 0,
     "label": "Company",
     "link_to": "Company",
     "link_type": "DocType",
@@ -1400,6 +1415,21 @@
     "parentfield": "links",
     "parenttype": "Workspace",
     "type": "Link"
+   },
+   {
+    "dependencies": null,
+    "hidden": 0,
+    "icon": null,
+    "is_query_report": 0,
+    "label": "TAG Transaction",
+    "link_to": null,
+    "link_type": "DocType",
+    "onboard": 0,
+    "only_for": null,
+    "parent": "My Activities",
+    "parentfield": "links",
+    "parenttype": "Workspace",
+    "type": "Card Break"
    },
    {
     "dependencies": null,
@@ -1462,7 +1492,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2021-11-17 19:57:20.956646",
+  "modified": "2021-12-21 06:20:14.504256",
   "module": "Tag Workflow",
   "name": "My Activities",
   "onboarding": null,

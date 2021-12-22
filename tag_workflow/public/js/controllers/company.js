@@ -5,6 +5,9 @@ frappe.ui.form.on("Company", {
 		hide_details(frm);
 		update_company_fields(frm);
 		jazzhr_data(frm);
+		if(frappe.user.has_role('Tag Admin')) {
+			frm.set_df_property('employees', 'read_only' , 1);
+	   	}
 	},
 	setup: function(frm){
 		init_values(frm);
@@ -20,7 +23,7 @@ frappe.ui.form.on("Company", {
 			}else if(frappe.user_roles.includes('Staffing Admin')){
 				return {
 					filters: [
-						[ORG, "name", "in", ["Staffing", "Exclusive Hiring"]]
+						[ORG, "name", "=", "Exclusive Hiring"]
 					]
 				}
 			}else if(frappe.user_roles.includes('Hiring Admin')){
