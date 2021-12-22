@@ -159,7 +159,7 @@
 									<ul class="nav">
 										<li>
 											<a href="#" id="btn-1" data-toggle="collapse" data-target="#submenu1" aria-expanded="false">
-												<span class="pl-3 ml-3"><img src="/assets/tag_workflow/images/ico-crm.svg" class="pr-3 pl-3"></span>CRM
+												<span class="pl-3 ml-3"><img src="/assets/tag_workflow/images/ico-crm.svg" class="pr-3 pl-3" alt="crm"></span>CRM
 												<span class="pl-5"><i class="fa fa-angle-down" aria-hidden="true"></i></span>
 											</a>
 											<ul class="inner-menu pl-5 ml-5 list-unstyled collapse" id="submenu1" role="menu" aria-labelledby="btn-1">
@@ -209,7 +209,7 @@
 								<div class="d-flex">
 									<div><img src="/assets/tag_workflow/images/ico-maps.jpeg" class="img-fluid px-3" alt="user-image"></div>
 									<div class="pr-3 ml-3">
-										<h5 class="mb-0"><b>{{frappe.session.user_fullname}}</b></h5>
+										<h5 class="mb-0"><strong>{{frappe.session.user_fullname}}</strong></h5>
 										<span class="badge badge-danger">
 											{% if frappe.session.user_fullname == "Administrator" %}
 												{{ __("Master Admin") }}
