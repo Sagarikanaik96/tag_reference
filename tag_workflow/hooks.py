@@ -15,6 +15,8 @@ app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.svg"
 
 fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow", "Workflow State", "Workflow Action Master"]
 
+boot_session = "tag_workflow.utils.trigger_session.update_boot"
+
 on_session_creation = [
         "tag_workflow.utils.trigger_session.on_session_creation"
 ]
@@ -25,7 +27,8 @@ app_include_css = [
 
 app_include_js = [
         "/assets/tag_workflow/js/tag.js",
-        "/assets/tag_workflow/js/controllers/sortable.js"
+        "/assets/tag_workflow/js/controllers/sortable.js",
+        "/assets/tag-template.min.js"
 ]
 
 web_include_css = [

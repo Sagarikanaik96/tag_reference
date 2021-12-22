@@ -1,5 +1,8 @@
 {
 	"css/tag_workflow.min.css":[
 		"public/scss/custom.scss"
+	],
+	"tag-template.min.js":[
+		"public/js/template/tag.html"
 	]
 }

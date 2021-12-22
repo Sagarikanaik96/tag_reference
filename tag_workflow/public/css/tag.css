@@ -197,3 +197,20 @@ input::-webkit-credentials-auto-fill-button {
 		padding-right: 0px;
 	}
 }
+
+.col-lg-2.layout-side-section {
+	display: none;
+}
+
+.icon.icon-md.sidebar-toggle-placeholder {
+	display: none;
+}
+
+[data-page-route="Workspaces"] .layout-main .layout-main-section-wrapper, [data-page-route="Workspaces"] .layout-main .layout-side-section {
+	left: 13rem;
+}
+
+.col.layout-main-section-wrapper{
+	left: 10rem;
+	max-width: 90%;
+}
