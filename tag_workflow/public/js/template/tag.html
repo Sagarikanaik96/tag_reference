@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 	<head>
+		<title></title>
 		<!-- Required meta tags -->
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -137,19 +138,19 @@
 
 							<a href="/app/home">
 								<div class="tab-button custom-btn">
-									<img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-5">Home
+									<img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-5" alt="home">Home
 								</div>
 							</a>
 
 							<a href="/app/job-order">
 								<div class="tab-button custom-btn">
-									<img src="/assets/tag_workflow/images/ico-order.svg" class="pr-3 pl-5">Order
+									<img src="/assets/tag_workflow/images/ico-order.svg" class="pr-3 pl-5" alt="order">Order
 								</div>
 							</a>
 
 							<a href="/app/home">
 								<div class="tab-button custom-btn">
-									<img src="/assets/tag_workflow/images/ico-messages.svg" class="pr-3 pl-5">Messages
+									<img src="/assets/tag_workflow/images/ico-messages.svg" class="pr-3 pl-5" alt="message">Messages
 								</div>
 							</a>
 
@@ -172,41 +173,41 @@
 
 								<a href="/app/employee">
 									<div class="tab-button custom-btn">
-										<img src="/assets/tag_workflow/images/ico-employee.svg" class="pr-3 pl-5"> Employees
+										<img src="/assets/tag_workflow/images/ico-employee.svg" class="pr-3 pl-5" alt="employee">Employees
 									</div>
 								</a>
 							{% endif %}
 
 							<a href="/app/home">
 								<div class="tab-button custom-btn">
-									<img src="/assets/tag_workflow/images/ico-maps.svg"class="pr-3 pl-5">Maps
+									<img src="/assets/tag_workflow/images/ico-maps.svg"class="pr-3 pl-5" alt="maps">Maps
 								</div>
 							</a>
 
 							{% if frappe.boot.tag.tag_user_info.company_type != "Hiring" %}
 								<a href="/app/home">
 									<div class="tab-button custom-btn">
-										<img src="/assets/tag_workflow/images/ico-invoice.svg" class="pr-3 pl-5">Reports
+										<img src="/assets/tag_workflow/images/ico-invoice.svg" class="pr-3 pl-5" alt="reports">Reports
 									</div>
 								</a>
 							{% endif %}
 							
 							<a href="/app/sales-invoice">
 								<div class="tab-button custom-btn">
-									<img src="/assets/tag_workflow/images/ico-invoice.svg" class="pr-3 pl-5">Invoice
+									<img src="/assets/tag_workflow/images/ico-invoice.svg" class="pr-3 pl-5" alt="invoice">Invoice
 								</div>
 							</a>
 
 							<a href="/app/home">
 								<div class="tab-button custom-btn"> 
-									<img src="/assets/tag_workflow/images/ico-contact.svg" class="pr-3 pl-5">Contact Us
+									<img src="/assets/tag_workflow/images/ico-contact.svg" class="pr-3 pl-5" alt="contact-us">Contact Us
 								</div>
 							</a>
 
 							<!-- user info -->
 							<div class="row footer-admin border-top pl-4 py-4"> 
 								<div class="d-flex">
-									<div><img src="/assets/tag_workflow/images/ico-maps.jpeg" class="img-fluid px-3"></div>
+									<div><img src="/assets/tag_workflow/images/ico-maps.jpeg" class="img-fluid px-3" alt="user-image"></div>
 									<div class="pr-3 ml-3">
 										<h5 class="mb-0"><b>{{frappe.session.user_fullname}}</b></h5>
 										<span class="badge badge-danger">
