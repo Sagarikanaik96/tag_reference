@@ -123,6 +123,7 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
         if(len(update_values)<2):
             if staff_company:
                 x.company_type = 'Non Exclusive'
+                x.is_single_share = 1
                 x.save(ignore_permissions = True)
                 user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(staff_company),as_list=1)
                 l = [l[0] for l in user_list]

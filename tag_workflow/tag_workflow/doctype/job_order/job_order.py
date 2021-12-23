@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 import frappe
 from frappe.utils import user
+from frappe.share import add
 from tag_workflow.utils.notification import sendmail
 from tag_workflow.utils.notification import make_system_notification
 from frappe.model.document import Document
@@ -40,3 +41,38 @@ def is_send_mail_required(organizaton,doc_name,msg):
 	except Exception as e:
 		frappe.log_error(e, "Job Order Notification Error")
 		frappe.throw(e)
+
+
+@frappe.whitelist()
+def get_jobtitle_list(doctype, txt, searchfield, page_len, start, filters):
+	company=filters.get('job_order_company')
+	if company is None:
+		return None
+	else:
+		return frappe.db.sql(''' select job_titles from `tabJob Titles` where parent=%(company)s''',{'company':company})
+
+
+@frappe.whitelist()	
+def update_joborder_rate_desc(company = None,job = None):
+	if job is None or company is None:
+		return None
+
+	org_detail = frappe.db.sql(''' select wages,description from `tabJob Titles` where parent = "{}" and job_titles = "{}"'''.format(company,job),as_dict=True)
+	if org_detail:
+		return org_detail[0]
+
+@frappe.whitelist()
+def after_denied_joborder(staff_company,joborder_name):
+	share_list = frappe.db.sql('''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staff_company),as_list = True)
+	if share_list:
+		for user in share_list:
+			add("Job Order", joborder_name, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
+	try:
+		jb_ord = frappe.get_doc('Job Order',joborder_name)
+		jb_ord.is_single_share = 0
+		jb_ord.save(ignore_permissions = True)
+	except Exception as e:
+		frappe.log_error(e,'job order not found')
+		
+	return True
+		
