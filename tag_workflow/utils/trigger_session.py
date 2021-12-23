@@ -44,14 +44,14 @@ def add_company_share_permission(users):
             if not frappe.db.exists("DocShare", {"share_doctype": "Company", "user":usr['name'], "share_name":usr['company'], "read":1, "write":1, "share": 1}):
                 add("Company", usr['company'], user=usr['name'], read=1, write=1, share=1, flags={"ignore_share_permission": 1})
     except Exception as e:
-        frappe.log_error(e, "doc share error")
+        frappe.log_error(frappe.get_traceback(), "doc share error")
         print(e)
 
 def share_company_with_user(users=None):
     try:
         if not users:
             users = frappe.db.sql(""" select name, company from `tabUser` where enabled = 1 and company != '' """, as_dict=1)
-        #frappe.msgprint(_("{0}, {1}").format(users, "share_company_with_users"))
+        frappe.msgprint(_("{0}, {1}").format(users, "share_company_with_users"))
         add_company_share_permission(users)
     except Exception as e:
         frappe.log_error(e, "sharing company")
