@@ -133,7 +133,7 @@ function init_values(frm){
 function update_company_fields(frm){
 	let roles = frappe.user_roles;
 	let is_local = cur_frm.doc.__islocal;
-	let company_fields = ['organization_type', 'country', 'fein', 'title', 'primary_language', 'industry', 'accounts_payable_contact_name', 'accounts_payable_email', 'accounts_payable_phone_number', 'address', 'state', 'zip', 'city', 'branch', 'default_currency', 'parent_staffing'];
+	let company_fields = ['organization_type', 'country', 'fein', 'title', 'primary_language', 'industry', 'accounts_payable_contact_name', 'accounts_payable_email', 'accounts_payable_phone_number', 'address', 'state', 'zip', 'city', 'default_currency', 'parent_staffing'];
 
 	if(roles.includes('System Manager') && !is_local && cur_frm.doc.organization_type != 'TAG'){
 		for(let f in company_fields){

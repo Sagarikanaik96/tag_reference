@@ -177,7 +177,7 @@ def staff_org_details(company_details=None):
     is_ok = "failed"
     if None in company_info[0]:
         return is_ok
-    if(len(comp_data.branch)==0 or len(comp_data.industry_type)==0 or len(comp_data.employees)==0):
+    if(len(comp_data.job_site)==0 or len(comp_data.industry_type)==0 or len(comp_data.employees)==0):
         return is_ok
     return "success"
 
@@ -269,3 +269,6 @@ def disable_user(company, check):
         check=int(1)
     frappe.db.sql(""" UPDATE `tabUser` SET `tabUser`.enabled ="{0}" where company="{1}" and `terminated`!=1 """.format(check,company))
     frappe.db.commit()
+
+
+
