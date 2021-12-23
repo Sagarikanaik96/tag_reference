@@ -223,7 +223,7 @@ def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters)
     if job_category is None:
         return frappe.db.sql("""select name from `tabEmployee` where company=%(emp_company)s and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company})
     else:
-        return frappe.db.sql("""select name from `tabEmployee` where company=%(emp_company)s and job_category = %(job_category)s or job_category IS NULL and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company,'job_category':job_category})
+        return frappe.db.sql("""select name from `tabEmployee` where company=%(emp_company)s and (job_category = %(job_category)s or job_category IS NULL) and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company,'job_category':job_category})
     
 @frappe.whitelist()
 def get_org_site(doctype, txt, searchfield, page_len, start, filters):
@@ -250,3 +250,12 @@ def job_order_notification(job_order_title,hiring_org,job_order,subject,l):
     make_system_notification(l,msg,'Job Order',job_order,subject)   
     message=f'New Work Order for {job_order_title} has been created by {hiring_org}. <a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
     return send_email(subject,message,l)
+
+@frappe.whitelist()
+def disable_user(company, check):
+    if check=="1":
+        check=int(0)
+    else:
+        check=int(1)
+    frappe.db.sql(""" UPDATE `tabUser` SET `tabUser`.enabled ="{0}" where company="{1}" and `terminated`!=1 """.format(check,company))
+    frappe.db.commit()

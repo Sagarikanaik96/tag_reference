@@ -95,6 +95,12 @@ frappe.ui.form.on("Company", {
 
 	before_save: function(frm){
 		validate_phone_and_zip(frm);
+	},
+	make_organization_inactive(frm) {
+		frappe.call({
+		method: "tag_workflow.tag_data.disable_user",
+		args: {company: cur_frm.doc.company_name, check:cur_frm.doc.make_organization_inactive},
+		})
 	}
 });
 
