@@ -25,19 +25,20 @@ frappe.FaceRecognition = Class.extend({
 			frappe.call({
 				method:"tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.comp",
 				
-				callback:function(r)
-				{
-					var comp_data=r.message
-					const profile_html = `
-									${comp_data.map((l,p) => `<tr>
-										<td>${p+1}</td>
-										<td ><a href=javascript:get_location(${p+1})>${l.name}</a></td>
-										<td>${l.address}</td>
-										<td>${l.city}</td>
-										<td>${l.state}</td>
-										<td>${l.zip}</td>	
-										<td>${l.average_rating}</td>				
-									</tr>`).join('')}`
+				callback:function(r){
+					var data = r.message;
+					let profile_html = ``;
+					for(let p in data){
+						profile_html += `<tr>
+							<td>${p+1}</td>
+							<td ><a href=javascript:get_location(${p+1})>${data[p].name}</a></td>
+							<td>${data[p].address}</td>
+							<td>${data[p].city}</td>
+							<td>${data[p].state}</td>
+							<td>${data[p].zip}</td>
+							<td>${data[p].average_rating}</td>
+							</tr>`;
+					}
 					$("#myTable").html(profile_html);
 				}
 				})
