@@ -136,7 +136,6 @@ frappe.ui.form.States = Class.extend({
 								return 0;
 							}
 						}
-						return 0;
 					});
 				}
 			});

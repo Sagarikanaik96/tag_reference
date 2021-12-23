@@ -90,9 +90,9 @@ function get_location(name){
 			}
 
 			let review = ``;
-			for(let r in company_review){
+			for(let c in company_review){
 				review += `<h4>Team Member</h4>
-				${company_review[r].owner}<br>${company_review[r].rating}<br>${company_review[r].comments}<br>${company_review[r].creation}<br>`;
+				${company_review[c].owner}<br>${company_review[c].rating}<br>${company_review[c].comments}<br>${company_review[c].creation}<br>`;
 			}
 
 			$("#listdata").html(data);
