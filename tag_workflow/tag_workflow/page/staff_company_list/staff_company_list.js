@@ -53,8 +53,7 @@ function get_location(name){
 
 			"comp_id":name,
 		},	
-		callback:function(r)
-		{
+		callback:function(r){
 			let company_data=r.message[0][0]
 			let company_industry=r.message[1]
 			let company_member=r.message[2]
@@ -80,17 +79,22 @@ function get_location(name){
 				</tr>
 			</table>`
 
-			const industry=`<h4>Serving Industries</h4>
-				${company_industry.map((l) => `${l.industry_type}<br>`).join('')}`
+			let industry = ``;
+			for(let i in company_industry){
+				industry += `<h4>Serving Industries</h4>${company_industry[i].industry_type}<br>`;
+			}
 			
-			const team=`<h4>Team Member</h4>
-				${company_member.map((l) => `${l.first_name}${l.last_name}<br>`).join('')}`
+			let team = ``;
+			for(let m in company_member){
+				team += `<h4>Team Member</h4>${company_member[m].first_name}${company_member[m].last_name}<br>`;
+			}
 
-			const review=`<h4>Team Member</h4>
-			${company_review.map((l) => `${l.owner}<br>	
-										${l.rating}<br>	
-										${l.comments}<br>
-										${l.creation}<br>`).join('')}`
+			let review = ``;
+			for(let r in company_review){
+				review += `<h4>Team Member</h4>
+				${company_review[r].owner}<br>${company_review[r].rating}<br>${company_review[r].comments}<br>${company_review[r].creation}<br>`;
+			}
+
 			$("#listdata").html(data);
 			$("#industrydata").html(industry);
 			$("#teamdata").html(team);
