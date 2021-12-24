@@ -24,9 +24,10 @@ frappe.ui.form.on("Timesheet", {
 
 		frm.set_query("job_order_detail", function(){
 			return {
-				filters: [
-					["Job Order", "company", "=", frm.doc.company]
-				]
+				query: "tag_workflow.utils.timesheet.assigned_job_order",
+				filters: {
+					"company": frm.doc.company}
+				
 			}
 		});
 
@@ -59,7 +60,7 @@ frappe.ui.form.on("Timesheet", {
 
 	workflow_state: function(frm){
 		check_update_timesheet(frm);
-	}
+	},
 });
 
 
