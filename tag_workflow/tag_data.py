@@ -94,7 +94,7 @@ def update_job_order(job_name, employee_filled, staffing_org, hiringorg, name):
 @frappe.whitelist()
 def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc_name):
     import json
-    bid_receive=frappe.get_doc("Job Order",job_order)
+    bid_receive=frappe.get_doc(jobOrder,job_order)
     bid_receive.bid=1+int(bid_receive.bid)
     bid_receive.claim=str(bid_receive.claim)+str(",")+staffing_org
     bid_receive.save(ignore_permissions=True)
@@ -281,10 +281,10 @@ def update_job_order_status():
         end_date = job.to_date if job.to_date else ""
 
         if now_date<start_date:
-            frappe.db.set_value("Job Order", job.name, "order_status", "Upcoming")
+            frappe.db.set_value(jobOrder, job.name, "order_status", "Upcoming")
         elif now_date>end_date:
-            frappe.db.set_value("Job Order", job.name, "order_status", "Completed")
+            frappe.db.set_value(jobOrder, job.name, "order_status", "Completed")
         else:
-            frappe.db.set_value("Job Order", job.name, "order_status", "Ongoing")
+            frappe.db.set_value(jobOrder, job.name, "order_status", "Ongoing")
 
 
