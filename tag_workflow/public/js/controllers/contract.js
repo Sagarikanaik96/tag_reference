@@ -80,12 +80,7 @@ let _contract = `<p><b>Staffing/Vendor Contract</b></p>
 function update_contract(frm){
 	if(cur_frm.doc.__islocal == 1){
 		cur_frm.set_value("contract_terms", _contract);
-		setTimeout(setup_hiring(frm), 300);
 	}
-}
-
-function setup_hiring(frm){
-	cur_frm.set_value("hiring_company", "");
 }
 
 /*-------update user----------*/
