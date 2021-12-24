@@ -78,3 +78,8 @@ override_doctype_dashboards = {
         "Company": "tag_workflow.dashboard_data.company_dashboard.get_data",
         "Sales Invoice": "tag_workflow.dashboard_data.sales_invoice_dashboard.get_data"
 }
+scheduler_events={
+        "all":  [
+	        "tag_workflow.tag_data.update_job_order_status"
+	]
+}

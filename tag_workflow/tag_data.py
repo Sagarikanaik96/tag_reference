@@ -3,7 +3,7 @@ from frappe import _
 from frappe.share import add
 from frappe import enqueue
 from tag_workflow.utils.notification import sendmail, make_system_notification
-
+from frappe.utils import get_datetime,now
 
 jobOrder = "Job Order"
 
@@ -270,5 +270,21 @@ def disable_user(company, check):
     frappe.db.sql(""" UPDATE `tabUser` SET `tabUser`.enabled ="{0}" where company="{1}" and `terminated`!=1 """.format(check,company))
     frappe.db.commit()
 
+
+
+@frappe.whitelist()
+def update_job_order_status():
+    job_order_data=frappe.get_all('Job Order',fields=['name','from_date','to_date','order_status'])
+    now_date = get_datetime(now())
+    for job in job_order_data:
+        start_date = job.from_date if job.from_date else ""
+        end_date = job.to_date if job.to_date else ""
+
+        if now_date<start_date:
+            frappe.db.set_value("Job Order", job.name, "order_status", "Upcoming")
+        elif now_date>end_date:
+            frappe.db.set_value("Job Order", job.name, "order_status", "Completed")
+        else:
+            frappe.db.set_value("Job Order", job.name, "order_status", "Ongoing")
 
 
