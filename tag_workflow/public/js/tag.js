@@ -6,8 +6,10 @@ $(document).bind('toolbar_setup', function() {
         $('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
 });
 
-$(document).ready(function() {
-	$(".main-section").append(frappe.render_template("tag"));
+$(document).ready(function(){
+	if(frappe.boot && frappe.boot.home_page!=='setup-wizard'){
+		$(".main-section").append(frappe.render_template("tag"));
+	}
 });
 
 frappe.provide("tag_workflow.workflow");
