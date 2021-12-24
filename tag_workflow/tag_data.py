@@ -117,39 +117,39 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
 @frappe.whitelist()
 def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None,staff_company=None):
     try:
-        x = frappe.get_doc(jobOrder,job_order)
+        doc = frappe.get_doc(jobOrder,job_order)
         subject="New Work Order"
         update_values=frappe.db.sql(''' select data from `tabVersion` where ref_doctype='Job Order' and docname='{}' '''.format(job_order),as_list=1)
         if(len(update_values)<2):
             if staff_company:
-                x.company_type = 'Non Exclusive'
-                x.is_single_share = 1
-                x.save(ignore_permissions = True)
+                doc.company_type = 'Non Exclusive'
+                doc.is_single_share = 1
+                doc.save(ignore_permissions = True)
                 user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(staff_company),as_list=1)
                 l = [l[0] for l in user_list]
                 for user in l:
                     add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
                 job_order_notification(job_order_title,hiring_org,job_order,subject,l)
             else:
-                staff_email_notification_cont(hiring_org, job_order, job_order_title, staff_company)
+                staff_email_notification_cont(hiring_org, job_order, job_order_title,doc,subject)
     except Exception as e:
         print(e, frappe.get_traceback())
         frappe.db.rollback()
 
-def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title=None,staff_company=None):
+def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title=None,doc=None,subject=None):
     try:
         org_type=frappe.db.sql('''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org),as_list=1)
         if(org_type[0][0]=='Hiring'):
-            x.company_type = 'Non Exclusive'
-            x.save(ignore_permissions = True)
+            doc.company_type = 'Non Exclusive'
+            doc.save(ignore_permissions = True)
             user_list=frappe.db.sql(''' select email from `tabUser` where organization_type='staffing' ''',as_list=1)
             l = [l[0] for l in user_list]
             for user in l:
                 add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
             job_order_notification(job_order_title,hiring_org,job_order,subject,l)
         elif org_type[0][0]=="Exclusive Hiring":
-            x.company_type = 'Exclusive'
-            x.save(ignore_permissions = True)
+            doc.company_type = 'Exclusive'
+            doc.save(ignore_permissions = True)
             owner_info=frappe.db.sql(''' select owner from `tabCompany` where organization_type="Exclusive Hiring" and name="{}" '''.format(hiring_org),as_list=1)
             company_info=frappe.db.sql(''' select company from `tabUser` where name='{}' '''.format(owner_info[0][0]),as_list=1)
             user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(company_info[0][0]),as_list=1)

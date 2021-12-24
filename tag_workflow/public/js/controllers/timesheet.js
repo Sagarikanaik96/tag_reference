@@ -8,7 +8,6 @@ frappe.ui.form.on("Timesheet", {
 			}, 700);	
 		}
 		if(cur_frm.doc.status=='Submitted' && frm.doc.workflow_state == "Approved"){
-			console.log()
 			frappe.call({
 				"method": "tag_workflow.utils.timesheet.approval_notification",
 				"args": {"job_order": frm.doc.job_order_detail,"hiring_company":frm.doc.company,"staffing_company": frm.doc.employee_company, "timesheet_name":cur_frm.doc.name,'timesheet_approved_time':frm.doc.modified,'current_time':frappe.datetime.now_datetime()}
@@ -173,6 +172,6 @@ function trigger_email(frm, key, value, type){
 function notify_email(frm, type, value){
 	frappe.call({
 		"method": "tag_workflow.utils.timesheet.notify_email",
-		"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation}
+		"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation,'employee_company':frm.doc.employee_company}
 	});
 }

@@ -1,3 +1,4 @@
+from time import time
 import frappe
 from frappe import _, msgprint
 from frappe.share import add
@@ -32,33 +33,14 @@ def get_timesheet_employee(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def notify_email(job_order, employee, value, subject, company, employee_name, date):
+def notify_email(job_order, employee, value, subject, company, employee_name, date,employee_company):
     try:
         user_list = frappe.db.sql(""" select name from `tabUser` where company = (select company from `tabEmployee` where name = %s) """,employee, as_dict=1)
-        
-        if(int(value)):
-            message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
+        if subject=='DNR':
+            message=dnr_notification(job_order,value,employee_name,subject,date,company,employee_company,employee)       
         else:
-            message = f'<b>{employee_name}</b> has been unmarked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
-        
-        if(subject=='Non Satisfactory' and int(value)==1):
-            emp_doc = frappe.get_doc('Employee', employee)
-            if len(emp_doc.unsatisfied_from)==0:
-                unsatisfied_organization(emp_doc,company)
-            else:
-                for i in emp_doc.unsatisfied_from:
-                    if(i['unsatisfied_organization_name']==company):
-                        break
-                else:
-                    unsatisfied_organization(emp_doc,company)
-        elif(subject=='Non Satisfactory' and int(value)==0):
-            emp_doc = frappe.get_doc('Employee', employee)
-            if len(emp_doc.unsatisfied_from)!=0:
-                for i in emp_doc.unsatisfied_from:
-                    if i.unsatisfied_organization_name == company:
-                        remove_row = i
-            emp_doc.remove(remove_row)
-            emp_doc.save(ignore_permissions=True)
+            message=show_satisfactory_notification(job_order,value,employee_name,subject,date,company,employee_company,employee)
+            
         users = []
         for user in user_list:
             users.append(user['name'])
@@ -88,9 +70,8 @@ def check_employee_editable(job_order, name, creation):
 
         time_diff = creation - from_date
         emp_list = frappe.db.sql(""" select no_show, non_satisfactory, dnr from `tabTimesheet` where docstatus != 1 and job_order_detail = %s and employee in (select employee from `tabAssign Employee Details` where parent = %s) """,(job_order, name), as_dict=1)
-
         for emp in emp_list:
-            if((emp.no_show == 1 or emp.dnr == 1 or emp.non_satisfactory == 1) and (time_diff.seconds/60/60 > 2)):
+            if((emp.no_show == 1 or emp.dnr == 1 or emp.non_satisfactory == 1) and (time_diff.seconds/60/60 < 2)):
                 is_editable = 1
 
         return is_editable
@@ -147,3 +128,58 @@ def unsatisfied_organization(emp_doc,company):
         'unsatisfied_organization_name': company,
     })
     emp_doc.save(ignore_permissions=True)
+
+def dnr_notification(job_order,value,employee_name,subject,date,company,employee_company,employee):
+    data=frappe.db.sql(''' select from_date,to_date from `tabJob Order` where name='{}' '''.format(job_order),as_dict=1)
+    start_date=data[0].from_date
+    end_date=data[0].to_date
+    time_format = '%Y-%m-%d %H:%M:%S'
+    to_date = datetime.datetime.strptime(str(end_date), time_format)
+    today = datetime.datetime.now()
+    time_diff=today-start_date
+    if(today<=to_date and (time_diff.seconds/60/60 < 2)):
+        if(int(value)):
+            message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>. There is time to substitute this employee for today’s work order.'
+        return message
+
+
+    else:
+        if(int(value)):
+            message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
+        else:
+            message = f'<b>{employee_name}</b> has been unmarked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
+        return message
+        
+def show_satisfactory_notification(job_order,value,employee_name,subject,date,company,employee_company,employee):
+    if(int(value)):
+        message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
+    else:
+        message = f'<b>{employee_name}</b> has been unmarked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
+    
+    if(subject=='Non Satisfactory' and int(value)==1):
+        emp_doc = frappe.get_doc('Employee', employee)
+        employee_unsatisfactory(company,emp_doc)
+
+    elif(subject=='Non Satisfactory' and int(value)==0):
+        emp_doc = frappe.get_doc('Employee', employee)
+        removing_unsatisfied_employee(company,emp_doc)
+        
+    return message
+
+def employee_unsatisfactory(company,emp_doc):
+    if len(emp_doc.unsatisfied_from)==0:
+        unsatisfied_organization(emp_doc,company)
+    else:
+        for i in emp_doc.unsatisfied_from:
+            if(i['unsatisfied_organization_name']==company):
+                break
+        else:
+            unsatisfied_organization(emp_doc,company)
+
+def removing_unsatisfied_employee(company,emp_doc):
+    if len(emp_doc.unsatisfied_from)!=0:
+        for i in emp_doc.unsatisfied_from:
+            if i.unsatisfied_organization_name == company:
+                remove_row = i
+        emp_doc.remove(remove_row)
+        emp_doc.save(ignore_permissions=True)
