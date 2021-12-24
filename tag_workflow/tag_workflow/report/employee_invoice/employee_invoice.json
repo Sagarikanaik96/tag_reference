@@ -25,38 +25,26 @@
  "idx": 0,
  "is_standard": "Yes",
  "json": "{}",
- "modified": "2021-12-02 18:19:24.773311",
+ "modified": "2021-12-24 11:57:43.814438",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Employee Invoice",
  "owner": "Administrator",
  "prepared_report": 0,
- "query": "SELECT\n  `tabTimesheet`.employee_name as \"Employee Name:Data:200\",\n  `tabTimesheet`.job_order_detail as \"Job Order:Link/Job Order:200\",\n  `tabTimesheet`.company as \"Company:Link/Company:200\",\n  `tabTimesheet`.total_billable_hours as \"Hours Worked:Data:200\",\n  `tabTimesheet`.start_date as \"Start Date:Date:200\",\n  `tabTimesheet`.end_date as \"End Date:Date:200\",\n  `tabTimesheet`.total_billable_amount as \"Total Paid:Data:200\",\n  `tabTimesheet`.non_satisfactory as \"Unsatisfactory:Check:200\" ,\n  `tabTimesheet`.dnr as \"DNR:Check:200\" \n  \n  \n  \n  \nFROM `tabTimesheet`\nWHERE `tabTimesheet`.start_date >= %(from_date)s and `tabTimesheet`.end_date <= %(to_date)s",
+ "query": "SELECT\r  `tabTimesheet`.employee_name as \"Employee Name:Data:200\",\r  `tabTimesheet`.job_order_detail as \"Job Order:Link/Job Order:200\",\r  `tabTimesheet`.company as \"Company:Link/Company:200\",\r  `tabTimesheet`.total_billable_hours as \"Hours Worked:Data:200\",\r  `tabTimesheet`.start_date as \"Start Date:Date:200\",\r  `tabTimesheet`.end_date as \"End Date:Date:200\",\r  `tabTimesheet`.start_date as \"Start Date:Date:200\",\r  `tabTimesheet Detail`.base_billing_rate as \"Rate:Currency:200\",\r  `tabTimesheet`.total_billable_amount as \"Total Paid:Data:200\",\r  `tabTimesheet`.non_satisfactory as \"Unsatisfactory:Check:200\" ,\r  `tabTimesheet`.dnr as \"DNR:Check:200\" \r \r  \rFROM `tabTimesheet`, `tabTimesheet Detail`\rWHERE `tabTimesheet`.start_date >= %(from_date)s and `tabTimesheet`.end_date <= %(to_date)s and `tabTimesheet`.name = `tabTimesheet Detail`.parent",
  "ref_doctype": "Timesheet",
  "report_name": "Employee Invoice",
  "report_script": "",
  "report_type": "Query Report",
  "roles": [
   {
-   "role": "Employee Self Service"
+   "role": "Tag Admin"
   },
   {
-   "role": "Projects User"
+   "role": "Staffing Admin"
   },
   {
-   "role": "HR User"
-  },
-  {
-   "role": "Manufacturing User"
-  },
-  {
-   "role": "Employee"
-  },
-  {
-   "role": "Accounts User"
-  },
-  {
-   "role": "Hiring Admin"
+   "role": "Staffing User"
   }
  ]
 }
