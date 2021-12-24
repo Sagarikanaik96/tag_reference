@@ -4,6 +4,7 @@ from frappe import _, msgprint, throw
 from frappe.utils import cint, cstr, flt, now_datetime, getdate, nowdate
 from frappe.model.mapper import get_mapped_doc
 from erpnext.selling.doctype.quotation.quotation import _make_customer
+from tag_workflow.utils.notification import sendmail, make_system_notification, share_doc
 
 #-------global var------#
 item = "Timesheet Activity Cost"
@@ -139,3 +140,38 @@ def get_user_company_data(user, company):
 def get_orgs():
     return frappe.db.sql(""" select name from `tabCompany` where organization_type = 'Hiring' """, as_dict=1)
 
+#-------get company users----#
+@frappe.whitelist(allow_guest=True)
+def get_user(company):
+    user = ""
+    try:
+        users = frappe.db.sql("""select name from `tabUser` where company = %s and enabled = 1 """,company, as_dict=1)
+        for u in users:
+            user += "\n"+str(u.name)
+
+        return user
+    except Exception as e:
+        print(e)
+        return user
+
+#-----------request signature----------------#
+@frappe.whitelist()
+def request_signature(staff_user, staff_company, hiring_user, name):
+    try:
+        link = frappe.utils.get_link_to_form("Contract", name, label='{{ _("Click here for signature") }}')
+        link = '<p style="margin: 15px 0px;">'+link+'</p>'
+        template = frappe.get_template("templates/emails/digital_signature.html")
+        message = template.render({"staff_user": staff_user, "staff_company": staff_company, "link": link})
+        make_system_notification([hiring_user], message, 'Contract', name, "Signature Request")
+        sendmail([hiring_user], message, "Signature Request", 'Contract', name)
+        share_doc("Contract", name, hiring_user)
+    except Exception as e:
+        print(e)
+
+#-------update lead--------#
+@frappe.whitelist(allow_guest=True)
+def update_lead(lead):
+    try:
+        frappe.db.set_value("Lead", lead, "status", 'Close')
+    except Exception as e:
+        print(e)

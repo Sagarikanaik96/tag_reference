@@ -46,7 +46,8 @@ doctype_js = {
         "Employee": "public/js/controllers/employee.js",
         "Sales Invoice": "public/js/controllers/sales_invoice.js",
         "Contact": "public/js/controllers/contact.js",
-        "Lead": "public/js/controllers/lead.js"
+        "Lead": "public/js/controllers/lead.js",
+        "Contract": "public/js/controllers/contract.js"
 }
 
 # doctype list
@@ -76,7 +77,8 @@ website_context = {
 override_doctype_dashboards = {
         "Item": "tag_workflow.dashboard_data.item_dashboard.get_data",
         "Company": "tag_workflow.dashboard_data.company_dashboard.get_data",
-        "Sales Invoice": "tag_workflow.dashboard_data.sales_invoice_dashboard.get_data"
+        "Sales Invoice": "tag_workflow.dashboard_data.sales_invoice_dashboard.get_data",
+        "Lead": "tag_workflow.dashboard_data.lead_dashboard.get_data"
 }
 scheduler_events={
         "all":  [
