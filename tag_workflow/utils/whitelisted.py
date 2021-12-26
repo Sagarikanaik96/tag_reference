@@ -161,7 +161,7 @@ def request_signature(staff_user, staff_company, hiring_user, name):
         link = frappe.utils.get_link_to_form("Contract", name, label='{{ _("Click here for signature") }}')
         link = '<p style="margin: 15px 0px;">'+link+'</p>'
         template = frappe.get_template("templates/emails/digital_signature.html")
-        message = template.render({"staff_user": staff_user, "staff_company": staff_company, "link": link})
+        message = template.render({"staff_user": staff_user, "staff_company": staff_company, "link": linki, "date": ""})
         make_system_notification([hiring_user], message, 'Contract', name, "Signature Request")
         sendmail([hiring_user], message, "Signature Request", 'Contract', name)
         share_doc("Contract", name, hiring_user)
@@ -170,8 +170,13 @@ def request_signature(staff_user, staff_company, hiring_user, name):
 
 #-------update lead--------#
 @frappe.whitelist(allow_guest=True)
-def update_lead(lead):
+def update_lead(lead, staff_company, date, staff_user, name):
     try:
         frappe.db.set_value("Lead", lead, "status", 'Close')
+        template = frappe.get_template("templates/emails/digital_signature.html")
+        message = template.render({"staff_user": "", "staff_company": staff_company, "link": "", "date": date})
+        make_system_notification([staff_user], message, 'Contract', name, "hiring prospects signs a contract")
+        sendmail([staff_user], message, "hiring prospects signs a contract", 'Contract', name)
     except Exception as e:
+        frappe.error_log(frappe.get_traceback(), "update_lead")
         print(e)

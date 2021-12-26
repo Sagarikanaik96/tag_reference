@@ -1,2 +1,6 @@
-<p>{{staff_user}} from {{staff_company}} is requesting an electronic signature for you contract agreement. </p>
-<p style="margin: 15px 0px;"><a href="{{ link }}" rel="nofollow" class="btn btn-primary">{{ _("Click here for signature") }}</a></p>
+{% if link %}
+	<p>{{staff_user}} from {{staff_company}} is requesting an electronic signature for you contract agreement. </p>
+	{{ link }}
+{% else %}
+	<p>Congratulations! A Hiring contract has been signed on <strong>{{date}}</strong> for <strong>{{staff_company}}</strong></p>
+{% endif %}

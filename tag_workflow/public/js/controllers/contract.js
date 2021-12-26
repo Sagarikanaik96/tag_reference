@@ -29,7 +29,7 @@ frappe.ui.form.on("Contract", {
 		});
 	},
 
-	after_save: function(frm){
+	before_save: function(frm){
 		update_lead(frm);
 	},
 
@@ -38,14 +38,6 @@ frappe.ui.form.on("Contract", {
 			cur_frm.set_value("sign_date_hiring", frappe.datetime.now_date());
 		}else{
 			cur_frm.set_value("sign_date_hiring", "");
-		}
-	},
-
-	sign_date_staffing: function(frm){
-		if(frm.doc.sign_date_staffing){
-			cur_frm.set_value("sign_date_staffing", frappe.datetime.now_date());
-		}else{
-			cur_frm.set_value("sign_date_staffing", "");
 		}
 	}
 });
@@ -136,4 +128,12 @@ function request_sign(frm){
 }
 
 /*------update lead status-------*/
-function update_lead(frm){if(frm.doc.signed_by && frm.doc.lead){frappe.call({method: "tag_workflow.utils.whitelisted.update_lead",args: {"lead": frm.doc.lead}});}}
+function update_lead(frm){
+	if(frm.doc.signed_by && frm.doc.lead && !frm.doc.sign_date_hiring){
+		cur_frm.set_value("sign_date_hiring", frappe.datetime.now_date());
+		frappe.call({
+			method: "tag_workflow.utils.whitelisted.update_lead",
+			args: {"lead": frm.doc.lead, "staff_company": frm.doc.staffing_company, "date": frappe.datetime.now_date(), "staff_user": frm.doc.contract_prepared_by, "name": frm.doc.name}
+		});
+	}
+}
