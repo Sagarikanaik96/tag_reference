@@ -78,11 +78,11 @@ def update_job_order(job_name, employee_filled, staffing_org, hiringorg, name):
         claimed = job.staff_org_claimed if job.staff_org_claimed else ""
         frappe.db.set_value(jobOrder, job_name, "worker_filled", (int(employee_filled)+int(job.worker_filled)))
         frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
-
         sub = f'New Message regarding {job_name} from {hiringorg} is available'
         msg = f'Your Employees has been approved for Work Order {job_name}'
         user_list = frappe.db.sql(""" select email from `tabUser` where company = %s """,(staffing_org), as_dict=1)
         users = [usr['email'] for usr in user_list]
+        make_system_notification(users,msg,'Job Order',job_name,sub)   
         enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name)
         return sendmail(users, msg, sub, "Assign Employee", name)
     except Exception as e:
@@ -109,8 +109,10 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
 
     l = [l[0] for l in user_list]
     for user in l:
-        add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
-
+        add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0)
+    sub="Employee Assigned"
+    msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["job_title"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}'
+    make_system_notification(l,msg,'Job Order',job_order,sub)
     msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["job_title"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim <a href="/app/assign-employee/{doc_name}">Assign Employee</a> .'
     return send_email(None,msg,l)
 

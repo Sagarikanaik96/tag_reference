@@ -20,6 +20,7 @@ frappe.ui.form.on('Job Order', {
 	onload:function(frm){
 		if(cur_frm.doc.__islocal==1){
 			check_company_detail(frm);
+			frm.set_value("from_date",'')
 			frm.set_df_property("time_remaining_for_make_edits", "options"," ");
 			frappe.call({
 				method:"tag_workflow.tag_data.org_industy_type",
@@ -146,7 +147,7 @@ frappe.ui.form.on('Job Order', {
 		check_company_detail(frm);
 		if(cur_frm.doc.no_of_workers<cur_frm.doc.worker_filled)
 		{
-			msgprint("No Of workers can't be less than"+cur_frm.doc.worker_filled);
+			frappe.msgprint({message: __('<b>Agree To COntract</b>Is Mandatory Field'), title: __('Error'), indicator: 'orange'});
 			frappe.validated = false;	
 		}
 		if(cur_frm.doc.__islocal==1){
@@ -224,6 +225,54 @@ frappe.ui.form.on('Job Order', {
 			});
 			contract.show();
 		}
+	},
+	from_date:function(frm){
+		check_from_date(frm)
+	},
+	to_date(frm){
+		check_to_date(frm)
+	},
+	estimated_hours_per_day:function(frm){
+		let field="Estimated Hours Per Day";
+		let name='estimated_hours_per_day';
+		let value=frm.doc.estimated_hours_per_day;
+		check_value(frm,field,name,value)
+	},
+	no_of_workers:function(frm){
+		let field="No Of Workers";
+		let name='no_of_workers';
+		let value=frm.doc.no_of_workers;
+		check_value(frm,field,name,value)
+	},
+	rate:function(frm){
+		let field="Rate";
+		let name='rate';
+		let value=parseFloat(frm.doc.rate);
+		check_value(frm,field,name,value)
+	},
+	extra_price_increase:function(frm){
+		let field="Extra Price Increase";
+		let name='extra_price_increase';
+		let value=frm.doc.extra_price_increase;
+		check_value(frm,field,name,value)
+	},
+	per_hour:function(frm){
+		let field="Per Hour";
+		let name='per_hour';
+		let value=frm.doc.per_hour;
+		check_value(frm,field,name,value)
+	},
+	flat_rate:function(frm){
+		let field="Flat Rate";
+		let name='flat_rate';
+		let value=frm.doc.flat_rate;
+		check_value(frm,field,name,value)
+	},
+	validate:function(frm){
+		if(frm.doc.agree_to_contract!=1){
+			msgprint("Pease select mandatory field:<b>Agree To Contract</b>");
+			frappe.validated = false;
+		}
 	}
 });
 
@@ -283,7 +332,7 @@ function redirect_quotation(frm){
 }
  
 function set_read_fields(frm){
-	var myStringArray = ["phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
+	var myStringArray = ["phone_number","estimated_hours_per_day","address","rate","description","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
 			var arrayLength = myStringArray.length;
 			for (var i = 0; i < arrayLength; i++) {
 				frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -294,7 +343,7 @@ function set_read_fields(frm){
 function timer_value(frm){
 	var time=frappe.datetime.get_hour_diff(cur_frm.doc.from_date,frappe.datetime.now_datetime())
 	if(time<24){
-		var myStringArray = ["company","posting_date_time","from_date","to_date","category","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
+		var myStringArray = ["company","posting_date_time","from_date","to_date","category","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","rate","description","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
 		var arrayLength = myStringArray.length;
 		for (var i = 0; i < arrayLength; i++) {
 			frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -341,4 +390,41 @@ function notification_joborder_change(frm){
 			posting_date:frm.doc.from_date
 		}
 	});
+}
+
+function check_from_date(frm){
+	let from_date = frm.doc.from_date || "";
+	let to_date = frm.doc.to_date || "";
+
+	if(from_date && from_date <= frappe.datetime.now_date()){
+		frappe.msgprint({message: __('<b>Start Date</b> Cannot be Today`s date or Past date'), title: __('Error'), indicator: 'orange'});
+		cur_frm.set_value("from_date", "");
+	}
+	else if(to_date && from_date && from_date>=to_date){
+		frappe.msgprint({message: __('<b>End Date</b> Cannot be Less than Start Date'), title: __('Error'), indicator: 'orange'});
+		cur_frm.set_value("from_date", "");
+		cur_frm.set_value("to_date", "");
+
+	}
+}
+function check_to_date(frm){
+	let from_date=frm.doc.from_date || "";
+	let to_date = frm.doc.to_date || "";
+	if(to_date && frappe.datetime.now_date()>=to_date)
+	{
+		frappe.msgprint({message: __('<b>End Date</b> Cannot be Today`s date or Past date'), title: __('Error'), indicator: 'orange'});
+		cur_frm.set_value("to_date", "");
+	}
+	else if(to_date && from_date && from_date>=to_date){
+		frappe.msgprint({message: __('<b>End Date</b> Cannot be Less than Start Date'), title: __('Error'), indicator: 'orange'});
+		cur_frm.set_value("to_date", "");
+	}
+
+}
+
+function check_value(frm,field,name,value){
+	if(value && value<0){
+		frappe.msgprint({message: __('<b>'+field +'</b> Cannot be Less Than Zero'), title: __('Error'), indicator: 'orange'});
+		cur_frm.set_value(name, "");
+	}
 }

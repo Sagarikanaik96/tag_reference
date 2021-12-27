@@ -129,11 +129,10 @@
    "reqd": 1
   },
   {
-   "fetch_from": "select_job.item_name",
-   "fetch_if_empty": 1,
    "fieldname": "job_title",
    "fieldtype": "Data",
-   "label": "Job Title"
+   "label": "Job Title",
+   "reqd": 1
   },
   {
    "fieldname": "job_site",
@@ -275,13 +274,6 @@
   },
   {
    "default": "0",
-   "fieldname": "agree_to_contract",
-   "fieldtype": "Check",
-   "label": "Agree To Contract",
-   "reqd": 1
-  },
-  {
-   "default": "0",
    "fieldname": "age_reqiured",
    "fieldtype": "Check",
    "label": "Check if age 18+ are required for this order"
@@ -380,7 +372,6 @@
    "reqd": 1
   },
   {
-   "default": "Today",
    "fieldname": "from_date",
    "fieldtype": "Datetime",
    "label": "Job Order Start Date",
@@ -426,11 +417,18 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Single Share"
+  },
+  {
+   "default": "1",
+   "fieldname": "agree_to_contract",
+   "fieldtype": "Check",
+   "label": "Agree To Contract",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-23 18:15:29.470525",
+ "modified": "2021-12-27 15:26:59.971279",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
