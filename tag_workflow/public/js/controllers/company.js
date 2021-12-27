@@ -8,6 +8,9 @@ frappe.ui.form.on("Company", {
 		if(frappe.user.has_role('Tag Admin')) {
 			frm.set_df_property('employees', 'read_only' , 1);
 	   	}
+		if(frm.doc.__islocal == 1){
+			$('div[data-fieldname="average_rating"]').css("display", "none");
+		}
 	},
 	setup: function(frm){
 		init_values(frm);

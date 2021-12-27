@@ -47,6 +47,12 @@ frappe.ui.form.on("User", {
 			setup_company_value(frm,company)
 
 		}
+		if(frm.doc.organization_type == "Hiring"){
+			frm.set_value("tag_user_type", "Hiring Admin")
+		}
+		else if(frm.doc.organization_type == "Staffing"){
+			frm.set_value("tag_user_type", "Staffing Admin")
+		}
 	},
 	first_name:function(frm){
 		if(cur_frm.doc.first_name){

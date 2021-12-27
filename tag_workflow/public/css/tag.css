@@ -214,3 +214,6 @@ input::-webkit-credentials-auto-fill-button {
 	left: 10rem;
 	max-width: 90%;
 }
+.form-footer{
+	display: none!important;
+}
