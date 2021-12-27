@@ -1,7 +1,19 @@
 frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
-		cur_frm.set_value("employee"," ");
+		if(frm.doc.__islocal==1){
+			frm.set_value("employee","");
+			setTimeout(() => {
+				frm.set_value("employee","");
+				frm.set_df_property("job_details", "options", " ");
+			}, 700);	
+		}
+		if(cur_frm.doc.status=='Submitted' && frm.doc.workflow_state == "Approved"){
+			frappe.call({
+				"method": "tag_workflow.utils.timesheet.approval_notification",
+				"args": {"job_order": frm.doc.job_order_detail,"hiring_company":frm.doc.company,"staffing_company": frm.doc.employee_company, "timesheet_name":cur_frm.doc.name,'timesheet_approved_time':frm.doc.modified,'current_time':frappe.datetime.now_datetime()}
+			});
 
+		}
 		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
 		hide_timesheet_field(timesheet_fields);
 
@@ -9,13 +21,13 @@ frappe.ui.form.on("Timesheet", {
 
 	setup: function(frm){
 		job_order_details(frm);
-		cur_frm.set_value("employee"," ");
 
 		frm.set_query("job_order_detail", function(){
 			return {
-				filters: [
-					["Job Order", "company", "=", frm.doc.company]
-				]
+				query: "tag_workflow.utils.timesheet.assigned_job_order",
+				filters: {
+					"company": frm.doc.company}
+				
 			}
 		});
 
@@ -48,7 +60,7 @@ frappe.ui.form.on("Timesheet", {
 
 	workflow_state: function(frm){
 		check_update_timesheet(frm);
-	}
+	},
 });
 
 
@@ -161,6 +173,6 @@ function trigger_email(frm, key, value, type){
 function notify_email(frm, type, value){
 	frappe.call({
 		"method": "tag_workflow.utils.timesheet.notify_email",
-		"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation}
+		"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation,'employee_company':frm.doc.employee_company}
 	});
 }

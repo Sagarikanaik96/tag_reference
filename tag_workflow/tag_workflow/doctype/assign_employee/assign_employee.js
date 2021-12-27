@@ -15,7 +15,7 @@ frappe.ui.form.on('Assign Employee', {
 				query: "tag_workflow.tag_data.filter_blocked_employee",
 				filters: {
 					company: doc.hiring_organization,
-					emp_company: frappe.defaults.get_user_default("company"),
+					emp_company: doc.company,
 					job_category: doc.job_category,
 				  },
 			}
@@ -66,17 +66,20 @@ function check_employee_data(frm){
 	let employees = [];
 
 	for(var d in table){
-		if(table[d].job_category != frm.doc.job_category){
-			msg.push('Employee(<b>'+table[d]/employee+'</b>) job category not matched with Job Order job category');
+		if(table[d].job_category===null || table[d].job_category != frm.doc.job_category){
+			msg.push('Employee(<b>'+table[d].employee+'</b>) job category not matched with Job Order job category');
 		}
 	}
-
-	(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
-
+	if(frm.doc.tag_status=='Approved'){
+		(table.length > Number(frm.doc.no_of_employee_required)+1) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
+	}
+	else{
+		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
+	}
 	for(var e in table){(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg.push('Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details');}
-
 	if(msg.length){frappe.msgprint({message: msg.join("\n\n"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
 }
+
 
 /*--------------child table------------------*/
 function render_table(frm){
@@ -87,7 +90,6 @@ function render_table(frm){
 			"method": "tag_workflow.utils.timesheet.check_employee_editable",
 			"args": {"job_order": frm.doc.job_order, "name": frm.doc.name, "creation": frm.doc.creation},
 			"callback": function(r){
-				console.log(r);
 				if(r && r.message == 0){
 					cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = true;
 					cur_frm.fields_dict['employee_details'].refresh();

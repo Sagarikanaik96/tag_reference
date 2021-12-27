@@ -37,7 +37,16 @@ frappe.ui.form.on("User", {
 	organization_type: function(frm){
 		set_options(frm);
 		init_values(frm);
-		setup_company_value(frm);
+		if(frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring'){
+			let company=cur_frm.doc.organization_type
+			setup_company_value(frm,company);
+		}
+		else{
+			let company='Exclusive Hiring'
+			frm.set_value('company',frappe.boot.tag.tag_user_info.company)
+			setup_company_value(frm,company)
+
+		}
 	},
 	first_name:function(frm){
 		if(cur_frm.doc.first_name){
@@ -64,16 +73,6 @@ frappe.ui.form.on("User", {
 	after_save: function(frm){
 		update_employee(frm);
 	},
-	company: function(frm){
-		cur_frm.fields_dict['branches'].grid.get_field('branch_name').get_query = function(doc, cdt, cdn) {
-			return {
-				filters:[
-					['organization_name', '=', cur_frm.doc.company]
-				]
-			}
-		}
-	},
-
 	birth_date: function(frm){
 		check_bd(frm);
 	}
@@ -191,11 +190,11 @@ function update_employee(frm){
 }
 
 
-function setup_company_value(frm){
+function setup_company_value(frm,company){
 	cur_frm.fields_dict['company'].get_query = function(doc) {
 		return {
 			filters: {
-				"organization_type": cur_frm.doc.organization_type
+				"organization_type": company
 			}
 		}
 	}

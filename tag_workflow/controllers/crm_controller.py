@@ -59,9 +59,9 @@ def make_company(exclusive, staffing):
 
 def make_user(exclusive, staffing, email, person_name):
     try:
-        user = frappe.get_doc(dict(doctype="User",organization_type=EXC,tag_user_type="Hiring Admin",company=exclusive,email=email,first_name=person_name,module_profile="Hiring",role_profile_name="Hiring Admin"))
+        user = frappe.get_doc(dict(doctype="User",organization_type=EXC,tag_user_type="Hiring Admin",company=exclusive,email=email,first_name=person_name,module_profile="Hiring",role_profile_name="Hiring Admin", date_of_joining=frappe.utils.nowdate()))
         user.save(ignore_permissions=True)
-        check_employee(user.name, person_name, exclusive, last_name=None, gender=None, date_of_birth=None, date_of_joining=None, organization_type=EXC)
+        check_employee(user.name, person_name, exclusive, last_name=None, gender=None, date_of_birth=None, date_of_joining=user.date_of_joining, organization_type=EXC)
         return user.name
     except Exception as e:
         frappe.throw(e)

@@ -32,7 +32,7 @@ class MasterController(base_controller.BaseController):
                 customer = frappe.get_doc(dict(doctype="Customer", customer_name=self.doc.name, customer_type="Company", territory=TERRITORY, customer_group=GROUP))
                 customer.insert(ignore_permissions=True)
         elif(self.dt == "User"):
-            if not self.doc.tag_user_type or not self.doc.organization_type:
+            if(frappe.session.user not in STANDARD and (not self.doc.tag_user_type or not self.doc.organization_type)):
                 frappe.msgprint(_("Please select <b>Organization Type</b> and <b>TAG User Type</b> before saving the User."))
         elif(self.dt == "Item"):
             self.check_activity_type()

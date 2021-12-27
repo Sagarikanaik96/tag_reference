@@ -1,76 +1,64 @@
-frappe.ui.form.on("Lead", {
+frappe.ui.form.on("Contract", {
 	refresh: function(frm){
-		cur_frm.clear_custom_buttons();
-		reqd_fields(frm);
-		hide_fields(frm);
-		make_contract(frm);
-		let roles = frappe.user_roles;
-		if(cur_frm.is_dirty() != 1 && frm.doc.status == "Close" && (roles.includes("Tag Admin") || roles.includes("Tag User") || roles.includes("Staffing Admin") || roles.includes("Staffing User"))){
-			onboard_org(frm);
+		toggle_field(frm);
+		update_contract(frm);
+		update_user(frm);
+		request_sign(frm);
+	},
+
+	hiring_company: function(frm){
+		cur_frm.set_value("party_name", cur_frm.doc.hiring_company);
+		update_user(frm);
+	},
+
+	setup: function(frm){
+		frm.set_query("hiring_company", function(doc){
+			return {
+				filters: [
+					["Company", "organization_type", "=", "Hiring"]
+				]
+			}
+		});
+
+		frm.set_query("staffing_company", function(doc){
+			return {
+				filters: [
+					["Company", "organization_type", "in", ["TAG", "Staffing"]]
+				]
+			}
+		});
+	},
+
+	before_save: function(frm){
+		update_lead(frm);
+	},
+
+	signed_by: function(frm){
+		if(frm.doc.signed_by){
+			cur_frm.set_value("sign_date_hiring", frappe.datetime.now_date());
+		}else{
+			cur_frm.set_value("sign_date_hiring", "");
 		}
 	}
 });
 
-/*------hide-----*/
-function hide_fields(frm){
-	let fields = ["organization_lead"];
-	for(let f in fields){
-		cur_frm.toggle_display(fields[f], 0);
-	}
-}
-
-/*-------reqd------*/
-function reqd_fields(frm){
-	let reqd = ["lead_name", "company_name", "email_id"];
-	for(let r in reqd){
-		cur_frm.toggle_reqd(reqd[r], 1);
-	}
-}
-
-/*------------onboard----------------*/
-function onboard_org(frm){
-	var email = frm.doc.email_id;
-	var exclusive = frm.doc.company_name;
-	var person_name = frm.doc.lead_name;
-
-	frappe.db.get_value("User", {"name": frappe.session.user}, "company", function(r){
-		if(r && r.company){
-			frm.add_custom_button("Onboard Organization", function() {
-				(check_dirty(frm)) ? onboard_orgs(exclusive, r.company, email, person_name) : console.log("TAG");
-			}).addClass("btn-primary");
-		}	
-	});
-}
-
-function check_dirty(frm){
-	let is_ok = true;
-	if(cur_frm.is_dirty() == 1){
-		frappe.msgprint("Please save the form before Onboard Organization");
-		is_ok = false;
-	}
-	return is_ok;
-}
-
-/*-------onboard----------*/
-function onboard_orgs(exclusive, staffing, email, person_name){
-	if(exclusive && email){
-		frappe.call({
-			"method": "tag_workflow.controllers.crm_controller.onboard_org",
-			"freeze": true,
-			"freeze_message": "<p><b>Please wait while we are preparing Organization for onboarding</b></p>",
-			"args": {"exclusive": exclusive, "staffing": staffing, "email": email, "person_name": person_name},
-			"callback": function(r){
-				console.log(r);
-			}
-		});
+/*-----------field-----------*/
+function toggle_field(frm){
+	cur_frm.toggle_display("party_name", 0);
+	let roles = frappe.user_roles;
+	if((roles.includes("Hiring Admin") || roles.includes("Hiring User")) && (!roles.includes("Tag Admin") || !roles.includes("Tag User"))){
+		let fields = ['signee_company', 'contract_terms', 'signee_staffing', 'signee_company', 'requires_fulfilment', 'fulfilment_deadline', 'fulfilment_deadline', 'start_date', 'end_date', 'staffing_company', 'hiring_company', 'end_party_user', 'signee_company'];
+		for(let f in fields){
+			cur_frm.toggle_enable(fields[f], 0);
+		}
 	}else{
-		(!exclusive) ? cur_frm.scroll_to_field("company_name") : cur_frm.scroll_to_field("email_id");
-		frappe.msgprint({message: __('<b>Organization Name</b> and <b>Email Address</b> is required for Onboarding'), title: __('Warning'), indicator: 'red'});
+		cur_frm.toggle_enable("signee_hiring", 0)
+		cur_frm.toggle_enable("signed_by", 0);
 	}
 }
-
 
 /*--------makecontract--------*/
+
 let _contract = `<p><b>Staffing/Vendor Contract</b></p>
 <p>This Staffing/Vendor Contract (“Contract”) is entered into by and between Staffing Company and Hiring Company as further described and as set forth below. By agreeing to the Temporary Assistance Guru, Inc. (“TAG”) End-User License Agreement, and using the TAG application service and website (the “Service”) Staffing Company and Hiring Company agree that they have a contractual relationship with each other and that the following terms apply to such relationship:</p>
 
@@ -97,22 +85,55 @@ let _contract = `<p><b>Staffing/Vendor Contract</b></p>
 <p>(21) Representatives. The Hiring Company and the Staffing Company each certifies that its authorized representative has read all of the terms and conditions of this Contract and understands and agrees to the same.</p>
 <p>(22) Extra Contract Language.</p>`
 
+function update_contract(frm){
+	if(cur_frm.doc.__islocal == 1){
+		cur_frm.set_value("contract_terms", _contract);
+	}
+}
 
-function make_contract(frm){
-	if(cur_frm.is_dirty() != 1 && frm.doc.status == "Contract Signing" && (roles.includes("Tag Admin") || roles.includes("Tag User") || roles.includes("Staffing Admin") || roles.includes("Staffing User"))){
-		frm.add_custom_button("Prepare Contract", function() {
-			run_contract(frm);
+/*-------update user----------*/
+function update_user(frm){
+	if(frm.doc.hiring_company){
+		frappe.call({
+			method: "tag_workflow.utils.whitelisted.get_user",
+			args: {"company": frm.doc.hiring_company},
+			callback: function(r){
+				if(r){
+					var data = r.message;
+					cur_frm.set_df_property("end_party_user", "options", data);
+				}
+			}
+		});
+	}else{
+		cur_frm.set_df_property("end_party_user", "options", "");
+		cur_frm.set_value("end_party_user", "");
+	}
+}
+
+/*------signature------*/
+function request_sign(frm){
+	if(cur_frm.doc.__islocal != 1 && cur_frm.doc.signee_company && cur_frm.doc.owner == frappe.session.user){
+		frm.add_custom_button("Request Signature", function() {
+			frappe.call({
+				method: "tag_workflow.utils.whitelisted.request_signature",
+				freeze: true,
+				freeze_message: "<p><b>sending signature request...</b></p>",
+				args: {
+					"staff_user": frm.doc.contract_prepared_by ? frm.doc.contract_prepared_by : frappe.session.user,
+					"staff_company": frm.doc.staffing_company, "hiring_user": frm.doc.end_party_user, "name": frm.doc.name
+				}
+			});
 		}).addClass("btn-primary");
 	}
 }
 
-function run_contract(frm){
-	let contract = frappe.model.get_new_doc("Contract");
-	contract.lead = frm.doc.name;
-	contract.contract_prepared_by = frappe.session.user;
-	contract.party_type = "Customer";
-	contract.contract_terms = _contract;
-	contract.staffing_company = cur_frm.doc.company;
-	contract.hiring_company = "";
-	frappe.set_route("form", contract.doctype, contract.name);
+/*------update lead status-------*/
+function update_lead(frm){
+	if(frm.doc.signed_by && frm.doc.lead && !frm.doc.sign_date_hiring){
+		cur_frm.set_value("sign_date_hiring", frappe.datetime.now_date());
+		frappe.call({
+			method: "tag_workflow.utils.whitelisted.update_lead",
+			args: {"lead": frm.doc.lead, "staff_company": frm.doc.staffing_company, "date": frappe.datetime.now_date(), "staff_user": frm.doc.contract_prepared_by, "name": frm.doc.name}
+		});
+	}
 }

@@ -25,19 +25,20 @@ frappe.FaceRecognition = Class.extend({
 			frappe.call({
 				method:"tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.comp",
 				
-				callback:function(r)
-				{
-					var comp_data=r.message
-					const profile_html = `
-									${comp_data.map((l,p) => `<tr>
-										<td>${p+1}</td>
-										<td ><a href=javascript:get_location(${p+1})>${l.name}</a></td>
-										<td>${l.address}</td>
-										<td>${l.city}</td>
-										<td>${l.state}</td>
-										<td>${l.zip}</td>	
-										<td>${l.average_rating}</td>				
-									</tr>`).join('')}`
+				callback:function(r){
+					var data = r.message;
+					let profile_html = ``;
+					for(let p in data){
+						profile_html += `<tr>
+							<td>${p+1}</td>
+							<td ><a href=javascript:get_location(${p+1})>${data[p].name}</a></td>
+							<td>${data[p].address}</td>
+							<td>${data[p].city}</td>
+							<td>${data[p].state}</td>
+							<td>${data[p].zip}</td>
+							<td>${data[p].average_rating}</td>
+							</tr>`;
+					}
 					$("#myTable").html(profile_html);
 				}
 				})
@@ -52,8 +53,7 @@ function get_location(name){
 
 			"comp_id":name,
 		},	
-		callback:function(r)
-		{
+		callback:function(r){
 			let company_data=r.message[0][0]
 			let company_industry=r.message[1]
 			let company_member=r.message[2]
@@ -79,17 +79,22 @@ function get_location(name){
 				</tr>
 			</table>`
 
-			const industry=`<h4>Serving Industries</h4>
-				${company_industry.map((l) => `${l.industry_type}<br>`).join('')}`
+			let industry = ``;
+			for(let i in company_industry){
+				industry += `<h4>Serving Industries</h4>${company_industry[i].industry_type}<br>`;
+			}
 			
-			const team=`<h4>Team Member</h4>
-				${company_member.map((l) => `${l.first_name}${l.last_name}<br>`).join('')}`
+			let team = ``;
+			for(let m in company_member){
+				team += `<h4>Team Member</h4>${company_member[m].first_name}${company_member[m].last_name}<br>`;
+			}
 
-			const review=`<h4>Team Member</h4>
-			${company_review.map((l) => `${l.owner}<br>	
-										${l.rating}<br>	
-										${l.comments}<br>
-										${l.creation}<br>`).join('')}`
+			let review = ``;
+			for(let c in company_review){
+				review += `<h4>Team Member</h4>
+				${company_review[c].owner}<br>${company_review[c].rating}<br>${company_review[c].comments}<br>${company_review[c].creation}<br>`;
+			}
+
 			$("#listdata").html(data);
 			$("#industrydata").html(industry);
 			$("#teamdata").html(team);

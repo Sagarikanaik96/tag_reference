@@ -95,6 +95,12 @@ frappe.ui.form.on("Company", {
 
 	before_save: function(frm){
 		validate_phone_and_zip(frm);
+	},
+	make_organization_inactive(frm) {
+		frappe.call({
+		method: "tag_workflow.tag_data.disable_user",
+		args: {company: cur_frm.doc.company_name, check:cur_frm.doc.make_organization_inactive},
+		})
 	}
 });
 
@@ -127,7 +133,7 @@ function init_values(frm){
 function update_company_fields(frm){
 	let roles = frappe.user_roles;
 	let is_local = cur_frm.doc.__islocal;
-	let company_fields = ['organization_type', 'country', 'fein', 'title', 'primary_language', 'industry', 'accounts_payable_contact_name', 'accounts_payable_email', 'accounts_payable_phone_number', 'address', 'state', 'zip', 'city', 'branch', 'default_currency', 'parent_staffing'];
+	let company_fields = ['organization_type', 'country', 'fein', 'title', 'primary_language', 'industry', 'accounts_payable_contact_name', 'accounts_payable_email', 'accounts_payable_phone_number', 'address', 'state', 'zip', 'city', 'default_currency', 'parent_staffing'];
 
 	if(roles.includes('System Manager') && !is_local && cur_frm.doc.organization_type != 'TAG'){
 		for(let f in company_fields){

@@ -6,6 +6,12 @@ $(document).bind('toolbar_setup', function() {
         $('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
 });
 
+$(document).ready(function(){
+	if(frappe.boot && frappe.boot.home_page!=='setup-wizard'){
+		$(".main-section").append(frappe.render_template("tag"));
+	}
+});
+
 frappe.provide("tag_workflow.workflow");
 frappe.ui.form.States = Class.extend({
 	init: function(opts) {
@@ -129,10 +135,9 @@ frappe.ui.form.States = Class.extend({
 									+ __("to") +
 									new_docstatus + " " + __("is not allowed."));
 								frappe.msgprint(__("Document Status transition from {0} to {1} is not allowed", [me.frm.doc.docstatus, new_docstatus]));
-								return false;
+								return 0;
 							}
 						}
-						return 0;
 					});
 				}
 			});

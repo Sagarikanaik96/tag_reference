@@ -21,3 +21,9 @@ def make_system_notification(users, message, doctype, docname, subject):
     except Exception as e:
         frappe.log_error(e, "System Notification")
         frappe.throw(e)
+
+def share_doc(doctype, docname, user):
+    try:
+        add(doctype, docname, user=user, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
+    except Exception as e:
+        print(e)
