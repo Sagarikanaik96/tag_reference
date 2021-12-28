@@ -290,3 +290,28 @@ def update_job_order_status():
             frappe.db.set_value(jobOrder, job.name, "order_status", "Ongoing")
 
 
+
+@frappe.whitelist()
+def sales_invoice_notification(job_order=None,company=None,invoice_name=None):
+    try:
+        data=frappe.db.sql('''  select workflow_state from `tabTimesheet` where job_order_detail='{0}' and employee_company='{1}' '''.format(job_order,company),as_list=1)
+        if(len(data)>0):
+            for i in data:
+                if i[0]!="Approved":
+                    break
+            else:
+                job_order_details=frappe.db.sql(""" Select company,select_job,job_site from `tabJob Order` where name='{0}' """.format(job_order),as_dict=1)
+                msg=f'{company} has submitted an invoice for {job_order_details[0].select_job} at {job_order_details[0].job_site}'
+                subject="Invoice Submitted"
+                user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(job_order_details[0].company),as_list=1)
+                if(len(user_list)>0):
+                    l = [l[0] for l in user_list]
+                    for user in l:
+                        add("Sales Invoice", invoice_name, user, read=1, write = 0, share = 0, everyone = 0)
+                    make_system_notification(l,msg,'Sales Invoice',invoice_name,subject)   
+                    return send_email(subject,msg,l)
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.error_log(e, "invoice notification")
+        frappe.throw(e)
+             

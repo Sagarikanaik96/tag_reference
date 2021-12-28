@@ -3,7 +3,23 @@ frappe.ui.form.on("Sales Invoice", {
 		let is_table = '';
 		var invoice_field = ["naming_series", "is_pos", "is_return", "is_debit_note", "accounting_dimensions_section", "customer_po_details", "address_and_contact", "currency_and_price_list", "update_stock", "sec_warehouse", "pricing_rule_details", "packing_list", "taxes_section", "section_break_40", "sec_tax_breakup", "section_break_43", "loyalty_points_redemption", "column_break4", "advances_section", "payment_terms_template", "payments_section", "section_break_84", "terms_section_break", "transporter_info", "edit_printing_settings", "gst_section", "more_information", "more_info", "sales_team_section_break", "subscription_section", "einvoice_section", "section_break2", "ewaybill", "disable_rounded_total", "total_advance", "rounded_total", "rounding_adjustment"];
 		hide_fields(frm, invoice_field, is_table);
+	},
+	on_submit: function(frm) {
+		if(frm.doc.docstatus ==1){
+			frappe.call({
+				"method":"tag_workflow.tag_data.sales_invoice_notification",
+				"freeze": true,
+				"freeze_message": "<p><b>preparing notification for hiring orgs...</b></p>",
+				"args":{
+					"job_order":frm.doc.job_order,
+					"company":frm.doc.company,
+					"invoice_name":frm.doc.name
+				}
+			})
+
+		}
 	}
+
 });
 
 
