@@ -21,23 +21,39 @@ class CRMController(base_controller.BaseController):
 
 
 
+#-----------org type details--------#
+def get_org_types(staffing, organization_type=None):
+    try:
+        org_type, user_type, tag_user_type, staffing = EXC, "Hiring", "Hiring Admin", staffing
+
+        if(organization_type == "Staffing"):
+            org_type, user_type, tag_user_type, staffing = "Staffing", "Staffing", "Staffing Admin", ""
+        elif(organization_type == "Hiring"):
+            org_type, user_type, tag_user_type, staffing = "Hiring", "Hiring", "Hiring Admin", ""
+        return org_type, user_type, tag_user_type, staffing
+    except Exception as e:
+        print(e)
+        return org_type, user_type, tag_user_type, staffing
+
 
 @frappe.whitelist()
-def onboard_org(exclusive, staffing, email, person_name):
+def onboard_org(exclusive, staffing, email, person_name, organization_type=None):
     try:
         is_company, is_user = 1, 1
         company_doc, user = "", ""
+
+        org_type, user_type, tag_user_type, staffing = get_org_types(staffing, organization_type)
 
         if frappe.db.exists("User", email):
             frappe.msgprint(_("User already exists with given email(<b>{0}</b>). Email must be unique for onboarding.").format(email))
             return is_company, is_user, company_doc, user
 
         if not frappe.db.exists("Company", exclusive):
-            exclusive = make_company(exclusive, staffing)
+            exclusive = make_company(exclusive, staffing, org_type)
             is_company = 0
 
         if not frappe.db.exists("User", email):
-            user = make_user(exclusive, staffing, email, person_name)
+            user = make_user(exclusive, staffing, email, person_name, org_type, user_type, tag_user_type)
             is_user = 0
 
         enqueue("tag_workflow.controllers.master_controller.make_update_comp_perm", docname=exclusive)
@@ -48,20 +64,19 @@ def onboard_org(exclusive, staffing, email, person_name):
 
 
 # add orgs
-def make_company(exclusive, staffing):
+def make_company(exclusive, staffing, org_type):
     try:
-        company = frappe.get_doc(dict(doctype="Company", organization_type=EXC, parent_staffing=staffing, company_name=exclusive, default_currency="USD", country="United States", create_chart_of_accounts_based_on="Standard Template", chart_of_accounts= "Standard with Numbers"))
+        company = frappe.get_doc(dict(doctype="Company", organization_type=org_type, parent_staffing=staffing, company_name=exclusive, default_currency="USD", country="United States", create_chart_of_accounts_based_on="Standard Template", chart_of_accounts= "Standard with Numbers"))
         company.save(ignore_permissions=True)
         return company.name
     except Exception as e:
         frappe.throw(e)
 
 
-def make_user(exclusive, staffing, email, person_name):
+def make_user(exclusive, staffing, email, person_name, org_type, user_type, tag_user_type):
     try:
-        user = frappe.get_doc(dict(doctype="User",organization_type=EXC,tag_user_type="Hiring Admin",company=exclusive,email=email,first_name=person_name,module_profile="Hiring",role_profile_name="Hiring Admin", date_of_joining=frappe.utils.nowdate()))
+        user = frappe.get_doc(dict(doctype="User", organization_type=org_type, tag_user_type=tag_user_type, company=exclusive, email=email, first_name=person_name, module_profile=user_type, role_profile_name=tag_user_type, date_of_joining=frappe.utils.nowdate()))
         user.save(ignore_permissions=True)
-        check_employee(user.name, person_name, exclusive, last_name=None, gender=None, date_of_birth=None, date_of_joining=user.date_of_joining, organization_type=EXC)
         return user.name
     except Exception as e:
         frappe.throw(e)

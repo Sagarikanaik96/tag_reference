@@ -3495,6 +3495,30 @@
    "property_type": "Data",
    "row_name": null,
    "value": "Company Phone No"
+  },
+  {
+    "_assign": null,
+    "_comments": null,
+    "_liked_by": null,
+    "_user_tags": null,
+    "creation": "2021-12-27 12:18:06.425955",
+    "default_value": null,
+    "doc_type": "Company",
+    "docstatus": 0,
+    "doctype_or_field": "DocField",
+    "field_name": "company_info",
+    "idx": 0,
+    "modified": "2021-12-27 12:18:06.425955",
+    "modified_by": "sahil@tag.com",
+    "name": "Company-company_info-collapsible",
+    "owner": "sahil@tag.com",
+    "parent": null,
+    "parentfield": null,
+    "parenttype": null,
+    "property": "collapsible",
+    "property_type": "Check",
+    "row_name": null,
+    "value": "0"
   }
  ],
  "sync_on_migrate": 1

@@ -180,15 +180,14 @@ function setup_profile(frm){
 /*------------update employee--------------*/
 function update_employee(frm){
 	if(frm.doc.enabled == 1){
-		frappe.call({"method": "tag_workflow.controllers.master_controller.check_employee","args": {"name": frm.doc.name, "first_name": frm.doc.first_name, "last_name": frm.doc.last_name || '', "company": frm.doc.company, "gender": frm.doc.gender, "date_of_birth": frm.doc.birth_date, "date_of_joining": frm.doc.date_of_joining, "organization_type": frm.doc.organization_type}, "callback": function(r){cur_frm.reload_doc();}});
 		if (cur_frm.doc.organization_type == 'Exclusive Hiring'){
 			frappe.call({
 				method:"tag_workflow.tag_data.update_exclusive_org",
 				"args":{
-					exclusive_email:cur_frm.doc.email,
-					staffing_email:cur_frm.doc.owner,
-					staffing_comapny:frappe.defaults.get_user_defaults("Company")[0],
-					exclusive_company:frm.doc.company
+					exclusive_email: cur_frm.doc.email,
+					staffing_email: cur_frm.doc.owner,
+					staffing_comapny: frappe.defaults.get_user_defaults("Company")[0],
+					exclusive_company: frm.doc.company
 				}
 			});
 		}

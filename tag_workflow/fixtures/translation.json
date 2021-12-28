@@ -55,22 +55,6 @@
   "docstatus": 0,
   "doctype": "Translation",
   "language": "en-US",
-  "modified": "2021-12-03 00:13:57.618510",
-  "name": "e2bbe9ea2e",
-  "parent": null,
-  "parentfield": null,
-  "parenttype": null,
-  "source_text": "Company",
-  "translated_text": "Organization"
- },
- {
-  "context": null,
-  "contributed": 0,
-  "contribution_docname": null,
-  "contribution_status": "",
-  "docstatus": 0,
-  "doctype": "Translation",
-  "language": "en-US",
   "modified": "2021-12-03 00:14:11.536458",
   "name": "7e541971d7",
   "parent": null,
@@ -78,21 +62,5 @@
   "parenttype": null,
   "source_text": "Sales Invoice",
   "translated_text": "Invoice"
- },
- {
-  "context": null,
-  "contributed": 0,
-  "contribution_docname": null,
-  "contribution_status": "",
-  "docstatus": 0,
-  "doctype": "Translation",
-  "language": "en",
-  "modified": "2021-12-07 05:44:15.672284",
-  "name": "fcb7594799",
-  "parent": null,
-  "parentfield": null,
-  "parenttype": null,
-  "source_text": "Company",
-  "translated_text": "Organization"
  }
 ]
