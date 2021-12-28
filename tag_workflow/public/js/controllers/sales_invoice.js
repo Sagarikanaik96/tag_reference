@@ -25,7 +25,7 @@ frappe.ui.form.on("Sales Invoice", {
 		update_payment(frm);
 	},
 	is_pos: function(frm){
-		update_payment(frm);
+		check_timesheet(frm);
 	}
 });
 
@@ -55,6 +55,26 @@ frappe.ui.form.on("Sales Invoice Item", {
 
 
 /*----------payments-----------*/
+function check_timesheet(frm){
+	if(frm.doc.is_pos){
+		frappe.call({
+			"method": "tag_workflow.utils.whitelisted.check_timesheet",
+			"args":  {"job_order": frm.doc.job_order},
+			"callback": function(r){
+				let data = r.message;
+				if(!data){
+					cur_frm.set_value("is_pos", 0);
+					cur_frm.clear_table("payments");
+					cur_frm.refresh_field("payments");
+				}
+			}
+		});
+	}else{
+		cur_frm.clear_table("payments");
+		cur_frm.refresh_field("payments");
+	}
+}
+
 function update_payment(frm){
 	if(frm.doc.is_pos){
 		if(frm.doc.payments.length <= 0){

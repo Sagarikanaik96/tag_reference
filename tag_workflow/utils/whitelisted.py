@@ -192,4 +192,18 @@ def get_company_list(company_type):
         return "\n".join(data)
     except Exception as e:
         print(e)
-        return e
+        return []
+
+#-------check timesheet-----#
+@frappe.whitelist()
+def check_timesheet(job_order):
+    try:
+        is_value = True
+        if(frappe.db.exists("Timesheet", {"job_order_detail": job_order, "docstatus": 0})):
+            frappe.msgprint(_("All timesheets needs to be approved for this job order"))
+            is_value = False
+        return is_value
+    except Exception as e:
+        print(e)
+        return is_value
+
