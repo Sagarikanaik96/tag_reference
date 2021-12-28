@@ -81,7 +81,7 @@ def get_data(filters):
         for d in data:
             if(d.job_order_detail):
                 start_date, end_date, job_title = frappe.db.get_value("Job Order", {"name": d.job_order_detail}, ["from_date", "to_date", "select_job"])
-                row.append({"employee": d.employee, "employee_name": d.employee_name, "job_title": job_title, "start_date": start_date, "end_date": end_date, "job_title": job_title, "hours": d.total_billable_hours, "total_payment": d.total_billable_amount})
+                row.append({"employee": d.employee, "employee_name": d.employee_name, "job_title": job_title, "start_date": start_date, "end_date": end_date, "hours": d.total_billable_hours, "total_payment": d.total_billable_amount})
 
         return row
     except Exception as e:
