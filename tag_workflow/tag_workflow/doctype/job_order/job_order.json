@@ -66,7 +66,9 @@
   "view_contract",
   "contract_add_on",
   "apply_for_quotation_section",
-  "assign_employees"
+  "assign_employees",
+  "dispute_section",
+  "dispute_comment"
  ],
  "fields": [
   {
@@ -129,10 +131,11 @@
    "reqd": 1
   },
   {
+   "fetch_from": "select_job.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "job_title",
    "fieldtype": "Data",
-   "label": "Job Title",
-   "reqd": 1
+   "label": "Job Title"
   },
   {
    "fieldname": "job_site",
@@ -372,6 +375,7 @@
    "reqd": 1
   },
   {
+   "default": "Today",
    "fieldname": "from_date",
    "fieldtype": "Datetime",
    "label": "Job Order Start Date",
@@ -419,16 +423,27 @@
    "label": "Is Single Share"
   },
   {
-   "default": "1",
+   "default": "0",
    "fieldname": "agree_to_contract",
    "fieldtype": "Check",
    "label": "Agree To Contract",
    "reqd": 1
+  },
+  {
+   "fieldname": "dispute_section",
+   "fieldtype": "Section Break",
+   "label": "dispute"
+  },
+  {
+   "depends_on": "eval:doc.dispute_comment != undefined",
+   "fieldname": "dispute_comment",
+   "fieldtype": "Long Text",
+   "label": "Dispute Comment"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-27 02:28:21.936413",
+ "modified": "2021-12-28 00:31:34.543542",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

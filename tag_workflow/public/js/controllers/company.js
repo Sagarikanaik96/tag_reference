@@ -104,6 +104,14 @@ frappe.ui.form.on("Company", {
 		method: "tag_workflow.tag_data.disable_user",
 		args: {company: cur_frm.doc.company_name, check:cur_frm.doc.make_organization_inactive},
 		})
+	},
+	click_here:function(frm){
+		if(frm.doc.organization_type == 'Hiring'){
+			frappe.set_route('Form','Hiring Company Review')
+		}
+		else{
+			frappe.set_route('Form','Company Review')
+		}
 	}
 });
 

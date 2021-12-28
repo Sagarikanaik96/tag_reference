@@ -23,8 +23,8 @@ def company_details(company_name=None):
 
 @frappe.whitelist()
 def update_timesheet(job_order_detail):
-    value = frappe.db.sql('''select select_job,posting_date_time from `tabJob Order` where name = "{}" '''.format(job_order_detail),as_dict = 1)
-    return value[0]['select_job'],value[0]['posting_date_time']
+    value = frappe.db.sql('''select select_job,from_date,to_date from `tabJob Order` where name = "{}" '''.format(job_order_detail),as_dict = 1)
+    return value[0]['select_job'],value[0]['from_date'],value[0]['to_date']
 
 
 def send_email(subject = None,content = None,recipients = None):

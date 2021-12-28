@@ -144,39 +144,20 @@ frappe.ui.form.on('Job Order', {
 		})
 	},
 	before_save: function(frm){
-		check_company_detail(frm);
-		if(cur_frm.doc.no_of_workers<cur_frm.doc.worker_filled)
-		{
-			frappe.msgprint({message: __('<b>Agree To COntract</b>Is Mandatory Field'), title: __('Error'), indicator: 'orange'});
-			frappe.validated = false;	
-		}
-		if(cur_frm.doc.__islocal==1){
-			var total_per_hour=cur_frm.doc.extra_price_increase+cur_frm.doc.per_hour
-			var total_flat_rate=cur_frm.doc.flat_rate
-			if(cur_frm.doc.company!='undefined'){
-				frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','mvr','shovel'], function(r){
-					const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
-					const optional_field_data=[frm.doc.drug_screen,frm.doc.background_check,frm.doc.driving_record,frm.doc.shovel]
-					const optional_fields=["drug_screen",'background_check','driving_record','shovel']
-					for(let i=0;i<org_optional_data.length;i++){
-						if(optional_field_data[i] && optional_field_data[i]!='None')
-							{
-								if(org_optional_data[i]=='Flat rate person'){
-									total_flat_rate=total_flat_rate+parseFloat(optional_field_data[i])
-								}
-								else if(org_optional_data[i]=='Hour per person'){
-									total_per_hour=total_per_hour+parseFloat(optional_field_data[i])
-								}
-							}
-							else{
-								cur_frm.set_value(optional_fields[i],'None')
-							}
-					}
-					cur_frm.set_value("flat_rate",total_flat_rate)
-					cur_frm.set_value("per_hour",total_per_hour)
+		if(frm.doc.__islocal === 1){
+			return new Promise(function(resolve, reject) {
+				frappe.confirm("Do you want to save <br> <br> <b>your order no  </b>  "+frm.doc.name+" <br> <b>Job category</b> "+frm.doc.category+"<br> <b>Order status : </b>"+frm.doc.order_status+" <br> job Info <br><br> <b>job order start date</b>:"+frm.doc.from_date+" <b>end date: </b>"+frm.doc.to_date+" <br> <job title : "+frm.doc.select_job+" job duration : "+frm.doc.job_duration+" <br><b> job site </b>:  "+frm.doc.job_site+"<b> Estimated per hour </b>: "+frm.doc.estimated_hours_per_day+" <br> <b>no of worker filled </b> : "+frm.doc.worker_filled+" <br><b> Description </b>: "+frm.doc.description+"",
+				function() {  
+					let resp = 'frappe.validated = false';
+						resolve(resp);
+						check_company_detail(frm);
+						rate_hour_contract_change(frm)
+					},
+				function() {
+				  reject()
 				})
-			}
-		}
+			  })
+		}		
 	},
 	after_save:function(frm){
 		if (frm.doc.staff_org_claimed){
@@ -427,4 +408,43 @@ function check_value(frm,field,name,value){
 		frappe.msgprint({message: __('<b>'+field +'</b> Cannot be Less Than Zero'), title: __('Error'), indicator: 'orange'});
 		cur_frm.set_value(name, "");
 	}
+}
+
+function rate_hour_contract_change(frm){
+	if(cur_frm.doc.no_of_workers<cur_frm.doc.worker_filled)
+		{
+			frappe.msgprint({message: __('<b>Agree To COntract</b>Is Mandatory Field'), title: __('Error'), indicator: 'orange'});
+			frappe.validated = false;	
+		}
+		if(cur_frm.doc.__islocal==1){
+			rate_calculation(frm)
+		}
+	}
+
+function rate_calculation(frm){
+	var total_per_hour=cur_frm.doc.extra_price_increase+cur_frm.doc.per_hour
+	var total_flat_rate=cur_frm.doc.flat_rate
+	if(cur_frm.doc.company!='undefined'){
+				frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','mvr','shovel'], function(r){
+					const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
+					const optional_field_data=[frm.doc.drug_screen,frm.doc.background_check,frm.doc.driving_record,frm.doc.shovel]
+					const optional_fields=["drug_screen",'background_check','driving_record','shovel']
+					for(let i=0;i<org_optional_data.length;i++){
+						if(optional_field_data[i] && optional_field_data[i]!='None')
+							{
+								if(org_optional_data[i]=='Flat rate person'){
+									total_flat_rate=total_flat_rate+parseFloat(optional_field_data[i])
+								}
+								else if(org_optional_data[i]=='Hour per person'){
+									total_per_hour=total_per_hour+parseFloat(optional_field_data[i])
+								}
+							}
+							else{
+								cur_frm.set_value(optional_fields[i],'None')
+							}
+					}
+					frm.set_value("flat_rate",total_flat_rate)
+					frm.set_value("per_hour",total_per_hour)
+				})
+			}
 }
