@@ -81,6 +81,10 @@ frappe.ui.form.on("User", {
 	},
 	birth_date: function(frm){
 		check_bd(frm);
+	},
+	enabled: function(frm){
+		field_toggle(frm);
+		multi_company_setup(frm);
 	}
 });
 
@@ -211,6 +215,8 @@ function multi_company_setup(frm){
 		frm.add_custom_button("Assign Multi Company", function() {
 			(cur_frm.doc.__islocal == 1) ? frappe.msgprint("Please save the form first") : make_multicompany(frm);
 		}).addClass("btn-primary");
+	}else{
+		cur_frm.clear_custom_buttons();
 	}
 }
 
