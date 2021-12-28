@@ -23,8 +23,8 @@ def company_details(company_name=None):
 
 @frappe.whitelist()
 def update_timesheet(job_order_detail):
-    value = frappe.db.sql('''select select_job,posting_date_time from `tabJob Order` where name = "{}" '''.format(job_order_detail),as_dict = 1)
-    return value[0]['select_job'],value[0]['posting_date_time']
+    value = frappe.db.sql('''select select_job,from_date,to_date from `tabJob Order` where name = "{}" '''.format(job_order_detail),as_dict = 1)
+    return value[0]['select_job'],value[0]['from_date'],value[0]['to_date']
 
 
 def send_email(subject = None,content = None,recipients = None):
@@ -78,11 +78,11 @@ def update_job_order(job_name, employee_filled, staffing_org, hiringorg, name):
         claimed = job.staff_org_claimed if job.staff_org_claimed else ""
         frappe.db.set_value(jobOrder, job_name, "worker_filled", (int(employee_filled)+int(job.worker_filled)))
         frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
-
         sub = f'New Message regarding {job_name} from {hiringorg} is available'
         msg = f'Your Employees has been approved for Work Order {job_name}'
         user_list = frappe.db.sql(""" select email from `tabUser` where company = %s """,(staffing_org), as_dict=1)
         users = [usr['email'] for usr in user_list]
+        make_system_notification(users,msg,jobOrder,job_name,sub)   
         enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name)
         return sendmail(users, msg, sub, "Assign Employee", name)
     except Exception as e:
@@ -109,8 +109,10 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
 
     l = [l[0] for l in user_list]
     for user in l:
-        add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0,notify = 1)
-
+        add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0)
+    sub="Employee Assigned"
+    msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["job_title"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}'
+    make_system_notification(l,msg,jobOrder,job_order,sub)
     msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["job_title"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim <a href="/app/assign-employee/{doc_name}">Assign Employee</a> .'
     return send_email(None,msg,l)
 
@@ -231,9 +233,9 @@ def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters)
     company = filters.get('company')
 
     if job_category is None:
-        return frappe.db.sql("""select name from `tabEmployee` where company=%(emp_company)s and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company})
+        return frappe.db.sql("""select name, employee_name from `tabEmployee` where company=%(emp_company)s and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company})
     else:
-        return frappe.db.sql("""select name from `tabEmployee` where company=%(emp_company)s and (job_category = %(job_category)s or job_category IS NULL) and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company,'job_category':job_category})
+        return frappe.db.sql("""select name, employee_name from `tabEmployee` where company=%(emp_company)s and (job_category = %(job_category)s or job_category IS NULL) and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company,'job_category':job_category})
     
 @frappe.whitelist()
 def get_org_site(doctype, txt, searchfield, page_len, start, filters):
@@ -257,7 +259,7 @@ def delete_file_data(file_name):
 
 def job_order_notification(job_order_title,hiring_org,job_order,subject,l):
     msg=f'New Work Order for {job_order_title} has been created by {hiring_org}'
-    make_system_notification(l,msg,'Job Order',job_order,subject)   
+    make_system_notification(l,msg,jobOrder,job_order,subject)   
     message=f'New Work Order for {job_order_title} has been created by {hiring_org}. <a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
     return send_email(subject,message,l)
 
@@ -274,7 +276,7 @@ def disable_user(company, check):
 
 @frappe.whitelist()
 def update_job_order_status():
-    job_order_data=frappe.get_all('Job Order',fields=['name','from_date','to_date','order_status'])
+    job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','order_status'])
     now_date = get_datetime(now())
     for job in job_order_data:
         start_date = job.from_date if job.from_date else ""

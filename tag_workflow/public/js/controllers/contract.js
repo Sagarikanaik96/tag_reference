@@ -31,14 +31,6 @@ frappe.ui.form.on("Contract", {
 
 	before_save: function(frm){
 		update_lead(frm);
-	},
-
-	signed_by: function(frm){
-		if(frm.doc.signed_by){
-			cur_frm.set_value("sign_date_hiring", frappe.datetime.now_date());
-		}else{
-			cur_frm.set_value("sign_date_hiring", "");
-		}
 	}
 });
 

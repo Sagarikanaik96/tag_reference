@@ -92,7 +92,7 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
     if 'Comment' in ratings.keys():
         doc.comments=ratings['Comment']
     doc.save(ignore_permissions=True)
-    staff_member=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(staffing_company),as_list=1)
+    staff_member=frappe.db.sql('''select email from `tabUser` where company='{}' '''.format(staffing_company),as_list=1)
     for staff in staff_member:
         add("Company Review", doc.name, staff[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
     company_rate=frappe.db.sql(''' select average_rating from `tabCompany` where name='{}' '''.format(staffing_company),as_list=1)
@@ -188,3 +188,48 @@ def removing_unsatisfied_employee(company,emp_doc):
 def assigned_job_order(doctype,txt,searchfield,page_len,start,filters):
     company=filters.get('company')
     return frappe.db.sql(''' select name from `tabJob Order` where company =%(company)s and name in (select job_order from `tabAssign Employee` where hiring_organization=%(company)s) ''',{'company':company})
+
+@frappe.whitelist()
+def jb_ord_dispute_comment_box(comment,job_order):
+    comment = json.loads(comment)
+    if comment:
+        job_order_doc = frappe.get_doc('Job Order',job_order)
+        if job_order_doc.dispute_comment:
+            job_order_doc.dispute_comment += '\n' +'-'*15 + '\n'+ comment['Comment']
+        else:
+            job_order_doc.dispute_comment = comment['Comment']
+
+        job_order_doc.flags.ignore_mandatory = True
+        job_order_doc.save(ignore_permissions=True)
+
+        return True
+
+
+@frappe.whitelist()
+def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None,job_order=None):
+    ratings = json.loads(ratings)
+    doc = frappe.new_doc('Hiring Company Review')
+    doc.staffing_company=staffing_company
+    doc.hiring_company=hiring_company
+    doc.job_order=job_order
+    doc.rating=ratings['Rating']
+    if 'Comment' in ratings.keys():
+        doc.comments=ratings['Comment']
+    doc.save(ignore_permissions=True)
+    hiring_member=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(hiring_company),as_list=1)
+    for name in hiring_member:
+        add("Hiring Company Review", doc.name, name[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
+    company_rate=frappe.db.sql(''' select average_rating from `tabCompany` where name='{}' '''.format(hiring_company),as_list=1)
+    if (len(company_rate)==0 or company_rate[0][0]==None):
+        doc=frappe.get_doc('Company',hiring_company)
+        doc.average_rating=ratings['Rating']
+        doc.save()
+    else:
+        average_rate=frappe.db.sql(''' select rating from `tabHiring Company Review` where hiring_company='{}' '''.format(hiring_company),as_list=1)
+        if average_rate[0][0]!=None:
+            rating=[float(i) for i in average_rate[0]]
+            doc=frappe.get_doc('Company',hiring_company)
+            avg_rating=sum(rating)/len(rating)
+            doc.average_rating=str(avg_rating)
+            doc.save()
+    return "success"

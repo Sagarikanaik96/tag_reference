@@ -20,6 +20,7 @@ frappe.ui.form.on('Job Order', {
 	onload:function(frm){
 		if(cur_frm.doc.__islocal==1){
 			check_company_detail(frm);
+			frm.set_value("from_date",'')
 			frm.set_df_property("time_remaining_for_make_edits", "options"," ");
 			frappe.call({
 				method:"tag_workflow.tag_data.org_industy_type",
@@ -143,39 +144,20 @@ frappe.ui.form.on('Job Order', {
 		})
 	},
 	before_save: function(frm){
-		check_company_detail(frm);
-		if(cur_frm.doc.no_of_workers<cur_frm.doc.worker_filled)
-		{
-			msgprint("No Of workers can't be less than"+cur_frm.doc.worker_filled);
-			frappe.validated = false;	
-		}
-		if(cur_frm.doc.__islocal==1){
-			var total_per_hour=cur_frm.doc.extra_price_increase+cur_frm.doc.per_hour
-			var total_flat_rate=cur_frm.doc.flat_rate
-			if(cur_frm.doc.company!='undefined'){
-				frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','mvr','shovel'], function(r){
-					const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
-					const optional_field_data=[frm.doc.drug_screen,frm.doc.background_check,frm.doc.driving_record,frm.doc.shovel]
-					const optional_fields=["drug_screen",'background_check','driving_record','shovel']
-					for(let i=0;i<org_optional_data.length;i++){
-						if(optional_field_data[i] && optional_field_data[i]!='None')
-							{
-								if(org_optional_data[i]=='Flat rate person'){
-									total_flat_rate=total_flat_rate+parseFloat(optional_field_data[i])
-								}
-								else if(org_optional_data[i]=='Hour per person'){
-									total_per_hour=total_per_hour+parseFloat(optional_field_data[i])
-								}
-							}
-							else{
-								cur_frm.set_value(optional_fields[i],'None')
-							}
-					}
-					cur_frm.set_value("flat_rate",total_flat_rate)
-					cur_frm.set_value("per_hour",total_per_hour)
+		if(frm.doc.__islocal === 1){
+			return new Promise(function(resolve, reject) {
+				frappe.confirm("Do you want to save <br> <br> <b>your order no  </b>  "+frm.doc.name+" <br> <b>Job category</b> "+frm.doc.category+"<br> <b>Order status : </b>"+frm.doc.order_status+" <br> job Info <br><br> <b>job order start date</b>:"+frm.doc.from_date+" <b>end date: </b>"+frm.doc.to_date+" <br> <job title : "+frm.doc.select_job+" job duration : "+frm.doc.job_duration+" <br><b> job site </b>:  "+frm.doc.job_site+"<b> Estimated per hour </b>: "+frm.doc.estimated_hours_per_day+" <br> <b>no of worker filled </b> : "+frm.doc.worker_filled+" <br><b> Description </b>: "+frm.doc.description+"",
+				function() {  
+					let resp = 'frappe.validated = false';
+						resolve(resp);
+						check_company_detail(frm);
+						rate_hour_contract_change(frm)
+					},
+				function() {
+				  reject()
 				})
-			}
-		}
+			  })
+		}		
 	},
 	after_save:function(frm){
 		if (frm.doc.staff_org_claimed){
@@ -223,6 +205,54 @@ frappe.ui.form.on('Job Order', {
 				],
 			});
 			contract.show();
+		}
+	},
+	from_date:function(frm){
+		check_from_date(frm)
+	},
+	to_date(frm){
+		check_to_date(frm)
+	},
+	estimated_hours_per_day:function(frm){
+		let field="Estimated Hours Per Day";
+		let name='estimated_hours_per_day';
+		let value=frm.doc.estimated_hours_per_day;
+		check_value(frm,field,name,value)
+	},
+	no_of_workers:function(frm){
+		let field="No Of Workers";
+		let name='no_of_workers';
+		let value=frm.doc.no_of_workers;
+		check_value(frm,field,name,value)
+	},
+	rate:function(frm){
+		let field="Rate";
+		let name='rate';
+		let value=parseFloat(frm.doc.rate);
+		check_value(frm,field,name,value)
+	},
+	extra_price_increase:function(frm){
+		let field="Extra Price Increase";
+		let name='extra_price_increase';
+		let value=frm.doc.extra_price_increase;
+		check_value(frm,field,name,value)
+	},
+	per_hour:function(frm){
+		let field="Per Hour";
+		let name='per_hour';
+		let value=frm.doc.per_hour;
+		check_value(frm,field,name,value)
+	},
+	flat_rate:function(frm){
+		let field="Flat Rate";
+		let name='flat_rate';
+		let value=frm.doc.flat_rate;
+		check_value(frm,field,name,value)
+	},
+	validate:function(frm){
+		if(frm.doc.agree_to_contract!=1){
+			msgprint("Pease select mandatory field:<b>Agree To Contract</b>");
+			frappe.validated = false;
 		}
 	}
 });
@@ -283,7 +313,7 @@ function redirect_quotation(frm){
 }
  
 function set_read_fields(frm){
-	var myStringArray = ["phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
+	var myStringArray = ["phone_number","estimated_hours_per_day","address","rate","description","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
 			var arrayLength = myStringArray.length;
 			for (var i = 0; i < arrayLength; i++) {
 				frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -294,7 +324,7 @@ function set_read_fields(frm){
 function timer_value(frm){
 	var time=frappe.datetime.get_hour_diff(cur_frm.doc.from_date,frappe.datetime.now_datetime())
 	if(time<24){
-		var myStringArray = ["company","posting_date_time","from_date","to_date","category","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
+		var myStringArray = ["company","posting_date_time","from_date","to_date","category","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","rate","description","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
 		var arrayLength = myStringArray.length;
 		for (var i = 0; i < arrayLength; i++) {
 			frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -341,4 +371,80 @@ function notification_joborder_change(frm){
 			posting_date:frm.doc.from_date
 		}
 	});
+}
+
+function check_from_date(frm){
+	let from_date = frm.doc.from_date || "";
+	let to_date = frm.doc.to_date || "";
+
+	if(from_date && from_date <= frappe.datetime.now_date()){
+		frappe.msgprint({message: __('<b>Start Date</b> Cannot be Today`s date or Past date'), title: __('Error'), indicator: 'orange'});
+		cur_frm.set_value("from_date", "");
+	}
+	else if(to_date && from_date && from_date>=to_date){
+		frappe.msgprint({message: __('<b>End Date</b> Cannot be Less than Start Date'), title: __('Error'), indicator: 'orange'});
+		cur_frm.set_value("from_date", "");
+		cur_frm.set_value("to_date", "");
+
+	}
+}
+function check_to_date(frm){
+	let from_date=frm.doc.from_date || "";
+	let to_date = frm.doc.to_date || "";
+	if(to_date && frappe.datetime.now_date()>=to_date)
+	{
+		frappe.msgprint({message: __('<b>End Date</b> Cannot be Today`s date or Past date'), title: __('Error'), indicator: 'orange'});
+		cur_frm.set_value("to_date", "");
+	}
+	else if(to_date && from_date && from_date>=to_date){
+		frappe.msgprint({message: __('<b>End Date</b> Cannot be Less than Start Date'), title: __('Error'), indicator: 'orange'});
+		cur_frm.set_value("to_date", "");
+	}
+
+}
+
+function check_value(frm,field,name,value){
+	if(value && value<0){
+		frappe.msgprint({message: __('<b>'+field +'</b> Cannot be Less Than Zero'), title: __('Error'), indicator: 'orange'});
+		cur_frm.set_value(name, "");
+	}
+}
+
+function rate_hour_contract_change(frm){
+	if(cur_frm.doc.no_of_workers<cur_frm.doc.worker_filled)
+		{
+			frappe.msgprint({message: __('<b>Agree To COntract</b>Is Mandatory Field'), title: __('Error'), indicator: 'orange'});
+			frappe.validated = false;	
+		}
+		if(cur_frm.doc.__islocal==1){
+			rate_calculation(frm)
+		}
+	}
+
+function rate_calculation(frm){
+	var total_per_hour=cur_frm.doc.extra_price_increase+cur_frm.doc.per_hour
+	var total_flat_rate=cur_frm.doc.flat_rate
+	if(cur_frm.doc.company!='undefined'){
+				frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','mvr','shovel'], function(r){
+					const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
+					const optional_field_data=[frm.doc.drug_screen,frm.doc.background_check,frm.doc.driving_record,frm.doc.shovel]
+					const optional_fields=["drug_screen",'background_check','driving_record','shovel']
+					for(let i=0;i<org_optional_data.length;i++){
+						if(optional_field_data[i] && optional_field_data[i]!='None')
+							{
+								if(org_optional_data[i]=='Flat rate person'){
+									total_flat_rate=total_flat_rate+parseFloat(optional_field_data[i])
+								}
+								else if(org_optional_data[i]=='Hour per person'){
+									total_per_hour=total_per_hour+parseFloat(optional_field_data[i])
+								}
+							}
+							else{
+								cur_frm.set_value(optional_fields[i],'None')
+							}
+					}
+					frm.set_value("flat_rate",total_flat_rate)
+					frm.set_value("per_hour",total_per_hour)
+				})
+			}
 }

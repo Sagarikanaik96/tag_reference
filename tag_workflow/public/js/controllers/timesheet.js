@@ -12,6 +12,41 @@ frappe.ui.form.on("Timesheet", {
 				"method": "tag_workflow.utils.timesheet.approval_notification",
 				"args": {"job_order": frm.doc.job_order_detail,"hiring_company":frm.doc.company,"staffing_company": frm.doc.employee_company, "timesheet_name":cur_frm.doc.name,'timesheet_approved_time':frm.doc.modified,'current_time':frappe.datetime.now_datetime()}
 			});
+			if((frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User')) && frappe.session.user!='Administrator'){
+				frappe.db.get_value("Hiring Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
+					if(!r.rating){
+						var pop_up = new frappe.ui.Dialog({
+							'fields': [
+								{'fieldname': 'Rating', 'fieldtype': 'Rating','label':'Rating','reqd':1},
+								{'fieldname': 'Comment', 'fieldtype': 'Data','label':'Review'}
+							],
+							primary_action: function(){
+								pop_up.hide();
+								var comp_rating=pop_up.get_values()
+								frappe.call({
+									method:"tag_workflow.utils.timesheet.hiring_company_rating",
+									args:{
+										'hiring_company':cur_frm.doc.company,
+										'staffing_company':cur_frm.doc.employee_company,
+										'ratings':comp_rating,
+										'job_order':cur_frm.doc.job_order_detail
+									},
+									callback:function(rm){
+											frappe.msgprint('Review Submitted Successfully')	
+									}
+								})
+							}
+						});
+						pop_up.show();
+					}
+					
+				})
+				
+			}
+
+		}
+		if (cur_frm.doc.status == 'Submitted' && cur_frm.doc.workflow_state == "Denied"){
+				denied_timesheet(frm)
 
 		}
 		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
@@ -66,10 +101,10 @@ frappe.ui.form.on("Timesheet", {
 
 function job_order_details(frm){
 	if(frm.doc.job_order_detail){
-		frappe.db.get_value("Job Order", {"name": frm.doc.job_order_detail}, ["job_title", "job_site", "job_duration", "per_hour"], function(r){
+		frappe.db.get_value("Job Order", {"name": frm.doc.job_order_detail}, ["select_job", "job_site", "job_duration", "per_hour"], function(r){
 			if(r){
 				let data = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-					<p><b>Job Title: </b> ${r['job_title']}</p>
+					<p><b>Job Title: </b> ${r['select_job']}</p>
 					<p><b>Job Site: </b> ${r['job_site']}</p>
 					<p><b>Job Duration: </b> ${r['job_duration']}</p>
 					<p><b>Rate Per Hour: </b> ${r['per_hour']}</p>
@@ -121,7 +156,6 @@ function check_update_timesheet(frm){
 	}
 }
 
-
 /*----------hide field----------------*/
 function hide_timesheet_field(fields){
 	for(let val in fields){
@@ -137,8 +171,8 @@ function update_job_detail(frm){
 			callback:function(r){
 				if(r.message){
 					cur_frm.clear_table("time_logs");
-					let child = frappe.model.get_new_doc("Timesheet Detail", cur_frm.doc, "time_logs");
-					$.extend(child, {"activity_type": r.message[0], "from_time": r.message[1]});
+					var child = frappe.model.get_new_doc("Timesheet Detail", cur_frm.doc, "time_logs");
+					$.extend(child, {"activity_type": r.message[0], "from_time": r.message[1],"to_date":r.message[2]});
 					cur_frm.refresh_field("time_logs");
 				}
 			}
@@ -176,3 +210,39 @@ function notify_email(frm, type, value){
 		"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation,'employee_company':frm.doc.employee_company}
 	});
 }
+
+function denied_timesheet(frm){
+		var current_date=new Date(frappe.datetime.now_datetime())
+		var approved_date=new Date(frm.doc.modified)
+		var diff=current_date.getTime()-approved_date.getTime()
+		diff=parseInt(diff/1000)
+		if (diff<5)
+		{
+			if((frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User')) && frappe.session.user!='Administrator'){
+				var pop_up = new frappe.ui.Dialog({
+					'fields': [
+						{'fieldname': 'Comment', 'fieldtype': 'Long Text','label':'comment'}
+					],
+					primary_action: function(){
+						pop_up.hide();
+						var comment=pop_up.get_values()
+						frappe.call({
+							method:"tag_workflow.utils.timesheet.jb_ord_dispute_comment_box",
+							args:{
+								'comment':comment,
+								'job_order':cur_frm.doc.job_order_detail
+							},
+							callback:function(rm){
+								if (rm.message){
+									frappe.msgprint('Comment Submitted Successfully')
+								}
+								
+							}
+						})
+					}
+				});
+				pop_up.show();
+			}
+	}
+}
+	

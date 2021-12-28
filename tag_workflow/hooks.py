@@ -59,12 +59,16 @@ doctype_list_js = {
 after_migrate = ["tag_workflow.utils.organization.setup_data"]
 
 # Hook on document methods and events
+validate = "tag_workflow.controllers.base_controller.validate_controller"
 doc_events = {
         "*":{
-            "validate": "tag_workflow.controllers.base_controller.validate_controller"
+            "validate": validate
         },
         "Company": {
-            "on_trash": "tag_workflow.controllers.base_controller.validate_controller"
+            "on_trash": validate
+        },
+        "User": {
+            "on_update": validate
         }
 }
 

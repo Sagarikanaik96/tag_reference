@@ -2,7 +2,7 @@
  "cards_label": " My Activities",
  "category": "Modules",
  "charts": [],
- "creation": "2021-12-20 02:29:25.140402",
+ "creation": "2021-12-27 16:09:01.950873",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
@@ -21,15 +21,6 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Item",
-   "link_to": "Item",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   },
   {
    "hidden": 0,
@@ -103,7 +94,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-12-21 06:20:14.504256",
+ "modified": "2021-12-27 16:29:39.802204",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "My Activities",

@@ -8,6 +8,9 @@ frappe.ui.form.on("Company", {
 		if(frappe.user.has_role('Tag Admin')) {
 			frm.set_df_property('employees', 'read_only' , 1);
 	   	}
+		if(frm.doc.__islocal == 1){
+			$('div[data-fieldname="average_rating"]').css("display", "none");
+		}
 	},
 	setup: function(frm){
 		init_values(frm);
@@ -101,6 +104,14 @@ frappe.ui.form.on("Company", {
 		method: "tag_workflow.tag_data.disable_user",
 		args: {company: cur_frm.doc.company_name, check:cur_frm.doc.make_organization_inactive},
 		})
+	},
+	click_here:function(frm){
+		if(frm.doc.organization_type == 'Hiring'){
+			frappe.set_route('Form','Hiring Company Review')
+		}
+		else{
+			frappe.set_route('Form','Company Review')
+		}
 	}
 });
 

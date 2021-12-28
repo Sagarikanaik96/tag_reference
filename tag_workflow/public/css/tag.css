@@ -1,3 +1,7 @@
+label {
+	color: #454F63 !important;
+    font-size: 14px !important;
+}
 .widget.onboarding-widget-box {
 	display: none;
 }
@@ -25,12 +29,13 @@ input[type="radio"]:checked::before {
 }
 
 .layout-main-section .frappe-list .list-row .indicator-pill {
-	padding: 4px;
-	border-radius: 4px;
+	padding: 4px 8px;
+	border-radius: 11px;
 }
 
 .navbar{
 	background-color: white;
+	margin-right: 0 !important;
 }
 
 li.dropdown.dropdown.dropdown-help.dropdown-mobile {
@@ -118,15 +123,30 @@ input:visited{
     font-weight: 600;
 	color:#21B9E4 !important;
 }
-#page-User .layout-main-section-wrapper .layout-main-section , 
+/* #page-User .layout-main-section-wrapper .layout-main-section, 
 #page-Company .layout-main-section-wrapper .layout-main-section,
-#page-Lead .layout-main-section-wrapper .layout-main-section ,
-#page-Timesheet .layout-main-section-wrapper .layout-main-section 
+#page-Lead .layout-main-section-wrapper .layout-main-section,
+#page-Timesheet .layout-main-section-wrapper .layout-main-section,
+#page-Sales .layout-main-section-wrapper .layout-main-section,
+#Invoice .layout-main-section-wrapper .layout-main-section,
+#page-Report .layout-main-section-wrapper .layout-main-section,
+#page-List .layout-main-section-wrapper .layout-main-section,
+#page-Employee .layout-main-section-wrapper .layout-main-section,
+#page-Organization .layout-main-section-wrapper .layout-main-section,
+#page-Job .layout-main-section-wrapper .layout-main-section, */
+.editable-form .layout-main-section-wrapper .layout-main-section,
+#page-Company .layout-main-section-wrapper .layout-main-section
 {
-    width: 50%;
-    margin-left: 13rem;
+    max-width: 496px;
+	width: 100%;
+    margin: auto;
 }
 
+#page-DocType .layout-main-section-wrapper .layout-main-section
+{
+	max-width: 100%;
+	width: 100%;
+}
 /* user management */
 #page-User .layout-main .layout-side-section {
 	border-right: none;
@@ -134,12 +154,23 @@ input:visited{
 .form-section.card-section {
 	padding: 20px;
 }
-#page-User .user-bg ,
-#page-Lead .user-bg 
+/* #page-User .user-bg,
+#page-Lead .user-bg,
+#page-Sales .user-bg,
+#Invoice .user-bg,
+#page-Report .user-bg,
+#page-List .user-bg,
+#page-Employee .user-bg,
+#page-Company .user-bg */
+.editable-form .user-bg,
+#page-Company .user-bg
 {
 	background: url("/assets/tag_workflow/images/background.jpg");
 	background-size: 100% 100%;
 	background-repeat: no-repeat;
+}
+.signature-field { 
+	overflow: auto;
 }
 /* notification */
 .notifications-list .notification-item-tabs .notifications-category.active {
@@ -176,7 +207,11 @@ input::-webkit-credentials-auto-fill-button {
 .layout-main-section .frappe-list .list-row .ellipsis a {
 	font-weight: normal;
 }
-
+.col-md-12.layout-main-section-wrapper {
+	left: 8rem;
+    max-width: 90%;
+    width: 100%;
+}
 /* Table UI update  */
 
 @media (max-width:768px) {
@@ -206,11 +241,21 @@ input::-webkit-credentials-auto-fill-button {
 	display: none;
 }
 
-[data-page-route="Workspaces"] .layout-main .layout-main-section-wrapper, [data-page-route="Workspaces"] .layout-main .layout-side-section {
+/* [data-page-route="Workspaces"] .layout-main .layout-main-section-wrapper, [data-page-route="Workspaces"] .layout-main .layout-side-section {
 	left: 13rem;
-}
+} */
 
 .col.layout-main-section-wrapper{
-	left: 10rem;
+	left: 8rem;
 	max-width: 90%;
+	width: 100%;
 }
+
+/* .frappe-card .page-form  {
+	margin-left: 9rem;
+} */
+
+.form-footer{
+	display: none!important;
+}
+

@@ -2,28 +2,33 @@ frappe.ui.form.on("Lead", {
 	refresh: function(frm){
 		cur_frm.clear_custom_buttons();
 		reqd_fields(frm);
-		hide_fields(frm);
 		make_contract(frm);
 		let roles = frappe.user_roles;
 		if(cur_frm.is_dirty() != 1 && frm.doc.status == "Close" && (roles.includes("Tag Admin") || roles.includes("Tag User") || roles.includes("Staffing Admin") || roles.includes("Staffing User"))){
 			onboard_org(frm);
 		}
-	}
+	},
 });
-
-/*------hide-----*/
-function hide_fields(frm){
-	let fields = ["organization_lead"];
-	for(let f in fields){
-		cur_frm.toggle_display(fields[f], 0);
-	}
-}
 
 /*-------reqd------*/
 function reqd_fields(frm){
 	let reqd = ["lead_name", "company_name", "email_id"];
 	for(let r in reqd){
 		cur_frm.toggle_reqd(reqd[r], 1);
+	}
+
+	let roles = frappe.user_roles;
+	if(roles.includes("Tag Admin") || roles.includes("Tag User")){
+		cur_frm.toggle_reqd("organization_type", 1);
+		frm.set_query("organization_type", function(doc){
+			return {
+				filters:[
+					["Organization Type", "name", "!=", "Tag"]
+				]
+			}
+		});
+	}else{
+		cur_frm.toggle_display("organization_type", 0);
 	}
 }
 
@@ -32,11 +37,12 @@ function onboard_org(frm){
 	var email = frm.doc.email_id;
 	var exclusive = frm.doc.company_name;
 	var person_name = frm.doc.lead_name;
+	var organization_type = frm.doc.organization_type;
 
 	frappe.db.get_value("User", {"name": frappe.session.user}, "company", function(r){
 		if(r && r.company){
 			frm.add_custom_button("Onboard Organization", function() {
-				(check_dirty(frm)) ? onboard_orgs(exclusive, r.company, email, person_name) : console.log("TAG");
+				(check_dirty(frm)) ? onboard_orgs(exclusive, r.company, email, person_name, organization_type) : console.log("TAG");
 			}).addClass("btn-primary");
 		}	
 	});
@@ -52,13 +58,13 @@ function check_dirty(frm){
 }
 
 /*-------onboard----------*/
-function onboard_orgs(exclusive, staffing, email, person_name){
+function onboard_orgs(exclusive, staffing, email, person_name, organization_type){
 	if(exclusive && email){
 		frappe.call({
 			"method": "tag_workflow.controllers.crm_controller.onboard_org",
 			"freeze": true,
 			"freeze_message": "<p><b>Please wait while we are preparing Organization for onboarding</b></p>",
-			"args": {"exclusive": exclusive, "staffing": staffing, "email": email, "person_name": person_name},
+			"args": {"exclusive": exclusive, "staffing": staffing, "email": email, "person_name": person_name, "organization_type": organization_type},
 			"callback": function(r){
 				console.log(r);
 			}

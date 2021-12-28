@@ -55,6 +55,10 @@ class MasterController(base_controller.BaseController):
         if(self.dt == "Company"):
             frappe.throw(_("User is not allowed to delete the organisation: <b>{0}</b>").format(self.doc.name))
 
+    def apply_user_permissions(self):
+        if(self.dt == "User" and self.doc.enabled):
+            check_employee(self.doc.email, self.doc.first_name, self.doc.company, self.doc.last_name, self.doc.gender, self.doc.birth_date, self.doc.date_of_joining, self.doc.organization_type)
+
 
 #-----------data update--------------#
 @frappe.whitelist()
@@ -163,17 +167,6 @@ def check_employee(name, first_name, company, last_name=None, gender=None, date_
         else:
             emp = frappe.get_doc(EMP, {"user_id": name, "company": company})
 
-            if company != emp.company:
-                frappe.db.sql(""" delete from `tabUser Permission` where user = %s and company = %s """, name, emp.company)
-
-            emp.first_name=first_name
-            emp.last_name=last_name
-            emp.company=company
-            emp.gender=gender
-            emp.date_of_birth=date_of_birth
-            emp.date_of_joining=date_of_joining
-            emp.create_user_permission=1
-            emp.save(ignore_permissions=True)
 
         if(organization_type != "TAG"):
             make_employee_permission(name, emp.name, company)
