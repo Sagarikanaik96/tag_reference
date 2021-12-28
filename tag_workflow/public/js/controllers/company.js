@@ -8,6 +8,7 @@ frappe.ui.form.on("Company", {
 		if(frappe.user.has_role('Tag Admin')) {
 			frm.set_df_property('employees', 'read_only' , 1);
 	   	}
+
 		if(frm.doc.__islocal == 1){
 			$('div[data-fieldname="average_rating"]').css("display", "none");
 		}
@@ -41,50 +42,39 @@ frappe.ui.form.on("Company", {
 		frm.set_query("parent_staffing", function(doc){
 			return {
 				filters: [
-					["Company", "organization_type", "=", "Staffing"]
+					["Company", "organization_type", "=", "Staffing"],
+					["Company", "make_organization_inactive", "=", 0]
 				]
 			}
 		});
 	},
 	set_primary_contact_as_account_receivable_contact:function(frm){
-		if(cur_frm.doc.set_primary_contact_as_account_receivable_contact==1)
-		{
-			if((cur_frm.doc.contact_name) && (cur_frm.doc.phone_no) && (cur_frm.doc.email))
-			{
-				console.log("working")
+		if(cur_frm.doc.set_primary_contact_as_account_receivable_contact==1){
+			if((cur_frm.doc.contact_name) && (cur_frm.doc.phone_no) && (cur_frm.doc.email)){
 				cur_frm.set_value("accounts_receivable_name",cur_frm.doc.contact_name );
 				cur_frm.set_value("accounts_receivable_rep_email",cur_frm.doc.email);
 				cur_frm.set_value("accounts_receivable_phone_number", cur_frm.doc.phone_no);
-			}
-			else
-			{
+			}else{
 				msgprint("You Can't set Primary Contact unless your value are filled")
 				cur_frm.set_value("set_primary_contact_as_account_receivable_contact",0);
 			}
-		}
-		else
-		{
+		}else{
 			cur_frm.set_value("accounts_receivable_name",'' );
 			cur_frm.set_value("accounts_receivable_rep_email",'');
 			cur_frm.set_value("accounts_receivable_phone_number", '');
 		}
 	},
 	set_primary_contact_as_account_payable_contact:function(frm){
-		if(cur_frm.doc.set_primary_contact_as_account_payable_contact==1)
-		{
-			if((cur_frm.doc.contact_name) && (cur_frm.doc.phone_no) && (cur_frm.doc.email))
-			{
+		if(cur_frm.doc.set_primary_contact_as_account_payable_contact==1){
+			if((cur_frm.doc.contact_name) && (cur_frm.doc.phone_no) && (cur_frm.doc.email)){
 				cur_frm.set_value("accounts_payable_contact_name",cur_frm.doc.contact_name );
 				cur_frm.set_value("accounts_payable_email",cur_frm.doc.email);
 				cur_frm.set_value("accounts_payable_phone_number", cur_frm.doc.phone_no);
-			}
-			else
-			{
+			}else{
 				msgprint("You Can't set Primary Contact unless your value are filled")
 				cur_frm.set_value("set_primary_contact_as_account_payable_contact",0);
 			}
-		}
-		else{
+		}else{
 			cur_frm.set_value("accounts_payable_contact_name",'' );
 			cur_frm.set_value("accounts_payable_email",'');
 			cur_frm.set_value("accounts_payable_phone_number", '');
@@ -99,17 +89,18 @@ frappe.ui.form.on("Company", {
 	before_save: function(frm){
 		validate_phone_and_zip(frm);
 	},
+
 	make_organization_inactive(frm) {
 		frappe.call({
-		method: "tag_workflow.tag_data.disable_user",
-		args: {company: cur_frm.doc.company_name, check:cur_frm.doc.make_organization_inactive},
+			method: "tag_workflow.tag_data.disable_user",
+			args: {company: cur_frm.doc.company_name, check:cur_frm.doc.make_organization_inactive},
 		})
 	},
-	click_here:function(frm){
+
+	click_here: function(frm){
 		if(frm.doc.organization_type == 'Hiring'){
 			frappe.set_route('Form','Hiring Company Review')
-		}
-		else{
+		}else{
 			frappe.set_route('Form','Company Review')
 		}
 	}

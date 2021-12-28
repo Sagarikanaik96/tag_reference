@@ -265,13 +265,16 @@ def job_order_notification(job_order_title,hiring_org,job_order,subject,l):
 
 @frappe.whitelist()
 def disable_user(company, check):
-    if check=="1":
-        check=int(0)
-    else:
-        check=int(1)
-    frappe.db.sql(""" UPDATE `tabUser` SET `tabUser`.enabled ="{0}" where company="{1}" and `terminated`!=1 """.format(check,company))
-    frappe.db.commit()
+    try:
+        if check=="1":
+            check=int(0)
+        else:
+            check=int(1)
 
+        frappe.db.sql(""" UPDATE `tabUser` SET `tabUser`.enabled ="{0}" where company="{1}" and `terminated`!=1 """.format(check,company))
+        frappe.db.commit()
+    except Exception as e:
+        frappe.msgprint(e)
 
 
 @frappe.whitelist()

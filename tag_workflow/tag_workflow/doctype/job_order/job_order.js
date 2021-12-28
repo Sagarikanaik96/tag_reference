@@ -81,9 +81,13 @@ frappe.ui.form.on('Job Order', {
 
 		frm.set_query("company", function(doc) {
 			return {
-				"filters":[ ['Company', "organization_type", "in", ["Hiring" , "Exclusive Hiring"]] ]
+				"filters":[
+					['Company', "organization_type", "in", ["Hiring" , "Exclusive Hiring"]],
+					["Company", "make_organization_inactive", "=", 0]
+				]
 			}
 		});
+
 		frm.set_query('select_job', function(doc) {
 			return {
 				query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_jobtitle_list",
@@ -106,13 +110,13 @@ frappe.ui.form.on('Job Order', {
 			timer_value(frm)
 			let roles = frappe.user_roles;
 			if(roles.includes("Hiring User") || roles.includes("Hiring Admin")){
-		
 				if((frappe.datetime.now_datetime()>=cur_frm.doc.from_date) && (cur_frm.doc.to_date>=frappe.datetime.now_datetime())){
 					frm.set_df_property("no_of_workers", "read_only",0);
 				}	
 			}
 		}
-		if (cur_frm.doc.is_single_share  == 1){
+
+		if(cur_frm.doc.is_single_share  == 1){
 			frm.add_custom_button(__('Deny Job Order'), function(){
 				console.log('function is called');
 				frappe.call({
@@ -120,11 +124,10 @@ frappe.ui.form.on('Job Order', {
 					args:{
 						staff_company:frm.doc.staff_company,
 						joborder_name:frm.doc.name
-					},	
+					},
 				})
-			}
-		)}
-		else{
+			});
+		}else{
 			frm.remove_custom_button('Deny Job Order');
 		}
 	},
@@ -137,11 +140,10 @@ frappe.ui.form.on('Job Order', {
 			},
 			callback:function(r){
 				if (r.message){
-					frm.set_value('description',r.message['description'])
-					frm.set_value('rate',r.message['wages'])
-					refresh_field("rate")
-					refresh_field("description")
-			
+					frm.set_value('description',r.message['description']);
+					frm.set_value('rate',r.message['wages']);
+					refresh_field("rate");
+					refresh_field("description");
 				}
 			}
 		})

@@ -187,7 +187,7 @@ def update_lead(lead, staff_company, date, staff_user, name):
 def get_company_list(company_type):
     try:
         data = []
-        companies = frappe.db.sql(""" select name from `tabCompany` where organization_type = %s """,company_type, as_dict=1)
+        companies = frappe.db.sql(""" select name from `tabCompany` where make_organization_inactive = 0 and organization_type = %s """,company_type, as_dict=1)
         data = [c['name'] for c in companies]
         return "\n".join(data)
     except Exception as e:

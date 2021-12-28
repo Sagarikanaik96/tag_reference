@@ -1,4 +1,5 @@
 frappe.listview_settings['Employee'] = {
+	filters: [["status","=", "Active"], ["company", "=", frappe.boot.tag.tag_user_info.company]],
 	refresh: function(listview){
 		let view = listview;
 		let children = view.$list_head_subject[0].children;
