@@ -66,6 +66,8 @@ function check_timesheet(frm){
 					cur_frm.set_value("is_pos", 0);
 					cur_frm.clear_table("payments");
 					cur_frm.refresh_field("payments");
+				}else{
+					update_payment(frm);
 				}
 			}
 		});
