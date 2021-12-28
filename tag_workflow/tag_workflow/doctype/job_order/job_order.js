@@ -19,6 +19,9 @@ frappe.ui.form.on('Job Order', {
 	},
 	onload:function(frm){
 		if(cur_frm.doc.__islocal==1){
+			if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ){
+				frm.set_value('company',frappe.boot.tag.tag_user_info.company)
+			}
 			check_company_detail(frm);
 			frm.set_value("from_date",'')
 			frm.set_df_property("time_remaining_for_make_edits", "options"," ");
