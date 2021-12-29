@@ -26,9 +26,7 @@ frappe.query_reports["Work Orders Completed"] = {
 			"fieldtype": "Data",
 			"width": "100",
 			"reqd": 0,
-			// "options":'Company'
-		},
-		,
+		},	
 		{
 			"fieldname": 'status',
             "label": __('Past Order'),
