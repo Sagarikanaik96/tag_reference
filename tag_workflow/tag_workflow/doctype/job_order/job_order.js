@@ -18,6 +18,7 @@ frappe.ui.form.on('Job Order', {
 		}
 	},
 	onload:function(frm){
+		hide_employee_rating(frm);
 		if(cur_frm.doc.__islocal==1){
 			if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ){
 				frm.set_value('company',frappe.boot.tag.tag_user_info.company)
@@ -118,7 +119,6 @@ frappe.ui.form.on('Job Order', {
 
 		if(cur_frm.doc.is_single_share  == 1){
 			frm.add_custom_button(__('Deny Job Order'), function(){
-				console.log('function is called');
 				frappe.call({
 					method:"tag_workflow.tag_workflow.doctype.job_order.job_order.after_denied_joborder",
 					args:{
@@ -452,4 +452,11 @@ function rate_calculation(frm){
 					frm.set_value("per_hour",total_per_hour)
 				})
 			}
+}
+
+function hide_employee_rating(frm){
+	let table = frm.doc.employee_rating || []
+		if (table.length == 0){
+			cur_frm.toggle_display('employee_rating', 0);
+		}
 }

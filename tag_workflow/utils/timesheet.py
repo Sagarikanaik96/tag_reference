@@ -233,3 +233,20 @@ def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None
             doc.average_rating=str(avg_rating)
             doc.save()
     return "success"
+
+
+@frappe.whitelist()
+def staffing_emp_rating(employee,id,up,down,job_order,comment,timesheet_name):
+    parent = frappe.get_doc('Job Order', job_order)
+    parent.append('employee_rating', {
+        'employee_name': employee +'-'+ id,
+        'rating':  1 if up else down,
+        'comment': comment if comment else ''
+    })
+    parent.flags.ignore_mandatory = True
+    parent.save(ignore_permissions=True)
+    timesheet = frappe.get_doc('Timesheet',timesheet_name)
+    timesheet.is_employee_rating_done = 1
+    timesheet.flags.ignore_mandatory = True
+    timesheet.save(ignore_permissions=True)
+    return True

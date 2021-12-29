@@ -67,6 +67,8 @@
   "contract_add_on",
   "apply_for_quotation_section",
   "assign_employees",
+  "section_break_61",
+  "employee_rating",
   "dispute_section",
   "dispute_comment"
  ],
@@ -437,6 +439,17 @@
    "fieldname": "dispute_comment",
    "fieldtype": "Long Text",
    "label": "Dispute Comment"
+  },
+  {
+   "fieldname": "section_break_61",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee_rating",
+   "fieldtype": "Table",
+   "label": "Employee Rating",
+   "options": "Employee Rating",
+   "permlevel": 1
   }
  ],
  "index_web_pages_for_search": 1,
