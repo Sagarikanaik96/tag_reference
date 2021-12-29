@@ -1,8 +1,31 @@
 frappe.ui.form.on("Sales Invoice", {
 	refresh: function(frm){
 		let is_table = '';
-		var invoice_field = ["naming_series", "is_pos", "is_return", "is_debit_note", "accounting_dimensions_section", "customer_po_details", "address_and_contact", "currency_and_price_list", "update_stock", "sec_warehouse", "pricing_rule_details", "packing_list", "taxes_section", "section_break_40", "sec_tax_breakup", "section_break_43", "loyalty_points_redemption", "column_break4", "advances_section", "payment_terms_template", "payments_section", "section_break_84", "terms_section_break", "transporter_info", "edit_printing_settings", "gst_section", "more_information", "more_info", "sales_team_section_break", "subscription_section", "einvoice_section", "section_break2", "ewaybill", "disable_rounded_total", "total_advance", "rounded_total", "rounding_adjustment"];
+		var invoice_field = ["naming_series", "is_return", "is_debit_note", "accounting_dimensions_section", "customer_po_details", "address_and_contact", "currency_and_price_list", "update_stock", "sec_warehouse", "pricing_rule_details", "packing_list", "taxes_section", "section_break_40", "sec_tax_breakup", "section_break_43", "loyalty_points_redemption", "column_break4", "advances_section", "payment_terms_template", "terms_section_break", "transporter_info", "edit_printing_settings", "gst_section", "more_information", "more_info", "sales_team_section_break", "subscription_section", "einvoice_section", "section_break2", "ewaybill", "disable_rounded_total", "total_advance", "rounded_total", "rounding_adjustment", "pos_profile", "payments_section", "section_break_88"];
 		hide_fields(frm, invoice_field, is_table);
+	},
+	on_submit: function(frm) {
+		if(frm.doc.docstatus ==1){
+			frappe.call({
+				"method":"tag_workflow.tag_data.sales_invoice_notification",
+				"freeze": true,
+				"freeze_message": "<p><b>preparing notification for hiring orgs...</b></p>",
+				"args":{
+					"job_order":frm.doc.job_order,
+					"company":frm.doc.company,
+					"invoice_name":frm.doc.name
+				}
+			})
+
+		}
+	},
+	before_save: function(frm){
+		cur_frm.set_value("taxes_and_charges", "");
+		cur_frm.clear_table("taxes");
+		update_payment(frm);
+	},
+	is_pos: function(frm){
+		check_timesheet(frm);
 	}
 });
 
@@ -29,3 +52,44 @@ frappe.ui.form.on("Sales Invoice Item", {
 		hide_fields(frm, table_fields, child);
 	}
 });
+
+
+/*----------payments-----------*/
+function check_timesheet(frm){
+	if(frm.doc.is_pos){
+		frappe.call({
+			"method": "tag_workflow.utils.whitelisted.check_timesheet",
+			"args":  {"job_order": frm.doc.job_order},
+			"callback": function(r){
+				let data = r.message;
+				if(!data){
+					cur_frm.set_value("is_pos", 0);
+					cur_frm.clear_table("payments");
+					cur_frm.refresh_field("payments");
+				}else{
+					update_payment(frm);
+				}
+			}
+		});
+	}else{
+		cur_frm.clear_table("payments");
+		cur_frm.refresh_field("payments");
+	}
+}
+
+function update_payment(frm){
+	if(frm.doc.is_pos){
+		if(frm.doc.payments.length <= 0){
+			let child = frappe.model.get_new_doc("Sales Invoice Payment", cur_frm.doc, "payments");
+			$.extend(child, {
+				"mode_of_payment": "Cash",
+				"amount": cur_frm.doc.grand_total
+			});
+		}else{
+			cur_frm.doc.payments[0].amount = cur_frm.doc.grand_total;
+		}
+	}else{
+		cur_frm.clear_table("payments");
+		cur_frm.refresh_field("payments");
+	}
+}

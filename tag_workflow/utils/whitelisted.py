@@ -161,12 +161,13 @@ def request_signature(staff_user, staff_company, hiring_user, name):
         link = frappe.utils.get_link_to_form("Contract", name, label='{{ _("Click here for signature") }}')
         link = '<p style="margin: 15px 0px;">'+link+'</p>'
         template = frappe.get_template("templates/emails/digital_signature.html")
-        message = template.render({"staff_user": staff_user, "staff_company": staff_company, "link": linki, "date": ""})
+        message = template.render({"staff_user": staff_user, "staff_company": staff_company, "link": link, "date": ""})
         make_system_notification([hiring_user], message, 'Contract', name, "Signature Request")
         sendmail([hiring_user], message, "Signature Request", 'Contract', name)
         share_doc("Contract", name, hiring_user)
     except Exception as e:
         print(e)
+        frappe.throw(frappe.get_traceback())
 
 #-------update lead--------#
 @frappe.whitelist(allow_guest=True)
@@ -180,3 +181,29 @@ def update_lead(lead, staff_company, date, staff_user, name):
     except Exception as e:
         frappe.error_log(frappe.get_traceback(), "update_lead")
         print(e)
+
+#-------company list-------#
+@frappe.whitelist(allow_guest=True)
+def get_company_list(company_type):
+    try:
+        data = []
+        companies = frappe.db.sql(""" select name from `tabCompany` where make_organization_inactive = 0 and organization_type = %s """,company_type, as_dict=1)
+        data = [c['name'] for c in companies]
+        return "\n".join(data)
+    except Exception as e:
+        print(e)
+        return []
+
+#-------check timesheet-----#
+@frappe.whitelist()
+def check_timesheet(job_order):
+    try:
+        is_value = True
+        if(frappe.db.exists("Timesheet", {"job_order_detail": job_order, "docstatus": 0})):
+            frappe.msgprint(_("All timesheets needs to be approved for this job order"))
+            is_value = False
+        return is_value
+    except Exception as e:
+        print(e)
+        return is_value
+

@@ -6,6 +6,7 @@ frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
 		render_table(frm);
 		approved_employee(frm);
+		hide_resume(frm);
 	},
 	tag_status: function(frm) {
 		make_hiring_notification(frm);
@@ -25,13 +26,6 @@ frappe.ui.form.on('Assign Employee', {
 	before_save:function(frm){
 		check_employee_data(frm);
 	},
-	before_load:function(frm){
-		if (!frm.doc.resume_required){
-		var table=frappe.meta.get_docfield("Assign Employee Details", "resume",frm.doc.name);
-			table.hidden=1;
-			frm.refresh_fields();
-		}
-	}
 });
 
 /*-----------hiring notification--------------*/
@@ -130,4 +124,12 @@ function approved_employee(frm){
 
 		}	
 	}
+}
+
+function hide_resume(frm){
+	if (!frm.doc.resume_required){
+		var table=frappe.meta.get_docfield("Assign Employee Details", "resume",frm.doc.name);
+			table.hidden=1;
+			frm.refresh_fields();
+		}
 }

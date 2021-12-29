@@ -75,7 +75,13 @@ frappe.ui.form.on("Timesheet", {
 			}
 		});
 	},
-
+	onload:function(frm){
+		if(!frm.doc.is_employee_rating_done && frm.doc.workflow_state == "Approved" && frm.doc.status == "Submitted"){
+			if((frappe.user_roles.includes('Hiring Admin') || frappe.user_roles.includes('Hiring User')) && frappe.session.user!='Administrator'){
+				employee_timesheet_rating(frm)
+			}
+		}
+	},
 	job_order_detail: function(frm){
 		job_order_details(frm);
 		update_job_detail(frm);
@@ -245,4 +251,44 @@ function denied_timesheet(frm){
 			}
 	}
 }
-	
+
+function employee_timesheet_rating(frm){
+		var pop_up = new frappe.ui.Dialog({
+			'fields': [
+				{'fieldname': 'thumbs_up', 'fieldtype': 'Check','label':"<i class='fa fa-thumbs-up' type='radio' style='font-size: 50px;' value='up' id = '1'> "},
+				{'fieldtype':"Column Break"},
+				{'fieldname': 'thumbs_down', 'fieldtype': 'Check','label':"<i class='fa fa-thumbs-down' style='font-size: 50px;'>"},
+				{'fieldtype':"Section Break"},
+				{'fieldname': 'Comment', 'fieldtype': 'Data','label':'Review'}
+			],
+			primary_action: function(){
+				let up = pop_up.get_value('thumbs_up')
+				let down = pop_up.get_value('thumbs_down')
+				if (up === down){
+					msgprint('both value can not select')
+				}
+				else{
+					pop_up.hide();
+					frappe.call({
+						method:"tag_workflow.utils.timesheet.staffing_emp_rating",
+						args:{
+							'employee':frm.doc.employee_name,
+							'id':frm.doc.employee,
+							'up':up,
+							'down':down,
+							'job_order':frm.doc.job_order_detail,
+							'comment':pop_up.get_value('Comment'),
+							'timesheet_name':frm.doc.name
+						},
+						callback:function(rm){
+							if (rm.message){
+								frappe.msgprint('Employee Rating is Submitted')
+							}
+							
+						}
+				})
+			}
+		}
+		});
+		pop_up.show();		
+	}
