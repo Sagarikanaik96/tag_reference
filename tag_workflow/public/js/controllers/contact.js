@@ -56,5 +56,5 @@ function make_field_mandatory(frm){
 }
 
 function set_default(frm){
-	cur_frm.set_value("company",frappe.defaults.get_user_defaults('Company'))
+	cur_frm.set_value("company",frappe.boot.tag.tag_user_info.company)
 }
