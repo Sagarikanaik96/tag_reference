@@ -25,7 +25,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "json": "{}",
- "modified": "2021-12-24 11:57:43.814438",
+ "modified": "2021-12-30 15:13:13.505276",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Employee Invoice",
@@ -35,7 +35,7 @@
  "ref_doctype": "Timesheet",
  "report_name": "Employee Invoice",
  "report_script": "",
- "report_type": "Query Report",
+ "report_type": "Script Report",
  "roles": [
   {
    "role": "Tag Admin"
