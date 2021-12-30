@@ -258,9 +258,9 @@ def delete_file_data(file_name):
     frappe.db.sql('''Delete from `tabFile` where file_name = "{}"'''.format(file_name))
 
 def job_order_notification(job_order_title,hiring_org,job_order,subject,l):
-    msg=f'New Work Order for {job_order_title} has been created by {hiring_org}'
+    msg=f'New Work Order for a {job_order_title} has been created by {hiring_org}.'
     make_system_notification(l,msg,jobOrder,job_order,subject)   
-    message=f'New Work Order for {job_order_title} has been created by {hiring_org}. <a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
+    message=f'New Work Order for a {job_order_title} has been created by {hiring_org}. <a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
     return send_email(subject,message,l)
 
 @frappe.whitelist()
