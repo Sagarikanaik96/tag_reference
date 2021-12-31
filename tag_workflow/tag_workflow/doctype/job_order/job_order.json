@@ -290,7 +290,7 @@
   {
    "fieldname": "assign_employees",
    "fieldtype": "Button",
-   "label": "Assign Employees",
+   "label": "Employee Assign For Order",
    "permlevel": 1
   },
   {
@@ -454,7 +454,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-28 17:30:07.060377",
+ "modified": "2021-12-31 13:23:06.558183",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

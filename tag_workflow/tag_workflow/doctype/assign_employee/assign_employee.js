@@ -8,9 +8,6 @@ frappe.ui.form.on('Assign Employee', {
 		approved_employee(frm);
 		hide_resume(frm);
 	},
-	tag_status: function(frm) {
-		make_hiring_notification(frm);
-	},
 	onload:function(frm){
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
 			return {
@@ -26,22 +23,24 @@ frappe.ui.form.on('Assign Employee', {
 	before_save:function(frm){
 		check_employee_data(frm);
 	},
+	after_save:function(frm){
+		if(frm.doc.tag_status=='Open'){
+			make_hiring_notification(frm)
+		}
+	}
 });
 
 /*-----------hiring notification--------------*/
 function make_hiring_notification(frm){
-	let state = cur_frm.doc.tag_status;
-	if(state == "Approval Request"){
-		frappe.call({
-			"method":"tag_workflow.tag_data.receive_hiring_notification",
-			"freeze": true,
-			"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
-			"args":{
-				"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
-				"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name
-			}
-		});
-	}
+	frappe.call({
+		"method":"tag_workflow.tag_data.receive_hiring_notification",
+		"freeze": true,
+		"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
+		"args":{
+			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
+			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name
+		}
+	});
 }
 
 /*---------employee data--------------*/
@@ -104,7 +103,7 @@ frappe.ui.form.on("Assign Employee Details", {
 });
 
 function approved_employee(frm){
-	if(cur_frm.doc.tag_status == "Approved"){
+	if(cur_frm.doc.tag_status == "Approved" && frappe.boot.tag.tag_user_info.company_type=='Hiring'){
 		var current_date=new Date(frappe.datetime.now_datetime())
 		var approved_date=new Date(frm.doc.modified)
 		var diff=current_date.getTime()-approved_date.getTime()
