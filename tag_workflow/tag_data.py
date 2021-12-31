@@ -326,3 +326,8 @@ def sales_invoice_notification(job_order=None,company=None,invoice_name=None):
         frappe.error_log(e, "invoice notification")
         frappe.throw(e)
              
+@frappe.whitelist()
+def hiring_org_name(current_user):
+    user_company=frappe.db.sql(''' select company from `tabEmployee` where email='{0}' '''.format(current_user),as_list=1)
+    if(len(user_company)==1):
+        return 'success'

@@ -53,6 +53,7 @@ frappe.ui.form.on("User", {
 		else if(frm.doc.organization_type == "Staffing"){
 			frm.set_value("tag_user_type", "Staffing Admin")
 		}
+		hiring_org(frm);		
 	},
 	first_name:function(frm){
 		if(cur_frm.doc.first_name){
@@ -85,6 +86,11 @@ frappe.ui.form.on("User", {
 	enabled: function(frm){
 		field_toggle(frm);
 		multi_company_setup(frm);
+	},
+	onload:function(frm){
+		if(frm.doc.__islocal==1){
+			hiring_org(frm)
+		}
 	}
 });
 
@@ -290,5 +296,21 @@ function check_bd(frm){
 	if(date && date >= frappe.datetime.now_date()){
 		frappe.msgprint({message: __('<b>Birth Date</b> Cannot be Today`s date or Future date'), title: __('Error'), indicator: 'orange'});
 		cur_frm.set_value("birth_date", "");
+	}
+}
+function hiring_org(frm){
+	if(frappe.boot.tag.tag_user_info.company_type=="Hiring"){
+		frappe.call({
+			'method':"tag_workflow.tag_data.hiring_org_name",
+			'args':{'current_user':frappe.session.user},
+			callback:function(r){
+				if(r.message=='success'){
+					frm.set_value('company',frappe.boot.tag.tag_user_info.company)
+				}
+				else{
+					frm.set_value('company','')
+				}
+			}	
+		})
 	}
 }
