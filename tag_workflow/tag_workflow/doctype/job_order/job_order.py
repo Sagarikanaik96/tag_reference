@@ -116,7 +116,7 @@ def make_sales_invoice(source_name, company, emp_list, target_doc=None, ignore_p
 
         doclist.total_billing_amount = total_amount
         doclist.total_billing_hours = total_hours
-        timesheet_item = {"item_name": "Service", "description": "Service", "uom": "Nos", "qty": 1, "stock_uom": 1, "conversion_factor": 1, "stock_qty": 1, "rate": total_amount, "amount": total_amount, "income_account": income_account, "cost_center": cost_center, "default_expense_account": default_expense_account, "stock_uom": "Nos"}
+        timesheet_item = {"item_name": "Service", "description": "Service", "uom": "Nos", "qty": 1, "stock_uom": "Nos", "conversion_factor": 1, "stock_qty": 1, "rate": total_amount, "amount": total_amount, "income_account": income_account, "cost_center": cost_center, "default_expense_account": default_expense_account}
         doclist.append("items", timesheet_item)
         doclist.company = company
 
@@ -139,13 +139,10 @@ def make_sales_invoice(source_name, company, emp_list, target_doc=None, ignore_p
 def make_invoice(source_name, target_doc=None):
     try:
         company = frappe.db.get_value("User", frappe.session.user, "company")
-        timesheets = []
-        is_timesheet = 0
         emp_list = frappe.db.sql(""" select name from `tabEmployee` where company = %s """, company)
         if(len(frappe.db.sql(""" select name from `tabTimesheet` where job_order_detail = %s and employee in %s """,(source_name, emp_list), as_dict=1)) <= 0):
             frappe.msgprint(_("No Timesheet found for this Job Order(<b>{0}</b>)").format(source_name))
         else:
-            #timesheet = frappe.db.sql(""" select name, status from `tabTimesheet` where employee in %s """, emp_list, as_dict=1)
             return prepare_invoice(company, source_name, emp_list)
     except Exception as e:
         frappe.msgprint(frappe.get_traceback())
