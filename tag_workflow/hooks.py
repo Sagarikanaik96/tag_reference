@@ -70,6 +70,9 @@ doc_events = {
         },
         "User": {
             "on_update": validate
+        },
+        "Designation":{
+                "after_insert":'tag_workflow.tag_data.designation_activity_data'
         }
 }
 

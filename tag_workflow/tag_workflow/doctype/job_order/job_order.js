@@ -150,13 +150,14 @@ frappe.ui.form.on('Job Order', {
 	},
 	before_save: function(frm){
 		if(frm.doc.__islocal === 1){
+			rate_hour_contract_change(frm)
+
 			return new Promise(function(resolve, reject) {
-				frappe.confirm("Do you want to save <br> <br> <b>your order no  </b>  "+frm.doc.name+" <br> <b>Job category</b> "+frm.doc.category+"<br> <b>Order status : </b>"+frm.doc.order_status+" <br> job Info <br><br> <b>job order start date</b>:"+frm.doc.from_date+" <b>end date: </b>"+frm.doc.to_date+" <br> <job title : "+frm.doc.select_job+" job duration : "+frm.doc.job_duration+" <br><b> job site </b>:  "+frm.doc.job_site+"<b> Estimated per hour </b>: "+frm.doc.estimated_hours_per_day+" <br> <b>no of worker filled </b> : "+frm.doc.worker_filled+" <br><b> Description </b>: "+frm.doc.description+"",
+				frappe.confirm("<br><h4>Do you want to save </h4> <br> <b>Job category</b> "+frm.doc.category+" <br> <b>job order start date</b>:"+frm.doc.from_date+" <br><b>Job Order end date: </b>"+frm.doc.to_date+" <br> <job title : "+frm.doc.select_job+" job duration : "+frm.doc.job_duration+" <br><b> job site </b>:  "+frm.doc.job_site+"<br><b> Estimated per hour </b>: "+frm.doc.estimated_hours_per_day+" <br><b> Description </b>: "+frm.doc.description+" <br> <b> Bill rate Per Hour </b>:"+frm.doc.per_hour+" <br><b> Bill rate flat rate</b>:"+frm.doc.flat_rate+"",
 				function() {  
 					let resp = 'frappe.validated = false';
 						resolve(resp);
 						check_company_detail(frm);
-						rate_hour_contract_change(frm)
 					},
 				function() {
 				  reject()

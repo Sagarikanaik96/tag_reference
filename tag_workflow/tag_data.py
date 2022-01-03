@@ -331,3 +331,9 @@ def hiring_org_name(current_user):
     user_company=frappe.db.sql(''' select company from `tabEmployee` where email='{0}' '''.format(current_user),as_list=1)
     if(len(user_company)==1):
         return 'success'
+           
+@frappe.whitelist()
+def designation_activity_data(doc,method):
+    docs=frappe.new_doc('Activity Type')
+    docs.activity_type=doc.name
+    docs.insert()

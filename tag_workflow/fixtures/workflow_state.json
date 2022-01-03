@@ -106,5 +106,17 @@
   "parenttype": null,
   "style": "",
   "workflow_state_name": "Cancel"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2022-01-03 11:30:13.797405",
+  "name": "Denied",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "style": "",
+  "workflow_state_name": "Denied"
  }
 ]
