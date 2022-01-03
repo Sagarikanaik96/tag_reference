@@ -29,6 +29,25 @@ frappe.ui.form.on("Employee", {
 			refresh_field('resume');
 			frappe.msgprint("Upload Wrong File type in Resume");
 		}
+	},
+	validate:function(frm){
+
+		if (frm.doc.zip &&frm.doc.zip.toString().length != 5){
+            frappe.msgprint(__("Minimum and Maximum Characters allowed for Zip are 5"));
+            frappe.validated = false;
+        }
+		
+		if (frm.doc.ssn && frm.doc.ssn.toString().length != 9) {
+			frappe.msgprint(__("Minimum and Maximum Characters allowed for SSN are 9")); 
+		frappe.validated = false;
+			
+		}
+		if (frm.doc.ssn && isNaN(frm.doc.ssn))
+		{
+			frappe.msgprint(__("Only numbers are allowed in SSN."));
+			frappe.validated = false;
+		}
+ 
 	}
 });
 

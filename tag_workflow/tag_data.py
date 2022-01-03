@@ -93,28 +93,36 @@ def update_job_order(job_name, employee_filled, staffing_org, hiringorg, name):
 
 @frappe.whitelist()
 def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc_name):
-    import json
-    bid_receive=frappe.get_doc(jobOrder,job_order)
-    bid_receive.bid=1+int(bid_receive.bid)
-    bid_receive.claim=str(bid_receive.claim)+str(",")+staffing_org
-    bid_receive.save(ignore_permissions=True)
+    try:
+        import json
+        update_values=frappe.db.sql(''' select data from `tabVersion` where docname='{}' '''.format(doc_name),as_list=1)
+        if(len(update_values)<2):
+            bid_receive=frappe.get_doc(jobOrder,job_order)
+            bid_receive.bid=1+int(bid_receive.bid)
+            if(bid_receive.claim is None):
+                bid_receive.claim=staffing_org
+            else:
+                if(staffing_org not in bid_receive.claim):
+                    bid_receive.claim=str(bid_receive.claim)+str(",")+staffing_org
+            bid_receive.save(ignore_permissions=True)
+            job_detail = frappe.db.sql('''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order),as_dict=1)
+            user_list = frappe.db.sql(''' select email from `tabUser` where company = "{}"'''.format(hiring_org),as_list=1)
+            v = json.loads(emp_detail)
+            s = ''
+            for i in v:
+                s += i['employee_name'] + ','
 
-    job_detail = frappe.db.sql('''select job_title,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order),as_dict=1)
-    user_list = frappe.db.sql(''' select email from `tabUser` where company = "{}"'''.format(hiring_org),as_list=1)
-    
-    v = json.loads(emp_detail)
-    s = ''
-    for i in v:
-        s += i['employee_name'] + ','
-
-    l = [l[0] for l in user_list]
-    for user in l:
-        add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0)
-    sub="Employee Assigned"
-    msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["job_title"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}'
-    make_system_notification(l,msg,jobOrder,job_order,sub)
-    msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["job_title"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim <a href="/app/assign-employee/{doc_name}">Assign Employee</a> .'
-    return send_email(None,msg,l)
+            l = [l[0] for l in user_list]
+            for user in l:
+                add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0)
+            sub="Employee Assigned"
+            msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}'
+            make_system_notification(l,msg,'Assign Employee',doc_name,sub)
+            msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim <a href="/app/assign-employee/{doc_name}">Assign Employee</a> .'
+            return send_email(None,msg,l)
+    except Exception as e:
+        print(e, frappe.get_traceback())
+        frappe.db.rollback()
 
 @frappe.whitelist()
 def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None,staff_company=None):
@@ -260,7 +268,7 @@ def delete_file_data(file_name):
 def job_order_notification(job_order_title,hiring_org,job_order,subject,l):
     msg=f'New Work Order for a {job_order_title} has been created by {hiring_org}.'
     make_system_notification(l,msg,jobOrder,job_order,subject)   
-    message=f'New Work Order for a {job_order_title} has been created by {hiring_org}. <a href="/app/job-<a href="/app/job-order/{{doc.name}}">Job Order</a>order/{job_order}">View Work Order</a>'
+    message=f'New Work Order for a {job_order_title} has been created by {hiring_org}. <a href="/app/job-order/{{doc.name}}">View Work Order</a>'
     return send_email(subject,message,l)
 
 @frappe.whitelist()
@@ -318,3 +326,14 @@ def sales_invoice_notification(job_order=None,company=None,invoice_name=None):
         frappe.error_log(e, "invoice notification")
         frappe.throw(e)
              
+@frappe.whitelist()
+def hiring_org_name(current_user):
+    user_company=frappe.db.sql(''' select company from `tabEmployee` where email='{0}' '''.format(current_user),as_list=1)
+    if(len(user_company)==1):
+        return 'success'
+           
+@frappe.whitelist()
+def designation_activity_data(doc,method):
+    docs=frappe.new_doc('Activity Type')
+    docs.activity_type=doc.name
+    docs.insert()

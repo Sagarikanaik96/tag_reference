@@ -30,8 +30,8 @@ frappe.FaceRecognition = Class.extend({
 					let profile_html = ``;
 					for(let p in data){
 						profile_html += `<tr>
-							<td>${p+1}</td>
-							<td ><a href=javascript:get_location(${p+1})>${data[p].name}</a></td>
+							<td>${parseInt(p)+1}</td>
+							<td ><a href=javascript:get_location(${parseInt(p)+1})>${data[p].name}</a></td>
 							<td>${data[p].address}</td>
 							<td>${data[p].city}</td>
 							<td>${data[p].state}</td>
@@ -79,19 +79,19 @@ function get_location(name){
 				</tr>
 			</table>`
 
-			let industry = ``;
+			let industry = `<h4>Serving Industries</h4>`;
 			for(let i in company_industry){
-				industry += `<h4>Serving Industries</h4>${company_industry[i].industry_type}<br>`;
+				industry += `${company_industry[i].industry_type}<br>`;
 			}
 			
-			let team = ``;
+			let team = `<h4>Team Member</h4>`;
 			for(let m in company_member){
-				team += `<h4>Team Member</h4>${company_member[m].first_name}${company_member[m].last_name}<br>`;
+				team += `${company_member[m].first_name}${company_member[m].last_name}<br>`;
 			}
 
-			let review = ``;
+			let review = `<h4>Review And Rating</h4>`;
 			for(let c in company_review){
-				review += `<h4>Team Member</h4>
+				review += `
 				${company_review[c].owner}<br>${company_review[c].rating}<br>${company_review[c].comments}<br>${company_review[c].creation}<br>`;
 			}
 
