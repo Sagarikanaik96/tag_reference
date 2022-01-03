@@ -31,7 +31,6 @@ frappe.ui.form.on("Employee", {
 		}
 	},
 	validate:function(frm){
-		var regex = /[^0-9]/g;
 
 		if (frm.doc.zip &&frm.doc.zip.toString().length != 5){
             frappe.msgprint(__("Minimum and Maximum Characters allowed for Zip are 5"));
@@ -43,7 +42,8 @@ frappe.ui.form.on("Employee", {
 		frappe.validated = false;
 			
 		}
-		if (frm.doc.ssn && regex.test(frm.doc.ssn) === true){
+		if (frm.doc.ssn && isNaN(frm.doc.ssn))
+		{
 			frappe.msgprint(__("Only numbers are allowed in SSN."));
 			frappe.validated = false;
 		}
