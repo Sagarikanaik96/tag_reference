@@ -53,7 +53,12 @@ frappe.ui.form.on("User", {
 		else if(frm.doc.organization_type == "Staffing"){
 			frm.set_value("tag_user_type", "Staffing Admin")
 		}
-		hiring_org(frm);		
+		if(frappe.boot.tag.tag_user_info.company_type=="Hiring"){
+			org_info(frm);
+		}
+		else if(frm.doc.organization_type == "Staffing" && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+			org_info(frm);	
+		}	
 	},
 	first_name:function(frm){
 		if(cur_frm.doc.first_name){
@@ -298,8 +303,7 @@ function check_bd(frm){
 		cur_frm.set_value("birth_date", "");
 	}
 }
-function hiring_org(frm){
-	if(frappe.boot.tag.tag_user_info.company_type=="Hiring"){
+function org_info(frm){
 		frappe.call({
 			'method':"tag_workflow.tag_data.hiring_org_name",
 			'args':{'current_user':frappe.session.user},
@@ -312,5 +316,4 @@ function hiring_org(frm){
 				}
 			}	
 		})
-	}
 }
