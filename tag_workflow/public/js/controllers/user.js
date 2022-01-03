@@ -56,7 +56,7 @@ frappe.ui.form.on("User", {
 		if(frappe.boot.tag.tag_user_info.company_type=="Hiring"){
 			org_info(frm);
 		}
-		else if(frm.doc.organization_type == "Staffing" && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		if(frm.doc.organization_type == "Staffing" && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 			org_info(frm);	
 		}	
 	},
