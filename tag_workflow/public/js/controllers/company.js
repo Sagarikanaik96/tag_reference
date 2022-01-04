@@ -5,6 +5,7 @@ frappe.ui.form.on("Company", {
 		hide_details(frm);
 		update_company_fields(frm);
 		jazzhr_data(frm);
+		make_invoice(frm);
 		if(frappe.user.has_role('Tag Admin')) {
 			frm.set_df_property('employees', 'read_only' , 1);
 	   	}
@@ -135,7 +136,7 @@ function init_values(frm){
 function update_company_fields(frm){
 	let roles = frappe.user_roles;
 	let is_local = cur_frm.doc.__islocal;
-	let company_fields = ['organization_type', 'country', 'fein', 'title', 'primary_language', 'industry', 'accounts_payable_contact_name', 'accounts_payable_email', 'accounts_payable_phone_number', 'address', 'state', 'zip', 'city', 'default_currency', 'parent_staffing'];
+	let company_fields = ['organization_type', 'country', 'industry','default_currency', 'parent_staffing'];
 
 	if(roles.includes('System Manager') && !is_local && cur_frm.doc.organization_type != 'TAG'){
 		for(let f in company_fields){
@@ -150,6 +151,13 @@ function update_company_fields(frm){
 			cur_frm.toggle_display(company_fields[0], 1);
 		}else{
 			cur_frm.toggle_enable(company_fields[0], 0);
+		}
+	}
+	if(frappe.boot.tag.tag_user_info.user_type=='Hiring User' || frappe.boot.tag.tag_user_info.user_type=='Staffing User')
+	{
+		let company_field=['organization_type', 'country', 'industry','default_currency', 'parent_staffing','name','jazzhr_api_key','make_organization_inactive','company_name','fein','title','primary_language','contact_name','phone_no','email','set_primary_contact_as_account_payable_contact','set_primary_contact_as_account_receivable_contact','accounts_payable_contact_name','accounts_payable_email','accounts_payable_phone_number','accounts_receivable_name','accounts_receivable_rep_email','accounts_receivable_phone_number','cert_of_insurance','w9','safety_manual','industry_type','employees','address','city','state','zip','job_site','drug_screen','drug_screen_rate','background_check','background_check_rate','upload_docs','about_organization','mvr','mvr_rate','shovel','shovel_rate','contract_addendums','rating','average_rating','click_here','job_titles']
+		for(let f in company_field){
+			cur_frm.toggle_enable(company_field[f], 0);
 		}
 	}
 }
@@ -190,5 +198,31 @@ function make_jazzhr_request(frm){
 	}else{
 		cur_frm.scroll_to_field("jazzhr_api_key");
 		frappe.msgprint("<b>JazzHR API Key</b> is required");
+	}
+}
+
+
+/*---------make invoice------------*/
+function hide_tag_charges(frm){
+	let roles = frappe.user_roles;
+	if(roles.includes("System Manager")){
+		prepare_invoice(frm);
+	}else{
+		cur_frm.toggle_display("tag_charges", 0);
+	}
+}
+
+function make_invoice(frm){
+	hide_tag_charges(frm);
+}
+
+function prepare_invoice(frm){
+	if(["Staffing"].includes(cur_frm.doc.organization_type)){
+		frm.add_custom_button(__('Make Invoice'), function(){
+			frappe.model.open_mapped_doc({
+				method: "tag_workflow.utils.invoice.make_invoice",
+				frm: cur_frm
+			});
+		}).addClass("btn-primary");
 	}
 }

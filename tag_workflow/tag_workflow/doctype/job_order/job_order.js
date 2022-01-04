@@ -99,6 +99,7 @@ frappe.ui.form.on('Job Order', {
 		});
 	},
 	refresh:function(frm){
+		make_invoice(frm);
 		if(cur_frm.doc.__islocal==1){
 			check_company_detail(frm);
 			frappe.db.get_doc('Company', cur_frm.doc.company).then(doc => {
@@ -460,4 +461,22 @@ function hide_employee_rating(frm){
 		if (table.length == 0){
 			cur_frm.toggle_display('employee_rating', 0);
 		}
+}
+
+
+/*----------make invoice---------*/
+function make_invoice(frm){
+	let roles = frappe.user_roles;
+	if(cur_frm.doc.__islocal != 1 && roles.includes("Staffing Admin", "Staffing User") && frappe.boot.tag.tag_user_info.company){
+		frappe.db.get_value("Assign Employee", {"company": frappe.boot.tag.tag_user_info.company, "tag_status": "Approved"}, "name", function(r){
+			if(r.name){
+				frm.add_custom_button(__('Make Invoice'), function(){
+					frappe.model.open_mapped_doc({
+						method: "tag_workflow.tag_workflow.doctype.job_order.job_order.make_invoice",
+						frm: cur_frm
+					});
+				}).addClass("btn-primary");
+			}
+		});
+	}
 }

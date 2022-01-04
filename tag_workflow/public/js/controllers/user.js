@@ -222,7 +222,7 @@ function setup_company_value(frm,company){
 
 /*-------multi company--------*/
 function multi_company_setup(frm){
-	if((frappe.user_roles.includes("Tag Admin") || frappe.user_roles.includes("Staffing Admin")) && cur_frm.doc.enabled == 1){
+	if((frappe.user_roles.includes("Tag Admin") || frappe.user_roles.includes("Staffing Admin")) && cur_frm.doc.enabled == 1 && ["Hiring Admin", "Staffing Admin"].includes(cur_frm.doc.tag_user_type)){
 		frm.add_custom_button("Assign Multi Company", function() {
 			(cur_frm.doc.__islocal == 1) ? frappe.msgprint("Please save the form first") : make_multicompany(frm);
 		}).addClass("btn-primary");
