@@ -8,7 +8,7 @@ frappe.ui.form.on("Lead", {
 			onboard_org(frm);
 		}
 		if(frappe.user.has_role('Staffing Admin')) {
-			frm.set_query("company", function(frm) {
+			frm.set_query("company", function(doc) {
 			
 			return {
 				  
