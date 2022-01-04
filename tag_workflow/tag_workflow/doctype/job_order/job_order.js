@@ -126,6 +126,10 @@ frappe.ui.form.on('Job Order', {
 						staff_company:frm.doc.staff_company,
 						joborder_name:frm.doc.name
 					},
+					callback:function(r){					
+						cur_frm.refresh()
+						cur_frm.reload_doc()
+					}
 				})
 			});
 		}else{

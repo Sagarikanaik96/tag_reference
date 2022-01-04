@@ -4,7 +4,7 @@
   "doctype": "Workflow",
   "document_type": "Assign Employee",
   "is_active": 1,
-  "modified": "2021-12-31 13:24:00.963590",
+  "modified": "2022-01-04 15:59:58.888965",
   "name": "Employee assign",
   "override_status": 0,
   "parent": null,
@@ -13,7 +13,7 @@
   "send_email_alert": 0,
   "states": [
    {
-    "allow_edit": "Accounts User",
+    "allow_edit": "System Manager",
     "doc_status": "0",
     "is_optional_state": 0,
     "message": null,
