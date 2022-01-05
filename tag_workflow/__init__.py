@@ -15,4 +15,4 @@ User.send_login_mail = send_login_mail
 Document.raise_no_permission_to = raise_no_permission_to
 Employee.validate_duplicate_user_id = validate_duplicate_user_id
 Company.validate_abbr = validate_abbr
-NavbarSettings.validate_standard_navbar_items = validate_standard_navbar_items
+NavbarSettings.validate_standard_navbar_items =validate_standard_navbar_items

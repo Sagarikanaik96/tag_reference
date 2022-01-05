@@ -6,7 +6,7 @@
   "help_dropdown": [
    {
     "action": null,
-    "hidden": 1,
+    "hidden": 0,
     "is_standard": 1,
     "item_label": "Documentation",
     "item_type": "Route",
