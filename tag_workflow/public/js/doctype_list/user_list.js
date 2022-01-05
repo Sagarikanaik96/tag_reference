@@ -30,7 +30,7 @@ frappe.ui.form.ControlPassword = frappe.ui.form.ControlData.extend({
 		this._super();
 	},
 	make_input: function() {
-		var me = this;
+		
 		this._super();
 		this.$wrapper.find(":input[type='password'][data-fieldtype='Password']").addClass("hidepassword")
 		this.$input.parent().append($('<span class="input-area" > <input type="checkbox"  id="showPassword"  data-fieldtype=Check autocomplete="off" class="input-with-feedback-showPassword" ></span>'));
@@ -50,15 +50,3 @@ frappe.ui.form.ControlPassword = frappe.ui.form.ControlData.extend({
 
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
