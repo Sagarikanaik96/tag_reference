@@ -113,3 +113,9 @@ def validate_abbr(self):
 
     if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
         self.abbr = append_number_if_name_exists("Company", self.abbr, fieldname="abbr", separator="-", filters=None)
+
+
+#-----navbar settings-------#
+def validate_standard_navbar_items(self):
+    doc_before_save = self.get_doc_before_save()
+    print(doc_before_save)
