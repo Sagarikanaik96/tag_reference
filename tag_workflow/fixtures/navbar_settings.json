@@ -6,7 +6,7 @@
   "help_dropdown": [
    {
     "action": null,
-    "hidden": 0,
+    "hidden": 1,
     "is_standard": 1,
     "item_label": "Documentation",
     "item_type": "Route",
@@ -17,7 +17,7 @@
    },
    {
     "action": null,
-    "hidden": 0,
+    "hidden": 1,
     "is_standard": 1,
     "item_label": "User Forum",
     "item_type": "Route",
@@ -28,7 +28,7 @@
    },
    {
     "action": null,
-    "hidden": 0,
+    "hidden": 1,
     "is_standard": 1,
     "item_label": "Report an Issue",
     "item_type": "Route",
@@ -39,7 +39,7 @@
    },
    {
     "action": "frappe.ui.toolbar.show_about()",
-    "hidden": 0,
+    "hidden": 1,
     "is_standard": 1,
     "item_label": "About",
     "item_type": "Action",
@@ -50,7 +50,7 @@
    },
    {
     "action": "frappe.ui.toolbar.show_shortcuts(event)",
-    "hidden": 0,
+    "hidden": 1,
     "is_standard": 1,
     "item_label": "Keyboard Shortcuts",
     "item_type": "Action",
