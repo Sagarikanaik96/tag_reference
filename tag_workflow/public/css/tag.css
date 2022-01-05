@@ -189,11 +189,6 @@ input::-webkit-credentials-auto-fill-button {
 .layout-main-section .frappe-list .list-row .ellipsis a {
 	font-weight: normal;
 }
-.col-md-12.layout-main-section-wrapper {
-	left: 8rem;
-    max-width: 90%;
-    width: 100%;
-}
 .col-lg-2.layout-side-section {
 	display: none;
 }
@@ -202,7 +197,8 @@ input::-webkit-credentials-auto-fill-button {
 	display: none;
 }
 
-.col.layout-main-section-wrapper{
+.col.layout-main-section-wrapper, 
+.col-md-12.layout-main-section-wrapper {
 	left: 8rem;
 	max-width: 90%;
 	width: 100%;
@@ -230,13 +226,19 @@ input::-webkit-credentials-auto-fill-button {
     margin: 3px 0;
     border-bottom: none !important;
 }
+
+#page-dashboard-view .dashboard .dashboard-graph {
+	margin-left: 8rem;
+} 
+
 /* Inner report Table UI update  */
 
 @media (max-width:768px) {
     #page-User .layout-main-section-wrapper .layout-main-section , 
 	#page-Company .layout-main-section-wrapper .layout-main-section ,
 	#page-Lead .layout-main-section-wrapper .layout-main-section ,
-	#page-Timesheet .layout-main-section-wrapper .layout-main-section 
+	#page-Timesheet .layout-main-section-wrapper .layout-main-section,
+	#page-dashboard-view .dashboard .dashboard-graph 
 	{
         width: 100%;
 		margin-left: 0;
