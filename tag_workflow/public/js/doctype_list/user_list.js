@@ -14,14 +14,23 @@ frappe.listview_settings['User'] = {
 			}
 		}
 
-		
-	},
 
-	// onload: function(listview){
+		for (let i of view.data) {
+			frappe.call({	
+				method:"tag_workflow.tag_workflow.doctype.employee_assign_name.employee_assign_name.employee_email_filter",
+				args:{
+					"email":i["email"]
+				},
+				callback:function(r){
+					if (r.message.length > 1){
+						
+						listview.$page.find(`a[data-filter="company,=,${r.message[0]}"]`).addClass("indicator-pill green");
+					}
+				}
+			})
+		}
+	}
 
-
-        
- //    },
 };
 
 frappe.ui.form.ControlPassword = frappe.ui.form.ControlData.extend({
@@ -45,8 +54,5 @@ frappe.ui.form.ControlPassword = frappe.ui.form.ControlData.extend({
 			
 		}
 		});
-
 	}
-
-
 });
