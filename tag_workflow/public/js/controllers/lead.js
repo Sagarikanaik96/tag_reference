@@ -7,6 +7,15 @@ frappe.ui.form.on("Lead", {
 		if(cur_frm.is_dirty() != 1 && frm.doc.status == "Close" && (roles.includes("Tag Admin") || roles.includes("Tag User") || roles.includes("Staffing Admin") || roles.includes("Staffing User"))){
 			onboard_org(frm);
 		}
+		if(frappe.user.has_role('Staffing Admin')) {
+			frm.set_query("company", function(doc) {
+			
+			return {
+				  
+				   "filters":[ ['Company', "organization_type", "in", ["Staffing" ]] ]
+			}
+			});
+		}
 	},
 });
 

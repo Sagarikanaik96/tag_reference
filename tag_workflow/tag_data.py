@@ -4,6 +4,7 @@ from frappe.share import add
 from frappe import enqueue
 from tag_workflow.utils.notification import sendmail, make_system_notification
 from frappe.utils import get_datetime,now
+from frappe.utils import date_diff
 
 jobOrder = "Job Order"
 
@@ -23,8 +24,16 @@ def company_details(company_name=None):
 
 @frappe.whitelist()
 def update_timesheet(job_order_detail):
-    value = frappe.db.sql('''select select_job,from_date,to_date from `tabJob Order` where name = "{}" '''.format(job_order_detail),as_dict = 1)
-    return value[0]['select_job'],value[0]['from_date'],value[0]['to_date']
+    value = frappe.db.sql('''select select_job,from_date,to_date,per_hour,flat_rate,estimated_hours_per_day from `tabJob Order` where name = "{}" '''.format(job_order_detail),as_dict = 1)
+    time_differnce=date_diff(value[0]['to_date'],value[0]['from_date'])
+    per_person_rate=value[0]['per_hour']
+    flat_rate=value[0]['flat_rate']
+    hours=time_differnce*value[0]['estimated_hours_per_day']
+    extra_hours=(hours-40) if hours>40 else 0
+    extra_rate=(per_person_rate+flat_rate)*1.5 if extra_hours>0 else 0
+    billing_rate=per_person_rate
+    return value[0]['select_job'],value[0]['from_date'],value[0]['to_date'],hours,billing_rate,value[0]['flat_rate'],extra_hours,extra_rate
+
 
 
 def send_email(subject = None,content = None,recipients = None):
@@ -241,9 +250,9 @@ def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters)
     company = filters.get('company')
 
     if job_category is None:
-        return frappe.db.sql("""select name, employee_name from `tabEmployee` where company=%(emp_company)s and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company})
+        return frappe.db.sql("""select name, employee_name from `tabEmployee` where company=%(emp_company)s and status='Active' and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company})
     else:
-        return frappe.db.sql("""select name, employee_name from `tabEmployee` where company=%(emp_company)s and (job_category = %(job_category)s or job_category IS NULL) and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company,'job_category':job_category})
+        return frappe.db.sql("""select name, employee_name from `tabEmployee` where company=%(emp_company)s and status='Active' and (job_category = %(job_category)s or job_category IS NULL) and name NOT IN (select parent from `tabBlocked Employees` BE where blocked_from=%(company)s)""",{'emp_company':emp_company,'company':company,'job_category':job_category})
     
 @frappe.whitelist()
 def get_org_site(doctype, txt, searchfield, page_len, start, filters):

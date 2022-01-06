@@ -101,7 +101,7 @@ frappe.ui.form.on("Timesheet", {
 
 	workflow_state: function(frm){
 		check_update_timesheet(frm);
-	},
+	}
 });
 
 
@@ -178,7 +178,7 @@ function update_job_detail(frm){
 				if(r.message){
 					cur_frm.clear_table("time_logs");
 					var child = frappe.model.get_new_doc("Timesheet Detail", cur_frm.doc, "time_logs");
-					$.extend(child, {"activity_type": r.message[0], "from_time": r.message[1],"to_date":r.message[2]});
+					$.extend(child, {"activity_type": r.message[0], "from_time": r.message[1],"to_time":r.message[2],"hours":r.message[3],"is_billable":1,"billing_hours":r.message[3],"billing_rate":r.message[4],"flat_rate":r.message[5],"extra_hours":r.message[6],"extra_rate":r.message[7]});
 					cur_frm.refresh_field("time_logs");
 				}
 			}

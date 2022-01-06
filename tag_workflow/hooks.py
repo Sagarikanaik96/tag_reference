@@ -9,7 +9,7 @@ app_color = "grey"
 app_email = "shadab.sutar@sourcefuse.com"
 app_license = "MIT"
 app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.svg"
-
+sales_invoice="Sales Invoice"
 # Includes in <head>
 # ------------------
 
@@ -44,7 +44,7 @@ doctype_js = {
         "Quotation": "public/js/controllers/quotation.js",
         "Sales Order": "public/js/controllers/sales_order.js",
         "Employee": "public/js/controllers/employee.js",
-        "Sales Invoice": "public/js/controllers/sales_invoice.js",
+        sales_invoice: "public/js/controllers/sales_invoice.js",
         "Contact": "public/js/controllers/contact.js",
         "Lead": "public/js/controllers/lead.js",
         "Contract": "public/js/controllers/contract.js"
@@ -54,7 +54,8 @@ doctype_js = {
 doctype_list_js = {
         "User": "public/js/doctype_list/user_list.js",
         "Employee": "public/js/doctype_list/employee_list.js",
-        "Company": "public/js/doctype_list/company_list.js"
+        "Company": "public/js/doctype_list/company_list.js",
+        sales_invoice:"public/js/doctype_list/sales_invoice_list.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]
@@ -85,7 +86,7 @@ website_context = {
 override_doctype_dashboards = {
         "Item": "tag_workflow.dashboard_data.item_dashboard.get_data",
         "Company": "tag_workflow.dashboard_data.company_dashboard.get_data",
-        "Sales Invoice": "tag_workflow.dashboard_data.sales_invoice_dashboard.get_data",
+        sales_invoice: "tag_workflow.dashboard_data.sales_invoice_dashboard.get_data",
         "Lead": "tag_workflow.dashboard_data.lead_dashboard.get_data"
 }
 scheduler_events={

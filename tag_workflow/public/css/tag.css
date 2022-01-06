@@ -189,11 +189,6 @@ input::-webkit-credentials-auto-fill-button {
 .layout-main-section .frappe-list .list-row .ellipsis a {
 	font-weight: normal;
 }
-.col-md-12.layout-main-section-wrapper {
-	left: 8rem;
-    max-width: 90%;
-    width: 100%;
-}
 .col-lg-2.layout-side-section {
 	display: none;
 }
@@ -202,7 +197,8 @@ input::-webkit-credentials-auto-fill-button {
 	display: none;
 }
 
-.col.layout-main-section-wrapper{
+.col.layout-main-section-wrapper, 
+.col-md-12.layout-main-section-wrapper {
 	left: 8rem;
 	max-width: 90%;
 	width: 100%;
@@ -211,8 +207,10 @@ input::-webkit-credentials-auto-fill-button {
 .form-footer{
 	display: none!important;
 }
-.layout-main-section .datatable .dt-instance-1 .dt-cell {
+/* Inner report Table UI update  */
+.layout-main-section .datatable.dt-instance-1 .dt-cell {
     border: none;
+	margin: 6px 0;
 }
 .layout-main-section .datatable .dt-header .dt-cell--header .dt-cell__content {
     color: #8D9CBC;
@@ -223,18 +221,24 @@ input::-webkit-credentials-auto-fill-button {
 	background: transparent !important;
 }
 .layout-main-section .datatable .dt-row {
-    background: #fff;
+	background: #fafbfc;
     border-radius: 8px;
-    margin: 7px 0;
+    margin: 3px 0;
     border-bottom: none !important;
 }
-/* Table UI update  */
+
+#page-dashboard-view .dashboard .dashboard-graph {
+	margin-left: 8rem;
+} 
+
+/* Inner report Table UI update  */
 
 @media (max-width:768px) {
     #page-User .layout-main-section-wrapper .layout-main-section , 
 	#page-Company .layout-main-section-wrapper .layout-main-section ,
 	#page-Lead .layout-main-section-wrapper .layout-main-section ,
-	#page-Timesheet .layout-main-section-wrapper .layout-main-section 
+	#page-Timesheet .layout-main-section-wrapper .layout-main-section,
+	#page-dashboard-view .dashboard .dashboard-graph 
 	{
         width: 100%;
 		margin-left: 0;
