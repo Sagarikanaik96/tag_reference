@@ -61,9 +61,8 @@
   "html_37",
   "e_signature_full_name",
   "agree_to_contract",
-  "age_reqiured",
-  "column_break_49",
   "view_contract",
+  "age_reqiured",
   "contract_add_on",
   "apply_for_quotation_section",
   "assign_employees",
@@ -354,10 +353,6 @@
    "label": "Organization info"
   },
   {
-   "fieldname": "column_break_49",
-   "fieldtype": "Column Break"
-  },
-  {
    "depends_on": "eval:doc.agree_to_contract==1",
    "fieldname": "view_contract",
    "fieldtype": "Button",
@@ -426,9 +421,10 @@
   },
   {
    "default": "0",
+   "description": "<p style=\"font-size: 12px;\"><span style=\"color: red;\">&#42;</span>\nAgree To Contract Is compulsory To Save The Order</p>",
    "fieldname": "agree_to_contract",
    "fieldtype": "Check",
-   "label": "Agree To Contract",
+   "label": "Agree To Contract <span style=\"color: red;\">&#42;</span>",
    "reqd": 1
   },
   {
@@ -456,7 +452,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-03 13:22:06.023858",
+ "modified": "2022-01-06 20:41:06.651109",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

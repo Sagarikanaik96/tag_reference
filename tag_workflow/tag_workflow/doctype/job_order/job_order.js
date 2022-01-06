@@ -157,6 +157,7 @@ frappe.ui.form.on('Job Order', {
 		if(frm.doc.__islocal === 1){
 			rate_hour_contract_change(frm)
 
+			if(frappe.validated==true){
 			return new Promise(function(resolve, reject) {
 				frappe.confirm("<br><h4>Do you want to save </h4> <br> <b>Job category</b> "+frm.doc.category+" <br> <b>job order start date</b>:"+frm.doc.from_date+" <br><b>Job Order end date: </b>"+frm.doc.to_date+" <br> <job title : "+frm.doc.select_job+" job duration : "+frm.doc.job_duration+" <br><b> job site </b>:  "+frm.doc.job_site+"<br><b> Estimated per hour </b>: "+frm.doc.estimated_hours_per_day+" <br><b> Description </b>: "+frm.doc.description+" <br> <b> Bill rate Per Hour </b>:"+frm.doc.per_hour+" <br><b> Bill rate flat rate</b>:"+frm.doc.flat_rate+"",
 				function() {  
@@ -168,6 +169,7 @@ frappe.ui.form.on('Job Order', {
 				  reject()
 				})
 			  })
+			}
 		}		
 	},
 	after_save:function(frm){
@@ -261,10 +263,24 @@ frappe.ui.form.on('Job Order', {
 		check_value(frm,field,name,value)
 	},
 	validate:function(frm){
-		if(frm.doc.agree_to_contract!=1){
-			msgprint("Pease select mandatory field:<b>Agree To Contract</b>");
-			frappe.validated = false;
+		var l = {'Company':frm.doc.company,"Select Job":frm.doc.select_job,"Category":frm.doc.category,"Job Order Start Date":cur_frm.doc.from_date,"Job Site":cur_frm.doc.job_site,"No Of Workers":cur_frm.doc.no_of_workers,"Rate":cur_frm.doc.rate,"Description":cur_frm.doc.description,"Job Order End Date":cur_frm.doc.to_date,"Job Duration":cur_frm.doc.job_duration,"Estimated Hours Per Day":cur_frm.doc.estimated_hours_per_day,"E-Signature Full Name":cur_frm.doc.e_signature_full_name}
+		var message="<b>Please Fill Mandatory Fields:</b>"
+		for (let k in l) {
+			if(l[k]===undefined || !l[k]){
+				message=message+"<br>"+k
+			}
 		}
+		if(frm.doc.agree_to_contract==0){
+			message=message+"<br>Agree To Contract"
+		}
+		if(message!="<b>Please Fill Mandatory Fields:</b>"){
+			// frappe.msgprint(message)
+			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
+
+			frappe.validated=false
+		}
+		
+		
 	}
 });
 
@@ -424,10 +440,10 @@ function check_value(frm,field,name,value){
 function rate_hour_contract_change(frm){
 	if(cur_frm.doc.no_of_workers<cur_frm.doc.worker_filled)
 		{
-			frappe.msgprint({message: __('<b>Agree To COntract</b>Is Mandatory Field'), title: __('Error'), indicator: 'orange'});
+			frappe.msgprint({message: __('Workers Already Filled'), title: __('Error'), indicator: 'orange'});
 			frappe.validated = false;	
 		}
-		if(cur_frm.doc.__islocal==1){
+		if(cur_frm.doc.__islocal==1 && frappe.validated==true){
 			rate_calculation(frm)
 		}
 	}
