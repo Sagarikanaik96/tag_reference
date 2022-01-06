@@ -230,8 +230,32 @@ input::-webkit-credentials-auto-fill-button {
 #page-dashboard-view .dashboard .dashboard-graph {
 	margin-left: 8rem;
 } 
-
 /* Inner report Table UI update  */
+
+/* Staff Company List table */
+#page-staff_company_list table thead tr th {
+	color: #8D9CBC;
+    font-weight: 500;
+    font-size: 12px;
+	padding: 10px 5px;
+}
+#page-staff_company_list table {
+	font-size: 13px !important;
+	margin: 15px 0;
+}
+#page-staff_company_list table tbody tr td {
+	padding: 5px;
+}
+#page-staff_company_list table tbody tr {
+	background: #fff;
+}
+#page-staff_company_list #myInput {
+	border: 1px solid#21B9E4;
+    border-radius: 5px;
+    padding: 1px 5px;
+}
+/* Staff Company List table */
+
 
 @media (max-width:768px) {
     #page-User .layout-main-section-wrapper .layout-main-section , 
