@@ -207,3 +207,15 @@ def check_timesheet(job_order):
         print(e)
         return is_value
 
+
+@frappe.whitelist()
+def get_staffing_company_list():
+    try:
+        data = []
+        companies = frappe.db.sql(""" select name from `tabCompany` where organization_type = 'Staffing'""", as_dict=1)
+        data = [c['name'] for c in companies]
+        return "\n".join(data)
+    except Exception as e:
+        print(e)
+        return []
+
