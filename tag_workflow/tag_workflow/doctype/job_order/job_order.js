@@ -157,7 +157,7 @@ frappe.ui.form.on('Job Order', {
 		if(frm.doc.__islocal === 1){
 			rate_hour_contract_change(frm)
 
-			if(frappe.validated==true){
+			if(frappe.validated){
 			return new Promise(function(resolve, reject) {
 				frappe.confirm("<br><h4>Do you want to save </h4> <br> <b>Job category</b> "+frm.doc.category+" <br> <b>job order start date</b>:"+frm.doc.from_date+" <br><b>Job Order end date: </b>"+frm.doc.to_date+" <br> <job title : "+frm.doc.select_job+" job duration : "+frm.doc.job_duration+" <br><b> job site </b>:  "+frm.doc.job_site+"<br><b> Estimated per hour </b>: "+frm.doc.estimated_hours_per_day+" <br><b> Description </b>: "+frm.doc.description+" <br> <b> Bill rate Per Hour </b>:"+frm.doc.per_hour+" <br><b> Bill rate flat rate</b>:"+frm.doc.flat_rate+"",
 				function() {  
@@ -443,7 +443,7 @@ function rate_hour_contract_change(frm){
 			frappe.msgprint({message: __('Workers Already Filled'), title: __('Error'), indicator: 'orange'});
 			frappe.validated = false;	
 		}
-		if(cur_frm.doc.__islocal==1 && frappe.validated==true){
+		if(cur_frm.doc.__islocal==1 && frappe.validated){
 			rate_calculation(frm)
 		}
 	}
