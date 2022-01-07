@@ -47,8 +47,9 @@ def make_sales_invoice(source_name, company, target_doc=None, ignore_permissions
             payment: {"doctype": payment,"add_if_empty": True}
         }, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
-    customer = customer_doc(company)
+    customer = customer_doc(source_name)
     doclist = make_invoice(source_name, target_doc)
+    doclist.company = company
     update_item(company, source_name, doclist, target_doc)
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
     return doclist

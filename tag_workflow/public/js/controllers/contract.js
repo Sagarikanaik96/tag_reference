@@ -2,6 +2,7 @@ frappe.ui.form.on("Contract", {
 	refresh: function(frm){
 		toggle_field(frm);
 		update_contract(frm);
+		update_hiring(frm);
 		update_user(frm);
 		request_sign(frm);
 	},
@@ -12,14 +13,6 @@ frappe.ui.form.on("Contract", {
 	},
 
 	setup: function(frm){
-		frm.set_query("hiring_company", function(doc){
-			return {
-				filters: [
-					["Company", "organization_type", "=", "Hiring"]
-				]
-			}
-		});
-
 		frm.set_query("staffing_company", function(doc){
 			return {
 				filters: [
@@ -81,6 +74,20 @@ function update_contract(frm){
 	if(cur_frm.doc.__islocal == 1){
 		cur_frm.set_value("contract_terms", _contract);
 	}
+}
+
+/*-------update hiring-------*/
+function update_hiring(frm){
+	frappe.call({
+		method: "tag_workflow.utils.whitelisted.get_company_list",
+		args: {"company_type": "Hiring"},
+		callback: function(r){
+			if(r){
+				var data = r.message || '';
+				cur_frm.set_df_property("hiring_company", "options", data);
+			}
+		}
+	});
 }
 
 /*-------update user----------*/
