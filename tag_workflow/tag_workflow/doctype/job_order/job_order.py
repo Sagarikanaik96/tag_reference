@@ -154,3 +154,13 @@ def prepare_invoice(company, source_name, emp_list):
     except Exception as e:
         frappe.msgprint(frappe.get_traceback())
         frappe.log_error(e, 'make_invoice')
+
+@frappe.whitelist()
+def make_notes(company):
+    try:
+        doc=frappe.get_doc("Company",company)
+        l=[doc.drug_screen,doc.background_check,doc.shovel,doc.mvr]
+        return l
+    except Exception as e:
+        frappe.msgprint(frappe.get_traceback())
+        frappe.log_error(e, 'job order company')
