@@ -7,33 +7,25 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "section_break_1",
-  "time_remaining_for_make_edits",
-  "section_break_3",
+  "data_33",
+  "column_break_29",
+  "section_break_27",
+  "column_break_15",
+  "column_break_9",
+  "column_break_4",
+  "section_break_7",
   "company",
   "naming_series",
-  "staff_company",
-  "column_break_4",
-  "category",
   "posting_date_time",
-  "order_status",
-  "company_type",
   "amended_from",
-  "section_break_7",
-  "resumes_required",
-  "column_break_9",
   "require_staff_to_wear_face_mask",
+  "resumes_required",
   "section_break_11",
-  "from_date",
   "select_job",
   "job_title",
   "job_site",
   "no_of_workers",
   "worker_filled",
-  "rate",
-  "description",
-  "column_break_15",
-  "to_date",
   "job_duration",
   "estimated_hours_per_day",
   "extra_price_increase",
@@ -41,40 +33,30 @@
   "additional_addons_section",
   "drug_screen",
   "background_check",
-  "column_break_24",
   "driving_record",
   "shovel",
+  "employee_details",
   "bill_rate_section",
   "per_hour",
-  "column_break_29",
   "flat_rate",
   "address_info_section",
   "address",
-  "data_33",
-  "bid",
-  "claim",
-  "staff_org_claimed",
   "email",
   "phone_number",
-  "is_single_share",
   "e_signature_for_order_request_section",
   "html_37",
   "e_signature_full_name",
   "agree_to_contract",
-  "view_contract",
   "age_reqiured",
-  "contract_add_on",
+  "quotation_submitted",
   "apply_for_quotation_section",
-  "assign_employees",
-  "section_break_61",
-  "employee_rating",
-  "dispute_section",
-  "dispute_comment"
+  "assign_employees"
  ],
  "fields": [
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -129,28 +111,26 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Select Job",
-   "options": "Designation",
+   "options": "Item",
    "reqd": 1
   },
   {
+   "fetch_from": "select_job.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "job_title",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Job Title"
   },
   {
    "fieldname": "job_site",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Job Site",
-   "options": "Job Site",
-   "reqd": 1
+   "options": "Job Site"
   },
   {
-   "default": "1",
+   "default": "0",
    "fieldname": "no_of_workers",
    "fieldtype": "Int",
-   "in_list_view": 1,
    "label": "No. of workers",
    "reqd": 1
   },
@@ -159,7 +139,6 @@
    "depends_on": "eval:doc.__islocal!=1",
    "fieldname": "worker_filled",
    "fieldtype": "Int",
-   "in_list_view": 1,
    "label": "Worker Filled",
    "read_only": 1
   },
@@ -170,9 +149,9 @@
   {
    "fieldname": "job_duration",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Job Duration",
-   "options": "N/A\n1 Day\n2 Day\n3 Day\n4 Day\n5 Day\n6 Day\n1 Week\n2 Week\n3 Week\n4 Week\n5 Week\n6 Week\n1 Month\n2 Month\n3 Month\n4 Month\n5 Month\n6 Month\nTemp to Hire",
-   "reqd": 1
+   "options": "N/A\n1 Day\n2 Day\n3 Day\n4 Day\n5 Day\n6 Day\n1 Week\n2 Week\n3 Week\n4 Week\n5 Week\n6 Week\n1 Month\n2 Month\n3 Month\n4 Month\n5 Month\n6 Month\nTemp to Hire"
   },
   {
    "default": "0",
@@ -193,27 +172,26 @@
   {
    "fieldname": "drug_screen",
    "fieldtype": "Select",
-   "label": "Drug Screen"
+   "label": "Drug Screen",
+   "options": "None\n$0.50/hour per person\n$15 flat per person"
   },
   {
    "fieldname": "background_check",
    "fieldtype": "Select",
-   "label": "Background Check"
-  },
-  {
-   "fieldname": "column_break_24",
-   "fieldtype": "Column Break"
+   "label": "Background Check",
+   "options": "None\n$0.60/hour per person\n$20 flat per person"
   },
   {
    "fieldname": "driving_record",
    "fieldtype": "Select",
-   "label": "Driving Record"
+   "label": "Driving Record",
+   "options": "None\n$0.40/hour per person\n$10 flat per person"
   },
   {
-   "depends_on": "eval:doc.category=='Construction'",
    "fieldname": "shovel",
    "fieldtype": "Select",
-   "label": "Shovel"
+   "label": "Shovel",
+   "options": "None\n$0.15/hour per person\n$5 flat per person"
   },
   {
    "fieldname": "bill_rate_section",
@@ -224,15 +202,13 @@
    "default": "0",
    "fieldname": "per_hour",
    "fieldtype": "Float",
-   "label": "Per Hour",
-   "precision": "2"
+   "label": "Per Hour"
   },
   {
    "fieldname": "column_break_29",
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
    "fieldname": "flat_rate",
    "fieldtype": "Float",
    "label": "Flat Rate"
@@ -274,8 +250,7 @@
   {
    "fieldname": "e_signature_full_name",
    "fieldtype": "Data",
-   "label": "E-Signature Full Name",
-   "reqd": 1
+   "label": "E-Signature Full Name"
   },
   {
    "default": "0",
@@ -291,168 +266,51 @@
   {
    "fieldname": "assign_employees",
    "fieldtype": "Button",
-   "label": "Employee Assign For Order",
+   "label": "Assign Employees",
    "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "estimated_hours_per_day",
    "fieldtype": "Float",
-   "label": "Estimated Hours Per Day",
-   "reqd": 1
+   "label": "Estimated Hours Per Day"
   },
   {
-   "default": "0",
-   "fieldname": "bid",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "label": "Bid Received"
-  },
-  {
-   "fieldname": "claim",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Claimed By"
-  },
-  {
-   "fieldname": "staff_org_claimed",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Staffing Org Claimed"
-  },
-  {
-   "depends_on": "eval:doc.__islocal!=1",
-   "fieldname": "order_status",
-   "fieldtype": "Select",
-   "label": "Order Status",
-   "options": "\nCompleted\nOngoing\nUpcoming",
-   "read_only": 1
-  },
-  {
-   "fieldname": "company_type",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "in_standard_filter": 1,
-   "label": "Company Type",
-   "options": "\nExclusive\nNon Exclusive"
-  },
-  {
-   "fieldname": "section_break_1",
-   "fieldtype": "Section Break",
-   "permlevel": 2
-  },
-  {
-   "fieldname": "time_remaining_for_make_edits",
-   "fieldtype": "HTML",
-   "label": "Time Remaining For Make Edits",
-   "permlevel": 2
-  },
-  {
-   "fieldname": "section_break_3",
-   "fieldtype": "Section Break",
-   "label": "Organization info"
-  },
-  {
-   "depends_on": "eval:doc.agree_to_contract==1",
-   "fieldname": "view_contract",
-   "fieldtype": "Button",
-   "label": "View Contract"
-  },
-  {
-   "fieldname": "contract_add_on",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Contract Add On"
-  },
-  {
-   "fieldname": "category",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Category",
-   "options": "Industry Type",
-   "reqd": 1
-  },
-  {
-   "default": "Today",
-   "fieldname": "from_date",
+   "default": "now",
+   "fieldname": "posting_date_time",
    "fieldtype": "Datetime",
    "in_list_view": 1,
-   "label": "Job Order Start Date",
+   "label": "Posting Date TIme",
    "reqd": 1
-  },
-  {
-   "fieldname": "to_date",
-   "fieldtype": "Datetime",
-   "label": "Job Order End Date",
-   "reqd": 1
-  },
-  {
-   "default": "Today",
-   "fieldname": "posting_date_time",
-   "fieldtype": "Date",
-   "hidden": 1,
-   "label": "Posting Date"
-  },
-  {
-   "fieldname": "staff_company",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Staff Company",
-   "read_only": 1
-  },
-  {
-   "fieldname": "rate",
-   "fieldtype": "Data",
-   "label": "Rate",
-   "reqd": 1
-  },
-  {
-   "fieldname": "description",
-   "fieldtype": "Small Text",
-   "label": "Description",
-   "reqd": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "is_single_share",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Single Share"
   },
   {
    "default": "0",
    "description": "<p style=\"font-size: 12px;\"><span style=\"color: red;\">&#42;</span>\nAgree To Contract Is compulsory To Save The Order</p>",
    "fieldname": "agree_to_contract",
    "fieldtype": "Check",
-   "label": "Agree To Contract <span style=\"color: red;\">&#42;</span>",
-   "reqd": 1
+   "label": "Agree To Contract"
   },
   {
-   "fieldname": "dispute_section",
-   "fieldtype": "Section Break",
-   "label": "dispute"
-  },
-  {
-   "depends_on": "eval:doc.dispute_comment != undefined",
-   "fieldname": "dispute_comment",
-   "fieldtype": "Long Text",
-   "label": "Dispute Comment"
-  },
-  {
-   "fieldname": "section_break_61",
+   "fieldname": "section_break_27",
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "employee_rating",
+   "depends_on": "eval:doc.quotation_submitted",
+   "fieldname": "employee_details",
    "fieldtype": "Table",
-   "label": "Employee Rating",
-   "options": "Employee Rating",
-   "permlevel": 1
+   "label": "Employee Details",
+   "options": "Job Card Time Log"
+  },
+  {
+   "fieldname": "quotation_submitted",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Quotation Submitted"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-06 20:41:06.651109",
+ "modified": "2022-01-06 19:42:29.222303",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
