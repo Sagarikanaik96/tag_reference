@@ -142,6 +142,9 @@ tag_workflow/tag_workflow/doctype/employee_assign_name/employee_assign_name.py
 tag_workflow/tag_workflow/doctype/employee_attachments/__init__.py
 tag_workflow/tag_workflow/doctype/employee_attachments/employee_attachments.json
 tag_workflow/tag_workflow/doctype/employee_attachments/employee_attachments.py
+tag_workflow/tag_workflow/doctype/employee_rating/__init__.py
+tag_workflow/tag_workflow/doctype/employee_rating/employee_rating.json
+tag_workflow/tag_workflow/doctype/employee_rating/employee_rating.py
 tag_workflow/tag_workflow/doctype/hiring_company_review/__init__.py
 tag_workflow/tag_workflow/doctype/hiring_company_review/hiring_company_review.js
 tag_workflow/tag_workflow/doctype/hiring_company_review/hiring_company_review.json
@@ -190,7 +193,9 @@ tag_workflow/tag_workflow/page/staff_company_list/staff_company_list.json
 tag_workflow/tag_workflow/page/staff_company_list/staff_company_list.py
 tag_workflow/tag_workflow/report/__init__.py
 tag_workflow/tag_workflow/report/employee_invoice/__init__.py
+tag_workflow/tag_workflow/report/employee_invoice/employee_invoice.js
 tag_workflow/tag_workflow/report/employee_invoice/employee_invoice.json
+tag_workflow/tag_workflow/report/employee_invoice/employee_invoice.py
 tag_workflow/tag_workflow/report/employee_work_record/__init__.py
 tag_workflow/tag_workflow/report/employee_work_record/employee_work_record.js
 tag_workflow/tag_workflow/report/employee_work_record/employee_work_record.json
@@ -207,6 +212,10 @@ tag_workflow/tag_workflow/report/work_orders/__init__.py
 tag_workflow/tag_workflow/report/work_orders/work_orders.js
 tag_workflow/tag_workflow/report/work_orders/work_orders.json
 tag_workflow/tag_workflow/report/work_orders/work_orders.py
+tag_workflow/tag_workflow/report/work_orders_completed/__init__.py
+tag_workflow/tag_workflow/report/work_orders_completed/work_orders_completed.js
+tag_workflow/tag_workflow/report/work_orders_completed/work_orders_completed.json
+tag_workflow/tag_workflow/report/work_orders_completed/work_orders_completed.py
 tag_workflow/tag_workflow/workspace/my_activities/my_activities.json
 tag_workflow/templates/__init__.py
 tag_workflow/templates/web.html

@@ -31,7 +31,9 @@ def get_user_info():
     try:
         user = frappe.session.user
         user_doc = frappe.get_doc(USR, user)
-        data = {"user_type": user_doc.tag_user_type, "company": user_doc.company, "company_type": user_doc.organization_type}
+
+        api_key = frappe.db.get_value("Google Settings", "Google Settings", "api_key") or ''
+        data = {"user_type": user_doc.tag_user_type, "company": user_doc.company, "company_type": user_doc.organization_type, "api_key": api_key}
         return data
     except Exception as e:
         print(e)
