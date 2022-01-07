@@ -88,7 +88,8 @@ override_doctype_dashboards = {
         "Item": "tag_workflow.dashboard_data.item_dashboard.get_data",
         "Company": "tag_workflow.dashboard_data.company_dashboard.get_data",
         sales_invoice: "tag_workflow.dashboard_data.sales_invoice_dashboard.get_data",
-        "Lead": "tag_workflow.dashboard_data.lead_dashboard.get_data"
+        "Lead": "tag_workflow.dashboard_data.lead_dashboard.get_data",
+        "Customer": "tag_workflow.dashboard_data.customer_dashboard.get_data"
 }
 scheduler_events={
         "all":  [
