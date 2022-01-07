@@ -9,6 +9,11 @@ def execute(filters=None):
 	from_date=filters.get('start_date')
 	to_date=filters.get('end_date')
 	columns,data=[],[]
+	
+	if frappe.utils.getdate(from_date) > frappe.utils.getdate(to_date):
+		frappe.msgprint(" Start Date is Greater Than End Date")
+		return columns,data
+
 	columns=[
 		{'fieldname':'employee_name','label':('Employee Name'),'fieldtype':'Data','width':200},
         {'fieldname':'job_order_detail','label':('Job Title'),'fieldtype':'Link','options':'Job Order','width':200},
