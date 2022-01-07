@@ -222,7 +222,7 @@ function denied_timesheet(frm){
 		var approved_date=new Date(frm.doc.modified)
 		var diff=current_date.getTime()-approved_date.getTime()
 		diff=parseInt(diff/1000)
-		if (diff<5)
+		if (diff<30)
 		{
 			if((frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User')) && frappe.session.user!='Administrator'){
 				var pop_up = new frappe.ui.Dialog({

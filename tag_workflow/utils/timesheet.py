@@ -112,7 +112,7 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
 
 @frappe.whitelist()
 def approval_notification(job_order=None,staffing_company=None,date=None,hiring_company=None,timesheet_name=None,timesheet_approved_time=None,current_time=None):
-    if(time_diff_in_seconds(current_time,timesheet_approved_time)<=5):
+    if(time_diff_in_seconds(current_time,timesheet_approved_time)<=30):
         job_order_data=frappe.db.sql(''' select select_job,job_site,creation from `tabJob Order` where name='{}' '''.format(job_order),as_dict=1)
         job_location=job_order_data[0].job_site
         job_title=job_order_data[0].select_job

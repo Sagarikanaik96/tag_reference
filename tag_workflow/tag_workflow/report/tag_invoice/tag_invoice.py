@@ -37,10 +37,8 @@ def execute(filters=None):
         year = filters.get('from_fiscal_year').strip()
         get_month_digit = months[date]
 
-        current_month_str = '01-'+str(get_month_digit)+'-'+str(year)
-
-        current_date = frappe.utils.format_date(current_month_str)
-
+        current_month_str = str(year)+'-'+str(get_month_digit)+'-'+'01' 
+        current_date = frappe.utils.getdate(current_month_str)
         previous_month = frappe.utils.add_months(current_date, months=-1)
         first_day = frappe.utils.get_first_day(previous_month)
         last_day = frappe.utils.get_last_day(first_day)
