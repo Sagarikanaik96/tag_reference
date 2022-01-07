@@ -12,15 +12,27 @@ from frappe.utils import time_diff_in_seconds
 JOB = "Job Order"
 
 @frappe.whitelist()
-def send_timesheet_for_approval(employee, docname):
+def send_timesheet_for_approval(employee, docname,company,job_order):
     try:
         user_list = frappe.db.sql(""" select parent from `tabHas Role` where role = "Staffing Admin" and parent in(select user_id from `tabEmployee` where user_id != '' and company = (select company from `tabEmployee` where name = %s)) """, employee, as_dict=1)
-
+        staffing_user=[]
         for user in user_list:
             if not frappe.db.exists("User Permission",{"user": user.parent,"allow": "Timesheet","apply_to_all_doctypes":1, "for_value": docname}):
-                add("Timesheet", docname, user=user.parent, read=1, write=1, submit=1, notify=1)
+                add("Timesheet", docname, user=user.parent, read=1, write=1, submit=1, notify=0)
                 perm_doc = frappe.get_doc(dict(doctype="User Permission",user=user.parent,allow="Timesheet",for_value=docname,apply_to_all_doctypes=1))
                 perm_doc.save(ignore_permissions=True)
+            if user.parent not in staffing_user:
+                staffing_user.append(user.parent)
+        job_order_data=frappe.db.sql(''' select job_site from `tabJob Order` where name='{}' '''.format(job_order),as_dict=1)
+        job_title=job_order_data[0].select_job
+        today = datetime.date.today()
+        msg=f'{company} has submitted a timesheet on {today} for {job_title} for approval. '
+        subject='Timesheet For Approval'
+
+        make_system_notification(staffing_user,msg,'Timesheet',docname,subject)
+        sendmail(staffing_user, msg, subject, 'Timesheet', docname)
+
+
     except Exception as e:
         frappe.error_log(e, "Job Order Approval")
         frappe.throw(e)
