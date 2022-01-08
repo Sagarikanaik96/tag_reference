@@ -159,7 +159,8 @@
    "default": "0",
    "fieldname": "extra_price_increase",
    "fieldtype": "Float",
-   "label": "Extra Price Increase"
+   "label": "Extra Price Increase",
+   "precision": "2"
   },
   {
    "fieldname": "extra_notes",
@@ -210,6 +211,7 @@
    "fieldname": "flat_rate",
    "fieldtype": "Float",
    "label": "Flat Rate",
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -270,6 +272,7 @@
    "fieldname": "estimated_hours_per_day",
    "fieldtype": "Float",
    "label": "Estimated Hours Per Day",
+   "precision": "2",
    "reqd": 1
   },
   {
@@ -423,7 +426,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-08 16:53:46.399722",
+ "modified": "2022-01-08 17:42:11.662657",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
