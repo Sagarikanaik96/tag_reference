@@ -149,6 +149,15 @@ def dnr_notification(job_order,value,employee_name,subject,date,company,employee
     to_date = datetime.datetime.strptime(str(end_date), time_format)
     today = datetime.datetime.now()
     time_diff=today-start_date
+
+    if int(value) ==1 and subject == 'DNR':
+        emp_doc = frappe.get_doc('Employee', employee)
+        employee_dnr(company,emp_doc)
+    
+    elif int(value) == 0 and subject == 'DNR':
+         emp_doc = frappe.get_doc('Employee', employee)
+         removing_dnr_employee(company,emp_doc)
+
     if(today<=to_date and (time_diff.seconds/60/60 < 2)):
         if(int(value)):
             message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>. There is time to substitute this employee for today’s work order.'
@@ -183,7 +192,7 @@ def employee_unsatisfactory(company,emp_doc):
         unsatisfied_organization(emp_doc,company)
     else:
         for i in emp_doc.unsatisfied_from:
-            if(i['unsatisfied_organization_name']==company):
+            if(i.unsatisfied_organization_name == company):
                 break
         else:
             unsatisfied_organization(emp_doc,company)
@@ -262,3 +271,27 @@ def staffing_emp_rating(employee,id,up,down,job_order,comment,timesheet_name):
     timesheet.flags.ignore_mandatory = True
     timesheet.save(ignore_permissions=True)
     return True
+
+def employee_dnr(company,emp_doc):
+    if len(emp_doc.dnr_employee_list) == 0:
+        do_not_return(emp_doc,company)
+    else:
+        for i in emp_doc.dnr_employee_list:
+            if i.dnr == company:
+                break
+        else:
+            do_not_return(emp_doc,company)
+            
+        
+def removing_dnr_employee(company,emp_doc):
+    if len(emp_doc.dnr_employee_list)!=0:
+        for i in emp_doc.dnr_employee_list:
+            if i.dnr == company:
+                remove_row = i
+        emp_doc.remove(remove_row)
+        emp_doc.save(ignore_permissions=True)
+        
+        
+def do_not_return(emp_doc,company):
+    emp_doc.append('dnr_employee_list',{'dnr':company})
+    emp_doc.save(ignore_permissions = True)
