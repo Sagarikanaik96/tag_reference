@@ -49,8 +49,12 @@ frappe.ui.form.on('Job Order', {
 				}
 				}
 			});
+
 		}
+		if(frappe.boot.tag.tag_user_info.company_type!='Staffing'){
+
 		fields_setup(frm)
+		}
 		
 	},
 	setup: function(frm){
@@ -80,7 +84,10 @@ frappe.ui.form.on('Job Order', {
 				}
 			}
 		});
-		fields_setup(frm)
+		if(frappe.boot.tag.tag_user_info.company_type!='Staffing' && cur_frm.doc.__islocal==1){
+			fields_setup(frm)
+
+		}
 	},
 	refresh:function(frm){
 		make_invoice(frm);
