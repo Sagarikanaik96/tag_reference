@@ -69,6 +69,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -114,7 +115,7 @@
    "fieldname": "select_job",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Select Job",
+   "label": "Job",
    "options": "Designation",
    "reqd": 1
   },
@@ -136,7 +137,6 @@
    "default": "1",
    "fieldname": "no_of_workers",
    "fieldtype": "Int",
-   "in_list_view": 1,
    "label": "No. of workers",
    "reqd": 1
   },
@@ -145,7 +145,6 @@
    "depends_on": "eval:doc.__islocal!=1",
    "fieldname": "worker_filled",
    "fieldtype": "Int",
-   "in_list_view": 1,
    "label": "Worker Filled",
    "read_only": 1
   },
@@ -203,13 +202,15 @@
    "fieldname": "per_hour",
    "fieldtype": "Float",
    "label": "Per Hour",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "flat_rate",
    "fieldtype": "Float",
-   "label": "Flat Rate"
+   "label": "Flat Rate",
+   "read_only": 1
   },
   {
    "fieldname": "address_info_section",
@@ -294,6 +295,7 @@
    "depends_on": "eval:doc.__islocal!=1",
    "fieldname": "order_status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Order Status",
    "options": "\nCompleted\nOngoing\nUpcoming",
    "read_only": 1
@@ -346,7 +348,6 @@
    "default": "Today",
    "fieldname": "from_date",
    "fieldtype": "Datetime",
-   "in_list_view": 1,
    "label": "Job Order Start Date",
    "reqd": 1
   },
@@ -422,7 +423,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-07 20:17:23.715101",
+ "modified": "2022-01-08 16:53:46.399722",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

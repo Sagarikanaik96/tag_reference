@@ -19,6 +19,7 @@ frappe.ui.form.on('Job Order', {
 	},
 	onload:function(frm){
 		hide_employee_rating(frm);
+
 		if(cur_frm.doc.__islocal==1){
 			if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ){
 				frm.set_value('company',frappe.boot.tag.tag_user_info.company)
@@ -48,27 +49,9 @@ frappe.ui.form.on('Job Order', {
 				}
 				}
 			});
-			if(cur_frm.doc.company){
-				frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','shovel','mvr','drug_screen_rate','background_check_rate','mvr_rate','shovel_rate','contract_addendums'], function(r){
-				    if(r.contract_addendums!="undefined"){
-						cur_frm.set_value("contract_add_on",r.contract_addendums)
-					}
-					const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
-					const optional_field_data=['drug_screen','background_check','driving_record','shovel']
-					const org_optional_data_rate=[r.drug_screen_rate,r.background_check_rate,r.mvr_rate,r.shovel_rate]
-					for(let i=0;i<org_optional_data.length;i++){
-						if(!org_optional_data[i]){
-							// cur_frm.set_value(optional_field_data[i],'None')
-							cur_frm.set_df_property(optional_field_data[i],'options',"None")
-						}
-						else{
-							cur_frm.set_df_property(optional_field_data[i],'options',"None\n"+org_optional_data_rate[i])
-							cur_frm.set_df_property(optional_field_data[i],'description',"Note:The value is set for "+org_optional_data[i])
-						}
-					}	
-				})
-			}
 		}
+		fields_setup(frm)
+		
 	},
 	setup: function(frm){
 		frm.set_query('job_site', function(doc) {
@@ -97,6 +80,7 @@ frappe.ui.form.on('Job Order', {
 				}
 			}
 		});
+		fields_setup(frm)
 	},
 	refresh:function(frm){
 		make_invoice(frm);
@@ -174,6 +158,8 @@ frappe.ui.form.on('Job Order', {
 		}		
 	},
 	after_save:function(frm){
+		rate_calculation(frm)
+
 		if (frm.doc.staff_org_claimed){
 			notification_joborder_change(frm)
 		}
@@ -275,7 +261,6 @@ frappe.ui.form.on('Job Order', {
 			message=message+"<br>Agree To Contract"
 		}
 		if(message!="<b>Please Fill Mandatory Fields:</b>"){
-			// frappe.msgprint(message)
 			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
 
 			frappe.validated=false
@@ -444,14 +429,14 @@ function rate_hour_contract_change(frm){
 			frappe.msgprint({message: __('Workers Already Filled'), title: __('Error'), indicator: 'orange'});
 			frappe.validated = false;	
 		}
-		if(cur_frm.doc.__islocal==1 && frappe.validated){
+		if(frappe.validated){
 			rate_calculation(frm)
 		}
 	}
 
 function rate_calculation(frm){
-	var total_per_hour=cur_frm.doc.extra_price_increase+cur_frm.doc.per_hour
-	var total_flat_rate=cur_frm.doc.flat_rate
+	var total_per_hour=cur_frm.doc.extra_price_increase+parseFloat(cur_frm.doc.rate)
+	var total_flat_rate=0
 	if(cur_frm.doc.company!='undefined'){
 				frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','mvr','shovel'], function(r){
 					const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
@@ -522,4 +507,26 @@ function make_notes(frm){
 
 	}
 
+}
+
+function fields_setup(frm){
+	if(cur_frm.doc.company){
+		frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','shovel','mvr','drug_screen_rate','background_check_rate','mvr_rate','shovel_rate','contract_addendums'], function(r){
+			if(r.contract_addendums!="undefined"){
+				cur_frm.set_value("contract_add_on",r.contract_addendums)
+			}
+			const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
+			const optional_field_data=['drug_screen','background_check','driving_record','shovel']
+			const org_optional_data_rate=[r.drug_screen_rate,r.background_check_rate,r.mvr_rate,r.shovel_rate]
+			for(let i=0;i<org_optional_data.length;i++){
+				if(!org_optional_data[i]){
+					cur_frm.set_df_property(optional_field_data[i],'options',"None")
+				}
+				else{
+					cur_frm.set_df_property(optional_field_data[i],'options',"None\n"+org_optional_data_rate[i])
+					cur_frm.set_df_property(optional_field_data[i],'description',"Note:The value is set for "+org_optional_data[i])
+				}
+			}	
+		})
+	}
 }
