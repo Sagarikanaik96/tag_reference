@@ -78,7 +78,8 @@ def raise_no_permission_to(self, perm_type):
 
 #validate_duplicate_user_id
 def validate_duplicate_user_id(self):
-    employee = frappe.db.sql_list("""select name from `tabEmployee` where user_id=%s and status='Active' and name!=%s""", (self.user_id, self.name))
+    sql = """select name from `tabEmployee` where user_id = '{0}' and status = 'Active' and name != '{1}' """.format(self.user_id, self.name)
+    employee = frappe.db.sql_list(sql)
     print(employee)
 
 
@@ -91,7 +92,8 @@ def append_number_if_name_exists(doctype, value, fieldname="abbr", separator="-"
     regex = "^{value}{separator}\\d+$".format(value=re.escape(value), separator=separator)
     
     if(exists):
-        last = frappe.db.sql("""SELECT `{fieldname}` FROM `tab{doctype}` WHERE `{fieldname}` {regex_character} %s ORDER BY length({fieldname}) DESC, `{fieldname}` DESC LIMIT 1""".format(doctype=doctype, fieldname=fieldname, regex_character=frappe.db.REGEX_CHARACTER), regex)
+        sql = """SELECT `{fieldname}` FROM `tab{doctype}` WHERE `{fieldname}` {regex_character} %s ORDER BY length({fieldname}) DESC, `{fieldname}` DESC LIMIT 1""".format(doctype=doctype, fieldname=fieldname, regex_character=frappe.db.REGEX_CHARACTER)
+        last = frappe.db.sql(sql, regex)
 
         if last:
             count = str(cint(last[0][0].rsplit(separator, 1)[1]) + 1)
@@ -111,7 +113,8 @@ def validate_abbr(self):
     if not self.abbr.strip():
         frappe.throw(_("Abbreviation is mandatory"))
 
-    if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
+    sql = "select abbr from tabCompany where name != '{0}' and abbr = '{1}' ".format(self.name, self.abbr)
+    if frappe.db.sql(sql):
         self.abbr = append_number_if_name_exists("Company", self.abbr, fieldname="abbr", separator="-", filters=None)
 
 #-----navbar settings-------#

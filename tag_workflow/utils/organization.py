@@ -82,7 +82,8 @@ def update_organization():
 def update_organization_data():
     try:
         print("*------updating organization data-----------*\n")
-        frappe.db.sql(""" delete from `tabOrganization Type` """)
+        sql = """ delete from `tabOrganization Type` """
+        frappe.db.sql(sql)
         for data in ADD_ORGANIZATION_DATA:
             org_doc = frappe.get_doc(dict(doctype = Organization, organization = data))
             org_doc.save()
@@ -162,7 +163,8 @@ def module_data_update(all_modules, module_data, module_doc):
 def update_permissions():
     try:
         print("*------updating permissions-----------------*\n")
-        frappe.db.sql(""" delete from `tabCustom DocPerm` """)
+        sql = """ delete from `tabCustom DocPerm` """
+        frappe.db.sql(sql)
         FILE_PATH = str(Path(__file__).resolve().parent) + "/role_permission.json"
         refactor_permission_data(FILE_PATH)
 
@@ -223,7 +225,8 @@ def check_if_user_exists():
         for user in user_list:
             if(frappe.db.exists(EMP, {"user_id": user.name})):
                 company, date_of_joining = frappe.db.get_value(EMP, {"user_id": user.name}, ["company", "date_of_joining"])
-                frappe.db.sql(""" UPDATE `tabUser` SET company = %s, date_of_joining = %s where name = %s """,(company, date_of_joining, user.name))
+                sql = """ UPDATE `tabUser` SET company = '{0}', date_of_joining = '{1}' where name = '{2}' """.format(company, date_of_joining, user.name)
+                frappe.db.sql(sql)
 
             if(user.company):
                 user_exclusive_perm(user.name, user.company, user.organization_type)

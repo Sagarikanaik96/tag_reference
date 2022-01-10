@@ -31,7 +31,9 @@ def make_sales_invoice(source_name, company, target_doc=None, ignore_permissions
         total_amount = 0
         
         income_account, cost_center, default_expense_account, tag_charges = frappe.db.get_value("Company", company, ["default_income_account", "cost_center", "default_expense_account", "tag_charges"])
-        invoice = frappe.db.sql(""" select grand_total from `tabSales Invoice` where docstatus = 1 and company = %s and posting_date between %s and %s """,(source, start, end), as_dict=1)
+
+        sql = """ select grand_total from `tabSales Invoice` where docstatus = 1 and company = '{0}' and posting_date between '{1}' and '{2}' """.format(source, start, end)
+        invoice = frappe.db.sql(sql, as_dict=1)
 
         for inv in invoice:
             total_amount += (inv.grand_total * tag_charges)/100
@@ -58,7 +60,8 @@ def make_sales_invoice(source_name, company, target_doc=None, ignore_permissions
 def make_invoice(source_name, target_doc=None):
     try:
         company = frappe.db.get_value("User", frappe.session.user, "company") or "TAG"
-        invoice_list = frappe.db.sql(""" select name from `tabSales Invoice` where docstatus = 1 and company = %s and posting_date between %s and %s """,(source_name, start, end), as_dict=1)
+        sql = """ select name from `tabSales Invoice` where docstatus = 1 and company = '{0}' and posting_date between '{1}' and '{2}' """.format(source_name, start, end)
+        invoice_list = frappe.db.sql(sql, as_dict=1)
         if(len(invoice_list) <= 0):
             frappe.msgprint(_("No Invoice found for <b>{0}</b> for current month").format(source_name))
             return 0

@@ -52,7 +52,8 @@ def add_company_share_permission(users):
 def share_company_with_user(users=None):
     try:
         if not users:
-            users = frappe.db.sql(""" select name, company from `tabUser` where enabled = 1 and company != '' """, as_dict=1)
+            sql = """ select name, company from `tabUser` where enabled = 1 and company != '' """
+            users = frappe.db.sql(sql, as_dict=1)
         add_company_share_permission(users)
     except Exception as e:
         frappe.log_error(e, "sharing company")
