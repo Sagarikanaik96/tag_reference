@@ -23,7 +23,8 @@
   "employee_details",
   "digital_sign",
   "agree_contract",
-  "amended_from"
+  "amended_from",
+  "is_single_share"
  ],
  "fields": [
   {
@@ -140,12 +141,19 @@
    "fieldname": "agree_contract",
    "fieldtype": "Check",
    "label": "Agree Contract"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_single_share",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Single Share"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-12-15 10:55:01.809692",
+ "modified": "2022-01-10 12:35:37.630800",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",

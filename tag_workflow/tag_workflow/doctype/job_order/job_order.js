@@ -312,6 +312,7 @@ function redirect_quotation(frm){
 	doc.job_location = frm.doc.job_site;
 	doc.job_order_email = frm.doc.owner;
 	doc.resume_required = frm.doc.resumes_required;
+	doc.is_single_share = frm.doc.is_single_share
 
 	frappe.call({
 		method:"tag_workflow.tag_data.staff_org_details",

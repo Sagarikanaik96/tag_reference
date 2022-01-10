@@ -5,6 +5,7 @@ from frappe import enqueue
 from tag_workflow.utils.notification import sendmail, make_system_notification
 from frappe.utils import get_datetime,now
 from frappe.utils import date_diff
+import json
 
 jobOrder = "Job Order"
 
@@ -102,12 +103,16 @@ def update_job_order(job_name, employee_filled, staffing_org, hiringorg, name):
 
 
 @frappe.whitelist()
-def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc_name):
+def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc_name,no_of_worker_req,is_single_share):
     try:
         import json
         update_values=frappe.db.sql(''' select data from `tabVersion` where docname='{}' '''.format(doc_name),as_list=1)
         if(len(update_values)<2):
             bid_receive=frappe.get_doc(jobOrder,job_order)
+
+            if is_single_share:
+                check_partial_employee(bid_receive,staffing_org,emp_detail,no_of_worker_req)
+
             bid_receive.bid=1+int(bid_receive.bid)
             if(bid_receive.claim is None):
                 bid_receive.claim=staffing_org
@@ -134,6 +139,19 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
         print(e, frappe.get_traceback())
         frappe.db.rollback()
 
+def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req):
+    
+    emp_detail = json.loads(emp_detail)
+    job_order.is_single_share = 0
+    
+    if int(no_of_worker_req) > len(emp_detail): 
+        share_list = frappe.db.sql('''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org),as_list = True)
+        
+        if share_list:
+            for user in share_list:
+                add("Job Order", job_order.name, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
+                
+   
 @frappe.whitelist()
 def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None,staff_company=None):
     try:
