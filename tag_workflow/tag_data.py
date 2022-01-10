@@ -73,7 +73,7 @@ def send_email_staffing_user(email_list=None,subject = None,body=None,additional
 #----------assign data------------#
 def assign_employee_data(hiringorg, name):
     try:
-        sql = """ select employee from `tabAssign Employee Details` where parent = %s """.format(name)
+        sql = """ select employee from `tabAssign Employee Details` where parent = '{0}' """.format(name)
         emps = frappe.db.sql(sql, as_dict=1)
         users = frappe.db.get_list("User", {"company": hiringorg}, "name")
 
@@ -209,7 +209,7 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
             doc.save(ignore_permissions = True)
 
             own_sql = ''' select owner from `tabCompany` where organization_type="Exclusive Hiring" and name="{}" '''.format(hiring_org)
-            owner_info=frappe.db.sql(sql, as_list=1)
+            owner_info=frappe.db.sql(own_sql, as_list=1)
 
             com_sql = ''' select company from `tabUser` where name='{}' '''.format(owner_info[0][0])
             company_info=frappe.db.sql(com_sql, as_list=1)
@@ -303,7 +303,7 @@ def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters)
 
         return frappe.db.sql(sql)
     else:
-        sql = """select name, employee_name from `tabEmployee` where company='{2}' and status='Active' and (job_category = '{1}' or job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{2}' and name NOT IN (select parent from `tabDNR`  where dnr='{2}' )) and name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{2}')""".format(emp_company, job_category, company)
+        sql = """select name, employee_name from `tabEmployee` where company='{0}' and status='Active' and (job_category = '{1}' or job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{2}' and name NOT IN (select parent from `tabDNR`  where dnr='{2}' )) and name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{2}')""".format(emp_company, job_category, company)
 
         return frappe.db.sql(sql)
     
