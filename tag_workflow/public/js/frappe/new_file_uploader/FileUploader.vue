@@ -369,14 +369,8 @@ export default {
 						if (xhr.status === 200) {
 							let r = null;
 							let file_doc = null;
-							try {
-								r = JSON.parse(xhr.responseText);
-								if (r.message.doctype === 'File') {
-									file_doc = r.message;
-								}
-							} catch(e) {
-								r = xhr.responseText;
-							}
+							r,file_doc=xhr_data(file_doc,xhr,r)
+							
 
 							file.doc = file_doc;
 
@@ -488,6 +482,17 @@ function xhr_new(file,xhr){
 							}
 							frappe.request.cleanup({}, error);
 						}
+}
+function xhr_data(file_doc,xhr,r){
+	try {
+		r = JSON.parse(xhr.responseText);
+		if (r.message.doctype === 'File') {
+			file_doc = r.message;
+			return r,file_doc
+		}
+		} catch(e) {
+			r = xhr.responseText;
+		}
 }
 </script>
 <style>
