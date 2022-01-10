@@ -387,23 +387,8 @@ export default {
 							if (this.on_success) {
 								this.on_success(file_doc, r);
 							}
-						} else if (xhr.status === 403) {
-							let response = JSON.parse(xhr.responseText);
-							frappe.msgprint({
-								title: __('Not permitted'),
-								indicator: 'red',
-								message: response._error_message
-							});
-						} else {
-							file.failed = true;
-							let error = null;
-							try {
-								error = JSON.parse(xhr.responseText);
-							} catch(e) {
-								// pass
-							}
-							frappe.request.cleanup({}, error);
-						}
+						} else 
+						xhr_new(file,xhr);
 					}
 				}
 				xhr.open('POST', '/api/method/upload_file', true);
@@ -416,15 +401,7 @@ export default {
 				}
 				form_data.append('is_private', +file.private);
 				form_data.append('folder', this.folder);
-
-				if (file.file_url) {
-					form_data.append('file_url', file.file_url);
-				}
-
-				if (file.file_name) {
-					form_data.append('file_name', file.file_name);
-				}
-
+				validate_data(file);
 				if (this.doctype && this.docname) {
 					form_data.append('doctype', this.doctype);
 					form_data.append('docname', this.docname);
@@ -438,6 +415,8 @@ export default {
 					form_data.append('method', this.method);
 				}
 
+
+			
 				xhr.send(form_data);
 			});
 		},
@@ -479,6 +458,36 @@ export default {
 					.then(buffer => new File([buffer], filename, { type: mime_type }));
 		},
 	}
+}
+function validate_data(file){
+				if (file.file_url) {
+					form_data.append('file_url', file.file_url);
+				}
+
+				if (file.file_name) {
+					form_data.append('file_name', file.file_name);
+				}
+
+			
+		}
+function xhr_new(file,xhr){
+	if (xhr.status === 403) {
+							let response = JSON.parse(xhr.responseText);
+							frappe.msgprint({
+								title: __('Not permitted'),
+								indicator: 'red',
+								message: response._error_message
+							});
+						} else {
+							file.failed = true;
+							let error = null;
+							try {
+								error = JSON.parse(xhr.responseText);
+							} catch(e) {
+								// pass
+							}
+							frappe.request.cleanup({}, error);
+						}
 }
 </script>
 <style>
