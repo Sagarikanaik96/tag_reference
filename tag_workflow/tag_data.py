@@ -141,15 +141,18 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
 
 def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req):
     
-    emp_detail = json.loads(emp_detail)
-    job_order.is_single_share = 0
-    
-    if int(no_of_worker_req) > len(emp_detail): 
-        share_list = frappe.db.sql('''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org),as_list = True)
+    try:
+        emp_detail = json.loads(emp_detail)
+        job_order.is_single_share = 0
         
-        if share_list:
-            for user in share_list:
-                add("Job Order", job_order.name, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
+        if int(no_of_worker_req) > len(emp_detail): 
+            share_list = frappe.db.sql('''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org),as_list = True)
+            
+            if share_list:
+                for user in share_list:
+                    add("Job Order", job_order.name, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
+    except Exception as e:
+        frappe.error_log(e, "Partial Job order Failed ")
                 
    
 @frappe.whitelist()
