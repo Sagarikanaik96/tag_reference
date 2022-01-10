@@ -268,10 +268,6 @@ export default {
 		},
 		check_restrictions(file) {
 			let { max_file_size, allowed_file_types } = this.restrictions;
-
-			let mime_type = file.type;
-			let extension = '.' + file.name.split('.').pop();
-
 			let is_correct_type = true;
 			let valid_file_size = true;
 
@@ -388,7 +384,11 @@ export default {
 								this.on_success(file_doc, r);
 							}
 						} else 
-						xhr_new(file,xhr);
+						{
+							xhr_new(file,xhr);
+
+
+						}
 					}
 				}
 				xhr.open('POST', '/api/method/upload_file', true);
