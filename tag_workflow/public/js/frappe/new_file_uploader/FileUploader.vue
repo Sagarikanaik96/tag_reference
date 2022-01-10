@@ -295,13 +295,6 @@ export default {
 				valid_file_size = file.size < max_file_size;
 			}
 
-			if (!is_correct_type) {
-				console.warn('File skipped because of invalid file type', file);
-			}
-			if (!valid_file_size) {
-				console.warn('File skipped because of invalid file size', file.size, file);
-			}
-
 			return is_correct_type && valid_file_size;
 		},
 		upload_files() {
