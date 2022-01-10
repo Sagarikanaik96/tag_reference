@@ -12,7 +12,7 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 
 class JobOrder(Document):
-	pass
+    pass
 
 #-----------------#
 ORD = "Job Order"
@@ -23,66 +23,71 @@ team = "Sales Team"
 
 @frappe.whitelist()
 def joborder_notification(organizaton,doc_name,company,job_title,posting_date,job_site=None):
-	change = frappe.db.sql('''select data from `tabVersion` where docname = "{}" '''.format(doc_name),as_dict= True)
-	if len(change) > 2:
-		data=frappe.db.sql(''' select data from `tabVersion` where docname='{}' order by modified DESC'''.format(doc_name),as_list=1)
-		new_data=json.loads(data[0][0])
-		if(new_data['changed'][0][0]=='no_of_workers'):
-			msg = 'The number of employees requested for '+doc_name+' on '+str(datetime.now())+' has been modified. '
-			is_send_mail_required(organizaton,doc_name,msg)
-		else:
-			msg = f'{company} has updated details for {job_title} work order at {job_site} for {posting_date}. Please review work order details.'
-			is_send_mail_required(organizaton,doc_name,msg)
+    sql = '''select data from `tabVersion` where docname = "{}" '''.format(doc_name)
+    change = frappe.db.sql(sql, as_dict= True)
+    if len(change) > 2:
+        sql = ''' select data from `tabVersion` where docname='{}' order by modified DESC'''.format(doc_name)
+        data=frappe.db.sql(sql, as_list=1)
+        new_data=json.loads(data[0][0])
+        if(new_data['changed'][0][0]=='no_of_workers'):
+            msg = 'The number of employees requested for '+doc_name+' on '+str(datetime.now())+' has been modified. '
+            is_send_mail_required(organizaton,doc_name,msg)
+        else:
+            msg = f'{company} has updated details for {job_title} work order at {job_site} for {posting_date}. Please review work order details.'
+            is_send_mail_required(organizaton,doc_name,msg)
 
 def is_send_mail_required(organizaton,doc_name,msg):
-	try:
-		staffing = organizaton.split(',')[1:]
-		staffing_list = []
-		for name in staffing:
-			staffing_name = frappe.db.sql('''select name from `tabUser` where company = "{}"'''.format(name.strip()),as_list = True) 
-			for value in staffing_name:
-				staffing_list.append(value[0])
-		subject = 'Job Order Notification'
-		if staffing_list:
-			make_system_notification(staffing_list, message = msg, doctype = ORD, docname =  doc_name, subject = subject)
-			sendmail(emails = staffing_list, message = msg, subject = subject, doctype = ORD, docname = doc_name)
-	except Exception as e:
-		frappe.log_error(e, "Job Order Notification Error")
-		frappe.throw(e)
+    try:
+        staffing = organizaton.split(',')[1:]
+        staffing_list = []
+        for name in staffing:
+            sql = '''select name from `tabUser` where company = "{}"'''.format(name.strip())
+            staffing_name = frappe.db.sql(sql, as_list = True) 
+            for value in staffing_name:
+                staffing_list.append(value[0])
+                subject = 'Job Order Notification'
+        if staffing_list:
+            make_system_notification(staffing_list, message = msg, doctype = ORD, docname =  doc_name, subject = subject)
+            sendmail(emails = staffing_list, message = msg, subject = subject, doctype = ORD, docname = doc_name)
+    except Exception as e:
+        frappe.log_error(e, "Job Order Notification Error")
+        frappe.throw(e)
 
 
 @frappe.whitelist()
 def get_jobtitle_list(doctype, txt, searchfield, page_len, start, filters):
-	company=filters.get('job_order_company')
-	if company is None:
-		return None
-	else:
-		return frappe.db.sql(''' select job_titles from `tabJob Titles` where parent=%(company)s''',{'company':company})
+    company=filters.get('job_order_company')
+    if company is None:
+        return None
+    else:
+        sql = ''' select job_titles from `tabJob Titles` where parent = '{0}' '''.format(company)
+        return frappe.db.sql(sql)
 
-
-@frappe.whitelist()	
+@frappe.whitelist()
 def update_joborder_rate_desc(company = None,job = None):
-	if job is None or company is None:
-		return None
+    if job is None or company is None:
+        return None
 
-	org_detail = frappe.db.sql(''' select wages,description from `tabJob Titles` where parent = "{}" and job_titles = "{}"'''.format(company,job),as_dict=True)
-	if org_detail:
-		return org_detail[0]
+    sql = ''' select wages,description from `tabJob Titles` where parent = "{}" and job_titles = "{}"'''.format(company, job)
+    org_detail = frappe.db.sql(sql, as_dict=True)
+    if org_detail:
+        return org_detail[0]
 
 @frappe.whitelist()
 def after_denied_joborder(staff_company,joborder_name):
-	share_list = frappe.db.sql('''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staff_company),as_list = True)
-	if share_list:
-		for user in share_list:
-			add(ORD, joborder_name, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
-	try:
-		jb_ord = frappe.get_doc(ORD,joborder_name)
-		jb_ord.is_single_share = 0
-		jb_ord.save(ignore_permissions = True)
-	except Exception as e:
-		frappe.log_error(e,'job order not found')
-		
-	return True
+    sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staff_company)
+    share_list = frappe.db.sql(sql, as_list=True)
+    if share_list:
+        for user in share_list:
+            add(ORD, joborder_name, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
+    try:
+        jb_ord = frappe.get_doc(ORD,joborder_name)
+        jb_ord.is_single_share = 0
+        jb_ord.save(ignore_permissions = True)
+    except Exception as e:
+        frappe.log_error(e,'job order not found')
+
+    return True
 	
 
 #-----------------------------------#
@@ -103,7 +108,8 @@ def make_sales_invoice(source_name, company, emp_list, target_doc=None, ignore_p
         income_account, cost_center, default_expense_account = frappe.db.get_value("Company", company, ["default_income_account", "cost_center", "default_expense_account"])
         total_amount = 0
         total_hours = 0
-        timesheet = frappe.db.sql(""" select name from `tabTimesheet` where job_order_detail = %s and docstatus = 1 and employee in %s """,(source, emp_list), as_dict=1)
+        sql = """ select name from `tabTimesheet` where job_order_detail = {0} and docstatus = 1 and employee in {1} """.format(source, emp_list)
+        timesheet = frappe.db.sql(sql, as_dict=1)
 
         for time in timesheet:
             sheet = frappe.get_doc("Timesheet", {"name": time.name})
@@ -139,8 +145,11 @@ def make_sales_invoice(source_name, company, emp_list, target_doc=None, ignore_p
 def make_invoice(source_name, target_doc=None):
     try:
         company = frappe.db.get_value("User", frappe.session.user, "company")
-        emp_list = frappe.db.sql(""" select name from `tabEmployee` where company = %s """, company)
-        if(len(frappe.db.sql(""" select name from `tabTimesheet` where job_order_detail = %s and employee in %s """,(source_name, emp_list), as_dict=1)) <= 0):
+        emp_sql = """ select name from `tabEmployee` where company = '{0}' """.format(company)
+        emp_list = frappe.db.sql(emp_sql)
+
+        len_sql = """ select name from `tabTimesheet` where job_order_detail = {0} and employee in '{1}' """.format(source_name, emp_list)
+        if(len(frappe.db.sql(len_sql, as_dict=1)) <= 0):
             frappe.msgprint(_("No Timesheet found for this Job Order(<b>{0}</b>)").format(source_name))
         else:
             return prepare_invoice(company, source_name, emp_list)

@@ -13,7 +13,10 @@ jobOrder = "Job Order"
 def company_details(company_name=None):
     if frappe.session.user != 'Administrator':
         comp_data=frappe.get_doc('Company',company_name)
-        company_info = frappe.db.sql(""" select fein, title, address, city, state, zip, contact_name, email, phone_no, primary_language, accounts_payable_contact_name, accounts_payable_email, accounts_payable_phone_number from `tabCompany` where name="{}" """.format(company_name),as_list=1)
+
+        sql = """ select fein, title, address, city, state, zip, contact_name, email, phone_no, primary_language, accounts_payable_contact_name, accounts_payable_email, accounts_payable_phone_number from `tabCompany` where name="{}" """.format(company_name)
+
+        company_info = frappe.db.sql(sql, as_list=1)
         is_ok = "failed"
         if None in company_info[0]:
             return is_ok
@@ -25,8 +28,8 @@ def company_details(company_name=None):
 
 @frappe.whitelist()
 def update_timesheet(job_order_detail):
-    value = frappe.db.sql('''select select_job,from_date,to_date,per_hour,flat_rate,estimated_hours_per_day
-     from `tabJob Order` where name = "{}" '''.format(job_order_detail),as_dict = 1)
+    sql = '''select select_job,from_date,to_date,per_hour,flat_rate,estimated_hours_per_day from `tabJob Order` where name = "{}" '''.format(job_order_detail)
+    value = frappe.db.sql(sql, as_dict = 1)
     time_differnce=date_diff(value[0]['to_date'],value[0]['from_date'])
     per_person_rate=value[0]['per_hour']
     flat_rate=value[0]['flat_rate']
@@ -70,7 +73,8 @@ def send_email_staffing_user(email_list=None,subject = None,body=None,additional
 #----------assign data------------#
 def assign_employee_data(hiringorg, name):
     try:
-        emps = frappe.db.sql(""" select employee from `tabAssign Employee Details` where parent = %s """,(name), as_dict=1)
+        sql = """ select employee from `tabAssign Employee Details` where parent = %s """.format(name)
+        emps = frappe.db.sql(sql, as_dict=1)
         users = frappe.db.get_list("User", {"company": hiringorg}, "name")
 
         for usr in users:
@@ -91,7 +95,9 @@ def update_job_order(job_name, employee_filled, staffing_org, hiringorg, name):
         frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
         sub = f'New Message regarding {job_name} from {hiringorg} is available'
         msg = f'Your Employees has been approved for Work Order {job_name}'
-        user_list = frappe.db.sql(""" select email from `tabUser` where company = %s """,(staffing_org), as_dict=1)
+
+        lst_sql = """ select email from `tabUser` where company = '{0}' """.format(staffing_org)
+        user_list = frappe.db.sql(lst_sql, as_dict=1)
         users = [usr['email'] for usr in user_list]
         make_system_notification(users,msg,jobOrder,job_name,sub)   
         enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name)
@@ -120,8 +126,12 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
                 if(staffing_org not in bid_receive.claim):
                     bid_receive.claim=str(bid_receive.claim)+str(",")+staffing_org
             bid_receive.save(ignore_permissions=True)
-            job_detail = frappe.db.sql('''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order),as_dict=1)
-            user_list = frappe.db.sql(''' select email from `tabUser` where company = "{}"'''.format(hiring_org),as_list=1)
+
+            job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
+            job_detail = frappe.db.sql(job_sql, as_dict=1)
+
+            lst_sql = ''' select email from `tabUser` where company = "{}"'''.format(hiring_org)
+            user_list = frappe.db.sql(lst_sql, as_list=1)
             v = json.loads(emp_detail)
             s = ''
             for i in v:
@@ -145,8 +155,9 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req):
         emp_detail = json.loads(emp_detail)
         job_order.is_single_share = 0
         
-        if int(no_of_worker_req) > len(emp_detail): 
-            share_list = frappe.db.sql('''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org),as_list = True)
+        if int(no_of_worker_req) > len(emp_detail):
+            sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org)
+            share_list = frappe.db.sql(sql, as_list = True)
             
             if share_list:
                 for user in share_list:
@@ -160,7 +171,9 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
     try:
         doc = frappe.get_doc(jobOrder,job_order)
         subject="New Work Order"
-        update_values=frappe.db.sql(''' select data from `tabVersion` where ref_doctype='Job Order' and docname='{}' '''.format(job_order),as_list=1)
+
+        sql = ''' select data from `tabVersion` where ref_doctype='Job Order' and docname='{}' '''.format(job_order)
+        update_values=frappe.db.sql(sql, as_list=1)
         if(len(update_values)<2):
             if staff_company:
                 doc.company_type = 'Non Exclusive'
@@ -179,11 +192,14 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
 
 def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title=None,doc=None,subject=None):
     try:
-        org_type=frappe.db.sql('''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org),as_list=1)
+        sql = '''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org)
+        org_type=frappe.db.sql(sql, as_list=1)
         if(org_type[0][0]=='Hiring'):
             doc.company_type = 'Non Exclusive'
             doc.save(ignore_permissions = True)
-            user_list=frappe.db.sql(''' select email from `tabUser` where organization_type='staffing' ''',as_list=1)
+
+            sql = ''' select email from `tabUser` where organization_type='staffing' '''
+            user_list=frappe.db.sql(sql, as_list=1)
             l = [l[0] for l in user_list]
             for user in l:
                 add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
@@ -191,9 +207,15 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
         elif org_type[0][0]=="Exclusive Hiring":
             doc.company_type = 'Exclusive'
             doc.save(ignore_permissions = True)
-            owner_info=frappe.db.sql(''' select owner from `tabCompany` where organization_type="Exclusive Hiring" and name="{}" '''.format(hiring_org),as_list=1)
-            company_info=frappe.db.sql(''' select company from `tabUser` where name='{}' '''.format(owner_info[0][0]),as_list=1)
-            user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(company_info[0][0]),as_list=1)
+
+            own_sql = ''' select owner from `tabCompany` where organization_type="Exclusive Hiring" and name="{}" '''.format(hiring_org)
+            owner_info=frappe.db.sql(sql, as_list=1)
+
+            com_sql = ''' select company from `tabUser` where name='{}' '''.format(owner_info[0][0])
+            company_info=frappe.db.sql(com_sql, as_list=1)
+
+            usr_sql = ''' select email from `tabUser` where company='{}' '''.format(company_info[0][0])
+            user_list = frappe.db.sql(usr_sql, as_list=1)
             l = [l[0] for l in user_list]
             for user in l:
                 add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
@@ -214,7 +236,10 @@ def update_exclusive_org(exclusive_email,staffing_email,staffing_comapny,exclusi
 @frappe.whitelist()
 def staff_org_details(company_details=None):
     comp_data=frappe.get_doc('Company',company_details)
-    company_info = frappe.db.sql(""" select fein, title, address, city, state, zip, contact_name, email, phone_no, primary_language,accounts_receivable_rep_email,accounts_receivable_name,accounts_receivable_phone_number, cert_of_insurance,safety_manual,w9 from `tabCompany` where name="{}" """.format(company_details),as_list=1)
+
+    sql = """ select fein, title, address, city, state, zip, contact_name, email, phone_no, primary_language,accounts_receivable_rep_email,accounts_receivable_name,accounts_receivable_phone_number, cert_of_insurance,safety_manual,w9 from `tabCompany` where name="{}" """.format(company_details)
+
+    company_info = frappe.db.sql(sql, as_list=1)
     is_ok = "failed"
     if None in company_info[0]:
         return is_ok
@@ -226,7 +251,9 @@ def staff_org_details(company_details=None):
 @frappe.whitelist()
 def update_staffing_user_with_exclusive(company,company_name):
     from frappe.share import add
-    a = frappe.db.sql('''select name from `tabUser` where company = "{}" and tag_user_type = 'Staffing User' '''.format(company),as_list=1)
+
+    sql = '''select name from `tabUser` where company = "{}" and tag_user_type = 'Staffing User' '''.format(company)
+    a = frappe.db.sql(sql, as_list=1)
     try:
         for i in a:
             add("Company",company_name,i[0],write = 0,read = 1,share = 0,notify=1,flags={"ignore_share_permission": 1})
@@ -272,29 +299,37 @@ def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters)
     company = filters.get('company')
 
     if job_category is None:
-        return frappe.db.sql("""select name, employee_name from `tabEmployee` where company=%(emp_company)s and status='Active' and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from=%(company)s) and name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name=%(company)s) and name NOT IN (select parent from `tabDNR` BE where dnr=%(company)s))""",{'emp_company':emp_company,'company':company})
+        sql = """ select name, employee_name from `tabEmployee` where company=%(emp_company)s and status='Active' and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from=%(company)s) and name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{0}') and name NOT IN (select parent from `tabDNR` BE where dnr='{1}')) """.format(emp_company, company)
+
+        return frappe.db.sql(sql)
     else:
-        return frappe.db.sql("""select name, employee_name from `tabEmployee` where company=%(emp_company)s and status='Active' and (job_category = %(job_category)s or job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from=%(company)s) and name NOT IN (select parent from `tabDNR`  where dnr=%(company)s)) and name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name=%(company)s)""",{'emp_company':emp_company,'company':company,'job_category':job_category})
+        sql = """select name, employee_name from `tabEmployee` where company='{2}' and status='Active' and (job_category = '{1}' or job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{2}' and name NOT IN (select parent from `tabDNR`  where dnr='{2}' )) and name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{2}')""".format(emp_company, job_category, company)
+
+        return frappe.db.sql(sql)
     
 @frappe.whitelist()
 def get_org_site(doctype, txt, searchfield, page_len, start, filters):
-    company=filters.get('job_order_company')   
-    return frappe.db.sql(''' select job_site from `tabCompany Site` where parent=%(company)s''',{'company':company})
+    company=filters.get('job_order_company')
+    sql = ''' select job_site from `tabCompany Site` where parent='{0}' '''.format(company)
+    return frappe.db.sql(sql)
     
 @frappe.whitelist()
 def hiring_category(doctype,txt,searchfield,page_len,start,filters):
     company=filters.get('hiring_company')
-    return frappe.db.sql(''' select industry_type from `tabIndustry Types` where parent=%(company)s''',{'company':company})
+    sql = ''' select industry_type from `tabIndustry Types` where parent={0} '''.format(company)
+    return frappe.db.sql(sql)
 
 
 @frappe.whitelist()
 def org_industy_type(company=None):
-    return frappe.db.sql(''' select industry_type from `tabIndustry Types` where parent='{}' '''.format(company))
+    sql = ''' select industry_type from `tabIndustry Types` where parent='{}' '''.format(company)
+    return frappe.db.sql(sql)
 
 
 @frappe.whitelist()
 def delete_file_data(file_name):
-    frappe.db.sql('''Delete from `tabFile` where file_name = "{}"'''.format(file_name))
+    sql = '''Delete from `tabFile` where file_name = "{}"'''.format(file_name)
+    frappe.db.sql(sql)
 
 def job_order_notification(job_order_title,hiring_org,job_order,subject,l):
     msg=f'New Work Order for a {job_order_title} has been created by {hiring_org}.'
@@ -310,7 +345,8 @@ def disable_user(company, check):
         else:
             check=int(1)
 
-        frappe.db.sql(""" UPDATE `tabUser` SET `tabUser`.enabled ="{0}" where company="{1}" and `terminated`!=1 """.format(check,company))
+        sql = """ UPDATE `tabUser` SET `tabUser`.enabled ="{0}" where company="{1}" and `terminated`!=1 """.format(check, company)
+        frappe.db.sql(sql)
         frappe.db.commit()
     except Exception as e:
         frappe.msgprint(e)
@@ -336,16 +372,20 @@ def update_job_order_status():
 @frappe.whitelist()
 def sales_invoice_notification(job_order=None,company=None,invoice_name=None):
     try:
-        data=frappe.db.sql('''  select workflow_state from `tabTimesheet` where job_order_detail='{0}' and employee_company='{1}' '''.format(job_order,company),as_list=1)
+        sql = '''  select workflow_state from `tabTimesheet` where job_order_detail='{0}' and employee_company='{1}' '''.format(job_order, company)
+        data=frappe.db.sql(sql, as_list=1)
         if(len(data)>0):
             for i in data:
                 if i[0]!="Approved":
                     break
             else:
-                job_order_details=frappe.db.sql(""" Select company,select_job,job_site from `tabJob Order` where name='{0}' """.format(job_order),as_dict=1)
+                sql = """ Select company,select_job,job_site from `tabJob Order` where name='{0}' """.format(job_order)
+                job_order_details=frappe.db.sql(sql, as_dict=1)
                 msg=f'{company} has submitted an invoice for {job_order_details[0].select_job} at {job_order_details[0].job_site}'
                 subject="Invoice Submitted"
-                user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(job_order_details[0].company),as_list=1)
+
+                sql = ''' select email from `tabUser` where company='{}' '''.format(job_order_details[0].company)
+                user_list=frappe.db.sql(sql, as_list=1)
                 if(len(user_list)>0):
                     l = [l[0] for l in user_list]
                     for user in l:
@@ -359,7 +399,8 @@ def sales_invoice_notification(job_order=None,company=None,invoice_name=None):
              
 @frappe.whitelist()
 def hiring_org_name(current_user):
-    user_company=frappe.db.sql(''' select company from `tabEmployee` where email='{0}' '''.format(current_user),as_list=1)
+    sql = ''' select company from `tabEmployee` where email='{0}' '''.format(current_user)
+    user_company=frappe.db.sql(sql, as_list=1)
     if(len(user_company)==1):
         return 'success'
            
