@@ -369,8 +369,14 @@ export default {
 						if (xhr.status === 200) {
 							let r = null;
 							let file_doc = null;
-							r,file_doc=xhr_data(file_doc,xhr,r)
-							
+							try {
+								r = JSON.parse(xhr.responseText);
+								if (r.message.doctype === 'File') {
+									file_doc = r.message;
+								}
+							} catch(e) {
+								r = xhr.responseText;
+							}
 
 							file.doc = file_doc;
 
@@ -408,9 +414,6 @@ export default {
 				if (this.method) {
 					form_data.append('method', this.method);
 				}
-
-
-			
 				xhr.send(form_data);
 			});
 		},
@@ -482,17 +485,6 @@ function xhr_new(file,xhr){
 							}
 							frappe.request.cleanup({}, error);
 						}
-}
-function xhr_data(file_doc,xhr,r){
-	try {
-		r = JSON.parse(xhr.responseText);
-		if (r.message.doctype === 'File') {
-			file_doc = r.message;
-			return r,file_doc
-		}
-		} catch(e) {
-			r = xhr.responseText;
-		}
 }
 </script>
 <style>
