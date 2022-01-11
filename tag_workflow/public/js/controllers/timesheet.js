@@ -13,44 +13,22 @@ frappe.ui.form.on("Timesheet", {
 				"args": {"job_order": frm.doc.job_order_detail,"hiring_company":frm.doc.company,"staffing_company": frm.doc.employee_company, "timesheet_name":cur_frm.doc.name,'timesheet_approved_time':frm.doc.modified,'current_time':frappe.datetime.now_datetime()}
 			});
 			if((frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User')) && frappe.session.user!='Administrator'){
-				frappe.db.get_value("Hiring Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
-					if(!r.rating){
-						var pop_up = new frappe.ui.Dialog({
-							'fields': [
-								{'fieldname': 'Rating', 'fieldtype': 'Rating','label':'Rating','reqd':1},
-								{'fieldname': 'Comment', 'fieldtype': 'Data','label':'Review'}
-							],
-							primary_action: function(){
-								pop_up.hide();
-								var comp_rating=pop_up.get_values()
-								frappe.call({
-									method:"tag_workflow.utils.timesheet.hiring_company_rating",
-									args:{
-										'hiring_company':cur_frm.doc.company,
-										'staffing_company':cur_frm.doc.employee_company,
-										'ratings':comp_rating,
-										'job_order':cur_frm.doc.job_order_detail
-									},
-									callback:function(rm){
-											frappe.msgprint('Review Submitted Successfully')	
-									}
-								})
-							}
-						});
-						pop_up.show();
-					}
-					
-				})
-				
+				approval_timesheet(frm)
 			}
+	
 
 		}
-		if (cur_frm.doc.status == 'Submitted' && cur_frm.doc.workflow_state == "Denied"){
+		if (cur_frm.doc.status == 'Draft' && cur_frm.doc.workflow_state == "Denied"){
 				denied_timesheet(frm)
+
+		}
+		if (cur_frm.doc.status == 'Draft' && cur_frm.doc.workflow_state == "Approval Request"){
+			check_update_timesheet(frm)
 
 		}
 		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
 		hide_timesheet_field(timesheet_fields);
+
 
 	},
 
@@ -99,9 +77,9 @@ frappe.ui.form.on("Timesheet", {
 		trigger_email(frm, "dnr", frm.doc.dnr, "DNR");
 	},
 
-	workflow_state: function(frm){
-		check_update_timesheet(frm);
-	}
+	// workflow_state: function(frm){
+	// 	check_update_timesheet(frm);
+	// }
 });
 
 
@@ -126,11 +104,18 @@ function job_order_details(frm){
 /*-----------timesheet-----------------*/
 function check_update_timesheet(frm){
 	if(frm.doc.workflow_state == "Approval Request"){
-		frappe.call({method: "tag_workflow.utils.timesheet.send_timesheet_for_approval",args: {"employee": frm.doc.employee, "docname": frm.doc.name,'company':frm.doc.company,'job_order':frm.doc.job_order_detail }});
+		var current_date=new Date(frappe.datetime.now_datetime())
+		var approved_date=new Date(frm.doc.modified)
+		var diff=current_date.getTime()-approved_date.getTime()
+		diff=parseInt(diff/1000)
+		if (diff<30){
+			frappe.call({method: "tag_workflow.utils.timesheet.send_timesheet_for_approval",args: {"employee": frm.doc.employee, "docname": frm.doc.name,'company':frm.doc.company,'job_order':frm.doc.job_order_detail }});
+		}
 		if((frappe.user_roles.includes('Hiring Admin') || frappe.user_roles.includes('Hiring User')) && frappe.session.user!='Administrator'){
 			frappe.db.get_value("Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
 				if(!r.rating){
 					var pop_up = new frappe.ui.Dialog({
+						title: __('Staffing Company Review'),
 						'fields': [
 							{'fieldname': 'Rating', 'fieldtype': 'Rating','label':'Rating','reqd':1},
 							{'fieldname': 'Comment', 'fieldtype': 'Data','label':'Review'}
@@ -224,8 +209,14 @@ function denied_timesheet(frm){
 		diff=parseInt(diff/1000)
 		if (diff<30)
 		{
+			frappe.call({
+				"method": "tag_workflow.utils.timesheet.denied_notification",
+				"args": {"job_order": frm.doc.job_order_detail,"hiring_company":frm.doc.company,"staffing_company": frm.doc.employee_company, "timesheet_name":cur_frm.doc.name}
+			});
+
 			if((frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User')) && frappe.session.user!='Administrator'){
 				var pop_up = new frappe.ui.Dialog({
+					title: __('Dispute Message'),
 					'fields': [
 						{'fieldname': 'Comment', 'fieldtype': 'Long Text','label':'comment'}
 					],
@@ -254,6 +245,7 @@ function denied_timesheet(frm){
 
 function employee_timesheet_rating(frm){
 		var pop_up = new frappe.ui.Dialog({
+			title: __('Employee Rating'),
 			'fields': [
 				{'fieldname': 'thumbs_up', 'fieldtype': 'Check','label':"<i class='fa fa-thumbs-up' type='radio' style='font-size: 50px;' value='up' id = '1'> "},
 				{'fieldtype':"Column Break"},
@@ -292,3 +284,35 @@ function employee_timesheet_rating(frm){
 		});
 		pop_up.show();		
 	}
+
+function approval_timesheet(frm){
+	frappe.db.get_value("Hiring Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
+		if(!r.rating){
+			var pop_up = new frappe.ui.Dialog({
+				title: __('Hiring Company Rating'),
+				'fields': [
+					{'fieldname': 'Rating', 'fieldtype': 'Rating','label':'Rating','reqd':1},
+					{'fieldname': 'Comment', 'fieldtype': 'Data','label':'Review'}
+				],
+				primary_action: function(){
+					pop_up.hide();
+					var comp_rating=pop_up.get_values()
+					frappe.call({
+						method:"tag_workflow.utils.timesheet.hiring_company_rating",
+						args:{
+							'hiring_company':cur_frm.doc.company,
+							'staffing_company':cur_frm.doc.employee_company,
+							'ratings':comp_rating,
+							'job_order':cur_frm.doc.job_order_detail
+						},
+						callback:function(rm){
+								frappe.msgprint('Review Submitted Successfully')	
+						}
+					})
+				}
+			});
+			pop_up.show();
+		}
+		
+	})
+}
