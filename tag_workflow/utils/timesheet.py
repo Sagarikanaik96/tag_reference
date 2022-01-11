@@ -219,7 +219,7 @@ def removing_unsatisfied_employee(company,emp_doc):
 @frappe.whitelist()
 def assigned_job_order(doctype,txt,searchfield,page_len,start,filters):
     company=filters.get('company')
-    sql = ''' select name from `tabJob Order` where company =%(company)s and name in (select job_order from `tabAssign Employee` where hiring_organization = '{0}')'''.format(company)
+    sql = ''' select name from `tabJob Order` where company = '{0}' and name in (select job_order from `tabAssign Employee` where hiring_organization = '{0}')'''.format(company)
     return frappe.db.sql(sql)
 
 @frappe.whitelist()

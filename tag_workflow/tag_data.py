@@ -303,7 +303,7 @@ def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters)
 
         return frappe.db.sql(sql)
     else:
-        sql = """select name, employee_name from `tabEmployee` where company='{0}' and status='Active' and (job_category = '{1}' or job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{2}' and name NOT IN (select parent from `tabDNR`  where dnr='{2}' )) and name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{2}')""".format(emp_company, job_category, company)
+        sql = """select name, employee_name from `tabEmployee` where company='{0}' and status='Active' and (job_category = '{1}' or job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{2}' and name NOT IN (select parent from `tabDNR`  where dnr='{2}' )) and name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{2}'))""".format(emp_company, job_category, company)
 
         return frappe.db.sql(sql)
     
@@ -316,13 +316,13 @@ def get_org_site(doctype, txt, searchfield, page_len, start, filters):
 @frappe.whitelist()
 def hiring_category(doctype,txt,searchfield,page_len,start,filters):
     company=filters.get('hiring_company')
-    sql = ''' select industry_type from `tabIndustry Types` where parent={0} '''.format(company)
+    sql = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''.format(company)
     return frappe.db.sql(sql)
 
 
 @frappe.whitelist()
 def org_industy_type(company=None):
-    sql = ''' select industry_type from `tabIndustry Types` where parent='{}' '''.format(company)
+    sql = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''.format(company)
     return frappe.db.sql(sql)
 
 

@@ -28,7 +28,8 @@ def execute(filters=None):
                 {'fieldname':'claim','label':(claimed_by),'fieldtype':'Data','width':150},
                 {'fieldname':'staff_org_claimed','label':(staffing_company),'fieldtype':'Data','width':150}
                 ]
-            data=frappe.db.sql(''' select name,from_date,job_site,no_of_workers,bid,claim,staff_org_claimed from `tabJob Order` ''')
+            sql = ''' select name,from_date,job_site,no_of_workers,bid,claim,staff_org_claimed from `tabJob Order` '''
+            data=frappe.db.sql(sql)
         elif filters.get('status')=='Completed':
             columns=[
                 {'fieldname':'name','label':('Title'),'fieldtype':'Link','options':jobOrder,'width':200},
@@ -37,7 +38,8 @@ def execute(filters=None):
                 {'fieldname':'no_of_workers','label':(no_of_workers),'fieldtype':'Int','width':200},
                 {'fieldname':'staff_org_claimed','label':(staffing_company),'fieldtype':'Data','width':200}
                 ]
-            data=frappe.db.sql(''' select name,from_date,job_site,no_of_workers,staff_org_claimed from `tabJob Order` where to_date<'{0}' '''.format(today))
+            sql = ''' select name,from_date,job_site,no_of_workers,staff_org_claimed from `tabJob Order` where to_date<'{0}' '''.format(today)
+            data=frappe.db.sql(sql)
         elif filters.get('status')=='Ongoing':
             columns=[
                 {'fieldname':'name','label':('Title'),'fieldtype':'Link','options':jobOrder,'width':200},
@@ -46,7 +48,8 @@ def execute(filters=None):
                 {'fieldname':'no_of_workers','label':(no_of_workers),'fieldtype':'Int','width':200},
                 {'fieldname':'staff_org_claimed','label':(staffing_company),'fieldtype':'Data','width':200}
                 ]
-            data=frappe.db.sql(''' select name,from_date,job_site,no_of_workers,staff_org_claimed from `tabJob Order` where from_date<'{0}' and to_date>'{0}' '''.format(today))
+            sql = ''' select name,from_date,job_site,no_of_workers,staff_org_claimed from `tabJob Order` where from_date<'{0}' and to_date>'{0}' '''.format(today)
+            data=frappe.db.sql(sql)
 
     
         elif filters.get('status')=='Upcoming':
@@ -57,7 +60,8 @@ def execute(filters=None):
                 {'fieldname':'bid','label':(bids_received),'fieldtype':'Int','width':200},
                 {'fieldname':'claim','label':(claimed_by),'fieldtype':'Data','width':200},
                 ]
-            data=frappe.db.sql(''' select name,from_date,job_site,bid,claim from `tabJob Order` where from_date>'{0}' '''.format(today))
+            sql = ''' select name,from_date,job_site,bid,claim from `tabJob Order` where from_date>'{0}' '''.format(today)
+            data=frappe.db.sql(sql)
     else:
         if filters.get('status')==None:
 
@@ -70,7 +74,8 @@ def execute(filters=None):
                 {'fieldname':'claim','label':(claimed_by),'fieldtype':'Data','width':150},
                 {'fieldname':'staff_org_claimed','label':(staffing_company),'fieldtype':'Data','width':150}
                 ]
-            data=frappe.db.sql(''' select name,from_date,job_site,no_of_workers,bid,claim,staff_org_claimed from `tabJob Order` where company='{}' '''.format(company))
+            sql = ''' select name,from_date,job_site,no_of_workers,bid,claim,staff_org_claimed from `tabJob Order` where company='{0}' '''.format(company)
+            data=frappe.db.sql(sql)
         elif filters.get('status')=='Completed':
             columns=[
                 {'fieldname':'name','label':('Title'),'fieldtype':'Link','options':jobOrder,'width':200},
@@ -79,7 +84,8 @@ def execute(filters=None):
                 {'fieldname':'no_of_workers','label':(no_of_workers),'fieldtype':'Int','width':200},
                 {'fieldname':'staff_org_claimed','label':(staffing_company),'fieldtype':'Data','width':200}
                 ]
-            data=frappe.db.sql(''' select name,from_date,job_site,no_of_workers,staff_org_claimed from `tabJob Order`  where to_date<'{0}'  AND company='{1}' '''.format(today,company))
+            sql = ''' select name,from_date,job_site,no_of_workers,staff_org_claimed from `tabJob Order`  where to_date<'{0}'  AND company='{1}' '''.format(today,company)
+            data=frappe.db.sql(sql)
         elif filters.get('status')=='Ongoing':
             columns=[
                 {'fieldname':'name','label':('Title'),'fieldtype':'Link','options':jobOrder,'width':200},
@@ -88,7 +94,8 @@ def execute(filters=None):
                 {'fieldname':'no_of_workers','label':(no_of_workers),'fieldtype':'Int','width':200},
                 {'fieldname':'staff_org_claimed','label':(staffing_company),'fieldtype':'Data','width':200}
                 ]
-            data=frappe.db.sql(''' select name,from_date,job_site,no_of_workers,staff_org_claimed from `tabJob Order` where from_date<'{0}' and to_date>'{0}' AND company='{1}' '''.format(today,company))
+            sql = ''' select name,from_date,job_site,no_of_workers,staff_org_claimed from `tabJob Order` where from_date<'{0}' and to_date>'{0}' AND company='{1}' '''.format(today,company)
+            data=frappe.db.sql(sql)
 
     
         elif filters.get('status')=='Upcoming':
@@ -99,6 +106,7 @@ def execute(filters=None):
                 {'fieldname':'bid','label':(bids_received),'fieldtype':'Int','width':200},
                 {'fieldname':'claim','label':(claimed_by),'fieldtype':'Data','width':200},
                 ]
-            data=frappe.db.sql(''' select name,from_date,job_site,bid,claim from `tabJob Order` where from_date>'{0}'  AND company='{1}' '''.format(today,company))
+            sql = ''' select name,from_date,job_site,bid,claim from `tabJob Order` where from_date>'{0}'  AND company='{1}' '''.format(today,company)
+            data=frappe.db.sql(sql)
 
     return columns,data
