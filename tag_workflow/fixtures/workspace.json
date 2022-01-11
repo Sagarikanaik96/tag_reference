@@ -48,12 +48,12 @@
     "type": "Link"
    },
    {
-    "dependencies": "",
+    "dependencies": null,
     "hidden": 0,
     "icon": null,
     "is_query_report": 0,
-    "label": "Customer",
-    "link_to": "Customer",
+    "label": "User",
+    "link_to": "User",
     "link_type": "DocType",
     "onboard": 1,
     "only_for": null,
@@ -123,7 +123,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2021-11-17 19:55:41.054855",
+  "modified": "2022-01-06 06:25:42.149792",
   "module": "Setup",
   "name": "Home",
   "onboarding": null,
@@ -141,20 +141,6 @@
     "icon": null,
     "label": "Item",
     "link_to": "Item",
-    "parent": "Home",
-    "parentfield": "shortcuts",
-    "parenttype": "Workspace",
-    "restrict_to_domain": null,
-    "stats_filter": null,
-    "type": "DocType"
-   },
-   {
-    "color": null,
-    "doc_view": null,
-    "format": null,
-    "icon": null,
-    "label": "Customer",
-    "link_to": "Customer",
     "parent": "Home",
     "parentfield": "shortcuts",
     "parenttype": "Workspace",

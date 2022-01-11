@@ -2,6 +2,15 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
+function get_first_sunday(){
+	if(frappe.datetime.week_start() < frappe.datetime.get_today()){
+		return frappe.datetime.week_start()
+	}
+	else{
+		return frappe.datetime.get_today()
+	}
+}
+
 frappe.query_reports["Employee Invoice"] = {
 	"filters": [
 		{
@@ -10,7 +19,7 @@ frappe.query_reports["Employee Invoice"] = {
 			"fieldtype": "Date",
 			"width": "80",
 			"reqd": 1,
-			"default": frappe.datetime.month_start()
+			"default": get_first_sunday()
 		},
 		{
 			"fieldname":"end_date",

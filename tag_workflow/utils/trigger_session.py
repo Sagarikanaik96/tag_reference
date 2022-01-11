@@ -31,7 +31,9 @@ def get_user_info():
     try:
         user = frappe.session.user
         user_doc = frappe.get_doc(USR, user)
-        data = {"user_type": user_doc.tag_user_type, "company": user_doc.company, "company_type": user_doc.organization_type}
+
+        api_key = frappe.db.get_value("Google Settings", "Google Settings", "api_key") or ''
+        data = {"user_type": user_doc.tag_user_type, "company": user_doc.company, "company_type": user_doc.organization_type, "api_key": api_key}
         return data
     except Exception as e:
         print(e)
@@ -50,7 +52,8 @@ def add_company_share_permission(users):
 def share_company_with_user(users=None):
     try:
         if not users:
-            users = frappe.db.sql(""" select name, company from `tabUser` where enabled = 1 and company != '' """, as_dict=1)
+            sql = """ select name, company from `tabUser` where enabled = 1 and company != '' """
+            users = frappe.db.sql(sql, as_dict=1)
         add_company_share_permission(users)
     except Exception as e:
         frappe.log_error(e, "sharing company")

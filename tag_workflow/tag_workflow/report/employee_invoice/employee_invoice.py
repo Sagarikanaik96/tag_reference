@@ -9,17 +9,22 @@ def execute(filters=None):
 	from_date=filters.get('start_date')
 	to_date=filters.get('end_date')
 	columns,data=[],[]
+	
+	if frappe.utils.getdate(from_date) > frappe.utils.getdate(to_date):
+		frappe.msgprint(" Start Date is Greater Than End Date")
+		return columns,data
+
 	columns=[
-		{'fieldname':'employee_name','label':('Employee Name'),'fieldtype':'Data','width':200},
-        {'fieldname':'job_order_detail','label':('Job Title'),'fieldtype':'Link','options':'Job Order','width':200},
-        {'fieldname':'company','label':('Company'),'fieldtype':'Data','width':200},
-        {'fieldname':'total_billable_hours','label':('Hours Worked'),'fieldtype':'Int','width':200},
-        {'fieldname':'start_date','label':('Start Date'),'fieldtype':'Date','width':200},
-        {'fieldname':'end_date','label':("End Date"),'fieldtype':'Date','width':200},
-		{'fieldname':'base_billing_rate','label':('Rate'),'fieldtype':'Float','width':200},
-        {'fieldname':'total_billable_amount','label':('Total Paid'),'fieldtype':'Float','width':200},
-        {'fieldname':'non_satisfactory','label':("Unsatisfactory"),'fieldtype':'Check','width':200},
-        {'fieldname':'dnr','label':('DNR'),'fieldtype':'Check','width':200}
+		{'fieldname':'employee_name','label':('Employee Name'),'fieldtype':'Data','width':150},
+        {'fieldname':'job_order_detail','label':('Job Title'),'fieldtype':'Link','options':'Job Order','width':100},
+        {'fieldname':'company','label':('Company'),'fieldtype':'Data','width':100},
+        {'fieldname':'total_billable_hours','label':('Hours Worked'),'fieldtype':'Int','width':100},
+        {'fieldname':'start_date','label':('Start Date'),'fieldtype':'Date','width':100},
+        {'fieldname':'end_date','label':("End Date"),'fieldtype':'Date','width':100},
+		{'fieldname':'base_billing_rate','label':('Rate'),'fieldtype':'Float','width':100},
+        {'fieldname':'total_billable_amount','label':('Total Paid'),'fieldtype':'Float','width':100},
+        {'fieldname':'non_satisfactory','label':("Unsatisfactory"),'fieldtype':'Check','width':150},
+        {'fieldname':'dnr','label':('DNR'),'fieldtype':'Check','width':100}
 	]
 	current_company=frappe.db.sql(''' select company from `tabUser` where email='{}' '''.format(frappe.session.user),as_list=1)
 	if(len(current_company)==0 or current_company[0][0]=='TAG'):

@@ -26,7 +26,11 @@ frappe.ui.form.on("Sales Invoice", {
 		update_payment(frm);
 	},
 	is_pos: function(frm){
-		check_timesheet(frm);
+		if(frappe.user_roles.includes("System Manager")){
+			update_payment(frm);
+		}else{
+			check_timesheet(frm);
+		}
 	}
 });
 

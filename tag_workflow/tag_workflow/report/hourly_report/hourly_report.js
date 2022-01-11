@@ -15,7 +15,7 @@ function get_company_list(){
 	return company
 }
 
-frappe.query_reports["Employee Work Record"] = {
+frappe.query_reports["Hourly Report"] = {
 	"filters": [
 		{
 			"fieldname": "employee",

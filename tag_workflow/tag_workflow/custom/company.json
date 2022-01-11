@@ -513,7 +513,7 @@
    "in_preview": 0,
    "in_standard_filter": 0,
    "insert_after": null,
-   "label": "Company Type",
+   "label": "Organization Type",
    "length": 0,
    "mandatory_depends_on": null,
    "modified": "2021-11-15 12:59:35.136565",

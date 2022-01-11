@@ -89,9 +89,11 @@ def check_item_group():
 #-----------after company insert update-------------#
 def get_user_list(company=None):
     if company:
-        return frappe.db.sql(""" select name from `tabUser` where enabled = 1 and tag_user_type in ("Staffing Admin", "Staffing User") and company = %s """,company, as_dict=1)
+        sql = """ select name from `tabUser` where enabled = 1 and tag_user_type in ("Staffing Admin", "Staffing User") and company = '{0}' """.format(company)
     else:
-        return frappe.db.sql(""" select name from `tabUser` where enabled = 1 and tag_user_type in ("Staffing Admin", "Staffing User")""", as_dict=1)
+        sql = """ select name from `tabUser` where enabled = 1 and tag_user_type in ("Staffing Admin", "Staffing User")"""
+
+    return frappe.db.sql(sql, as_dict=1)
 
 
 def update_job_order_permission(user_list, company):
@@ -143,13 +145,16 @@ def user_exclusive_perm(user, company, organization_type=None):
             exclusive = frappe.get_list("Company", {"parent_staffing": company}, "name")
             for ex in exclusive:
                 update_exclusive_perm([{"name": user}], ex.name)
-        frappe.db.sql(""" delete from `tabUser Permission` where user = %s and allow = "Employee" """,(user))
+
+        sql = """ delete from `tabUser Permission` where user = '{0}' and allow = "Employee" """.format(user)
+        frappe.db.sql(sql)
     except Exception as e:
         frappe.error_log(e, "user_exclusive_permission")
 
 def remove_tag_permission(user, emp, company):
     try:
-        perms = frappe.db.sql(""" select name from `tabUser Permission` where user = %s and (for_value in (%s, %s)) """,(user, emp, company), as_dict=1)
+        sql = """ select name from `tabUser Permission` where user = '{0}' and (for_value in ('{1}', '{2}')) """.format(user, emp, company)
+        perms = frappe.db.sql(sql, as_dict=1)
         for per in perms:
             frappe.delete_doc(PERMISSION, per.name, force=1)
     except Exception as e:

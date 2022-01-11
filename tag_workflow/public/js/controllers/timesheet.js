@@ -126,7 +126,7 @@ function job_order_details(frm){
 /*-----------timesheet-----------------*/
 function check_update_timesheet(frm){
 	if(frm.doc.workflow_state == "Approval Request"){
-		frappe.call({method: "tag_workflow.utils.timesheet.send_timesheet_for_approval",args: {"employee": frm.doc.employee, "docname": frm.doc.name}});
+		frappe.call({method: "tag_workflow.utils.timesheet.send_timesheet_for_approval",args: {"employee": frm.doc.employee, "docname": frm.doc.name,'company':frm.doc.company,'job_order':frm.doc.job_order_detail }});
 		if((frappe.user_roles.includes('Hiring Admin') || frappe.user_roles.includes('Hiring User')) && frappe.session.user!='Administrator'){
 			frappe.db.get_value("Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
 				if(!r.rating){
@@ -222,7 +222,7 @@ function denied_timesheet(frm){
 		var approved_date=new Date(frm.doc.modified)
 		var diff=current_date.getTime()-approved_date.getTime()
 		diff=parseInt(diff/1000)
-		if (diff<5)
+		if (diff<30)
 		{
 			if((frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User')) && frappe.session.user!='Administrator'){
 				var pop_up = new frappe.ui.Dialog({

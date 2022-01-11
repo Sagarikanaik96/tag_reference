@@ -4,5 +4,12 @@
 	],
 	"tag-template.min.js":[
 		"public/js/template/tag.html"
+	],
+	"js/file_upload.min.js":[
+		"public/js/file_upload.js"
+	],
+	"js/file_upload-file.min.js":[
+		"public/js/new_file_uploader/FileUploader.vue",
+		"public/js/new_file_uploader/index.js"
 	]
 }

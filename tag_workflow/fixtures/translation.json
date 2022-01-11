@@ -62,5 +62,37 @@
   "parenttype": null,
   "source_text": "Sales Invoice",
   "translated_text": "Invoice"
+ },
+ {
+  "context": null,
+  "contributed": 0,
+  "contribution_docname": null,
+  "contribution_status": "",
+  "docstatus": 0,
+  "doctype": "Translation",
+  "language": "en",
+  "modified": "2022-01-06 06:24:18.402749",
+  "name": "a2746236ce",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "source_text": "Organization Type",
+  "translated_text": "Company Type"
+ },
+ {
+  "context": null,
+  "contributed": 0,
+  "contribution_docname": null,
+  "contribution_status": "",
+  "docstatus": 0,
+  "doctype": "Translation",
+  "language": "en-US",
+  "modified": "2022-01-06 06:24:28.068567",
+  "name": "c80329aa45",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "source_text": "Organization Type",
+  "translated_text": "Company Type"
  }
 ]

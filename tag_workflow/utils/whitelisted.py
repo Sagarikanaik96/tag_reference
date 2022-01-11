@@ -138,14 +138,16 @@ def get_user_company_data(user, company):
 #--------hiring orgs data----#
 @frappe.whitelist(allow_guest=True)
 def get_orgs():
-    return frappe.db.sql(""" select name from `tabCompany` where organization_type = 'Hiring' """, as_dict=1)
+    sql = """ select name from `tabCompany` where organization_type = 'Hiring' """
+    return frappe.db.sql(sql, as_dict=1)
 
 #-------get company users----#
 @frappe.whitelist(allow_guest=True)
 def get_user(company):
     user = ""
     try:
-        users = frappe.db.sql("""select name from `tabUser` where company = %s and enabled = 1 """,company, as_dict=1)
+        sql = """select name from `tabUser` where company = '{0}' and enabled = 1 """.format(company)
+        users = frappe.db.sql(sql, as_dict=1)
         for u in users:
             user += "\n"+str(u.name)
 
@@ -187,7 +189,8 @@ def update_lead(lead, staff_company, date, staff_user, name):
 def get_company_list(company_type):
     try:
         data = []
-        companies = frappe.db.sql(""" select name from `tabCompany` where make_organization_inactive = 0 and organization_type = %s """,company_type, as_dict=1)
+        sql = """ select name from `tabCompany` where make_organization_inactive = 0 and organization_type = '{0}' """.format(company_type)
+        companies = frappe.db.sql(sql, as_dict=1)
         data = [c['name'] for c in companies]
         return "\n".join(data)
     except Exception as e:
@@ -206,4 +209,17 @@ def check_timesheet(job_order):
     except Exception as e:
         print(e)
         return is_value
+
+
+@frappe.whitelist()
+def get_staffing_company_list():
+    try:
+        data = []
+        sql = """ select name from `tabCompany` where organization_type = 'Staffing' """
+        companies = frappe.db.sql(sql, as_dict=1)
+        data = [c['name'] for c in companies]
+        return "\n".join(data)
+    except Exception as e:
+        print(e)
+        return []
 

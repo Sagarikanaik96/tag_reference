@@ -19,6 +19,7 @@ frappe.ui.form.on('Job Order', {
 	},
 	onload:function(frm){
 		hide_employee_rating(frm);
+
 		if(cur_frm.doc.__islocal==1){
 			if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ){
 				frm.set_value('company',frappe.boot.tag.tag_user_info.company)
@@ -48,27 +49,13 @@ frappe.ui.form.on('Job Order', {
 				}
 				}
 			});
-			if(cur_frm.doc.company!='undefined'){
-				frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','shovel','mvr','drug_screen_rate','background_check_rate','mvr_rate','shovel_rate','contract_addendums'], function(r){
-				    if(r.contract_addendums!="undefined"){
-						cur_frm.set_value("contract_add_on",r.contract_addendums)
-					}
-					const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
-					const optional_field_data=['drug_screen','background_check','driving_record','shovel']
-					const org_optional_data_rate=[r.drug_screen_rate,r.background_check_rate,r.mvr_rate,r.shovel_rate]
-					for(let i=0;i<org_optional_data.length;i++){
-						if(!org_optional_data[i]){
-							// cur_frm.set_value(optional_field_data[i],'None')
-							cur_frm.set_df_property(optional_field_data[i],'options',"None")
-						}
-						else{
-							cur_frm.set_df_property(optional_field_data[i],'options',"None\n"+org_optional_data_rate[i])
-							cur_frm.set_df_property(optional_field_data[i],'description',"Note:The value is set for "+org_optional_data[i])
-						}
-					}	
-				})
-			}
+
 		}
+		if(frappe.boot.tag.tag_user_info.company_type!='Staffing'){
+
+		fields_setup(frm)
+		}
+		
 	},
 	setup: function(frm){
 		frm.set_query('job_site', function(doc) {
@@ -97,9 +84,14 @@ frappe.ui.form.on('Job Order', {
 				}
 			}
 		});
+		if(frappe.boot.tag.tag_user_info.company_type!='Staffing' && cur_frm.doc.__islocal==1){
+			fields_setup(frm)
+
+		}
 	},
 	refresh:function(frm){
 		make_invoice(frm);
+		make_notes(frm)
 		if(cur_frm.doc.__islocal==1){
 			check_company_detail(frm);
 			frappe.db.get_doc('Company', cur_frm.doc.company).then(doc => {
@@ -157,6 +149,7 @@ frappe.ui.form.on('Job Order', {
 		if(frm.doc.__islocal === 1){
 			rate_hour_contract_change(frm)
 
+			if(frappe.validated){
 			return new Promise(function(resolve, reject) {
 				frappe.confirm("<br><h4>Do you want to save </h4> <br> <b>Job category</b> "+frm.doc.category+" <br> <b>job order start date</b>:"+frm.doc.from_date+" <br><b>Job Order end date: </b>"+frm.doc.to_date+" <br> <job title : "+frm.doc.select_job+" job duration : "+frm.doc.job_duration+" <br><b> job site </b>:  "+frm.doc.job_site+"<br><b> Estimated per hour </b>: "+frm.doc.estimated_hours_per_day+" <br><b> Description </b>: "+frm.doc.description+" <br> <b> Bill rate Per Hour </b>:"+frm.doc.per_hour+" <br><b> Bill rate flat rate</b>:"+frm.doc.flat_rate+"",
 				function() {  
@@ -168,9 +161,12 @@ frappe.ui.form.on('Job Order', {
 				  reject()
 				})
 			  })
+			}
 		}		
 	},
 	after_save:function(frm){
+		rate_calculation(frm)
+
 		if (frm.doc.staff_org_claimed){
 			notification_joborder_change(frm)
 		}
@@ -261,10 +257,23 @@ frappe.ui.form.on('Job Order', {
 		check_value(frm,field,name,value)
 	},
 	validate:function(frm){
-		if(frm.doc.agree_to_contract!=1){
-			msgprint("Pease select mandatory field:<b>Agree To Contract</b>");
-			frappe.validated = false;
+		var l = {'Company':frm.doc.company,"Select Job":frm.doc.select_job,"Category":frm.doc.category,"Job Order Start Date":cur_frm.doc.from_date,"Job Site":cur_frm.doc.job_site,"No Of Workers":cur_frm.doc.no_of_workers,"Rate":cur_frm.doc.rate,"Description":cur_frm.doc.description,"Job Order End Date":cur_frm.doc.to_date,"Job Duration":cur_frm.doc.job_duration,"Estimated Hours Per Day":cur_frm.doc.estimated_hours_per_day,"E-Signature Full Name":cur_frm.doc.e_signature_full_name}
+		var message="<b>Please Fill Mandatory Fields:</b>"
+		for (let k in l) {
+			if(l[k]===undefined || !l[k]){
+				message=message+"<br>"+k
+			}
 		}
+		if(frm.doc.agree_to_contract==0){
+			message=message+"<br>Agree To Contract"
+		}
+		if(message!="<b>Please Fill Mandatory Fields:</b>"){
+			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
+
+			frappe.validated=false
+		}
+		
+		
 	}
 });
 
@@ -303,6 +312,7 @@ function redirect_quotation(frm){
 	doc.job_location = frm.doc.job_site;
 	doc.job_order_email = frm.doc.owner;
 	doc.resume_required = frm.doc.resumes_required;
+	doc.is_single_share = frm.doc.is_single_share
 
 	frappe.call({
 		method:"tag_workflow.tag_data.staff_org_details",
@@ -424,17 +434,17 @@ function check_value(frm,field,name,value){
 function rate_hour_contract_change(frm){
 	if(cur_frm.doc.no_of_workers<cur_frm.doc.worker_filled)
 		{
-			frappe.msgprint({message: __('<b>Agree To COntract</b>Is Mandatory Field'), title: __('Error'), indicator: 'orange'});
+			frappe.msgprint({message: __('Workers Already Filled'), title: __('Error'), indicator: 'orange'});
 			frappe.validated = false;	
 		}
-		if(cur_frm.doc.__islocal==1){
+		if(frappe.validated){
 			rate_calculation(frm)
 		}
 	}
 
 function rate_calculation(frm){
-	var total_per_hour=cur_frm.doc.extra_price_increase+cur_frm.doc.per_hour
-	var total_flat_rate=cur_frm.doc.flat_rate
+	var total_per_hour=cur_frm.doc.extra_price_increase+parseFloat(cur_frm.doc.rate)
+	var total_flat_rate=0
 	if(cur_frm.doc.company!='undefined'){
 				frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','mvr','shovel'], function(r){
 					const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
@@ -482,5 +492,49 @@ function make_invoice(frm){
 				}).addClass("btn-primary");
 			}
 		});
+	}
+}
+function make_notes(frm){
+	if(frm.doc.company){
+		frappe.call({
+			method:"tag_workflow.tag_workflow.doctype.job_order.job_order.make_notes",
+			args:{
+				"company":frm.doc.company,
+	
+			},
+			callback:function(r){
+				const optional_field_data=['drug_screen','background_check','driving_record','shovel']
+				for(let i=0;i<optional_field_data.length;i++){
+					if(r.message[i]){
+						cur_frm.set_df_property(optional_field_data[i],'description',"Note:The value is set for "+r.message[i])
+					}
+				}	
+			}
+				
+		})
+
+	}
+
+}
+
+function fields_setup(frm){
+	if(cur_frm.doc.company){
+		frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','shovel','mvr','drug_screen_rate','background_check_rate','mvr_rate','shovel_rate','contract_addendums'], function(r){
+			if(r.contract_addendums!="undefined"){
+				cur_frm.set_value("contract_add_on",r.contract_addendums)
+			}
+			const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
+			const optional_field_data=['drug_screen','background_check','driving_record','shovel']
+			const org_optional_data_rate=[r.drug_screen_rate,r.background_check_rate,r.mvr_rate,r.shovel_rate]
+			for(let i=0;i<org_optional_data.length;i++){
+				if(!org_optional_data[i]){
+					cur_frm.set_df_property(optional_field_data[i],'options',"None")
+				}
+				else{
+					cur_frm.set_df_property(optional_field_data[i],'options',"None\n"+org_optional_data_rate[i])
+					cur_frm.set_df_property(optional_field_data[i],'description',"Note:The value is set for "+org_optional_data[i])
+				}
+			}	
+		})
 	}
 }
