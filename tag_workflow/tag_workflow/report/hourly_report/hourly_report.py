@@ -62,10 +62,10 @@ def get_condition(filters):
         condition = ""
 
         if(filters.get("employee")):
-            condition += " and employee = %(employee)s"
+            condition += " and employee = '{0}'".format(filters.get("employee"))
 
         if(filters.get("company")):
-            condition += " and company = %(company)s"
+            condition += " and company = '{0}'".format(filters.get("company"))
 
         return condition
     except Exception as e:
@@ -75,7 +75,8 @@ def get_condition(filters):
 def get_data(filters):
     try:
         condition = get_condition(filters)
-        data = frappe.db.sql(""" select name, job_order_detail, employee, employee_name, total_billable_hours, total_billable_amount, company from `tabTimesheet` where docstatus = 1 %s """%condition, filters, as_dict=True)
+        sql = """ select name, job_order_detail, employee, employee_name, total_billable_hours, total_billable_amount, company from `tabTimesheet` where docstatus = 1 {0} """.format(condition)
+        data = frappe.db.sql(sql, as_dict=True)
 
         row = []
         for d in data:

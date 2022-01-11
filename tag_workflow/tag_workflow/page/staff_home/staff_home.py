@@ -7,6 +7,7 @@ def get_order_info(company):
     try:
         location = []
         order_detail = []
+        com = frappe.db.get_value("Company", {"name": company}, "organization_type")
         job_order = frappe.db.get_list("Assign Employee", {"company": company, "tag_status": "Approved"}, "job_order")
 
         for j in job_order:
@@ -17,12 +18,12 @@ def get_order_info(company):
 
 
         for o in job_order:
-            sql = "select select_job, from_date, to_date  estimated_hours_per_day, no_of_workers from `tabJob Order` where name = '{}'".format(o['job_order'])
+            sql = "select name, select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour from `tabJob Order` where name = '{}'".format(o['job_order'])
             data = frappe.db.sql(sql, as_dict=1)
             for d in data:
                 order_detail.append(d)
 
-        value = {"location": location, "order": order_detail}
+        value = {"location": location, "order": order_detail, "org_type": com}
         return value
     except Exception as e:
         print(e)

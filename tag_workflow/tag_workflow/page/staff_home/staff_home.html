@@ -1,9 +1,202 @@
-<div class="row widget" style="flex-direction: row;">
-	<div class="col-xs-5 widget links-widget-box">
-		<div id="order" style="border-radius: var(--border-radius-md);"></div>
-	</div>
-	<div class="col-xs-1"></div>
-	<div class="col-xs-6 widget links-widget-box">
-		<div id="map" style="height:450px;border-radius: var(--border-radius-md);"></div>
-	</div>
-</div>
+<!DOCTYPE html lang="en">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<title>Home</title>
+		<style>
+			body {
+				font-size: 14px;
+			}
+			.header img:nth-child(2) {
+				width: 110px;
+			}
+			.btn-primary  {
+				background:#21B9E4 !important;
+				text-align: left !important;
+				border:1px solid#21B9E4 !important;
+				border-radius: 6px !important;
+			}
+			.sub-menu .tab-button {
+				padding: 10px 0;
+				color: #78849E;
+				margin: 10px 0;
+				font-size: 14px;
+				cursor: pointer;
+			}
+			.sub-menu .tab-button a {
+				color: #78849E;
+				text-decoration: none;
+			}
+			.sub-menu .tab-button .btn-link {
+				color: #78849E !important;
+				font-size: 14px;
+				text-decoration: none;
+			}
+			.sub-menu .dropdown-menu.show {
+				border: none !important;
+				padding-left: 50px !important;
+				font-size: 14px !important;
+				color: #78849E !important;
+			}
+			.sub-menu .dropdown-item {
+				color: #78849E !important;
+			}
+			.sub-menu .tab-button.active {
+				background: #E8F8FC;
+				border-left: 4px solid #37C0E6;
+				color:#2E3C54 !important;
+			}
+			.footer-admin img {
+				height: 30px;
+				margin-top: 5px;
+			}
+			.sub-menu {
+				height: calc(100vh - 235px);
+			}
+			.footer-admin .badge-danger {
+				background:#F1EFFD !important;
+				color: #7B68EE !important;
+				font-size: 12px;
+				font-weight: normal;
+			}
+			.home-tab {
+				margin-top: 5px !important;
+			}
+			.home-tab .nav-tabs .nav-link.active {
+				border: none;
+				border-bottom: 2px solid#37C0E6;
+				color: #000;
+			}
+			.home-tab .nav-tabs .nav-link {
+				color: #78849E;
+				font-size: 14px;
+			}
+			.home-tab .nav-tabs .nav-link .badge-danger {
+				background: #FC646B !important;
+				padding: 4px 7px;
+				border-radius: 8px;
+				margin-left: 5px;
+			}
+			.home-tab .dropdown .btn-link {
+				color: #21B9E4 !important;
+			}
+			.home-tab .bg-img {
+				background: url(abstract-bg.svg);
+				background-repeat: no-repeat;
+				background-position: right;
+				background-size: contain;
+			}
+			.search-box {
+				position: relative;
+			}
+			.search-box span {
+				position: absolute;
+				top: 6px;
+				left: 10px;
+			}
+			.search-box input {
+				max-width: 470px;
+				width: 100%;
+				padding-left: 30px;
+				border-radius: 8px;
+			}
+			::placeholder {
+				color: #ACBBD1;
+				font-size: 14px;
+			}
+			.sub-menu .tab-button .icon:hover {
+				fill:red;
+			}
+			.map-section {
+				background: #FAFBFC;
+			}
+			.map-section .exclusive {
+				background: #FFE880;
+				color: #2A2E43;
+				font-weight: normal;
+				font-size: 12px;
+			}
+			.map-section .admin {
+				background: #EEF5FF;
+				color: #3D6EB4;
+				font-weight: normal;
+				font-size: 12px;
+				margin-left: 5px;
+			}
+			.map-section small {
+				font-size: 12px;
+			}
+			.order-btn {
+				border-radius: 6px !important;
+			}
+			.map-section .construction {
+				background: #FFF3EB;
+				color: #F47721;
+				font-weight: normal;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-xl-12 col-md-12">
+					<div class="row home-tab border-top">
+						<div class="tab-content w-100" id="myTabContent">
+							<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+								<div class="p-4 d-flex flex-wrap">
+									<div class="col-lg-8">
+										<div class="search-box w-50">
+											<span>
+												<i class="fa fa-search" aria-hidden="true"></i>
+											</span>
+											<input class="form-control my-0 py-1" type="text" placeholder="Search for “Job Title”" aria-label="Search">
+										</div>
+									</div>
+									<div class="col-lg-4">
+										<div class="d-flex flex-wrap ">
+											<div class="dropdown">
+												<label class="text-secondary">
+													Categories:
+												</label>
+												<button class="btn btn-link dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-expanded="false">
+													All
+												</button>
+												<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+													<a class="dropdown-item" href="#">Action</a>
+													<a class="dropdown-item" href="#">Another action</a>
+													<a class="dropdown-item" href="#">Something else here</a>
+												</div>
+											</div>
+											<div class="dropdown ml-3">
+												<label class="text-secondary">
+													Order By:
+												</label>
+												<button class="btn btn-link dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-expanded="false">
+													Both
+												</button>
+												<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+													<a class="dropdown-item" href="#">Action</a>
+													<a class="dropdown-item" href="#">Another action</a>
+													<a class="dropdown-item" href="#">Something else here</a>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="d-flex flex-wrap px-3 map-section">
+									<div class="col-md-6" id="order"></div>
+									<div class="col-md-6">
+										<div id="map" style="height:450px;border-radius: var(--border-radius-md);"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">...</div>
+						<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
