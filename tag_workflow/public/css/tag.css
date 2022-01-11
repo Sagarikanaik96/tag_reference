@@ -239,20 +239,85 @@ input::-webkit-credentials-auto-fill-button {
     font-size: 12px;
     padding: 10px 5px;
 }
+/* #page-staff_company_list table thead tr {
+	background: #FAFBFC;
+} */
+#page-staff_company_list #listview {
+	width: 100%;
+    padding: 0 15px;
+}
 #page-staff_company_list table {
-    font-size: 13px !important;
+    font-size: 14px !important;
     margin: 15px 0;
+	width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+#page-staff_company_list #listdata table {
+	border-spacing: 0;
+	margin: 0;
+}
+#page-staff_company_list #listdata table tbody tr:nth-child(1) td:nth-child(1) {
+	display: none;
+}
+#page-staff_company_list #listdata table tr td {
+	background: #FAFBFC;
+}
+#page-staff_company_list #listdata table tr td button {
+	background: #21B9E4;
+    border-radius: 5px;
+    border: none;
+    color: #fff;
+    font-size: 13px;
+    padding: 3px 12px;
+    margin-top: 15px;
+}
+#page-staff_company_list #industrydata h4,
+#page-staff_company_list #teamdata h4,
+#page-staff_company_list #compreview h4 {
+	margin-bottom: 0;
+}
+#page-staff_company_list #industrydata,
+#page-staff_company_list #teamdata,
+#page-staff_company_list #compreview {
+	margin-bottom: 15px;
+}
+#page-staff_company_list #listdata table tr td[colspan="3"] h6 {
+	font-size: 18px;
+}
+#page-staff_company_list #listdata table tr td h3 {
+	font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+#page-staff_company_list #listdata table tr td h3 span {
+	color: #FDD22C;
+}
+#page-staff_company_list #listdata table tr td h5, 
+#page-staff_company_list #listdata table tr td h4 {
+	font-size: 14px;
+    margin-bottom: 0px;
+    color: #454F63;
+}
+#page-staff_company_list .card-section {
+	background: #FAFBFC;
 }
 #page-staff_company_list table tbody tr td {
-    padding: 5px;
+    padding: 15px 5px;
+    color: #454F63;
 }
 #page-staff_company_list table tbody tr {
     background: #fff;
+}
+#page-staff_company_list table tbody tr td:nth-child(2) {
+	font-weight: 500;
 }
 #page-staff_company_list #myInput {
     border: 1px solid#21B9E4;
     border-radius: 5px;
     padding: 1px 5px;
+    max-width: 324px;
+    width: 100%;
 }
 /* Staff Company List table */
 
