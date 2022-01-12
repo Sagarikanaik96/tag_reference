@@ -100,15 +100,15 @@ def set_missing_values(source, target, customer=None, ignore_permissions=True):
     target.run_method("set_missing_values")
     target.run_method("calculate_taxes_and_totals")
 
-def make_sales_invoice(source_name, company, emp_list, target_doc=None, ignore_permissions=True):
+def make_sales_invoice(source_name, company, emp_list, emp_sql,target_doc=None, ignore_permissions=True):
     def customer_doc(source_name):
         return frappe.get_doc("Customer", {"name": source_name})
 
-    def update_timesheet(company, source, doclist, target, emp_list):
+    def update_timesheet(company, source, doclist, target, emp_list,emp_sql):
         income_account, cost_center, default_expense_account = frappe.db.get_value("Company", company, ["default_income_account", "cost_center", "default_expense_account"])
         total_amount = 0
         total_hours = 0
-        sql = """ select name from `tabTimesheet` where job_order_detail = {0} and docstatus = 1 and employee in {1} """.format(source, emp_list)
+        sql = """ select name from `tabTimesheet` where job_order_detail = '{0}' and docstatus = 1 and employee in ({1}) """.format(source, emp_sql)
         timesheet = frappe.db.sql(sql, as_dict=1)
 
         for time in timesheet:
@@ -136,7 +136,7 @@ def make_sales_invoice(source_name, company, emp_list, target_doc=None, ignore_p
 
     customer = customer_doc(company)
     doclist = make_invoice(source_name, target_doc)
-    update_timesheet(company, source_name, doclist, target_doc, emp_list)
+    update_timesheet(company, source_name, doclist, target_doc, emp_list,emp_sql)
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
     return doclist
 
@@ -148,18 +148,18 @@ def make_invoice(source_name, target_doc=None):
         emp_sql = """ select name from `tabEmployee` where company = '{0}' """.format(company)
         emp_list = frappe.db.sql(emp_sql)
 
-        len_sql = """ select name from `tabTimesheet` where job_order_detail = {0} and employee in '{1}' """.format(source_name, emp_list)
+        len_sql = """ select name from `tabTimesheet` where job_order_detail = '{0}' and employee in ({1}) """.format(source_name, emp_sql)
         if(len(frappe.db.sql(len_sql, as_dict=1)) <= 0):
             frappe.msgprint(_("No Timesheet found for this Job Order(<b>{0}</b>)").format(source_name))
         else:
-            return prepare_invoice(company, source_name, emp_list)
+            return prepare_invoice(company, source_name, emp_list,emp_sql)
     except Exception as e:
         frappe.msgprint(frappe.get_traceback())
         frappe.log_error(e, 'make_invoice')
 
-def prepare_invoice(company, source_name, emp_list):
+def prepare_invoice(company, source_name, emp_list,emp_sql):
     try:
-        return make_sales_invoice(source_name, company, emp_list, target_doc=None)
+        return make_sales_invoice(source_name, company, emp_list,emp_sql, target_doc=None)
     except Exception as e:
         frappe.msgprint(frappe.get_traceback())
         frappe.log_error(e, 'make_invoice')

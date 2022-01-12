@@ -26,7 +26,7 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
             if user.parent not in staffing_user:
                 staffing_user.append(user.parent)
 
-        sql = ''' select job_site from `tabJob Order` where name='{}' '''.format(job_order)
+        sql = ''' select select_job from `tabJob Order` where name='{}' '''.format(job_order)
         job_order_data = frappe.db.sql(sql,as_dict=1)
         job_title = job_order_data[0].select_job
         today = datetime.date.today()
