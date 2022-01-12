@@ -57,15 +57,15 @@
                                height: 90px;
                         }
                         .sub-menu {
-							height: 100%;
-							position: fixed;
-							top: 130px;
-							width: 220px;
-							background: #fff;
-							max-width: 200px;
-							overflow-y: auto;
-							overflow-x: hidden;
-							transition: .5s ease-in-out;
+                                height: 100%;
+                                position: fixed;
+                                top: 130px;
+                                width: 220px;
+                                background: #fff;
+                                max-width: 200px;
+                                overflow-y: auto;
+                                overflow-x: hidden;
+                                transition: .5s ease-in-out;
                         }
                         .footer-admin .badge-danger {
                                 background:#F1EFFD !important;
@@ -124,42 +124,45 @@
                         .sub-menu .custom-btn:hover {
                                 text-decoration: none;
                                 background: #E8F8FC;
-                        		border-left: 4px solid #37C0E6;
+                                        border-left: 4px solid #37C0E6;
                                 transition: .2s ease-in-out;
+                        }
+                        .sub-menu .inner-menu .active a {
+                              font-weight: 700;
                         }
                         [data-route="Workspaces/Home"] .sub-menu , [data-route=""] .sub-menu {
                                 top: 61px !important;
                                 z-index: 9 !important;
                                 transition: .5s ease-in-out;
                         }
-						.toggle_icon {
-							display: none;
-						}
+                        .toggle_icon {
+                                display: none;
+                        }
 
                         @media (max-width:768px) {
                                 .sub-menu {
                                         display: none;
-										transition: .5s ease-in-out;
+                                        transition: .5s ease-in-out;
                                 }
                                 .layout-main-section {
                                         margin-left: 0rem;
                                 }
-								.toggle_icon {
-									position: fixed;
-									top: 84px;
-									z-index: 9999;
-									left: 17px;
-									font-size: 19px;
-									display: block;
-									transition: .5s ease-in-out;
-								}
-								.page-title .title-area .title-text {
-									padding-left: 20px;
-								}
-								[data-route="Workspaces/Home"] .sub-menu, [data-route=""] .sub-menu {
-									top: 130px !important;
-								}
-							}
+                                .toggle_icon {
+                                        position: fixed;
+                                        top: 84px;
+                                        z-index: 9999;
+                                        left: 17px;
+                                        font-size: 19px;
+                                        display: block;
+                                        transition: .5s ease-in-out;
+                                }
+                                .page-title .title-area .title-text {
+                                        padding-left: 20px;
+                                }
+                                [data-route="Workspaces/Home"] .sub-menu, [data-route=""] .sub-menu {
+                                        top: 130px !important;
+                                }
+                        }
                 </style>
         </head>
         <body>
@@ -167,42 +170,48 @@
                         <div class="row">
                                 <div class="col-xl-2 col-md-2 position-relative">
                                         <div class="row">
-											<div class="toggle_icon"> 
-												<i class="fa fa-bars" aria-hidden="true"></i>
-											</div>
+                                                <div class="toggle_icon"> 
+                                                        <i class="fa fa-bars" aria-hidden="true"></i>
+                                                </div>
                                                 <div class="sub-menu w-100 border-top border-right" id="myDIV">
                                                         <div class="p-4">
                                                                 <button type="button" class="btn btn-primary btn-block"><span class="px-2">&#x2b;</span>New Order</button>
                                                         </div>
 
                                                         <a href="/app/home">
-                                                                <div class="tab-button custom-btn">
+                                                                <div class="tab-button custom-btn ">
                                                                         <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-5" alt="home">Home 
                                                                 </div>
                                                         </a>
 
-                                                        <a href="/app/job-order">
-                                                                <div class="tab-button custom-btn">
-                                                                        <img src="/assets/tag_workflow/images/ico-order.svg" class="pr-3 pl-5" alt="order">Order
-                                                                </div>
-                                                        </a>
-
-                                                        <a href="/app/home">
-                                                                <div class="tab-button custom-btn">
-                                                                        <img src="/assets/tag_workflow/images/ico-messages.svg" class="pr-3 pl-5" alt="message">Messages
-                                                                </div>
-                                                        </a>
+                                                        <div class="tab-button custom-btn">
+                                                                <ul class="nav order">
+                                                                        <li>
+                                                                                <a href="#" id="btn-1" data-toggle="collapse" data-target="#submenu1" aria-expanded="false">
+                                                                                        <span class="pl-3 ml-3"><img src="/assets/tag_workflow/images/ico-order.svg" class="pr-3 pl-3" alt="crm"></span>Order
+                                                                                        <span class="pl-5"><i class="fa fa-angle-down" aria-hidden="true"></i></span>
+                                                                                </a>
+                                                                                
+                                                                                <ul class="inner-menu pl-5 ml-5 list-unstyled collapse" id="submenu1" role="menu" aria-labelledby="btn-1">
+                                                                                        <li class="py-2 mt-2"><a href="/app/job-order">All</a></li>
+                                                                                        {% if frappe.boot.tag.tag_user_info.company_type != "Staffing" %}
+                                                                                        <li class="py-2"><a href="/app/staff_company_list">Direct Order</a></li>
+                                                                                        {% endif %}
+                                                                                </ul>
+                                                                        </li>
+                                                                </ul>
+                                                        </div>
 
                                                         {% if frappe.boot.tag.tag_user_info.company_type != "Hiring" %}
                                                                 <div class="tab-button custom-btn">
-                                                                        <ul class="nav">
+                                                                        <ul class="nav crm">
                                                                                 <li>
-                                                                                        <a href="#" id="btn-1" data-toggle="collapse" data-target="#submenu1" aria-expanded="false">
+                                                                                        <a href="#" id="btn-1" data-toggle="collapse" data-target="#submenu2" aria-expanded="false">
                                                                                                 <span class="pl-3 ml-3"><img src="/assets/tag_workflow/images/ico-crm.svg" class="pr-3 pl-3" alt="crm"></span>CRM
                                                                                                 <span class="pl-5"><i class="fa fa-angle-down" aria-hidden="true"></i></span>
                                                                                         </a>
-                                                                                        <ul class="inner-menu pl-5 ml-5 list-unstyled collapse" id="submenu1" role="menu" aria-labelledby="btn-1">
-                                                                                                <li class="py-2 mt-2"><a href="/app/contact">Contacts</a></li>
+                                                                                        <ul class="inner-menu pl-5 ml-5 list-unstyled collapse" id="submenu2" role="menu" aria-labelledby="btn-1">
+                                                                                                <li class="py-2 mt-2 "><a href="/app/contact">Contacts</a></li>
                                                                                                 <li class="py-2"><a href="/app/lead">Deals</a></li>
                                                                                                 <li class="py-2"><a href="#">Email</a></li>
                                                                                         </ul>
@@ -217,36 +226,18 @@
                                                                 </a>
                                                         {% endif %}
 
-                                                        <a href="/app/home">
-                                                                <div class="tab-button custom-btn">
-                                                                        <img src="/assets/tag_workflow/images/ico-maps.svg"class="pr-3 pl-5" alt="maps">Maps
-                                                                </div>
-                                                        </a>
-
                                                         {% if frappe.boot.tag.tag_user_info.company_type != "Hiring" %}
-                                                                <a href="/app/home">
+                                                                <a href="/app/report">
                                                                         <div class="tab-button custom-btn">
                                                                                 <img src="/assets/tag_workflow/images/ico-invoice.svg" class="pr-3 pl-5" alt="reports">Reports
                                                                         </div>
                                                                 </a>
                                                         {% endif %}
-                                                        {% if frappe.boot.tag.tag_user_info.company_type != "Staffing" %}
-                                                                <a href="/app/staff_company_list">
-                                                                        <div class="tab-button custom-btn">
-                                                                                <img src="/assets/tag_workflow/images/ico-order.svg" class="pr-3 pl-5" alt="order">Direct Order
-                                                                        </div>
-                                                                </a>
-                                                        {% endif %}
+                                                      
                                                         
-                                                        <a href="/app/sales-invoice">
+                                                        <a href="/app/sales-invoice" >
                                                                 <div class="tab-button custom-btn">
                                                                         <img src="/assets/tag_workflow/images/ico-invoice.svg" class="pr-3 pl-5" alt="invoice">Invoice
-                                                                </div>
-                                                        </a>
-
-                                                        <a href="/app/home">
-                                                                <div class="tab-button custom-btn"> 
-                                                                        <img src="/assets/tag_workflow/images/ico-contact.svg" class="pr-3 pl-5" alt="contact-us">Contact Us
                                                                 </div>
                                                         </a>
 
@@ -255,19 +246,19 @@
                                                                 <div class="d-flex">
                                                                         <div><img src="/assets/tag_workflow/images/ico-maps.jpeg" class="img-fluid px-3" alt="user-image"></div>
                                                                         <div class="pr-3 ml-2">
-																			<h5 class="mb-0"><strong>{{frappe.session.user_fullname}}</strong></h5>
-																			<span class="badge badge-danger">
-																					{% if frappe.session.user_fullname == "Administrator" %}
-																							{{ __("Master Admin") }}
-																					{% else %}
-																							{{ frappe.boot.tag.tag_user_info.user_type }}
-																					{% endif %}
-																			</span>
+                                                                        <h5 class="mb-0"><strong>{{frappe.session.user_fullname}}</strong></h5>
+                                                                        <span class="badge badge-danger">
+                                                                                                                                                                        {% if frappe.session.user_fullname == "Administrator" %}
+                                                                                                                                                                                        {{ __("Master Admin") }}
+                                                                                                                                                                        {% else %}
+                                                                                                                                                                                        {{ frappe.boot.tag.tag_user_info.user_type }}
+                                                                                                                                                                        {% endif %}
+                                                                        </span>
                                                                         </div>
                                                                         <div>
-																			<span class="ml-1 pr-2">
-																				<i class="fa fa-angle-right" aria-hidden="true"></i>
-																			</span>
+                                                                                <span class="ml-1 pr-2">
+                                                                                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                                                                                </span>
                                                                         </div>
                                                                 </div>
                                                         </div>
@@ -280,26 +271,34 @@
 </html>
 
 <script>
+      
         $(".btn.btn-primary.btn-block").click(function(){
                 let order = frappe.model.get_new_doc("Job Order");
                 frappe.set_route("form", order.doctype, order.name);
         });
 
-        var header = document.getElementById("myDIV");
-        var btns = header.getElementsByClassName("custom-btn");
 
-        for (var i = 0; i < btns.length; i++) {
-                btns[i].addEventListener("click", function() {
-                        var current = document.getElementsByClassName("active");
-                        current[0].className = current[0].className.replace(" active", "");
-                        this.className += " active";
-                });
-        }
+        $(".sub-menu .custom-btn").on("click", function() {
+        $(".sub-menu .custom-btn").removeClass("active");
+        $(this).addClass("active");
+        }); 
 
-		$(document).ready(function(){
-		$(".toggle_icon").click(function(){
-			$(".sub-menu").toggle();
-		});
-		});
+        
+        $(document).ready(function(){
+        $(".toggle_icon").click(function(){
+                $(".sub-menu").toggle();
+        });
+        });
+
+        $(".order li ul li").on("click", function() {
+        $(".order li ul li").removeClass("active");
+        $(this).addClass("active");
+        });
+
+        $(".crm li ul li").on("click", function() {
+        $(".crm li ul li").removeClass("active");
+        $(this).addClass("active");
+        }); 
+
 
 </script>
