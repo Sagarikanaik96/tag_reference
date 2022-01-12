@@ -73,7 +73,7 @@
   "doctype": "Workflow",
   "document_type": "Timesheet",
   "is_active": 1,
-  "modified": "2022-01-03 11:32:25.557093",
+  "modified": "2022-01-11 20:02:24.619304",
   "name": "Timesheet",
   "override_status": 0,
   "parent": null,
@@ -122,20 +122,7 @@
    },
    {
     "allow_edit": "Projects User",
-    "doc_status": "2",
-    "is_optional_state": 0,
-    "message": null,
-    "next_action_email_template": null,
-    "parent": "Timesheet",
-    "parentfield": "states",
-    "parenttype": "Workflow",
-    "state": "Cancelled",
-    "update_field": "workflow_state",
-    "update_value": "Cancelled"
-   },
-   {
-    "allow_edit": "Hiring Admin",
-    "doc_status": "1",
+    "doc_status": "0",
     "is_optional_state": 0,
     "message": null,
     "next_action_email_template": null,
@@ -171,17 +158,6 @@
     "state": "Approval Request"
    },
    {
-    "action": "Cancel",
-    "allow_self_approval": 1,
-    "allowed": "Accounts User",
-    "condition": null,
-    "next_state": "Cancelled",
-    "parent": "Timesheet",
-    "parentfield": "transitions",
-    "parenttype": "Workflow",
-    "state": "Approved"
-   },
-   {
     "action": "Deny",
     "allow_self_approval": 1,
     "allowed": "Accounts User",
@@ -190,14 +166,14 @@
     "parent": "Timesheet",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "Approved"
+    "state": "Approval Request"
    },
    {
-    "action": "Approve",
+    "action": "Approval Request",
     "allow_self_approval": 1,
-    "allowed": "Accounts User",
+    "allowed": "Projects User",
     "condition": null,
-    "next_state": "Approved",
+    "next_state": "Approval Request",
     "parent": "Timesheet",
     "parentfield": "transitions",
     "parenttype": "Workflow",

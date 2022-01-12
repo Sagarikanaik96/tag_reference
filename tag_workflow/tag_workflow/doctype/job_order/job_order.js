@@ -308,7 +308,7 @@ function redirect_quotation(frm){
 	doc.job_order = frm.doc.name;
 	doc.no_of_employee_required = frm.doc.no_of_workers-frm.doc.worker_filled;
 	doc.hiring_organization = frm.doc.company;
-	doc.job_category = frm.doc.category;
+	doc.job_category = frm.doc.select_job;
 	doc.job_location = frm.doc.job_site;
 	doc.job_order_email = frm.doc.owner;
 	doc.resume_required = frm.doc.resumes_required;
@@ -443,7 +443,8 @@ function rate_hour_contract_change(frm){
 	}
 
 function rate_calculation(frm){
-	var total_per_hour=cur_frm.doc.extra_price_increase+parseFloat(cur_frm.doc.rate)
+	var extra_price_increase=frm.doc.extra_price_increase || 0;
+	var total_per_hour=extra_price_increase+parseFloat(cur_frm.doc.rate)
 	var total_flat_rate=0
 	if(cur_frm.doc.company!='undefined'){
 				frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','mvr','shovel'], function(r){

@@ -99,52 +99,59 @@ def check_employee_editable(job_order, name, creation):
 
 @frappe.whitelist()
 def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_order=None):
-    ratings = json.loads(ratings)
-    doc = frappe.new_doc('Company Review')
-    doc.staffing_company=staffing_company
-    doc.hiring_company=hiring_company
-    doc.job_order=job_order
-    doc.rating=ratings['Rating']
-    if 'Comment' in ratings.keys():
-        doc.comments=ratings['Comment']
-    doc.save(ignore_permissions=True)
+    try:
+        ratings = json.loads(ratings)
+        doc = frappe.new_doc('Company Review')
+        doc.staffing_company=staffing_company
+        doc.hiring_company=hiring_company
+        doc.job_order=job_order
+        doc.rating=ratings['Rating']
+        if 'Comment' in ratings.keys():
+            doc.comments=ratings['Comment']
+        doc.save(ignore_permissions=True)
 
-    sql = '''select email from `tabUser` where company = '{}' '''.format(staffing_company)
-    staff_member = frappe.db.sql(sql, as_list=1)
-    for staff in staff_member:
-        add("Company Review", doc.name, staff[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
+        sql = '''select email from `tabUser` where company = '{}' '''.format(staffing_company)
+        staff_member = frappe.db.sql(sql, as_list=1)
+        for staff in staff_member:
+            add("Company Review", doc.name, staff[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
 
-    sql = ''' select average_rating from `tabCompany` where name = '{}' '''.format(staffing_company)
-    company_rate = frappe.db.sql(sql, as_list=1)
-    if (len(company_rate)==0 or company_rate[0][0]==None):
-        doc=frappe.get_doc('Company',staffing_company)
-        doc.average_rating=ratings['Rating']
-        doc.save()
-    else:
-        sql = ''' select rating from `tabCompany Review` where staffing_company='{}' '''.format(staffing_company)
-        average_rate = frappe.db.sql(sql, as_list=1)
-        if average_rate[0][0]!=None:
-            rating=[float(i) for i in average_rate[0]]
+        sql = ''' select average_rating from `tabCompany` where name = '{}' '''.format(staffing_company)
+        company_rate = frappe.db.sql(sql, as_list=1)
+        if (len(company_rate)==0 or company_rate[0][0]==None):
             doc=frappe.get_doc('Company',staffing_company)
-            avg_rating=sum(rating)/len(rating)
-            doc.average_rating=str(avg_rating)
+            doc.average_rating=ratings['Rating']
             doc.save()
-    return "success"
+        else:
+            sql = ''' select rating from `tabCompany Review` where staffing_company='{}' '''.format(staffing_company)
+            average_rate = frappe.db.sql(sql, as_list=1)
+            if average_rate[0][0]!=None:
+                rating=[float(i) for i in average_rate[0]]
+                doc=frappe.get_doc('Company',staffing_company)
+                avg_rating=sum(rating)/len(rating)
+                doc.average_rating=str(avg_rating)
+                doc.save()
+        return "success"
+    except Exception as e:
+        frappe.error_log(e, "Hiring Company Rating")
+        frappe.throw(e)
 
 @frappe.whitelist()
 def approval_notification(job_order=None,staffing_company=None,date=None,hiring_company=None,timesheet_name=None,timesheet_approved_time=None,current_time=None):
-    if(time_diff_in_seconds(current_time,timesheet_approved_time)<=30):
-        sql = ''' select select_job,job_site,creation from `tabJob Order` where name='{}' '''.format(job_order)
-        job_order_data = frappe.db.sql(sql,as_dict=1)
-        job_location=job_order_data[0].job_site
-        job_title=job_order_data[0].select_job
-        subject='Timesheet Approval'
-        msg=f'{staffing_company} has approved the {timesheet_name} timesheet for {job_title} at {job_location}'
-        user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(hiring_company),as_list=1)        
-        hiring_user = [hiring_user[0] for hiring_user in user_list]
-        make_system_notification(hiring_user,msg,'Timesheet',timesheet_name,subject)
-        sendmail(hiring_user, msg, subject, 'Timesheet', timesheet_name)
-
+    try:
+        if(time_diff_in_seconds(current_time,timesheet_approved_time)<=30):
+            sql = ''' select select_job,job_site,creation from `tabJob Order` where name='{}' '''.format(job_order)
+            job_order_data = frappe.db.sql(sql,as_dict=1)
+            job_location=job_order_data[0].job_site
+            job_title=job_order_data[0].select_job
+            subject='Timesheet Approval'
+            msg=f'{staffing_company} has approved the {timesheet_name} timesheet for {job_title} at {job_location}'
+            user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(hiring_company),as_list=1)        
+            hiring_user = [hiring_user[0] for hiring_user in user_list]
+            make_system_notification(hiring_user,msg,'Timesheet',timesheet_name,subject)
+            sendmail(hiring_user, msg, subject, 'Timesheet', timesheet_name)
+    except Exception as e:
+        frappe.error_log(e, "Timesheet Approved")
+        frappe.throw(e)
 def unsatisfied_organization(emp_doc,company):
     emp_doc.append('unsatisfied_from', {
         'unsatisfied_organization_name': company,
@@ -218,73 +225,91 @@ def removing_unsatisfied_employee(company,emp_doc):
         
 @frappe.whitelist()
 def assigned_job_order(doctype,txt,searchfield,page_len,start,filters):
-    company=filters.get('company')
-    sql = ''' select name from `tabJob Order` where company = '{0}' and name in (select job_order from `tabAssign Employee` where hiring_organization = '{0}')'''.format(company)
-    return frappe.db.sql(sql)
+    try:
+        company=filters.get('company')
+        sql = ''' select name from `tabJob Order` where company = '{0}' and name in (select job_order from `tabAssign Employee` where hiring_organization = '{0}')'''.format(company)
+        return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.error_log(e, "Job Order For Timesheet")
+        frappe.throw(e)
 
 @frappe.whitelist()
 def jb_ord_dispute_comment_box(comment,job_order):
-    comment = json.loads(comment)
-    if comment:
-        job_order_doc = frappe.get_doc('Job Order',job_order)
-        if job_order_doc.dispute_comment:
-            job_order_doc.dispute_comment += '\n' +'-'*15 + '\n'+ comment['Comment']
-        else:
-            job_order_doc.dispute_comment = comment['Comment']
+    try:
+        comment = json.loads(comment)
+        if comment:
+            job_order_doc = frappe.get_doc('Job Order',job_order)
+            if job_order_doc.dispute_comment:
+                job_order_doc.dispute_comment += '\n' +'-'*15 + '\n'+ comment['Comment']
+            else:
+                job_order_doc.dispute_comment = comment['Comment']
 
-        job_order_doc.flags.ignore_mandatory = True
-        job_order_doc.save(ignore_permissions=True)
+            job_order_doc.flags.ignore_mandatory = True
+            job_order_doc.save(ignore_permissions=True)
 
-        return True
+            return True
+    except Exception as e:
+        frappe.error_log(e, "Dispute Message")
+        frappe.throw(e)
 
 
 @frappe.whitelist()
 def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None,job_order=None):
-    ratings = json.loads(ratings)
-    doc = frappe.new_doc('Hiring Company Review')
-    doc.staffing_company=staffing_company
-    doc.hiring_company=hiring_company
-    doc.job_order=job_order
-    doc.rating=ratings['Rating']
-    if 'Comment' in ratings.keys():
-        doc.comments=ratings['Comment']
-    doc.save(ignore_permissions=True)
-    sql = ''' select email from `tabUser` where company = '{}' '''.format(hiring_company)
-    hiring_member = frappe.db.sql(sql, as_list=1)
-    for name in hiring_member:
-        add("Hiring Company Review", doc.name, name[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
-    company_rate=frappe.db.sql(''' select average_rating from `tabCompany` where name='{}' '''.format(hiring_company),as_list=1)
-    if (len(company_rate)==0 or company_rate[0][0]==None):
-        doc=frappe.get_doc('Company',hiring_company)
-        doc.average_rating=ratings['Rating']
-        doc.save()
-    else:
-        sql = ''' select rating from `tabHiring Company Review` where hiring_company = '{}' '''.format(hiring_company)
-        average_rate = frappe.db.sql(sql, as_list=1)
-        if average_rate[0][0]!=None:
-            rating=[float(i) for i in average_rate[0]]
+    try:
+        ratings = json.loads(ratings)
+        doc = frappe.new_doc('Hiring Company Review')
+        doc.staffing_company=staffing_company
+        doc.hiring_company=hiring_company
+        doc.job_order=job_order
+        doc.rating=ratings['Rating']
+        if 'Comment' in ratings.keys():
+            doc.comments=ratings['Comment']
+        doc.save(ignore_permissions=True)
+        sql = ''' select email from `tabUser` where company = '{}' '''.format(hiring_company)
+        hiring_member = frappe.db.sql(sql, as_list=1)
+        for name in hiring_member:
+            add("Hiring Company Review", doc.name, name[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
+        company_rate=frappe.db.sql(''' select average_rating from `tabCompany` where name='{}' '''.format(hiring_company),as_list=1)
+        if (len(company_rate)==0 or company_rate[0][0]==None):
             doc=frappe.get_doc('Company',hiring_company)
-            avg_rating=sum(rating)/len(rating)
-            doc.average_rating=str(avg_rating)
+            doc.average_rating=ratings['Rating']
             doc.save()
-    return "success"
+        else:
+            sql = ''' select rating from `tabHiring Company Review` where hiring_company = '{}' '''.format(hiring_company)
+            average_rate = frappe.db.sql(sql, as_list=1)
+            if average_rate[0][0]!=None:
+                rating=[float(i) for i in average_rate[0]]
+                doc=frappe.get_doc('Company',hiring_company)
+                avg_rating=sum(rating)/len(rating)
+                doc.average_rating=str(avg_rating)
+                doc.save()
+        return "success"
+    except Exception as e:
+        frappe.error_log(e, "Hiring Company Rating")
+        frappe.throw(e)
+
 
 
 @frappe.whitelist()
 def staffing_emp_rating(employee,id,up,down,job_order,comment,timesheet_name):
-    parent = frappe.get_doc('Job Order', job_order)
-    parent.append('employee_rating', {
-        'employee_name': employee +'-'+ id,
-        'rating':  1 if up else down,
-        'comment': comment if comment else ''
-    })
-    parent.flags.ignore_mandatory = True
-    parent.save(ignore_permissions=True)
-    timesheet = frappe.get_doc('Timesheet',timesheet_name)
-    timesheet.is_employee_rating_done = 1
-    timesheet.flags.ignore_mandatory = True
-    timesheet.save(ignore_permissions=True)
-    return True
+    try:
+        parent = frappe.get_doc('Job Order', job_order)
+        parent.append('employee_rating', {
+            'employee_name': employee +'-'+ id,
+            'rating':  1 if up else down,
+            'comment': comment if comment else ''
+        })
+        parent.flags.ignore_mandatory = True
+        parent.save(ignore_permissions=True)
+        timesheet = frappe.get_doc('Timesheet',timesheet_name)
+        timesheet.is_employee_rating_done = 1
+        timesheet.flags.ignore_mandatory = True
+        timesheet.save(ignore_permissions=True)
+        return True
+    except Exception as e:
+        frappe.error_log(e, "Staffing Employee Rating")
+        frappe.throw(e)
+
 
 def employee_dnr(company,emp_doc):
     if len(emp_doc.dnr_employee_list) == 0:
@@ -309,3 +334,20 @@ def removing_dnr_employee(company,emp_doc):
 def do_not_return(emp_doc,company):
     emp_doc.append('dnr_employee_list',{'dnr':company})
     emp_doc.save(ignore_permissions = True)
+
+@frappe.whitelist()
+def denied_notification(job_order,hiring_company,staffing_company,timesheet_name):
+    try:
+        sql = ''' select select_job,job_site,creation from `tabJob Order` where name='{}' '''.format(job_order)
+        job_order_data = frappe.db.sql(sql,as_dict=1)
+        job_location=job_order_data[0].job_site
+        job_title=job_order_data[0].select_job
+        subject='Timesheet Denied'
+        msg=f'{staffing_company} has denied the {timesheet_name} timesheet for {job_title} at {job_location}'
+        user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(hiring_company),as_list=1)        
+        hiring_user = [hiring_user[0] for hiring_user in user_list]
+        make_system_notification(hiring_user,msg,'Timesheet',timesheet_name,subject)
+        sendmail(hiring_user, msg, subject, 'Timesheet', timesheet_name)
+    except Exception as e:
+        frappe.error_log(e, "Timesheet Denied")
+        frappe.throw(e)
