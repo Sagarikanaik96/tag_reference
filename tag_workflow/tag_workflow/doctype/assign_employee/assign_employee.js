@@ -9,6 +9,7 @@ frappe.ui.form.on('Assign Employee', {
 		hide_resume(frm);
 	},
 	onload:function(frm){
+		hide_resume(frm);
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
 			return {
 				query: "tag_workflow.tag_data.filter_blocked_employee",

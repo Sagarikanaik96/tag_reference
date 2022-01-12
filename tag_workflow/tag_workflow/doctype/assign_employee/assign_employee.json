@@ -21,6 +21,8 @@
   "resume_required",
   "section_break_6",
   "employee_details",
+  "html_37",
+  "e_signature_full_name",
   "digital_sign",
   "agree_contract",
   "amended_from",
@@ -125,6 +127,7 @@
   {
    "fieldname": "digital_sign",
    "fieldtype": "Signature",
+   "hidden": 1,
    "label": "Digital Sign"
   },
   {
@@ -140,7 +143,19 @@
    "description": "Agree to Contract Mention in JOB ORDER",
    "fieldname": "agree_contract",
    "fieldtype": "Check",
-   "label": "Agree Contract"
+   "label": "Agree Contract",
+   "reqd": 1
+  },
+  {
+   "fieldname": "html_37",
+   "fieldtype": "HTML",
+   "options": "<b>Important Note Regarding Signature</b> By typing your full name below and submitting this agreement. You acknowledge and agree that your typed name represents your signed name(signature) and that you intend for this electronic signature to having the same force and effects as a manual(handwritten) signature.<br>\n"
+  },
+  {
+   "fieldname": "e_signature_full_name",
+   "fieldtype": "Data",
+   "label": "E Signature Full Name",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -153,7 +168,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-10 12:35:37.630800",
+ "modified": "2022-01-12 03:09:45.975767",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",
