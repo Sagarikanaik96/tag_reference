@@ -73,7 +73,6 @@ def check_employee_editable(job_order, name, creation):
     try:
         is_editable = 0
         order = frappe.get_doc(JOB, job_order)
-
         time_format = '%Y-%m-%d %H:%M:%S'
         from_date = datetime.datetime.strptime(str(order.from_date), time_format)
         to_date = datetime.datetime.strptime(str(order.to_date), time_format)
@@ -87,7 +86,7 @@ def check_employee_editable(job_order, name, creation):
         sql = """ select no_show, non_satisfactory, dnr from `tabTimesheet` where docstatus != 1 and job_order_detail = '{0}' and employee in (select employee from `tabAssign Employee Details` where parent = '{1}') """.format(job_order, name)
         emp_list = frappe.db.sql(sql, as_dict=1)
         for emp in emp_list:
-            if((emp.no_show == 1 or emp.dnr == 1 or emp.non_satisfactory == 1) and (time_diff.seconds/60/60 < 2)):
+            if(emp.no_show == 1 or emp.dnr == 1 or emp.non_satisfactory == 1):
                 is_editable = 1
 
         return is_editable
@@ -178,13 +177,13 @@ def dnr_notification(job_order,value,employee_name,subject,date,company,employee
 
     if(today<=to_date and (time_diff.seconds/60/60 < 2)):
         if(int(value)):
-            message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>. There is time to substitute this employee for today’s work order.'
+            message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>. There is time to substitute this employee for today’s work order {datetime.date.today()}'
         return message
 
 
     else:
         if(int(value)):
-            message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
+            message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>. There is time to substitute this employee for tomorrow’s work order {datetime.date.today()}'
         else:
             message = f'<b>{employee_name}</b> has been unmarked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
         return message
@@ -227,7 +226,9 @@ def removing_unsatisfied_employee(company,emp_doc):
 def assigned_job_order(doctype,txt,searchfield,page_len,start,filters):
     try:
         company=filters.get('company')
-        sql = ''' select name from `tabJob Order` where company = '{0}' and name in (select job_order from `tabAssign Employee` where hiring_organization = '{0}')'''.format(company)
+        today = datetime.datetime.now()
+
+        sql = ''' select name from `tabJob Order` where company = '{0}' and from_date<'{1}' and name in (select job_order from `tabAssign Employee` where hiring_organization = '{0}')'''.format(company,today)
         return frappe.db.sql(sql)
     except Exception as e:
         frappe.error_log(e, "Job Order For Timesheet")
