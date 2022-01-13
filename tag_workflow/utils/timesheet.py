@@ -82,7 +82,6 @@ def check_employee_editable(job_order, name, creation):
         if(today.date() >= to_date.date()):
             return is_editable
 
-        time_diff = creation - from_date
         sql = """ select no_show, non_satisfactory, dnr from `tabTimesheet` where docstatus != 1 and job_order_detail = '{0}' and employee in (select employee from `tabAssign Employee Details` where parent = '{1}') """.format(job_order, name)
         emp_list = frappe.db.sql(sql, as_dict=1)
         for emp in emp_list:

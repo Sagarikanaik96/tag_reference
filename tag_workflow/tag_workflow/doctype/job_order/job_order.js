@@ -24,7 +24,6 @@ frappe.ui.form.on('Job Order', {
 			if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ){
 				frm.set_value('company',frappe.boot.tag.tag_user_info.company)
 			}
-			check_company_detail(frm);
 			frm.set_value("from_date",'')
 			frm.set_df_property("time_remaining_for_make_edits", "options"," ");
 			frappe.call({
@@ -334,7 +333,7 @@ function redirect_quotation(frm){
 }
  
 function set_read_fields(frm){
-	var myStringArray = ["phone_number","estimated_hours_per_day","address","rate","description","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
+	var myStringArray = ["phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
 			var arrayLength = myStringArray.length;
 			for (var i = 0; i < arrayLength; i++) {
 				frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -387,7 +386,7 @@ function notification_joborder_change(frm){
 			organizaton:frm.doc.staff_org_claimed,
 			doc_name : frm.doc.name,
 			company:frm.doc.company,
-			job_title:frm.doc.job_title,
+			job_title:frm.doc.select_job,
 			job_site:frm.doc.job_site,
 			posting_date:frm.doc.from_date
 		}
