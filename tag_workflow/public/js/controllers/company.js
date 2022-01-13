@@ -104,6 +104,16 @@ frappe.ui.form.on("Company", {
 		}else{
 			frappe.set_route('Form','Company Review')
 		}
+	},
+	onload:function(frm){
+		cur_frm.fields_dict['employees'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
+			return {
+				query: "tag_workflow.tag_data.filter_company_employee",
+				filters: {
+					company: doc.name
+				  },
+			}
+		}
 	}
 });
 
