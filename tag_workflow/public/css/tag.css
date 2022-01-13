@@ -166,7 +166,10 @@ input:visited{
 .recent-item.notification-item .notification-body:before {
     display: none;
 }
-
+.notification-list-body .recent-item.notification-item {
+    background: #E8F8FC;
+    margin: 10px 0;
+}
 /* notification */
 
 input::-webkit-credentials-auto-fill-button { 
@@ -333,6 +336,47 @@ input::-webkit-credentials-auto-fill-button {
 }
 /* Staff Company List table */
 
+/* Hiring table */
+[data-route="Workspaces/My Activities"] .sub-menu, [data-route=""] .sub-menu {
+    top: 61px !important;
+    z-index: 9 !important;
+    transition: .5s ease-in-out;
+}
+
+/* Chat UI */
+.chat-space .chat-space-container .sender-message .message-bubble {
+    background: #54C38E !important;
+    font-size: 13px!important;
+}
+.chat-space .chat-space-container .recipient-message .message-bubble {
+    background: #fff !important;
+    border:1px solid#ECECF1 !important;
+    font-size: 13px!important;
+}
+.chat-space .chat-space-container {
+    background: #FAFBFC !important;
+}
+.chat-space .chat-space-container .message-time {
+    color: #8D9CBC !important;
+}
+.chat-space .chat-space-actions .type-message {
+    border-radius: 5px !important;
+    background: #fff !important;
+    border: 1px solid#ECECF1 !important;
+}
+.chat-space .chat-space-actions .message-send-button {
+    background: #21B9E4 !important;
+    border-radius: 5px !important;
+}
+.chat-header .chat-profile-info {
+    display: flex !important;
+}
+.chat-list .chat-rooms-container .chat-room {
+    font-size: 13px !important;
+}
+.chat-list .chat-rooms-container .chat-room .chat-date {
+    color: #8D9CBC !important;
+}
 
 @media (max-width:768px) {
     #page-User .layout-main-section-wrapper .layout-main-section , 

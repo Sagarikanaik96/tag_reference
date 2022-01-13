@@ -295,6 +295,7 @@
    "label": "Staffing Org Claimed"
   },
   {
+   "default": "Upcoming",
    "depends_on": "eval:doc.__islocal!=1",
    "fieldname": "order_status",
    "fieldtype": "Select",
@@ -426,7 +427,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-08 17:42:11.662657",
+ "modified": "2022-01-13 17:21:51.366237",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

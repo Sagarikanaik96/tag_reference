@@ -409,3 +409,14 @@ def designation_activity_data(doc,method):
     docs=frappe.new_doc('Activity Type')
     docs.activity_type=doc.name
     docs.insert()
+
+@frappe.whitelist()
+def filter_company_employee(doctype, txt, searchfield, page_len, start, filters):
+    try:
+        company=filters.get('company')
+        sql = """ select name, employee_name,company from `tabEmployee` where company='{0}' """.format(company)
+        return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.error_log(e, "Staffing Company Error")
+        frappe.throw(e)
