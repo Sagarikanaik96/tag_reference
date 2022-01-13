@@ -174,9 +174,12 @@
                                                         <i class="fa fa-bars" aria-hidden="true"></i>
                                                 </div>
                                                 <div class="sub-menu w-100 border-top border-right" id="myDIV">
-                                                        <div class="p-4">
-                                                                <button type="button" class="btn btn-primary btn-block"><span class="px-2">&#x2b;</span>New Order</button>
-                                                        </div>
+                                                        {% if frappe.boot.tag.tag_user_info.company_type != "Staffing" %}
+
+                                                                <div class="p-4">
+                                                                        <button type="button" class="btn btn-primary btn-block"><span class="px-2">&#x2b;</span>New Order</button>
+                                                                </div>
+                                                        {% endif %}
 
                                                         <a href="/app/home">
                                                                 <div class="tab-button custom-btn ">

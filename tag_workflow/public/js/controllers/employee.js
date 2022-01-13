@@ -2,6 +2,7 @@ frappe.ui.form.on("Employee", {
 	refresh: function(frm){
 		trigger_hide(frm);
 		required_field(frm);
+		cur_frm.dashboard.hide()
 	},
 	decrypt_ssn: function(frm) {
 		frappe.call({
