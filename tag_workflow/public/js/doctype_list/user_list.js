@@ -1,4 +1,5 @@
 frappe.listview_settings['User'] = {
+	hide_name_column: true,
 	refresh: function(listview){
 		listview.$page.find(`div[data-fieldname="name"]`).addClass("hide");
 		let view = listview;
