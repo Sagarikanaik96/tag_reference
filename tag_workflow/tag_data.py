@@ -420,3 +420,15 @@ def filter_company_employee(doctype, txt, searchfield, page_len, start, filters)
         frappe.db.rollback()
         frappe.error_log(e, "Staffing Company Error")
         frappe.throw(e)
+
+@frappe.whitelist()
+def contact_company(doctype, txt, searchfield, page_len, start, filters):
+    company=filters.get('company')
+    sql = """ select name from `tabCompany` where name='{}' """.format(company)
+    return frappe.db.sql(sql) 
+
+@frappe.whitelist()
+def email_recipient(doctype, txt, searchfield, page_len, start, filters):
+    company=filters.get('company')
+    sql = """ select name from `tabContact` where company='{}' """.format(company)
+    return frappe.db.sql(sql) 

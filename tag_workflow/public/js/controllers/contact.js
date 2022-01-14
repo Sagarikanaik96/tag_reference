@@ -2,7 +2,18 @@ frappe.ui.form.on("Contact", {
 	refresh: function(frm){
 		init_fields(frm);
 		make_field_mandatory(frm);
-		set_default(frm)
+	},
+	onload: function (frm) {
+		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+			cur_frm.fields_dict["company"].get_query = function (doc) {
+				return {
+					query: "tag_workflow.tag_data.contact_company",
+					filters: {
+						company: frappe.defaults.get_user_default("Company"),
+					},
+				};
+			};
+		}
 	},
 	before_save:function(frm){
 		let name = frm.doc.first_name
@@ -53,8 +64,4 @@ function make_field_mandatory(frm){
 	for(let r in reqd){
 		cur_frm.toggle_reqd(reqd[r], 1);
 	}
-}
-
-function set_default(frm){
-	cur_frm.set_value("company",frappe.boot.tag.tag_user_info.company)
 }
