@@ -333,7 +333,7 @@ function redirect_quotation(frm){
 }
  
 function set_read_fields(frm){
-	var myStringArray = ["phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
+	var myStringArray = ["phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email","select_job","rate","description"];
 			var arrayLength = myStringArray.length;
 			for (var i = 0; i < arrayLength; i++) {
 				frm.set_df_property(myStringArray[i], "read_only", 1);
