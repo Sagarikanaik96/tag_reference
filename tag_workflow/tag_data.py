@@ -92,7 +92,11 @@ def update_job_order(job_name, employee_filled, staffing_org, hiringorg, name):
         job = frappe.get_doc(jobOrder, job_name)
         claimed = job.staff_org_claimed if job.staff_org_claimed else ""
         frappe.db.set_value(jobOrder, job_name, "worker_filled", (int(employee_filled)+int(job.worker_filled)))
-        frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
+        if(len(claimed)==0):
+            frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+str(staffing_org)))
+        else:
+            frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
+
         sub = f'New Message regarding {job_name} from {hiringorg} is available'
         msg = f'Your Employees has been approved for Work Order {job_name}'
 
