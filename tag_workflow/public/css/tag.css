@@ -123,7 +123,8 @@ input:visited{
     color:#21B9E4 !important;
 }
 .editable-form .layout-main-section-wrapper .layout-main-section,
-#page-Company .layout-main-section-wrapper .layout-main-section
+#page-Company .layout-main-section-wrapper .layout-main-section,
+#page-Timesheet .layout-main-section-wrapper .layout-main-section
 {
     max-width: 496px;
     width: 100%;
@@ -334,6 +335,9 @@ input::-webkit-credentials-auto-fill-button {
     max-width: 324px;
     width: 100%;
 }
+#page-User [data-fieldname="new_password"] {
+    margin-bottom: 20px;
+}
 /* Staff Company List table */
 
 /* Hiring table */
@@ -377,6 +381,21 @@ input::-webkit-credentials-auto-fill-button {
 .chat-list .chat-rooms-container .chat-room .chat-date {
     color: #8D9CBC !important;
 }
+
+/* File upload UI */
+.modal-dialog .file-upload-area {
+    min-height: 12rem;
+}
+.modal-dialog .file-upload-area div button {
+    display: none;
+}
+.modal-dialog .file-upload-area div button:nth-child(1) {
+    display: block;
+    margin: auto;
+    color: #21B9E4;
+    font-size: 14px;
+}
+
 
 @media (max-width:768px) {
     #page-User .layout-main-section-wrapper .layout-main-section , 
