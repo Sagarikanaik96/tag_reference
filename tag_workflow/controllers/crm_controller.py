@@ -16,7 +16,7 @@ class CRMController(base_controller.BaseController):
         self.check_lead_closing()
 
     def check_lead_closing(self):
-        if self.doc.status == "Close" and not self.doc.signature:
+        if self.doc.status == "Close" and not self.doc.sign:
             frappe.throw("Please add Signature before closing Lead")
 
 
