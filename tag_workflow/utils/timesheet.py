@@ -177,8 +177,9 @@ def dnr_notification(job_order,value,employee_name,subject,date,company,employee
     if(today<=to_date and (time_diff.seconds/60/60 < 2)):
         if(int(value)):
             message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>. There is time to substitute this employee for today’s work order {datetime.date.today()}'
+        else:
+            message = f'<b>{employee_name}</b> has been unmarked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
         return message
-
 
     else:
         if(int(value)):
