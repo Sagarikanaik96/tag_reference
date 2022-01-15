@@ -235,6 +235,13 @@
                                                                         </div>
                                                                 </a>
                                                         {% endif %}
+                                                        {% if frappe.boot.tag.tag_user_info.company_type == "TAG" %}
+								<a href="/app/query-report/Work%20Orders">
+									<div class="tab-button custom-btn">
+										<img src="/assets/tag_workflow/images/ico-invoice.svg" class="pr-3 pl-5" alt="reports">Work Orders
+									</div>
+								</a>
+							{% endif %}
                                                       
                                                         
                                                         <a href="/app/sales-invoice" >

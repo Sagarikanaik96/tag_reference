@@ -386,7 +386,7 @@ def sales_invoice_notification(job_order=None,company=None,invoice_name=None):
             else:
                 sql = """ Select company,select_job,job_site from `tabJob Order` where name='{0}' """.format(job_order)
                 job_order_details=frappe.db.sql(sql, as_dict=1)
-                msg=f'{company} has submitted an invoice for {job_order_details[0].select_job} at {job_order_details[0].job_site}'
+                msg=f'{company} has submitted an invoice for {job_order_details[0].select_job} at {job_order_details[0].job_site}.'
                 subject="Invoice Submitted"
 
                 sql = ''' select email from `tabUser` where company='{}' '''.format(job_order_details[0].company)
