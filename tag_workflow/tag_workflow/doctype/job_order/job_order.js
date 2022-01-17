@@ -115,7 +115,9 @@ frappe.ui.form.on('Job Order', {
 					method:"tag_workflow.tag_workflow.doctype.job_order.job_order.after_denied_joborder",
 					args:{
 						staff_company:frm.doc.staff_company,
-						joborder_name:frm.doc.name
+						joborder_name:frm.doc.name,
+						job_title:frm.doc.select_job,
+						hiring_name:frm.doc.company
 					},
 					callback:function(r){					
 						cur_frm.refresh()
