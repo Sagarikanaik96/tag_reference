@@ -48,6 +48,15 @@ frappe.ui.form.on('Assign Employee', {
 			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
 			frappe.validated=false
 		}
+	},
+	setup: function(frm){
+		frm.set_query("company", function(doc){
+			return {
+				filters: [
+					["Company", "organization_type", "=", "Staffing"]
+				]
+			}
+		});
 	}
 });
 
