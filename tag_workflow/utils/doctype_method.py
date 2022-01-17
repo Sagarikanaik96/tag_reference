@@ -2,7 +2,7 @@ import frappe
 from frappe import _
 import re
 from frappe.utils import (cint, flt, has_gravatar, escape_html, format_datetime, now_datetime, get_formatted_email, today)
-
+from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
 
 # user method update
 STANDARD_USERS = ("Guest", "Administrator")
@@ -170,6 +170,11 @@ def create_contact(self):
     return contact
 
 #-------timesheet------#
+def get_bill_cost(rate, data):
+    bill_rate = flt(rate.get('billing_rate')) if flt(data.billing_rate) == 0 else data.billing_rate
+    cost_rate = flt(rate.get('costing_rate')) if flt(data.costing_rate) == 0 else data.costing_rate
+    return bill_rate, cost_rate
+
 def update_cost(self):
     for data in self.time_logs:
         if data.activity_type or data.is_billable:
@@ -177,7 +182,8 @@ def update_cost(self):
             hours = data.billing_hours or 0
             costing_hours = data.billing_hours or data.hours or 0
             if rate:
-                data.billing_rate = flt(rate.get('billing_rate')) if flt(data.billing_rate) == 0 else data.billing_rate
-                data.costing_rate = flt(rate.get('costing_rate')) if flt(data.costing_rate) == 0 else data.costing_rate
+                bill_rate, cost_rate = get_bill_cost(rate, data)
+                data.billing_rate = bill_rate
+                data.costing_rate = cost_rate
                 data.billing_amount = ((data.billing_rate * (hours-data.extra_hours))+data.flat_rate)+(data.extra_hours*data.extra_rate)
                 data.costing_amount = data.costing_rate * costing_hours
