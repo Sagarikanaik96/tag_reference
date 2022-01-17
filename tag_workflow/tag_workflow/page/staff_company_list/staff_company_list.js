@@ -68,31 +68,31 @@ function get_location(name){
 						<h3>${company_data['name']}</h3><h5>${company_data['address']}</h5><h4>${company_data['zip']}</h4>
 						</td>
 					<td>
-						<h3><span>&star;</span>${company_data['average_rating']}</h3>
+						<h3><span>&starf;</span>${company_data['average_rating']}</h3>
 						<a href=javascript:new_job_order(${name})><button>Place Order</button></a>
 					</td>
 				</tr>
 				<tr>
-					<td colspan=3><h6>About</h6>
+					<td colspan=3><h4 style="font-size:20px">About</h4>
 						${company_data['about_organization']}
 					</td>
 				</tr>
 			</table>`
 
-			let industry = `<h4>Serving Industries</h4>`;
+			let industry = `<h3>Serving Industries</h3>`;
 			for(let i in company_industry){
 				industry += `${company_industry[i].industry_type}<br>`;
 			}
 			
-			let team = `<h4>Team Member</h4>`;
+			let team = `<h3>Team Member</h3>`;
 			for(let m in company_member){
-				team += `${company_member[m].first_name}${company_member[m].last_name}<br>`;
+				team += `${company_member[m].first_name} ${company_member[m].last_name}<br>`;
 			}
 
-			let review = `<h4>Review And Rating</h4>`;
+			let review = `<h3>Review And Rating</h3>`;
 			for(let c in company_review){
 				review += `
-				${company_review[c].owner}<br>${company_review[c].rating}<br>${company_review[c].comments}<br>${company_review[c].creation}<br>`;
+				<b>${company_review[c].first_name} ${company_review[c].last_name}</b><br><b><span>&starf;</span>${company_review[c].rating}</b><br>${company_review[c].comments}<br>${company_review[c].creation}<br>`;
 			}
 
 			$("#listdata").html(data);

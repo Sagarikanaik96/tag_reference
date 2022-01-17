@@ -22,6 +22,7 @@ tag_workflow/controllers/crm_controller.py
 tag_workflow/controllers/master_controller.py
 tag_workflow/dashboard_data/__init__.py
 tag_workflow/dashboard_data/company_dashboard.py
+tag_workflow/dashboard_data/customer_dashboard.py
 tag_workflow/dashboard_data/item_dashboard.py
 tag_workflow/dashboard_data/lead_dashboard.py
 tag_workflow/dashboard_data/sales_invoice_dashboard.py
@@ -47,7 +48,9 @@ tag_workflow/public/images/abstract-bg.svg
 tag_workflow/public/images/graphic-hiring-org.svg
 tag_workflow/public/images/graphic-staffing-org.svg
 tag_workflow/public/images/ico-building.png
+tag_workflow/public/images/ico-calendar.svg
 tag_workflow/public/images/ico-chat.png
+tag_workflow/public/images/ico-clock.svg
 tag_workflow/public/images/ico-contact.svg
 tag_workflow/public/images/ico-crm.svg
 tag_workflow/public/images/ico-employee.svg
@@ -67,6 +70,7 @@ tag_workflow/public/images/ico-order.png
 tag_workflow/public/images/ico-order.svg
 tag_workflow/public/images/ico-rate.png
 tag_workflow/public/images/ico-twitter.svg
+tag_workflow/public/images/ico-worker.svg
 tag_workflow/public/images/tag-signup-grphic.png
 tag_workflow/public/images/ico-building/ico-building.png
 tag_workflow/public/images/ico-building/ico-building@2x.png
@@ -82,6 +86,7 @@ tag_workflow/public/images/ico-order/ico-order.png
 tag_workflow/public/images/ico-order/ico-order@2x.png
 tag_workflow/public/images/ico-rate/ico-rate.png
 tag_workflow/public/images/ico-rate/ico-rate@2x.png
+tag_workflow/public/js/file_upload.js
 tag_workflow/public/js/map.js
 tag_workflow/public/js/tag.js
 tag_workflow/public/js/controllers/company.js
@@ -101,12 +106,15 @@ tag_workflow/public/js/doctype_list/company_list.js
 tag_workflow/public/js/doctype_list/employee_list.js
 tag_workflow/public/js/doctype_list/sales_invoice_list.js
 tag_workflow/public/js/doctype_list/user_list.js
+tag_workflow/public/js/frappe/new_file_uploader/index.js
 tag_workflow/public/js/template/tag.html
 tag_workflow/tag_workflow/__init__.py
+tag_workflow/tag_workflow/custom/address.json
 tag_workflow/tag_workflow/custom/branch.json
 tag_workflow/tag_workflow/custom/company.json
 tag_workflow/tag_workflow/custom/contact.json
 tag_workflow/tag_workflow/custom/contract.json
+tag_workflow/tag_workflow/custom/customer.json
 tag_workflow/tag_workflow/custom/employee.json
 tag_workflow/tag_workflow/custom/item.json
 tag_workflow/tag_workflow/custom/job_card_time_log.json
@@ -114,6 +122,7 @@ tag_workflow/tag_workflow/custom/lead.json
 tag_workflow/tag_workflow/custom/sales_invoice.json
 tag_workflow/tag_workflow/custom/sales_invoice_timesheet.json
 tag_workflow/tag_workflow/custom/sales_order.json
+tag_workflow/tag_workflow/custom/supplier.json
 tag_workflow/tag_workflow/custom/timesheet.json
 tag_workflow/tag_workflow/custom/timesheet_detail.json
 tag_workflow/tag_workflow/custom/user.json
@@ -137,6 +146,9 @@ tag_workflow/tag_workflow/doctype/company_review/test_company_review.py
 tag_workflow/tag_workflow/doctype/company_site/__init__.py
 tag_workflow/tag_workflow/doctype/company_site/company_site.json
 tag_workflow/tag_workflow/doctype/company_site/company_site.py
+tag_workflow/tag_workflow/doctype/dnr/__init__.py
+tag_workflow/tag_workflow/doctype/dnr/dnr.json
+tag_workflow/tag_workflow/doctype/dnr/dnr.py
 tag_workflow/tag_workflow/doctype/email_recipients_list/__init__.py
 tag_workflow/tag_workflow/doctype/email_recipients_list/email_recipients_list.json
 tag_workflow/tag_workflow/doctype/email_recipients_list/email_recipients_list.py
@@ -162,6 +174,7 @@ tag_workflow/tag_workflow/doctype/job_order/job_order.js
 tag_workflow/tag_workflow/doctype/job_order/job_order.json
 tag_workflow/tag_workflow/doctype/job_order/job_order.py
 tag_workflow/tag_workflow/doctype/job_order/job_order_dashboard.py
+tag_workflow/tag_workflow/doctype/job_order/job_order_list.js
 tag_workflow/tag_workflow/doctype/job_order/test_job_order.py
 tag_workflow/tag_workflow/doctype/job_site/__init__.py
 tag_workflow/tag_workflow/doctype/job_site/job_site.js
@@ -207,13 +220,18 @@ tag_workflow/tag_workflow/report/employee_invoice/employee_invoice.js
 tag_workflow/tag_workflow/report/employee_invoice/employee_invoice.json
 tag_workflow/tag_workflow/report/employee_invoice/employee_invoice.py
 tag_workflow/tag_workflow/report/employee_work_record/__init__.py
-tag_workflow/tag_workflow/report/employee_work_record/employee_work_record.js
-tag_workflow/tag_workflow/report/employee_work_record/employee_work_record.json
-tag_workflow/tag_workflow/report/employee_work_record/employee_work_record.py
+tag_workflow/tag_workflow/report/hourly_report/__init__.py
+tag_workflow/tag_workflow/report/hourly_report/hourly_report.js
+tag_workflow/tag_workflow/report/hourly_report/hourly_report.json
+tag_workflow/tag_workflow/report/hourly_report/hourly_report.py
 tag_workflow/tag_workflow/report/orders/__init__.py
 tag_workflow/tag_workflow/report/orders/orders.js
 tag_workflow/tag_workflow/report/orders/orders.json
 tag_workflow/tag_workflow/report/orders/orders.py
+tag_workflow/tag_workflow/report/tag_earning/__init__.py
+tag_workflow/tag_workflow/report/tag_earning/tag_earning.js
+tag_workflow/tag_workflow/report/tag_earning/tag_earning.json
+tag_workflow/tag_workflow/report/tag_earning/tag_earning.py
 tag_workflow/tag_workflow/report/tag_invoice/__init__.py
 tag_workflow/tag_workflow/report/tag_invoice/tag_invoice.js
 tag_workflow/tag_workflow/report/tag_invoice/tag_invoice.json
@@ -248,3 +266,4 @@ tag_workflow/utils/trigger_session.py
 tag_workflow/utils/whitelisted.py
 tag_workflow/www/login.html
 tag_workflow/www/login.py
+tag_workflow/www/update-password.html

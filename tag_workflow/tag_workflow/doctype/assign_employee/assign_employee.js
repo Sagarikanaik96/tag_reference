@@ -9,6 +9,7 @@ frappe.ui.form.on('Assign Employee', {
 		hide_resume(frm);
 	},
 	onload:function(frm){
+		hide_resume(frm);
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
 			return {
 				query: "tag_workflow.tag_data.filter_blocked_employee",
@@ -26,6 +27,26 @@ frappe.ui.form.on('Assign Employee', {
 	after_save:function(frm){
 		if(frm.doc.tag_status=='Open'){
 			make_hiring_notification(frm)
+		}
+	},
+	validate:function(frm){
+		var sign = cur_frm.doc.e_signature_full_name
+		var emp_tab=frm.doc.employee_details;
+		var message="<b>Please Fill Mandatory Fields:</b>"
+		if(sign===undefined || !sign){
+				message=message+"<br>E Signature Full Name"
+			
+		}
+		if(emp_tab===undefined || emp_tab.length==0){
+			message=message+"<br>Employee Details"
+
+		}
+		if(frm.doc.agree_contract==0 || frm.doc.agree_contract===undefined){
+			message=message+"<br>Agree To Contract"
+		}
+		if(message!="<b>Please Fill Mandatory Fields:</b>"){
+			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
+			frappe.validated=false
 		}
 	}
 });

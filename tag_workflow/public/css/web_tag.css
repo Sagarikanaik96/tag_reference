@@ -73,3 +73,9 @@ input::-webkit-credentials-auto-fill-button {
 	width: 163px !important;
 	font-size: 14px;
 }
+
+@media (max-width:576px) {
+	.for-login .page-card {
+		background: #fff;
+	}
+}

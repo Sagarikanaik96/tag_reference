@@ -92,7 +92,11 @@ def update_job_order(job_name, employee_filled, staffing_org, hiringorg, name):
         job = frappe.get_doc(jobOrder, job_name)
         claimed = job.staff_org_claimed if job.staff_org_claimed else ""
         frappe.db.set_value(jobOrder, job_name, "worker_filled", (int(employee_filled)+int(job.worker_filled)))
-        frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
+        if(len(claimed)==0):
+            frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+str(staffing_org)))
+        else:
+            frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
+
         sub = f'New Message regarding {job_name} from {hiringorg} is available'
         msg = f'Your Employees has been approved for Work Order {job_name}'
 
@@ -299,11 +303,12 @@ def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters)
     company = filters.get('company')
 
     if job_category is None:
-        sql = """ select name, employee_name from `tabEmployee` where company=%(emp_company)s and status='Active' and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from=%(company)s) and name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{0}') and name NOT IN (select parent from `tabDNR` BE where dnr='{1}')) """.format(emp_company, company)
+        sql = """ select name, employee_name from `tabEmployee` where company=%(emp_company)s and status='Active' and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from=%(company)s) and (name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{0}')) and (name NOT IN (select parent from `tabDNR` BE where dnr='{1}')) """.format(emp_company, company)
 
         return frappe.db.sql(sql)
     else:
-        sql = """select name, employee_name from `tabEmployee` where company='{0}' and status='Active' and (job_category = '{1}' or job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{2}' and name NOT IN (select parent from `tabDNR`  where dnr='{2}' )) and name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{2}'))""".format(emp_company, job_category, company)
+        sql = """select name, employee_name from `tabEmployee` where company='{0}' and status='Active' and (job_category = '{1}' or job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{2}')) and (name NOT IN (select parent from `tabDNR`  where dnr='{2}' )) and (name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{2}'))""".format(emp_company, job_category, company)
+
 
         return frappe.db.sql(sql)
     
@@ -381,7 +386,7 @@ def sales_invoice_notification(job_order=None,company=None,invoice_name=None):
             else:
                 sql = """ Select company,select_job,job_site from `tabJob Order` where name='{0}' """.format(job_order)
                 job_order_details=frappe.db.sql(sql, as_dict=1)
-                msg=f'{company} has submitted an invoice for {job_order_details[0].select_job} at {job_order_details[0].job_site}'
+                msg=f'{company} has submitted an invoice for {job_order_details[0].select_job} at {job_order_details[0].job_site}.'
                 subject="Invoice Submitted"
 
                 sql = ''' select email from `tabUser` where company='{}' '''.format(job_order_details[0].company)
@@ -420,3 +425,15 @@ def filter_company_employee(doctype, txt, searchfield, page_len, start, filters)
         frappe.db.rollback()
         frappe.error_log(e, "Staffing Company Error")
         frappe.throw(e)
+
+@frappe.whitelist()
+def contact_company(doctype, txt, searchfield, page_len, start, filters):
+    company=filters.get('company')
+    sql = """ select name from `tabCompany` where name='{}' """.format(company)
+    return frappe.db.sql(sql) 
+
+@frappe.whitelist()
+def email_recipient(doctype, txt, searchfield, page_len, start, filters):
+    company=filters.get('company')
+    sql = """ select name from `tabContact` where company='{}' """.format(company)
+    return frappe.db.sql(sql) 

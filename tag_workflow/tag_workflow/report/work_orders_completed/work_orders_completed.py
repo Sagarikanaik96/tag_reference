@@ -42,9 +42,9 @@ def admin_data(filters,staff_company,fromdate,todate,from_date,to_date,company_s
 			{'fieldname':'employee_company','label':(staff_company),'fieldtype':'Data','width':150},
 			{'fieldname':'from_date','label':(fromdate),'fieldtype':'Date','width':150},
 			{'fieldname':'to_date','label':(todate),'fieldtype':'Date' ,'width':150},
-			{'fieldname':'name','label':('Total Number of Work Orders'),'fieldtype':'Data','width':150},
-			{'fieldname':'base_billing_amount','label':('Total Hours Billed'),'fieldtype':'Data','width':150},
-			{'fieldname':'hours','label':('Total Cost Billed'),'fieldtype':'Data','width':150}
+			{'fieldname':'name','label':('Total Number of Work Orders'),'fieldtype':'Int','width':150},
+			{'fieldname':'base_billing_amount','label':('Total Hours Billed'),'fieldtype':'Int','width':150},
+			{'fieldname':'hours','label':('Total Cost Billed'),'fieldtype':'Float','width':150}
 		]
 		if(filters.get('companies')):
 			query_data=frappe.db.sql(''' select T.employee_company,min(JO.from_date),max(JO.to_date),count(JO.name),sum(TD.base_billing_amount),sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and from_date>'{0}' and end_date<'{1}' and T.employee_company like '{2}%' group by T.employee_company;'''.format(from_date,to_date,company_search))
@@ -57,8 +57,8 @@ def admin_data(filters,staff_company,fromdate,todate,from_date,to_date,company_s
 			{'fieldname':'employee_name','label':('Employee Name'),'fieldtype':'Data','width':150},
 			{'fieldname':'from_date','label':(fromdate),'fieldtype':'Date','width':150},
 			{'fieldname':'to_date','label':(todate),'fieldtype':'Date' ,'width':150},
-			{'fieldname':'total_hours_worked','label':('Total Days Worked'),'fieldtype':'Data','width':150},
-			{'fieldname':'hours','label':('Total Hours Worked'),'fieldtype':'Data','width':150}
+			{'fieldname':'total_hours_worked','label':('Total Days Worked'),'fieldtype':'Int','width':150},
+			{'fieldname':'hours','label':('Total Hours Worked'),'fieldtype':'Int','width':150}
 		]
 		if(filters.get('companies')):
 			query_data=frappe.db.sql(''' select T.employee_company,T.employee_name,min(JO.from_date),max(JO.to_date),ceil(sum((JO.to_date-JO.from_date)/(24*60*60*1000))) as total_hours_worked,sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and from_date>'{0}' and end_date<'{1}' and T.employee_company like '{2}%' group by employee_name;'''.format(from_date,to_date,company_search))
@@ -70,7 +70,7 @@ def admin_data(filters,staff_company,fromdate,todate,from_date,to_date,company_s
 			{'fieldname':'employee_company','label':(staff_company),'fieldtype':'Data','width':150},
 			{'fieldname':'from_date','label':(fromdate),'fieldtype':'Date','width':150},
 			{'fieldname':'to_date','label':(todate),'fieldtype':'Date' ,'width':150},
-			{'fieldname':'total_hours_worked','label':('Total Cost'),'fieldtype':'Data','width':150},
+			{'fieldname':'total_hours_worked','label':('Total Cost'),'fieldtype':'Float','width':150},
 		]
 		if(filters.get('companies')):
 			query_data=frappe.db.sql(''' select T.employee_company,min(JO.from_date),max(JO.to_date),sum(TD.base_billing_amount) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and from_date>'{0}' and end_date<'{1}' and T.employee_company like '{2}%' group by T.employee_company; '''.format(from_date,to_date,company_search))
@@ -85,9 +85,9 @@ def hiring_data(filters,staff_company,fromdate,todate,from_date,to_date,company_
 			{'fieldname':'employee_company','label':(staff_company),'fieldtype':'Data','width':150},
 			{'fieldname':'from_date','label':(fromdate),'fieldtype':'Date','width':150},
 			{'fieldname':'to_date','label':(todate),'fieldtype':'Date' ,'width':150},
-			{'fieldname':'name','label':('Total Number of Work Orders'),'fieldtype':'Data','width':150},
-			{'fieldname':'base_billing_amount','label':('Total Hours Billed'),'fieldtype':'Data','width':150},
-			{'fieldname':'hours','label':('Total Cost Billed'),'fieldtype':'Data','width':150}
+			{'fieldname':'name','label':('Total Number of Work Orders'),'fieldtype':'Int','width':150},
+			{'fieldname':'base_billing_amount','label':('Total Hours Billed'),'fieldtype':'Int','width':150},
+			{'fieldname':'hours','label':('Total Cost Billed'),'fieldtype':'Float','width':150}
 		]
 		if(filters.get('companies')):
 			query_data=frappe.db.sql(''' select T.employee_company,min(JO.from_date),max(JO.to_date),count(JO.name),sum(TD.base_billing_amount),sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.company='{0}' and from_date>'{1}' and end_date<'{2}' and T.employee_company like '{3}%' group by T.employee_company;'''.format(current_company,from_date,to_date,company_search))
@@ -101,8 +101,8 @@ def hiring_data(filters,staff_company,fromdate,todate,from_date,to_date,company_
 			{'fieldname':'employee_name','label':('Employee Name'),'fieldtype':'Data','width':150},
 			{'fieldname':'from_date','label':(fromdate),'fieldtype':'Date','width':150},
 			{'fieldname':'to_date','label':(todate),'fieldtype':'Date' ,'width':150},
-			{'fieldname':'total_hours_worked','label':('Total Days Worked'),'fieldtype':'Data','width':150},
-			{'fieldname':'hours','label':('Total Hours Worked'),'fieldtype':'Data','width':150}
+			{'fieldname':'total_hours_worked','label':('Total Days Worked'),'fieldtype':'Int','width':150},
+			{'fieldname':'hours','label':('Total Hours Worked'),'fieldtype':'Int','width':150}
 		]
 		if(filters.get('companies')):
 			query_data=frappe.db.sql(''' select T.employee_company,T.employee_name,min(JO.from_date),max(JO.to_date),ceil(sum((JO.to_date-JO.from_date)/(24*60*60*1000))) as total_hours_worked,sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.company='{0}' and from_date>'{1}' and end_date<'{2}' and T.employee_company like '{3}%' group by employee_name;'''.format(current_company,from_date,to_date,company_search))
@@ -114,7 +114,7 @@ def hiring_data(filters,staff_company,fromdate,todate,from_date,to_date,company_
 			{'fieldname':'employee_company','label':(staff_company),'fieldtype':'Data','width':150},
 			{'fieldname':'from_date','label':(fromdate),'fieldtype':'Date','width':150},
 			{'fieldname':'to_date','label':(todate),'fieldtype':'Date' ,'width':150},
-			{'fieldname':'total_hours_worked','label':('Total Cost'),'fieldtype':'Data','width':150},
+			{'fieldname':'total_hours_worked','label':('Total Cost'),'fieldtype':'Float','width':150},
 		]
 		if(filters.get('companies')):
 			query_data=frappe.db.sql(''' select T.employee_company,min(JO.from_date),max(JO.to_date),sum(TD.base_billing_amount) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.company='{0}' and from_date>'{1}' and end_date<'{2}' and T.employee_company like '{3}%' group by T.employee_company; '''.format(current_company,from_date,to_date,company_search))

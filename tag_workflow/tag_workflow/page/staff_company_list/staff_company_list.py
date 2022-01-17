@@ -38,7 +38,7 @@ def company_data(company_name):
     mem_sql = """ select first_name,last_name from `tabUser` where company='{}' """.format(company_name)
     team_member=frappe.db.sql(mem_sql, as_dict=True)
 
-    rev_sql = """select owner,rating,comments,creation from `tabCompany Review` where staffing_company='{}' """.format(company_name)
+    rev_sql = """select `tabUser`.first_name,`tabUser`.last_name,rating,comments,LEFT(`tabCompany Review`.creation,10) as creation from `tabCompany Review`,`tabUser` where staffing_company='{}' and comments IS NOT NULL and `tabUser`.name=`tabCompany Review`.owner""".format(company_name)
     company_review_rating=frappe.db.sql(rev_sql, as_dict=True)
 
     return company_detail,company_industry,team_member,company_review_rating  
