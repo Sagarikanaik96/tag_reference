@@ -5,9 +5,9 @@ $(document).bind('toolbar_setup', function() {
         $(".dropdown-help").empty();
         $('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
 
-		frappe.ui.toolbar.route_to_company = function() {
-			frappe.set_route('Form', 'Company', frappe.boot.tag.tag_user_info.company);
-		};
+	frappe.ui.toolbar.route_to_company = function() {
+		frappe.set_route('Form', 'Company', frappe.boot.tag.tag_user_info.company);
+	};
 });
 
 $(document).ready(function(){
@@ -15,6 +15,7 @@ $(document).ready(function(){
 		$(".main-section").append(frappe.render_template("tag"));
 	}
 });
+
 
 frappe.provide("tag_workflow.workflow");
 frappe.ui.form.States = Class.extend({
