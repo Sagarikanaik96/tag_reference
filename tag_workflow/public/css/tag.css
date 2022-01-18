@@ -416,11 +416,32 @@ input::-webkit-credentials-auto-fill-button {
     }
 }
 
+@media (max-width: 1300px) {
+    .col.layout-main-section-wrapper, 
+    .col-md-12.layout-main-section-wrapper {
+        left: 10rem;
+        max-width: 80%;
+    }
+}
 
 @media (min-width: 768px) {
     .layout-main .form-column.col-sm-12 > form > .input-max-width {
         max-width: 100%;
         padding-right: 0px;
+    }
+}
+
+@media (min-width:570px) and (max-width:768px) {
+    .dropdown-notifications .notifications-list {
+        right: -230px;
+    }
+}
+
+@media (max-width: 768px) {
+    .col.layout-main-section-wrapper, 
+    .col-md-12.layout-main-section-wrapper {
+        left: 0rem;
+        max-width: 100%;
     }
 }
 
