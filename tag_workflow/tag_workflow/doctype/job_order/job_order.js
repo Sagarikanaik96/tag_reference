@@ -115,7 +115,9 @@ frappe.ui.form.on('Job Order', {
 					method:"tag_workflow.tag_workflow.doctype.job_order.job_order.after_denied_joborder",
 					args:{
 						staff_company:frm.doc.staff_company,
-						joborder_name:frm.doc.name
+						joborder_name:frm.doc.name,
+						job_title:frm.doc.select_job,
+						hiring_name:frm.doc.company
 					},
 					callback:function(r){					
 						cur_frm.refresh()
@@ -280,7 +282,7 @@ frappe.ui.form.on('Job Order', {
 function check_company_detail(frm){
 	let roles = frappe.user_roles;
 	if(roles.includes("Hiring User") || roles.includes("Hiring Admin")){
-		var company_name = frappe.defaults.get_user_default("company");
+		var company_name = frappe.boot.tag.tag_user_info.company;
 		frappe.call({
 			method:"tag_workflow.tag_data.company_details",
 			args: {'company_name':company_name},
@@ -301,7 +303,7 @@ function assign_employe(frm){
 
 function redirect_quotation(frm){
 	var doc = frappe.model.get_new_doc("Assign Employee");
-	var staff_company = frappe.defaults.get_user_defaults("company") || [];
+	var staff_company = frappe.boot.tag.tag_user_info.company || [];
 	doc.transaction_date = frappe.datetime.now_date();
 	doc.company = staff_company[0];
 	doc.job_order = frm.doc.name;
@@ -316,33 +318,30 @@ function redirect_quotation(frm){
 	frappe.call({
 		method:"tag_workflow.tag_data.staff_org_details",
 		args: {
-			company_details:frappe.defaults.get_user_defaults('Company')[0]
+			company_details: frappe.boot.tag.tag_user_info.company
 		},
-		callback:function(r)
-		{
+		callback:function(r){
 			if(r.message=="failed"){
 				msgprint("You can't Assign Employees Unless Your Company Details are Complete");
 				frappe.validated = false;
-			}
-			else{
-					frappe.set_route("Form", "Assign Employee", doc.name);
+			}else{
+				frappe.set_route("Form", "Assign Employee", doc.name);
 			}
 		}
-		})
-
+	});
 }
  
 function set_read_fields(frm){
 	var myStringArray = ["phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email","select_job","rate","description"];
-			var arrayLength = myStringArray.length;
-			for (var i = 0; i < arrayLength; i++) {
-				frm.set_df_property(myStringArray[i], "read_only", 1);
-			}
+	var arrayLength = myStringArray.length;
+	for(var i = 0; i < arrayLength; i++){
+		frm.set_df_property(myStringArray[i], "read_only", 1);
+	}
  }
   
   
 function timer_value(frm){
-	var time=frappe.datetime.get_hour_diff(cur_frm.doc.from_date,frappe.datetime.now_datetime())
+	var time = frappe.datetime.get_hour_diff(cur_frm.doc.from_date,frappe.datetime.now_datetime());
 	if(time<24){
 		var myStringArray = ["company","posting_date_time","from_date","to_date","category","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","rate","description","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
 		var arrayLength = myStringArray.length;
@@ -351,12 +350,12 @@ function timer_value(frm){
 		}
 		frm.set_df_property("time_remaining_for_make_edits", "options"," ");
 	}else{
-		set_read_fields(frm)
-		time_value(frm)
+		set_read_fields(frm);
+		time_value(frm);
 		setTimeout(function(){
-			time_value(frm)
-			cur_frm.refresh()
-		},60000);  
+			time_value(frm);
+			cur_frm.refresh();
+		},60000);
 	}
 }
 

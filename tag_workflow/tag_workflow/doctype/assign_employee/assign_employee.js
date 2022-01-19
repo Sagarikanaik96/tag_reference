@@ -48,6 +48,15 @@ frappe.ui.form.on('Assign Employee', {
 			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
 			frappe.validated=false
 		}
+	},
+	setup: function(frm){
+		frm.set_query("company", function(doc){
+			return {
+				filters: [
+					["Company", "organization_type", "=", "Staffing"]
+				]
+			}
+		});
 	}
 });
 
@@ -59,7 +68,7 @@ function make_hiring_notification(frm){
 		"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
 		"args":{
 			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
-			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share
+			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category
 		}
 	});
 }

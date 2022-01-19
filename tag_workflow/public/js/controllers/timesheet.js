@@ -54,6 +54,15 @@ frappe.ui.form.on("Timesheet", {
 		});
 	},
 	onload:function(frm){
+		if(frappe.user.has_role("Tag Admin")){
+			frm.set_query("company", function(){
+				return {
+					filters: [
+						["Company", "organization_type", "in",["Hiring", "Exclusive Hiring"]]
+					]
+				}
+			});
+		}
 		if(!frm.doc.is_employee_rating_done && frm.doc.workflow_state == "Approved" && frm.doc.status == "Submitted"){
 			if((frappe.user_roles.includes('Hiring Admin') || frappe.user_roles.includes('Hiring User')) && frappe.session.user!='Administrator'){
 				employee_timesheet_rating(frm)
@@ -198,7 +207,7 @@ function trigger_email(frm, key, value, type){
 function notify_email(frm, type, value){
 	frappe.call({
 		"method": "tag_workflow.utils.timesheet.notify_email",
-		"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation,'employee_company':frm.doc.employee_company}
+		"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation,'employee_company':frm.doc.employee_company,'timesheet_name':frm.doc.name}
 	});
 }
 

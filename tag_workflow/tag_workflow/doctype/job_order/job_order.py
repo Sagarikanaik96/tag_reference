@@ -38,7 +38,7 @@ def joborder_notification(organizaton,doc_name,company,job_title,posting_date,jo
 
 def is_send_mail_required(organizaton,doc_name,msg):
     try:
-        staffing = organizaton.split(',')[1:]
+        staffing = organizaton.split(',')
         staffing_list = []
         for name in staffing:
             sql = '''select name from `tabUser` where company = "{}"'''.format(name.strip())
@@ -74,20 +74,29 @@ def update_joborder_rate_desc(company = None,job = None):
         return org_detail[0]
 
 @frappe.whitelist()
-def after_denied_joborder(staff_company,joborder_name):
+def after_denied_joborder(staff_company,joborder_name,job_title,hiring_name):
     sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staff_company)
     share_list = frappe.db.sql(sql, as_list=True)
+    sql1 = ''' select email from `tabUser` where organization_type = 'hiring' and company = "{}"'''.format(hiring_name)
+    hiring_list = frappe.db.sql(sql1,as_list=True)
+    hiring_user_list = [user[0] for user in hiring_list]
+
+    
     if share_list:
         for user in share_list:
             add(ORD, joborder_name, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
+
     try:
         jb_ord = frappe.get_doc(ORD,joborder_name)
         jb_ord.is_single_share = 0
         jb_ord.save(ignore_permissions = True)
+        subject = 'Job Order Notification'
+        msg=f'{staff_company} placed unable to fulfill claim on your work order: {job_title}.'
+        make_system_notification(hiring_user_list,msg,ORD,joborder_name,subject)   
+        sendmail(emails = hiring_user_list, message = msg, subject = subject, doctype = ORD, docname = joborder_name)
+        
     except Exception as e:
         frappe.log_error(e,'job order not found')
-
-    return True
 	
 
 #-----------------------------------#

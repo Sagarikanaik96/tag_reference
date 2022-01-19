@@ -2,7 +2,7 @@ import frappe
 from frappe import _
 import re
 from frappe.utils import (cint, flt, has_gravatar, escape_html, format_datetime, now_datetime, get_formatted_email, today)
-
+from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
 
 # user method update
 STANDARD_USERS = ("Guest", "Administrator")
@@ -121,3 +121,69 @@ def validate_abbr(self):
 def validate_standard_navbar_items(self):
     doc_before_save = self.get_doc_before_save()
     print(doc_before_save)
+
+#------crm contact------#
+def create_contact(self):
+    if not self.lead_name:
+        self.set_lead_name()
+
+    names = self.lead_name.strip().split(" ")
+    if len(names) > 1:
+        first_name, last_name = names[0], " ".join(names[1:])
+    else:
+        first_name, last_name = self.lead_name, None
+
+    contact = frappe.new_doc("Contact")
+    contact.update({
+        "first_name": first_name,
+        "last_name": last_name,
+        "salutation": self.salutation,
+        "gender": self.gender,
+        "designation": self.designation,
+        "company_name": self.company_name,
+        "email_address": self.email_id
+    })
+
+    if self.company:
+        contact.company = self.company
+    else:
+        contact.company = "TAG"
+
+    if self.email_id:
+        contact.append("email_ids", {
+            "email_id": self.email_id,
+            "is_primary": 1
+        })
+
+    if self.phone:
+        contact.append("phone_nos", {
+            "phone": self.phone,
+            "is_primary_phone": 1
+        })
+
+    if self.mobile_no:
+        contact.append("phone_nos", {
+            "phone": self.mobile_no,
+            "is_primary_mobile_no":1
+        })
+    contact.insert(ignore_permissions=True)
+    return contact
+
+#-------timesheet------#
+def get_bill_cost(rate, data):
+    bill_rate = flt(rate.get('billing_rate')) if flt(data.billing_rate) == 0 else data.billing_rate
+    cost_rate = flt(rate.get('costing_rate')) if flt(data.costing_rate) == 0 else data.costing_rate
+    return bill_rate, cost_rate
+
+def update_cost(self):
+    for data in self.time_logs:
+        if data.activity_type or data.is_billable:
+            rate = get_activity_cost(self.employee, data.activity_type)
+            hours = data.billing_hours or 0
+            costing_hours = data.billing_hours or data.hours or 0
+            if rate:
+                bill_rate, cost_rate = get_bill_cost(rate, data)
+                data.billing_rate = bill_rate
+                data.costing_rate = cost_rate
+                data.billing_amount = ((data.billing_rate * (hours-data.extra_hours))+data.flat_rate)+(data.extra_hours*data.extra_rate)
+                data.costing_amount = data.costing_rate * costing_hours

@@ -47,7 +47,7 @@ def get_timesheet_employee(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def notify_email(job_order, employee, value, subject, company, employee_name, date,employee_company):
+def notify_email(job_order, employee, value, subject, company, employee_name, date,employee_company,timesheet_name):
     try:
         sql = """ select name from `tabUser` where company = (select company from `tabEmployee` where name = '{0}') """.format(employee)
         user_list = frappe.db.sql(sql, as_dict=1)
@@ -61,8 +61,8 @@ def notify_email(job_order, employee, value, subject, company, employee_name, da
             users.append(user['name'])
 
         if users:
-            make_system_notification(users, message, JOB, job_order, subject)
-            sendmail(users, message, subject, JOB, job_order)
+            make_system_notification(users, message, "Timesheet", timesheet_name, subject)
+            sendmail(users, message, subject, "Timesheet", timesheet_name)
     except Exception as e:
         frappe.log_error(e, "Timesheet Email Error")
         frappe.throw(e)

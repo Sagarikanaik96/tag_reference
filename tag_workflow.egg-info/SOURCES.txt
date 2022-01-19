@@ -106,6 +106,7 @@ tag_workflow/public/js/doctype_list/company_list.js
 tag_workflow/public/js/doctype_list/employee_list.js
 tag_workflow/public/js/doctype_list/sales_invoice_list.js
 tag_workflow/public/js/doctype_list/user_list.js
+tag_workflow/public/js/doctype_list/designation_list.js
 tag_workflow/public/js/frappe/new_file_uploader/index.js
 tag_workflow/public/js/template/tag.html
 tag_workflow/tag_workflow/__init__.py
