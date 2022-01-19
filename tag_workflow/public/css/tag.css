@@ -266,7 +266,7 @@ input::-webkit-credentials-auto-fill-button {
 #page-staff_company_list #listdata table tr td {
     background: #FAFBFC;
     font-weight: 500;
-    font-size: 16px;
+    font-size: 14px;
 }
 #page-staff_company_list #listdata table tr td button {
     background: #21B9E4;
@@ -277,9 +277,9 @@ input::-webkit-credentials-auto-fill-button {
     padding: 3px 12px;
     margin-top: 15px;
 }
-#page-staff_company_list #industrydata h4,
-#page-staff_company_list #teamdata h4,
-#page-staff_company_list #compreview h4 {
+#page-staff_company_list #industrydata h3,
+#page-staff_company_list #teamdata h3,
+#page-staff_company_list #compreview h3 {
     margin-bottom: 0;
     font-weight: 500;
     font-size: 16px;
@@ -292,10 +292,12 @@ input::-webkit-credentials-auto-fill-button {
     height: 100%;
     overflow-y: auto;
 }
-#page-staff_company_list #listdata table tr td[colspan="3"] h6 {
+#page-staff_company_list #listdata table tr td[colspan="3"] h4 {
     font-size: 16px;
+    margin-bottom: 5px;
+    font-weight: 600;
 }
-#page-staff_company_list #listdata table tr td h3 {
+#page-staff_company_list #listdata table tr td h4 {
     font-size: 24px;
     font-weight: 600;
     margin-bottom: 5px;
@@ -348,7 +350,10 @@ input::-webkit-credentials-auto-fill-button {
     z-index: 9 !important;
     transition: .5s ease-in-out;
 }
-
+#page-Workspaces .page-title .title-area .title-text {
+    margin-left: 120px;
+    font-weight: 600;
+}
 /* Chat UI */
 .chat-space .chat-space-container .sender-message .message-bubble {
     background: #54C38E !important;
@@ -398,13 +403,26 @@ input::-webkit-credentials-auto-fill-button {
     font-size: 14px;
 }
 
+/* Responsive css start */
+
+@media (max-width: 1300px) {
+    .col.layout-main-section-wrapper, 
+    .col-md-12.layout-main-section-wrapper {
+        left: 10rem;
+        max-width: 80%;
+    }
+    #page-Workspaces .page-title .title-area .title-text {
+        margin-left: 152px;
+    }
+}
+
 
 @media (max-width:768px) {
     #page-User .layout-main-section-wrapper .layout-main-section , 
     #page-Company .layout-main-section-wrapper .layout-main-section ,
     #page-Lead .layout-main-section-wrapper .layout-main-section ,
     #page-Timesheet .layout-main-section-wrapper .layout-main-section,
-    #page-dashboard-view .dashboard .dashboard-graph 
+    #page-dashboard-view .dashboard .dashboard-graph
     {
         width: 100%;
         margin-left: 0;
@@ -414,13 +432,8 @@ input::-webkit-credentials-auto-fill-button {
         max-width: 100%;
         width: 100%;
     }
-}
-
-@media (max-width: 1300px) {
-    .col.layout-main-section-wrapper, 
-    .col-md-12.layout-main-section-wrapper {
-        left: 10rem;
-        max-width: 80%;
+    #page-Workspaces .page-title .title-area .title-text {
+        margin-left: 0px;
     }
 }
 
@@ -428,6 +441,20 @@ input::-webkit-credentials-auto-fill-button {
     .layout-main .form-column.col-sm-12 > form > .input-max-width {
         max-width: 100%;
         padding-right: 0px;
+    }
+}
+
+@media (min-width:570px) and (max-width:768px) {
+    .dropdown-notifications .notifications-list {
+        right: -230px;
+    }
+}
+
+@media (max-width: 768px) {
+    .col.layout-main-section-wrapper, 
+    .col-md-12.layout-main-section-wrapper {
+        left: 0rem;
+        max-width: 100%;
     }
 }
 
