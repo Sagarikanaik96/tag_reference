@@ -3,7 +3,7 @@ def get_data():
             'fieldname': 'job_order',
             'transactions': [
                 {
-                    'label': ('Assign Employee'),
+                    'label': ('Assigned Employee'),
                     'items': ['Assign Employee']
                 },
             ]
