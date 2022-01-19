@@ -16,7 +16,7 @@ def execute(filters=None):
 
 	columns=[
 		{'fieldname':'employee_name','label':('Employee Name'),'fieldtype':'Data','width':150},
-        {'fieldname':'job_order_detail','label':('Job Title'),'fieldtype':'Link','options':'Job Order','width':100},
+        {'fieldname':'activity_type','label':('Job Title'),'fieldtype':'Data','options':'Job Order','width':100},
         {'fieldname':'company','label':('Company'),'fieldtype':'Data','width':100},
         {'fieldname':'total_billable_hours','label':('Hours Worked'),'fieldtype':'Int','width':100},
         {'fieldname':'start_date','label':('Start Date'),'fieldtype':'Date','width':100},
@@ -28,11 +28,11 @@ def execute(filters=None):
 	]
 	current_company=frappe.db.sql(''' select company from `tabUser` where email='{}' '''.format(frappe.session.user),as_list=1)
 	if(len(current_company)==0 or current_company[0][0]=='TAG'):
-		sql = ''' SELECT `tabTimesheet`.employee_name, `tabTimesheet`.job_order_detail, `tabTimesheet`.company, `tabTimesheet`.total_billable_hours, `tabTimesheet`.start_date, `tabTimesheet`.end_date, `tabTimesheet Detail`.base_billing_rate, `tabTimesheet`.total_billable_amount, `tabTimesheet`.non_satisfactory, `tabTimesheet`.dnr FROM `tabTimesheet`, `tabTimesheet Detail` WHERE `tabTimesheet`.start_date >= '{0}' and `tabTimesheet`.end_date <= '{1}' and `tabTimesheet`.name = `tabTimesheet Detail`.parent'''.format(from_date,to_date)
+		sql = ''' SELECT `tabTimesheet`.employee_name, `tabTimesheet Detail`.activity_type, `tabTimesheet`.company, `tabTimesheet`.total_billable_hours, `tabTimesheet`.start_date, `tabTimesheet`.end_date, `tabTimesheet Detail`.base_billing_rate, `tabTimesheet`.total_billable_amount, `tabTimesheet`.non_satisfactory, `tabTimesheet`.dnr FROM `tabTimesheet`, `tabTimesheet Detail` WHERE `tabTimesheet`.start_date >= '{0}' and `tabTimesheet`.end_date <= '{1}' and `tabTimesheet`.name = `tabTimesheet Detail`.parent'''.format(from_date,to_date)
 		data=frappe.db.sql(sql)
 	else:
 		current_company=current_company[0][0]
-		sql = '''SELECT `tabTimesheet`.employee_name, `tabTimesheet`.job_order_detail, `tabTimesheet`.company, `tabTimesheet`.total_billable_hours, `tabTimesheet`.start_date, `tabTimesheet`.end_date, `tabTimesheet Detail`.base_billing_rate, `tabTimesheet`.total_billable_amount, `tabTimesheet`.non_satisfactory, `tabTimesheet`.dnr FROM `tabTimesheet`, `tabTimesheet Detail` WHERE `tabTimesheet`.start_date >= '{0}' and `tabTimesheet`.end_date <= '{1}' and `tabTimesheet`.name = `tabTimesheet Detail`.parent and employee_company='{2}' '''.format(from_date,to_date,current_company)
+		sql = '''SELECT `tabTimesheet`.employee_name, `tabTimesheet Detail`.activity_type, `tabTimesheet`.company, `tabTimesheet`.total_billable_hours, `tabTimesheet`.start_date, `tabTimesheet`.end_date, `tabTimesheet Detail`.base_billing_rate, `tabTimesheet`.total_billable_amount, `tabTimesheet`.non_satisfactory, `tabTimesheet`.dnr FROM `tabTimesheet`, `tabTimesheet Detail` WHERE `tabTimesheet`.start_date >= '{0}' and `tabTimesheet`.end_date <= '{1}' and `tabTimesheet`.name = `tabTimesheet Detail`.parent and employee_company='{2}' '''.format(from_date,to_date,current_company)
 		data=frappe.db.sql(sql)
 
 	return columns, data
