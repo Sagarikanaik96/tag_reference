@@ -198,7 +198,7 @@ function trigger_email(frm, key, value, type){
 function notify_email(frm, type, value){
 	frappe.call({
 		"method": "tag_workflow.utils.timesheet.notify_email",
-		"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation,'employee_company':frm.doc.employee_company}
+		"args": {"job_order": frm.doc.job_order_detail, "employee": frm.doc.employee, "value": value, "subject": type, "company": frm.doc.company, "employee_name": frm.doc.employee_name, "date": frm.doc.creation,'employee_company':frm.doc.employee_company,'timesheet_name':frm.doc.name}
 	});
 }
 
