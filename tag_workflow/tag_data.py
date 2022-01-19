@@ -8,6 +8,7 @@ from frappe.utils import date_diff
 import json
 
 jobOrder = "Job Order"
+assignEmployees = "Assign Employee"
 
 @frappe.whitelist()
 def company_details(company_name=None):
@@ -105,7 +106,7 @@ def update_job_order(job_name, employee_filled, staffing_org, hiringorg, name):
         users = [usr['email'] for usr in user_list]
         make_system_notification(users,msg,jobOrder,job_name,sub)   
         enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name)
-        return sendmail(users, msg, sub, "Assign Employee", name)
+        return sendmail(users, msg, sub, assignEmployees, name)
     except Exception as e:
         frappe.db.rollback()
         frappe.error_log(e, "final_notification")
@@ -145,7 +146,7 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
 
             l = [l[0] for l in user_list]
             for user in l:
-                add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0)
+                add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)
             sub="Employee Assigned"
             msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}'
             make_system_notification(l,msg,'Assign Employee',doc_name,sub)
@@ -176,12 +177,8 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
         if int(no_of_worker_req) > len(emp_detail):
             sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org)
             share_list = frappe.db.sql(sql, as_list = True)
-            if share_list:
-                for user in share_list:
-                    add("Job Order", job_order.name, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
+            assign_notification(share_list,hiring_user_list,doc_name,job_order) 
             subject = 'Job Order Notification' 
-            for user in hiring_user_list:
-                add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0)   
             msg=f'{staffing_org} placed partial claim on your work order: {job_title}. Please review & approve the candidates matched with this work order.'
             make_system_notification(hiring_user_list,msg,'Assign Employee',doc_name,subject)
             return send_email(subject,msg,hiring_user_list)
@@ -189,7 +186,7 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
             if hiring_user_list:
                 subject = 'Job Order Notification' 
                 for user in hiring_user_list:
-                    add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0)   
+                    add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)   
                
                 msg=f'{staffing_org} placed Full claim on your work order: {job_title}. Please review & approve the candidates matched with this work order.'
                 make_system_notification(hiring_user_list,msg,'Assign Employee',doc_name,subject)
@@ -478,3 +475,11 @@ def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l
         return send_email(subject,message,l)
     except Exception as e:
         frappe.error_log(e, "Single Job Order Notification Error")
+
+def assign_notification(share_list,hiring_user_list,doc_name,job_order):
+    if share_list:
+        for user in share_list:
+            add("Job Order", job_order.name, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
+    for user in hiring_user_list:
+        add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)  
+        
