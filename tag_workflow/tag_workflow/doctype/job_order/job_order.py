@@ -38,7 +38,7 @@ def joborder_notification(organizaton,doc_name,company,job_title,posting_date,jo
 
 def is_send_mail_required(organizaton,doc_name,msg):
     try:
-        staffing = organizaton.split(',')[1:]
+        staffing = organizaton.split(',')
         staffing_list = []
         for name in staffing:
             sql = '''select name from `tabUser` where company = "{}"'''.format(name.strip())

@@ -120,8 +120,9 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
         if(len(update_values)<2):
             bid_receive=frappe.get_doc(jobOrder,job_order)
 
-            if is_single_share:
-                check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,job_title,hiring_org)
+
+            if int(is_single_share):
+                check_partial_employee(bid_receive,staffing_org,emp_detail,no_of_worker_req,job_title,hiring_org,doc_name)
                 return
 
             bid_receive.bid=1+int(bid_receive.bid)
@@ -154,10 +155,10 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
         print(e, frappe.get_traceback())
         frappe.db.rollback()
 
-def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,job_title,hiring_org):
+def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,job_title,hiring_org,doc_name):
     try:
         emp_detail = json.loads(emp_detail)
-        job_order.is_single_share = 0
+        job_order.is_single_share = '0'
 
         job_order.bid=1+int(job_order.bid)
         if(job_order.claim is None):
@@ -178,15 +179,20 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
             if share_list:
                 for user in share_list:
                     add("Job Order", job_order.name, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
-            subject = 'Job Order Notification'    
+            subject = 'Job Order Notification' 
+            for user in hiring_user_list:
+                add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0)   
             msg=f'{staffing_org} placed partial claim on your work order: {job_title}. Please review & approve the candidates matched with this work order.'
-            make_system_notification(hiring_user_list,msg,jobOrder,job_order.name,subject)   
+            make_system_notification(hiring_user_list,msg,'Assign Employee',doc_name,subject)
             return send_email(subject,msg,hiring_user_list)
         else:
             if hiring_user_list:
-                subject = 'Job Order Notification'    
+                subject = 'Job Order Notification' 
+                for user in hiring_user_list:
+                    add("Assign Employee", doc_name, user, read=1, write = 0, share = 0, everyone = 0)   
+               
                 msg=f'{staffing_org} placed Full claim on your work order: {job_title}. Please review & approve the candidates matched with this work order.'
-                make_system_notification(hiring_user_list,msg,jobOrder,job_order.name,subject)
+                make_system_notification(hiring_user_list,msg,'Assign Employee',doc_name,subject)
                 return send_email(subject,msg,hiring_user_list)
             
     except Exception as e:
