@@ -180,7 +180,7 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
             assign_notification(share_list,hiring_user_list,doc_name,job_order) 
             subject = 'Job Order Notification' 
             msg=f'{staffing_org} placed partial claim on your work order: {job_title}. Please review & approve the candidates matched with this work order.'
-            make_system_notification(hiring_user_list,msg,'Assign Employee',doc_name,subject)
+            make_system_notification(hiring_user_list,msg,assignEmployees,doc_name,subject)
             return send_email(subject,msg,hiring_user_list)
         else:
             if hiring_user_list:
@@ -189,7 +189,7 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
                     add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)   
                
                 msg=f'{staffing_org} placed Full claim on your work order: {job_title}. Please review & approve the candidates matched with this work order.'
-                make_system_notification(hiring_user_list,msg,'Assign Employee',doc_name,subject)
+                make_system_notification(hiring_user_list,msg,assignEmployees,doc_name,subject)
                 return send_email(subject,msg,hiring_user_list)
             
     except Exception as e:
