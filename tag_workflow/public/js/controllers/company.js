@@ -2,10 +2,11 @@ frappe.ui.form.on("Company", {
   refresh: function (frm) {
     cur_frm.clear_custom_buttons();
     init_values(frm);
+    hide_connections(frm);
     hide_details(frm);
     update_company_fields(frm);
     jazzhr_data(frm);
-    make_invoice(frm);
+    make_invoice(frm); 
     if (frappe.user.has_role("Tag Admin")) {
       frm.set_df_property("employees", "read_only", 1);
     }
@@ -370,4 +371,8 @@ function prepare_invoice(frm) {
       })
       .addClass("btn-primary");
   }
+}
+
+function hide_connections(frm){
+    frm.dashboard.hide();
 }
