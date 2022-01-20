@@ -18,6 +18,7 @@ frappe.ui.form.on("Company", {
 
     if (frm.doc.__islocal == 1) {
       $('div[data-fieldname="average_rating"]').css("display", "none");
+      cancel_company(frm);
     }
   },
   setup: function (frm) {
@@ -401,3 +402,10 @@ function uploaded_file_format(frm){
   };
 	
 }
+
+function cancel_company(frm){
+	frm.add_custom_button(__('Cancel'), function(){
+		frappe.set_route("Form", "Company");
+	});
+}
+

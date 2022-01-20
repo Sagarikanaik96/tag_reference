@@ -7,6 +7,9 @@ frappe.ui.form.on("User", {
 		field_reqd(frm);
 		field_check(frm);
 		cur_frm.dashboard.hide()
+		if(frm.doc.__islocal==1){
+			cancel_user(frm);
+		}
 
 	},
 	setup: function(frm){
@@ -316,4 +319,10 @@ function org_info(frm){
 				}
 			}	
 		})
+}
+
+function cancel_user(frm){
+	frm.add_custom_button(__('Cancel'), function(){
+		frappe.set_route("Form", "User");
+	});
 }
