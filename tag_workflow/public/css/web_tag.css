@@ -12,7 +12,7 @@ label {
 	color: #2A2E43;
 }
 .for-login .page-card .page-card-body .forgot-password-message {
-	text-align: -webkit-auto !important;
+	text-align: left !important;
 	position: relative;
 }
 input:hover { 
