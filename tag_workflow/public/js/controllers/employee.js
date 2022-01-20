@@ -3,6 +3,7 @@ frappe.ui.form.on("Employee", {
 		trigger_hide(frm);
 		required_field(frm);
 		cur_frm.dashboard.hide()
+		uploaded_file_format(frm);
 	},
 	decrypt_ssn: function(frm) {
 		frappe.call({
@@ -110,4 +111,17 @@ function render_orgs(child, frm){
 			}
 		}
 	});
+}
+
+function uploaded_file_format(frm){
+	frm.get_field('resume').df.options = {
+	    restrictions: {
+	    allowed_file_types: ['.pdf','.txt','.docx']
+		}
+	};
+	frm.get_field('w4').df.options = {
+	    restrictions: {
+	    allowed_file_types: ['.pdf','.txt','.docx']
+		}
+	};	
 }
