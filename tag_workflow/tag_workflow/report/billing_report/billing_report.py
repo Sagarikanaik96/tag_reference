@@ -30,10 +30,10 @@ def execute(filters=None):
 		frappe.msgprint("Start Date Can't be Future Date For End Date")
 	else:
 		current_company=frappe.db.sql(''' select company from `tabUser` where email='{}' '''.format(frappe.session.user),as_list=1)
-		data= fields_data(current_company,filters,data,from_date,to_date,company_search)
+		dataa= fields_data(current_company,filters,data,from_date,to_date,company_search)
 		
 			
-	return columns, data
+	return columns, dataa
 
 def fields_data(current_company,filters,data,from_date,to_date,company_search):
 	if(len(current_company)==0 or current_company[0][0]=='TAG'):
