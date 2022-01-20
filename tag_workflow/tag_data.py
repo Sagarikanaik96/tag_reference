@@ -364,7 +364,10 @@ def delete_file_data(file_name):
 
 def job_order_notification(job_order_title,hiring_org,job_order,subject,l):
     msg=f'New Work Order for a {job_order_title} has been created by {hiring_org}.'
-    return make_system_notification(l,msg,jobOrder,job_order,subject)
+    make_system_notification(l,msg,jobOrder,job_order,subject)
+    url=frappe.utils.get_url_to_form(jobOrder,job_order )
+    message=f'New Work Order for a {job_order_title} has been created by {hiring_org}. <a href="{url}">View Work Order</a>'
+    return send_email(subject,message,l)
 
 @frappe.whitelist()
 def disable_user(company, check):
@@ -477,7 +480,7 @@ def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l
 def assign_notification(share_list,hiring_user_list,doc_name,job_order):
     if share_list:
         for user in share_list:
-            add("Job Order", job_order.name, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
+            add(jobOrder, job_order.name, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
     for user in hiring_user_list:
         add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)  
         

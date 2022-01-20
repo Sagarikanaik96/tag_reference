@@ -49,6 +49,13 @@ frappe.ui.form.on("Employee", {
 			frappe.validated = false;
 		}
  
+	},
+	setup:function(frm){
+		frm.set_query("company", function(doc) {
+			return {
+				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]] ]
+			}
+		});
 	}
 });
 
