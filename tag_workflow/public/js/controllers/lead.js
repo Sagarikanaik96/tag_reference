@@ -2,6 +2,7 @@ frappe.ui.form.on("Lead", {
 	refresh: function(frm){
 		cur_frm.clear_custom_buttons();
 		reqd_fields(frm);
+		hide_details(frm);
 		make_contract(frm);
 		let roles = frappe.user_roles;
 		if(cur_frm.is_dirty() != 1 && frm.doc.status == "Close" && (roles.includes("Tag Admin") || roles.includes("Tag User") || roles.includes("Staffing Admin") || roles.includes("Staffing User"))){
@@ -131,3 +132,13 @@ function run_contract(frm){
 	contract.hiring_company = "";
 	frappe.set_route("form", contract.doctype, contract.name);
 }
+
+/*---------hide details----------*/
+function hide_details(frm) {
+	let fields = [
+	  "source","designation","campaign_name","gender","signature"
+	];
+	for (let data in fields) {
+	  cur_frm.toggle_display(fields[data], 0);
+	}
+  }
