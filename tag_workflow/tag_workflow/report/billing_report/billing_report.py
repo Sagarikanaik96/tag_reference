@@ -30,19 +30,23 @@ def execute(filters=None):
 		frappe.msgprint("Start Date Can't be Future Date For End Date")
 	else:
 		current_company=frappe.db.sql(''' select company from `tabUser` where email='{}' '''.format(frappe.session.user),as_list=1)
-		if(len(current_company)==0 or current_company[0][0]=='TAG'):
-			if(filters.get('companies')):
-				data=frappe.db.sql(''' select T.employee_company,min(JO.from_date),max(JO.to_date),sum(TD.base_billing_amount) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and from_date>'{0}' and end_date<'{1}' and T.employee_company like '{2}%' group by T.employee_company; '''.format(from_date,to_date,company_search))
-			else:
-				data=frappe.db.sql(''' select T.employee_company,min(JO.from_date),max(JO.to_date),sum(TD.base_billing_amount) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and from_date>'{0}' and end_date<'{1}' group by T.employee_company; '''.format(from_date,to_date))
-	
+		data= fields_data(current_company,filters,data,from_date,to_date,company_search)
 		
-		else:
-			current_company=current_company[0][0]
-			if(filters.get('companies')):
-				data=frappe.db.sql(''' select T.employee_company,min(JO.from_date),max(JO.to_date),sum(TD.base_billing_amount) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.company='{0}' and from_date>'{1}' and end_date<'{2}' and T.employee_company like '{3}%' group by T.employee_company; '''.format(current_company,from_date,to_date,company_search))
-			else:
-				data=frappe.db.sql(''' select T.employee_company,min(JO.from_date),max(JO.to_date),sum(TD.base_billing_amount) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.company='{0}' and from_date>'{1}' and end_date<'{2}' group by T.employee_company; '''.format(current_company,from_date,to_date))
-	
 			
 	return columns, data
+
+def fields_data(current_company,filters,data,from_date,to_date,company_search):
+	if(len(current_company)==0 or current_company[0][0]=='TAG'):
+		if(filters.get('companies')):
+			data=frappe.db.sql(''' select T.employee_company,min(JO.from_date),max(JO.to_date),sum(TD.base_billing_amount) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and from_date>'{0}' and end_date<'{1}' and T.employee_company like '{2}%' group by T.employee_company; '''.format(from_date,to_date,company_search))
+		else:
+			data=frappe.db.sql(''' select T.employee_company,min(JO.from_date),max(JO.to_date),sum(TD.base_billing_amount) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and from_date>'{0}' and end_date<'{1}' group by T.employee_company; '''.format(from_date,to_date))
+
+	
+	else:
+		current_company=current_company[0][0]
+		if(filters.get('companies')):
+			data=frappe.db.sql(''' select T.employee_company,min(JO.from_date),max(JO.to_date),sum(TD.base_billing_amount) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.company='{0}' and from_date>'{1}' and end_date<'{2}' and T.employee_company like '{3}%' group by T.employee_company; '''.format(current_company,from_date,to_date,company_search))
+		else:
+			data=frappe.db.sql(''' select T.employee_company,min(JO.from_date),max(JO.to_date),sum(TD.base_billing_amount) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.company='{0}' and from_date>'{1}' and end_date<'{2}' group by T.employee_company; '''.format(current_company,from_date,to_date))
+	return data
