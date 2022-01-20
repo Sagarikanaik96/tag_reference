@@ -364,11 +364,8 @@ def delete_file_data(file_name):
 
 def job_order_notification(job_order_title,hiring_org,job_order,subject,l):
     msg=f'New Work Order for a {job_order_title} has been created by {hiring_org}.'
-    make_system_notification(l,msg,jobOrder,job_order,subject)
-    url=frappe.utils.get_url_to_form(jobOrder,job_order )
-    message=f'New Work Order for a {job_order_title} has been created by {hiring_org}. <a href="{url}">View Work Order</a>'
-    return send_email(subject,message,l)
-
+    return make_system_notification(l,msg,jobOrder,job_order,subject)
+    
 @frappe.whitelist()
 def disable_user(company, check):
     try:
