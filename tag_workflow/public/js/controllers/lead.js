@@ -136,7 +136,7 @@ function run_contract(frm){
 /*---------hide details----------*/
 function hide_details(frm) {
 	let fields = [
-	  "source","designation","campaign_name","gender","signature"
+	  "source","designation","campaign_name","gender"
 	];
 	for (let data in fields) {
 	  cur_frm.toggle_display(fields[data], 0);
