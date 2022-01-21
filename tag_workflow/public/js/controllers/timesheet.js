@@ -388,7 +388,7 @@ frappe.ui.form.on("Timesheet Detail", {
 			frappe.model.set_value(cdt, cdn, "from_time", frm.doc.from_date);
 		}
 		else if((child.from_time).slice(0,10)>(frm.doc.to_date)){
-			frappe.msgprint('Start Date cant be before Job Order Start Date')
+			frappe.msgprint('Start Date cant be After Job Order End Date')
 			frappe.model.set_value(cdt, cdn, "from_time", frm.doc.from_date);
 		}
 		if(child.to_time){
