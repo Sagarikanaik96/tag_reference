@@ -345,7 +345,6 @@ function approval_timesheet(frm){
 
 frappe.ui.form.on("Timesheet Detail", {
 	activity_type:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn]
 		frappe.model.set_value(cdt,cdn,"is_billable",1)
 		frappe.model.set_value(cdt, cdn, "billing_rate", frm.doc.per_hour_rate);
 		frappe.model.set_value(cdt, cdn, "flat_rate", frm.doc.flat_rate);
@@ -393,7 +392,6 @@ frappe.ui.form.on("Timesheet Detail", {
 			frappe.model.set_value(cdt, cdn, "from_time", frm.doc.from_date);
 		}
 		if(child.to_time){
-			var t=child.to_time
 			frappe.model.set_value(cdt, cdn, "hours", "");
 			frappe.model.set_value(cdt, cdn, "to_time","");
 		}
