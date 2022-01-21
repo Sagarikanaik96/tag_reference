@@ -369,3 +369,13 @@ def timesheet_dispute_comment_box(comment,timesheet):
     except Exception as e:
         frappe.error_log(e, "Dispute Message")
         frappe.throw(e)
+
+@frappe.whitelist()
+def job_name(doctype,txt,searchfield,page_len,start,filters):
+    try:
+        job=filters.get('job_name')
+        sql = ''' select select_job from `tabJob Order` where name="{0}" '''.format(job)
+        return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.error_log(e, "Job Order For Timesheet")
+        frappe.throw(e)
