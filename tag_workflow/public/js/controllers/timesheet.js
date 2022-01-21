@@ -52,6 +52,15 @@ frappe.ui.form.on("Timesheet", {
 				}
 			}
 		});
+		frm.fields_dict['time_logs'].grid.get_field('activity_type').get_query = function(doc, cdt, cdn) {
+			return {
+				query: "tag_workflow.utils.timesheet.job_name",
+				filters: {
+					'job_name': doc.job_order_detail
+				}
+
+			}
+		}
 	},
 	onload:function(frm){
 		if(frappe.user.has_role("Tag Admin")){
@@ -94,7 +103,7 @@ frappe.ui.form.on("Timesheet", {
 
 function job_order_details(frm){
 	if(frm.doc.job_order_detail){
-		frappe.db.get_value("Job Order", {"name": frm.doc.job_order_detail}, ["select_job", "job_site", "job_duration", "per_hour"], function(r){
+		frappe.db.get_value("Job Order", {"name": frm.doc.job_order_detail}, ["select_job", "job_site", "job_duration", "per_hour","from_date","to_date","per_hour","flat_rate"], function(r){
 			if(r){
 				let data = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
 					<p><b>Job Title: </b> ${r['select_job']}</p>
@@ -103,6 +112,12 @@ function job_order_details(frm){
 					<p><b>Rate Per Hour: </b> ${r['per_hour']}</p>
 				</div>`;
 				frm.set_df_property("job_details", "options", data);
+				frm.set_value('from_date',(r.from_date).slice(0,10))  //.slice(0,10)
+				frm.set_value('to_date',(r.to_date).slice(0,10)) //.slice(0,10)
+				frm.set_value('job_name',(r.select_job))
+				frm.set_value('per_hour_rate',(r.per_hour))
+				frm.set_value('flat_rate',(r.flat_rate))
+
 			}
 		});
 	}else{
@@ -172,7 +187,7 @@ function update_job_detail(frm){
 				if(r.message){
 					cur_frm.clear_table("time_logs");
 					var child = frappe.model.get_new_doc("Timesheet Detail", cur_frm.doc, "time_logs");
-					$.extend(child, {"activity_type": r.message[0], "from_time": r.message[1],"to_time":r.message[2],"hours":r.message[3],"is_billable":1,"billing_hours":r.message[3],"billing_rate":r.message[4],"flat_rate":r.message[5],"extra_hours":r.message[6],"extra_rate":r.message[7]});
+					$.extend(child, {"activity_type": r.message[0], "is_billable":1,"billing_rate":r.message[4],"flat_rate":r.message[5],"extra_hours":r.message[6],"extra_rate":r.message[7]});
 					cur_frm.refresh_field("time_logs");
 				}
 			}
@@ -233,11 +248,12 @@ function denied_timesheet(frm){
 						pop_up.hide();
 						var comment=pop_up.get_values()
 						frappe.call({
-							method:"tag_workflow.utils.timesheet.jb_ord_dispute_comment_box",
+							
+                            method:"tag_workflow.utils.timesheet.timesheet_dispute_comment_box",
 							args:{
-								'comment':comment,
-								'job_order':cur_frm.doc.job_order_detail
-							},
+                                'comment':comment,
+                                'timesheet':cur_frm.doc.name //fetch timesheet name
+                            },
 							callback:function(rm){
 								if (rm.message){
 									frappe.msgprint('Comment Submitted Successfully')
@@ -325,3 +341,60 @@ function approval_timesheet(frm){
 		
 	})
 }
+
+
+frappe.ui.form.on("Timesheet Detail", {
+	activity_type:function(frm,cdt,cdn){
+		frappe.model.set_value(cdt,cdn,"is_billable",1)
+		frappe.model.set_value(cdt, cdn, "billing_rate", frm.doc.per_hour_rate);
+		frappe.model.set_value(cdt, cdn, "flat_rate", frm.doc.flat_rate);
+
+
+	},
+	is_billable:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn]
+		if(child.is_billable==1){
+			frappe.model.set_value(cdt, cdn, "billing_rate", frm.doc.per_hour_rate);
+			frappe.model.set_value(cdt, cdn, "flat_rate", frm.doc.flat_rate);
+	
+
+		}
+	},
+
+	to_time:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn]
+		if((child.to_time).slice(0,10)<(frm.doc.from_date)){
+			setTimeout(() => {
+				frappe.model.set_value(cdt, cdn, "to_time", frm.doc.from_date);
+				frappe.msgprint('End Date cant be before Job Order Start Date')
+			},1000)
+		
+		}
+		else if((child.to_time).slice(0,10)>(frm.doc.to_date)){
+			setTimeout(() => {
+			frappe.model.set_value(cdt, cdn, "to_time",frm.doc.to_date);
+			frappe.msgprint('End Date cant be After Job Order End Date')
+		},1000)
+
+		}
+		frappe.model.set_value(cdt,cdn,"billing_hours",child.hours)
+	
+
+	},
+	from_time:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn]
+		if((child.from_time).slice(0,10)<(frm.doc.from_date)){
+			frappe.msgprint('Start Date cant be before Job Order Start Date')
+			frappe.model.set_value(cdt, cdn, "from_time", frm.doc.from_date);
+		}
+		else if((child.from_time).slice(0,10)>(frm.doc.to_date)){
+			frappe.msgprint('Start Date cant be After Job Order End Date')
+			frappe.model.set_value(cdt, cdn, "from_time", frm.doc.from_date);
+		}
+		if(child.to_time){
+			frappe.model.set_value(cdt, cdn, "hours", "");
+			frappe.model.set_value(cdt, cdn, "to_time","");
+		}
+	}
+	
+});

@@ -218,7 +218,7 @@ login.login_handlers = (function () {
 				}
 			} else if (window.location.hash === '#forgot') {
 				if (data.message === 'not found') {
-					login.set_status('{{ _("Not a valid user") }}', 'red');
+					login.set_status('{{ _("Please check your email and click on the provided link to reset your password") }}', 'red');
 				} else if (data.message == 'not allowed') {
 					login.set_status('{{ _("Not Allowed") }}', 'red');
 				} else if (data.message == 'disabled') {

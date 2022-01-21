@@ -152,7 +152,7 @@ frappe.ui.form.on('Job Order', {
 
 			if(frappe.validated){
 			return new Promise(function(resolve, reject) {
-				frappe.confirm("<br><h4>Do you want to save </h4> <br> <b>Job category</b> "+frm.doc.category+" <br> <b>job order start date</b>:"+frm.doc.from_date+" <br><b>Job Order end date: </b>"+frm.doc.to_date+" <br> <job title : "+frm.doc.select_job+" job duration : "+frm.doc.job_duration+" <br><b> job site </b>:  "+frm.doc.job_site+"<br><b> Estimated per hour </b>: "+frm.doc.estimated_hours_per_day+" <br><b> Description </b>: "+frm.doc.description+" <br> <b> Bill rate Per Hour </b>:"+frm.doc.per_hour+" <br><b> Bill rate flat rate</b>:"+frm.doc.flat_rate+"",
+				frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>"+frm.doc.category+"<br><b>Job Order Start Date: </b>"+frm.doc.from_date+"<br><b>Job Order End Date: </b>"+frm.doc.to_date+"<br><b>Job Title: </b>"+frm.doc.select_job+"<br><b>Job Duration: </b>"+frm.doc.job_duration+"<br><b>Job Site: </b>"+frm.doc.job_site+"<br><b>Estimated Per Hour: </b>"+frm.doc.estimated_hours_per_day+"<br><b>Description: </b>"+frm.doc.description+"<br><b>Bill Rate Per Hour: </b>"+frm.doc.per_hour+"<br><b>Bill Rate Flat Rate: </b>"+frm.doc.flat_rate+"",
 				function() {  
 					let resp = 'frappe.validated = false';
 						resolve(resp);
@@ -166,8 +166,6 @@ frappe.ui.form.on('Job Order', {
 		}		
 	},
 	after_save:function(frm){
-		rate_calculation(frm)
-
 		if (frm.doc.staff_org_claimed){
 			notification_joborder_change(frm)
 		}
@@ -258,6 +256,7 @@ frappe.ui.form.on('Job Order', {
 		check_value(frm,field,name,value)
 	},
 	validate:function(frm){
+		rate_calculation(frm)
 		var l = {'Company':frm.doc.company,"Select Job":frm.doc.select_job,"Category":frm.doc.category,"Job Order Start Date":cur_frm.doc.from_date,"Job Site":cur_frm.doc.job_site,"No Of Workers":cur_frm.doc.no_of_workers,"Rate":cur_frm.doc.rate,"Description":cur_frm.doc.description,"Job Order End Date":cur_frm.doc.to_date,"Job Duration":cur_frm.doc.job_duration,"Estimated Hours Per Day":cur_frm.doc.estimated_hours_per_day,"E-Signature Full Name":cur_frm.doc.e_signature_full_name}
 		var message="<b>Please Fill Mandatory Fields:</b>"
 		for (let k in l) {
