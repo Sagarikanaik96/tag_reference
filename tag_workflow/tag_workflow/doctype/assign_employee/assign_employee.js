@@ -123,14 +123,20 @@ frappe.ui.form.on("Assign Employee Details", {
 			frappe.throw("You can't delete employee details once it's Approved.");
 		}
 	},
-
 	form_render: function(frm, cdt, cdn){
 		let child = frappe.get_doc(cdt, cdn);
 		if(frm.doc.tag_status == "Approved" && child.__islocal != 1){
 			cur_frm.fields_dict["employee_details"].grid.grid_rows_by_docname[child.name].toggle_editable("employee", 0);
 		}
-	}
+		$('[data-fieldname="resume"]').on({
+		  'click': function () {
+		    window.open(cur_frm.doc.employee_details[0]["resume"]);
+	  		}
+	});
+
+	}	
 });
+
 
 function approved_employee(frm){
 	if(cur_frm.doc.tag_status == "Approved" && frappe.boot.tag.tag_user_info.company_type=='Hiring'){
@@ -161,4 +167,12 @@ function hide_resume(frm){
 			table.hidden=1;
 			frm.refresh_fields();
 		}
+
+	$('[data-fieldname="resume"]').on({
+	  'click': function () {
+	    window.open(cur_frm.doc.employee_details[0]["resume"]);
+  		}
+	});
 }
+
+

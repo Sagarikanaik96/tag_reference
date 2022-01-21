@@ -2,10 +2,12 @@ frappe.ui.form.on("Company", {
   refresh: function (frm) {
     cur_frm.clear_custom_buttons();
     init_values(frm);
+    hide_connections(frm);
     hide_details(frm);
     update_company_fields(frm);
     jazzhr_data(frm);
-    make_invoice(frm);
+    make_invoice(frm); 
+    uploaded_file_format(frm);
     if (frappe.user.has_role("Tag Admin")) {
       frm.set_df_property("employees", "read_only", 1);
     }
@@ -370,4 +372,32 @@ function prepare_invoice(frm) {
       })
       .addClass("btn-primary");
   }
+}
+
+function hide_connections(frm){
+    frm.dashboard.hide();
+}
+
+function uploaded_file_format(frm){
+	frm.get_field('cert_of_insurance').df.options = {
+	    restrictions: {
+	    allowed_file_types: ['.pdf','.txt','.docx']
+		}
+	};
+	frm.get_field('w9').df.options = {
+	    restrictions: {
+	    allowed_file_types: ['.pdf','.txt','.docx']
+		}
+	};	
+  frm.get_field('safety_manual').df.options = {
+    restrictions: {
+    allowed_file_types: ['.pdf','.txt','.docx']
+  }
+  };	
+  frm.get_field('upload_docs').df.options = {
+    restrictions: {
+    allowed_file_types: ['.pdf','.txt','.docx']
+  }
+  };
+	
 }

@@ -115,7 +115,7 @@
    "fieldname": "select_job",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Job",
+   "label": "Job Title",
    "options": "Designation",
    "reqd": 1
   },
@@ -427,7 +427,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-13 17:21:51.366237",
+ "modified": "2022-01-20 06:00:51.807828",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
