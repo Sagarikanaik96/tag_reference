@@ -352,3 +352,20 @@ def denied_notification(job_order,hiring_company,staffing_company,timesheet_name
     except Exception as e:
         frappe.error_log(e, "Timesheet Denied")
         frappe.throw(e)
+
+@frappe.whitelist()
+def timesheet_dispute_comment_box(comment,timesheet):
+    try:
+        comment = json.loads(comment)
+        if comment:
+            timesheet_doc = frappe.get_doc('Timesheet',timesheet) #timesheet
+            if timesheet_doc.dispute:
+                timesheet_doc.dispute += '\n' +'-'*15 + '\n'+ comment['Comment']
+            else:
+                timesheet_doc.dispute = comment['Comment']
+            timesheet_doc.flags.ignore_mandatory = True
+            timesheet_doc.save(ignore_permissions=True)
+            return True
+    except Exception as e:
+        frappe.error_log(e, "Dispute Message")
+        frappe.throw(e)

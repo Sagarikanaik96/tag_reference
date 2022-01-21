@@ -233,11 +233,12 @@ function denied_timesheet(frm){
 						pop_up.hide();
 						var comment=pop_up.get_values()
 						frappe.call({
-							method:"tag_workflow.utils.timesheet.jb_ord_dispute_comment_box",
+							
+                            method:"tag_workflow.utils.timesheet.timesheet_dispute_comment_box",
 							args:{
-								'comment':comment,
-								'job_order':cur_frm.doc.job_order_detail
-							},
+                                'comment':comment,
+                                'timesheet':cur_frm.doc.name //fetch timesheet name
+                            },
 							callback:function(rm){
 								if (rm.message){
 									frappe.msgprint('Comment Submitted Successfully')
