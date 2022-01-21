@@ -61,6 +61,17 @@ class MasterController(base_controller.BaseController):
 
 
 #-----------data update--------------#
+def update_user_info(company, make_organization_inactive):
+    try:
+        if(make_organization_inactive == 1):
+            user = """ select name, enabled from `tabUser` where company="{0}" """.format(company)
+            user_list = frappe.db.sql(user, as_dict=1)
+            for u in user_list:
+                if(u.enabled == 1 and len(frappe.db.get_list("Employee", {"user_id": u.name}, "name")) == 1):
+                    frappe.sessions.clear_sessions(user=u.name, keep_current=False, device=None, force=True)
+    except Exception as e:
+        frappe.error_log(e, "User disabled")
+
 @frappe.whitelist()
 def make_update_comp_perm(docname):
     try:
@@ -71,6 +82,7 @@ def make_update_comp_perm(docname):
         elif doc.organization_type != "Staffing":
             user_list = get_user_list()
             enqueue("tag_workflow.controllers.master_controller.update_job_order_permission", user_list=user_list, company=doc.name)
+        update_user_info(doc.name, doc.make_organization_inactive)
     except Exception as e:
         frappe.error_log(e, "Quotation and Job Order Permission")
 
