@@ -61,7 +61,7 @@
    }
   ],
   "logo_width": 0,
-  "modified": "2022-01-04 12:00:59.958340",
+  "modified": "2022-01-18 03:15:23.980593",
   "name": "Navbar Settings",
   "parent": null,
   "parentfield": null,
@@ -135,7 +135,7 @@
    },
    {
     "action": "frappe.ui.toolbar.toggle_full_width()",
-    "hidden": 0,
+    "hidden": 1,
     "is_standard": 1,
     "item_label": "Toggle Full Width",
     "item_type": "Action",
@@ -146,7 +146,7 @@
    },
    {
     "action": null,
-    "hidden": 0,
+    "hidden": 1,
     "is_standard": 1,
     "item_label": "Background Jobs",
     "item_type": "Route",
