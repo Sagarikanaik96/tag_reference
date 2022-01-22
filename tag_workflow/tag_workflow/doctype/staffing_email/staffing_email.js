@@ -3,6 +3,7 @@
 
 frappe.ui.form.on("Staffing Email", {
   refresh: function (frm) {
+    frm.disable_save();
     if (frm.doc.__islocal) {
       frm.add_custom_button(__("Send"), function () {
         frappe.call({
@@ -24,6 +25,7 @@ frappe.ui.form.on("Staffing Email", {
     }
   },
   setup: function (frm) {
+    frm.disable_save();
     if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
       frm.fields_dict.email_recipients.grid.get_field(
         "email_recipients"
