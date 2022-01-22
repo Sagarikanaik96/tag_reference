@@ -259,12 +259,12 @@
   {
    "fieldname": "apply_for_quotation_section",
    "fieldtype": "Section Break",
-   "label": "Apply for Quotation"
+   "label": "Employee Assignment"
   },
   {
    "fieldname": "assign_employees",
    "fieldtype": "Button",
-   "label": "Employee Assign For Order",
+   "label": "Assign Employee to Order",
    "permlevel": 1
   },
   {
@@ -384,7 +384,8 @@
   {
    "fieldname": "description",
    "fieldtype": "Small Text",
-   "label": "Description",
+   "label": "Job Title Description",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -427,7 +428,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-20 06:00:51.807828",
+ "modified": "2022-01-22 08:25:22.368943",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
