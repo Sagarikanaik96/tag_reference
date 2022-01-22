@@ -2,279 +2,278 @@
 // For license information, please see license.txt
 frappe.ui.form.on('Job Order', {
 	assign_employees: function(frm){
-		if(frm.doc.to_date  < frappe.datetime.now_datetime()){
-			frappe.msgprint({message:__('Date has been past to claim this order'), title:__('Job Order filled'),indicator: 'blue'})
-		}
-		else if(frm.doc.__islocal != 1 && cur_frm.doc.owner != frappe.session.user && frm.doc.worker_filled < frm.doc.no_of_workers){
-			if(cur_frm.is_dirty()){
-				frappe.msgprint({message: __('Please save the form before creating Quotation'), title: __('Save Job Order'), indicator: 'red'});
+			if(frm.doc.to_date  < frappe.datetime.now_datetime()){
+					frappe.msgprint({message:__('Date has been past to claim this order'), title:__('Job Order filled'),indicator: 'blue'})
 			}
-			else{
-				assign_employe(frm);
+			else if(frm.doc.__islocal != 1 && cur_frm.doc.owner != frappe.session.user && frm.doc.worker_filled < frm.doc.no_of_workers){
+					if(cur_frm.is_dirty()){
+							frappe.msgprint({message: __('Please save the form before creating Quotation'), title: __('Save Job Order'), indicator: 'red'});
+					}
+					else{
+							assign_employe(frm);
+					}
 			}
-		}
-		else if(frm.doc.worker_filled >= frm.doc.no_of_workers){
-			frappe.msgprint({message: __('No of workers already filled for this job order'), title: __('Worker Filled'), indicator: 'red'});
-		}
+			else if(frm.doc.worker_filled >= frm.doc.no_of_workers){
+					frappe.msgprint({message: __('No of workers already filled for this job order'), title: __('Worker Filled'), indicator: 'red'});
+			}
 	},
 	onload:function(frm){
-		hide_employee_rating(frm);
+			hide_employee_rating(frm);
 
-		if(cur_frm.doc.__islocal==1){
-			if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ){
-				frm.set_value('company',frappe.boot.tag.tag_user_info.company)
-			}
-			frm.set_value("from_date",'')
-			frm.set_df_property("time_remaining_for_make_edits", "options"," ");
-			frappe.call({
-				method:"tag_workflow.tag_data.org_industy_type",
-				args: {
-					company:cur_frm.doc.company,
-				},
-				callback:function(r){
-				if(r.message.length==1){
-					cur_frm.set_df_property("category", "read_only",1);
-					cur_frm.set_value("category",r.message[0][0])
-				}
-				else{
-					frm.set_query('category',function(doc){
-						return {
-							query: "tag_workflow.tag_data.hiring_category",
-							filters:{
-								'hiring_company':doc.company
+			if(cur_frm.doc.__islocal==1){
+					if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ){
+							frm.set_value('company',frappe.boot.tag.tag_user_info.company)
+					}
+					frm.set_value("from_date",'')
+					frm.set_df_property("time_remaining_for_make_edits", "options"," ");
+					frappe.call({
+							method:"tag_workflow.tag_data.org_industy_type",
+							args: {
+									company:cur_frm.doc.company,
+							},
+							callback:function(r){
+							if(r.message.length==1){
+									cur_frm.set_df_property("category", "read_only",1);
+									cur_frm.set_value("category",r.message[0][0])
 							}
-						}
+							else{
+									frm.set_query('category',function(doc){
+											return {
+													query: "tag_workflow.tag_data.hiring_category",
+													filters:{
+															'hiring_company':doc.company
+													}
+											}
+									});
+							}
+							}
 					});
-				}
-				}
-			});
 
-		}
-		if(frappe.boot.tag.tag_user_info.company_type!='Staffing'){
+			}
+			if(frappe.boot.tag.tag_user_info.company_type!='Staffing'){
 
-		fields_setup(frm)
-		}
-		
+			fields_setup(frm)
+			}
+			
 	},
 	setup: function(frm){
-		frm.set_query('job_site', function(doc) {
-			return {
-				query: "tag_workflow.tag_data.get_org_site",
-				filters: {
-					'job_order_company': doc.company
-				}
-			}
-		});
+			frm.set_query('job_site', function(doc) {
+					return {
+							query: "tag_workflow.tag_data.get_org_site",
+							filters: {
+									'job_order_company': doc.company
+							}
+					}
+			});
 
-		frm.set_query("company", function(doc) {
-			return {
-				"filters":[
-					['Company', "organization_type", "in", ["Hiring" , "Exclusive Hiring"]],
-					["Company", "make_organization_inactive", "=", 0]
-				]
-			}
-		});
+			frm.set_query("company", function(doc) {
+					return {
+							"filters":[
+									['Company', "organization_type", "in", ["Hiring" , "Exclusive Hiring"]],
+									["Company", "make_organization_inactive", "=", 0]
+							]
+					}
+			});
 
-		frm.set_query('select_job', function(doc) {
-			return {
-				query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_jobtitle_list",
-				filters: {
-					'job_order_company': doc.company
-				}
-			}
-		});
-		if(frappe.boot.tag.tag_user_info.company_type!='Staffing' && cur_frm.doc.__islocal==1){
-			fields_setup(frm)
+			frm.set_query('select_job', function(doc) {
+					return {
+							query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_jobtitle_list",
+							filters: {
+									'job_order_company': doc.company
+							}
+					}
+			});
+			if(frappe.boot.tag.tag_user_info.company_type!='Staffing' && cur_frm.doc.__islocal==1){
+					fields_setup(frm)
 
-		}
+			}
 	},
 	refresh:function(frm){
-		make_invoice(frm);
-		make_notes(frm)
-		if(cur_frm.doc.__islocal==1){
-			check_company_detail(frm);
-			frappe.db.get_doc('Company', cur_frm.doc.company).then(doc => {
-				if (doc.organization_type === "Staffing") {
-					cur_frm.set_value('company', "")
-				}
-			});
-			cancel_joborder(frm);
-		}
-		else{
-			timer_value(frm)
-			let roles = frappe.user_roles;
-			if(roles.includes("Hiring User") || roles.includes("Hiring Admin")){
-				if((frappe.datetime.now_datetime()>=cur_frm.doc.from_date) && (cur_frm.doc.to_date>=frappe.datetime.now_datetime())){
-					frm.set_df_property("no_of_workers", "read_only",0);
-				}	
+			make_invoice(frm);
+			make_notes(frm)
+			if(cur_frm.doc.__islocal==1){
+					check_company_detail(frm);
+					frappe.db.get_doc('Company', cur_frm.doc.company).then(doc => {
+							if (doc.organization_type === "Staffing") {
+									cur_frm.set_value('company', "")
+							}
+					});
 			}
-		}
-
-		if(cur_frm.doc.is_single_share  == 1){
-			frm.add_custom_button(__('Deny Job Order'), function(){
-				frappe.call({
-					method:"tag_workflow.tag_workflow.doctype.job_order.job_order.after_denied_joborder",
-					args:{
-						staff_company:frm.doc.staff_company,
-						joborder_name:frm.doc.name,
-						job_title:frm.doc.select_job,
-						hiring_name:frm.doc.company
-					},
-					callback:function(r){					
-						cur_frm.refresh()
-						cur_frm.reload_doc()
+			else{
+					timer_value(frm)
+					let roles = frappe.user_roles;
+					if(roles.includes("Hiring User") || roles.includes("Hiring Admin")){
+							if((frappe.datetime.now_datetime()>=cur_frm.doc.from_date) && (cur_frm.doc.to_date>=frappe.datetime.now_datetime())){
+									frm.set_df_property("no_of_workers", "read_only",0);
+							}       
 					}
-				})
-			});
-		}else{
-			frm.remove_custom_button('Deny Job Order');
-		}
+			}
+
+			if(cur_frm.doc.is_single_share  == 1){
+					frm.add_custom_button(__('Deny Job Order'), function(){
+							frappe.call({
+									method:"tag_workflow.tag_workflow.doctype.job_order.job_order.after_denied_joborder",
+									args:{
+											staff_company:frm.doc.staff_company,
+											joborder_name:frm.doc.name,
+											job_title:frm.doc.select_job,
+											hiring_name:frm.doc.company
+									},
+									callback:function(r){                                   
+											cur_frm.refresh()
+											cur_frm.reload_doc()
+									}
+							})
+					});
+			}else{
+					frm.remove_custom_button('Deny Job Order');
+			}
 	},
 	select_job:function(frm){
-		frappe.call({
-			method:"tag_workflow.tag_workflow.doctype.job_order.job_order.update_joborder_rate_desc",
-			args:{
-				company:frm.doc.company,
-				job:frm.doc.select_job
-			},
-			callback:function(r){
-				if (r.message){
-					frm.set_value('description',r.message['description']);
-					frm.set_value('rate',r.message['wages']);
-					refresh_field("rate");
-					refresh_field("description");
-				}
-			}
-		})
+			frappe.call({
+					method:"tag_workflow.tag_workflow.doctype.job_order.job_order.update_joborder_rate_desc",
+					args:{
+							company:frm.doc.company,
+							job:frm.doc.select_job
+					},
+					callback:function(r){
+							if (r.message){
+									frm.set_value('description',r.message['description']);
+									frm.set_value('rate',r.message['wages']);
+									refresh_field("rate");
+									refresh_field("description");
+							}
+					}
+			})
 	},
 	before_save: function(frm){
-		if(frm.doc.__islocal === 1){
-			rate_hour_contract_change(frm)
+			if(frm.doc.__islocal === 1){
+					rate_hour_contract_change(frm)
 
-			if(frappe.validated){
-			return new Promise(function(resolve, reject) {
-				frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>"+frm.doc.category+"<br><b>Job Order Start Date: </b>"+frm.doc.from_date+"<br><b>Job Order End Date: </b>"+frm.doc.to_date+"<br><b>Job Title: </b>"+frm.doc.select_job+"<br><b>Job Duration: </b>"+frm.doc.job_duration+"<br><b>Job Site: </b>"+frm.doc.job_site+"<br><b>Estimated Per Hour: </b>"+frm.doc.estimated_hours_per_day+"<br><b>Description: </b>"+frm.doc.description+"<br><b>Bill Rate Per Hour: </b>"+frm.doc.per_hour+"<br><b>Bill Rate Flat Rate: </b>"+frm.doc.flat_rate+"",
-				function() {  
-					let resp = 'frappe.validated = false';
-						resolve(resp);
-						check_company_detail(frm);
-					},
-				function() {
-				  reject()
-				})
-			  })
-			}
-		}		
+					if(frappe.validated){
+					return new Promise(function(resolve, reject) {
+							frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>"+frm.doc.category+"<br><b>Job Order Start Date: </b>"+frm.doc.from_date+"<br><b>Job Order End Date: </b>"+frm.doc.to_date+"<br><b>Job Title: </b>"+frm.doc.select_job+"<br><b>Job Duration: </b>"+frm.doc.job_duration+"<br><b>Job Site: </b>"+frm.doc.job_site+"<br><b>Estimated Per Hour: </b>"+frm.doc.estimated_hours_per_day+"<br><b>Description: </b>"+frm.doc.description+"<br><b>Bill Rate Per Hour: </b>"+frm.doc.per_hour+"<br><b>Bill Rate Flat Rate: </b>"+frm.doc.flat_rate+"",
+							function() {  
+									let resp = 'frappe.validated = false';
+											resolve(resp);
+											check_company_detail(frm);
+									},
+							function() {
+							  reject()
+							})
+					  })
+					}
+			}               
 	},
 	after_save:function(frm){
-		if (frm.doc.staff_org_claimed){
-			notification_joborder_change(frm)
-		}
-		else{
-			frappe.call({
-				method:"tag_workflow.tag_data.staff_email_notification",
-				args: {
-					hiring_org:cur_frm.doc.company,
-					job_order:cur_frm.doc.name,
-					job_order_title:cur_frm.doc.select_job,
-					staff_company:cur_frm.doc.staff_company
-				}
-			});
-		}
+			if (frm.doc.staff_org_claimed){
+					notification_joborder_change(frm)
+			}
+			else{
+					frappe.call({
+							method:"tag_workflow.tag_data.staff_email_notification",
+							args: {
+									hiring_org:cur_frm.doc.company,
+									job_order:cur_frm.doc.name,
+									job_order_title:cur_frm.doc.select_job,
+									staff_company:cur_frm.doc.staff_company
+							}
+					});
+			}
 	},
 	view_contract:function(frm){
-		var contracts="<div class='contract_div'><h3>Staffing/Vendor Contract</h3>This Staffing/Vendor Contract (“Contract”) is entered into by and between Staffing Company and Hiring Company as further described and as set forth below. By agreeing to the Temporary Assistance Guru, Inc. (“TAG”) End-User License Agreement, and using the TAG application service and website (the “Service”) Staffing Company and Hiring Company agree that they have a contractual relationship with each other and that the following terms apply to such relationship: <br> <ul> <li> The billing rate Hiring Company shall pay Staffing Company to hire each temporary worker provided by Staffing Company (the “Worker”) is the rate set forth by the TAG Service for the location and position sought to be filled, and this rate includes all wages, worker’s compensation premiums, unemployment insurance, payroll taxes, and all other employer burdens recruiting, administration, payroll funding, and liability insurance.</li><li> Hiring Company agrees not to directly hire and employ the Worker until the Worker has completed at least 720 work hours. Hiring Company agrees to pay Staffing Company an administrative placement fee of $3,000.00 if Hiring Company directly employs the Worker prior to completion of 720 work hours.</li> <li> Hiring Company acknowledges that it has complete care, custody, and control of workplaces and job sites. Hiring Company agrees to comply with all applicable laws, regulations, and ordinances relating to health and safety, and agrees to provide any site/task specific training and/or safety devices and protective equipment necessary or required by law. Hiring Company will not, without prior written consent of Staffing Company, entrust Staffing Company employees with the handling of cash, checks, credit cards, jewelry, equipment, tools, or other valuables.</li> <li> Hiring Company agrees that it will maintain a written safety program, a hazard communication program, and an accident investigation program. Hiring Company agrees that it will make first aid kits available to Workers, that proper lifting techniques are to be used, that fall protection is to be used, and that Hiring Company completes regular inspections on electrical cords and equipment. Hiring Company represents, warrants, and covenants that it handles and stores hazardous materials properly and in compliance with all applicable laws. </li> <li> Hiring Company agrees to post Occupational Safety and Health Act (“OSHA”) of 1970 information and other safety information, as required by law. Hiring Company agrees to log all accidents in its OSHA 300 logs. Hiring Company agrees to indemnify and hold harmless Staffing Company for all claims, damages, or penalties arising out of violations of the OSHA or any state law with respect to workplaces or equipment owned, leased, or supervised by Hiring Company and to which employees are assigned. </li> <li>  Hiring Company will not, without prior written consent of Staffing Company, utilize Workers to operate machinery, equipment, or vehicles. Hiring Company agrees to indemnify and save Staffing Company and Workers harmless from any and all claims and expenses (including litigation) for bodily injury or property damage or other loss as asserted by Hiring Company, its employees, agents, the owner of any such vehicles and/or equipment or contents thereof, or by members of the general public, or any other third party, arising out of the operation or use of said vehicles and/or equipment by Workers. </li> <li> Commencement of work by dispatched Workers, or Hiring Company’s signature on work ticket serves as confirmation of Hiring Company’s agreement to conditions of service listed in or referred to by this Contract. </li> <li> Hiring Company agrees not to place Workers in a supervisory position except for a Worker designated as a “lead,” and, in that position, Hiring Company agrees to supervise all Workers at all times. </li> <li> Billable time begins at the time Workers report to the workplace as designated by the Hiring Company. </li> <li> Jobs must be canceled a minimum of 24 hours prior to start time to avoid a minimum of four hours billing per Worker. </li> <li> Staffing Company guarantees that its Workers will satisfy Hiring Company, or the first two hours are free of charge. If Hiring Company is not satisfied with the Workers, Hiring Company is to call the designated phone number for the Staffing Company within the first two hours, and Staffing Company will replace them free of charge.</li> <li> Staffing Company agrees that it will comply with Hiring Company’s safety program rules. </li> <li> Overtime will be billed at one and one-half times the regular billing rate for all time worked over forty hours in a pay period and/or eight hours in a day as provided by state law. </li> <li> Invoices are due 30 days from receipt, unless other arrangements have been made and agreed to by each of the parties. </li> <li> Interest Rate: Any outstanding balance due to Staffing Company is subject to an interest rate of two percent (2%) per month, commencing on the 90th day after the date the balance was due, until the balance is paid in full by Hiring Company. </li> <li> Severability. If any provision of this Contract is held to be invalid and unenforceable, then the remainder of this Contract shall nevertheless remain in full force and effect. </li> <li> Attorney’s Fees. Hiring Company agrees to pay reasonable attorney’s fees and/or collection fees for any unpaid account balances or in any action incurred to enforce this Contract. </li> <li> Governing Law. This Contract is governed by the laws of the state of Florida, regardless of its conflicts of laws rules. </li> <li>  If Hiring Company utilizes a Staffing Company employee to work on a prevailing wage job, Hiring Company agrees to notify Staffing Company with the correct prevailing wage rate and correct job classification for duties Staffing Company employees will be performing. Failure to provide this information or providing incorrect information may result in the improper reporting of wages, resulting in fines or penalties being imposed upon Staffing Company. The Hiring Company agrees to reimburse Staffing Company for any and all fines, penalties, wages, lost revenue, administrative and/or supplemental charges incurred by Staffing Company.</li> <li> WORKERS' COMPENSATION COSTS: Staffing Company represents and warrants that it has a strong safety program, and it is Staffing Company’s highest priority to bring its Workers home safely every day. AFFORDABLE CARE ACT (ACA): Staffing Company represents and warrants that it is in compliance with all aspects of the ACA. </li> <li> Representatives. The Hiring Company and the Staffing Company each certifies that its authorized representative has read all of the terms and conditions of this Contract and understands and agrees to the same. </li> <li> Extra Contract Language. </li> <li> hello </li> </ul> <br> </div>"
-		if(cur_frm.doc.contract_add_on)
-			{frappe.db.get_value("Company", {"name": cur_frm.doc.company},['contract_addendums'], function(r){
-				let contract = new frappe.ui.Dialog({
-					title: 'Contract Details',
-					fields: [
-						{
-							"fieldname": "html_37",
-							"fieldtype": "HTML",
-							"options": contracts+"(23)"+cur_frm.doc.contract_add_on
-						}
-					],
-				});
-				contract.show();
-			});
-		}
-		else{
-			let contract = new frappe.ui.Dialog({
-				title: 'Contract Details',
-				fields: [
-					{
-						"fieldname": "html_37",
-						"fieldtype": "HTML",
-						"options": contracts
-				   
-					}
-				],
-			});
-			contract.show();
-		}
+			var contracts="<div class='contract_div'><h3>Staffing/Vendor Contract</h3>This Staffing/Vendor Contract (“Contract”) is entered into by and between Staffing Company and Hiring Company as further described and as set forth below. By agreeing to the Temporary Assistance Guru, Inc. (“TAG”) End-User License Agreement, and using the TAG application service and website (the “Service”) Staffing Company and Hiring Company agree that they have a contractual relationship with each other and that the following terms apply to such relationship: <br> <ol> <li> The billing rate Hiring Company shall pay Staffing Company to hire each temporary worker provided by Staffing Company (the “Worker”) is the rate set forth by the TAG Service for the location and position sought to be filled, and this rate includes all wages, worker’s compensation premiums, unemployment insurance, payroll taxes, and all other employer burdens recruiting, administration, payroll funding, and liability insurance.</li><li> Hiring Company agrees not to directly hire and employ the Worker until the Worker has completed at least 720 work hours. Hiring Company agrees to pay Staffing Company an administrative placement fee of $3,000.00 if Hiring Company directly employs the Worker prior to completion of 720 work hours.</li> <li> Hiring Company acknowledges that it has complete care, custody, and control of workplaces and job sites. Hiring Company agrees to comply with all applicable laws, regulations, and ordinances relating to health and safety, and agrees to provide any site/task specific training and/or safety devices and protective equipment necessary or required by law. Hiring Company will not, without prior written consent of Staffing Company, entrust Staffing Company employees with the handling of cash, checks, credit cards, jewelry, equipment, tools, or other valuables.</li> <li> Hiring Company agrees that it will maintain a written safety program, a hazard communication program, and an accident investigation program. Hiring Company agrees that it will make first aid kits available to Workers, that proper lifting techniques are to be used, that fall protection is to be used, and that Hiring Company completes regular inspections on electrical cords and equipment. Hiring Company represents, warrants, and covenants that it handles and stores hazardous materials properly and in compliance with all applicable laws. </li> <li> Hiring Company agrees to post Occupational Safety and Health Act (“OSHA”) of 1970 information and other safety information, as required by law. Hiring Company agrees to log all accidents in its OSHA 300 logs. Hiring Company agrees to indemnify and hold harmless Staffing Company for all claims, damages, or penalties arising out of violations of the OSHA or any state law with respect to workplaces or equipment owned, leased, or supervised by Hiring Company and to which employees are assigned. </li> <li>  Hiring Company will not, without prior written consent of Staffing Company, utilize Workers to operate machinery, equipment, or vehicles. Hiring Company agrees to indemnify and save Staffing Company and Workers harmless from any and all claims and expenses (including litigation) for bodily injury or property damage or other loss as asserted by Hiring Company, its employees, agents, the owner of any such vehicles and/or equipment or contents thereof, or by members of the general public, or any other third party, arising out of the operation or use of said vehicles and/or equipment by Workers. </li> <li> Commencement of work by dispatched Workers, or Hiring Company’s signature on work ticket serves as confirmation of Hiring Company’s agreement to conditions of service listed in or referred to by this Contract. </li> <li> Hiring Company agrees not to place Workers in a supervisory position except for a Worker designated as a “lead,” and, in that position, Hiring Company agrees to supervise all Workers at all times. </li> <li> Billable time begins at the time Workers report to the workplace as designated by the Hiring Company. </li> <li> Jobs must be canceled a minimum of 24 hours prior to start time to avoid a minimum of four hours billing per Worker. </li> <li> Staffing Company guarantees that its Workers will satisfy Hiring Company, or the first two hours are free of charge. If Hiring Company is not satisfied with the Workers, Hiring Company is to call the designated phone number for the Staffing Company within the first two hours, and Staffing Company will replace them free of charge.</li> <li> Staffing Company agrees that it will comply with Hiring Company’s safety program rules. </li> <li> Overtime will be billed at one and one-half times the regular billing rate for all time worked over forty hours in a pay period and/or eight hours in a day as provided by state law. </li> <li> Invoices are due 30 days from receipt, unless other arrangements have been made and agreed to by each of the parties. </li> <li> Interest Rate: Any outstanding balance due to Staffing Company is subject to an interest rate of two percent (2%) per month, commencing on the 90th day after the date the balance was due, until the balance is paid in full by Hiring Company. </li> <li> Severability. If any provision of this Contract is held to be invalid and unenforceable, then the remainder of this Contract shall nevertheless remain in full force and effect. </li> <li> Attorney’s Fees. Hiring Company agrees to pay reasonable attorney’s fees and/or collection fees for any unpaid account balances or in any action incurred to enforce this Contract. </li> <li> Governing Law. This Contract is governed by the laws of the state of Florida, regardless of its conflicts of laws rules. </li> <li>  If Hiring Company utilizes a Staffing Company employee to work on a prevailing wage job, Hiring Company agrees to notify Staffing Company with the correct prevailing wage rate and correct job classification for duties Staffing Company employees will be performing. Failure to provide this information or providing incorrect information may result in the improper reporting of wages, resulting in fines or penalties being imposed upon Staffing Company. The Hiring Company agrees to reimburse Staffing Company for any and all fines, penalties, wages, lost revenue, administrative and/or supplemental charges incurred by Staffing Company.</li> <li> WORKERS' COMPENSATION COSTS: Staffing Company represents and warrants that it has a strong safety program, and it is Staffing Company’s highest priority to bring its Workers home safely every day. AFFORDABLE CARE ACT (ACA): Staffing Company represents and warrants that it is in compliance with all aspects of the ACA. </li> <li> Representatives. The Hiring Company and the Staffing Company each certifies that its authorized representative has read all of the terms and conditions of this Contract and understands and agrees to the same. </li> "
+			if(cur_frm.doc.contract_add_on)
+					{frappe.db.get_value("Company", {"name": cur_frm.doc.company},['contract_addendums'], function(r){
+							let contract = new frappe.ui.Dialog({
+									title: 'Contract Details',
+									fields: [
+											{
+													"fieldname": "html_37",
+													"fieldtype": "HTML",
+													"options": contracts+"<li>"+cur_frm.doc.contract_add_on + "</li>  </ol>  </div>"
+											}
+									],
+							});
+							contract.show();
+					});
+			}
+			else{
+					let contract = new frappe.ui.Dialog({
+							title: 'Contract Details',
+							fields: [
+									{
+											"fieldname": "html_37",
+											"fieldtype": "HTML",
+											"options": contracts
+							   
+									}
+							],
+					});
+					contract.show();
+			}
 	},
 	from_date:function(frm){
-		check_from_date(frm)
+			check_from_date(frm)
 	},
 	to_date(frm){
-		check_to_date(frm)
+			check_to_date(frm)
 	},
 	estimated_hours_per_day:function(frm){
-		let field="Estimated Hours Per Day";
-		let name='estimated_hours_per_day';
-		let value=frm.doc.estimated_hours_per_day;
-		check_value(frm,field,name,value)
+			let field="Estimated Hours Per Day";
+			let name='estimated_hours_per_day';
+			let value=frm.doc.estimated_hours_per_day;
+			check_value(frm,field,name,value)
 	},
 	no_of_workers:function(frm){
-		let field="No Of Workers";
-		let name='no_of_workers';
-		let value=frm.doc.no_of_workers;
-		check_value(frm,field,name,value)
+			let field="No Of Workers";
+			let name='no_of_workers';
+			let value=frm.doc.no_of_workers;
+			check_value(frm,field,name,value)
 	},
 	rate:function(frm){
-		let field="Rate";
-		let name='rate';
-		let value=parseFloat(frm.doc.rate);
-		check_value(frm,field,name,value)
+			let field="Rate";
+			let name='rate';
+			let value=parseFloat(frm.doc.rate);
+			check_value(frm,field,name,value)
 	},
 	extra_price_increase:function(frm){
-		let field="Extra Price Increase";
-		let name='extra_price_increase';
-		let value=frm.doc.extra_price_increase;
-		check_value(frm,field,name,value)
+			let field="Extra Price Increase";
+			let name='extra_price_increase';
+			let value=frm.doc.extra_price_increase;
+			check_value(frm,field,name,value)
 	},
 	per_hour:function(frm){
-		let field="Per Hour";
-		let name='per_hour';
-		let value=frm.doc.per_hour;
-		check_value(frm,field,name,value)
+			let field="Per Hour";
+			let name='per_hour';
+			let value=frm.doc.per_hour;
+			check_value(frm,field,name,value)
 	},
 	flat_rate:function(frm){
-		let field="Flat Rate";
-		let name='flat_rate';
-		let value=frm.doc.flat_rate;
-		check_value(frm,field,name,value)
+			let field="Flat Rate";
+			let name='flat_rate';
+			let value=frm.doc.flat_rate;
+			check_value(frm,field,name,value)
 	},
 	validate:function(frm){
-		rate_calculation(frm)
-		var l = {'Company':frm.doc.company,"Select Job":frm.doc.select_job,"Category":frm.doc.category,"Job Order Start Date":cur_frm.doc.from_date,"Job Site":cur_frm.doc.job_site,"No Of Workers":cur_frm.doc.no_of_workers,"Rate":cur_frm.doc.rate,"Description":cur_frm.doc.description,"Job Order End Date":cur_frm.doc.to_date,"Job Duration":cur_frm.doc.job_duration,"Estimated Hours Per Day":cur_frm.doc.estimated_hours_per_day,"E-Signature Full Name":cur_frm.doc.e_signature_full_name}
-		var message="<b>Please Fill Mandatory Fields:</b>"
-		for (let k in l) {
-			if(l[k]===undefined || !l[k]){
-				message=message+"<br>"+k
+			rate_calculation(frm)
+			var l = {'Company':frm.doc.company,"Select Job":frm.doc.select_job,"Category":frm.doc.category,"Job Order Start Date":cur_frm.doc.from_date,"Job Site":cur_frm.doc.job_site,"No Of Workers":cur_frm.doc.no_of_workers,"Rate":cur_frm.doc.rate,"Description":cur_frm.doc.description,"Job Order End Date":cur_frm.doc.to_date,"Job Duration":cur_frm.doc.job_duration,"Estimated Hours Per Day":cur_frm.doc.estimated_hours_per_day,"E-Signature Full Name":cur_frm.doc.e_signature_full_name}
+			var message="<b>Please Fill Mandatory Fields:</b>"
+			for (let k in l) {
+					if(l[k]===undefined || !l[k]){
+							message=message+"<br>"+k
+					}
 			}
-		}
-		if(frm.doc.agree_to_contract==0){
-			message=message+"<br>Agree To Contract"
-		}
-		if(message!="<b>Please Fill Mandatory Fields:</b>"){
-			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
+			if(frm.doc.agree_to_contract==0){
+					message=message+"<br>Agree To Contract"
+			}
+			if(message!="<b>Please Fill Mandatory Fields:</b>"){
+					frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
 
-			frappe.validated=false
-		}
-		
-		
+					frappe.validated=false
+			}
+			
+			
 	}
 });
 
@@ -282,17 +281,17 @@ frappe.ui.form.on('Job Order', {
 function check_company_detail(frm){
 	let roles = frappe.user_roles;
 	if(roles.includes("Hiring User") || roles.includes("Hiring Admin")){
-		var company_name = frappe.boot.tag.tag_user_info.company;
-		frappe.call({
-			method:"tag_workflow.tag_data.company_details",
-			args: {'company_name':company_name},
-			callback:function(r){
-				if(r.message!="success"){
-					msgprint("You can't Create Job Order Unless Your Company Details are Complete");
-					frappe.validated = false;
-				}
-			}
-		});
+			var company_name = frappe.boot.tag.tag_user_info.company;
+			frappe.call({
+					method:"tag_workflow.tag_data.company_details",
+					args: {'company_name':company_name},
+					callback:function(r){
+							if(r.message!="success"){
+									msgprint("You can't Create Job Order Unless Your Company Details are Complete");
+									frappe.validated = false;
+							}
+					}
+			});
 	}
 
 }
@@ -317,46 +316,46 @@ function redirect_quotation(frm){
 	doc.distance_radius = "5 miles";
 
 	frappe.call({
-		method:"tag_workflow.tag_data.staff_org_details",
-		args: {
-			company_details: frappe.boot.tag.tag_user_info.company
-		},
-		callback:function(r){
-			if(r.message=="failed"){
-				msgprint("You can't Assign Employees Unless Your Company Details are Complete");
-				frappe.validated = false;
-			}else{
-				frappe.set_route("Form", "Assign Employee", doc.name);
+			method:"tag_workflow.tag_data.staff_org_details",
+			args: {
+					company_details: frappe.boot.tag.tag_user_info.company
+			},
+			callback:function(r){
+					if(r.message=="failed"){
+							msgprint("You can't Assign Employees Unless Your Company Details are Complete");
+							frappe.validated = false;
+					}else{
+							frappe.set_route("Form", "Assign Employee", doc.name);
+					}
 			}
-		}
 	});
 }
- 
+
 function set_read_fields(frm){
 	var myStringArray = ["phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email","select_job","rate","description"];
 	var arrayLength = myStringArray.length;
 	for(var i = 0; i < arrayLength; i++){
-		frm.set_df_property(myStringArray[i], "read_only", 1);
+			frm.set_df_property(myStringArray[i], "read_only", 1);
 	}
- }
-  
-  
+}
+
+
 function timer_value(frm){
 	var time = frappe.datetime.get_hour_diff(cur_frm.doc.from_date,frappe.datetime.now_datetime());
 	if(time<24){
-		var myStringArray = ["company","posting_date_time","from_date","to_date","category","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","rate","description","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
-		var arrayLength = myStringArray.length;
-		for (var i = 0; i < arrayLength; i++) {
-			frm.set_df_property(myStringArray[i], "read_only", 1);
-		}
-		frm.set_df_property("time_remaining_for_make_edits", "options"," ");
+			var myStringArray = ["company","posting_date_time","from_date","to_date","category","order_status","resumes_required","require_staff_to_wear_face_mask","select_job","job_title","job_site","rate","description","no_of_workers","job_duration","extra_price_increase","extra_notes","drug_screen","background_check","driving_record","shovel","phone_number","estimated_hours_per_day","address","e_signature_full_name","agree_to_contract","age_reqiured","per_hour","flat_rate","email"];
+			var arrayLength = myStringArray.length;
+			for (var i = 0; i < arrayLength; i++) {
+					frm.set_df_property(myStringArray[i], "read_only", 1);
+			}
+			frm.set_df_property("time_remaining_for_make_edits", "options"," ");
 	}else{
-		set_read_fields(frm);
-		time_value(frm);
-		setTimeout(function(){
+			set_read_fields(frm);
 			time_value(frm);
-			cur_frm.refresh();
-		},60000);
+			setTimeout(function(){
+					time_value(frm);
+					cur_frm.refresh();
+			},60000);
 	}
 }
 
@@ -376,20 +375,20 @@ function time_value(frm){
 	let data = `<p><b>Time Remaining for Make Edits: </b> ${[data1]}</p>`;
 	frm.set_df_property("time_remaining_for_make_edits", "options",data);
 }
- 
+
 function notification_joborder_change(frm){
 	frappe.call({
-		"method":"tag_workflow.tag_workflow.doctype.job_order.job_order.joborder_notification",
-		"freeze": true,
-		"freeze_message": "<p><b>preparing notification for staffing orgs...</b></p>",
-		"args": {
-			organizaton:frm.doc.staff_org_claimed,
-			doc_name : frm.doc.name,
-			company:frm.doc.company,
-			job_title:frm.doc.select_job,
-			job_site:frm.doc.job_site,
-			posting_date:frm.doc.from_date
-		}
+			"method":"tag_workflow.tag_workflow.doctype.job_order.job_order.joborder_notification",
+			"freeze": true,
+			"freeze_message": "<p><b>preparing notification for staffing orgs...</b></p>",
+			"args": {
+					organizaton:frm.doc.staff_org_claimed,
+					doc_name : frm.doc.name,
+					company:frm.doc.company,
+					job_title:frm.doc.select_job,
+					job_site:frm.doc.job_site,
+					posting_date:frm.doc.from_date
+			}
 	});
 }
 
@@ -398,13 +397,13 @@ function check_from_date(frm){
 	let to_date = frm.doc.to_date || "";
 
 	if(from_date && from_date <= frappe.datetime.now_date()){
-		frappe.msgprint({message: __('<b>Start Date</b> Cannot be Today`s date or Past date'), title: __('Error'), indicator: 'orange'});
-		cur_frm.set_value("from_date", "");
+			frappe.msgprint({message: __('<b>Start Date</b> Cannot be Today`s date or Past date'), title: __('Error'), indicator: 'orange'});
+			cur_frm.set_value("from_date", "");
 	}
 	else if(to_date && from_date && from_date>=to_date){
-		frappe.msgprint({message: __('<b>End Date</b> Cannot be Less than Start Date'), title: __('Error'), indicator: 'orange'});
-		cur_frm.set_value("from_date", "");
-		cur_frm.set_value("to_date", "");
+			frappe.msgprint({message: __('<b>End Date</b> Cannot be Less than Start Date'), title: __('Error'), indicator: 'orange'});
+			cur_frm.set_value("from_date", "");
+			cur_frm.set_value("to_date", "");
 
 	}
 }
@@ -413,32 +412,32 @@ function check_to_date(frm){
 	let to_date = frm.doc.to_date || "";
 	if(to_date && frappe.datetime.now_date()>=to_date)
 	{
-		frappe.msgprint({message: __('<b>End Date</b> Cannot be Today`s date or Past date'), title: __('Error'), indicator: 'orange'});
-		cur_frm.set_value("to_date", "");
+			frappe.msgprint({message: __('<b>End Date</b> Cannot be Today`s date or Past date'), title: __('Error'), indicator: 'orange'});
+			cur_frm.set_value("to_date", "");
 	}
 	else if(to_date && from_date && from_date>=to_date){
-		frappe.msgprint({message: __('<b>End Date</b> Cannot be Less than Start Date'), title: __('Error'), indicator: 'orange'});
-		cur_frm.set_value("to_date", "");
+			frappe.msgprint({message: __('<b>End Date</b> Cannot be Less than Start Date'), title: __('Error'), indicator: 'orange'});
+			cur_frm.set_value("to_date", "");
 	}
 
 }
 
 function check_value(frm,field,name,value){
 	if(value && value<0){
-		frappe.msgprint({message: __('<b>'+field +'</b> Cannot be Less Than Zero'), title: __('Error'), indicator: 'orange'});
-		cur_frm.set_value(name, "");
+			frappe.msgprint({message: __('<b>'+field +'</b> Cannot be Less Than Zero'), title: __('Error'), indicator: 'orange'});
+			cur_frm.set_value(name, "");
 	}
 }
 
 function rate_hour_contract_change(frm){
 	if(cur_frm.doc.no_of_workers<cur_frm.doc.worker_filled)
-		{
-			frappe.msgprint({message: __('Workers Already Filled'), title: __('Error'), indicator: 'orange'});
-			frappe.validated = false;	
-		}
-		if(frappe.validated){
-			rate_calculation(frm)
-		}
+			{
+					frappe.msgprint({message: __('Workers Already Filled'), title: __('Error'), indicator: 'orange'});
+					frappe.validated = false;       
+			}
+			if(frappe.validated){
+					rate_calculation(frm)
+			}
 	}
 
 function rate_calculation(frm){
@@ -446,35 +445,35 @@ function rate_calculation(frm){
 	var total_per_hour=extra_price_increase+parseFloat(cur_frm.doc.rate)
 	var total_flat_rate=0
 	if(cur_frm.doc.company!='undefined'){
-				frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','mvr','shovel'], function(r){
-					const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
-					const optional_field_data=[frm.doc.drug_screen,frm.doc.background_check,frm.doc.driving_record,frm.doc.shovel]
-					const optional_fields=["drug_screen",'background_check','driving_record','shovel']
-					for(let i=0;i<org_optional_data.length;i++){
-						if(optional_field_data[i] && optional_field_data[i]!='None')
-							{
-								if(org_optional_data[i]=='Flat rate person'){
-									total_flat_rate=total_flat_rate+parseFloat(optional_field_data[i])
-								}
-								else if(org_optional_data[i]=='Hour per person'){
-									total_per_hour=total_per_hour+parseFloat(optional_field_data[i])
-								}
-							}
-							else{
-								cur_frm.set_value(optional_fields[i],'None')
-							}
+							frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','mvr','shovel'], function(r){
+									const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
+									const optional_field_data=[frm.doc.drug_screen,frm.doc.background_check,frm.doc.driving_record,frm.doc.shovel]
+									const optional_fields=["drug_screen",'background_check','driving_record','shovel']
+									for(let i=0;i<org_optional_data.length;i++){
+											if(optional_field_data[i] && optional_field_data[i]!='None')
+													{
+															if(org_optional_data[i]=='Flat rate person'){
+																	total_flat_rate=total_flat_rate+parseFloat(optional_field_data[i])
+															}
+															else if(org_optional_data[i]=='Hour per person'){
+																	total_per_hour=total_per_hour+parseFloat(optional_field_data[i])
+															}
+													}
+													else{
+															cur_frm.set_value(optional_fields[i],'None')
+													}
+									}
+									frm.set_value("flat_rate",total_flat_rate)
+									frm.set_value("per_hour",total_per_hour)
+							})
 					}
-					frm.set_value("flat_rate",total_flat_rate)
-					frm.set_value("per_hour",total_per_hour)
-				})
-			}
 }
 
 function hide_employee_rating(frm){
 	let table = frm.doc.employee_rating || []
-		if (table.length == 0){
-			cur_frm.toggle_display('employee_rating', 0);
-		}
+			if (table.length == 0){
+					cur_frm.toggle_display('employee_rating', 0);
+			}
 }
 
 
@@ -482,36 +481,36 @@ function hide_employee_rating(frm){
 function make_invoice(frm){
 	let roles = frappe.user_roles;
 	if(cur_frm.doc.__islocal != 1 && roles.includes("Staffing Admin", "Staffing User") && frappe.boot.tag.tag_user_info.company){
-		frappe.db.get_value("Assign Employee", {"company": frappe.boot.tag.tag_user_info.company, "tag_status": "Approved"}, "name", function(r){
-			if(r.name){
-				frm.add_custom_button(__('Make Invoice'), function(){
-					frappe.model.open_mapped_doc({
-						method: "tag_workflow.tag_workflow.doctype.job_order.job_order.make_invoice",
-						frm: cur_frm
-					});
-				}).addClass("btn-primary");
-			}
-		});
+			frappe.db.get_value("Assign Employee", {"company": frappe.boot.tag.tag_user_info.company, "tag_status": "Approved"}, "name", function(r){
+					if(r.name){
+							frm.add_custom_button(__('Make Invoice'), function(){
+									frappe.model.open_mapped_doc({
+											method: "tag_workflow.tag_workflow.doctype.job_order.job_order.make_invoice",
+											frm: cur_frm
+									});
+							}).addClass("btn-primary");
+					}
+			});
 	}
 }
 function make_notes(frm){
 	if(frm.doc.company){
-		frappe.call({
-			method:"tag_workflow.tag_workflow.doctype.job_order.job_order.make_notes",
-			args:{
-				"company":frm.doc.company,
+			frappe.call({
+					method:"tag_workflow.tag_workflow.doctype.job_order.job_order.make_notes",
+					args:{
+							"company":frm.doc.company,
 	
-			},
-			callback:function(r){
-				const optional_field_data=['drug_screen','background_check','driving_record','shovel']
-				for(let i=0;i<optional_field_data.length;i++){
-					if(r.message[i]){
-						cur_frm.set_df_property(optional_field_data[i],'description',"Note:The value is set for "+r.message[i])
+					},
+					callback:function(r){
+							const optional_field_data=['drug_screen','background_check','driving_record','shovel']
+							for(let i=0;i<optional_field_data.length;i++){
+									if(r.message[i]){
+											cur_frm.set_df_property(optional_field_data[i],'description',"Note:The value is set for "+r.message[i])
+									}
+							}       
 					}
-				}	
-			}
-				
-		})
+							
+			})
 
 	}
 
@@ -519,28 +518,22 @@ function make_notes(frm){
 
 function fields_setup(frm){
 	if(cur_frm.doc.company){
-		frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','shovel','mvr','drug_screen_rate','background_check_rate','mvr_rate','shovel_rate','contract_addendums'], function(r){
-			if(r.contract_addendums!="undefined"){
-				cur_frm.set_value("contract_add_on",r.contract_addendums)
-			}
-			const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
-			const optional_field_data=['drug_screen','background_check','driving_record','shovel']
-			const org_optional_data_rate=[r.drug_screen_rate,r.background_check_rate,r.mvr_rate,r.shovel_rate]
-			for(let i=0;i<org_optional_data.length;i++){
-				if(!org_optional_data[i]){
-					cur_frm.set_df_property(optional_field_data[i],'options',"None")
-				}
-				else{
-					cur_frm.set_df_property(optional_field_data[i],'options',"None\n"+org_optional_data_rate[i])
-					cur_frm.set_df_property(optional_field_data[i],'description',"Note:The value is set for "+org_optional_data[i])
-				}
-			}	
-		})
+			frappe.db.get_value("Company", {"name": cur_frm.doc.company},['drug_screen','background_check','shovel','mvr','drug_screen_rate','background_check_rate','mvr_rate','shovel_rate','contract_addendums'], function(r){
+					if(r.contract_addendums!="undefined"){
+							cur_frm.set_value("contract_add_on",r.contract_addendums)
+					}
+					const org_optional_data=[r.drug_screen,r.background_check,r.mvr,r.shovel]
+					const optional_field_data=['drug_screen','background_check','driving_record','shovel']
+					const org_optional_data_rate=[r.drug_screen_rate,r.background_check_rate,r.mvr_rate,r.shovel_rate]
+					for(let i=0;i<org_optional_data.length;i++){
+							if(!org_optional_data[i]){
+									cur_frm.set_df_property(optional_field_data[i],'options',"None")
+							}
+							else{
+									cur_frm.set_df_property(optional_field_data[i],'options',"None\n"+org_optional_data_rate[i])
+									cur_frm.set_df_property(optional_field_data[i],'description',"Note:The value is set for "+org_optional_data[i])
+							}
+					}       
+			})
 	}
-}
-
-function cancel_joborder(frm){
-	frm.add_custom_button(__('Cancel'), function(){
-		frappe.set_route("Form", "Job Order");
-	});
 }
