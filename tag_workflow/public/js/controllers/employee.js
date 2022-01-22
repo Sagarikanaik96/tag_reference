@@ -4,6 +4,9 @@ frappe.ui.form.on("Employee", {
 		required_field(frm);
 		cur_frm.dashboard.hide()
 		uploaded_file_format(frm);
+		if (frm.doc.__islocal == 1) {
+			cancel_employee(frm);
+		  }
 	},
 	decrypt_ssn: function(frm) {
 		frappe.call({
@@ -124,4 +127,10 @@ function uploaded_file_format(frm){
 	    allowed_file_types: ['.pdf','.txt','.docx']
 		}
 	};	
+}
+
+function cancel_employee(frm){
+	frm.add_custom_button(__('Cancel'), function(){
+		frappe.set_route("Form", "Employee");
+	});
 }

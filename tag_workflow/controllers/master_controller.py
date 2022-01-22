@@ -67,7 +67,7 @@ def update_user_info(company, make_organization_inactive):
             user = """ select name, enabled from `tabUser` where company="{0}" """.format(company)
             user_list = frappe.db.sql(user, as_dict=1)
             for u in user_list:
-                if(u.enabled == 1 and len(frappe.db.get_list("Employee", {"user_id": u.name}, "name")) == 1):
+                if(u.enabled == 0 and len(frappe.db.get_list("Employee", {"user_id": u.name}, "name")) == 1):
                     frappe.sessions.clear_sessions(user=u.name, keep_current=False, device=None, force=True)
     except Exception as e:
         frappe.error_log(e, "User disabled")
