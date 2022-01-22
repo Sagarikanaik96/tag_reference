@@ -429,6 +429,23 @@ input::-webkit-credentials-auto-fill-button {
     display:none;
 }
 
+/* View contract start */
+[data-route="Form/Job Order"] .modal .modal-dialog { 
+    max-width: 900px !important;
+}
+.contract_div h3 {
+    color: #21B9E4;
+    font-weight: 600;
+}
+.contract_div {
+    height: 600px;
+    overflow-y: auto;
+}
+.contract_div ul li {
+    margin-top: 10px; 
+    padding-right:10px ;
+}
+
 /* Responsive css start */
 
 @media (max-width: 1300px) {
