@@ -235,6 +235,7 @@ def check_if_user_exists():
         frappe.log_error(e, "user update")
         print(e)
 
+
 # remove custom columns
 def remove_column():
     try:
@@ -243,3 +244,4 @@ def remove_column():
             frappe.db.sql(sql)
     except Exception as e:
         frappe.log_error(e, "user update")
+
