@@ -351,6 +351,9 @@ input::-webkit-credentials-auto-fill-button {
 #page-User [data-fieldname="new_password"] {
     margin-bottom: 20px;
 }
+#page-User [data-fieldname="new_password"] #showPassword{
+    margin: 0 8px -2px 0 !important;
+}
 /* Staff Company List table */
 
 /* Hiring table */
