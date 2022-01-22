@@ -205,7 +205,9 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
         sql = ''' select data from `tabVersion` where ref_doctype='Job Order' and docname='{}' '''.format(job_order)
         update_values=frappe.db.sql(sql, as_list=1)
         if(len(update_values)<2):
-            if staff_company:
+            sql = '''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org)
+            org_type=frappe.db.sql(sql, as_list=1)
+            if staff_company and org_type[0][0]=="Hiring":
                 doc.company_type = 'Non Exclusive'
                 doc.is_single_share = 1
                 doc.save(ignore_permissions = True)
