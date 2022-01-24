@@ -27,7 +27,7 @@ frappe.listview_settings['Job Order']={
     formatters: {
         company(val, d, f) {
             if (val) {
-                var tmp = `<span class=" ellipsis" title="" id="${val}-${f.name}">
+                return `<span class=" ellipsis" title="" id="${val}-${f.name}">
                             <a class="filterable ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" onmouseover="showCasePopover('${val}','${f.name}')" onmouseout = "hideCasePopover('${val}','${f.name}')">${val}</a>
                         </span>
                         <script>
@@ -69,20 +69,18 @@ frappe.listview_settings['Job Order']={
                             $("#"+cname+"-"+dname).popover('hide');
                         }
                         </script>`        
-                return tmp;
             } else {
-                var tmp = `<span class="ellipsis" title=""><a class="filterable ellipsis" data-filter="${d.fieldname},=,''"></a></span>`;
-                return tmp;
+                return `<span class="ellipsis" title=""><a class="filterable ellipsis" data-filter="${d.fieldname},=,''"></a></span>`;
             }
         },
 
         name(val, d, f) {
             if (val) {
-                var tmp = `<span class="level-item select-like">
-                <input class="list-row-checkbox" type="checkbox" data-name="${f.name}">
-                    <span class="list-row-like hidden-xs style=" margin-bottom:="" 1px;"="">
-                        <span class="like-action not-liked" data-name="${f.name}" data-doctype="Job Order" data-liked-by="null" title="">
-                            <svg class="icon  icon-sm" style="">
+                return `<span class="level-item select-like">
+                    <input class="list-row-checkbox" type="checkbox" data-name="${f.name}">
+                        <span class="list-row-like hidden-xs style=" margin-bottom:="" 1px;"="">
+                            <span class="like-action not-liked" data-name="${f.name}" data-doctype="Job Order" data-liked-by="null" title="">
+                                <svg class="icon  icon-sm" style="">
                                 <use class="like-icon" href="#icon-heart"></use>
                             </svg>
                         </span>
@@ -131,10 +129,8 @@ frappe.listview_settings['Job Order']={
                             $("#"+dname).popover('hide');
                         }
                         </script>`       
-                return tmp;
             } else {
-                var tmp = `<span class="ellipsis" title=""><a class="filterable ellipsis" data-filter="${d.fieldname},=,''"></a></span>`;
-                return tmp;
+                return  `<span class="ellipsis" title=""><a class="filterable ellipsis" data-filter="${d.fieldname},=,''"></a></span>`;
             }
         
         }
