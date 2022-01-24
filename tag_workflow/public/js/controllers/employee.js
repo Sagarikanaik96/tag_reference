@@ -88,14 +88,7 @@ function required_field(frm){
 	}
 }
 
-// /*-------blocked child table---------*/
-frappe.ui.form.on('Blocked Employees', {
-	form_render: function(frm, cdt, cdn){
-		let child = frappe.get_doc(cdt, cdn);
-		// frm.fields_dict["block_from"].grid.grid_rows_by_docname[child.name].toggle_display("blocked_from", 1);
-		// render_orgs(child, frm);
-	}
-});
+
 
 /*-------render orgs data-------*/
 function render_orgs(child, frm){
