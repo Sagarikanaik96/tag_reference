@@ -8,6 +8,12 @@ frappe.listview_settings['Job Order']={
             })
 
         }
+        if(frappe.session.user=='Administrator'){
+          
+            $('.btn-primary').hide();
+
+        }
+
     },
     refresh:function(listview){
         if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
