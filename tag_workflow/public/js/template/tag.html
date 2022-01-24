@@ -228,8 +228,7 @@
                       <li class="py-2 mt-2">
                         <a href="/app/job-order">All</a>
                       </li>
-                      {% if frappe.boot.tag.tag_user_info.company_type !=
-                      "Staffing" %}
+                      {% if frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" %}
                       <li class="py-2">
                         <a href="/app/staff_company_list">Direct Order</a>
                       </li>
