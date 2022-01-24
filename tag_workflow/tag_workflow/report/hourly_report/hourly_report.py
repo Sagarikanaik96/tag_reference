@@ -2,89 +2,54 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import _
+import datetime
 
 def execute(filters=None):
-    columns, data = [], []
-    columns = get_columns()
-    data = get_data(filters)
-    return columns, data
+	if not filters:
+		filters={}
+	company_search=filters.get('companies')
+	time_format = '%Y-%m-%d'
+	from_date = datetime.datetime.strptime(str(filters.get('start_date')), time_format)
+	to_date = datetime.datetime.strptime(str(filters.get('end_date')), time_format)
+	today = datetime.datetime.now()
+	staff_company='Staffing Company Name'
+	fromdate='From Date'
+	todate='To Date'
+	columns, dataa = [], []
+	columns=[
+			{'fieldname':'employee_company','label':(staff_company),'fieldtype':'Data','width':150},
+			{'fieldname':'employee_name','label':('Employee Name'),'fieldtype':'Data','width':150},
+			{'fieldname':'from_date','label':(fromdate),'fieldtype':'Date','width':150},
+			{'fieldname':'to_date','label':(todate),'fieldtype':'Date' ,'width':150},
+			{'fieldname':'total_hours_worked','label':('Total Days Worked'),'fieldtype':'Int','width':150},
+			{'fieldname':'hours','label':('Total Hours Worked'),'fieldtype':'Int','width':150}
+		]
+	if(today.date() < to_date.date()):
+		frappe.msgprint("You Can't Fetch record of Future Date")
+	elif(today.date() < from_date.date()):
+		frappe.msgprint("You Can't Fetch record of Future Date")
+	elif(to_date.date()<from_date.date()):
+		frappe.msgprint("Start Date Can't be Future Date For End Date")
+	else:
+		current_company=frappe.db.sql(''' select company from `tabUser` where email='{}' '''.format(frappe.session.user),as_list=1)
+		dataa= fields_data(current_company,filters,from_date,to_date,company_search)
+		
+			
+	return columns, dataa
 
-def get_columns():
-    columns = [
-            {
-                "label": _("Employee Code"),
-                "fieldname": "employee",
-                "fieldtype": "Link",
-                "options": "EMployee",
-                "width": 150
-            },
-            {
-                "label": _("Employee Name"),
-                "fieldname": "employee_name",
-                "width": 150
-            },
-            {
-                "label": _("Job Title"),
-                "fieldname": "job_title",
-                "fieldtype": "Data",
-                "width": 150
-            },
-            {
-                "label": _("Start Date"),
-                "fieldname": "start_date",
-                "fieldtype": "Date",
-                "width": 150
-            },
-            {
-                "label": _("End Date"),
-                "fieldname": "end_date",
-                "fieldtype": "Date",
-                "width": 150
-            },
-            {
-                "label": _("Hours Worked"),
-                "fieldname": "hours",
-                "fieldtype": "Float",
-                "width": 150
-            },
-            {
-                "label": _("Total Payment"),
-                "fieldname": "total_payment",
-                "fieldtype": "Currency",
-                "width": 150
-            }
-        ]
-    return columns
+def fields_data(current_company,filters,from_date,to_date,company_search):
+	data=[]
+	if(len(current_company)==0 or current_company[0][0]=='TAG'):
+		if(filters.get('companies')):
+			data=frappe.db.sql(''' select T.employee_company,T.employee_name,min(JO.from_date),max(JO.to_date),ceil(sum((JO.to_date-JO.from_date)/(24*60*60*1000))) as total_hours_worked,sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.from_date>'{0}' and JO.to_date<'{1}' and T.employee_company like '{2}%' group by employee_name;'''.format(from_date,to_date,company_search))
+		else:
+			data=frappe.db.sql(''' select T.employee_company,T.employee_name,min(JO.from_date),max(JO.to_date),ceil(sum((JO.to_date-JO.from_date)/(24*60*60*1000))) as total_hours_worked,sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.from_date>'{0}' and JO.to_date<'{1}' group by employee_name;'''.format(from_date,to_date))
 
-def get_condition(filters):
-    try:
-        condition = ""
-
-        if(filters.get("employee")):
-            condition += " and employee = '{0}'".format(filters.get("employee"))
-
-        if(filters.get("company")):
-            condition += " and company = '{0}'".format(filters.get("company"))
-
-        return condition
-    except Exception as e:
-        frappe.msgprint(e)
-
-
-def get_data(filters):
-    try:
-        condition = get_condition(filters)
-        sql = """ select name, job_order_detail, employee, employee_name, total_billable_hours, total_billable_amount, company from `tabTimesheet` where docstatus = 1 {0} """.format(condition)
-        data = frappe.db.sql(sql, as_dict=True)
-
-        row = []
-        for d in data:
-            if(d.job_order_detail):
-                start_date, end_date, job_title = frappe.db.get_value("Job Order", {"name": d.job_order_detail}, ["from_date", "to_date", "select_job"])
-                row.append({"employee": d.employee, "employee_name": d.employee_name, "job_title": job_title, "start_date": start_date, "end_date": end_date, "hours": d.total_billable_hours, "total_payment": d.total_billable_amount})
-
-        return row
-    except Exception as e:
-        frappe.msgprint(e)
-
+	
+	else:
+		current_company=current_company[0][0]
+		if(filters.get('companies')):
+			data=frappe.db.sql(''' select T.employee_company,T.employee_name,min(JO.from_date),max(JO.to_date),ceil(sum((JO.to_date-JO.from_date)/(24*60*60*1000))) as total_hours_worked,sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.company='{0}' and JO.from_date>'{1}' and JO.to_date<'{2}' and T.employee_company like '{3}%' group by employee_name;'''.format(current_company,from_date,to_date,company_search))
+		else:
+			data=frappe.db.sql(''' select T.employee_company,T.employee_name,min(JO.from_date),max(JO.to_date),ceil(sum((JO.to_date-JO.from_date)/(24*60*60*1000))) as total_hours_worked,sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.company='{0}' and JO.from_date>'{1}' and JO.to_date<'{2}' group by employee_name;'''.format(current_company,from_date,to_date))
+	return data
