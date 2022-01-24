@@ -307,7 +307,14 @@ function employee_timesheet_rating(frm){
 			}
 		}
 		});
-		pop_up.show();		
+		pop_up.show();
+		$(document).on('click', '[data-fieldname="thumbs_up"]', function(){
+    		$('[data-fieldname="thumbs_down"]').prop('checked', false);
+		});
+
+		$(document).on('click', '[data-fieldname="thumbs_down"]', function(){
+    		$('[data-fieldname="thumbs_up"]').prop('checked', false);
+		});		
 	}
 
 function approval_timesheet(frm){

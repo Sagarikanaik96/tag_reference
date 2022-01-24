@@ -22,9 +22,9 @@ def execute(filters=None):
         {'fieldname':'to_date','label':('End Date'),'fieldtype':'Date','width':150}
 	]
 	if frappe.session.user=="Administrator":
-		data=frappe.db.sql(''' select job_order_detail,employee_name,`tabJob Order`.select_job,`tabTimesheet`.company as company,total_hours,total_billable_amount,from_date,to_date from `tabTimesheet`,`tabJob Order` where `tabTimesheet`.job_order_detail=`tabJob Order`.name and non_satisfactory=1 and start_date>="{0}" and end_date<="{1}" '''.format(from_date,to_date))
+		data=frappe.db.sql(''' select job_order_detail,employee_name,`tabJob Order`.select_job,`tabTimesheet`.company as company,total_hours,total_billable_amount,`tabJob Order`.from_date,`tabJob Order`.to_date from `tabTimesheet`,`tabJob Order` where `tabTimesheet`.job_order_detail=`tabJob Order`.name and non_satisfactory=1 and start_date>="{0}" and end_date<="{1}" '''.format(from_date,to_date))
 	else:
-		data=frappe.db.sql(''' select job_order_detail,employee_name,`tabJob Order`.select_job,`tabTimesheet`.company as company,total_hours,total_billable_amount,from_date,to_date from `tabTimesheet`,`tabJob Order` where `tabTimesheet`.job_order_detail=`tabJob Order`.name and employee_company='{0}' and non_satisfactory=1 and start_date>="{1}" and end_date<="{2}" '''.format(company,from_date,to_date))
+		data=frappe.db.sql(''' select job_order_detail,employee_name,`tabJob Order`.select_job,`tabTimesheet`.company as company,total_hours,total_billable_amount,`tabJob Order`.from_date,`tabJob Order`.to_date from `tabTimesheet`,`tabJob Order` where `tabTimesheet`.job_order_detail=`tabJob Order`.name and employee_company='{0}' and non_satisfactory=1 and start_date>="{1}" and end_date<="{2}" '''.format(company,from_date,to_date))
 
 
 

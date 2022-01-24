@@ -24,8 +24,12 @@ frappe.FaceRecognition = Class.extend({
 		show_profile: function(wrapper, page){
 			frappe.call({
 				method:"tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.comp",
+				args:{
+					company_name:frappe.boot.tag.tag_user_info.company,
+				},
 				
 				callback:function(r){
+
 					var data = r.message;
 					let profile_html = ``;
 					for(let p in data){
@@ -52,6 +56,8 @@ function get_location(name){
 		args:{
 
 			"comp_id":name,
+			company_name:frappe.boot.tag.tag_user_info.company,
+
 		},	
 		callback:function(r){
 			let company_data=r.message[0][0]
@@ -105,6 +111,9 @@ function get_location(name){
 function new_job_order(nam){
 	frappe.call({
 		method:"tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.comp",
+		args:{
+			company_name:frappe.boot.tag.tag_user_info.company,
+		},
 		callback:function(r)
 		{
 			let doc = frappe.model.get_new_doc("Job Order");

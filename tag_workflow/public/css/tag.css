@@ -28,6 +28,15 @@ input[type="radio"]:checked::before {
     background: #21E4AE;
 }
 
+.indicator-pill.gray {
+    background: #FFF8E7 !important;
+    color:#E0A116 !important;
+}
+
+.indicator-pill.gray::before {
+    background: #E0A116  !important;
+}
+
 .layout-main-section .frappe-list .list-row .indicator-pill {
     padding: 4px 8px;
     border-radius: 11px;
@@ -342,6 +351,9 @@ input::-webkit-credentials-auto-fill-button {
 #page-User [data-fieldname="new_password"] {
     margin-bottom: 20px;
 }
+#page-User [data-fieldname="new_password"] #showPassword{
+    margin: 0 8px -2px 0 !important;
+}
 /* Staff Company List table */
 
 /* Hiring table */
@@ -402,29 +414,7 @@ input::-webkit-credentials-auto-fill-button {
     color: #21B9E4;
     font-size: 14px;
 }
-.editable-form [data-fieldname="time_logs"] .form-grid, 
-.editable-form [data-fieldtype="Table"] .form-grid  {
-    overflow-x: auto;
-}
-.editable-form .form-section [data-fieldname="time_logs"] .form-grid .grid-heading-row, 
-.editable-form .form-section [data-fieldname="time_logs"] .form-grid .grid-body .rows .grid-row, 
-.editable-form .form-section [data-fieldname="items"] .form-grid .grid-heading-row, 
-.editable-form .form-section [data-fieldname="items"] .form-grid .grid-body .rows .grid-row {  
-   width: 800px;
-}
-.editable-form .form-section [data-fieldname="items"] .form-grid .grid-heading-row, 
-.editable-form .form-section [data-fieldname="items"] .form-grid .grid-body .rows .grid-row, 
-.editable-form .form-section [data-fieldname="timesheets"] .form-grid .grid-heading-row, 
-.editable-form .form-section [data-fieldname="timesheets"] .form-grid .grid-body .rows .grid-row, 
-.editable-form .form-section [data-fieldname="payment_schedule"] .form-grid .grid-heading-row, 
-.editable-form .form-section [data-fieldname="payment_schedule"] .form-grid .grid-body .rows .grid-row  {
-   width: 500px;
-}
-.editable-form .form-section [data-fieldname="time_logs"] .form-grid .grid-body .rows .grid-row.grid-row-open , 
-.editable-form .form-section [data-fieldname="items"] .form-grid .grid-body .rows .grid-row.grid-row-open {
-    width:auto;
-    transition: .0s ease-in-out;
-}
+
 .editable-form .form-section [data-fieldtype="Table"] .sortable-handle span {
     display:none;
 }
@@ -441,7 +431,7 @@ input::-webkit-credentials-auto-fill-button {
     height: 600px;
     overflow-y: auto;
 }
-.contract_div ul li {
+.contract_div ol li {
     margin-top: 10px; 
     padding-right:10px ;
 }

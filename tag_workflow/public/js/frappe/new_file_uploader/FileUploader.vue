@@ -159,7 +159,7 @@ export default {
 			default: () => ({
 				max_file_size: null, // 2048 -> 2KB
 				max_number_of_files: null,
-				allowed_file_types: ['.pdf','.docx','.txt'] // ['image/*', 'video/*', '.jpg', '.gif', '.pdf']
+				allowed_file_types: ['.pdf','.docx','.txt','.csv'] // ['image/*', 'video/*', '.jpg', '.gif', '.pdf']
 			})
 		},
 		upload_notes: {

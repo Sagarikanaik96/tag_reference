@@ -12,12 +12,10 @@ frappe.ui.form.on('Assign Employee', {
 		hide_resume(frm);
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
 			return {
-				query: "tag_workflow.tag_data.filter_blocked_employee",
-				filters: {
-					company: doc.hiring_organization,
-					emp_company: doc.company,
-					job_category: doc.job_category,
-				  },
+				query: "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.get_employee",
+				filters: {company: doc.hiring_organization, emp_company: doc.company,
+					job_category: doc.job_category,	distance_radius: doc.distance_radius, job_location: doc.job_location
+				}
 			}
 		}
 	},
@@ -32,18 +30,19 @@ frappe.ui.form.on('Assign Employee', {
 	validate:function(frm){
 		var sign = cur_frm.doc.e_signature_full_name
 		var emp_tab=frm.doc.employee_details;
-		var message="<b>Please Fill Mandatory Fields:</b>"
+		var message="<b>Please Fill Mandatory Fields:</b>";
 		if(sign===undefined || !sign){
-				message=message+"<br>E Signature Full Name"
-			
+			message=message+"<br>E Signature Full Name";
 		}
-		if(emp_tab===undefined || emp_tab.length==0){
-			message=message+"<br>Employee Details"
 
+		if(emp_tab===undefined || emp_tab.length==0){
+			message=message+"<br>Employee Details";
 		}
+
 		if(frm.doc.agree_contract==0 || frm.doc.agree_contract===undefined){
-			message=message+"<br>Agree To Contract"
+			message=message+"<br>Agree To Contract";
 		}
+
 		if(message!="<b>Please Fill Mandatory Fields:</b>"){
 			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
 			frappe.validated=false
@@ -84,12 +83,13 @@ function check_employee_data(frm){
 			msg.push('Employee(<b>'+table[d].employee+'</b>) job category not matched with Job Order job category');
 		}
 	}
+
 	if(frm.doc.tag_status=='Approved'){
 		(table.length > Number(frm.doc.no_of_employee_required)+1) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
-	}
-	else{
+	}else{
 		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 	}
+
 	for(var e in table){(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg.push('Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details');}
 	if(msg.length){frappe.msgprint({message: msg.join("\n\n"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
 }
@@ -128,12 +128,12 @@ frappe.ui.form.on("Assign Employee Details", {
 		if(frm.doc.tag_status == "Approved" && child.__islocal != 1){
 			cur_frm.fields_dict["employee_details"].grid.grid_rows_by_docname[child.name].toggle_editable("employee", 0);
 		}
-		$('[data-fieldname="resume"]').on({
-		  'click': function () {
-		    window.open(cur_frm.doc.employee_details[0]["resume"]);
-	  		}
-	});
 
+		$('[data-fieldname="resume"]').on({
+			'click': function () {
+				window.open(cur_frm.doc.employee_details[0]["resume"]);
+			}
+		});
 	}	
 });
 
@@ -144,8 +144,7 @@ function approved_employee(frm){
 		var approved_date=new Date(frm.doc.modified)
 		var diff=current_date.getTime()-approved_date.getTime()
 		diff=parseInt(diff/1000)
-		if (diff<5)
-		{
+		if (diff<5){
 			frappe.call({
 				method:"tag_workflow.tag_data.update_job_order",
 				"freeze": true,
@@ -169,10 +168,8 @@ function hide_resume(frm){
 		}
 
 	$('[data-fieldname="resume"]').on({
-	  'click': function () {
-	    window.open(cur_frm.doc.employee_details[0]["resume"]);
-  		}
+		'click': function () {
+			window.open(cur_frm.doc.employee_details[0]["resume"]);
+		}
 	});
 }
-
-

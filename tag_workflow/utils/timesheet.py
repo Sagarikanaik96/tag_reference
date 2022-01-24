@@ -294,10 +294,13 @@ def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None
 @frappe.whitelist()
 def staffing_emp_rating(employee,id,up,down,job_order,comment,timesheet_name):
     try:
+        rating = 1
+        if int(down):
+            rating = 0
         parent = frappe.get_doc('Job Order', job_order)
         parent.append('employee_rating', {
             'employee_name': employee +'-'+ id,
-            'rating':  1 if up else down,
+            'rating':  rating,
             'comment': comment if comment else ''
         })
         parent.flags.ignore_mandatory = True

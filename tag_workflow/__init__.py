@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+import boto3
+import frappe
 from frappe.core.doctype.user.user import User
 from frappe.model.document import Document
 from frappe.core.doctype.navbar_settings.navbar_settings import NavbarSettings
@@ -20,3 +22,16 @@ Company.validate_abbr = validate_abbr
 NavbarSettings.validate_standard_navbar_items =validate_standard_navbar_items
 Lead.create_contact = create_contact
 Timesheet.update_cost = update_cost
+
+def get_key(key):
+    try:
+        if(frappe.cache().get_value("aws")):
+            return frappe.cache().get_value("aws")['tag_keys'][key]
+        else:
+            client = boto3.client('ssm')
+            response = client.get_parameter(Name='env_details')
+            frappe.cache().set_value("aws", response)
+            return frappe.cache().get_value("aws")['tag_keys'][key]
+    except Exception as e:
+        frappe.error_log(e, "redis")
+        return ""

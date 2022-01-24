@@ -20,6 +20,7 @@
   "job_order_email",
   "resume_required",
   "section_break_6",
+  "distance_radius",
   "employee_details",
   "html_37",
   "e_signature_full_name",
@@ -163,12 +164,19 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Single Share"
+  },
+  {
+   "default": "5 miles",
+   "fieldname": "distance_radius",
+   "fieldtype": "Select",
+   "label": "Distance Radius",
+   "options": "5 miles\n10 miles\n20 miles\n50 miles"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-17 10:27:50.671338",
+ "modified": "2022-01-21 10:41:28.331646",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",
