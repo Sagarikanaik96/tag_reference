@@ -1,4 +1,5 @@
 frappe.listview_settings['Employee'] = {
+	hide_name_column: true,
 	filters: [["status","=", "Active"], ["company", "=", frappe.boot.tag.tag_user_info.company]],
 	refresh: function(listview){
 		let view = listview;

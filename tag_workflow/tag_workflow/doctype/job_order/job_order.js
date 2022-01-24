@@ -269,6 +269,9 @@ frappe.ui.form.on('Job Order', {
 			}
 			if(frm.doc.no_of_workers<frm.doc.worker_filled){
 				message = 'Number of workers cannot be less than worker filled.'
+				frappe.db.get_value('Job Order', frm.doc.name, 'no_of_workers', function(r){
+					frm.set_value('no_of_workers', r['no_of_workers'])
+				})
 			}
 			if(message!="<b>Please Fill Mandatory Fields:</b>"){
 					frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});

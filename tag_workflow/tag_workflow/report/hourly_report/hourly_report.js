@@ -2,32 +2,30 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-function get_company_list(){
-	let company = '\n';
-	frappe.call({
-		"method": "tag_workflow.utils.whitelisted.get_company_list",
-		"args": {"company_type": "Hiring"},
-		"async": 0,
-		"callback": function(r){
-			company += r.message;
-		}
-	});
-	return company
-}
-
 frappe.query_reports["Hourly Report"] = {
 	"filters": [
 		{
-			"fieldname": "employee",
-			"label": __("Employee Code"),
-			"fieldtype": "Link",
-			"options": "Employee"
+			"fieldname":"start_date",
+			"label": ("From Date"),
+			"fieldtype": "Date",
+			"width": "100",
+			"reqd": 0,
+			"default": frappe.datetime.month_start()
 		},
 		{
-			"fieldname": "company",
-			"label": __("Company"),
-			"fieldtype": "Select",
-			"options": get_company_list(),
+			"fieldname":"end_date",
+			"label": ("To Date"),
+			"fieldtype": "Date",
+			"width": "100",
+			"reqd": 0,
+			"default": frappe.datetime.get_today()
 		},
+		{
+			"fieldname":"companies",
+			"label": ("Staffing Company Name"),
+			"fieldtype": "Data",
+			"width": "100",
+			"reqd": 0,
+		},	
 	]
 };
