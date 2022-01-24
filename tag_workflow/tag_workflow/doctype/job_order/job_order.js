@@ -267,6 +267,9 @@ frappe.ui.form.on('Job Order', {
 			if(frm.doc.agree_to_contract==0){
 					message=message+"<br>Agree To Contract"
 			}
+			if(frm.doc.no_of_workers<frm.doc.worker_filled){
+				message = 'Number of workers cannot be less than worker filled.'
+			}
 			if(message!="<b>Please Fill Mandatory Fields:</b>"){
 					frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
 
