@@ -60,6 +60,11 @@ frappe.ui.form.on("Employee", {
 				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]] ]
 			}
 		});
+
+	},
+	onload:function(frm){
+		let blocked_company=frappe.meta.get_docfield("Blocked Employees","blocked_from", cur_frm.doc.name);
+		blocked_child_orgs(frm,blocked_company)
 	}
 });
 
@@ -83,12 +88,12 @@ function required_field(frm){
 	}
 }
 
-/*-------blocked child table---------*/
+// /*-------blocked child table---------*/
 frappe.ui.form.on('Blocked Employees', {
 	form_render: function(frm, cdt, cdn){
 		let child = frappe.get_doc(cdt, cdn);
-		frm.fields_dict["block_from"].grid.grid_rows_by_docname[child.name].toggle_display("blocked_from", 0);
-		render_orgs(child, frm);
+		// frm.fields_dict["block_from"].grid.grid_rows_by_docname[child.name].toggle_display("blocked_from", 1);
+		// render_orgs(child, frm);
 	}
 });
 
@@ -133,4 +138,21 @@ function cancel_employee(frm){
 	frm.add_custom_button(__('Cancel'), function(){
 		frappe.set_route("Form", "Employee");
 	});
+}
+
+function blocked_child_orgs(frm,blocked_company){
+	frappe.call({
+		"method": "tag_workflow.utils.whitelisted.get_orgs",
+		"args":{
+			company:frappe.boot.tag.tag_user_info.company,
+		},
+		"callback": function(r){
+			if(r){
+				let data = r.message;
+				blocked_company.options =data;
+
+				}
+		}
+	});
+
 }

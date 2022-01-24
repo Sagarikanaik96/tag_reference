@@ -137,9 +137,17 @@ def get_user_company_data(user, company):
 
 #--------hiring orgs data----#
 @frappe.whitelist(allow_guest=True)
-def get_orgs():
-    sql = """ select name from `tabCompany` where organization_type = 'Hiring' """
-    return frappe.db.sql(sql, as_dict=1)
+def get_orgs(company):
+    try:
+        sql = """ select hiring_organization from `tabAssign Employee` where company = '{0}' """.format(company)
+        data=frappe.db.sql(sql, as_list=1)
+        my_data=[]
+        for i in data:
+            if i not in my_data:
+                my_data.append(i)
+        return my_data
+    except Exception as e:
+        print(e)
 
 #-------get company users----#
 @frappe.whitelist(allow_guest=True)

@@ -12,21 +12,21 @@
  "fields": [
   {
    "fieldname": "blocked_from",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Blocked From",
-   "read_only": 1
+   "label": "Blocked From"
   },
   {
    "fieldname": "html",
    "fieldtype": "HTML",
+   "hidden": 1,
    "label": "Blocked From"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-12-14 04:43:24.319516",
+ "modified": "2022-01-23 21:48:01.584422",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Blocked Employees",
