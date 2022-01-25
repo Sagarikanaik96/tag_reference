@@ -289,9 +289,9 @@
                   />Employees
                 </div>
               </a>
-              {% endif %} {% if frappe.boot.tag.tag_user_info.company_type !=
-              "Hiring" %}
-              <a href="/app/report">
+              {% endif %} 
+             
+              <a href="/app/reports">
                 <div class="tab-button custom-btn">
                   <img
                     src="/assets/tag_workflow/images/ico-invoice.svg"
@@ -300,7 +300,7 @@
                   />Reports
                 </div>
               </a>
-              {% endif %} {% if frappe.boot.tag.tag_user_info.company_type ==
+              {% if frappe.boot.tag.tag_user_info.company_type ==
               "TAG" %}
               <a href="/app/query-report/Work%20Orders">
                 <div class="tab-button custom-btn">
