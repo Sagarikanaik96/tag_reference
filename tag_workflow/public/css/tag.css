@@ -400,6 +400,9 @@ input::-webkit-credentials-auto-fill-button {
 .chat-list .chat-rooms-container .chat-room .chat-date {
     color: #8D9CBC !important;
 }
+#page-temporary-assistance-guru .chat-app #chat-bubble {
+    margin-bottom: 35px !important;
+}
 
 /* File upload UI */
 .modal-dialog .file-upload-area {
