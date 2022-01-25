@@ -11,7 +11,10 @@ login.bind_events = function () {
 	$(window).on("hashchange", function () {
 		login.route();
 	});
-
+	// disable copy paste
+	$("#login_password").on('copy paste cut', function(e) {
+		e.preventDefault();
+	});
 
 	$(".form-login").on("submit", function (event) {
 		event.preventDefault();

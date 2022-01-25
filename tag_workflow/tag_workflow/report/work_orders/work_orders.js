@@ -25,7 +25,13 @@ frappe.query_reports["Work Orders"] = {
 			width:100,
 			reqd:0
 		}
-
-
-	]
+	],
+	onload:function(frm){
+			setTimeout(hide_createcard,900)
+	}
 };
+
+
+function hide_createcard(){
+	$('[data-label="Create%20Card"]').hide()
+}
