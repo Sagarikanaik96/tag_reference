@@ -182,3 +182,27 @@ def make_notes(company):
     except Exception as e:
         frappe.msgprint(frappe.get_traceback())
         frappe.log_error(e, 'job order company')
+
+
+@frappe.whitelist()
+def get_company_details(comp_name):
+    try:
+        sql = ''' select name ,organization_type, address,state ,city ,phone_no from `tabCompany` where name = "{0}"'''.format(comp_name)
+        company_value = frappe.db.sql(sql,as_dict=True)
+        if company_value:
+            return company_value[0]
+    except Exception as e:
+        frappe.log_error(e, 'Job order list')
+        return []
+    
+
+@frappe.whitelist()
+def get_joborder_value(name):
+    try:
+        sql = ''' select name,category,from_date,to_date,select_job,job_duration,job_site,no_of_workers,rate from `tabJob Order` where name = "{0}" '''.format(name)
+        value = frappe.db.sql(sql,as_dict=True)
+        if value:
+            return value[0]
+    except Exception as e:
+        frappe.log_error(e, 'Job order list')
+        return []
