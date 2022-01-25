@@ -257,7 +257,7 @@ frappe.ui.form.on('Job Order', {
 	},
 	validate:function(frm){
 			rate_calculation(frm)
-			var l = {'Company':frm.doc.company,"Select Job":frm.doc.select_job,"Category":frm.doc.category,"Job Order Start Date":cur_frm.doc.from_date,"Job Site":cur_frm.doc.job_site,"No Of Workers":cur_frm.doc.no_of_workers,"Rate":cur_frm.doc.rate,"Description":cur_frm.doc.description,"Job Order End Date":cur_frm.doc.to_date,"Job Duration":cur_frm.doc.job_duration,"Estimated Hours Per Day":cur_frm.doc.estimated_hours_per_day,"E-Signature Full Name":cur_frm.doc.e_signature_full_name}
+			var l = {'Company':frm.doc.company,"Select Job":frm.doc.select_job,"Category":frm.doc.category,"Job Order Start Date":cur_frm.doc.from_date,"Job Site":cur_frm.doc.job_site,"No Of Workers":cur_frm.doc.no_of_workers,"Rate":cur_frm.doc.rate,"Job Order End Date":cur_frm.doc.to_date,"Job Duration":cur_frm.doc.job_duration,"Estimated Hours Per Day":cur_frm.doc.estimated_hours_per_day,"E-Signature Full Name":cur_frm.doc.e_signature_full_name}
 			var message="<b>Please Fill Mandatory Fields:</b>"
 			for (let k in l) {
 					if(l[k]===undefined || !l[k]){

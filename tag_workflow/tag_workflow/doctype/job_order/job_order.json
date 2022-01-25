@@ -385,8 +385,7 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Job Title Description",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "default": "0",
@@ -428,7 +427,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-22 08:25:22.368943",
+ "modified": "2022-01-25 04:14:33.488167",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
