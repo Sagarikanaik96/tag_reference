@@ -158,7 +158,7 @@
   {
    "default": "0",
    "fieldname": "extra_price_increase",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "label": "Extra Price Increase",
    "precision": "2"
   },
@@ -201,7 +201,7 @@
   {
    "default": "0",
    "fieldname": "per_hour",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "label": "Per Hour",
    "precision": "2",
    "read_only": 1
@@ -209,7 +209,7 @@
   {
    "default": "0",
    "fieldname": "flat_rate",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "label": "Flat Rate",
    "precision": "2",
    "read_only": 1
@@ -377,7 +377,7 @@
   },
   {
    "fieldname": "rate",
-   "fieldtype": "Data",
+   "fieldtype": "Currency",
    "label": "Rate",
    "reqd": 1
   },
@@ -427,7 +427,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-25 04:14:33.488167",
+ "modified": "2022-01-25 01:32:13.315130",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

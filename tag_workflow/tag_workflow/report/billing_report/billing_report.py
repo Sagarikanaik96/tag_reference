@@ -20,7 +20,7 @@ def execute(filters=None):
 			{'fieldname':'employee_company','label':(staff_company),'fieldtype':'Data','width':200},
 			{'fieldname':'from_date','label':(fromdate),'fieldtype':'Date','width':150},
 			{'fieldname':'to_date','label':(todate),'fieldtype':'Date' ,'width':150},
-			{'fieldname':'total_hours_worked','label':('Total Cost'),'fieldtype':'Float','width':150},
+			{'fieldname':'total_hours_worked','label':('Total Cost'),'fieldtype':'Currency','width':150},
 		]
 	if(today.date() < to_date.date()):
 		frappe.msgprint("You Can't Fetch record of Future Date")

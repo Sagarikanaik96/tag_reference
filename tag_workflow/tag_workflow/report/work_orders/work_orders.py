@@ -13,7 +13,7 @@ def execute(filters=None):
         {'fieldname':'name','label':('Work Order ID'),'fieldtype':'Link','options':'Job Order','width':150},
         {'fieldname':'company','label':('Company Name'),'fieldtype':'Data','width':150},
         {'fieldname':'select_job','label':('Job Title'),'fieldtype':'Data' ,'width':150},
-        {'fieldname':'per_hour','label':('Wage/Hour'),'fieldtype':'Int','width':150},
+        {'fieldname':'per_hour','label':('Wage/Hour'),'fieldtype':'Currency','width':150},
         {'fieldname':'category','label':('Job Category'),'fieldtype':'Data','width':150},
         {'fieldname':'from_date','label':('Start Date'),'fieldtype':'Data','width':150},
         {'fieldname':'job_site','label':('Job Site'),'fieldtype':'Data' ,'width':150},

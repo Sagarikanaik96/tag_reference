@@ -12,10 +12,10 @@ def execute(filters=None):
 		{"fieldname":"name","label":"Invoice ID","fieldtype": "Link",'options':'Sales Invoice',"width":200,},
 		{"fieldname":"first_creation","label":"Start Date","fieldtype": "Date","width":200},
         {'fieldname':"last_creation",'label':"End Date",'fieldtype':'Date','width':200},
-		{"fieldname":"total_received","label":"Gross Total Received","fieldtype": "Float","width":200},
-		{'fieldname':"total_pending",'label':"Gross Total Pending",'fieldtype':'Float','width':200},
-		{'fieldname':"approx_due",'label':"Approx. Total  due to TAG",'fieldtype':'Float','width':200},
-		{'fieldname':"total_due",'label':"Total due to TAG",'fieldtype':'Float','width':200},
+		{"fieldname":"total_received","label":"Gross Total Received","fieldtype": "Currency","width":200},
+		{'fieldname':"total_pending",'label':"Gross Total Pending",'fieldtype':'Currency','width':200},
+		{'fieldname':"approx_due",'label':"Approx. Total  due to TAG",'fieldtype':'Currency','width':200},
+		{'fieldname':"total_due",'label':"Total due to TAG",'fieldtype':'Currency','width':200},
 		{'fieldname':"is_paid",'label':"Paid",'fieldtype':'Check','width':200},
 		{'fieldname':'button','label':'Link','fieldtype':'Button'}
 	]
