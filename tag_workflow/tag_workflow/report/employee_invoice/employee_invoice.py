@@ -21,8 +21,8 @@ def execute(filters=None):
         {'fieldname':'total_billable_hours','label':('Hours Worked'),'fieldtype':'Int','width':100},
         {'fieldname':'start_date','label':('Start Date'),'fieldtype':'Date','width':100},
         {'fieldname':'end_date','label':("End Date"),'fieldtype':'Date','width':100},
-		{'fieldname':'base_billing_rate','label':('Rate'),'fieldtype':'Float','width':100},
-        {'fieldname':'total_billable_amount','label':('Total Paid'),'fieldtype':'Float','width':100},
+		{'fieldname':'base_billing_rate','label':('Rate'),'fieldtype':'Currency','width':100},
+        {'fieldname':'total_billable_amount','label':('Total Paid'),'fieldtype':'Currency','width':100},
         {'fieldname':'non_satisfactory','label':("Unsatisfactory"),'fieldtype':'Check','width':150},
         {'fieldname':'dnr','label':('DNR'),'fieldtype':'Check','width':100}
 	]

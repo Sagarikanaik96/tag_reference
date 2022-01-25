@@ -21,7 +21,7 @@ def execute(filters=None):
 		{'fieldname':'from_date','label':(fromdate),'fieldtype':'Date','width':150},
 		{'fieldname':'to_date','label':(todate),'fieldtype':'Date' ,'width':150},
 		{'fieldname':'name','label':('Total Number of Work Orders'),'fieldtype':'Int','width':200},
-		{'fieldname':'base_billing_amount','label':('Total Hours Billed'),'fieldtype':'Int','width':150},
+		{'fieldname':'base_billing_amount','label':('Total Hours Billed'),'fieldtype':'Currency','width':150},
 		{'fieldname':'hours','label':('Total Cost Billed'),'fieldtype':'Float','width':150}
 	]
 	if(today.date() < to_date.date()):

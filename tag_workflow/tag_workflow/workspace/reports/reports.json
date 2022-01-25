@@ -1,0 +1,126 @@
+{
+ "cards_label": "Reports",
+ "category": "Modules",
+ "charts": [],
+ "creation": "2022-01-25 05:08:29.943598",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "extends_another_page": 0,
+ "hide_custom": 0,
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "label": "Reports",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Billing Report",
+   "link_to": "Billing Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Billing Detail Report",
+   "link_to": "Billing Detail Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Invoice",
+   "link_to": "Employee Invoice",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Timesheet Report",
+   "link_to": "Employee Timesheet Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Work Record",
+   "link_to": "Employee Work Record",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Hourly Report",
+   "link_to": "Hourly Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Orders",
+   "link_to": "Orders",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "TAG Earning",
+   "link_to": "TAG Earning",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Tag Invoice",
+   "link_to": "Tag Invoice",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Unsatisfactory Employees",
+   "link_to": "Unsatisfactory Employees",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Work Orders",
+   "link_to": "Work Orders",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2022-01-25 05:41:31.263508",
+ "modified_by": "Administrator",
+ "module": "Tag Workflow",
+ "name": "Reports",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 1,
+ "shortcuts": [],
+ "shortcuts_label": ""
+}

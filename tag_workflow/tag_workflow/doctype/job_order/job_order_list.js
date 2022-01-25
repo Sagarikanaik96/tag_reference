@@ -88,7 +88,7 @@ frappe.listview_settings['Job Order']={
                             </span>
                         </span>
                             <span class=" ellipsis" title="" id="${f.name}">
-                            <a class="ellipsis" href="/app/job-order/${val}" onmouseover="showCasePopover1('${val}','${f.name}')" onmouseout = "hideCasePopover1('${val}','${f.name}')">${val}</a>
+                            <a class="ellipsis" href="/app/job-order/${val}" data-doctype="Job Order" onmouseover="showCasePopover1('${val}','${f.name}')" onmouseout = "hideCasePopover1('${val}','${f.name}')">${val}</a>
                         </span>
                         <script>
                         function showCasePopover1(cname,dname){

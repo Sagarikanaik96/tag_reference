@@ -16,10 +16,10 @@ def execute(filters=None):
         {"fieldname": "select_job", "label": "Job Title","fieldtype": "Link", 'options': 'Designation', "width": 200},
         {'fieldname': "start_date", 'label': ('Start Date'), 'fieldtype': 'Date', 'width': 200},
         {'fieldname': "total_billing_hours", 'label': ('Total Hours'), 'fieldtype': 'Date', 'width': 200},
-        {'fieldname': "rate", 'label': 'Rate', 'fieldtype': 'Int', 'width': 200},
-        {'fieldname': "total_invoiced", 'label': 'Total Invoiced','fieldtype': 'Int', 'width': 200},
+        {'fieldname': "rate", 'label': 'Rate', 'fieldtype': 'Currency', 'width': 200},
+        {'fieldname': "total_invoiced", 'label': 'Total Invoiced','fieldtype': 'Currency', 'width': 200},
         {"fieldname": "status", "label": "Status","fieldtype": "Date", "width": 200},
-        {'fieldname': "total_to_tag", 'label': 'Total To Tag','fieldtype': 'Int', 'width': 200},
+        {'fieldname': "total_to_tag", 'label': 'Total To Tag','fieldtype': 'Currency', 'width': 200},
     ]
 
     current_user_type = frappe.db.sql(''' select tag_user_type from `tabUser` where name = '{}' '''.format(user), as_dict=1)

@@ -53,6 +53,20 @@ def send_email(subject = None,content = None,recipients = None):
         frappe.msgprint("Could Not Send")
         return False
 
+def joborder_email_template(subject = None,content = None,recipients = None,link=None):
+    try:
+        from frappe.core.doctype.communication.email import make
+        make(subject = subject, content=frappe.render_template("templates/emails/email_template_custom.html",
+            {"conntent":content,"subject":subject,"link":link}),
+            recipients= recipients,send_email=True)
+        frappe.msgprint("Email Send Succesfully")
+        return True
+    except Exception as e:
+        frappe.log_error(e, "Doc Share Error")
+        frappe.msgprint("Could Not Send")
+        return False
+
+
 @frappe.whitelist()
 def send_email_staffing_user(email_list=None,subject = None,body=None,additional_email = None):
     import json
@@ -129,9 +143,13 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
             bid_receive.bid=1+int(bid_receive.bid)
             if(bid_receive.claim is None):
                 bid_receive.claim=staffing_org
+                chat_room_created(hiring_org,staffing_org,job_order)
+
             else:
                 if(staffing_org not in bid_receive.claim):
                     bid_receive.claim=str(bid_receive.claim)+str(",")+staffing_org
+                    chat_room_created(hiring_org,staffing_org,job_order)
+
             bid_receive.save(ignore_permissions=True)
 
             job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
@@ -150,8 +168,9 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
             sub="Employee Assigned"
             msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}'
             make_system_notification(l,msg,'Assign Employee',doc_name,sub)
-            msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim <a href="/app/assign-employee/{doc_name}">Assign Employee</a> .'
-            return send_email(None,msg,l)
+            msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim .'
+            link =  f'  href="/app/assign-employee/{doc_name}" '
+            return joborder_email_template(sub,msg,l,link)
     except Exception as e:
         print(e, frappe.get_traceback())
         frappe.db.rollback()
@@ -164,16 +183,20 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
         job_order.bid=1+int(job_order.bid)
         if(job_order.claim is None):
             job_order.claim=staffing_org
+            chat_room_created(hiring_org,staffing_org,job_order)
+
         else:
             if(staffing_org not in job_order.claim):
                 job_order.claim=str(job_order.claim)+str(",")+staffing_org
+                chat_room_created(hiring_org,staffing_org,job_order)
+
         job_order.save(ignore_permissions=True)
 
         sql1 = '''select email from `tabUser` where organization_type='hiring' and company = "{}"'''.format(hiring_org)
         
         hiring_list = frappe.db.sql(sql1,as_list=True)
         hiring_user_list = [user[0] for user in hiring_list]
-        
+
         if int(no_of_worker_req) > len(emp_detail):
             sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org)
             share_list = frappe.db.sql(sql, as_list = True)
@@ -366,7 +389,10 @@ def delete_file_data(file_name):
 
 def job_order_notification(job_order_title,hiring_org,job_order,subject,l):
     msg=f'New Work Order for a {job_order_title} has been created by {hiring_org}.'
-    return make_system_notification(l,msg,jobOrder,job_order,subject)
+    make_system_notification(l,msg,jobOrder,job_order,subject)   
+    message=f'New Work Order for a {job_order_title} has been created by {hiring_org}.'
+    link = f' href="/app/assign-employee/{job_order}"'
+    return joborder_email_template(subject,message,l,link)
     
 @frappe.whitelist()
 def disable_user(company, check):
@@ -483,3 +509,31 @@ def assign_notification(share_list,hiring_user_list,doc_name,job_order):
     for user in hiring_user_list:
         add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)  
         
+      
+def chat_room_created(hiring_org,staffing_org,job_order):
+    try:
+        hiring_comp_users=frappe.db.sql(''' select email from `tabUser` where company='{0}' '''.format(hiring_org),as_list=1)
+        staffing_users=frappe.db.sql(''' select email from `tabUser` where company='{0}' '''.format(staffing_org),as_list=1)
+        tag_users=frappe.db.sql(''' select email from `tabUser` where tag_user_type='Tag Admin' ''',as_list=1)
+
+        user_list=hiring_comp_users+staffing_users+tag_users
+        total_user_list=[]
+        print(user_list)
+        members=''
+        for claim in user_list:
+            value = claim[0].split(',')
+            for name in value:
+                if name:
+                    total_user_list.append(name.strip())
+        print(total_user_list)
+        for k in total_user_list:
+            members+=k+','
+        print(members)
+        doc=frappe.new_doc("Chat Room")
+        doc.room_name=job_order+"_"+staffing_org
+        doc.type="Group"
+        doc.members=members
+        doc.save()
+        print('hello')
+    except Exception as e:
+        frappe.error_log(e, "chat room creation error")

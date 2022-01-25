@@ -17,7 +17,7 @@ def execute(filters=None):
         {'fieldname':'select_job','label':('Job Title'),'fieldtype':'data','width':150},
         {'fieldname':'company','label':('Company'),'fieldtype':'Data','width':150},
         {'fieldname':'total_hours','label':('Hours Worked'),'fieldtype':'Float','width':150},
-        {'fieldname':'total_billable_amount','label':('Rate'),'fieldtype':'int','width':150},
+        {'fieldname':'total_billable_amount','label':('Rate'),'fieldtype':'Currency','width':150},
         {'fieldname':'from_date','label':("Start Date"),'fieldtype':'Date','width':150},
         {'fieldname':'to_date','label':('End Date'),'fieldtype':'Date','width':150}
 	]

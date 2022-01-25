@@ -16,7 +16,7 @@ def sendmail(emails, message, subject, doctype, docname):
 def make_system_notification(users, message, doctype, docname, subject):
     try:
         for user in users:
-            notification = frappe.get_doc(dict(doctype="Notification Log", document_type=doctype, document_name=docname, subject=message, for_user=user, from_user=frappe.session.user))
+            notification = frappe.get_doc(dict(doctype="Notification Log", document_type=doctype, document_name=docname, subject=message, for_user=user, from_user=frappe.session.user,type="Alert"))
             notification.save(ignore_permissions=True)
     except Exception as e:
         frappe.log_error(e, "System Notification")
