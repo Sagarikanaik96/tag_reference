@@ -144,7 +144,7 @@ function approved_employee(frm){
 		var approved_date=new Date(frm.doc.modified)
 		var diff=current_date.getTime()-approved_date.getTime()
 		diff=parseInt(diff/1000)
-		if (diff<5){
+		if (diff<60){
 			frappe.call({
 				method:"tag_workflow.tag_data.update_job_order",
 				"freeze": true,

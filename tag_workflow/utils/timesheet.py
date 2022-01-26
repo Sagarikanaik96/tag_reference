@@ -49,7 +49,7 @@ def get_timesheet_employee(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def notify_email(job_order, employee, value, subject, company, employee_name, date,employee_company,timesheet_name):
     try:
-        sql = """ select name from `tabUser` where company = (select company from `tabEmployee` where name = '{0}') """.format(employee)
+        sql = """ select user_id from `tabEmployee` where company = (select company from `tabEmployee` where name = '{0}') and user_id IS NOT NULL  """.format(employee)
         user_list = frappe.db.sql(sql, as_dict=1)
         if subject=='DNR':
             message=dnr_notification(job_order,value,employee_name,subject,date,company,employee_company,employee)       
@@ -58,7 +58,7 @@ def notify_email(job_order, employee, value, subject, company, employee_name, da
             
         users = []
         for user in user_list:
-            users.append(user['name'])
+            users.append(user['user_id'])
 
         if users:
             make_system_notification(users, message, "Timesheet", timesheet_name, subject)
@@ -108,7 +108,7 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
             doc.comments=ratings['Comment']
         doc.save(ignore_permissions=True)
 
-        sql = '''select email from `tabUser` where company = '{}' '''.format(staffing_company)
+        sql = '''select user_id from `tabEmployee` where company = '{}' and user_id IS NOT NULL '''.format(staffing_company)
         staff_member = frappe.db.sql(sql, as_list=1)
         for staff in staff_member:
             add("Company Review", doc.name, staff[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
@@ -143,7 +143,7 @@ def approval_notification(job_order=None,staffing_company=None,date=None,hiring_
             job_title=job_order_data[0].select_job
             subject='Timesheet Approval'
             msg=f'{staffing_company} has approved the {timesheet_name} timesheet for {job_title} at {job_location}'
-            user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(hiring_company),as_list=1)        
+            user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL'''.format(hiring_company),as_list=1)        
             hiring_user = [hiring_user[0] for hiring_user in user_list]
             make_system_notification(hiring_user,msg,'Timesheet',timesheet_name,subject)
             sendmail(hiring_user, msg, subject, 'Timesheet', timesheet_name)
@@ -266,7 +266,7 @@ def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None
         if 'Comment' in ratings.keys():
             doc.comments=ratings['Comment']
         doc.save(ignore_permissions=True)
-        sql = ''' select email from `tabUser` where company = '{}' '''.format(hiring_company)
+        sql = ''' select user_id from `tabEmployee` where company = '{}' and user_id IS NOT NULL '''.format(hiring_company)
         hiring_member = frappe.db.sql(sql, as_list=1)
         for name in hiring_member:
             add("Hiring Company Review", doc.name, name[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
@@ -348,7 +348,7 @@ def denied_notification(job_order,hiring_company,staffing_company,timesheet_name
         job_title=job_order_data[0].select_job
         subject='Timesheet Denied'
         msg=f'{staffing_company} has denied the {timesheet_name} timesheet for {job_title} at {job_location}'
-        user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(hiring_company),as_list=1)        
+        user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL '''.format(hiring_company),as_list=1)        
         hiring_user = [hiring_user[0] for hiring_user in user_list]
         make_system_notification(hiring_user,msg,'Timesheet',timesheet_name,subject)
         sendmail(hiring_user, msg, subject, 'Timesheet', timesheet_name)

@@ -41,7 +41,7 @@ def is_send_mail_required(organizaton,doc_name,msg):
         staffing = organizaton.split(',')
         staffing_list = []
         for name in staffing:
-            sql = '''select name from `tabUser` where company = "{}"'''.format(name.strip())
+            sql = '''select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(name.strip())
             staffing_name = frappe.db.sql(sql, as_list = True) 
             for value in staffing_name:
                 staffing_list.append(value[0])
