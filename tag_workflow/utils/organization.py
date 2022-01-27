@@ -215,5 +215,7 @@ def remove_column():
         for doc in [COM, EMP, USR]:
             sql = """ Delete from `tabCustom Field` where dt = '{0}' and fieldtype = 'Column Break' """.format(doc)
             frappe.db.sql(sql)
+        sql = """ Delete from `tabCustom Field` where dt = 'User' and fieldname in ('organization_type', 'tag_user_type') """
+        frappe.db.sql(sql)
     except Exception as e:
         frappe.log_error(e, "user update")
