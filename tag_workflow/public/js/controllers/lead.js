@@ -27,11 +27,7 @@ frappe.ui.form.on("Lead", {
 	},
 	organization_type:function(frm){
 		if(frm.doc.organization_type=='Exclusive Hiring'){
-			frm.set_query("owner_company", function(doc) {
-				return {  
-					   "filters":[ ['Company', "organization_type", "in", ["Staffing" , "TAG" ]] ]
-				}
-			});
+			tag_staff_company(frm)
 		}
 		else{
 			frm.set_query("owner_company", function(doc) {
@@ -174,11 +170,7 @@ function hide_details(frm) {
 function setting_owner_company(frm){
 	if(frappe.user.has_role('Tag User')) {
 		frm.set_value('owner_company','')
-		frm.set_query("owner_company", function(doc) {
-		return {
-			   "filters":[ ['Company', "organization_type", "in", ["Staffing" , "TAG" ]] ]
-			}
-		});
+		tag_staff_company(frm)
 	}
 	else if(frappe.user.has_role('Staffing Admin') || frappe.user.has_role('Staffing User')){
 		frm.set_value('organization_type','Exclusive Hiring')
@@ -200,4 +192,12 @@ function setting_owner_company(frm){
 			}	
 		})
 	}
+}
+
+function tag_staff_company(frm){
+	frm.set_query("owner_company", function(doc) {
+		return {  
+			   "filters":[ ['Company', "organization_type", "in", ["Staffing" , "TAG" ]] ]
+		}
+	});
 }
