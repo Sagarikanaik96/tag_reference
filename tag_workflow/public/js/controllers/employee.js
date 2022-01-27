@@ -53,6 +53,11 @@ frappe.ui.form.on("Employee", {
 			frappe.msgprint(__("Only numbers are allowed in SSN."));
 			frappe.validated = false;
 		}
+		let email = frm.doc.email
+		if (email.length > 120 || !frappe.utils.validate_type(email, "email")){
+			frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
+			frappe.validated = false
+		}
  
 	},
 	setup:function(frm){
@@ -66,7 +71,15 @@ frappe.ui.form.on("Employee", {
 	onload:function(frm){
 		let blocked_company=frappe.meta.get_docfield("Blocked Employees","blocked_from", cur_frm.doc.name);
 		blocked_child_orgs(frm,blocked_company)
+	},
+	zip:function(frm){
+		let zip = frm.doc.zip
+		if (zip && (zip.length !=5 || isNaN(zip))){
+			frappe.msgprint({message: __('Not Valid Zip please fill 5 digit zip'), indicator: 'red'})
+		}
+		
 	}
+		
 });
 
 function hasExtensions(filename, exts){

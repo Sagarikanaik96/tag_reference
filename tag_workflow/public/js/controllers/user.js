@@ -99,6 +99,12 @@ frappe.ui.form.on("User", {
 		if(frm.doc.__islocal==1){
 			hiring_org(frm)
 		}
+	},
+	validate:function(frm){
+		let phone = frm.doc.mobile_no
+		if (phone && (phone.length != 10 || isNaN(phone))){
+			frappe.msgprint({message: __('Not Valid phone number'), indicator: 'red'})
+		}
 	}
 });
 

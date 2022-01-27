@@ -18,6 +18,18 @@ frappe.ui.form.on("Lead", {
 			});
 		}
 	},
+	validate:function(frm){
+		let phone = frm.doc.phone
+		let email = frm.doc.email_id
+		if (phone && (phone.length != 10 || isNaN(phone))){
+			frappe.msgprint({message: __('Not Valid phone number'), indicator: 'red'})
+			frappe.validated = false
+		}
+		if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
+			frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
+			frappe.validated = false
+		}
+	}
 });
 
 /*-------reqd------*/
@@ -136,7 +148,7 @@ function run_contract(frm){
 /*---------hide details----------*/
 function hide_details(frm) {
 	let fields = [
-	  "source","designation","campaign_name","gender"
+	  "source","designation","campaign_name","gender","mobile_no"
 	];
 	for (let data in fields) {
 	  cur_frm.toggle_display(fields[data], 0);
