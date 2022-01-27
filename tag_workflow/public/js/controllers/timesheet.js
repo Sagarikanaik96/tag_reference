@@ -385,8 +385,10 @@ frappe.ui.form.on("Timesheet Detail", {
 
 		}
 		frappe.model.set_value(cdt,cdn,"billing_hours",child.hours)
-	
-
+		let sec=(moment(child.to_time).diff(moment(child.from_time), "seconds"))
+		let hour   = Math.floor(sec / 3600); // get hours
+		let minutes = Math.floor((sec - (hour * 3600)) / 60); // get minutes
+		frappe.model.set_value(cdt,cdn,"hrs",hour+'hr '+minutes+'min')
 	},
 	from_time:function(frm,cdt,cdn){
 		var child=locals[cdt][cdn]
@@ -400,6 +402,7 @@ frappe.ui.form.on("Timesheet Detail", {
 		}
 		if(child.to_time){
 			frappe.model.set_value(cdt, cdn, "hours", "");
+			frappe.model.set_value(cdt, cdn, "hrs", "");
 			frappe.model.set_value(cdt, cdn, "to_time","");
 		}
 	}
