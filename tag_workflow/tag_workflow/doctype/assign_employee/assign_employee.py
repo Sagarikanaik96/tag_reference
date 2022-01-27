@@ -22,9 +22,9 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
         job_location = filters.get('job_location')
 
         if job_category is None:
-            sql = """ select name, employee_name from `tabEmployee` where company='{0}' and status='Active' and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{1}') and (name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{0}')) and (name NOT IN (select parent from `tabDNR` BE where dnr='{1}')) """.format(emp_company, company)
+            sql = """ select name, employee_name from `tabEmployee` where company='{0}' and status='Active' and user_id IS NULL and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{1}') and (name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{0}')) and (name NOT IN (select parent from `tabDNR` BE where dnr='{1}')) """.format(emp_company, company)
         else:
-            sql = """select name, employee_name, street_address, city, state, zip from `tabEmployee` where company='{0}' and status='Active' and (job_category = '{1}' or job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{2}')) and (name NOT IN (select parent from `tabDNR`  where dnr='{2}' )) and (name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{2}'))""".format(emp_company, job_category, company)
+            sql = """select name, employee_name, street_address, city, state, zip from `tabEmployee` where company='{0}' and status='Active' and user_id IS NULL and (job_category = '{1}' or job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{2}')) and (name NOT IN (select parent from `tabDNR`  where dnr='{2}' )) and (name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{2}'))""".format(emp_company, job_category, company)
 
         emp = frappe.db.sql(sql, as_dict=1)
         result = check_distance(emp, distance, job_location)
