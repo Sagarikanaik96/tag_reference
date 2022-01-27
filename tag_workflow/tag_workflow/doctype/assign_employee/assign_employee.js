@@ -23,7 +23,7 @@ frappe.ui.form.on('Assign Employee', {
 								$('[data-fieldname="resume"]').last().append(' <div class="static-area ellipsis" style="display: block;"> <a class="attached-file-link nani static-area ellipsis" target="_blank"  href='+r.message[0]["resume"]+'>' + r.message[0]["resume"]+ '</a></div>')
 								$('[data-fieldname="resume"]').addClass("static-area ellipsis primary-action");
 							}
-						}r.message[0]["resume"]
+						}
 					}
 				})
   			}
@@ -32,7 +32,7 @@ frappe.ui.form.on('Assign Employee', {
 		$(document).on('click', '.nani', function(){
 			function show_popup(){
 			      $('.close-alt').click();
-			   };
+			   }
 	   window.setTimeout( show_popup,1250 );
 		})
 	},
