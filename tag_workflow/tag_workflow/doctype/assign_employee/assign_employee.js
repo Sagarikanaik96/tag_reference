@@ -7,6 +7,34 @@ frappe.ui.form.on('Assign Employee', {
 		render_table(frm);
 		approved_employee(frm);
 		hide_resume(frm);
+
+		$(document).on('click', '[data-fieldname="employee"]', function(){
+			if ($('[data-fieldname="employee"]').last().val() != '' ){
+				console.log($('[data-fieldname="employee"]').last().val(),"hi")
+  				frappe.call({
+					method:"tag_workflow.tag_data.joborder_resume",
+					args: {
+								name: $('[data-fieldname="employee"]').last().val(),
+							},
+					callback:function(r)
+					{	
+						if (r.message[0]["resume"]){
+							if ($('[data-fieldname="resume"]').last().text() == "Attach"){
+								$('[data-fieldname="resume"]').last().append(' <div class="static-area ellipsis" style="display: block;"> <a class="attached-file-link nani static-area ellipsis" target="_blank"  href='+r.message[0]["resume"]+'>' + r.message[0]["resume"]+ '</a></div>')
+								$('[data-fieldname="resume"]').addClass("static-area ellipsis primary-action");
+							}
+						}r.message[0]["resume"]
+					}
+				})
+  			}
+		});
+
+		$(document).on('click', '.nani', function(){
+			function show_popup(){
+			      $('.close-alt').click();
+			   };
+	   window.setTimeout( show_popup,1250 );
+		})
 	},
 	onload:function(frm){
 		hide_resume(frm);
@@ -26,6 +54,17 @@ frappe.ui.form.on('Assign Employee', {
 		if(frm.doc.tag_status=='Open'){
 			make_hiring_notification(frm)
 		}
+		var table = frm.doc.employee_details
+		for(var d in table){
+				frappe.call({
+					method:"tag_workflow.tag_data.assign_employee_resume_update",
+					args: {
+								employee: table[d].employee,
+								name : table[d].name
+							}
+					});
+		}
+		 location.reload();
 	},
 	validate:function(frm){
 		var sign = cur_frm.doc.e_signature_full_name

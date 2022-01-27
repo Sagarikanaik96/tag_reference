@@ -533,3 +533,17 @@ def chat_room_created(hiring_org,staffing_org,job_order):
         doc.save()
     except Exception as e:
         frappe.error_log(e, "chat room creation error")
+
+@frappe.whitelist()
+def assign_employee_resume_update(employee,name):
+    sql = """ select resume from `tabEmployee` where name='{}' """.format(employee)
+    data = frappe.db.sql(sql,as_dict=1)
+    if (len(data)>0 and data[0]["resume"]):
+        sql =""" UPDATE `tabAssign Employee Details` SET resume='{0}' WHERE name='{1}'; """.format(data[0]["resume"],name)
+        frappe.db.sql( sql)
+        frappe.db.commit()
+    return True
+@frappe.whitelist()
+def joborder_resume(name):
+    sql = """ select resume from `tabEmployee` where name='{}' """.format(name)
+    return frappe.db.sql(sql,as_dict=1)
