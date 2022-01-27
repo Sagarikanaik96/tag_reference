@@ -49,7 +49,8 @@ doctype_js = {
         sales_invoice: "public/js/controllers/sales_invoice.js",
         "Contact": "public/js/controllers/contact.js",
         "Lead": "public/js/controllers/lead.js",
-        "Contract": "public/js/controllers/contract.js"
+        "Contract": "public/js/controllers/contract.js",
+        "Job Site": "public/js/controllers/job_sites.js"
 }
 
 # doctype list

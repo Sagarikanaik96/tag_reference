@@ -123,7 +123,7 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
             sql = ''' select rating from `tabCompany Review` where staffing_company='{}' '''.format(staffing_company)
             average_rate = frappe.db.sql(sql, as_list=1)
             if average_rate[0][0]!=None:
-                rating=[float(i) for i in average_rate[0]]
+                rating=[float(i[0]) for i in average_rate]
                 doc=frappe.get_doc('Company',staffing_company)
                 avg_rating=sum(rating)/len(rating)
                 doc.average_rating=str(avg_rating)
@@ -279,7 +279,7 @@ def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None
             sql = ''' select rating from `tabHiring Company Review` where hiring_company = '{}' '''.format(hiring_company)
             average_rate = frappe.db.sql(sql, as_list=1)
             if average_rate[0][0]!=None:
-                rating=[float(i) for i in average_rate[0]]
+                rating=[float(i[0]) for i in average_rate]
                 doc=frappe.get_doc('Company',hiring_company)
                 avg_rating=sum(rating)/len(rating)
                 doc.average_rating=str(avg_rating)
