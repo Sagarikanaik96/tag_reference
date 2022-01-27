@@ -115,9 +115,9 @@ def update_job_order(job_name, employee_filled, staffing_org, hiringorg, name):
         sub = f'New Message regarding {job_name} from {hiringorg} is available'
         msg = f'Your Employees has been approved for Work Order {job_name}'
 
-        lst_sql = """ select email from `tabUser` where company = '{0}' """.format(staffing_org)
+        lst_sql = """ select user_id from `tabEmployee` where company = '{0}' and user_id IS NOT NULL""".format(staffing_org)
         user_list = frappe.db.sql(lst_sql, as_dict=1)
-        users = [usr['email'] for usr in user_list]
+        users = [usr['user_id'] for usr in user_list]
         make_system_notification(users,msg,jobOrder,job_name,sub)   
         enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name)
         return sendmail(users, msg, sub, assignEmployees, name)
@@ -155,7 +155,7 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
             job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
             job_detail = frappe.db.sql(job_sql, as_dict=1)
 
-            lst_sql = ''' select email from `tabUser` where company = "{}"'''.format(hiring_org)
+            lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)
             user_list = frappe.db.sql(lst_sql, as_list=1)
             v = json.loads(emp_detail)
             s = ''
@@ -234,7 +234,7 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
                 doc.company_type = 'Non Exclusive'
                 doc.is_single_share = 1
                 doc.save(ignore_permissions = True)
-                user_list=frappe.db.sql(''' select email from `tabUser` where company='{}' '''.format(staff_company),as_list=1)
+                user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL'''.format(staff_company),as_list=1)
                 l = [l[0] for l in user_list]
                 for user in l:
                     add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
@@ -269,7 +269,7 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
             com_sql = ''' select company from `tabUser` where name='{}' '''.format(owner_info[0][0])
             company_info=frappe.db.sql(com_sql, as_list=1)
 
-            usr_sql = ''' select email from `tabUser` where company='{}' '''.format(company_info[0][0])
+            usr_sql = ''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL '''.format(company_info[0][0])
             user_list = frappe.db.sql(usr_sql, as_list=1)
             l = [l[0] for l in user_list]
             for user in l:
@@ -441,7 +441,7 @@ def sales_invoice_notification(job_order=None,company=None,invoice_name=None):
                 msg=f'{company} has submitted an invoice for {job_order_details[0].select_job} at {job_order_details[0].job_site}.'
                 subject="Invoice Submitted"
 
-                sql = ''' select email from `tabUser` where company='{}' '''.format(job_order_details[0].company)
+                sql = ''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL '''.format(job_order_details[0].company)
                 user_list=frappe.db.sql(sql, as_list=1)
                 if(len(user_list)>0):
                     l = [l[0] for l in user_list]
@@ -512,28 +512,38 @@ def assign_notification(share_list,hiring_user_list,doc_name,job_order):
       
 def chat_room_created(hiring_org,staffing_org,job_order):
     try:
-        hiring_comp_users=frappe.db.sql(''' select email from `tabUser` where company='{0}' '''.format(hiring_org),as_list=1)
-        staffing_users=frappe.db.sql(''' select email from `tabUser` where company='{0}' '''.format(staffing_org),as_list=1)
+        hiring_comp_users=frappe.db.sql(''' select user_id from `tabEmployee` where company='{0}' and user_id IS NOT NULL'''.format(hiring_org),as_list=1)
+        staffing_users=frappe.db.sql(''' select user_id from `tabEmployee` where company='{0}' and user_id IS NOT NULL '''.format(staffing_org),as_list=1)
         tag_users=frappe.db.sql(''' select email from `tabUser` where tag_user_type='Tag Admin' ''',as_list=1)
 
         user_list=hiring_comp_users+staffing_users+tag_users
         total_user_list=[]
-        print(user_list)
         members=''
         for claim in user_list:
             value = claim[0].split(',')
             for name in value:
                 if name:
                     total_user_list.append(name.strip())
-        print(total_user_list)
         for k in total_user_list:
             members+=k+','
-        print(members)
         doc=frappe.new_doc("Chat Room")
         doc.room_name=job_order+"_"+staffing_org
         doc.type="Group"
         doc.members=members
         doc.save()
-        print('hello')
     except Exception as e:
         frappe.error_log(e, "chat room creation error")
+
+@frappe.whitelist()
+def assign_employee_resume_update(employee,name):
+    sql = """ select resume from `tabEmployee` where name='{}' """.format(employee)
+    data = frappe.db.sql(sql,as_dict=1)
+    if (len(data)>0 and data[0]["resume"]):
+        sql =""" UPDATE `tabAssign Employee Details` SET resume='{0}' WHERE name='{1}'; """.format(data[0]["resume"],name)
+        frappe.db.sql( sql)
+        frappe.db.commit()
+    return True
+@frappe.whitelist()
+def joborder_resume(name):
+    sql = """ select resume from `tabEmployee` where name='{}' """.format(name)
+    return frappe.db.sql(sql,as_dict=1)

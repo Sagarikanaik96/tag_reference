@@ -520,9 +520,7 @@ button.btn.btn-default.btn-sm.ellipsis {
 span.frappe-timestamp.mini{
     display: none;
 }
-button.btn.btn-default.ellipsis {
-    display: none;
-}
+
 
 .report-footer.text-muted{
     display: none;

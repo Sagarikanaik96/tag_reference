@@ -37,7 +37,6 @@ SPACE_PROFILE = ["CRM", "Users", tag_workflow, "Settings", "Home", "My Activitie
 #------setup data for TAG -------------#
 def setup_data():
     try:
-        update_organization()
         update_organization_data()
         update_roles()
         update_role_profile()
@@ -53,31 +52,6 @@ def setup_data():
         print(e)
         frappe.log_error(e, "Master")
         #frappe.db.rollback()
-
-#--------org_field_update----------#
-def update_organization():
-    try:
-        print("*------updating organization field----------*\n")
-        for docs in ADD_ORGANIZATION:
-            if(docs in ["Company"]):
-                if not frappe.db.exists(Custom_Label, {"dt": docs, "label": Organization}):
-                    custom_doc = frappe.get_doc(dict(doctype=Custom_Label, dt=docs, label=Organization, fieldtype="Link", options=Organization,reqd=1))
-                    custom_doc.save()
-
-            elif(docs in ["Quotation"] and not frappe.db.exists(Custom_Label, {"dt": docs, "label": Job_Label})):
-                custom_doc = frappe.get_doc(dict(doctype=Custom_Label, dt=docs, label=Job_Label, fieldtype="Link", options=Job_Label,reqd=1))
-                custom_doc.save()
-
-            elif(docs in ["Lead"] and not frappe.db.exists(Custom_Label, {"dt": docs, "label": Sign_Label})):
-                custom_doc = frappe.get_doc(dict(doctype=Custom_Label, dt=docs, label=Sign_Label, fieldtype="Section Break", insert_after="title"))
-                custom_doc.save()
-
-                if not frappe.db.exists(Custom_Label, {"dt": docs, "label": "Signature"}):
-                    custom_doc = frappe.get_doc(dict(doctype=Custom_Label, dt=docs, label="Signature", fieldtype="Signature",reqd=0, insert_after=Sign_Label, mandatory_depends_on="eval: doc.status=='Close'"))
-                    custom_doc.save()
-    except Exception as e:
-        print(e)
-        frappe.log_error(e, "update_organization")
 
 #--------org_update----------#
 def update_organization_data():

@@ -6,6 +6,7 @@ frappe.ui.form.on("Employee", {
 		uploaded_file_format(frm);
 		if (frm.doc.__islocal == 1) {
 			cancel_employee(frm);
+			tag_company(frm);
 		  }
 	},
 	decrypt_ssn: function(frm) {
@@ -57,7 +58,7 @@ frappe.ui.form.on("Employee", {
 	setup:function(frm){
 		frm.set_query("company", function(doc) {
 			return {
-				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]] ]
+				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]],['Company',"make_organization_inactive","=",0] ]
 			}
 		});
 
@@ -148,4 +149,10 @@ function blocked_child_orgs(frm,blocked_company){
 		}
 	});
 
+}
+
+function tag_company(frm){
+	if(frappe.boot.tag.tag_user_info.company_type=='TAG'){
+		frm.set_value('company','')
+	}
 }
