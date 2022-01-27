@@ -32,7 +32,7 @@ ROLE_PROFILE = [{ROLES[3]: ["Accounts User", "Sales User", ROLES[3], ROLES[6], "
 
 MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", tag_workflow, "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", tag_workflow, "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", tag_workflow, "Selling"]}]
 
-SPACE_PROFILE = ["CRM", "Users", tag_workflow, "Settings", "Home", "My Activities"]
+SPACE_PROFILE = ["CRM", "Users", tag_workflow, "Settings", "Home", "My Activities", "Reports"]
 
 #------setup data for TAG -------------#
 def setup_data():
