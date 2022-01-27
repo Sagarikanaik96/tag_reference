@@ -2,7 +2,7 @@
  "cards_label": "Reports",
  "category": "Modules",
  "charts": [],
- "creation": "2022-01-25 05:08:29.943598",
+ "creation": "2022-01-27 06:03:34.141028",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
@@ -53,15 +53,6 @@
   {
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Employee Work Record",
-   "link_to": "Employee Work Record",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
    "label": "Hourly Report",
    "link_to": "Hourly Report",
    "link_type": "Report",
@@ -80,7 +71,16 @@
   {
    "hidden": 0,
    "is_query_report": 1,
-   "label": "TAG Earning",
+   "label": "Sales Register",
+   "link_to": "Sales Register",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Tag Earning",
    "link_to": "TAG Earning",
    "link_type": "Report",
    "onboard": 0,
@@ -114,7 +114,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-01-25 05:41:31.263508",
+ "modified": "2022-01-27 06:09:54.760285",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Reports",

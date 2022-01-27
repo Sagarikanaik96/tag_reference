@@ -75,9 +75,17 @@ def get_condition(filters):
 
 def get_data(filters):
     try:
+        user_name=frappe.session.user
+        sql = ''' select organization_type from `tabUser` where email='{}' '''.format(user_name)
+        user_type=frappe.db.sql(sql, as_list=1)
         condition = get_condition(filters)
-        sql = """ select name, job_order_detail, employee, employee_name, total_billable_hours, total_billable_amount, company from `tabTimesheet` where docstatus = 1 {0} """.format(condition)
-        data = frappe.db.sql(sql, as_dict=True)
+        if frappe.session.user=="Administrator" or user_type[0][0]=='TAG':
+
+            sql = """ select name, job_order_detail, employee, employee_name, total_billable_hours, total_billable_amount, company from `tabTimesheet` where docstatus = 1 {0} """.format(condition)
+            data = frappe.db.sql(sql, as_dict=True)
+        else:
+            sql = """ select name, job_order_detail, employee, employee_name, total_billable_hours, total_billable_amount, company from `tabTimesheet` where docstatus = 1 and employee_company in (select company from `tabEmployee` where email ="{0}") {1}""".format(user_name,condition)
+            data = frappe.db.sql(sql, as_dict=True)
 
         row = []
         for d in data:
