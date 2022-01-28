@@ -30,8 +30,8 @@ frappe.ui.form.on("Contact", {
 			frappe.msgprint({message: __('Company lenght exceeds'), indicator: 'red'})
 			is_valid = 0
 		}
-		if (email && email.length > 120){
-			frappe.msgprint({message: __('Email length exceeds'), indicator: 'red'})
+		if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
+			frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
 			is_valid = 0
 		}
 		if (zip && (zip.length !=5 || isNaN(zip))){
