@@ -32,13 +32,13 @@ function toggle_field(frm){
 	cur_frm.toggle_display("party_name", 0);
 	let roles = frappe.user_roles;
 	if((roles.includes("Hiring Admin") || roles.includes("Hiring User")) && (!roles.includes("Tag Admin") || !roles.includes("Tag User"))){
-		let fields = ['signee_company', 'contract_terms', 'signee_staffing', 'signee_company', 'requires_fulfilment', 'fulfilment_deadline', 'fulfilment_deadline', 'start_date', 'end_date', 'staffing_company', 'hiring_company', 'end_party_user', 'signee_company'];
+		let fields = ['signe_company', 'contract_terms', 'signee_staffing', 'signe_company', 'requires_fulfilment', 'fulfilment_deadline', 'fulfilment_deadline', 'start_date', 'end_date', 'staffing_company', 'hiring_company', 'end_party_user', 'signe_company'];
 		for(let f in fields){
 			cur_frm.toggle_enable(fields[f], 0);
 		}
 	}else{
 		cur_frm.toggle_enable("signee_hiring", 0)
-		cur_frm.toggle_enable("signed_by", 0);
+		cur_frm.toggle_enable("signe_hiring", 0);
 	}
 }
 
@@ -111,7 +111,7 @@ function update_user(frm){
 
 /*------signature------*/
 function request_sign(frm){
-	if(cur_frm.doc.__islocal != 1 && cur_frm.doc.signee_company && cur_frm.doc.owner == frappe.session.user){
+	if(cur_frm.doc.__islocal != 1 && cur_frm.doc.signe_company && cur_frm.doc.owner == frappe.session.user){
 		frm.add_custom_button("Request Signature", function() {
 			frappe.call({
 				method: "tag_workflow.utils.whitelisted.request_signature",
@@ -128,7 +128,7 @@ function request_sign(frm){
 
 /*------update lead status-------*/
 function update_lead(frm){
-	if(frm.doc.signed_by && frm.doc.lead && !frm.doc.sign_date_hiring){
+	if(frm.doc.signe_hiring && frm.doc.lead && !frm.doc.sign_date_hiring){
 		cur_frm.set_value("sign_date_hiring", frappe.datetime.now_date());
 		frappe.call({
 			method: "tag_workflow.utils.whitelisted.update_lead",
