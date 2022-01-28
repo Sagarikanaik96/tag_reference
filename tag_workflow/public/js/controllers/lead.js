@@ -8,15 +8,7 @@ frappe.ui.form.on("Lead", {
 		if(cur_frm.is_dirty() != 1 && frm.doc.status == "Close" && (roles.includes("Tag Admin") || roles.includes("Tag User") || roles.includes("Staffing Admin") || roles.includes("Staffing User"))){
 			onboard_org(frm);
 		}
-		if(frappe.user.has_role('Staffing Admin')) {
-			frm.set_query("company", function(doc) {
-			
-			return {
-				  
-				   "filters":[ ['Company', "organization_type", "in", ["Staffing" ]] ]
-			}
-			});
-		}
+		
 	},
 	validate:function(frm){
 		let phone = frm.doc.phone
@@ -28,6 +20,26 @@ frappe.ui.form.on("Lead", {
 		if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
 			frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
 			frappe.validated = false
+		}
+	},
+	setup:function(frm){
+		setting_owner_company(frm)
+	},
+	organization_type:function(frm){
+		if(frm.doc.organization_type=='Exclusive Hiring'){
+			tag_staff_company(frm)
+		}
+		else{
+			frm.set_query("owner_company", function(doc) {
+				return {  
+					   "filters":[ ['Company', "organization_type", "in", ["TAG" ]] ]
+				}
+			});
+		}
+	},
+	owner_company:function(frm){	
+		if(frm.doc.owner_company){
+			frm.set_value('company',frm.doc.owner_company)
 		}
 	}
 });
@@ -154,3 +166,38 @@ function hide_details(frm) {
 	  cur_frm.toggle_display(fields[data], 0);
 	}
   }
+
+function setting_owner_company(frm){
+	if(frappe.user.has_role('Tag User')) {
+		frm.set_value('owner_company','')
+		tag_staff_company(frm)
+	}
+	else if(frappe.user.has_role('Staffing Admin') || frappe.user.has_role('Staffing User')){
+		frm.set_value('organization_type','Exclusive Hiring')
+		frm.set_query("owner_company", function(doc) {
+			return {	  
+				   "filters":[ ['Company', "organization_type", "in", ["Staffing"]] ]
+			}
+			});
+		frappe.call({
+			'method':"tag_workflow.tag_data.lead_org",
+			'args':{'current_user':frappe.session.user},
+			callback:function(r){
+				if(r.message=='success'){
+					frm.set_value('owner_company',frappe.boot.tag.tag_user_info.company)
+				}
+				else{
+					frm.set_value('owner_company','')
+				}
+			}	
+		})
+	}
+}
+
+function tag_staff_company(frm){
+	frm.set_query("owner_company", function(doc) {
+		return {  
+			   "filters":[ ['Company', "organization_type", "in", ["Staffing" , "TAG" ]] ]
+		}
+	});
+}

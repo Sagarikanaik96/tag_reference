@@ -89,6 +89,10 @@ frappe.ui.form.on('Job Order', {
 			}
 	},
 	refresh:function(frm){
+		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+			cur_frm.dashboard.hide();
+
+		}
 			make_invoice(frm);
 			make_notes(frm)
 			if(cur_frm.doc.__islocal==1){
