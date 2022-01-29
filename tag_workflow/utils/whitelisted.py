@@ -172,7 +172,8 @@ def request_signature(staff_user, staff_company, hiring_user, name):
         link = '<p style="margin: 15px 0px;">'+link+'</p>'
         template = frappe.get_template("templates/emails/digital_signature.html")
         message = template.render({"staff_user": staff_user, "staff_company": staff_company, "link": link, "date": ""})
-        make_system_notification([hiring_user], message, 'Contract', name, "Signature Request")
+        msg=f"{staff_user} from {staff_company} is requesting an electronic signature for you contract agreement."
+        make_system_notification([hiring_user], msg, 'Contract', name, "Signature Request")
         sendmail([hiring_user], message, "Signature Request", 'Contract', name)
         share_doc("Contract", name, hiring_user)
     except Exception as e:
