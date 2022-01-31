@@ -241,11 +241,12 @@ def run(report_name, filters=None, user=None, ignore_prepared_report=False, cust
     if not user:
         return None
 
+    report = get_report_doc(report_name)
+
     if not frappe.has_permission(report.ref_doctype, "report"):
         frappe.msgprint(_("Must have report permission to access this report."), raise_exception=True,)
         return None
 
-    report = get_report_doc(report_name)
     result = None
     if(report.prepared_report and not report.disable_prepared_report and not ignore_prepared_report and not custom_columns):
         if filters:
