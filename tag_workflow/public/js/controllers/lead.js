@@ -13,6 +13,7 @@ frappe.ui.form.on("Lead", {
 	validate:function(frm){
 		let phone = frm.doc.phone
 		let email = frm.doc.email_id
+		let zip = frm.doc.pincode
 		if (phone && (phone.length != 10 || isNaN(phone))){
 			frappe.msgprint({message: __('Not Valid phone number'), indicator: 'red'})
 			frappe.validated = false
@@ -20,6 +21,11 @@ frappe.ui.form.on("Lead", {
 		if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
 			frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
 			frappe.validated = false
+		}
+		if (zip && (zip.length !=5 || isNaN(zip))){
+			frappe.msgprint({message: __('Not Valid Zip'), indicator: 'red'})
+			frappe.validated = false
+
 		}
 	},
 	setup:function(frm){

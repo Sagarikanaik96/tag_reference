@@ -111,8 +111,35 @@ frappe.ui.form.on("Company", {
     });
   },
 
-  before_save: function (frm) {
+  validate: function (frm) {
     validate_phone_and_zip(frm);
+    let phone_no = frm.doc.accounts_payable_phone_number;
+    let account_phone_no=frm.doc.accounts_receivable_phone_number;
+    let email = frm.doc.email;
+    let receive_email = frm.doc.accounts_receivable_rep_email;
+    let pay_email = frm.doc.accounts_payable_email;
+
+    if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
+        frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
+        frappe.validated = false
+
+    }
+		if (phone_no && (phone_no.length != 10 || isNaN(phone_no))){
+			frappe.msgprint({message: __('Not Valid Accounts Payable phone number'), indicator: 'red'})
+			frappe.validated = false
+    }
+    if (account_phone_no && (account_phone_no.length != 10 || isNaN(account_phone_no))){
+			frappe.msgprint({message: __('Not Valid Accounts Receivable phone number'), indicator: 'red'})
+			frappe.validated = false
+    }
+    if (receive_email && (receive_email.length > 120 || !frappe.utils.validate_type(receive_email, "email"))){
+      frappe.msgprint({message: __('Not A Valid Accounts Receivable Email'), indicator: 'red'})
+      frappe.validated = false
+    }
+    if (pay_email && (pay_email.length > 120 || !frappe.utils.validate_type(pay_email, "email"))){
+      frappe.msgprint({message: __('Not A Valid Accounts Payable Email'), indicator: 'red'})
+      frappe.validated = false
+    }
   },
 
   make_organization_inactive(frm) {
@@ -297,7 +324,7 @@ function validate_phone_and_zip(frm) {
   if (phone && phone.length != 10 && !isNaN(phone)) {
     is_valid = 0;
     frappe.msgprint({
-      message: __("Phone No. is not valid"),
+      message: __("Company Phone No. is not valid"),
       title: __("Phone Number"),
       indicator: "red",
     });

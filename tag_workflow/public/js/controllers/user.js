@@ -104,6 +104,7 @@ frappe.ui.form.on("User", {
 		let phone = frm.doc.mobile_no
 		if (phone && (phone.length != 10 || isNaN(phone))){
 			frappe.msgprint({message: __('Not Valid phone number'), indicator: 'red'})
+			frappe.validated = false
 		}
 	}
 });

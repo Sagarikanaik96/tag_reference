@@ -547,3 +547,10 @@ def assign_employee_resume_update(employee,name):
 def joborder_resume(name):
     sql = """ select resume from `tabEmployee` where name='{}' """.format(name)
     return frappe.db.sql(sql,as_dict=1)
+
+@frappe.whitelist()
+def lead_org(current_user):
+    sql = ''' select company from `tabEmployee` where email='{0}' '''.format(current_user)
+    user_company=frappe.db.sql(sql, as_list=1)
+    if(len(user_company)==1):
+        return 'success'
