@@ -12,12 +12,9 @@ class AssignEmployee(Document):
 
 distance_value = {"5 miles": 5, "10 miles": 10, "20 miles": 20, "50 miles": 50}
 
-def check_distance(emp, distance, location):
+def get_souce(location=None):
     try:
-        result = []
         source = []
-        api_key = 'AIzaSyDRCtr2OCT1au8HCjMQPivkhIknFI7akIU'
-        gmaps = googlemaps.Client(key=api_key)
         if(location):
             site = frappe.db.get_list("Job Site", {"name": location}, ["address", "city", "state", "zip"])
             for s in site:
@@ -25,6 +22,17 @@ def check_distance(emp, distance, location):
             source = ",".join(source)
         else:
             source = ",".join(source)
+        return source
+    except Exception as e:
+        frappe.msgprint(e)
+
+def check_distance(emp, distance, location):
+    try:
+        result = []
+        source = []
+        api_key = 'AIzaSyDRCtr2OCT1au8HCjMQPivkhIknFI7akIU'
+        gmaps = googlemaps.Client(key=api_key)
+        source = get_souce(location)
 
         for e in emp:
             dest = [e['street_address'], e['city'], e['state'], e['zip']]
@@ -56,7 +64,7 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
         else:
             sql = """select name, employee_name, street_address, city, state, zip from `tabEmployee` where company='{0}' and status='Active' and (job_category = '{1}' or job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{2}')) and (name NOT IN (select parent from `tabDNR`  where dnr='{2}' )) and (name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{2}'))""".format(emp_company, job_category, company)
 
-        emp = frappe.db.sql(sql)
+        emp = frappe.db.sql(sql, as_dict=1)
         result = check_distance(emp, distance, job_location)
         return result
     except Exception as e:
