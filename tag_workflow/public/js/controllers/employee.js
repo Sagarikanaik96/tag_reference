@@ -8,6 +8,7 @@ frappe.ui.form.on("Employee", {
 			cancel_employee(frm);
 			tag_company(frm);
 		  }
+		$('.form-control[data-fieldname="ssn"]').css('-webkit-text-security', 'disc');
 	},
 	decrypt_ssn: function(frm) {
 		frappe.call({
