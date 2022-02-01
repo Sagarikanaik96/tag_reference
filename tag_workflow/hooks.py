@@ -100,3 +100,7 @@ scheduler_events={
 	        "tag_workflow.tag_data.update_job_order_status"
 	]
 }
+
+override_whitelisted_methods = {
+        "frappe.desk.query_report.run": "tag_workflow.utils.whitelisted.run"
+}
