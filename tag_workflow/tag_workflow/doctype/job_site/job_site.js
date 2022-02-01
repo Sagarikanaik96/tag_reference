@@ -161,8 +161,8 @@ let html = `
 				function update_address(data){
 					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "job_site", data["name"]);
 					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address", (data["street_number"]+" "+data["route"]));
-					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state", data["locality"]);
-					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city", data["administrative_area_level_1"]);
+					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state", data["administrative_area_level_1"]);
+					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city", data["locality"]);
 					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "lat", data["lat"]);
 					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "lng", data["lng"]);
 					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
