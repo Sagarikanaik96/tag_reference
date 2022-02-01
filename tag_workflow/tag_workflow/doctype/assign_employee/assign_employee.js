@@ -89,14 +89,36 @@ frappe.ui.form.on('Assign Employee', {
 	},
 	setup: function(frm){
 		frm.set_query("company", function(doc){
-			return {
+			var data = companyfilter(frm)
+			return data
+		})
+
+		frappe.call({
+			'method':"tag_workflow.tag_data.lead_org",
+			'args':{'current_user':frappe.session.user},
+			callback:function(r){
+				if(r.message=='success'){
+					frm.set_value('company',frappe.boot.tag.tag_user_info.company)
+					frm.refresh_fields();
+				}
+				else{
+					console.log("no success")
+					frm.refresh_fields();
+				}
+			}	
+		})
+	}
+});
+
+
+function companyfilter(frm){
+	return {
 				filters: [
 					["Company", "organization_type", "=", "Staffing"]
 				]
 			}
-		});
+
 	}
-});
 
 /*-----------hiring notification--------------*/
 function make_hiring_notification(frm){
