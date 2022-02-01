@@ -1,0 +1,92 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-02-01 00:19:42.931474",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "job_order",
+  "staffing_organization",
+  "staff_claims_no",
+  "no_of_workers_joborder",
+  "approved_no_of_workers",
+  "html_4",
+  "e_signature",
+  "agree_to_contract"
+ ],
+ "fields": [
+  {
+   "fieldname": "job_order",
+   "fieldtype": "Link",
+   "label": "Job Order",
+   "options": "Job Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "staffing_organization",
+   "fieldtype": "Link",
+   "label": "Staffing Organization",
+   "options": "Company"
+  },
+  {
+   "fieldname": "html_4",
+   "fieldtype": "HTML",
+   "options": "<b>Important Note Regarding Signature</b> By typing your full name below and submitting this agreement. You acknowledge and agree that your typed name represents your signed name(signature) and that you intend for this electronic signature to have the same force and effects as a manual(handwritten) signature.<br>\n"
+  },
+  {
+   "default": "0",
+   "fieldname": "agree_to_contract",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Agree To Contract ",
+   "reqd": 1
+  },
+  {
+   "fieldname": "staff_claims_no",
+   "fieldtype": "Int",
+   "label": "Claims No Of Workers"
+  },
+  {
+   "fieldname": "e_signature",
+   "fieldtype": "Data",
+   "label": "E signature",
+   "reqd": 1
+  },
+  {
+   "fieldname": "approved_no_of_workers",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Approved No of Workers"
+  },
+  {
+   "fieldname": "no_of_workers_joborder",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "No of workers JobOrder"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-02-01 01:12:19.384065",
+ "modified_by": "Administrator",
+ "module": "Tag Workflow",
+ "name": "Claim Order",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
