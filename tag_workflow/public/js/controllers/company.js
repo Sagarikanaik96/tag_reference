@@ -113,22 +113,25 @@ frappe.ui.form.on("Company", {
 
   validate: function (frm) {
     validate_phone_and_zip(frm);
+
     let phone_no = frm.doc.accounts_payable_phone_number;
     let account_phone_no=frm.doc.accounts_receivable_phone_number;
     let email = frm.doc.email;
     let receive_email = frm.doc.accounts_receivable_rep_email;
     let pay_email = frm.doc.accounts_payable_email;
+    var letters = /^[A-Za-z]+$/
+
 
     if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
         frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
         frappe.validated = false
 
     }
-		if (phone_no && (phone_no.length != 10 || isNaN(phone_no))){
+		if (phone_no && (phone_no.length != 10 || isNaN(phone_no)) || phone.match(letters)){
 			frappe.msgprint({message: __('Not Valid Accounts Payable phone number'), indicator: 'red'})
 			frappe.validated = false
     }
-    if (account_phone_no && (account_phone_no.length != 10 || isNaN(account_phone_no))){
+    if (account_phone_no && (account_phone_no.length != 10 || isNaN(account_phone_no)) || account_phone_no.match(letters)){
 			frappe.msgprint({message: __('Not Valid Accounts Receivable phone number'), indicator: 'red'})
 			frappe.validated = false
     }
@@ -321,7 +324,8 @@ function validate_phone_and_zip(frm) {
   let phone = frm.doc.phone_no;
   let zip = frm.doc.zip;
   let is_valid = 1;
-  if (phone && phone.length != 10 && !isNaN(phone)) {
+  var letters = /^[A-Za-z]+$/
+  if (phone && phone.length != 10 && !isNaN(phone) || phone.match(letters)) {
     is_valid = 0;
     frappe.msgprint({
       message: __("Company Phone No. is not valid"),
@@ -329,7 +333,7 @@ function validate_phone_and_zip(frm) {
       indicator: "red",
     });
   }
-  if (zip && zip.length != 5 && !isNaN(zip)) {
+  if (zip && zip.length != 5 && !isNaN(zip) || zip.match(letters)) {
     is_valid = 0;
     frappe.msgprint({
       message: __("Enter valid zip"),
