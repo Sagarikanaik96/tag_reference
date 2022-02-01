@@ -499,9 +499,7 @@ input::-webkit-credentials-auto-fill-button {
   }
 }
 
-button.btn.btn-default.btn-sm.ellipsis {
-  display: none;
-}
+
 
 @media (min-width: 570px) and (max-width: 768px) {
   .dropdown-notifications .notifications-list {
