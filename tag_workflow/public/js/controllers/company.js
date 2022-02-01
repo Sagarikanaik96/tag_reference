@@ -114,8 +114,8 @@ frappe.ui.form.on("Company", {
   validate: function (frm) {
     validate_phone_and_zip(frm);
 
-    let phone_no = frm.doc.accounts_payable_phone_number;
-    let account_phone_no=frm.doc.accounts_receivable_phone_number;
+    let phone_no = frm.doc.accounts_payable_phone_number || "";
+    let account_phone_no=frm.doc.accounts_receivable_phone_number || "";
     let email = frm.doc.email;
     let receive_email = frm.doc.accounts_receivable_rep_email;
     let pay_email = frm.doc.accounts_payable_email;
@@ -127,7 +127,7 @@ frappe.ui.form.on("Company", {
         frappe.validated = false
 
     }
-		if (phone_no && (phone_no.length != 10 || isNaN(phone_no)) || phone.match(letters)){
+		if (phone_no && (phone_no.length != 10 || isNaN(phone_no)) || phone_no.match(letters)){
 			frappe.msgprint({message: __('Not Valid Accounts Payable phone number'), indicator: 'red'})
 			frappe.validated = false
     }
@@ -321,7 +321,7 @@ function update_company_fields(frm) {
 
 /*--------phone and zip validation----------*/
 function validate_phone_and_zip(frm) {
-  let phone = frm.doc.phone_no;
+  let phone = frm.doc.phone_no || '';
   let zip = frm.doc.zip;
   let is_valid = 1;
   var letters = /^[A-Za-z]+$/
