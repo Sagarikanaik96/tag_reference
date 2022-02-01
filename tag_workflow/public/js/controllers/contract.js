@@ -5,6 +5,7 @@ frappe.ui.form.on("Contract", {
 		update_hiring(frm);
 		update_user(frm);
 		request_sign(frm);
+		$(".menu-btn-group").hide()
 	},
 
 	hiring_company: function(frm){
