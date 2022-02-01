@@ -199,7 +199,7 @@ def get_company_details(comp_name):
 @frappe.whitelist()
 def get_joborder_value(name):
     try:
-        sql = ''' select name,category,from_date,to_date,select_job,job_duration,job_site,no_of_workers,rate from `tabJob Order` where name = "{0}" '''.format(name)
+        sql = ''' select name,category,from_date,to_date,select_job,job_order_duration,job_site,no_of_workers,rate from `tabJob Order` where name = "{0}" '''.format(name)
         value = frappe.db.sql(sql,as_dict=True)
         if value:
             return value[0]

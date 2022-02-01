@@ -46,7 +46,6 @@ async function repeat_joborder(name){
 			"flat_rate": r["flat_rate"],
 			"idx": r["idx"],
 			"is_single_share": r["is_single_share"],
-			"job_duration": r["job_duration"],
 			"job_site": r["job_site"],
 			"job_title": r["job_title"],
 			"name": r["name"],
