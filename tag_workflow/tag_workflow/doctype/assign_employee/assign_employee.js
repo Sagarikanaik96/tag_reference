@@ -89,8 +89,11 @@ frappe.ui.form.on('Assign Employee', {
 	},
 	setup: function(frm){
 		frm.set_query("company", function(doc){
-			var data = companyfilter(frm)
-			return data
+			return {
+				filters: [
+					["Company", "organization_type", "=", "Staffing"]
+				]
+			}
 		})
 
 		frappe.call({
@@ -110,15 +113,6 @@ frappe.ui.form.on('Assign Employee', {
 	}
 });
 
-
-function companyfilter(frm){
-	return {
-				filters: [
-					["Company", "organization_type", "=", "Staffing"]
-				]
-			}
-
-	}
 
 /*-----------hiring notification--------------*/
 function make_hiring_notification(frm){
