@@ -19,8 +19,8 @@ function view_joborder(name){
 	frappe.set_route("Form", "Job Order", name)
 }
 
-function repeat_joborder(name){
-	frappe.db.get_value("Job Order", name, "*", function(r){
+async function repeat_joborder(name){
+	await frappe.db.get_value("Job Order", name, "*", function(r){
 		frappe.route_options = {
 			"address": r["address"],
 			"age_reqiured": r["age_required"],
