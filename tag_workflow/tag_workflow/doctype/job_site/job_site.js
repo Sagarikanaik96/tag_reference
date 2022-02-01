@@ -5,6 +5,17 @@ frappe.ui.form.on('Job Site', {
 	refresh: function(frm){
 		maps(frm);
 	},
+
+	setup: function(frm){
+		frm.set_query('job_site_contact', function(doc) {
+				return {
+						query: "tag_workflow.tag_data.job_site_employee",
+						filters: {
+								'job_order_company': doc.company
+						}
+				}
+		});
+	},
 	search_on_maps: function(frm){
 		if(cur_frm.doc.search_on_maps == 1){
 			update_field(frm, "map");
