@@ -374,7 +374,6 @@ def job_site_employee(doctype, txt, searchfield, page_len, start, filters):
 
     company=filters.get('job_order_company')
     sql = ''' select name from `tabEmployee` where company='{0}' '''.format(company)
-    print("hihih")
     return frappe.db.sql(sql)
 
 
