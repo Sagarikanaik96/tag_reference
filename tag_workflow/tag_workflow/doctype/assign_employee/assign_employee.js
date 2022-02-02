@@ -7,6 +7,7 @@ frappe.ui.form.on('Assign Employee', {
 		render_table(frm);
 		approved_employee(frm);
 		hide_resume(frm);
+	
 
 		$(document).on('click', '[data-fieldname="employee"]', function(){
 			if ($('[data-fieldname="employee"]').last().val() != '' ){
@@ -38,6 +39,9 @@ frappe.ui.form.on('Assign Employee', {
 	},
 	onload:function(frm){
 		hide_resume(frm);
+		if (frm.doc.is_single_share){
+			company_set_by_direct_order(frm)
+		}
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
 			return {
 				query: "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.get_employee",
@@ -105,7 +109,6 @@ frappe.ui.form.on('Assign Employee', {
 					frm.refresh_fields();
 				}
 				else{
-					console.log("no success")
 					frm.refresh_fields();
 				}
 			}	
@@ -227,4 +230,10 @@ function hide_resume(frm){
 			window.open(cur_frm.doc.employee_details[0]["resume"]);
 		}
 	});
+}
+
+function company_set_by_direct_order(frm){
+	frm.set_value('company',frappe.boot.tag.tag_user_info.company)
+	frm.set_df_property('company', "read_only", 1);
+	frm.refresh_fields();
 }
