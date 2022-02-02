@@ -265,7 +265,7 @@ class DesktopPage {
 
 		this.data.onboarding && this.data.onboarding.items.length && this.make_onboarding();
 		this.make_charts();
-		if(frappe.boot.tag.tag_user_info.company_type != "TAG" && frappe.boot.tag.tag_user_info.company_type){
+		if(frappe.boot.tag.tag_user_info.company_type != "TAG" && frappe.boot.tag.tag_user_info.company_type && frappe.desk_page.page_name == 'My Activities'){
 			this.make_order_list();
 			this.get_order_data();
 		}
@@ -395,8 +395,7 @@ class DesktopPage {
 
 	get_order_data() {
 		let data = this.data.get_order_data;
-
-		let body = ``;
+		let body;
 		let head = `<table class="col-cd-12 basic-table table-headers table table-hover"><thead><tr><th>Job Title</th><th>Date & Time</th><th>Job Site</th><th>Organizations</th><th>Total Price</th><th></th></tr></thead><tbody>`;
 		let html = ``;
 		for(let d in data){
@@ -404,7 +403,7 @@ class DesktopPage {
 		}
 
 		if(html){
-			body =  head + html + "</tbody></table>";
+			body = head + html + "</tbody></table>";
 		}else{
 			body = head + `<tr><td></td><td></td><td>No Data Found</td><td></td><td></td><td></td></tbody></table>`;
 		}
