@@ -535,7 +535,7 @@ def chat_room_created(hiring_org,staffing_org,job_order):
         for k in total_user_list:
             members+=k+','
         doc=frappe.new_doc("Chat Room")
-        doc.room_name=job_order+"_"+staffing_org
+        doc.room_name=str(job_order.name)+"_"+staffing_org
         doc.type="Group"
         doc.members=members
         doc.save()
