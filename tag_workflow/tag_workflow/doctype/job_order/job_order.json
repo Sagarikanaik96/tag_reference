@@ -7,7 +7,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "section_break_1",
+  "section_break_html",
+  "html_1",
+  "section_break123",
   "time_remaining_for_make_edits",
   "section_break_3",
   "company",
@@ -314,11 +316,6 @@
    "options": "\nExclusive\nNon Exclusive"
   },
   {
-   "fieldname": "section_break_1",
-   "fieldtype": "Section Break",
-   "permlevel": 2
-  },
-  {
    "fieldname": "time_remaining_for_make_edits",
    "fieldtype": "HTML",
    "label": "Time Remaining For Make Edits",
@@ -430,11 +427,26 @@
    "fieldtype": "Data",
    "label": "Job Duration",
    "read_only": 1
+  },
+  {
+   "fieldname": "html_1",
+   "fieldtype": "HTML",
+   "options": "<h4>you have claim the job order</h4>",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "section_break_html",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "section_break123",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-01 05:45:50.901486",
+ "modified": "2022-02-01 11:33:54.904371",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

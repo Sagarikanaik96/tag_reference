@@ -109,9 +109,21 @@ frappe.ui.form.on("Job Order", {
     }
   },
   refresh: function (frm) {
-    if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
-      cur_frm.dashboard.hide();
-    }
+    if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
+		frm.add_custom_button(__('Claim'), function(){
+			if(frm.doc.resumes_required || frm.doc.is_single_share){
+				assign_employees(frm)
+			}
+			else{
+				claim_job_order_staffing(frm);
+			}
+		});
+	}	
+
+	if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		cur_frm.dashboard.hide();
+		show_claim_bar(frm)
+		}
     make_invoice(frm);
     make_notes(frm);
     if (cur_frm.doc.__islocal == 1) {
@@ -133,8 +145,8 @@ frappe.ui.form.on("Job Order", {
         }
       }
     }
-
-    if (cur_frm.doc.is_single_share == 1) {
+	
+    if (cur_frm.doc.is_single_share == 1 && frappe.boot.tag.tag_user_info.company_type=='Staffing') {
       frm.add_custom_button(__("Deny Job Order"), function () {
         frappe.call({
           method:
@@ -805,4 +817,41 @@ function job_order_duration(frm){
 	else{
 		cur_frm.set_value('job_order_duration', days+' Days')
 	}
+}
+
+   function claim_job_order_staffing(frm){
+	var doc = frappe.model.get_new_doc("Claim Order");
+	var staff_company = frappe.boot.tag.tag_user_info.company || [];
+	doc.staffing_organization = staff_company[0];
+	doc.job_order = frm.doc.name;
+	doc.no_of_workers_joborder = frm.doc.no_of_workers
+	doc.hiring_organization = frm.doc.company;
+	frappe.set_route("Form", "Claim Order", doc.name);
+}
+
+
+function show_claim_bar(frm){
+	if (frm.doc.claim && (frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)){
+		cur_frm.toggle_display('section_break_html', 1);
+		frm.remove_custom_button('Claim')
+	}
+	
+}
+
+function assign_employees(frm){
+	if(frm.doc.to_date  < frappe.datetime.now_datetime()){
+		frappe.msgprint({message:__('Date has been past to claim this order'), title:__('Job Order filled'),indicator: 'blue'})
+	}
+	else if(frm.doc.__islocal != 1 && cur_frm.doc.owner != frappe.session.user && frm.doc.worker_filled < frm.doc.no_of_workers){
+			if(cur_frm.is_dirty()){
+					frappe.msgprint({message: __('Please save the form before creating Quotation'), title: __('Save Job Order'), indicator: 'red'});
+			}
+			else{
+					assign_employe(frm);
+			}
+	}
+	else if(frm.doc.worker_filled >= frm.doc.no_of_workers){
+			frappe.msgprint({message: __('No of workers already filled for this job order'), title: __('Worker Filled'), indicator: 'red'});
+	}
+
 }

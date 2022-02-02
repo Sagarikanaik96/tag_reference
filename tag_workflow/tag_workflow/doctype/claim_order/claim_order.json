@@ -7,9 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "job_order",
+  "hiring_organization",
   "staffing_organization",
-  "staff_claims_no",
   "no_of_workers_joborder",
+  "staff_claims_no",
   "approved_no_of_workers",
   "html_4",
   "e_signature",
@@ -44,7 +45,7 @@
   },
   {
    "fieldname": "staff_claims_no",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "Claims No Of Workers"
   },
   {
@@ -62,13 +63,19 @@
   {
    "fieldname": "no_of_workers_joborder",
    "fieldtype": "Int",
+   "label": "No of workers JobOrder",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hiring_organization",
+   "fieldtype": "Data",
    "hidden": 1,
-   "label": "No of workers JobOrder"
+   "label": "Hiring Organization"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-01 01:12:19.384065",
+ "modified": "2022-02-01 11:41:01.565619",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Claim Order",
