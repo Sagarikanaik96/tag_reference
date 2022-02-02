@@ -63,7 +63,7 @@ frappe.views.Workspace = class Workspace {
 
 	get_page_to_show() {
 		let default_page;
-
+		let page;
 		if (localStorage.current_workspace) {
 			default_page = localStorage.current_workspace;
 		} else if (this.workspaces) {
@@ -73,8 +73,7 @@ frappe.views.Workspace = class Workspace {
 		} else {
 			default_page = "Build";
 		}
-
-		let page = frappe.get_route()[1] || default_page;
+		page = frappe.get_route()[1] || default_page;
 		return page;
 	}
 
