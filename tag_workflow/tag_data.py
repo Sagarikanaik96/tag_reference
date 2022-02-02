@@ -368,7 +368,15 @@ def get_org_site(doctype, txt, searchfield, page_len, start, filters):
     company=filters.get('job_order_company')
     sql = ''' select job_site from `tabCompany Site` where parent='{0}' '''.format(company)
     return frappe.db.sql(sql)
-    
+
+@frappe.whitelist()
+def job_site_employee(doctype, txt, searchfield, page_len, start, filters):
+
+    company=filters.get('job_order_company')
+    sql = ''' select name from `tabEmployee` where company='{0}' '''.format(company)
+    return frappe.db.sql(sql)
+
+
 @frappe.whitelist()
 def hiring_category(doctype,txt,searchfield,page_len,start,filters):
     company=filters.get('hiring_company')

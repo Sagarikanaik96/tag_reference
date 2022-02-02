@@ -16,6 +16,9 @@ login.bind_events = function () {
 		e.preventDefault();
 	});
 
+	// hide chat bubble
+	$('.chat-app').hide()
+
 	$(".form-login").on("submit", function (event) {
 		event.preventDefault();
 		var args = {};
