@@ -535,7 +535,7 @@ def chat_room_created(hiring_org,staffing_org,job_order):
         for k in total_user_list:
             members+=k+','
         doc=frappe.new_doc("Chat Room")
-        doc.room_name=job_order+"_"+staffing_org
+        doc.room_name=str(job_order.name)+"_"+staffing_org
         doc.type="Group"
         doc.members=members
         doc.save()
@@ -562,3 +562,19 @@ def lead_org(current_user):
     user_company=frappe.db.sql(sql, as_list=1)
     if(len(user_company)==1):
         return 'success'
+    
+
+@frappe.whitelist()
+def timesheet_detail(job_order):
+    sql = ''' select * from `tabTimesheet` where job_order_detail='{0}' '''.format(job_order)
+    sales_sql= ''' select * from `tabSales Invoice` where job_order='{0}' '''.format(job_order)
+
+    user_company=frappe.db.sql(sql, as_list=1)
+    sales_company=frappe.db.sql(sales_sql, as_list=1)
+
+
+    if(len(user_company)>0 and len(sales_company)>1):
+        return 'success1'
+    elif(len(user_company)>0):
+        return 'success'
+

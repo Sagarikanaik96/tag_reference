@@ -109,6 +109,8 @@ frappe.ui.form.on("Job Order", {
     }
   },
   refresh: function (frm) {
+    cur_frm.dashboard.hide();
+    view_button(frm)
     if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
 		frm.add_custom_button(__('Claim'), function(){
 			if(frm.doc.resumes_required || frm.doc.is_single_share){
@@ -854,4 +856,248 @@ function assign_employees(frm){
 			frappe.msgprint({message: __('No of workers already filled for this job order'), title: __('Worker Filled'), indicator: 'red'});
 	}
 
+}
+
+function view_button(frm){
+  if (frappe.boot.tag.tag_user_info.company_type == "Staffing" && frm.doc.__islocal!=1) {
+    cur_frm.dashboard.hide();
+    view_buttons_staffing(frm);
+  }
+  else if (frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"  && frm.doc.__islocal!=1){
+    view_buttons_hiring(frm);
+
+  }
+}
+function view_buttons_hiring(frm){
+  hiring_buttons(frm)
+
+	
+	if(cur_frm.doc.__islocal != 1)
+
+	{	
+			let datad1 = `<div id="data" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+			<p><b>Claims </b> ${frm.doc.bid}</p>
+			
+					</div>`;
+      
+          $('[data-fieldname = related_details]').click(function(){
+            claim_orders(frm)
+            
+          })
+			frm.set_df_property("related_details", "options", datad1);
+			frm.toggle_display('related_actions_section',1)
+		
+
+		if(frm.doc.claim){
+      let datad2 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+          <p><b>Messages </b> ${frm.doc.bid}</p>
+        </div>`;
+        $('[data-fieldname = messages]').click(function() {
+          messages(frm)
+
+         
+        })
+      frm.set_df_property("messages", "options", datad2);
+      frm.toggle_display('related_actions_section',1)
+		}
+	
+		if(frm.doc.order_status=='Completed'){
+      let datad3 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+          <p><b>Timesheets </b>  <button>View</button></p>
+        </div>`;
+        $('[data-fieldname = timesheets]').click(function() {
+         timesheets_view(frm)
+        })
+      frm.set_df_property("timesheets", "options", datad3);
+      frm.toggle_display('related_actions_section',1)
+			frm.add_custom_button(__('Timesheets'), function(){
+        timesheets_view(frm)
+				
+
+			}, __("View"));
+		}
+		
+	
+		if(frm.doc.order_status=='Completed'){
+			frappe.call({
+				method:"tag_workflow.tag_data.timesheet_detail",
+				args: {
+						job_order:cur_frm.doc.name,
+				},
+				callback:function(r){
+				if(r.message=='success'){
+          let datad4 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+								<p><b>Invoices </b> <button>View</button></p>
+							</div>`;
+          $('[data-fieldname = invoices]').click(function() {
+            sales_invoice_data(frm)
+          })
+					frm.set_df_property("invoices", "options", datad4);
+					frm.toggle_display('related_actions_section',1)
+					frm.add_custom_button(__('Invoices'), function(){
+            sales_invoice_data(frm)
+		
+					}, __("View"));
+				}
+			}
+		
+			})
+			
+		}
+
+
+	}
+}
+
+
+function view_buttons_staffing(frm){
+
+  if((frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company)){
+    frm.add_custom_button(__('Assigned Employee'), function f1(){
+      assign_employe(frm);
+
+    }, __("View"));
+    let data1 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+    <p><b>Claims </b></p>
+    
+        </div>`;
+        $('[data-fieldname = related_details]').click(function() {
+          claim_orders(frm)
+        })
+    frm.set_df_property("related_details", "options", data1);
+    frm.toggle_display('related_actions_section',1)
+  }
+  else{
+    let data2 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+    <p><b>Claims </b></p>
+    
+        </div>`;
+        $('[data-fieldname = related_details]').click(function() {
+          claim_orders(frm)
+        })
+    frm.set_df_property("related_details", "options", data2);
+    frm.toggle_display('related_actions_section',1)
+  
+    frm.add_custom_button(__('Claims'), function(){
+      claim_orders(frm)
+
+    }, __("View"));
+
+  }
+
+ 
+  if((frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)){
+    let data3 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+						<p><b>Messages </b></p>
+					</div>`;
+          $('[data-fieldname = messages]').click(function() {
+            messages(frm)
+
+          })
+			frm.set_df_property("messages", "options", data3);
+			frm.toggle_display('related_actions_section',1)
+      frm.add_custom_button(__('Messages'), function(){
+        messages(frm)
+    }, __("View"));
+  }
+  if( (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company) && (frm.doc.order_status=='Completed')){
+    let data4 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+        <p><b>Timesheets </b>  <button>View</button></p>
+      </div>`;
+      $('[data-fieldname = timesheets]').click(function() {
+       timesheets_view(frm)
+      })
+    frm.set_df_property("timesheets", "options", data4);
+    frm.toggle_display('related_actions_section',1)
+    frm.add_custom_button(__('Timesheets'), function(){
+     timesheets_view(frm)
+    }, __("View"));
+  }
+  if( (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company) && (frm.doc.order_status=='Completed')){
+    frappe.call({
+      method:"tag_workflow.tag_data.timesheet_detail",
+      args: {
+          job_order:cur_frm.doc.name,
+      },
+      callback:function(r){
+        if(r.message=='success1')
+        {
+          let data5 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+              <p><b>Invoices </b> <button>View</button></p>
+            </div>`;
+            $('[data-fieldname = invoices]').click(function() {
+              sales_invoice_data(frm)
+            })
+            frm.set_df_property("invoices", "options", data5);
+            frm.toggle_display('related_actions_section',1)
+            frm.add_custom_button(__('Invoices'), function(){
+              sales_invoice_data(frm)
+              
+            }, __("View"));
+
+        }
+        
+      else if(r.message=='success'){
+        let data6 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+              <p><b>Invoices </b> <button>View</button></p>
+            </div>`;
+            $('[data-fieldname = invoices]').click(function() {
+              sales_invoice_data(frm)
+              
+            })
+            frm.set_df_property("invoices", "options", data6);
+            frm.toggle_display('related_actions_section',1)
+            
+            frm.add_custom_button(__('Invoices'), function(){
+              make_invoice(frm)
+            }, __("View"));
+      }
+    }
+
+    })
+  }
+}
+
+function hiring_buttons(frm){
+  if(cur_frm.doc.__islocal != 1)
+
+	{	
+		frm.add_custom_button(__('Claims'), function claim1(){
+			claim_orders(frm)
+			
+		}, __("View"));
+  }
+	if(frm.doc.claim){
+
+    frm.add_custom_button(__('Messages'), function(){
+      messages(frm)
+   
+
+
+    }, __("View"));
+  }
+
+
+}
+function timesheets_view(frm){
+  frappe.route_options = {
+    "job_order_detail": ["=", frm.doc.name]
+  };
+  frappe.set_route("List", "Timesheet")
+}
+function claim_orders(frm){
+  frappe.route_options = {
+    "job_order": ["=", frm.doc.name]
+  };
+  frappe.set_route("List", "Claim Order")
+}
+function messages(frm){
+  $('li.nav-item.dropdown.dropdown-notifications.dropdown-mobile.chat-navbar-icon').click()
+
+}
+function sales_invoice_data(frm){
+  frappe.route_options = {
+    "job_order": ["=", frm.doc.name]
+  };
+  frappe.set_route("List", "Sales Invoice")
 }

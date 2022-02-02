@@ -8,30 +8,37 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_html",
-  "html_1",
-  "section_break123",
+  "html_2",
+  "related_actions_section",
+  "related_details",
+  "messages",
+  "timesheets",
+  "invoices",
+  "section_break_8",
   "time_remaining_for_make_edits",
   "section_break_3",
   "company",
   "naming_series",
   "staff_company",
   "category",
+  "column_break_9",
   "posting_date_time",
   "order_status",
   "company_type",
   "amended_from",
   "section_break_7",
   "resumes_required",
+  "column_break_14",
   "require_staff_to_wear_face_mask",
   "section_break_11",
   "from_date",
   "to_date",
   "select_job",
   "job_title",
-  "job_order_duration",
   "job_duration",
   "job_site",
   "estimated_hours_per_day",
+  "column_break_24",
   "no_of_workers",
   "worker_filled",
   "rate",
@@ -41,16 +48,19 @@
   "additional_addons_section",
   "drug_screen",
   "background_check",
+  "column_break_35",
   "driving_record",
   "shovel",
   "bill_rate_section",
   "per_hour",
+  "column_break_44",
   "flat_rate",
   "address_info_section",
   "address",
   "bid",
   "claim",
   "staff_org_claimed",
+  "column_break_47",
   "email",
   "phone_number",
   "is_single_share",
@@ -118,7 +128,7 @@
    "fieldname": "select_job",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Job Title",
+   "label": "Job",
    "options": "Designation",
    "reqd": 1
   },
@@ -161,7 +171,7 @@
   {
    "default": "0",
    "fieldname": "extra_price_increase",
-   "fieldtype": "Currency",
+   "fieldtype": "Float",
    "label": "Extra Price Increase",
    "precision": "2"
   },
@@ -204,7 +214,7 @@
   {
    "default": "0",
    "fieldname": "per_hour",
-   "fieldtype": "Currency",
+   "fieldtype": "Float",
    "label": "Per Hour",
    "precision": "2",
    "read_only": 1
@@ -212,7 +222,7 @@
   {
    "default": "0",
    "fieldname": "flat_rate",
-   "fieldtype": "Currency",
+   "fieldtype": "Float",
    "label": "Flat Rate",
    "precision": "2",
    "read_only": 1
@@ -262,12 +272,12 @@
   {
    "fieldname": "apply_for_quotation_section",
    "fieldtype": "Section Break",
-   "label": "Employee Assignment"
+   "label": "Apply for Quotation"
   },
   {
    "fieldname": "assign_employees",
    "fieldtype": "Button",
-   "label": "Assign Employee to Order",
+   "label": "Employee Assign For Order",
    "permlevel": 1
   },
   {
@@ -298,7 +308,6 @@
    "label": "Staffing Org Claimed"
   },
   {
-   "default": "Upcoming",
    "depends_on": "eval:doc.__islocal!=1",
    "fieldname": "order_status",
    "fieldtype": "Select",
@@ -375,15 +384,15 @@
   },
   {
    "fieldname": "rate",
-   "fieldtype": "Currency",
+   "fieldtype": "Data",
    "label": "Rate",
    "reqd": 1
   },
   {
    "fieldname": "description",
    "fieldtype": "Small Text",
-   "label": "Job Title Description",
-   "read_only": 1
+   "label": "Description",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -423,16 +432,28 @@
    "permlevel": 1
   },
   {
-   "fieldname": "job_order_duration",
-   "fieldtype": "Data",
-   "label": "Job Duration",
-   "read_only": 1
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
   },
   {
-   "fieldname": "html_1",
-   "fieldtype": "HTML",
-   "options": "<h4>you have claim the job order</h4>",
-   "permlevel": 2
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_35",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_44",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_47",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "section_break_html",
@@ -440,13 +461,44 @@
    "hidden": 1
   },
   {
-   "fieldname": "section_break123",
+   "fieldname": "html_2",
+   "fieldtype": "HTML",
+   "options": "<h3>You Have Claimed For This Order</h3>"
+  },
+  {
+   "fieldname": "related_actions_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Related Sections"
+  },
+  {
+   "fieldname": "related_details",
+   "fieldtype": "HTML",
+   "label": "Claims"
+  },
+  {
+   "fieldname": "messages",
+   "fieldtype": "HTML",
+   "label": "Messages"
+  },
+  {
+   "fieldname": "timesheets",
+   "fieldtype": "HTML",
+   "label": "Timesheets"
+  },
+  {
+   "fieldname": "invoices",
+   "fieldtype": "HTML",
+   "label": "Invoices"
+  },
+  {
+   "fieldname": "section_break_8",
    "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-01 11:33:54.904371",
+ "modified": "2022-02-02 06:38:51.407765",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

@@ -30,7 +30,8 @@ app_include_js = [
         "/assets/tag_workflow/js/map.js",
         "/assets/tag_workflow/js/controllers/sortable.js",
         "/assets/tag-template.min.js",
-        "/assets/js/file_upload.min.js"
+        "/assets/js/file_upload.min.js",
+        "/assets/js/tag-min.js"
 ]
 
 web_include_css = [
@@ -102,5 +103,6 @@ scheduler_events={
 }
 
 override_whitelisted_methods = {
-        "frappe.desk.query_report.run": "tag_workflow.utils.whitelisted.run"
+        "frappe.desk.query_report.run": "tag_workflow.utils.whitelisted.run",
+        "frappe.desk.desktop.get_desktop_page": "tag_workflow.utils.whitelisted.get_desktop_page"
 }

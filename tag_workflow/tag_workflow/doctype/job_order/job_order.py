@@ -91,7 +91,7 @@ def after_denied_joborder(staff_company,joborder_name,job_title,hiring_name):
         jb_ord.is_single_share = 0
         jb_ord.save(ignore_permissions = True)
         subject = 'Job Order Notification'
-        msg=f'{staff_company} placed unable to fulfill claim on your work order: {job_title}.'
+        msg=f'{staff_company} unable to fulfill claim on your work order: {job_title}.'
         make_system_notification(hiring_user_list,msg,ORD,joborder_name,subject)   
         sendmail(emails = hiring_user_list, message = msg, subject = subject, doctype = ORD, docname = joborder_name)
         
