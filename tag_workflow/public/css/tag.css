@@ -134,15 +134,20 @@ input:visited {
   color: #21b9e4 !important;
 }
 .editable-form .layout-main-section-wrapper .layout-main-section,
+.submitted-form .layout-main-section-wrapper .layout-main-section,
 #page-Company .layout-main-section-wrapper .layout-main-section,
-#page-Timesheet .layout-main-section-wrapper .layout-main-section {
-  max-width: 496px;
+#page-Timesheet .layout-main-section-wrapper .layout-main-section,
+#page-Lead .layout-main-section-wrapper .layout-main-section {
+  max-width: 750px;
   width: 100%;
   margin: auto;
 }
 
 #page-DocType .layout-main-section-wrapper .layout-main-section,
 [data-route="Form/Web Page/temporary-assistance-guru"]
+  .layout-main-section-wrapper
+  .layout-main-section,
+[data-route="Form/Customize Form/Customize Form"]
   .layout-main-section-wrapper
   .layout-main-section {
   max-width: 100%;
@@ -403,7 +408,7 @@ input::-webkit-credentials-auto-fill-button {
   color: #8d9cbc !important;
 }
 #page-temporary-assistance-guru .chat-app #chat-bubble {
-    margin-bottom: 35px !important;
+  margin-bottom: 35px !important;
 }
 
 /* File upload UI */
@@ -515,13 +520,10 @@ input::-webkit-credentials-auto-fill-button {
   }
 }
 
-span.frappe-timestamp.mini{
-    display: none;
+span.frappe-timestamp.mini {
+  display: none;
 }
 
-
-.report-footer.text-muted{
-    display: none;
-
+.report-footer.text-muted {
+  display: none;
 }
-

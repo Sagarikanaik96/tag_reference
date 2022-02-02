@@ -218,7 +218,7 @@
                           class="pr-3 pl-3"
                           alt="crm" /></span
                       > 
-                        <span class="slide-text">Order </span>
+                      <span class="slide-text"> Order </span>
                       <span 
                         ><i class="fa fa-angle-down" aria-hidden="true"></i
                       ></span>
@@ -275,8 +275,6 @@
                       </li>
                       <li class="py-2"><a href="/app/lead">Deals</a></li>
                       <li class="py-2"><a href="/app/staffing-email">Email</a></li>
-                      <li class="py-2"><a href="/app/contract">Contract</a></li>
-
                     </ul>
                   </li>
                 </ul>
@@ -291,9 +289,9 @@
                   />Employees
                 </div>
               </a>
-              {% endif %} 
-             
-              <a href="/app/reports">
+              {% endif %} {% if frappe.boot.tag.tag_user_info.company_type !=
+              "Hiring" %}
+              <a href="/app/report">
                 <div class="tab-button custom-btn">
                   <img
                     src="/assets/tag_workflow/images/ico-invoice.svg"
@@ -302,6 +300,19 @@
                   />Reports
                 </div>
               </a>
+              {% endif %} {% if frappe.boot.tag.tag_user_info.company_type ==
+              "TAG" %}
+              <a href="/app/query-report/Work%20Orders">
+                <div class="tab-button custom-btn">
+                  <img
+                    src="/assets/tag_workflow/images/ico-invoice.svg"
+                    class="pr-3 pl-5"
+                    alt="reports"
+                  />Work Orders
+                </div>
+              </a>
+              {% endif %}
+
               <a href="/app/sales-invoice">
                 <div class="tab-button custom-btn">
                   <img
