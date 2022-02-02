@@ -6,6 +6,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.selling.doctype.quotation.quotation import _make_customer
 from tag_workflow.utils.notification import sendmail, make_system_notification, share_doc
 from frappe.desk.query_report import get_report_doc, generate_report_result
+from frappe.desk.desktop import Workspace
 
 #-------global var------#
 item = "Timesheet Activity Cost"
@@ -264,3 +265,48 @@ def run(report_name, filters=None, user=None, ignore_prepared_report=False, cust
     result["add_total_row"] = report.add_total_row and not result.get("skip_total_row", False)
 
     return result
+
+#--------------------------#
+@frappe.whitelist()
+def get_order_data():
+    try:
+        company, company_type = frappe.db.get_value("User", {"name": frappe.session.user}, ["company", "organization_type"])
+        result = []
+        if not company or not company_type:
+            return result
+
+        if(company_type == "Staffing"):
+            job_order = []
+            assign = frappe.db.get_list("Assign Employee", {"company": company}, "job_order", group_by="job_order", order_by="creation", limit=5)
+            job_order = [a['job_order'] for a in assign]
+            count = 0
+            for j in job_order:
+                date, job_site, company, per_hour = frappe.db.get_value("Job Order", {"name": j}, ["from_date", "job_site", "company", "per_hour"])
+                result.append({"name": j, "date": date.strftime("%d %b, %Y %H:%M %p"), "job_site": job_site, "company": company, "per_hour": per_hour})
+            return result
+
+        elif(company_type in ["Hiring", "Exclusive Hiring"]):
+            order = frappe.db.get_list("Job Order", {"company": company, "order_status": "Ongoing"}, ["name", "from_date", "job_site", "company", "per_hour", "order_status"], order_by="creation", limit=5)
+            for o in order:
+                result.append({"name":o['name'], "date":o['from_date'].strftime("%d %b, %Y %H:%M %p"), "job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour']})
+            return result
+    except Exception as e:
+        frappe.msgprint(e)
+
+@frappe.whitelist()
+@frappe.read_only()
+def get_desktop_page(page):
+    try:
+        wspace = Workspace(page)
+        wspace.build_workspace()
+        return {
+                'charts': wspace.charts,
+                'shortcuts': wspace.shortcuts,
+                'cards': wspace.cards,
+                'onboarding': wspace.onboarding,
+                'allow_customization': not wspace.doc.disable_user_customization,
+                'get_order_data': get_order_data()
+        }
+    except DoesNotExistError:
+        frappe.log_error(frappe.get_traceback())
+        return {}

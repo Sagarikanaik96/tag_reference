@@ -11,5 +11,8 @@
 	"js/file_upload-file.min.js":[
 		"public/js/new_file_uploader/FileUploader.vue",
 		"public/js/new_file_uploader/index.js"
+	],
+	"js/tag-min.js":[
+		"public/js/frappe/workspace.js"
 	]
 }
