@@ -8,8 +8,13 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_html",
-  "html_1",
-  "section_break123",
+  "html_2",
+  "related_actions_section",
+  "related_details",
+  "messages",
+  "timesheets",
+  "invoices",
+  "section_break_8",
   "time_remaining_for_make_edits",
   "section_break_3",
   "company",
@@ -30,7 +35,6 @@
   "to_date",
   "select_job",
   "job_title",
-  "job_order_duration",
   "job_duration",
   "job_site",
   "estimated_hours_per_day",
@@ -450,11 +454,51 @@
   {
    "fieldname": "column_break_47",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_html",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "html_2",
+   "fieldtype": "HTML",
+   "options": "<h3>You Have Claimed For This Order</h3>"
+  },
+  {
+   "fieldname": "related_actions_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Related Sections"
+  },
+  {
+   "fieldname": "related_details",
+   "fieldtype": "HTML",
+   "label": "Claims"
+  },
+  {
+   "fieldname": "messages",
+   "fieldtype": "HTML",
+   "label": "Messages"
+  },
+  {
+   "fieldname": "timesheets",
+   "fieldtype": "HTML",
+   "label": "Timesheets"
+  },
+  {
+   "fieldname": "invoices",
+   "fieldtype": "HTML",
+   "label": "Invoices"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-01 13:14:57.735347",
+ "modified": "2022-02-02 06:38:51.407765",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
