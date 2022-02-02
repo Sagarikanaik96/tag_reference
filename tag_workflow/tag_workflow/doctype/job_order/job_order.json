@@ -128,7 +128,7 @@
    "fieldname": "select_job",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Job",
+   "label": "Job Title",
    "options": "Designation",
    "reqd": 1
   },
@@ -171,7 +171,7 @@
   {
    "default": "0",
    "fieldname": "extra_price_increase",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "label": "Extra Price Increase",
    "precision": "2"
   },
@@ -214,7 +214,7 @@
   {
    "default": "0",
    "fieldname": "per_hour",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "label": "Per Hour",
    "precision": "2",
    "read_only": 1
@@ -222,7 +222,7 @@
   {
    "default": "0",
    "fieldname": "flat_rate",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "label": "Flat Rate",
    "precision": "2",
    "read_only": 1
@@ -272,12 +272,12 @@
   {
    "fieldname": "apply_for_quotation_section",
    "fieldtype": "Section Break",
-   "label": "Apply for Quotation"
+   "label": "Employee Assignment"
   },
   {
    "fieldname": "assign_employees",
    "fieldtype": "Button",
-   "label": "Employee Assign For Order",
+   "label": "Assign Employee to Order",
    "permlevel": 1
   },
   {
@@ -308,6 +308,7 @@
    "label": "Staffing Org Claimed"
   },
   {
+   "default": "Upcoming",
    "depends_on": "eval:doc.__islocal!=1",
    "fieldname": "order_status",
    "fieldtype": "Select",
@@ -384,15 +385,15 @@
   },
   {
    "fieldname": "rate",
-   "fieldtype": "Data",
+   "fieldtype": "Currency",
    "label": "Rate",
    "reqd": 1
   },
   {
    "fieldname": "description",
    "fieldtype": "Small Text",
-   "label": "Description",
-   "reqd": 1
+    "label": "Job Title Description",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -432,28 +433,25 @@
    "permlevel": 1
   },
   {
-   "fieldname": "column_break_14",
-   "fieldtype": "Column Break"
+   "fieldname": "job_order_duration",
+   "fieldtype": "Data",
+   "label": "Job Duration",
+   "read_only": 1
   },
   {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
+  "fieldname": "html_1",
+   "fieldtype": "HTML",
+   "options": "<h4>you have claim the job order</h4>",
+   "permlevel": 2
   },
   {
-   "fieldname": "column_break_24",
-   "fieldtype": "Column Break"
+  "fieldname": "section_break_html",
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
-   "fieldname": "column_break_35",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_44",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_47",
-   "fieldtype": "Column Break"
+   "fieldname": "section_break123",
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "section_break_html",
