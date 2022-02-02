@@ -11,7 +11,6 @@ frappe.ui.form.on('Assign Employee', {
 
 		$(document).on('click', '[data-fieldname="employee"]', function(){
 			if ($('[data-fieldname="employee"]').last().val() != '' ){
-				console.log($('[data-fieldname="employee"]').last().val(),"hi")
   				frappe.call({
 					method:"tag_workflow.tag_data.joborder_resume",
 					args: {
@@ -43,10 +42,15 @@ frappe.ui.form.on('Assign Employee', {
 			company_set_by_direct_order(frm)
 		}
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
+			const li = []
+			document.querySelectorAll('a[data-doctype="Employee"]').forEach(element=>{
+			li.push(element.getAttribute("data-name"))
+			})
 			return {
 				query: "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.get_employee",
 				filters: {company: doc.hiring_organization, emp_company: doc.company,
-					job_category: doc.job_category,	distance_radius: doc.distance_radius, job_location: doc.job_location
+					job_category: doc.job_category,	distance_radius: doc.distance_radius, job_location: doc.job_location,
+					employee_lis : li
 				}
 			}
 		}
