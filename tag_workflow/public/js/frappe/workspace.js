@@ -46,7 +46,7 @@ frappe.views.Workspace = class Workspace {
 
 	show() {
 		let page = this.get_page_to_show();
-		this.page.set_title(`${__(page)}`);
+		this.page.set_title(``);
 		this.show_page(page);
 	}
 
@@ -378,18 +378,67 @@ class DesktopPage {
 	}
 
 	make_order_list(){
-		this.page.append(`
-			<div class="row widget-group">
-				<div class="col-xs-11 widget-group-head">
-					<div class="widget-group-title">Today's Orders</div>
-					<div class="widget-group-control"></div>
+		if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"){
+			this.page.append(`
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="widget-group-title"><h1>Discover Top-Rated Professionals</h1><p>We are here to help you with any project</p></div>
+						<div class="widget-group-control"></div>
+					</div>
+					<div class="frappe-control input-max-width" style="margin-left: 15px;width: 30%;">
+						<div class="form-group">
+							<div class="control-input-wrapper">
+								<div class="control-input" style="display: block;">
+								<input type="text" autocomplete="off" class="input-with-feedback form-control bold" placeholder="Search staffing Company by name or category" list="staffing_list" oninput="update_list()" id="staff">
+								<datalist id="staffing_list"></datalist>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
-				<button class="btn btn-xs px-2 restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">View All</button>
-				<div class="col-xs-12">
-					<div class="widget widget-shadow shortcut-widget-box" id="data"></div>
+
+				<div class="row widget-group">
+					<div class="col-xs-11 widget-group-head">
+						<div class="widget-group-title">Today's Orders</div>
+						<div class="widget-group-control"></div>
+					</div>
+					<button class="btn btn-xs px-2 restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">View All</button>
+					<div class="col-xs-12">
+						<div class="widget widget-shadow shortcut-widget-box" id="data"></div>
+					</div>
 				</div>
-			</div>
-		`);
+				<script>
+					function update_list(){
+						let data = document.getElementById("staff").value;
+						frappe.call({
+							method: "tag_workflow.utils.whitelisted.search_staffing_by_hiring",
+							args: {"data": data},
+							callback: function(r){
+								let result = r.message || [];
+								let html;
+								for(let d in result){
+									html += "<option value='"+result[d]+"' />"
+								}
+								$("#staffing_list").html(html);
+							}
+						});
+					}
+				</script>
+			`);
+		}else{
+			this.page.append(`
+				<div class="row widget-group">
+					<div class="col-xs-11 widget-group-head">
+						<div class="widget-group-title">Today's Orders</div>
+						<div class="widget-group-control"></div>
+					</div>
+					<button class="btn btn-xs px-2 restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">View All</button>
+					<div class="col-xs-12">
+						<div class="widget widget-shadow shortcut-widget-box" id="data"></div>
+					</div>
+				</div>
+			`);
+		}
 	}
 
 	get_order_data() {
@@ -398,7 +447,7 @@ class DesktopPage {
 		let head = `<table class="col-cd-12 basic-table table-headers table table-hover"><thead><tr><th>Job Title</th><th>Date & Time</th><th>Job Site</th><th>Organizations</th><th>Total Price</th><th></th></tr></thead><tbody>`;
 		let html = ``;
 		for(let d in data){
-			html += `<tr><td>${data[d].name}</td><td>${data[d].date}</td><td>${data[d].job_site}</td><td>${data[d].company}</td><td>$ ${data[d].per_hour.toFixed(2)}</td><td><button class="btn btn-primary btn-sm primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${data[d].name}')">Order<span class="alt-underline">Det</span>ails</button></td></tr>`;
+			html += `<tr><td>${data[d].select_job}</td><td>${data[d].date}</td><td>${data[d].job_site}</td><td>${data[d].company}</td><td>$ ${data[d].per_hour.toFixed(2)}</td><td><button class="btn btn-primary btn-sm primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${data[d].name}')">Order<span class="alt-underline">Det</span>ails</button></td></tr>`;
 		}
 
 		if(html){

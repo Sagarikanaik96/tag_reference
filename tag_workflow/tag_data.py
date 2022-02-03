@@ -183,12 +183,12 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
         job_order.bid=1+int(job_order.bid)
         if(job_order.claim is None):
             job_order.claim=staffing_org
-            chat_room_created(hiring_org,staffing_org,job_order)
+            chat_room_created(hiring_org,staffing_org,job_order.name)
 
         else:
             if(staffing_org not in job_order.claim):
                 job_order.claim=str(job_order.claim)+str(",")+staffing_org
-                chat_room_created(hiring_org,staffing_org,job_order)
+                chat_room_created(hiring_org,staffing_org,job_order.name)
 
         job_order.save(ignore_permissions=True)
 
@@ -535,7 +535,7 @@ def chat_room_created(hiring_org,staffing_org,job_order):
         for k in total_user_list:
             members+=k+','
         doc=frappe.new_doc("Chat Room")
-        doc.room_name=str(job_order.name)+"_"+staffing_org
+        doc.room_name=str(job_order)+"_"+staffing_org
         doc.type="Group"
         doc.members=members
         doc.save()
