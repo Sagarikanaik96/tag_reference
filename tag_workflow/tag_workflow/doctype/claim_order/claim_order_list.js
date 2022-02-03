@@ -66,49 +66,7 @@ function refresh(listview){
                                 var l=0
                                 var dict = {}
 
-                                for(let i=0;i<data_len;i++){                                    
-                                    y=document.getElementById("_"+data[i].staffing_organization).value
-                                    if(y.length==0){
-                                        y=0
-                                    }
-                                    y=parseInt(y)
-                                    l=parseInt(l)+parseInt(y)
-                            
-                                    if(y>data[i].staff_claims_no)
-                                    {
-                                        frappe.msgprint({
-                                            message: __("No Of Workers Exceed For:"+data[i].staffing_organization),
-                                            title: __("Error"),
-                                            indicator: "red",
-                                          });
-                                          dict = {}
-
-                                          setTimeout(function () {
-                                            location.reload()                                    
-                                          }, 6000);
-                                    }
-                                    else if(l>r['no_of_workers'])
-                                    {
-                                        frappe.msgprint({
-                                            message: __("No Of Workers Exceed For Then required"),
-                                            title: __("Error"),
-                                            indicator: "red",
-                                          });
-                                          dict = {}
-
-                                          setTimeout(function () {
-                                            location.reload()                                    
-                                          }, 6000);
-                                    }
-                                    else{
-                                        if(y!=0){
-                                            dict[data[i].staffing_organization]=y
-                                        }
-                                       
-
-                                    }
-                                
-                                }
+                                dict=update_no(data_len,l,dict,data)
                                 if(Object.keys(dict).length>0)
                                 {
                                     frappe.call({
@@ -128,4 +86,50 @@ function refresh(listview){
             })
         }
     })
+}
+function update_no(data_len,l,dict,data){
+    for(let i=0;i<data_len;i++){                                    
+        let y=document.getElementById("_"+data[i].staffing_organization).value
+        if(y.length==0){
+            y=0
+        }
+        y=parseInt(y)
+        l=parseInt(l)+parseInt(y)
+
+        if(y>data[i].staff_claims_no)
+        {
+            frappe.msgprint({
+                message: __("No Of Workers Exceed For:"+data[i].staffing_organization),
+                title: __("Error"),
+                indicator: "red",
+              });
+              dict = {}
+
+              setTimeout(function () {
+                location.reload()                                    
+              }, 6000);
+        }
+        else if(l>r['no_of_workers'])
+        {
+            frappe.msgprint({
+                message: __("No Of Workers Exceed For Then required"),
+                title: __("Error"),
+                indicator: "red",
+              });
+              dict = {}
+
+              setTimeout(function () {
+                location.reload()                                    
+              }, 6000);
+        }
+        else{
+            if(y!=0){
+                dict[data[i].staffing_organization]=y
+            }
+           
+
+        }
+    
+    }
+    return dict
 }
