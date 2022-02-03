@@ -66,7 +66,7 @@ function refresh(listview){
                                 var l=0
                                 var dict = {}
 
-                                dict=update_no(data_len,l,dict,data)
+                                dict=update_no(data_len,l,dict,data,r)
                                 if(Object.keys(dict).length>0)
                                 {
                                     frappe.call({
@@ -87,7 +87,7 @@ function refresh(listview){
         }
     })
 }
-function update_no(data_len,l,dict,data){
+function update_no(data_len,l,dict,data,r){
     for(let i=0;i<data_len;i++){                                    
         let y=document.getElementById("_"+data[i].staffing_organization).value
         if(y.length==0){
