@@ -65,16 +65,14 @@ function refresh(listview){
                                 var data_len=data.length
                                 var l=0
                                 var dict = {}
-                                let valid
-                                let validd
 
-                                dict,validd=update_no(data_len,l,dict,data,r,valid)
-                                if(Object.keys(dict).length>0 && (validd!="False"))
+                                dict=update_no(data_len,l,dict,data,r)
+                                if(Object.keys(dict.dict).length>0 && (dict.valid!="False"))
                                 {
                                     frappe.call({
                                         method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_claims",
                                         args:{
-                                            'my_data':dict,
+                                            'my_data':dict.dict,
                                             'doc_name':listview.data[0].job_order
                                         },
                                         callback:function(rmdata){    
@@ -89,8 +87,10 @@ function refresh(listview){
         }
     })
 }
-function update_no(data_len,l,dict,data,r,valid){
-    for(let i=0;i<data_len;i++){                                    
+function update_no(data_len,l,dict,data,r){
+    let valid=""
+    for(let i=0;i<data_len;i++){     
+                               
         let y=document.getElementById("_"+data[i].staffing_organization).value
         if(y.length==0){
             y=0
@@ -133,5 +133,5 @@ function update_no(data_len,l,dict,data,r,valid){
         }
     
     }
-    return dict,valid
+    return {dict,valid}
 }
