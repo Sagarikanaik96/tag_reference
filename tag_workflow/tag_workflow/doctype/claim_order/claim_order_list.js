@@ -1,6 +1,6 @@
 frappe.listview_settings['Claim Order'] = {
 
-    onload(listview) {
+    refresh(listview) {
         listview.page.clear_primary_action()
         if((listview.filters).length>0 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
             listview.page.set_secondary_action('Select Head Count', () => refresh(listview), 'octicon octicon-sync');
@@ -65,9 +65,11 @@ function refresh(listview){
                                 var data_len=data.length
                                 var l=0
                                 var dict = {}
+                                let valid
+                                let validd
 
-                                dict=update_no(data_len,l,dict,data,r)
-                                if(Object.keys(dict).length>0)
+                                dict,validd=update_no(data_len,l,dict,data,r,valid)
+                                if(Object.keys(dict).length>0 && (validd!="False"))
                                 {
                                     frappe.call({
                                         method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_claims",
@@ -87,7 +89,7 @@ function refresh(listview){
         }
     })
 }
-function update_no(data_len,l,dict,data,r){
+function update_no(data_len,l,dict,data,r,valid){
     for(let i=0;i<data_len;i++){                                    
         let y=document.getElementById("_"+data[i].staffing_organization).value
         if(y.length==0){
@@ -103,7 +105,7 @@ function update_no(data_len,l,dict,data,r){
                 title: __("Error"),
                 indicator: "red",
               });
-              dict = {}
+              valid = "False"
 
               setTimeout(function () {
                 location.reload()                                    
@@ -116,7 +118,7 @@ function update_no(data_len,l,dict,data,r){
                 title: __("Error"),
                 indicator: "red",
               });
-              dict = {}
+              valid="False"
 
               setTimeout(function () {
                 location.reload()                                    
@@ -131,5 +133,5 @@ function update_no(data_len,l,dict,data,r){
         }
     
     }
-    return dict
+    return dict,valid
 }
