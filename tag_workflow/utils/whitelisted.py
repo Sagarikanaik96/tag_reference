@@ -277,17 +277,17 @@ def get_order_data():
 
         if(company_type == "Staffing"):
             job_order = []
-            assign = frappe.db.get_list("Assign Employee", {"company": company}, "job_order", group_by="job_order", order_by="creation", limit=5)
+            assign = frappe.db.get_list("Assign Employee", {"company": company}, "job_order", group_by="job_order", order_by="creation desc", limit=5)
             job_order = [a['job_order'] for a in assign]
             for j in job_order:
-                date, job_site, company, per_hour = frappe.db.get_value("Job Order", {"name": j}, ["from_date", "job_site", "company", "per_hour"])
-                result.append({"name": j, "date": date.strftime("%d %b, %Y %H:%M %p"), "job_site": job_site, "company": company, "per_hour": per_hour})
+                date, job_site, company, per_hour, select_job = frappe.db.get_value("Job Order", {"name": j}, ["from_date", "job_site", "company", "per_hour", "select_job"])
+                result.append({"name": j, "date": date.strftime("%d %b, %Y %H:%M %p"), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
             return result
 
         elif(company_type in ["Hiring", "Exclusive Hiring"]):
-            order = frappe.db.get_list("Job Order", {"company": company, "order_status": "Ongoing"}, ["name", "from_date", "job_site", "company", "per_hour", "order_status"], order_by="creation", limit=5)
+            order = frappe.db.get_list("Job Order", {"company": company, "order_status": "Ongoing"}, ["name", "from_date", "job_site", "company", "per_hour", "order_status", "select_job"], order_by="creation desc", limit=5)
             for o in order:
-                result.append({"name":o['name'], "date":o['from_date'].strftime("%d %b, %Y %H:%M %p"), "job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour']})
+                result.append({"name":o['name'], "date":o['from_date'].strftime("%d %b, %Y %H:%M %p"), "job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour'], "select_job": o['select_job']})
             return result
     except Exception as e:
         frappe.msgprint(e)
@@ -309,3 +309,17 @@ def get_desktop_page(page):
     except DoesNotExistError:
         frappe.log_error(frappe.get_traceback())
         return {}
+
+
+#----------------------#
+@frappe.whitelist()
+def search_staffing_by_hiring(data=None):
+    try:
+        if(data):
+            sql = """select name from `tabCompany` where organization_type = "Staffing" and (name like '%{0}%' or industry like '%{0}%')""".format(data)
+            data = frappe.db.sql(sql, as_dict=1)
+            return [d['name'] for d in data]
+        return []
+    except Exception as e:
+        print(e)
+        return []

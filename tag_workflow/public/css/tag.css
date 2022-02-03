@@ -527,3 +527,7 @@ span.frappe-timestamp.mini {
 .report-footer.text-muted {
   display: none;
 }
+
+.sort-selector {
+    display: none;
+}
