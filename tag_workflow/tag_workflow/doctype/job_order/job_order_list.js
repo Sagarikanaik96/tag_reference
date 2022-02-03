@@ -1,5 +1,9 @@
 frappe.listview_settings['Job Order'] = {
 	onload:function(listview){
+		frappe.route_options = {
+			"order_status": "",
+		};
+
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 			frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
 				if(r.name===undefined){
