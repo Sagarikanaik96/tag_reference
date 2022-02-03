@@ -705,7 +705,7 @@ function make_invoice(frm) {
       function (r) {
         if (r.name) {
           frm
-            .add_custom_button(__("Make Invoice"), function () {
+            .add_custom_button(__("Create Invoice"), function () {
               frappe.model.open_mapped_doc({
                 method:
                   "tag_workflow.tag_workflow.doctype.job_order.job_order.make_invoice",

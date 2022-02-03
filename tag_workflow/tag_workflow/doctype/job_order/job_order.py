@@ -117,7 +117,7 @@ def make_sales_invoice(source_name, company, emp_list, emp_sql,target_doc=None, 
         income_account, cost_center, default_expense_account = frappe.db.get_value("Company", company, ["default_income_account", "cost_center", "default_expense_account"])
         total_amount = 0
         total_hours = 0
-        sql = """ select name from `tabTimesheet` where job_order_detail = '{0}' and docstatus = 1 and employee in ({1}) """.format(source, emp_sql)
+        sql = """ select name from `tabTimesheet` where job_order_detail = '{0}' and docstatus = 1 and employee in ({1}) and is_check_in_sales_invoice = 0 """.format(source, emp_sql)
         timesheet = frappe.db.sql(sql, as_dict=1)
 
         for time in timesheet:
@@ -156,10 +156,11 @@ def make_invoice(source_name, target_doc=None):
         company = frappe.db.get_value("User", frappe.session.user, "company")
         emp_sql = """ select name from `tabEmployee` where company = '{0}' """.format(company)
         emp_list = frappe.db.sql(emp_sql)
-
-        len_sql = """ select name from `tabTimesheet` where job_order_detail = '{0}' and employee in ({1}) """.format(source_name, emp_sql)
+        # check if timesheet already in sales invoice and timesheet submitted
+        len_sql = """ select name from `tabTimesheet` where job_order_detail = '{0}' and docstatus = 1 and employee in ({1}) and is_check_in_sales_invoice = 0 """.format(source_name, emp_sql)
+     
         if(len(frappe.db.sql(len_sql, as_dict=1)) <= 0):
-            frappe.msgprint(_("No Timesheet found for this Job Order(<b>{0}</b>)").format(source_name))
+            frappe.msgprint(_("Either Invoice For Timesheet OR No Timesheet found for this Job Order(<b>{0}</b>)").format(source_name))
         else:
             return prepare_invoice(company, source_name, emp_list,emp_sql)
     except Exception as e:
