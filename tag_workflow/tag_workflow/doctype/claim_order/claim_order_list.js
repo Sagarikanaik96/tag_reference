@@ -81,7 +81,7 @@ function refresh(listview){
                                             title: __("Error"),
                                             indicator: "red",
                                           });
-                                          var dict = {}
+                                          dict = {}
 
                                           setTimeout(function () {
                                             location.reload()                                    
@@ -94,7 +94,7 @@ function refresh(listview){
                                             title: __("Error"),
                                             indicator: "red",
                                           });
-                                          var dict = {}
+                                          dict = {}
 
                                           setTimeout(function () {
                                             location.reload()                                    
@@ -117,7 +117,7 @@ function refresh(listview){
                                             'my_data':dict,
                                             'doc_name':listview.data[0].job_order
                                         },
-                                        callback:function(rm){    
+                                        callback:function(rmdata){    
                                                 frappe.msgprint('Notification send successfully')	
                                         }
                                     })
