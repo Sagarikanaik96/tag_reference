@@ -325,7 +325,7 @@ frappe.ui.form.on("Job Order", {
     check_value(frm, field, name, value);
   },
   validate: function (frm) {
-	job_order_duration(frm);
+	  job_order_duration(frm);
     rate_calculation(frm);
     var l = {
       Company: frm.doc.company,
@@ -861,7 +861,9 @@ function assign_employees(frm){
 function view_button(frm){
   if (frappe.boot.tag.tag_user_info.company_type == "Staffing" && frm.doc.__islocal!=1) {
     cur_frm.dashboard.hide();
-    view_buttons_staffing(frm);
+     if((frm.doc.staff_org_claimed)){
+      view_buttons_staffing(frm);
+    }
   }
   else if (frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"  && frm.doc.__islocal!=1){
     view_buttons_hiring(frm);
