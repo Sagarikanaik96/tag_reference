@@ -91,12 +91,7 @@ def update_role_profile():
                 profile_doc.role_profile = profile 
                 for data in profile_data:
                     profile_doc.append("roles", {"role": data})
-            else:
-                profile_doc = frappe.get_doc(Role_Profile, {"name": profile})
-                profile_doc.roles = []
-                for data in profile_data:
-                    profile_doc.append("roles", {"role": data})
-            profile_doc.save()
+                profile_doc.save()
     except Exception as e:
         print(e)
         frappe.log_error(frappe.get_traceback(), "update_role_profile")
@@ -115,11 +110,7 @@ def update_module_profile():
                 module_doc = frappe.new_doc(Module)
                 module_doc.module_profile_name = mods
                 module_doc = module_data_update(all_modules, module_data, module_doc)
-            else:
-                module_doc = frappe.get_doc(Module, {"name": mods})
-                module_doc.block_modules = []
-                module_doc = module_data_update(all_modules, module_data, module_doc)
-            module_doc.save()
+                module_doc.save()
     except Exception as e:
         print(e)
         frappe.log_error(e, "update_module_profile")
