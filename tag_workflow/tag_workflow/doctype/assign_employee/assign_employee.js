@@ -7,6 +7,7 @@ frappe.ui.form.on('Assign Employee', {
 		render_table(frm);
 		approved_employee(frm);
 		hide_resume(frm);
+		back_job_order_form(frm)
 	
 
 		$(document).on('click', '[data-fieldname="employee"]', function(){
@@ -103,7 +104,7 @@ frappe.ui.form.on('Assign Employee', {
 				]
 			}
 		})
-
+	if (frappe.boot.tag.tag_user_info.company_type == "Staffing"){
 		frappe.call({
 			'method':"tag_workflow.tag_data.lead_org",
 			'args':{'current_user':frappe.session.user},
@@ -118,6 +119,7 @@ frappe.ui.form.on('Assign Employee', {
 			}	
 		})
 	}
+}
 });
 
 
@@ -241,3 +243,11 @@ function company_set_by_direct_order(frm){
 	frm.set_df_property('company', "read_only", 1);
 	frm.refresh_fields();
 }
+
+
+function back_job_order_form(frm){
+		frm.add_custom_button(__('Go Job Order'), function(){
+			frappe.set_route("Form", "Job Order", frm.doc.job_order);
+		})
+}
+
