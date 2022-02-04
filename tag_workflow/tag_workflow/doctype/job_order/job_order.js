@@ -1091,9 +1091,9 @@ function hide_unnecessary_data(frm)
     frm.set_df_property(field_name[i], "hidden", 1);
   }
  let display_fields=["base_price","rate_increase"]
-  var arrayLength = display_fields.length;
-  for (var i = 0; i < arrayLength; i++) {
-    frm.set_df_property(display_fields[i], "hidden", 0);
+  var display_length = display_fields.length;
+  for (var j = 0; j < display_length; j++) {
+    frm.set_df_property(display_fields[j], "hidden", 0);
   }
 
 }
