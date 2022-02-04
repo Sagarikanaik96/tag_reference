@@ -1066,7 +1066,7 @@ function sales_invoice_data(frm){
 function set_custom_days(frm){
   let selected=""
   for (let i = 0; i < frm.doc.select_days.length; i++) {
-    if(frm.doc.select_days){
+    if(frm.doc.select_days[i]!="None"){
       selected=selected+frm.doc.select_days[i].days+","
     }
 
