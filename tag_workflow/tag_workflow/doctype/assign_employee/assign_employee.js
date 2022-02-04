@@ -39,7 +39,7 @@ frappe.ui.form.on('Assign Employee', {
 	},
 	onload:function(frm){
 		hide_resume(frm);
-		if (frm.doc.is_single_share){
+		if (frm.doc.is_single_share && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 			company_set_by_direct_order(frm)
 		}
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {

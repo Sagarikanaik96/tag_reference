@@ -955,6 +955,10 @@ function view_buttons_hiring(frm){
 function view_buttons_staffing(frm){
 
   if((frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company)){
+    frm.add_custom_button(__('Invoice'), function f1(){
+      frappe.set_route("List", "Sales Invoice")
+    }, __("View"));
+
     frm.add_custom_button(__('Assigned Employee'), function f1(){
       assign_employe(frm);
 
