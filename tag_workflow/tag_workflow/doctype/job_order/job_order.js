@@ -188,7 +188,10 @@ frappe.ui.form.on("Job Order", {
   },
   before_save: function (frm) {
     if (frm.doc.__islocal === 1) {
-      set_custom_days(frm)
+      if(frm.doc.availability=="Custom"){
+        set_custom_days(frm)
+
+      }
       rate_hour_contract_change(frm);
       if (frappe.validated) {
         return new Promise(function (resolve, reject) {
@@ -664,7 +667,6 @@ function rate_calculation(frm) {
           "shovel",
         ];
         for (let i = 0; i < optional_fields.length; i++) {
-          let y=optional_field_data[i]
           if (optional_field_data[i] && optional_field_data[i] != "None") {
             let y=optional_field_data[i]
 
@@ -1064,7 +1066,9 @@ function sales_invoice_data(frm){
 function set_custom_days(frm){
   let selected=""
   for (let i = 0; i < frm.doc.select_days.length; i++) {
-    selected=selected+frm.doc.select_days[i].days+","
+    if(frm.doc.select_days){
+      selected=selected+frm.doc.select_days[i].days+","
+    }
 
   }
   frm.set_value("selected_days",selected)
