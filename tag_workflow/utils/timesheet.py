@@ -125,7 +125,7 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
             if average_rate[0][0]!=None:
                 rating=[float(i[0]) for i in average_rate]
                 doc=frappe.get_doc('Company',staffing_company)
-                avg_rating=sum(rating)/len(rating)
+                avg_rating=round(sum(rating)/len(rating),1)
                 doc.average_rating=str(avg_rating)
                 doc.save()
         return "success"
@@ -281,7 +281,7 @@ def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None
             if average_rate[0][0]!=None:
                 rating=[float(i[0]) for i in average_rate]
                 doc=frappe.get_doc('Company',hiring_company)
-                avg_rating=sum(rating)/len(rating)
+                avg_rating=round(sum(rating)/len(rating),1)
                 doc.average_rating=str(avg_rating)
                 doc.save()
         return "success"
