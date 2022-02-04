@@ -127,7 +127,6 @@ frappe.ui.form.on("Job Order", {
 		show_claim_bar(frm)
 		}
     make_invoice(frm);
-    make_notes(frm);
     if (cur_frm.doc.__islocal == 1) {
       check_company_detail(frm);
       frappe.db.get_doc("Company", cur_frm.doc.company).then((doc) => {
@@ -189,6 +188,7 @@ frappe.ui.form.on("Job Order", {
   },
   before_save: function (frm) {
     if (frm.doc.__islocal === 1) {
+      set_custom_days(frm)
       rate_hour_contract_change(frm);
       if (frappe.validated) {
         return new Promise(function (resolve, reject) {
@@ -199,6 +199,8 @@ frappe.ui.form.on("Job Order", {
               frm.doc.from_date +
               "<br><b>Job Order End Date: </b>" +
               frm.doc.to_date +
+              "<br><b>Job Order Start Time: </b>" +
+              frm.doc.job_start_time +
               "<br><b>Job Title: </b>" +
               frm.doc.select_job +
               "<br><b>Job Duration: </b>" +
@@ -207,11 +209,15 @@ frappe.ui.form.on("Job Order", {
               frm.doc.job_site +
               "<br><b>Estimated Per Hour: </b>" +
               frm.doc.estimated_hours_per_day +
-              "<br><b>Description: </b>" +
+              "<br><b>Job Title Description: </b>" +
               frm.doc.description +
-              "<br><b>Bill Rate Per Hour: </b>" +
+              "<br><b>Base Price: </b>" +
+              frm.doc.rate +
+              "<br><b>Rate Increase: </b>" +
+              (frm.doc.per_hour-frm.doc.rate) +
+              "<br><b>Total Per Hour Rate: </b>" +
               frm.doc.per_hour +
-              "<br><b>Bill Rate Flat Rate: </b>" +
+              "<br><b>Total Flat Rate: </b>" +
               frm.doc.flat_rate +
               "",
             function () {
@@ -323,6 +329,15 @@ frappe.ui.form.on("Job Order", {
     let name = "flat_rate";
     let value = frm.doc.flat_rate;
     check_value(frm, field, name, value);
+  },
+  availability:function(frm){
+    if(frm.doc.availability=="Custom"){
+      cur_frm.set_value("select_days","")
+
+    }
+  },
+  category:function(frm){
+    frm.set_value('shovel',"")
   },
   validate: function (frm) {
 	  job_order_duration(frm);
@@ -467,8 +482,9 @@ function set_read_fields(frm) {
 }
 
 function timer_value(frm) {
+  var new_date=new Date(String(cur_frm.doc.from_date)+" "+String(cur_frm.doc.job_start_time))
   var time = frappe.datetime.get_hour_diff(
-    cur_frm.doc.from_date,
+    new_date,
     frappe.datetime.now_datetime()
   );
   if (time < 24) {
@@ -521,9 +537,8 @@ function timer_value(frm) {
 
 function time_value(frm) {
   var entry_datetime = frappe.datetime.now_datetime().split(" ")[1];
-  var exit_datetime = cur_frm.doc.from_date.split(" ")[1];
   var splitEntryDatetime = entry_datetime.split(":");
-  var splitExitDatetime = exit_datetime.split(":");
+  var splitExitDatetime = cur_frm.doc.job_start_time.split(":");
   var totalMinsOfEntry =
     splitEntryDatetime[0] * 60 +
     parseInt(splitEntryDatetime[1]) +
@@ -636,18 +651,6 @@ function rate_calculation(frm) {
   var extra_price_increase = frm.doc.extra_price_increase || 0;
   var total_per_hour = extra_price_increase + parseFloat(cur_frm.doc.rate);
   var total_flat_rate = 0;
-  if (cur_frm.doc.company != "undefined") {
-    frappe.db.get_value(
-      "Company",
-      { name: cur_frm.doc.company },
-      ["drug_screen", "background_check", "mvr", "shovel"],
-      function (r) {
-        const org_optional_data = [
-          r.drug_screen,
-          r.background_check,
-          r.mvr,
-          r.shovel,
-        ];
         const optional_field_data = [
           frm.doc.drug_screen,
           frm.doc.background_check,
@@ -660,24 +663,29 @@ function rate_calculation(frm) {
           "driving_record",
           "shovel",
         ];
-        for (let i = 0; i < org_optional_data.length; i++) {
+        for (let i = 0; i < optional_fields.length; i++) {
+          let y=optional_field_data[i]
           if (optional_field_data[i] && optional_field_data[i] != "None") {
-            if (org_optional_data[i] == "Flat rate person") {
+            let y=optional_field_data[i]
+
+            if(y.includes("Flat")){
+              y=y.split("$")
               total_flat_rate =
-                total_flat_rate + parseFloat(optional_field_data[i]);
-            } else if (org_optional_data[i] == "Hour per person") {
-              total_per_hour =
-                total_per_hour + parseFloat(optional_field_data[i]);
+                total_flat_rate + parseFloat(y[1]);
             }
-          } else {
+            else if(y.includes("Hour")){
+              y=y.split("$")
+              total_per_hour =
+                total_per_hour + parseFloat(y[1]);
+
+            }
+          } 
+          else {
             cur_frm.set_value(optional_fields[i], "None");
           }
         }
         frm.set_value("flat_rate", total_flat_rate);
         frm.set_value("per_hour", total_per_hour);
-      }
-    );
-  }
 }
 
 function hide_employee_rating(frm) {
@@ -705,7 +713,7 @@ function make_invoice(frm) {
       function (r) {
         if (r.name) {
           frm
-            .add_custom_button(__("Create Invoice"), function () {
+            .add_custom_button(__("Make Invoice"), function () {
               frappe.model.open_mapped_doc({
                 method:
                   "tag_workflow.tag_workflow.doctype.job_order.job_order.make_invoice",
@@ -718,60 +726,22 @@ function make_invoice(frm) {
     );
   }
 }
-function make_notes(frm) {
-  if (frm.doc.company) {
-    frappe.call({
-      method:
-        "tag_workflow.tag_workflow.doctype.job_order.job_order.make_notes",
-      args: {
-        company: frm.doc.company,
-      },
-      callback: function (r) {
-        const optional_field_data = [
-          "drug_screen",
-          "background_check",
-          "driving_record",
-          "shovel",
-        ];
-        for (let i = 0; i < optional_field_data.length; i++) {
-          if (r.message[i]) {
-            cur_frm.set_df_property(
-              optional_field_data[i],
-              "description",
-              "Note:The value is set for " + r.message[i]
-            );
-          }
-        }
-      },
-    });
-  }
-}
 
 function fields_setup(frm) {
   if (cur_frm.doc.company) {
     frappe.db.get_value(
       "Company",
       { name: cur_frm.doc.company },
-      [
-        "drug_screen",
-        "background_check",
-        "shovel",
-        "mvr",
-        "drug_screen_rate",
-        "background_check_rate",
-        "mvr_rate",
-        "shovel_rate",
-        "contract_addendums",
-      ],
+      ["drug_screen_rate", "hour_per_person_drug", "background_check_rate", "background_check_flat_rate","mvr_rate","mvr_per","shovel_rate","shovel_per_person","contract_addendums"],
       function (r) {
         if (r.contract_addendums != "undefined") {
           cur_frm.set_value("contract_add_on", r.contract_addendums);
         }
         const org_optional_data = [
-          r.drug_screen,
-          r.background_check,
-          r.mvr,
-          r.shovel,
+          r.drug_screen_rate,r.hour_per_person_drug,
+          r.background_check_rate,r.background_check_flat_rate,
+          r.mvr_rate,r.mvr_per,
+          r.shovel_rate,r.shovel_per_person
         ];
         const optional_field_data = [
           "drug_screen",
@@ -779,27 +749,14 @@ function fields_setup(frm) {
           "driving_record",
           "shovel",
         ];
-        const org_optional_data_rate = [
-          r.drug_screen_rate,
-          r.background_check_rate,
-          r.mvr_rate,
-          r.shovel_rate,
-        ];
-        for (let i = 0; i < org_optional_data.length; i++) {
-          if (!org_optional_data[i]) {
-            cur_frm.set_df_property(optional_field_data[i], "options", "None");
-          } else {
+        var a=0
+        for (let i = 0; i <=3 ; i++) {         
             cur_frm.set_df_property(
               optional_field_data[i],
               "options",
-              "None\n" + org_optional_data_rate[i]
+              "None\n" + "Flat Rate Person:$"+org_optional_data[a]+"\n"+"Hour Per Person:$"+org_optional_data[a+1]
             );
-            cur_frm.set_df_property(
-              optional_field_data[i],
-              "description",
-              "Note:The value is set for " + org_optional_data[i]
-            );
-          }
+            a=a+2
         }
       }
     );
@@ -834,7 +791,7 @@ function job_order_duration(frm){
 
 function show_claim_bar(frm){
 	if (frm.doc.claim && (frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)){
-		cur_frm.toggle_display('section_break_html', 1);
+		cur_frm.toggle_display('section_break_html1', 1);
 		frm.remove_custom_button('Claim')
 	}
 	
@@ -955,10 +912,6 @@ function view_buttons_hiring(frm){
 function view_buttons_staffing(frm){
 
   if((frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company)){
-    frm.add_custom_button(__('Invoice'), function f1(){
-      frappe.set_route("List", "Sales Invoice")
-    }, __("View"));
-
     frm.add_custom_button(__('Assigned Employee'), function f1(){
       assign_employe(frm);
 
@@ -1106,4 +1059,13 @@ function sales_invoice_data(frm){
     "job_order": ["=", frm.doc.name]
   };
   frappe.set_route("List", "Sales Invoice")
+}
+
+function set_custom_days(frm){
+  let selected=""
+  for (let i = 0; i < frm.doc.select_days.length; i++) {
+    selected=selected+frm.doc.select_days[i].days+","
+
+  }
+  frm.set_value("selected_days",selected)
 }

@@ -7,7 +7,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "section_break_html",
+  "section_break_html1",
   "html_2",
   "related_actions_section",
   "related_details",
@@ -19,37 +19,48 @@
   "section_break_3",
   "company",
   "naming_series",
+  "order_status",
+  "column_break_13",
   "staff_company",
   "category",
   "posting_date_time",
-  "order_status",
   "company_type",
   "amended_from",
-  "section_break_7",
-  "resumes_required",
-  "require_staff_to_wear_face_mask",
   "section_break_11",
+  "select_job",
   "from_date",
   "to_date",
-  "select_job",
+  "estimated_hours_per_day",
+  "job_start_time",
+  "availability",
+  "select_days",
+  "selected_days",
   "job_title",
   "job_duration",
   "job_order_duration",
-  "job_site",
-  "estimated_hours_per_day",
-  "no_of_workers",
-  "worker_filled",
   "rate",
   "description",
-  "extra_price_increase",
+  "section_break_7",
+  "resumes_required",
+  "require_staff_to_wear_face_mask",
+  "section_break_40",
+  "job_site",
+  "contact_name",
+  "contact_email",
+  "contact_number",
+  "no_of_workers",
+  "worker_filled",
   "extra_notes",
+  "extra_price_increase",
   "additional_addons_section",
   "drug_screen",
   "background_check",
+  "column_break_45",
   "driving_record",
   "shovel",
   "bill_rate_section",
   "per_hour",
+  "column_break_44",
   "flat_rate",
   "address_info_section",
   "address",
@@ -60,18 +71,19 @@
   "phone_number",
   "is_single_share",
   "e_signature_for_order_request_section",
-  "html_37",
   "e_signature_full_name",
+  "html_37",
   "agree_to_contract",
-  "view_contract",
   "age_reqiured",
+  "view_contract",
   "contract_add_on",
   "apply_for_quotation_section",
   "assign_employees",
   "section_break_61",
   "employee_rating",
   "dispute_section",
-  "dispute_comment"
+  "dispute_comment",
+  "section_break_html"
  ],
  "fields": [
   {
@@ -116,8 +128,7 @@
   },
   {
    "fieldname": "section_break_11",
-   "fieldtype": "Section Break",
-   "label": "Job Info"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "select_job",
@@ -167,18 +178,18 @@
    "default": "0",
    "fieldname": "extra_price_increase",
    "fieldtype": "Currency",
-   "label": "Extra Price Increase",
+   "label": "Extra Per Hour Price Increase",
    "precision": "2"
   },
   {
    "fieldname": "extra_notes",
    "fieldtype": "Small Text",
-   "label": "Extra Notes"
+   "label": "Notes"
   },
   {
    "fieldname": "additional_addons_section",
    "fieldtype": "Section Break",
-   "label": "Additional Addons:(optional)"
+   "label": "Add Ons"
   },
   {
    "fieldname": "drug_screen",
@@ -225,6 +236,7 @@
   {
    "fieldname": "address_info_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Address Info"
   },
   {
@@ -245,12 +257,12 @@
   {
    "fieldname": "e_signature_for_order_request_section",
    "fieldtype": "Section Break",
-   "label": "E Signature for Order Request"
+   "label": "E Signature"
   },
   {
    "fieldname": "html_37",
    "fieldtype": "HTML",
-   "options": "<b>Important Note Regarding Signature</b> By typing your full name below and submitting this agreement. You acknowledge and agree that your typed name represents your signed name(signature) and that you intend for this electronic signature to have the same force and effects as a manual(handwritten) signature.<br>\n"
+   "options": "<b>Note</b><br> By typing your full name below and submitting this agreement. You acknowledge and agree that your typed name represents your signed name(signature) and that you intend for this electronic signature to have the same force and effects as a manual(handwritten) signature.<br>\n"
   },
   {
    "fieldname": "e_signature_full_name",
@@ -279,7 +291,7 @@
    "default": "0",
    "fieldname": "estimated_hours_per_day",
    "fieldtype": "Float",
-   "label": "Estimated Hours Per Day",
+   "label": "Estimated Daily Hours",
    "precision": "2",
    "reqd": 1
   },
@@ -330,13 +342,13 @@
   {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break",
-   "label": "Organization info"
+   "label": "Basic Info"
   },
   {
    "depends_on": "eval:doc.agree_to_contract==1",
    "fieldname": "view_contract",
    "fieldtype": "Button",
-   "label": "View Contract"
+   "label": "View Contract Language"
   },
   {
    "fieldname": "contract_add_on",
@@ -355,14 +367,14 @@
   {
    "default": "Today",
    "fieldname": "from_date",
-   "fieldtype": "Datetime",
-   "label": "Job Order Start Date",
+   "fieldtype": "Date",
+   "label": "Start Date",
    "reqd": 1
   },
   {
    "fieldname": "to_date",
-   "fieldtype": "Datetime",
-   "label": "Job Order End Date",
+   "fieldtype": "Date",
+   "label": "End Date",
    "reqd": 1
   },
   {
@@ -380,12 +392,16 @@
    "read_only": 1
   },
   {
+   "fetch_from": "select_job.price",
+   "fetch_if_empty": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "label": "Rate",
    "reqd": 1
   },
   {
+   "fetch_from": "select_job.description",
+   "fetch_if_empty": 1,
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Job Title Description",
@@ -478,11 +494,84 @@
   {
    "fieldname": "section_break_8",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_44",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "job_start_time",
+   "fieldtype": "Time",
+   "label": "Start Time",
+   "reqd": 1
+  },
+  {
+   "default": "Everyday",
+   "fieldname": "availability",
+   "fieldtype": "Select",
+   "label": "Availability",
+   "options": "\nEveryday\nMon-Fri\nSat & Sun\nCustom"
+  },
+  {
+   "depends_on": "eval:doc.availability=='Custom'",
+   "fieldname": "select_days",
+   "fieldtype": "Table MultiSelect",
+   "label": "Select Days",
+   "options": "Availability"
+  },
+  {
+   "fieldname": "section_break_40",
+   "fieldtype": "Section Break",
+   "label": "Requirements"
+  },
+  {
+   "fieldname": "column_break_45",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_html1",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fetch_from": "job_site.contact_name",
+   "fetch_if_empty": 1,
+   "fieldname": "contact_name",
+   "fieldtype": "Data",
+   "label": "Contact Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "job_site.contact_name",
+   "fetch_if_empty": 1,
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "label": "Contact Email",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "job_site.phone_number",
+   "fetch_if_empty": 1,
+   "fieldname": "contact_number",
+   "fieldtype": "Data",
+   "label": "Contact Number",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.availability==\"Custom\"",
+   "fieldname": "selected_days",
+   "fieldtype": "Data",
+   "label": "Selected Days",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-03 09:55:04.687446",
+ "modified": "2022-02-04 06:06:10.517669",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
