@@ -578,3 +578,15 @@ def timesheet_detail(job_order):
     elif(len(user_company)>0):
         return 'success'
 
+
+@frappe.whitelist()
+def update_timesheet_is_check_in_sales_invoice(time_list):
+    try:
+        time_list = json.loads(time_list)
+
+        for i in time_list:
+            sql = """ UPDATE `tabTimesheet` SET `tabTimesheet`.is_check_in_sales_invoice = 1 where name = "{}" """.format(i['time_sheet'])
+            frappe.db.sql(sql)
+            frappe.db.commit()
+    except Exception as e:
+        frappe.error_log(e, "Update time sheet Invoice")

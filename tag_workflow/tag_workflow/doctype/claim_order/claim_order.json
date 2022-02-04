@@ -1,11 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series",
  "creation": "2022-02-01 00:19:42.931474",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "job_order",
   "hiring_organization",
   "staffing_organization",
@@ -20,6 +22,7 @@
   {
    "fieldname": "job_order",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Job Order",
    "options": "Job Order",
    "reqd": 1
@@ -27,6 +30,7 @@
   {
    "fieldname": "staffing_organization",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Staffing Organization",
    "options": "Company"
   },
@@ -39,14 +43,14 @@
    "default": "0",
    "fieldname": "agree_to_contract",
    "fieldtype": "Check",
-   "in_list_view": 1,
    "label": "Agree To Contract ",
    "reqd": 1
   },
   {
    "fieldname": "staff_claims_no",
-   "fieldtype": "Data",
-   "label": "Claims No Of Workers"
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "No. Of Workers"
   },
   {
    "fieldname": "e_signature",
@@ -58,7 +62,8 @@
    "fieldname": "approved_no_of_workers",
    "fieldtype": "Int",
    "hidden": 1,
-   "label": "Approved No of Workers"
+   "in_list_view": 1,
+   "label": "Selected Workers"
   },
   {
    "fieldname": "no_of_workers_joborder",
@@ -71,11 +76,17 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Hiring Organization"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "CO-"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-01 11:41:01.565619",
+ "modified": "2022-02-03 10:20:47.775345",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Claim Order",
@@ -90,6 +101,30 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Staffing Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Staffing User",
    "share": 1,
    "write": 1
   }

@@ -380,6 +380,16 @@ class DesktopPage {
 	make_order_list(){
 		if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"){
 			this.page.append(`
+				<style>
+					.home-tab .inner-search {
+						max-width: 470px;
+						width: 100%;
+						transition: .8s ease-in-out;
+						display: none;
+						position: absolute;
+						background: #fff;
+					}
+				</style>
 				<div class="row">
 					<div class="col-xs-12">
 						<div class="widget-group-title"><h1>Discover Top-Rated Professionals</h1><p>We are here to help you with any project</p></div>
@@ -389,8 +399,18 @@ class DesktopPage {
 						<div class="form-group">
 							<div class="control-input-wrapper">
 								<div class="control-input" style="display: block;">
-								<input type="text" autocomplete="off" class="input-with-feedback form-control bold" placeholder="Search staffing Company by name or category" list="staffing_list" oninput="update_list()" id="staff">
-								<datalist id="staffing_list"></datalist>
+									<input class="form-control my-0 py-2 search-area" type="text" placeholder="Search by Staffing Company or Job Category" aria-label="Search" oninput="update_list()" id="staff">
+									<div class="inner-search border shadow rounded mt-2 py-3" style="display: none;">
+										<div class="d-flex flex-wrap border-bottom">
+											<div class="col-md-6">
+												<label class="text-secondary"> Top search company </label>
+											</div>
+											<div class="col-md-6 text-right">
+												<a href="/app/staff_company_list" style="color: #21b9e4 !important;"> See All </a>
+											</div>
+										</div>
+										<div id="staffing_list"></div>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -409,17 +429,23 @@ class DesktopPage {
 				</div>
 				<script>
 					function update_list(){
+						$(".inner-search").css("display", "none");
 						let data = document.getElementById("staff").value;
 						frappe.call({
 							method: "tag_workflow.utils.whitelisted.search_staffing_by_hiring",
 							args: {"data": data},
 							callback: function(r){
-								let result = r.message || [];
-								let html;
-								for(let d in result){
-									html += "<option value='"+result[d]+"' />"
+								if(r && r.message.length){
+									let result = r.message || [];
+									let html="";
+									for(let d in result){
+										if(result[d] != "undefined"){
+											html += "<div class='d-flex flex-wrap border-bottom' style='margin-top: 0.5rem;'><div class='col-md-12'><label class='text-secondary'>"+result[d]+"</label></div></div>"
+										}
+									}
+									$("#staffing_list").html(html);
+									$(".inner-search").css("display", "block");
 								}
-								$("#staffing_list").html(html);
 							}
 						});
 					}
