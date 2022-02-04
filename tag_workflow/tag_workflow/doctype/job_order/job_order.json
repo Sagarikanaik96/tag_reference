@@ -58,8 +58,10 @@
   "driving_record",
   "shovel",
   "bill_rate_section",
+  "base_price",
   "per_hour",
   "column_break_44",
+  "rate_increase",
   "flat_rate",
   "address_info_section",
   "address",
@@ -562,11 +564,25 @@
    "fieldtype": "Data",
    "label": "Selected Days",
    "read_only": 1
+  },
+  {
+   "fieldname": "base_price",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Base Price",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate_increase",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Rate Increase",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-04 07:01:46.465406",
+ "modified": "2022-02-04 09:10:41.618424",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

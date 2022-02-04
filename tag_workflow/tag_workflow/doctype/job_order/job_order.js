@@ -109,6 +109,9 @@ frappe.ui.form.on("Job Order", {
     }
   },
   refresh: function (frm) {
+    if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=="Hiring" && frm.doc.order_status=="Upcoming"){
+      hide_unnecessary_data(frm)
+    }
     cur_frm.dashboard.hide();
     view_button(frm)
     if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
@@ -1072,5 +1075,25 @@ function set_custom_days(frm){
     }
 
   }
+  
   frm.set_value("selected_days",selected)
+  frm.set_value("base_price",frm.doc.rate)
+  frm.set_value("rate_increase",frm.doc.per_hour-frm.doc.rate)
+  
+}
+
+
+function hide_unnecessary_data(frm)
+{
+  let field_name=['company','order_status','category','select_days','job_order_duration',"rate","worker_filled","extra_price_increase","e_signature_for_order_request_section"]
+  var arrayLength = field_name.length;
+  for (var i = 0; i < arrayLength; i++) {
+    frm.set_df_property(field_name[i], "hidden", 1);
+  }
+ let display_fields=["base_price","rate_increase"]
+  var arrayLength = display_fields.length;
+  for (var i = 0; i < arrayLength; i++) {
+    frm.set_df_property(display_fields[i], "hidden", 0);
+  }
+
 }
