@@ -160,7 +160,7 @@ function update_timesheet(values){
 		args: {"data": values, "company": frappe.boot.tag.tag_user_info.company, "company_type": frappe.boot.tag.tag_user_info.company_type},
 		callback: function(r){
 			let data = r.message;
-			if(data == true){
+			if(data == 1){
 				frappe.msgprint("<b>Timesheet</b> updated successfully");
 			}else{
 				frappe.msgprint("Some errors while updating timesheet. please try again.")

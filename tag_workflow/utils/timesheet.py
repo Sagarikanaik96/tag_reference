@@ -69,7 +69,7 @@ def update_timesheet_data(data, company, company_type):
                 timesheet.append("time_logs", {
                     "activity_type": job,
                     "from_time": from_time,
-                    #"to_time": to_time,
+                    "to_time": to_time,
                     "hrs": str(item['total_hours'])+" hrs",
                     "hours": item['total_hours'],
                     "is_billable": 1
