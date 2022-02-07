@@ -292,11 +292,14 @@ def get_order_data():
 
         if(company_type == "Staffing"):
             job_order = []
-            assign = frappe.db.get_list("Assign Employee", {"company": company}, "job_order", group_by="job_order", order_by="creation desc", limit=5)
+            assign = frappe.db.get_list("Assign Employee", {"company": company}, "job_order", group_by="job_order", order_by="creation desc")
             job_order = [a['job_order'] for a in assign]
+            orders = frappe.db.get_list("Job Order", {"from_date": [">=", date]}, "name", ignore_permission = 1)
+            orders = [o['name'] for o in orders]
             for j in job_order:
-                date, job_site, company, per_hour, select_job = frappe.db.get_value("Job Order", {"name": j}, ["from_date", "job_site", "company", "per_hour", "select_job"])
-                result.append({"name": j, "date": date.strftime("%d %b, %Y %H:%M %p"), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
+                if(j in orders):
+                    date, job_site, company, per_hour, select_job = frappe.db.get_value("Job Order", {"name": j}, ["from_date", "job_site", "company", "per_hour", "select_job"])
+                    result.append({"name": j, "date": date.strftime("%d %b, %Y %H:%M %p"), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
             return result
 
         elif(company_type in ["Hiring", "Exclusive Hiring"]):
@@ -331,7 +334,7 @@ def get_desktop_page(page):
 def search_staffing_by_hiring(data=None):
     try:
         if(data):
-            sql = """select name from `tabCompany` where organization_type = "Staffing" and (name like '%{0}%' or industry like '%{0}%')""".format(data)
+            sql = """select p.name from `tabCompany` p inner join `tabIndustry Types` c where p.name = c.parent and organization_type = "Staffing" and (p.name like '%{0}%' or c.industry_type like '%{0}%')""".format(data)
             data = frappe.db.sql(sql, as_dict=1)
             return [d['name'] for d in data]
         return []
