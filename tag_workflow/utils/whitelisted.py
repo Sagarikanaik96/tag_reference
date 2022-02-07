@@ -14,6 +14,7 @@ order = "Sales Order"
 payment = "Payment Schedule"
 taxes= "Sales Taxes and Charges"
 team = "Sales Team"
+JO = "Job Order"
 #-----------------------------------#
 def set_missing_values(source, target, customer=None, ignore_permissions=True):
     if customer:
@@ -294,16 +295,16 @@ def get_order_data():
             job_order = []
             assign = frappe.db.get_list("Assign Employee", {"company": company}, "job_order", group_by="job_order", order_by="creation desc")
             job_order = [a['job_order'] for a in assign]
-            orders = frappe.db.get_list("Job Order", {"from_date": [">=", date]}, "name", ignore_permission = 1)
+            orders = frappe.db.get_list(JO, {"from_date": [">=", frappe.utils.nowdate()]}, "name", ignore_permission = 1)
             orders = [o['name'] for o in orders]
             for j in job_order:
                 if(j in orders):
-                    date, job_site, company, per_hour, select_job = frappe.db.get_value("Job Order", {"name": j}, ["from_date", "job_site", "company", "per_hour", "select_job"])
+                    date, job_site, company, per_hour, select_job = frappe.db.get_value(JO, {"name": j}, ["from_date", "job_site", "company", "per_hour", "select_job"])
                     result.append({"name": j, "date": date.strftime("%d %b, %Y %H:%M %p"), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
             return result
 
         elif(company_type in ["Hiring", "Exclusive Hiring"]):
-            order = frappe.db.get_list("Job Order", {"company": company, "order_status": "Ongoing"}, ["name", "from_date", "job_site", "company", "per_hour", "order_status", "select_job"], order_by="creation desc", limit=5)
+            order = frappe.db.get_list(JO, {"company": company, "order_status": "Ongoing"}, ["name", "from_date", "job_site", "company", "per_hour", "order_status", "select_job"], order_by="creation desc", limit=5)
             for o in order:
                 result.append({"name":o['name'], "date":o['from_date'].strftime("%d %b, %Y %H:%M %p"), "job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour'], "select_job": o['select_job']})
             return result
