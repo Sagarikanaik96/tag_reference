@@ -452,6 +452,10 @@ input::-webkit-credentials-auto-fill-button {
 }
 /* Responsive css start */
 
+#page-Company textarea.form-control {
+  height: 120px !important;
+}
+
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
   .col-md-12.layout-main-section-wrapper {
@@ -504,8 +508,6 @@ input::-webkit-credentials-auto-fill-button {
   }
 }
 
-
-
 @media (min-width: 570px) and (max-width: 768px) {
   .dropdown-notifications .notifications-list {
     right: -230px;
@@ -529,5 +531,5 @@ span.frappe-timestamp.mini {
 }
 
 .sort-selector {
-    display: none;
+  display: none;
 }

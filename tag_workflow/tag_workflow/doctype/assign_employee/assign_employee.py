@@ -16,7 +16,7 @@ def get_souce(location=None):
     try:
         source = []
         if(location):
-            site = frappe.db.get_list("Job Site", {"name": location}, ["address", "city", "state", "zip"])
+            site = frappe.db.get_list("Job Site", {"name": location}, ["address", "city", "state", "zip"], ignore_permissions=True)
             for s in site:
                 source = [s['address'], s['city'], s['state'], s['zip']]
             source = ",".join(source)
@@ -33,7 +33,6 @@ def check_distance(emp, distance, location):
         api_key = 'AIzaSyDRCtr2OCT1au8HCjMQPivkhIknFI7akIU'
         gmaps = googlemaps.Client(key=api_key)
         source = get_souce(location)
-
         for e in emp:
             dest = [e['street_address'], e['city'], e['state'], e['zip']]
             dest = ",".join([str(d) for d in dest if d])

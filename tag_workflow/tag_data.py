@@ -373,7 +373,7 @@ def get_org_site(doctype, txt, searchfield, page_len, start, filters):
 def job_site_employee(doctype, txt, searchfield, page_len, start, filters):
 
     company=filters.get('job_order_company')
-    sql = ''' select name from `tabEmployee` where company='{0}' '''.format(company)
+    sql = ''' select name,employee_name,user_id from `tabEmployee` where company='{0}' '''.format(company)
     return frappe.db.sql(sql)
 
 

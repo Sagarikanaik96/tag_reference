@@ -136,20 +136,35 @@ def get_user_company_data(user, company):
     except Exception as e:
         print(e)
 
-
+import ast
+import json
 #--------hiring orgs data----#
 @frappe.whitelist(allow_guest=True)
-def get_orgs(company):
+def get_orgs(company,employee_lis):
     try:
+
+        try:
+            employee_lis = json.loads(employee_lis)
+        except Exception as e:
+            vendor_ids = json.dumps(employee_lis)
+            employee_lis = ast.literal_eval(vendor_ids)
         sql = """ select hiring_organization from `tabAssign Employee` where company = '{0}' """.format(company)
         data=frappe.db.sql(sql, as_list=1)
         my_data=[]
         for i in data:
             if i not in my_data:
                 my_data.append(i)
-        return my_data
+        res = []
+        for index,value in enumerate(my_data):
+            if value[0] not in employee_lis:
+                res.append(value)
+        return res
     except Exception as e:
         print(e)
+
+
+
+
 
 #-------get company users----#
 @frappe.whitelist(allow_guest=True)

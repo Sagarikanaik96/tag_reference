@@ -9,6 +9,30 @@ frappe.ui.form.on("Employee", {
 			tag_company(frm);
 		  }
 		$('.form-control[data-fieldname="ssn"]').css('-webkit-text-security', 'disc');
+
+		$('*[data-fieldname="block_from"]').find('.grid-add-row')[0].addEventListener("click",function(){
+			const li = []
+			frm.doc.block_from.forEach(element=>{
+			li.push(element.blocked_from)
+			})
+			frappe.call({
+				"method": "tag_workflow.utils.whitelisted.get_orgs",
+				"args":{
+					company:frappe.boot.tag.tag_user_info.company,
+					employee_lis:li
+				},
+				"callback": function(r){
+					if(r){
+
+						frm.fields_dict.block_from.grid.update_docfield_property(
+						'blocked_from',
+						'options',
+						[''].concat(r.message)
+						);
+						}
+				}
+			});
+		});
 	},
 	decrypt_ssn: function(frm) {
 		frappe.call({
@@ -69,10 +93,7 @@ frappe.ui.form.on("Employee", {
 		});
 
 	},
-	onload:function(frm){
-		let blocked_company=frappe.meta.get_docfield("Blocked Employees","blocked_from", cur_frm.doc.name);
-		blocked_child_orgs(frm,blocked_company)
-	},
+	
 		
 });
 
@@ -97,31 +118,6 @@ function required_field(frm){
 }
 
 
-
-/*-------render orgs data-------*/
-function render_orgs(child, frm){
-	frappe.call({
-		"method": "tag_workflow.utils.whitelisted.get_orgs",
-		"callback": function(r){
-			if(r){
-				let data = r.message;
-				let options = "";
-				for(var d in data){
-					if(child.blocked_from == data[d].name){
-						options += '<option value="'+data[d].name+'" selected>'+data[d].name+'</option>';
-					}else{
-						options += '<option value="'+data[d].name+'">'+data[d].name+'</option>';
-					}
-				}
-
-				const html = '<label for="option" class="option-format">Blocked From</label><select class="custom-select" required onchange="myFunction()" selected="myFunction()" onload="myFunction()" id="'+child.idx+'">'+options+'</select></div><script>function myFunction(){frappe.model.set_value("Blocked Employees", "'+child.name+'", "blocked_from", (document.getElementById("'+child.idx+'").length > 0 ? document.getElementById("'+child.idx+'").value : ""))}</script>';
-
-				$(frm.fields_dict[child.parentfield].grid.grid_rows_by_docname[child.name].grid_form.fields_dict['html'].wrapper).html(html);
-			}
-		}
-	});
-}
-
 function uploaded_file_format(frm){
 	frm.get_field('resume').df.options = {
 	    restrictions: {
@@ -141,22 +137,7 @@ function cancel_employee(frm){
 	});
 }
 
-function blocked_child_orgs(frm,blocked_company){
-	frappe.call({
-		"method": "tag_workflow.utils.whitelisted.get_orgs",
-		"args":{
-			company:frappe.boot.tag.tag_user_info.company,
-		},
-		"callback": function(r){
-			if(r){
-				let data = r.message;
-				blocked_company.options =data;
 
-				}
-		}
-	});
-
-}
 
 function tag_company(frm){
 	if(frappe.boot.tag.tag_user_info.company_type=='TAG'){

@@ -170,7 +170,7 @@ let html = `
 				}
 
 				function update_address(data){
-					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "job_site", data["name"]);
+					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "job_site", document.getElementById("autocomplete-address").value);
 					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address", (data["street_number"]+" "+data["route"]));
 					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state", data["administrative_area_level_1"]);
 					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city", data["locality"]);

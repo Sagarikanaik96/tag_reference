@@ -5,31 +5,26 @@ frappe.ui.form.on("Timesheet", {
 			setTimeout(() => {
 				frm.set_value("employee","");
 				frm.set_df_property("job_details", "options", " ");
-			}, 700);	
+			}, 700);
 		}
+
 		if(cur_frm.doc.status=='Submitted' && frm.doc.workflow_state == "Approved"){
 			frappe.call({
 				"method": "tag_workflow.utils.timesheet.approval_notification",
 				"args": {"job_order": frm.doc.job_order_detail,"hiring_company":frm.doc.company,"staffing_company": frm.doc.employee_company, "timesheet_name":cur_frm.doc.name,'timesheet_approved_time':frm.doc.modified,'current_time':frappe.datetime.now_datetime()}
 			});
+
 			if((frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User')) && frappe.session.user!='Administrator'){
-				approval_timesheet(frm)
+				approval_timesheet(frm);
 			}
-	
-
 		}
+
 		if (cur_frm.doc.status == 'Draft' && cur_frm.doc.workflow_state == "Denied"){
-				denied_timesheet(frm)
-
+			denied_timesheet(frm)
 		}
-		if (cur_frm.doc.status == 'Draft' && cur_frm.doc.workflow_state == "Approval Request"){
-			check_update_timesheet(frm)
 
-		}
 		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
 		hide_timesheet_field(timesheet_fields);
-
-
 	},
 
 	setup: function(frm){
@@ -95,28 +90,30 @@ frappe.ui.form.on("Timesheet", {
 		trigger_email(frm, "dnr", frm.doc.dnr, "DNR");
 	},
 
-	// workflow_state: function(frm){
-	// 	check_update_timesheet(frm);
-	// }
+	workflow_state: function(frm){
+		check_update_timesheet(frm);
+	}
 });
 
 
 function job_order_details(frm){
 	if(frm.doc.job_order_detail){
-		frappe.db.get_value("Job Order", {"name": frm.doc.job_order_detail}, ["select_job", "job_site", "job_order_duration", "per_hour","from_date","to_date","per_hour","flat_rate"], function(r){
+		frappe.db.get_value("Job Order", {"name": frm.doc.job_order_detail}, ["select_job", "job_site", "job_duration", "per_hour","from_date","to_date","per_hour","flat_rate"], function(r){
 			if(r){
 				let data = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
 					<p><b>Job Title: </b> ${r['select_job']}</p>
 					<p><b>Job Site: </b> ${r['job_site']}</p>
-					<p><b>Job Duration: </b> ${r['job_order_duration']}</p>
+					<p><b>Job Duration: </b> ${r['job_duration']}</p>
 					<p><b>Rate Per Hour: </b> ${r['per_hour']}</p>
 				</div>`;
 				frm.set_df_property("job_details", "options", data);
-				frm.set_value('from_date',(r.from_date).slice(0,10))  //.slice(0,10)
-				frm.set_value('to_date',(r.to_date).slice(0,10)) //.slice(0,10)
-				frm.set_value('job_name',(r.select_job))
-				frm.set_value('per_hour_rate',(r.per_hour))
-				frm.set_value('flat_rate',(r.flat_rate))
+				if(cur_frm.doc.__islocal == 1){
+					frm.set_value('from_date',(r.from_date).slice(0,10));  //.slice(0,10)
+					frm.set_value('to_date',(r.to_date).slice(0,10)); //.slice(0,10)
+					frm.set_value('job_name',(r.select_job));
+					frm.set_value('per_hour_rate',(r.per_hour));
+					frm.set_value('flat_rate',(r.flat_rate));
+				}
 
 			}
 		});
@@ -128,13 +125,15 @@ function job_order_details(frm){
 /*-----------timesheet-----------------*/
 function check_update_timesheet(frm){
 	if(frm.doc.workflow_state == "Approval Request"){
-		var current_date=new Date(frappe.datetime.now_datetime())
-		var approved_date=new Date(frm.doc.modified)
-		var diff=current_date.getTime()-approved_date.getTime()
-		diff=parseInt(diff/1000)
+		var current_date = new Date(frappe.datetime.now_datetime());
+		var approved_date = new Date(frm.doc.modified);
+		var diff=current_date.getTime()-approved_date.getTime();
+		diff = parseInt(diff/1000);
+
 		if (diff<30){
 			frappe.call({method: "tag_workflow.utils.timesheet.send_timesheet_for_approval",args: {"employee": frm.doc.employee, "docname": frm.doc.name,'company':frm.doc.company,'job_order':frm.doc.job_order_detail }});
 		}
+
 		if((frappe.user_roles.includes('Hiring Admin') || frappe.user_roles.includes('Hiring User')) && frappe.session.user!='Administrator'){
 			frappe.db.get_value("Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
 				if(!r.rating){
@@ -146,7 +145,7 @@ function check_update_timesheet(frm){
 						],
 						primary_action: function(){
 							pop_up.hide();
-							var comp_rating=pop_up.get_values()
+							var comp_rating=pop_up.get_values();
 							frappe.call({
 								method:"tag_workflow.utils.timesheet.company_rating",
 								args:{
@@ -156,17 +155,14 @@ function check_update_timesheet(frm){
 									'job_order':cur_frm.doc.job_order_detail
 								},
 								callback:function(rm){
-										frappe.msgprint('Review Submitted Successfully')
-									
+									frappe.msgprint('Review Submitted Successfully');
 								}
-							})
+							});
 						}
 					});
 					pop_up.show();
 				}
-				
-			})
-			
+			});
 		}
 	}
 }

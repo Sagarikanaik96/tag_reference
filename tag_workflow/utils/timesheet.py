@@ -34,9 +34,55 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
         subject = 'Timesheet For Approval'
         make_system_notification(staffing_user, msg, 'Timesheet', docname,subject)
         sendmail(staffing_user, msg, subject, 'Timesheet', docname)
+        return True
     except Exception as e:
         frappe.error_log(e, "Job Order Approval")
         frappe.throw(e)
+
+
+#----------timesheet------------------#
+@frappe.whitelist()
+def get_timesheet_data(job_order, user, company_type):
+    try:
+        if(company_type in ["Hiring", "Exclusive Hiring"]):
+            sql = """ select employee, employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
+            data = frappe.db.sql(sql, as_dict=1)
+            result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": frappe.utils.nowtime(), "exit_time": frappe.utils.nowtime(), "total_hours": 0.00} for d in data]
+            return result
+        return []
+    except Exception as e:
+        return []
+        frappe.msgprint(e)
+
+
+@frappe.whitelist()
+def update_timesheet_data(data, company, company_type):
+    try:
+        if(company_type == "Hiring"):
+            data = json.loads(data)
+            job = frappe.db.get_value("Job Order", {"name": data['job_order']}, "select_job")
+            from_time = datetime.datetime.strptime((data['posting_date']+" "+data['enter_time']), "%Y-%m-%d %H:%M:%S")
+            to_time = datetime.datetime.strptime((data['posting_date']+" "+data['exit_time']), "%Y-%m-%d %H:%M:%S")
+            for item in data['items']:
+                timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=company, job_order_detail=data['job_order']))
+                timesheet.employee = item['employee']
+                timesheet.append("time_logs", {
+                    "activity_type": job,
+                    "from_time": from_time,
+                    "to_time": to_time,
+                    "hrs": str(item['total_hours'])+" hrs",
+                    "hours": item['total_hours'],
+                    "is_billable": 1
+                })
+                timesheet.insert(ignore_permissions=1)
+                timesheet.workflow_state = "Approval Request"
+                timesheet.save()
+                send_timesheet_for_approval(item['employee'], timesheet.name, company, data['job_order'])
+            return True
+        return False
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.msgprint(e)
 
 @frappe.whitelist(allow_guest=True)
 @frappe.validate_and_sanitize_search_inputs
@@ -125,7 +171,7 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
             if average_rate[0][0]!=None:
                 rating=[float(i[0]) for i in average_rate]
                 doc=frappe.get_doc('Company',staffing_company)
-                avg_rating=sum(rating)/len(rating)
+                avg_rating=round(sum(rating)/len(rating),1)
                 doc.average_rating=str(avg_rating)
                 doc.save()
         return "success"
@@ -281,7 +327,7 @@ def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None
             if average_rate[0][0]!=None:
                 rating=[float(i[0]) for i in average_rate]
                 doc=frappe.get_doc('Company',hiring_company)
-                avg_rating=sum(rating)/len(rating)
+                avg_rating=round(sum(rating)/len(rating),1)
                 doc.average_rating=str(avg_rating)
                 doc.save()
         return "success"
