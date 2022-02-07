@@ -917,7 +917,7 @@ function view_buttons_hiring(frm){
 function view_buttons_staffing(frm){
 
   if((frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company)){
-    frm.add_custom_button(__('Assigned Employee'), function f1(){
+    frm.add_custom_button(__('Assign Employee'), function f1(){
       assign_employe(frm);
 
     }, __("View"));
@@ -930,6 +930,7 @@ function view_buttons_staffing(frm){
         })
     frm.set_df_property("related_details", "options", data1);
     frm.toggle_display('related_actions_section',1)
+    staff_assigned_emp(frm)
   }
   else{
     let data2 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
@@ -948,7 +949,6 @@ function view_buttons_staffing(frm){
     }, __("View"));
 
   }
-
  
   if((frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)){
     let data3 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
@@ -1030,6 +1030,56 @@ function hiring_buttons(frm){
 			claim_orders(frm)
 			
 		}, __("View"));
+    frappe.call({
+      method:"tag_workflow.tag_data.assigned_employees",
+      args: {
+          job_order:cur_frm.doc.name,
+      },
+      callback:function(r){
+        if(r.message=='success1')
+        { 
+            frm.add_custom_button(__('Approved Employees'), function(){    
+                frappe.call({
+                  method:"tag_workflow.tag_data.assigned_employee_data",
+                  args:{
+                      'job_order':cur_frm.doc.name
+                  },
+                  callback:function(rm){
+                      var data = rm.message;
+                      let profile_html = `<table><th>Employee Name</th><th>Status</th><th>Staffing Company</th>`;
+                      for(let p in data){
+                          profile_html += `<tr>
+                              <td>${data[p].employee}</td>
+                              <td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>
+                              <td style="margin-right:20px;" >${data[p].staff_company}</td>
+
+                              </tr>`;
+                      }
+                      profile_html+=`</table><style>th, td {
+                        padding-left: 50px;padding-right:50px;
+                      } input{width:100%;}
+                    </style>`
+        
+                      var dialog = new frappe.ui.Dialog({
+                        title: __('Assigned Employee'),
+                        fields: [
+                          {fieldname: "staff_companies",fieldtype: "HTML",options:profile_html},
+
+                        ]
+                      });
+                      dialog.set_primary_action(__('Close'), function() {
+                        dialog.hide();
+
+                      });
+                      dialog.show();
+                      dialog.$wrapper.find('.modal-dialog').css('max-width', '880px');
+                      dialog.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
+                  }
+                })                                   
+            }, __("View"));
+        }
+      }
+    })
   }
 	if(frm.doc.claim){
 
@@ -1122,4 +1172,58 @@ function hide_unnecessary_data(frm)
     frm.set_df_property(display_fields[j], "hidden", 0);
   }
 
+}
+
+function staff_assigned_emp(frm){
+  frappe.call({
+    method:"tag_workflow.tag_data.staff_assigned_employees",
+    args: {
+        job_order:cur_frm.doc.name,
+    },
+    callback:function(r){
+      if(r.message=='success1')
+      {
+        frm.add_custom_button(__('Assigned Employees'), function(){
+            frappe.call({
+              method:"tag_workflow.tag_data.staffing_assigned_employee",
+              args:{
+                  'job_order':cur_frm.doc.name,
+              },
+              callback:function(rm){
+                  var data = rm.message;
+                  let profile_html = `<table><th>Employee Name</th><th>Marked As</th><th>Actions</th>`;
+                  for(let p in data){
+
+                      profile_html += `<tr>
+                          <td>${data[p].employee}</td>
+                          <td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>`;                     
+                        if(data[parseInt(p)].no_show=="No Show" || data[parseInt(p)].non_satisfactory=="Non Satisfactory"){
+                          profile_html+=`<td><button>Replace</button></td>`
+                        }
+                      profile_html+= `   
+
+                          </tr>`;
+                  }
+                  profile_html+=`</table><style>th, td {
+                    padding-left: 50px;padding-right:50px;
+                  } input{width:100%;}
+                </style>`
+                  var dialog1 = new frappe.ui.Dialog({
+                    title: __('Assigned Employee'),
+                    fields: [
+                      {fieldname: "staff_companies",fieldtype: "HTML",options:profile_html},
+                    ]
+                  });
+                  dialog1.set_primary_action(__('Close'), function() {
+                    dialog1.hide();
+                  });
+                  dialog1.show();
+                  dialog1.$wrapper.find('.modal-dialog').css('max-width', '880px');
+                  dialog1.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
+              }  
+          })
+        }, __("View"));
+      }
+    }
+  })
 }

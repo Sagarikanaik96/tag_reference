@@ -590,3 +590,82 @@ def update_timesheet_is_check_in_sales_invoice(time_list):
             frappe.db.commit()
     except Exception as e:
         frappe.error_log(e, "Update time sheet Invoice")
+
+@frappe.whitelist()
+def assigned_employees(job_order):
+    try:
+        sql=f" select name from `tabAssign Employee` where job_order='{job_order}' and tag_status='Approved'"
+        assigned_data=frappe.db.sql(sql)
+        if(len(assigned_data)>0):
+            return "success1"
+    except Exception as e:
+        frappe.error_log(e, "Assign Employee List")
+
+    
+@frappe.whitelist()
+def assigned_employee_data(job_order):
+    try:
+        assigne_employee=f""" select `tabAssign Employee`.company as staff_company,`tabAssign Employee Details`.employee_name as employee_name,`tabAssign Employee Details`.employee as employee from `tabAssign Employee`,`tabAssign Employee Details` where `tabAssign Employee`.name=`tabAssign Employee Details`.parent and job_order="{job_order}" and tag_status="Approved" """;
+
+        emp_data=frappe.db.sql(assigne_employee,as_dict=1)
+        emp_list=[]
+        for i in range(len(emp_data)):
+            emp_dic={}
+            sql3=f"""select IF(no_show=1, "No Show", " ") as no_show,IF(non_satisfactory=1,"Non Satisfactory"," ") as non_satisfactory,IF(dnr=1,"DNR"," ") as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
+            employees_data=frappe.db.sql(sql3,as_dict=True)
+            if(len(employees_data)==0):
+                emp_dic["staff_company"]=emp_data[i].staff_company
+                emp_dic["employee"]=emp_data[i].employee
+                emp_dic["no_show"]=""
+                emp_dic["non_satisfactory"]=""
+                emp_dic["dnr"]=""
+                emp_list.append(emp_dic)
+            else:
+                emp_dic["staff_company"]=emp_data[i].staff_company
+                emp_dic["employee"]=emp_data[i].employee
+                emp_dic["no_show"]=employees_data[0].no_show
+                emp_dic["non_satisfactory"]=employees_data[0].non_satisfactory
+                emp_dic["dnr"]=employees_data[0].dnr
+                emp_list.append(emp_dic)
+        return emp_list
+    except Exception as e:
+        frappe.error_log(e, "Assigned Employee")
+
+@frappe.whitelist()
+def staff_assigned_employees(job_order):
+    try:
+        sql=f" select name from `tabAssign Employee` where job_order='{job_order}' and tag_status='Approved' and  company in (select company from `tabEmployee` where email='{frappe.session.user}')"
+        assigned_data=frappe.db.sql(sql)
+        if(len(assigned_data)>0):
+            return "success1"
+    except Exception as e:
+        frappe.error_log(e, "Staff Employee")
+
+
+@frappe.whitelist()
+def staffing_assigned_employee(job_order):
+    try:
+        assigned_emp=f""" select `tabAssign Employee`.company,`tabAssign Employee`.name,`tabAssign Employee Details`.employee_name as employee_name,`tabAssign Employee Details`.employee as employee from `tabAssign Employee`,`tabAssign Employee Details` where `tabAssign Employee`.name=`tabAssign Employee Details`.parent and job_order="{job_order}" and tag_status="Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email='{frappe.session.user}' )  """
+        emp_data=frappe.db.sql(assigned_emp,as_dict=1)
+        emp_list=[]
+        for i in range(len(emp_data)):
+            emp_dic={}
+            sql3=f"""select IF(no_show=1, "No Show", " ") as no_show,IF(non_satisfactory=1,"Non Satisfactory"," ") as non_satisfactory,IF(dnr=1,"DNR"," ") as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
+            employees_data=frappe.db.sql(sql3,as_dict=True)
+            if(len(employees_data)==0):
+                emp_dic["staff_company"]=emp_data[i].staff_company
+                emp_dic["employee"]=emp_data[i].employee
+                emp_dic["no_show"]=""
+                emp_dic["non_satisfactory"]=""
+                emp_dic["dnr"]=""
+                emp_list.append(emp_dic)
+            else:
+                emp_dic["staff_company"]=emp_data[i].staff_company
+                emp_dic["employee"]=emp_data[i].employee
+                emp_dic["no_show"]=employees_data[0].no_show
+                emp_dic["non_satisfactory"]=employees_data[0].non_satisfactory
+                emp_dic["dnr"]=employees_data[0].dnr
+                emp_list.append(emp_dic)
+        return emp_list
+    except Exception as e:
+        frappe.error_log(e, "Approved Employee")
