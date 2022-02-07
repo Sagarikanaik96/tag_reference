@@ -40,7 +40,9 @@
   "selected_days",
   "job_title",
   "section_break_7",
+  "column_break_34",
   "resumes_required",
+  "column_break_36",
   "require_staff_to_wear_face_mask",
   "section_break_40",
   "job_site",
@@ -49,12 +51,13 @@
   "contact_number",
   "no_of_workers",
   "worker_filled",
-  "extra_notes",
+  "column_break_45",
   "extra_price_increase",
+  "extra_notes",
   "additional_addons_section",
   "drug_screen",
   "background_check",
-  "column_break_45",
+  "column_break_51",
   "driving_record",
   "shovel",
   "bill_rate_section",
@@ -578,11 +581,23 @@
    "hidden": 1,
    "label": "Rate Increase",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_51",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-04 09:10:41.618424",
+ "modified": "2022-02-07 07:10:54.623181",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
