@@ -233,7 +233,9 @@ function hide_resume(frm){
 
 	$('[data-fieldname="resume"]').on({
 		'click': function () {
-			window.open(cur_frm.doc.employee_details[0]["resume"]);
+			if (cur_frm.doc.employee_details[0]["resume"]) {
+				window.open(cur_frm.doc.employee_details[0]["resume"]);
+			}
 		}
 	});
 }
