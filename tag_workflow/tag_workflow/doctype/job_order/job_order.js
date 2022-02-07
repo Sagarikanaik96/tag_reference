@@ -1050,10 +1050,36 @@ function timesheets_view(frm){
   frappe.set_route("List", "Timesheet")
 }
 function claim_orders(frm){
-  frappe.route_options = {
-    "job_order": ["=", frm.doc.name]
-  };
-  frappe.set_route("List", "Claim Order")
+  if(frm.doc.order_status=='Upcoming')
+  {
+    if(frm.doc.staff_org_claimed){
+      frappe.route_options = {
+        "job_order": ["=", frm.doc.name],
+        "hiring_organization":["=",frm.doc.company],
+        "no_of_workers_joborder":["=",frm.doc.no_of_workers]
+      };
+      frappe.set_route("List", "Claim Order")
+  
+    }
+    else{
+      frappe.route_options = {
+        "job_order": ["=", frm.doc.name],
+        "no_of_workers_joborder":["=",frm.doc.no_of_workers]
+  
+      };
+      frappe.set_route("List", "Claim Order")
+  
+    } 
+
+  }
+  else{
+    frappe.route_options = {
+      "job_order": ["=", frm.doc.name],
+    };
+    frappe.set_route("List", "Claim Order")
+
+  }
+  
 }
 function messages(frm){
   $('li.nav-item.dropdown.dropdown-notifications.dropdown-mobile.chat-navbar-icon').click()
