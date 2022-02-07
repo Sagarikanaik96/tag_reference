@@ -93,9 +93,7 @@ frappe.ui.form.on("Employee", {
 		});
 
 	},
-	onload:function(frm){
-		let blocked_company=frappe.meta.get_docfield("Blocked Employees","blocked_from", cur_frm.doc.name);
-	},
+	
 		
 });
 

@@ -145,7 +145,7 @@ def get_orgs(company,employee_lis):
 
         try:
             employee_lis = json.loads(employee_lis)
-        except:
+        except BaseException:
             vendor_ids = json.dumps(employee_lis)
             employee_lis = ast.literal_eval(vendor_ids)
         sql = """ select hiring_organization from `tabAssign Employee` where company = '{0}' """.format(company)
