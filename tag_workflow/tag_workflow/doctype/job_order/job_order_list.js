@@ -11,7 +11,7 @@ frappe.listview_settings['Job Order'] = {
 				}
 			});
 		}
-		if(frappe.session.user=='Administrator'){
+		if(frappe.session.user=='Administrator' || frappe.boot.tag.tag_user_info.company_type=="TAG"){
 			$('.btn-primary').hide();
 		}
 	},

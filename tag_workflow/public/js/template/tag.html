@@ -183,7 +183,7 @@
               <i class="fa fa-bars" aria-hidden="true"></i>
             </div>
             <div class="sub-menu w-100 border-top border-right" id="myDIV">
-              {% if frappe.boot.tag.tag_user_info.company_type != "Staffing" %}
+              {% if frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" %}
 
               <div class="p-4">
                 <button type="button" class="btn btn-primary btn-block">
