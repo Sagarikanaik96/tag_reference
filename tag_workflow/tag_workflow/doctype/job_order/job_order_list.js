@@ -106,7 +106,7 @@ frappe.listview_settings['Job Order'] = {
 						function details_in_popup1(link, div_id, cname){
 							frappe.call({
 								method: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_joborder_value",
-								args: {"name":cname},
+								args: {"name": cname, "user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type},
 								callback: function(res) {
 									if (!res.exc) {
 										$('#'+div_id).html(popup_content1(res.message));

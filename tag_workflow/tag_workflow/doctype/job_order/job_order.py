@@ -200,13 +200,16 @@ def get_company_details(comp_name):
         return []
     
 
-@frappe.whitelist()
-def get_joborder_value(name):
+@frappe.whitelist(allow_guest=False)
+def get_joborder_value(user, company_type, name):
     try:
-        sql = ''' select name,category,from_date,to_date,select_job,job_order_duration,job_site,no_of_workers,rate from `tabJob Order` where name = "{0}" '''.format(name)
-        value = frappe.db.sql(sql,as_dict=True)
-        if value:
-            return value[0]
+        if(company_type in ["Staffing", "Hiring", "TAG", "Exclusive Hiring"] and user == frappe.session.user):
+            sql = ''' select name,category,from_date,to_date,select_job,job_order_duration,job_site,no_of_workers,rate from `tabJob Order` where name = "{0}" '''.format(name)
+            value = frappe.db.sql(sql,as_dict=True)
+            if value:
+                return value[0]
+        else:
+            return "No Access"
     except Exception as e:
         frappe.log_error(e, 'Job order list')
         return []
