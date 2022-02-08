@@ -10,6 +10,7 @@ frappe.ui.form.on('Claim Order', {
 			frappe.msgprint(__("Your claim is Not completed please try again from from Job Order"));
 			frappe.validated = false
 		}
+		frm.set_value('approved_no_of_workers',0)
 	},
 	validate: function(frm) {
 		let no_of_worker = frm.doc.no_of_workers_joborder
@@ -26,9 +27,29 @@ frappe.ui.form.on('Claim Order', {
 			frappe.validated = false
 		}
 
+	},
+	refresh:function(frm){
+		if(frm.doc.__islocal==1){
+			frm.set_df_property('approved_no_of_workers', "hidden", 1);
+			cancel_claimorder(frm);
+		}
+	},
+	setup:function(frm){
+		frm.set_query("staffing_organization", function (doc) {
+			return {
+			  filters: [
+				[
+				  "Company",
+				  "organization_type",
+				  "in",
+				  ["Staffing"],
+				],
+				["Company", "make_organization_inactive", "=", 0],
+			  ],
+			};
+		  });
 	}		
 });
-
 
 function staffing_claim_joborder(frm){
 	frappe.call({
@@ -39,4 +60,10 @@ function staffing_claim_joborder(frm){
 			"job_order" :frm.doc.job_order,"hiring_org" : frm.doc.hiring_organization,"staffing_org" : frm.doc.staffing_organization,"doc_name" : frm.doc.name}
 	});
 	
+}
+
+function cancel_claimorder(frm){
+	frm.add_custom_button(__('Cancel'), function(){
+		frappe.set_route("Form", "Job Order");
+	});
 }

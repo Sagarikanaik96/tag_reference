@@ -8,6 +8,8 @@ from frappe.share import add
 from tag_workflow.utils.notification import sendmail, make_system_notification
 from tag_workflow.tag_data import joborder_email_template
 import json
+
+from tenacity import retry
 class ClaimOrder(Document):
 	pass
 
@@ -35,7 +37,7 @@ def staffing_claim_joborder(job_order,hiring_org, staffing_org, doc_name):
 		job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
 		job_detail = frappe.db.sql(job_sql, as_dict=1)
 
-		lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)
+		lst_sql = ''' select user_id from `tabEmployee` where user_id IS NOT NULL and company = "{}" '''.format(hiring_org)
 		user_list = frappe.db.sql(lst_sql, as_list=1)
 
 		l = [l[0] for l in user_list]
@@ -65,10 +67,9 @@ def save_claims(my_data,doc_name):
 		for i in companies:
 			job = frappe.get_doc(jobOrder, doc_name)
 			claimed = job.staff_org_claimed if job.staff_org_claimed else ""
-			frappe.db.set_value(jobOrder, doc_name, "worker_filled", (int(my_data[i])+int(job.worker_filled)))
 			if(len(claimed)==0):
 				frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+str(i)))
-			else:
+			elif(str(i) not in claimed):
 				frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+", "+str(i)))
 			sql=f'select name from `tabClaim Order` where job_order="{doc_name}" and staffing_organization="{i}"'
 			claim_order_name=frappe.db.sql(sql,as_dict=1)
@@ -98,3 +99,50 @@ def order_details(doc_name):
 	except Exception as e:
 		print(e, frappe.get_traceback())
 		frappe.db.rollback()
+
+@frappe.whitelist()
+def modify_heads(doc_name):
+	try:
+		claim_data=f''' select staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{doc_name}" and staffing_organization not in (select company from `tabAssign Employee` where job_order="{doc_name}" and tag_status="Approved")'''
+		claims=frappe.db.sql(claim_data,as_dict=True)
+		return claims
+		
+	except Exception as e:
+		print(e,frappe.get_traceback())
+		frappe.db.rollback()
+
+@frappe.whitelist()
+def save_modified_claims(my_data,doc_name):
+	try:
+		companies=[]
+		my_data=json.loads(my_data)
+		for key in my_data:
+			companies.append(key)
+		
+		for i in companies:
+			job = frappe.get_doc(jobOrder, doc_name)
+			claimed = job.staff_org_claimed if job.staff_org_claimed else ""
+			if(len(claimed)==0):
+				frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+str(i)))
+			elif(str(i) not in claimed):
+				frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+", "+str(i)))
+			
+			sql=f'select name from `tabClaim Order` where job_order="{doc_name}" and staffing_organization="{i}"'
+			claim_order_name=frappe.db.sql(sql,as_dict=1)
+			doc=frappe.get_doc('Claim Order',claim_order_name[0].name)
+			msg = f"{doc.hiring_organization} has update the approved no. of employees needed for {doc_name} - {job.select_job} from {doc.approved_no_of_workers} to {my_data[i]}"
+			doc.approved_no_of_workers=my_data[i]
+			doc.save(ignore_permissions=True)
+
+			user_data = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(i)
+			user_list = frappe.db.sql(user_data, as_list=1)
+			l = [l[0] for l in user_list]
+			sub="Approve Claim Order"
+			make_system_notification(l,msg,claimOrder,doc.name,sub)
+			link =  f'  href="/app/claim-order/{doc.name}" '
+			joborder_email_template(sub,msg,l,link)
+		return "success"
+	except Exception as e:
+		print(e, frappe.get_traceback())
+		frappe.db.rollback()
+

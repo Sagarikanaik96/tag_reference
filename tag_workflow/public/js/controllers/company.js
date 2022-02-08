@@ -20,6 +20,14 @@ frappe.ui.form.on("Company", {
       $('div[data-fieldname="average_rating"]').css("display", "none");
       cancel_company(frm);
     }
+
+    $(document).on('input', '[data-fieldname="phone_no"]', function(event){
+      this.value = this.value?.replace(/\D/g, "");
+    });
+    
+    $(document).on('input', '[data-fieldname="zip"]', function(event){
+      this.value = this.value?.replace(/\D/g, "");
+    });
   },
   setup: function (frm) {
     init_values(frm);
@@ -439,4 +447,3 @@ function cancel_company(frm){
 		frappe.set_route("Form", "Company");
 	});
 }
-

@@ -15,6 +15,9 @@ frappe.ui.form.on("Lead", {
     ) {
       onboard_org(frm);
     }
+    if(frm.doc.__islocal==1){
+			cancel_lead(frm);
+		}
   },
   validate: function (frm) {
     let phone = frm.doc.phone_no;
@@ -105,6 +108,8 @@ function onboard_org(frm) {
   var exclusive = frm.doc.company_name;
   var person_name = frm.doc.lead_name;
   var organization_type = frm.doc.organization_type;
+  var lead = frm.doc.name
+  console.log(lead)
 
   frappe.db.get_value(
     "User",
@@ -116,6 +121,7 @@ function onboard_org(frm) {
           .add_custom_button("Onboard Organization", function () {
             check_dirty(frm)
               ? onboard_orgs(
+                  lead,
                   exclusive,
                   r.company,
                   email,
@@ -141,6 +147,7 @@ function check_dirty(frm) {
 
 /*-------onboard----------*/
 function onboard_orgs(
+  lead,
   exclusive,
   staffing,
   email,
@@ -154,6 +161,7 @@ function onboard_orgs(
       freeze_message:
         "<p><b>Please wait while we are preparing Organization for onboarding</b></p>",
       args: {
+        "lead":lead,
         exclusive: exclusive,
         staffing: staffing,
         email: email,
@@ -278,4 +286,11 @@ function tag_staff_company(frm) {
       filters: [["Company", "organization_type", "in", ["Staffing", "TAG"]]],
     };
   });
+}
+
+
+function cancel_lead(frm){
+	frm.add_custom_button(__('Cancel'), function(){
+		frappe.set_route("Form", "User");
+	});
 }

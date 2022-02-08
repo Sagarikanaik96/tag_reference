@@ -120,12 +120,12 @@ def check_employee_editable(job_order, name, creation):
         is_editable = 0
         order = frappe.get_doc(JOB, job_order)
         time_format = '%Y-%m-%d %H:%M:%S'
-        from_date = datetime.datetime.strptime(str(order.from_date), time_format)
-        to_date = datetime.datetime.strptime(str(order.to_date), time_format)
+        from_date = order.from_date#datetime.datetime.strptime(str(order.from_date), time_format)
+        to_date = order.to_date#datetime.datetime.strptime(str(order.to_date), time_format)
         creation = datetime.datetime.strptime(str(creation[0:19]), time_format)
         today = datetime.datetime.now()
 
-        if(today.date() >= to_date.date()):
+        if(today.date() >= to_date):
             return is_editable
 
         sql = """ select no_show, non_satisfactory, dnr from `tabTimesheet` where docstatus != 1 and job_order_detail = '{0}' and employee in (select employee from `tabAssign Employee Details` where parent = '{1}') """.format(job_order, name)

@@ -1,6 +1,7 @@
 frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
 		if(frm.doc.__islocal==1){
+			cancel_timesheet(frm);
 			frm.set_value("employee","");
 			setTimeout(() => {
 				frm.set_value("employee","");
@@ -404,3 +405,10 @@ frappe.ui.form.on("Timesheet Detail", {
 	}
 	
 });
+
+
+function cancel_timesheet(frm){
+	frm.add_custom_button(__('Cancel'), function(){
+		frappe.set_route("Form", "Timesheet");
+	});
+}

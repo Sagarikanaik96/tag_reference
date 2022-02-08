@@ -2,9 +2,16 @@ frappe.listview_settings['Claim Order'] = {
 
     refresh(listview) {
         listview.page.clear_primary_action()
-        if((listview.filters).length>0 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
+        $("button.btn.btn-default.btn-sm.filter-button").hide();
+        $("button.btn.btn-sm.filter-button.btn-primary-light").hide();
+        if((listview.filters).length==2 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
             listview.page.set_secondary_action('Select Head Count', () => refresh(listview), 'octicon octicon-sync');
         }
+        else if((listview.filters).length==3 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
+            listview.page.set_secondary_action('Modify Head Count', () => modify_claims(listview), 'octicon octicon-sync');
+
+        }
+
     },
 	hide_name_column: true,
 	button: {
@@ -21,7 +28,42 @@ frappe.listview_settings['Claim Order'] = {
 			frappe.set_route('Form', "Claim Order", doc.name);         
 
 		}
-	}
+	},
+    formatters: {
+		staffing_organization(val, d, f) {
+			if (val) {
+				return `<span class=" ellipsis" title="" id="${val}-${f.name}">
+						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">${val}</a>
+					</span>`
+
+            }
+        },
+        job_order(val, d, f) {
+			if (val) {
+				return `<span class=" ellipsis2" title="" id="${val}-${f.name}">
+						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">${val}</a>
+					</span>`
+
+            }
+        },
+        approved_no_of_workers(val, d, f) {
+			if (val) {
+				return `<span class=" ellipsis3" title="" id="${val}-${f.name}">
+						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">${val}</a>
+					</span>`
+
+            }
+        },  
+        staff_claims_no(val, d, f) {
+			if (val) {
+				return `<span class=" ellipsis4" title="" id="${val}-${f.name}">
+						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">${val}</a>
+					</span>`
+
+            }
+        },
+    }
+        
 };
 
 function refresh(listview){
@@ -97,8 +139,21 @@ function update_no(data_len,l,dict,data,r){
         }
         y=parseInt(y)
         l=parseInt(l)+parseInt(y)
+        if(y<0){
+            frappe.msgprint({
+                message: __("No Of Workers Can't Be less than 0 for:"+data[i].staffing_organization),
+                title: __("Error"),
+                indicator: "red",
+              });
+              valid = "False"
 
-        if(y>data[i].staff_claims_no)
+              setTimeout(function () {
+                location.reload()                                    
+              }, 6000);
+
+        }
+
+        else if(y>data[i].staff_claims_no)
         {
             frappe.msgprint({
                 message: __("No Of Workers Exceed For:"+data[i].staffing_organization),
@@ -134,4 +189,144 @@ function update_no(data_len,l,dict,data,r){
     
     }
     return {dict,valid}
+}
+
+
+
+function modify_claims(listview){
+    frappe.call({
+        method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.modify_heads",
+        args:{
+            'doc_name':listview.data[0].job_order
+        },
+        callback:function(rm){
+            frappe.db.get_value("Job Order",{ name: listview.data[0].job_order},["company",'select_job','from_date','to_date','no_of_workers','per_hour','worker_filled'],function (r) {
+                        var job_data = rm.message;
+                        let profile_html = `<table><th>Staffing Company</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th>`;
+                        for(let p in job_data){
+
+                            profile_html += `<tr>
+                                <td style="margin-right:20px;" >${job_data[p].staffing_organization}</td>
+                                <td>${job_data[p].staff_claims_no}</td>
+                                <td>${job_data[p].approved_no_of_workers}</td>
+
+                                <td><input type="number" id="_${job_data[p].staffing_organization}" min="0" max=${job_data[p].staff_claims_no}></td>
+                                </tr>`;
+                        }
+                        profile_html+=`</table><style>th, td {
+                            padding: 10px;
+                          } input{width:100%;}
+                        </style>`
+
+                        let modified_pop_up = new frappe.ui.Dialog({
+                            title: "Select Head Count",
+                            'fields': [
+                                {fieldname: "html_job_title1",fieldtype: "HTML",options:"Job Title:" + r['select_job']},
+                                {fieldname: "html_per_hour1",fieldtype: "HTML",options: "Price:$"+r['per_hour']},
+                                {'fieldname': 'inputdata3', 'fieldtype': 'Column Break',},
+                                {fieldname: "html_date1",fieldtype: "HTML",options:"Date:"+ r['from_date']+'-' +r['to_date']},                            
+                                {fieldname: "html_workers1",fieldtype: "HTML",options: "No. Of Workers Required:"+(r['no_of_workers']-r['worker_filled'])},
+                                {fieldname: 'inputdata2', 'fieldtype': 'Section Break',},
+                                {fieldname: "staff_companies1",fieldtype: "HTML",options:profile_html},
+                            ],
+                            primary_action: function(){
+                                modified_pop_up.hide();
+                                var data_len=job_data.length
+                                var l=0
+                                var dict = {}
+
+                                dict=update_claims(data_len,l,dict,job_data,r)
+                                if(Object.keys(dict.dict).length>0 && (dict.valid1!="False"))
+                                {
+                                    frappe.call({
+                                        method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_modified_claims",
+                                        args:{
+                                            'my_data':dict.dict,
+                                            'doc_name':listview.data[0].job_order
+                                        },
+                                        callback:function(rmdata1){    
+                                                frappe.msgprint('Notification send successfully')	
+                                        }
+                                    })
+                                }
+                            }
+                        })
+                        modified_pop_up.show();
+            })
+        }
+    })
+}
+function update_claims(data_len,l,dict,job_data,r){
+    let valid1=""
+    for(let i=0;i<data_len;i++){     
+                               
+        let y=document.getElementById("_"+job_data[i].staffing_organization).value
+        if(y.length==0){
+            y=0
+        }
+        y=parseInt(y)
+        l=parseInt(l)+parseInt(y)
+        if(y==job_data[i].approved_no_of_workers){
+            frappe.msgprint({
+                message: __("No Of Workers Are Same that previously assigned For:"+job_data[i].staffing_organization),
+                title: __("Error"),
+                indicator: "red",
+              });
+              valid1 = "False"
+
+              setTimeout(function () {
+                location.reload()                                    
+              }, 6000);
+
+
+        }
+        else if(y<0){
+            frappe.msgprint({
+                message: __("No Of Workers Can't Be less than 0 for:"+job_data[i].staffing_organization),
+                title: __("Error"),
+                indicator: "red",
+              });
+              valid1 = "False"
+
+              setTimeout(function () {
+                location.reload()                                    
+              }, 6000);
+
+        }
+    
+        else if(y>job_data[i].staff_claims_no)
+        {
+            frappe.msgprint({
+                message: __("No Of Workers Exceed For:"+job_data[i].staffing_organization),
+                title: __("Error"),
+                indicator: "red",
+              });
+              valid1 = "False"
+
+              setTimeout(function () {
+                location.reload()                                    
+              }, 6000);
+        }
+        else if(l>(r['no_of_workers']-r['worker_filled']))
+        {
+            frappe.msgprint({
+                message: __("No Of Workers Exceed For Then required"),
+                title: __("Error"),
+                indicator: "red",
+              });
+              valid1="False"
+
+              setTimeout(function () {
+                location.reload()                                    
+              }, 6000);
+        }
+        else{
+                dict[job_data[i].staffing_organization]=y
+
+           
+
+        }
+    
+    }
+    return {dict,valid1}
 }

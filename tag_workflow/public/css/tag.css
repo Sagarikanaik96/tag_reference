@@ -58,6 +58,12 @@ li.dropdown.dropdown.dropdown-help.dropdown-mobile {
 
 .btn.btn-primary {
   background-color: #21b9e4 !important;
+  color: #fff;
+  transition: 0.3s ease-in-out;
+}
+.btn.btn-primary:hover {
+  background-color: #0a97bfeb !important;
+  color: #fff !important;
 }
 
 input:hover {
@@ -454,6 +460,48 @@ input::-webkit-credentials-auto-fill-button {
 
 #page-Company textarea.form-control {
   height: 120px !important;
+}
+
+.hiring-home .tittle h3 {
+  font-weight: 600;
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+.hiring-home .tittle p {
+  color: #78849e;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+.hiring-home .search-area {
+  max-width: 470px;
+  width: 100%;
+  border: 2px solid#79D5EE;
+  padding-left: 30px;
+  border-radius: 8px;
+}
+.hiring-home .search_icon {
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  z-index: 999;
+}
+.hiring-home .search_field {
+  width: 420px;
+  max-width: 100%;
+  margin-left: 15px;
+}
+.hiring_dashboard_table table thead tr th {
+  color: #8d9cbc;
+  font-weight: 500;
+  font-size: 13px;
+}
+.hiring_dashboard_table table tbody tr td {
+  font-size: 13px;
+}
+.hiring_dashboard_table {
+  max-height: 300px;
+  overflow: auto;
 }
 
 @media (max-width: 1300px) {

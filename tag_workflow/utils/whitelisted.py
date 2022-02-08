@@ -14,6 +14,7 @@ order = "Sales Order"
 payment = "Payment Schedule"
 taxes= "Sales Taxes and Charges"
 team = "Sales Team"
+JO = "Job Order"
 #-----------------------------------#
 def set_missing_values(source, target, customer=None, ignore_permissions=True):
     if customer:
@@ -185,13 +186,11 @@ def get_user(company):
 @frappe.whitelist()
 def request_signature(staff_user, staff_company, hiring_user, name):
     try:
-        link = frappe.utils.get_link_to_form("Contract", name, label='{{ _("Click here for signature") }}')
-        link = '<p style="margin: 15px 0px;">'+link+'</p>'
-        template = frappe.get_template("templates/emails/digital_signature.html")
-        message = template.render({"staff_user": staff_user, "staff_company": staff_company, "link": link, "date": ""})
+        link = frappe.utils.get_link_to_form("Contract", name)
         msg=f"{staff_user} from {staff_company} is requesting an electronic signature for your contract agreement."
-        make_system_notification([hiring_user], msg, 'Contract', name, "Signature Request")
-        sendmail([hiring_user], message, "Signature Request", 'Contract', name)
+        subject = "Signature Request"
+        make_system_notification([hiring_user], msg, 'Contract', name, subject)
+        frappe.sendmail([hiring_user], subject=subject, delayed=False, reference_doctype='Contract', reference_name=name, template="digital_signature", args = dict(subject=subject, staff_user=staff_user, staff_company=staff_company, link = link))
         share_doc("Contract", name, hiring_user)
     except Exception as e:
         print(e)
@@ -202,10 +201,9 @@ def request_signature(staff_user, staff_company, hiring_user, name):
 def update_lead(lead, staff_company, date, staff_user, name):
     try:
         frappe.db.set_value("Lead", lead, "status", 'Close')
-        template = frappe.get_template("templates/emails/digital_signature.html")
-        message = template.render({"staff_user": "", "staff_company": staff_company, "link": "", "date": date})
-        make_system_notification([staff_user], message, 'Contract', name, "hiring prospects signs a contract")
-        sendmail([staff_user], message, "hiring prospects signs a contract", 'Contract', name)
+        message = f"Congratulations! A Hiring contract has been signed on \033[1m{date}\033[0m for \033[1m{staff_company}\033[0m"
+        make_system_notification([staff_user], message, 'Contract', name, "Hiring Prospect signs a contract")
+        frappe.sendmail([staff_user], subject="Hiring Prospect signs a contract", delayed=False, reference_doctype='Contract', reference_name=name, template="digital_signature", args = dict(subject="Signature Request", staff_user=staff_user, staff_company=staff_company, date=date))
     except Exception as e:
         frappe.error_log(frappe.get_traceback(), "update_lead")
         print(e)
@@ -292,15 +290,18 @@ def get_order_data():
 
         if(company_type == "Staffing"):
             job_order = []
-            assign = frappe.db.get_list("Assign Employee", {"company": company}, "job_order", group_by="job_order", order_by="creation desc", limit=5)
+            assign = frappe.db.get_list("Assign Employee", {"company": company}, "job_order", group_by="job_order", order_by="creation desc")
             job_order = [a['job_order'] for a in assign]
+            orders = frappe.db.get_list(JO, {"to_date": [">=", frappe.utils.nowdate()], "order_status": ["!=", "Completed"]}, "name", ignore_permissions = 1)
+            orders = [o['name'] for o in orders]
             for j in job_order:
-                date, job_site, company, per_hour, select_job = frappe.db.get_value("Job Order", {"name": j}, ["from_date", "job_site", "company", "per_hour", "select_job"])
-                result.append({"name": j, "date": date.strftime("%d %b, %Y %H:%M %p"), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
+                if((j in orders) and len(result) <= 5):
+                    date, job_site, company, per_hour, select_job = frappe.db.get_value(JO, {"name": j}, ["from_date", "job_site", "company", "per_hour", "select_job"])
+                    result.append({"name": j, "date": date.strftime("%d %b, %Y %H:%M %p"), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
             return result
 
         elif(company_type in ["Hiring", "Exclusive Hiring"]):
-            order = frappe.db.get_list("Job Order", {"company": company, "order_status": "Ongoing"}, ["name", "from_date", "job_site", "company", "per_hour", "order_status", "select_job"], order_by="creation desc", limit=5)
+            order = frappe.db.get_list(JO, {"company": company, "order_status": "Ongoing"}, ["name", "from_date", "job_site", "company", "per_hour", "order_status", "select_job"], order_by="creation desc", limit=5)
             for o in order:
                 result.append({"name":o['name'], "date":o['from_date'].strftime("%d %b, %Y %H:%M %p"), "job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour'], "select_job": o['select_job']})
             return result
@@ -331,7 +332,7 @@ def get_desktop_page(page):
 def search_staffing_by_hiring(data=None):
     try:
         if(data):
-            sql = """select name from `tabCompany` where organization_type = "Staffing" and (name like '%{0}%' or industry like '%{0}%')""".format(data)
+            sql = """select p.name from `tabCompany` p inner join `tabIndustry Types` c where p.name = c.parent and organization_type = "Staffing" and (p.name like '%{0}%' or c.industry_type like '%{0}%')""".format(data)
             data = frappe.db.sql(sql, as_dict=1)
             return [d['name'] for d in data]
         return []

@@ -4,6 +4,9 @@
 frappe.ui.form.on('Job Site', {
 	refresh: function(frm){
 		maps(frm);
+		if(frm.doc.__islocal==1){
+			cancel_jobsite(frm);
+		}
 	},
 
 	setup: function(frm){
@@ -185,4 +188,11 @@ let html = `
 
 function maps(frm){
 	 setTimeout(cur_frm.set_df_property("html", "options", html), 500);
+}
+
+
+function cancel_jobsite(frm){
+	frm.add_custom_button(__('Cancel'), function(){
+		frappe.set_route("Form", "Job Site");
+	});
 }

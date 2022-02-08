@@ -7,7 +7,7 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <title>Stafing</title>
+    <title>{{Subject}}</title>
 
 <style> 
     body {
@@ -47,17 +47,19 @@
     <div class="container"> 
         <div class="main-div text-center my-5"> 
             <div class="logo py-4"> 
-                <img src="https://qa.taguru.co/assets/tag_workflow/images/TAG-Logo.png" alt="TAG-Logo">
+                <img src="../../public/images/TAG-Logo.png" alt="TAG-Logo">
             </div>
             <div class="inner-div bg-white py-5"> 
                 <h2> {{subject}} </h2>
                 <p class="inner-text "> 
-                     {{ conntent }}
+                     {{ content }}
                 </p>
+                {% if link %}
                 <p> 
-                    <a{{link}}> view </a>
+                    <a{{link}}> View </a>
                     
                 </p>
+                {% endif %}
                 <p class="footer"> 
                     © 2022 TAG | All rights reserved
                 </p>

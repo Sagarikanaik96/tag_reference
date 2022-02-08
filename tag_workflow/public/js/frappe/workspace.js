@@ -389,16 +389,20 @@ class DesktopPage {
 						position: absolute;
 						background: #fff;
 					}
+				
 				</style>
-				<div class="row">
-					<div class="col-xs-12">
-						<div class="widget-group-title"><h1>Discover Top-Rated Professionals</h1><p>We are here to help you with any project</p></div>
+				<div class="row hiring-home">
+					<div class="col-xs-12 tittle">
+						<div class="widget-group-title"><h3>Discover Top-Rated Professionals</h3><p>We are here to help you with any project</p></div>
 						<div class="widget-group-control"></div>
 					</div>
-					<div class="frappe-control input-max-width" style="margin-left: 15px;width: 30%;">
+					<div class="frappe-control input-max-width search_field">
 						<div class="form-group">
 							<div class="control-input-wrapper">
 								<div class="control-input" style="display: block;">
+									<span class="search_icon">
+										<i class="fa fa-search" aria-hidden="true"></i>
+									</span>
 									<input class="form-control my-0 py-2 search-area" type="text" placeholder="Search by Staffing Company or Job Category" aria-label="Search" oninput="update_list()" id="staff">
 									<div class="inner-search border shadow rounded mt-2 py-3" style="display: none;">
 										<div class="d-flex flex-wrap border-bottom">
@@ -418,13 +422,15 @@ class DesktopPage {
 				</div>
 
 				<div class="row widget-group">
-					<div class="col-xs-11 widget-group-head">
-						<div class="widget-group-title">Today's Orders</div>
+					<div class="col-md-10 widget-group-head  col-sm-6">
+						<div class="widget-group-title mt-2">Today's Orders</div>
 						<div class="widget-group-control"></div>
 					</div>
-					<button class="btn btn-xs px-2 restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">View All</button>
+					<div class="col-md-2 col-sm-6">
+					<button class="btn btn-xs btn-primary px-2 float-right restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">View All</button>
+					</div>
 					<div class="col-xs-12">
-						<div class="widget widget-shadow shortcut-widget-box" id="data"></div>
+						<div class="widget widget-shadow hiring_dashboard_table shortcut-widget-box table-responsive" id="data"></div>
 					</div>
 				</div>
 				<script>
@@ -454,13 +460,15 @@ class DesktopPage {
 		}else{
 			this.page.append(`
 				<div class="row widget-group">
-					<div class="col-xs-11 widget-group-head">
-						<div class="widget-group-title">Today's Orders</div>
+					<div class="col-md-10 widget-group-head">
+						<div class="widget-group-title mt-2  col-sm-6">Today's Orders</div>
 						<div class="widget-group-control"></div>
 					</div>
-					<button class="btn btn-xs px-2 restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">View All</button>
-					<div class="col-xs-12">
-						<div class="widget widget-shadow shortcut-widget-box" id="data"></div>
+					<div class="col-md-2  col-sm-6">
+					<button class="btn btn-xs px-2 float-right btn-primary restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">View All</button>
+					</div>
+					<div class="col-md-12">
+						<div class="widget widget-shadow hiring_dashboard_table shortcut-widget-box table-responsive" id="data"></div>
 					</div>
 				</div>
 			`);
@@ -470,7 +478,7 @@ class DesktopPage {
 	get_order_data() {
 		let data = this.data.get_order_data;
 		let body;
-		let head = `<table class="col-cd-12 basic-table table-headers table table-hover"><thead><tr><th>Job Title</th><th>Date & Time</th><th>Job Site</th><th>Organizations</th><th>Total Price</th><th></th></tr></thead><tbody>`;
+		let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead><tr><th>Job Title</th><th>Date & Time</th><th>Job Site</th><th>Organizations</th><th>Total Price</th><th></th></tr></thead><tbody>`;
 		let html = ``;
 		for(let d in data){
 			html += `<tr><td>${data[d].select_job}</td><td>${data[d].date}</td><td>${data[d].job_site}</td><td>${data[d].company}</td><td>$ ${data[d].per_hour.toFixed(2)}</td><td><button class="btn btn-primary btn-sm primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${data[d].name}')">Order<span class="alt-underline">Det</span>ails</button></td></tr>`;
