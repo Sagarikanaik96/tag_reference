@@ -115,7 +115,7 @@ frappe.ui.form.on("Job Order", {
     cur_frm.dashboard.hide();
     view_button(frm)
     if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
-		frm.add_custom_button(__('Claim'), function(){
+		frm.add_custom_button(__('Claim Order'), function(){
 			if(frm.doc.resumes_required || frm.doc.is_single_share){
 				assign_employees(frm)
 			}
@@ -182,8 +182,8 @@ frappe.ui.form.on("Job Order", {
       },
       callback: function (r) {
         if (r.message) {
-          frm.set_value("description", r.message["description"]);
-          frm.set_value("rate", r.message["wages"]);
+          frm.set_value("description", r.message.description);
+          frm.set_value("rate", r.message.rate);
           refresh_field("rate");
           refresh_field("description");
         }

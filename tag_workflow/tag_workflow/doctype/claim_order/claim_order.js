@@ -29,6 +29,7 @@ frappe.ui.form.on('Claim Order', {
 
 	},
 	refresh:function(frm){
+		$('[data-label="Save"]').text("Submit Claim")
 		if(frm.doc.__islocal==1){
 			frm.set_df_property('approved_no_of_workers', "hidden", 1);
 			cancel_claimorder(frm);

@@ -67,11 +67,14 @@ def get_jobtitle_list(doctype, txt, searchfield, page_len, start, filters):
 def update_joborder_rate_desc(company = None,job = None):
     if job is None or company is None:
         return None
-
-    sql = ''' select wages,description from `tabJob Titles` where parent = "{}" and job_titles = "{}"'''.format(company, job)
-    org_detail = frappe.db.sql(sql, as_dict=True)
-    if org_detail:
-        return org_detail[0]
+    if frappe.db.exists("Company",company):
+        company = frappe.get_doc("Company", {"name": company})
+    
+    for i in company.job_titles:
+        if i.job_titles == job:
+            return {"description":i.description,"rate":i.wages}
+    return None
+   
 
 @frappe.whitelist()
 def after_denied_joborder(staff_company,joborder_name,job_title,hiring_name):
