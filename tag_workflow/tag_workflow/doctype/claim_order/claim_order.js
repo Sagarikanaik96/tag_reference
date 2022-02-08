@@ -31,6 +31,7 @@ frappe.ui.form.on('Claim Order', {
 	refresh:function(frm){
 		if(frm.doc.__islocal==1){
 			frm.set_df_property('approved_no_of_workers', "hidden", 1);
+			cancel_claimorder(frm);
 		}
 	},
 	setup:function(frm){
@@ -50,7 +51,6 @@ frappe.ui.form.on('Claim Order', {
 	}		
 });
 
-
 function staffing_claim_joborder(frm){
 	frappe.call({
 		"method":"tag_workflow.tag_workflow.doctype.claim_order.claim_order.staffing_claim_joborder",
@@ -60,4 +60,10 @@ function staffing_claim_joborder(frm){
 			"job_order" :frm.doc.job_order,"hiring_org" : frm.doc.hiring_organization,"staffing_org" : frm.doc.staffing_organization,"doc_name" : frm.doc.name}
 	});
 	
+}
+
+function cancel_claimorder(frm){
+	frm.add_custom_button(__('Cancel'), function(){
+		frappe.set_route("Form", "Job Order");
+	});
 }

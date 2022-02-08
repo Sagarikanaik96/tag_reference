@@ -6,6 +6,9 @@ frappe.ui.form.on("Sales Invoice", {
 		hide_fields(frm, invoice_field, is_table);
 		go_joborder_list(frm)
 		tag_field_hide(frm)
+		if(frm.doc.__islocal==1){
+			cancel_salesinvoice(frm);
+		}
 	},
 	on_submit: function(frm) {
 		if(frm.doc.docstatus ==1){
@@ -121,4 +124,9 @@ function tag_field_hide(frm){
 			cur_frm.toggle_display(fields[value],0)
 		}
 	}
+}
+function cancel_salesinvoice(frm){
+	frm.add_custom_button(__('Cancel'), function(){
+		frappe.set_route("Form", "Sales Invoice");
+	});
 }

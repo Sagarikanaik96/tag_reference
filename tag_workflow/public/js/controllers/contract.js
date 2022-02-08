@@ -6,6 +6,9 @@ frappe.ui.form.on("Contract", {
 		update_user(frm);
 		request_sign(frm);
 		$(".menu-btn-group").hide()
+		if(frm.doc.__islocal==1){
+			cancel_cantract(frm);
+		}
 	},
 
 	hiring_company: function(frm){
@@ -136,4 +139,10 @@ function update_lead(frm){
 			args: {"lead": frm.doc.lead, "staff_company": frm.doc.staffing_company, "date": frappe.datetime.now_date(), "staff_user": frm.doc.contract_prepared_by, "name": frm.doc.name}
 		});
 	}
+}
+
+function cancel_cantract(frm){
+	frm.add_custom_button(__('Cancel'), function(){
+		frappe.set_route("Form", "Contract");
+	});
 }

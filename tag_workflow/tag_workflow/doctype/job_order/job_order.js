@@ -137,6 +137,7 @@ frappe.ui.form.on("Job Order", {
           cur_frm.set_value("company", "");
         }
       });
+      cancel_joborder(frm);
     } else {
       timer_value(frm);
       let roles = frappe.user_roles;
@@ -1226,4 +1227,10 @@ function staff_assigned_emp(frm){
       }
     }
   })
+}
+
+function cancel_joborder(frm){
+	frm.add_custom_button(__('Cancel'), function(){
+		frappe.set_route("Form", "Job Order");
+	});
 }

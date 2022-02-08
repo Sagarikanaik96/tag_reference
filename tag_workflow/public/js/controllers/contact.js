@@ -2,6 +2,9 @@ frappe.ui.form.on("Contact", {
 	refresh: function(frm){
 		init_fields(frm);
 		make_field_mandatory(frm);
+		if(frm.doc.__islocal==1){
+			cancel_cantact(frm);
+		}
 	},
 	onload: function (frm) {
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
@@ -64,4 +67,10 @@ function make_field_mandatory(frm){
 	for(let r in reqd){
 		cur_frm.toggle_reqd(reqd[r], 1);
 	}
+}
+
+function cancel_cantact(frm){
+	frm.add_custom_button(__('Cancel'), function(){
+		frappe.set_route("Form", "User");
+	});
 }

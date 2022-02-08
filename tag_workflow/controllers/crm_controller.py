@@ -8,6 +8,7 @@ from frappe import _, msgprint, throw
 from tag_workflow.controllers import base_controller
 from tag_workflow.controllers.master_controller import check_employee
 
+
 # global #
 EXC = "Exclusive Hiring"
 
@@ -37,7 +38,7 @@ def get_org_types(staffing, organization_type=None):
 
 
 @frappe.whitelist()
-def onboard_org(exclusive, staffing, email, person_name, organization_type=None):
+def onboard_org(lead, exclusive, staffing, email, person_name, organization_type=None):
     try:
         is_company, is_user = 1, 1
         company_doc, user = "", ""
@@ -49,7 +50,7 @@ def onboard_org(exclusive, staffing, email, person_name, organization_type=None)
             return is_company, is_user, company_doc, user
 
         if not frappe.db.exists("Company", exclusive):
-            exclusive = make_company(exclusive, staffing, org_type)
+            exclusive = make_company(lead, exclusive, staffing, org_type)
             is_company = 0
 
         if not frappe.db.exists("User", email):
@@ -64,9 +65,19 @@ def onboard_org(exclusive, staffing, email, person_name, organization_type=None)
 
 
 # add orgs
-def make_company(exclusive, staffing, org_type):
+def make_company(lead, exclusive, staffing, org_type):
     try:
+        if(frappe.db.exists("Contract", {"lead": lead})):
+            contract = frappe.get_doc("Contract", {"lead": lead})
+
         company = frappe.get_doc(dict(doctype="Company", organization_type=org_type, parent_staffing=staffing, company_name=exclusive, default_currency="USD", country="United States", create_chart_of_accounts_based_on="Standard Template", chart_of_accounts= "Standard with Numbers"))
+        if(contract):
+
+            for c in contract.job_titles:
+                company.append("job_titles", {"job_titles": c.job_titles, "wages": c.wages,"description":c.description})
+
+            for c in contract._industry_types:
+                company.append("industry_type",{"industry_type":c.industry_type})
         company.save(ignore_permissions=True)
         return company.name
     except Exception as e:
