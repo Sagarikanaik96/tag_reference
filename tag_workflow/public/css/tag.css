@@ -510,6 +510,14 @@ input::-webkit-credentials-auto-fill-button {
   max-height: 300px;
   overflow: auto;
 }
+.hiring-home .inner-search {
+  max-width: 470px;
+  width: 100%;
+  transition: 0.8s ease-in-out;
+  position: absolute;
+  background: #fff;
+  z-index: 999;
+}
 
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
