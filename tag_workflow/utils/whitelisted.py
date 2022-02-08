@@ -186,13 +186,11 @@ def get_user(company):
 @frappe.whitelist()
 def request_signature(staff_user, staff_company, hiring_user, name):
     try:
-        link = frappe.utils.get_link_to_form("Contract", name, label='{{ _("Click here for signature") }}')
-        link = '<p style="margin: 15px 0px;">'+link+'</p>'
-        template = frappe.get_template("templates/emails/digital_signature.html")
-        message = template.render({"staff_user": staff_user, "staff_company": staff_company, "link": link, "date": ""})
+        link = frappe.utils.get_link_to_form("Contract", name)
         msg=f"{staff_user} from {staff_company} is requesting an electronic signature for your contract agreement."
-        make_system_notification([hiring_user], msg, 'Contract', name, "Signature Request")
-        sendmail([hiring_user], message, "Signature Request", 'Contract', name)
+        subject = "Signature Request"
+        make_system_notification([hiring_user], msg, 'Contract', name, subject)
+        frappe.sendmail([hiring_user], subject=subject, delayed=False, reference_doctype='Contract', reference_name=name, template="digital_signature", args = dict(subject=subject, staff_user=staff_user, staff_company=staff_company, link = link))
         share_doc("Contract", name, hiring_user)
     except Exception as e:
         print(e)
@@ -203,10 +201,9 @@ def request_signature(staff_user, staff_company, hiring_user, name):
 def update_lead(lead, staff_company, date, staff_user, name):
     try:
         frappe.db.set_value("Lead", lead, "status", 'Close')
-        template = frappe.get_template("templates/emails/digital_signature.html")
-        message = template.render({"staff_user": "", "staff_company": staff_company, "link": "", "date": date})
-        make_system_notification([staff_user], message, 'Contract', name, "hiring prospects signs a contract")
-        sendmail([staff_user], message, "hiring prospects signs a contract", 'Contract', name)
+        message = f"Congratulations! A Hiring contract has been signed on \033[1m{date}\033[0m for \033[1m{staff_company}\033[0m"
+        make_system_notification([staff_user], message, 'Contract', name, "Hiring Prospect signs a contract")
+        frappe.sendmail([staff_user], subject="Hiring Prospect signs a contract", delayed=False, reference_doctype='Contract', reference_name=name, template="digital_signature", args = dict(subject="Signature Request", staff_user=staff_user, staff_company=staff_company, date=date))
     except Exception as e:
         frappe.error_log(frappe.get_traceback(), "update_lead")
         print(e)

@@ -6,7 +6,7 @@ from frappe.share import add
 #------------email and system notification----------#
 def sendmail(emails, message, subject, doctype, docname):
     try:
-        frappe.sendmail(emails, subject=subject, delayed=False, reference_doctype=doctype, reference_name=docname, message=message)
+        frappe.sendmail(emails, subject=subject, delayed=False, reference_doctype=doctype, reference_name=docname, message=message, template="email_template_custom", args = dict(content=message,subject=subject))
         frappe.msgprint(_("Notification has been sent successfully"))
     except Exception as e:
         frappe.error_log(e, "Frappe Mail")
