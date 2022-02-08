@@ -464,7 +464,7 @@ input::-webkit-credentials-auto-fill-button {
 
 /* Hiring Dashboard */
 .hiring-home {
-  background: url("/apps/tag_workflow/tag_workflow/public/images/abstract-bg.svg");
+  background: url("/assets/tag_workflow/images/abstract-bg.svg");
   background-repeat: no-repeat;
   background-position: right;
   background-size: contain;
