@@ -295,10 +295,10 @@ def get_order_data():
             job_order = []
             assign = frappe.db.get_list("Assign Employee", {"company": company}, "job_order", group_by="job_order", order_by="creation desc")
             job_order = [a['job_order'] for a in assign]
-            orders = frappe.db.get_list(JO, {"from_date": [">=", frappe.utils.nowdate()]}, "name", ignore_permission = 1)
+            orders = frappe.db.get_list(JO, {"to_date": [">=", frappe.utils.nowdate()], "order_status": ["!=", "Completed"]}, "name", ignore_permissions = 1)
             orders = [o['name'] for o in orders]
             for j in job_order:
-                if(j in orders):
+                if((j in orders) and len(result) <= 5):
                     date, job_site, company, per_hour, select_job = frappe.db.get_value(JO, {"name": j}, ["from_date", "job_site", "company", "per_hour", "select_job"])
                     result.append({"name": j, "date": date.strftime("%d %b, %Y %H:%M %p"), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
             return result
