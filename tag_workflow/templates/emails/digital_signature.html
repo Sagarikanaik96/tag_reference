@@ -51,7 +51,7 @@
                 <p class="inner-text "> 
                     {{staff_user}} from {{staff_company}} is requesting an electronic signature for you contract agreement.
                 </p>
-				<p style="margin: 15px 0px; background: #21B9E4; color: white;"><a href="{{ link }}" rel="nofollow">{{ _("Click Here For Signature") }}</a></p>
+				{{link}}
 				{% else %}
 				<p class="inner-text">
 					Congratulations! A Hiring contract has been signed on <strong>{{date}}</strong> for <strong>{{staff_company}}</strong>
