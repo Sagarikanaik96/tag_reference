@@ -1,4 +1,8 @@
 frappe.listview_settings['Sales Invoice'] = {
+	refresh:function(listview){
+		$('.btn-primary').hide();
+		$('button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs').hide();
+	},
 	onload:function(listview){
 	if (frappe.boot.tag.tag_user_info.company == 'tag'){
 		listview.page.add_button(__("Create monthly Invoice"), function() {
