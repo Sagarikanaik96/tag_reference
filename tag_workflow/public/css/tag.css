@@ -462,6 +462,13 @@ input::-webkit-credentials-auto-fill-button {
   height: 120px !important;
 }
 
+/* Hiring Dashboard */
+.hiring-home {
+  background: url("/apps/tag_workflow/tag_workflow/public/images/abstract-bg.svg");
+  background-repeat: no-repeat;
+  background-position: right;
+  background-size: contain;
+}
 .hiring-home .tittle h3 {
   font-weight: 600;
   font-size: 30px;

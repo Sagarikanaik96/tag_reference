@@ -96,7 +96,7 @@ def execute(filters=None):
                 {'fieldname': 'view', 'label':('View'),'width': 60}, 
                 {'fieldname': 'repeat', 'label':('Repeat'),'width': 75}    
                 ]
-            sql = ''' select name,select_job,from_date,job_site,no_of_workers,staff_org_claimed, concat ('<button type="button" onClick="view_joborder(\''', `tabJob Order`.name ,\''')">View</button>'), concat('<button type="button" onClick="repeat_joborder(\''', `tabJob Order`.name ,\''')">Repeat</button>') from `tabJob Order`  where to_date<'{0}'  AND company in (select company from `tabEmployee` where email ="{1}") '''.format(today,user_name)
+            sql = ''' select name,select_job,from_date,job_site,no_of_workers,staff_org_claimed, concat ('<button type="button" class="btn-primary" onClick="view_joborder(\''', `tabJob Order`.name ,\''')">View</button>'), concat('<button type="button" class="btn-primary"  onClick="repeat_joborder(\''', `tabJob Order`.name ,\''')">Repeat</button>') from `tabJob Order`  where to_date<'{0}'  AND company in (select company from `tabEmployee` where email ="{1}") '''.format(today,user_name)
             data=frappe.db.sql(sql)
         elif filters.get('status')=='Ongoing':
             columns=[
@@ -121,7 +121,7 @@ def execute(filters=None):
                 {'fieldname':'claim','label':(claimed_by),'fieldtype':'Data','width':200},
                 {'fieldname': 'view', 'label':('View'),'width': 60}
                 ]
-            sql = ''' select name,select_job,from_date,job_site,bid,claim, concat ('<button type="button" onClick="view_joborder(\''', `tabJob Order`.name ,\''')">View</button>') from `tabJob Order` where from_date>'{0}'  AND company in (select company from `tabEmployee` where email ="{1}") '''.format(today,user_name)
+            sql = ''' select name,select_job,from_date,job_site,bid,claim, concat ('<button type="button" class="btn-primary" onClick="view_joborder(\''', `tabJob Order`.name ,\''')">View</button>') from `tabJob Order` where from_date>'{0}'  AND company in (select company from `tabEmployee` where email ="{1}") '''.format(today,user_name)
             data=frappe.db.sql(sql)
 
     return columns,data
