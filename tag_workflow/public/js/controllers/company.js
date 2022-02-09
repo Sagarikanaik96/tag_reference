@@ -304,7 +304,6 @@ function update_company_fields(frm) {
       "city",
       "state",
       "zip",
-      "job_site",
       "drug_screen",
       "drug_screen_rate",
       "background_check",
@@ -319,7 +318,7 @@ function update_company_fields(frm) {
       "rating",
       "average_rating",
       "click_here",
-      "job_titles",
+      "hour_per_person_drug","background_check_flat_rate","mvr_per","shovel_per_person"
     ];
     for (let f in company_field) {
       cur_frm.toggle_enable(company_field[f], 0);
