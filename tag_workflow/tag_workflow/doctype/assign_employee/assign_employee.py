@@ -38,7 +38,6 @@ def check_distance(emp, distance, location):
             dest = ",".join([str(d) for d in dest if d])
             try:
                 my_dist = gmaps.distance_matrix(source, dest)
-                frappe.msgprint(_("{0}").format(my_dist))
                 if(my_dist['status'] == 'OK'):
                     km = my_dist['rows'][0]['elements'][0]['distance']['value']/1000
                     if(km is not None and ((km*0.62137) <= distance_value[distance] or km == 0)):
