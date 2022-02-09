@@ -17,22 +17,17 @@ frappe.ui.form.on('Assign Employee', {
 						name: $('[data-fieldname="employee"]').last().val(),
 					},
 					callback:function(r){
-						if (r.message[0]["resume"]){
-							if ($('[data-fieldname="resume"]').last().text() == "Attach"){
-								$('[data-fieldname="resume"]').last().append(' <div class="static-area ellipsis" style="display: block;"> <a class="attached-file-link nani static-area ellipsis" target="_blank"  href='+r.message[0]["resume"]+'>' + r.message[0]["resume"]+ '</a></div>');
-								$('[data-fieldname="resume"]').addClass("static-area ellipsis primary-action");
-							}
+						if ($('[data-fieldname="resume"]').last().text() == "Attach"){
+							frm.doc.employee_details.forEach(element=>{
+								if (element.employee === $('[data-fieldname="employee"]').last().val()){
+									element.resume = r.message[0]["resume"]
+								}
+							})
+							cur_frm.refresh_field("employee_details");
 						}
 					}
 				});
 			}
-		});
-
-		$(document).on('click', '.nani', function(){
-			function show_popup(){
-				$('.close-alt').click();
-			}
-			window.setTimeout( show_popup,1250 );
 		});
 	},
 
@@ -65,18 +60,6 @@ frappe.ui.form.on('Assign Employee', {
 		if(frm.doc.tag_status=='Open'){
 			make_hiring_notification(frm);
 		}
-
-		var table = frm.doc.employee_details;
-		for(var d in table){
-			frappe.call({
-				method:"tag_workflow.tag_data.assign_employee_resume_update",
-				args: {
-					"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
-					employee: table[d].employee, name : table[d].name
-				}
-			});
-		}
-		location.reload();
 	},
 	validate:function(frm){
 		var sign = cur_frm.doc.e_signature_full_name
@@ -239,8 +222,8 @@ function hide_resume(frm){
 
 	$('[data-fieldname="resume"]').on({
 		'click': function () {
-			if (cur_frm.doc.employee_details[0]["resume"]) {
-				window.open(cur_frm.doc.employee_details[0]["resume"]);
+			if (document.querySelectorAll('[data-fieldname="resume"]')[$('[data-fieldname="resume"]').index(this)].children[1].innerText){
+				window.open(document.querySelectorAll('[data-fieldname="resume"]')[$('[data-fieldname="resume"]').index(this)].children[1].innerText);
 			}
 		}
 	});
