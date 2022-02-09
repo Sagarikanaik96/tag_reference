@@ -47,7 +47,7 @@ def get_timesheet_data(job_order, user, company_type):
         if(company_type in ["Hiring", "Exclusive Hiring"]):
             sql = """ select employee, employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
             data = frappe.db.sql(sql, as_dict=1)
-            result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": frappe.utils.nowtime(), "exit_time": frappe.utils.nowtime(), "total_hours": 0.00} for d in data]
+            result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00} for d in data]
             return result
         return []
     except Exception as e:
@@ -55,34 +55,72 @@ def get_timesheet_data(job_order, user, company_type):
         frappe.msgprint(e)
 
 
-@frappe.whitelist()
-def update_timesheet_data(data, company, company_type):
+#------------------------------------#
+def get_child_time(posting_date, from_time, to_time, child_from=None, child_to=None):
     try:
-        if(company_type == "Hiring"):
+        if(child_from and child_to):
+            from_time = datetime.datetime.strptime((posting_date+" "+str(child_from)), "%Y-%m-%d %H:%M:%S")
+            to_time = datetime.datetime.strptime((posting_date+" "+str(child_to)), "%Y-%m-%d %H:%M:%S")
+            return from_time, to_time
+        else:
+            return from_time, to_time
+    except Exception as e:
+        print(e)
+        return from_time, to_time
+
+def check_old_timesheet(child_from, child_to, employee, job_order):
+    try:
+        sql = """select c.name, c.parent from `tabTimesheet Detail` c where (('{1}' >= c.from_time and '{1}' <= c.to_time) or ('{2}' >= c.from_time and '{2}' <= c.to_time) or ('{1}' <= c.from_time and '{2}' >= c.to_time)) and parent in (select name from `tabTimesheet` where employee = '{0}') """.format(employee, child_from, child_to)
+        data = frappe.db.sql(sql, as_dict=1)
+        return 1 if(len(data) > 0) else 0
+    except Exception as e:
+        frappe.msgprint(e)
+        return 0
+        
+
+@frappe.whitelist()
+def update_timesheet_data(data, company, company_type, user):
+    try:
+        added = 0
+        if(company_type == "Hiring" and user == frappe.session.user):
             data = json.loads(data)
-            job = frappe.db.get_value("Job Order", {"name": data['job_order']}, "select_job")
-            from_time = datetime.datetime.strptime((data['posting_date']+" "+data['enter_time']), "%Y-%m-%d %H:%M:%S")
-            to_time = datetime.datetime.strptime((data['posting_date']+" "+data['exit_time']), "%Y-%m-%d %H:%M:%S")
-            for item in data['items']:
-                timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=company, job_order_detail=data['job_order']))
-                timesheet.employee = item['employee']
-                timesheet.append("time_logs", {
-                    "activity_type": job,
-                    "from_time": from_time,
-                    "to_time": to_time,
-                    "hrs": str(item['total_hours'])+" hrs",
-                    "hours": item['total_hours'],
-                    "is_billable": 1
-                })
-                timesheet.insert(ignore_permissions=1)
-                timesheet.workflow_state = "Approval Request"
-                timesheet.save()
-                send_timesheet_for_approval(item['employee'], timesheet.name, company, data['job_order'])
-            return True
+            job = frappe.get_doc("Job Order", {"name": data['job_order']})
+            posting_date = datetime.datetime.strptime(data['posting_date'], "%Y-%m-%d").date()
+
+            if(posting_date >= job.from_date and posting_date <= job.to_date):
+                from_time = datetime.datetime.strptime((data['posting_date']+" "+data['enter_time']), "%Y-%m-%d %H:%M:%S")
+                to_time = datetime.datetime.strptime((data['posting_date']+" "+data['exit_time']), "%Y-%m-%d %H:%M:%S")
+                for item in data['items']:
+                    child_from, child_to = get_child_time(data['posting_date'], from_time, to_time, item['enter_time'], item['exit_time'])
+
+                    is_ok = check_old_timesheet(child_from, child_to, item['employee'], data['job_order'])
+
+                    if(is_ok == 0):
+                        timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=company, job_order_detail=data['job_order'], employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate))
+                        timesheet.append("time_logs", {
+                            "activity_type": job.select_job,
+                            "from_time": child_from,
+                            "to_time": child_to,
+                            "hrs": str(item['total_hours'])+" hrs",
+                            "hours": float(item['total_hours']),
+                            "is_billable": 1
+                        })
+                        timesheet.insert(ignore_permissions=True)
+                        timesheet.workflow_state = "Approval Request"
+                        timesheet.save()
+                        send_timesheet_for_approval(item['employee'], timesheet.name, company, data['job_order'])
+                        added = 1
+                    else:
+                        frappe.msgprint(_("Timesheet already available for employee <b>{0}</b> with the given date").format(item['employee']))
+
+                if(added):
+                    frappe.msgprint("Timesheets added successfully")
+            else:
+                frappe.msgprint(_("Date must be in between Job Order start date and end date for timesheets"))
         return False
     except Exception as e:
         frappe.db.rollback()
-        frappe.msgprint(e)
+        frappe.msgprint(frappe.get_traceback())
 
 @frappe.whitelist(allow_guest=True)
 @frappe.validate_and_sanitize_search_inputs
