@@ -7,8 +7,11 @@ frappe.ui.form.on('Claim Order', {
 	},
 	before_save:function(frm){
 		if (!frm.doc.hiring_organization){
-			frappe.msgprint(__("Your claim is Not completed please try again from from Job Order"));
+			frappe.msgprint(__("Your claim is not completed. Please try again!"));
 			frappe.validated = false
+			setTimeout(() => {
+				frappe.set_route("Form","Job Order", frm.doc.job_order)
+			}, 3000);
 		}
 		frm.set_value('approved_no_of_workers',0)
 	},
@@ -31,6 +34,13 @@ frappe.ui.form.on('Claim Order', {
 	refresh:function(frm){
 		$('[data-label="Save"]').text("Submit Claim")
 		if(frm.doc.__islocal==1){
+			if (!frm.doc.hiring_organization){
+                frappe.msgprint(__("Your claim is not completed. Please try again from Job Order!"));
+                frappe.validated = false
+                setTimeout(() => {
+                    frappe.set_route("List","Job Order")
+                }, 3000);
+			}    
 			frm.set_df_property('approved_no_of_workers', "hidden", 1);
 			cancel_claimorder(frm);
 			if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
