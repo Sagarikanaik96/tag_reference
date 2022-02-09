@@ -1208,7 +1208,7 @@ function staff_assigned_emp(frm){
                           <td>${data[p].employee}</td>
                           <td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>`;                     
                         if(data[parseInt(p)].no_show=="No Show" || data[parseInt(p)].non_satisfactory=="Non Satisfactory"){
-                          profile_html+=`<td><button>Replace</button></td>`
+                          profile_html+=`<td class="replace" data-fieldname="replace" ><a href="/app/assign-employee/${data[p].assign_name}"><button>Replace</button></a></td>`
                         }
                       profile_html+= `   
 

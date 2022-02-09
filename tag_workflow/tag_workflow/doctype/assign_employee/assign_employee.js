@@ -179,6 +179,7 @@ function render_table(frm){
 				}else{
 					cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = false;
 					cur_frm.fields_dict['employee_details'].refresh();
+					cur_frm.toggle_display("replaced_employees", 1);
 				}
 			}
 		});
