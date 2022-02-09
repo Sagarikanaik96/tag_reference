@@ -213,3 +213,8 @@ def get_joborder_value(user, company_type, name):
     except Exception as e:
         frappe.log_error(e, 'Job order list')
         return []
+@frappe.whitelist()
+def selected_days(doctype, txt, searchfield, page_len, start, filters):
+   days="select name from `tabDays` order by creation desc"
+   data=frappe.db.sql(days)
+   return data

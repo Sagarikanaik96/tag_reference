@@ -107,6 +107,14 @@ frappe.ui.form.on("Job Order", {
     ) {
       fields_setup(frm);
     }
+    frm.set_query("select_days",function(doc){
+      return{
+        query:"tag_workflow.tag_workflow.doctype.job_order.job_order.selected_days",
+
+      }
+
+    })
+
   },
   refresh: function (frm) {
     if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=="Hiring" && frm.doc.order_status=="Upcoming"){
@@ -197,36 +205,35 @@ frappe.ui.form.on("Job Order", {
 
       }
       rate_hour_contract_change(frm);
+      let job_site_contact="Name:"+frm.doc.contact_name+ " Email:"+frm.doc.contact_email+" Phone Number:"+frm.doc.contact_number || " ";
+
       if (frappe.validated) {
         return new Promise(function (resolve, reject) {
           frappe.confirm(
             "<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" +
               frm.doc.category +
-              "<br><b>Job Order Start Date: </b>" +
+              "<br><b>Start Date: </b>" +
               frm.doc.from_date +
-              "<br><b>Job Order End Date: </b>" +
+              "<br><b>End Date: </b>" +
               frm.doc.to_date +
-              "<br><b>Job Order Start Time: </b>" +
+              "<br><b>Est. Daily Hours: </b>" +
+              frm.doc.estimated_hours_per_day +
+              "<br><b>Start Time: </b>" +
               frm.doc.job_start_time +
-              "<br><b>Job Title: </b>" +
-              frm.doc.select_job +
-              "<br><b>Job Duration: </b>" +
-              frm.doc.job_order_duration +
               "<br><b>Job Site: </b>" +
               frm.doc.job_site +
-              "<br><b>Estimated Per Hour: </b>" +
-              frm.doc.estimated_hours_per_day +
-              "<br><b>Job Title Description: </b>" +
-              frm.doc.description +
+              "<br><b>Job Site Contact: </b>" +
+              job_site_contact +
+             "<br><b>No. of Workers: </b>" +
+              frm.doc.no_of_workers +
               "<br><b>Base Price: </b>" +
               frm.doc.rate +
               "<br><b>Rate Increase: </b>" +
               (frm.doc.per_hour-frm.doc.rate) +
               "<br><b>Total Per Hour Rate: </b>" +
               frm.doc.per_hour +
-              "<br><b>Total Flat Rate: </b>" +
-              frm.doc.flat_rate +
               "",
+
             function () {
               let resp = "frappe.validated = false";
               resolve(resp);
@@ -599,7 +606,6 @@ function notification_joborder_change(frm) {
     },
   });
 }
-
 function check_from_date(frm) {
   let from_date = frm.doc.from_date || "";
   let to_date = frm.doc.to_date || "";
@@ -611,7 +617,7 @@ function check_from_date(frm) {
       indicator: "orange",
     });
     cur_frm.set_value("from_date", "");
-  } else if (to_date && from_date && from_date >= to_date) {
+  } else if (to_date && from_date && from_date > to_date) {
     frappe.msgprint({
       message: __("<b>End Date</b> Cannot be Less than Start Date"),
       title: __("Error"),
@@ -631,7 +637,7 @@ function check_to_date(frm) {
       indicator: "orange",
     });
     cur_frm.set_value("to_date", "");
-  } else if (to_date && from_date && from_date >= to_date) {
+  } else if (to_date && from_date && from_date > to_date) {
     frappe.msgprint({
       message: __("<b>End Date</b> Cannot be Less than Start Date"),
       title: __("Error"),
@@ -640,6 +646,7 @@ function check_to_date(frm) {
     cur_frm.set_value("to_date", "");
   }
 }
+
 
 function check_value(frm, field, name, value) {
   if (value && value < 0) {
