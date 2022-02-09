@@ -4,7 +4,8 @@
  
 frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
-		staff_comp(frm)
+		staff_comp(frm);
+		worker_notification(frm)
 		render_table(frm);
 		approved_employee(frm);
 		hide_resume(frm);
@@ -33,9 +34,6 @@ frappe.ui.form.on('Assign Employee', {
 
 	onload:function(frm){
 		hide_resume(frm);
-		if (frm.doc.is_single_share && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-			company_set_by_direct_order(frm)
-		}
 
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
 			const li = [];
@@ -239,16 +237,27 @@ function back_job_order_form(frm){
 
 function staff_comp(frm){
 	if(frm.doc.__islocal==1 && frm.doc.is_single_share==1){
-		// frm.toggle_display("company",0)
 		frm.set_df_property("company","read_only",1)
 	}
 }
-/*
-function company_set_by_direct_order(frm){
-	frm.set_value('company',frm.doc.company)
 
-	// to set value and makes read only in direct order
-	// frm.set_df_property('company', "read_only", 1);
-	frm.refresh_fields();
+
+function worker_notification(frm){
+	if(frm.doc.tag_status=="Open" && frappe.boot.tag.tag_user_info.company_type=="Staffing"){
+		frappe.call({
+			"method":"tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.worker_data",
+			"args":{
+				"job_order":frm.doc.job_order
+			},
+			callback:function(r){
+				let worker_required=r.message[0].no_of_workers-r.message[0].worker_filled
+				if(worker_required<frm.doc.employee_details.length){
+					frappe.msgprint("No Of Workers required for "+frm.doc.job_order+" is "+worker_required)
+					cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = false;
+					frm.set_df_property("employee_details","read_only",0)
+					cur_frm.fields_dict['employee_details'].refresh();
+				}
+			}
+		})
+	}
 }
-*/

@@ -108,7 +108,7 @@ def notify_email(job_order, employee, value, subject, company, employee_name, da
 
         if users:
             make_system_notification(users, message,JOB, job_order, subject)
-            # sendmail(users, message, subject, "Timesheet", timesheet_name)
+            sendmail(users, message, subject, "Timesheet", timesheet_name)
     except Exception as e:
         frappe.log_error(e, "Timesheet Email Error")
         frappe.throw(e)

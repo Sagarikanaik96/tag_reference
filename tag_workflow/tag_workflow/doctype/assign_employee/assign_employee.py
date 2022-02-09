@@ -75,3 +75,10 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
     except Exception as e:
         frappe.msgprint(e)
         return tuple()
+
+@frappe.whitelist()
+def worker_data(job_order):
+    print(job_order)
+    sql=f"select no_of_workers,worker_filled from `tabJob Order` where name='{job_order}'"
+    data=frappe.db.sql(sql,as_dict=True)
+    return data
