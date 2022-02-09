@@ -441,6 +441,9 @@ function redirect_quotation(frm) {
   doc.company = staff_company[0];
   doc.job_order = frm.doc.name;
   doc.no_of_employee_required = frm.doc.no_of_workers - frm.doc.worker_filled;
+  if(frm.doc.staff_company){
+    doc.company=frm.doc.staff_company;
+  }
   doc.hiring_organization = frm.doc.company;
   doc.job_category = frm.doc.select_job;
   doc.job_location = frm.doc.job_site;

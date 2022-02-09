@@ -4,6 +4,7 @@
  
 frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
+		staff_comp(frm)
 		render_table(frm);
 		approved_employee(frm);
 		hide_resume(frm);
@@ -252,6 +253,14 @@ function back_job_order_form(frm){
 	},__("View"));
 }
 
+
+function staff_comp(frm){
+	if(frm.doc.__islocal==1 && frm.doc.is_single_share==1){
+		// frm.toggle_display("company",0)
+		frm.set_df_property("company","read_only",1)
+	}
+}
+/*
 function company_set_by_direct_order(frm){
 	frm.set_value('company',frm.doc.company)
 
@@ -259,3 +268,4 @@ function company_set_by_direct_order(frm){
 	// frm.set_df_property('company', "read_only", 1);
 	frm.refresh_fields();
 }
+*/
