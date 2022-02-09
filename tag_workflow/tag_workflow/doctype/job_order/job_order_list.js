@@ -25,14 +25,17 @@ frappe.listview_settings['Job Order'] = {
 			});
 		}
 	},
+
+
 	formatters: {
 		company(val, d, f) {
 			if (val) {
-				return `<span class=" ellipsis" title="" id="${val}-${f.name}">
-						<a class="filterable ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" onmouseover="showCasePopover('${val}','${f.name}')" onmouseout = "hideCasePopover('${val}','${f.name}')">${val}</a>
+				return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
+						<a class="filterable ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" onmouseover="showCasePopover('${val}','${f.name}')" onmouseout = "hideCasePopover('${val}','${f.name}')"  onclick = "myfuncation()" data-company = "company" >${val}</a>
 					</span>
 					<script>
 						function showCasePopover(cname,dname){
+							$('.popover-body').hide();
 							$("#"+cname+"-"+dname).popover({
 								title: name,
 								content: function(){
@@ -41,6 +44,13 @@ frappe.listview_settings['Job Order'] = {
 								},
 								html: true,
 							}).popover('show');
+						}
+
+						function myfuncation(){
+							console.log("click on company")
+							$('.popover-body').hide();
+							$('.arrow').hide();
+							
 						}
 
 						function details_in_popup(link, div_id, cname){
@@ -89,10 +99,11 @@ frappe.listview_settings['Job Order'] = {
 						</span>
 					</span>
 					<span class=" ellipsis" title="" id="${f.name}">
-						<a class="ellipsis" href="/app/job-order/${val}" data-doctype="Job Order" onmouseover="showCasePopover1('${val}','${f.name}')" onmouseout = "hideCasePopover1('${val}','${f.name}')">${val}</a>
+						<a class="ellipsis" href="/app/job-order/${val}" data-doctype="Job Order" onmouseover="showCasePopover1('${val}','${f.name}')" onmouseout = "hideCasePopover1('${val}','${f.name}')" onclick = "myfuncation()" data-jobname = "name" >${val}</a>
 					</span>
 					<script>
 						function showCasePopover1(cname,dname){
+							$('.popover-body').hide();
 							$("#"+dname).popover({
 								title: name,
 								content: function(){
@@ -103,10 +114,16 @@ frappe.listview_settings['Job Order'] = {
 							}).popover('show');
 						}
 
+						function myfuncation(){
+							console.log("nni")
+							$('.popover-body').hide();
+							
+						}
+
 						function details_in_popup1(link, div_id, cname){
 							frappe.call({
 								method: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_joborder_value",
-								args: {"name":cname},
+								args: {"name": cname, "user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type},
 								callback: function(res) {
 									if (!res.exc) {
 										$('#'+div_id).html(popup_content1(res.message));

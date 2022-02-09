@@ -29,10 +29,23 @@ frappe.ui.form.on('Claim Order', {
 
 	},
 	refresh:function(frm){
+		$('[data-label="Save"]').text("Submit Claim")
 		if(frm.doc.__islocal==1){
 			frm.set_df_property('approved_no_of_workers', "hidden", 1);
 			cancel_claimorder(frm);
+			if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+				org_info(frm);	
+			}
 		}
+		else{
+			let company_field = [
+				"job_order","staffing_organization","agree_to_contract","e_signature","staff_claims_no"
+			  ];
+			  for (let f in company_field) {
+				cur_frm.toggle_enable(company_field[f], 0);
+			  }
+		}
+
 	},
 	setup:function(frm){
 		frm.set_query("staffing_organization", function (doc) {
@@ -66,4 +79,19 @@ function cancel_claimorder(frm){
 	frm.add_custom_button(__('Cancel'), function(){
 		frappe.set_route("Form", "Job Order");
 	});
+}
+
+function org_info(frm){
+	frappe.call({
+		'method':"tag_workflow.tag_data.hiring_org_name",
+		'args':{'current_user':frappe.session.user},
+		callback:function(r){
+			if(r.message=='success'){
+				frm.set_value('staffing_organization',frappe.boot.tag.tag_user_info.company)
+			}
+			else{
+				frm.set_value('staffing_organization','')
+			}
+		}	
+	})
 }

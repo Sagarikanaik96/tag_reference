@@ -115,7 +115,7 @@ frappe.ui.form.on("Job Order", {
     cur_frm.dashboard.hide();
     view_button(frm)
     if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
-		frm.add_custom_button(__('Claim'), function(){
+		frm.add_custom_button(__('Claim Order'), function(){
 			if(frm.doc.resumes_required || frm.doc.is_single_share){
 				assign_employees(frm)
 			}
@@ -182,8 +182,8 @@ frappe.ui.form.on("Job Order", {
       },
       callback: function (r) {
         if (r.message) {
-          frm.set_value("description", r.message["description"]);
-          frm.set_value("rate", r.message["wages"]);
+          frm.set_value("description", r.message.description);
+          frm.set_value("rate", r.message.rate);
           refresh_field("rate");
           refresh_field("description");
         }
@@ -867,8 +867,8 @@ function view_buttons_hiring(frm){
 		}
 	
 		if(frm.doc.order_status=='Completed'){
-      let datad3 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-          <p><b>Timesheets </b>  <button>View</button></p>
+      let datad3 = `<div class="my-2" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+          <p><b>Timesheets </b>  <button class="btn-primary">View</button></p>
         </div>`;
         $('[data-fieldname = timesheets]').click(function() {
          timesheets_view(frm)
@@ -891,8 +891,8 @@ function view_buttons_hiring(frm){
 				},
 				callback:function(r){
 				if(r.message=='success'){
-          let datad4 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-								<p><b>Invoices </b> <button>View</button></p>
+          let datad4 = `<div class="my-2" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+								<p><b>Invoices </b> <button class="btn-primary">View</button></p>
 							</div>`;
           $('[data-fieldname = invoices]').click(function() {
             sales_invoice_data(frm)
@@ -966,8 +966,8 @@ function view_buttons_staffing(frm){
     }, __("View"));
   }
   if( (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company) && (frm.doc.order_status=='Completed')){
-    let data4 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-        <p><b>Timesheets </b>  <button>View</button></p>
+    let data4 = `<div class="my-2"  style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+        <p><b>Timesheets </b>  <button class="btn-primary">View</button></p>
       </div>`;
       $('[data-fieldname = timesheets]').click(function() {
        timesheets_view(frm)
@@ -987,8 +987,8 @@ function view_buttons_staffing(frm){
       callback:function(r){
         if(r.message=='success1')
         {
-          let data5 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-              <p><b>Invoices </b> <button>View</button></p>
+          let data5 = `<div class="my-2" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+              <p><b>Invoices </b> <button class="btn-primary">View</button></p>
             </div>`;
             $('[data-fieldname = invoices]').click(function() {
               sales_invoice_data(frm)
@@ -1003,8 +1003,8 @@ function view_buttons_staffing(frm){
         }
         
       else if(r.message=='success'){
-        let data6 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-              <p><b>Invoices </b> <button>View</button></p>
+        let data6 = `<div class="my-2" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+              <p><b>Invoices </b> <button class="btn-primary">View</button></p>
             </div>`;
             $('[data-fieldname = invoices]').click(function() {
               sales_invoice_data(frm)

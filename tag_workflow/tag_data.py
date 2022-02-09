@@ -10,7 +10,7 @@ import json
 jobOrder = "Job Order"
 assignEmployees = "Assign Employee"
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def company_details(company_name=None):
     if frappe.session.user != 'Administrator':
         comp_data=frappe.get_doc('Company',company_name)
@@ -27,7 +27,7 @@ def company_details(company_name=None):
 
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def update_timesheet(job_order_detail):
     sql = '''select select_job,from_date,to_date,per_hour,flat_rate,estimated_hours_per_day from `tabJob Order` where name = "{}" '''.format(job_order_detail)
     value = frappe.db.sql(sql, as_dict = 1)
@@ -67,21 +67,25 @@ def joborder_email_template(subject = None,content = None,recipients = None,link
         return False
 
 
-@frappe.whitelist()
-def send_email_staffing_user(email_list=None,subject = None,body=None,additional_email = None):
-    import json
-    email = json.loads(email_list)
-    l = [i['email'] for i in email]
-    if additional_email:
-        v = additional_email.split(',')
-        for i in v:
-            l.append(i)
-
-    value = send_email(subject,body,l)
-    
-    if value:
-        return 1
-    else:
+@frappe.whitelist(allow_guest=False)
+def send_email_staffing_user(user, company_type, email_list=None,subject = None,body=None,additional_email = None):
+    try:
+        if(company_type == "Staffing" and user == frappe.session.user):
+            email = json.loads(email_list)
+            emails = [i['email'] for i in email]
+            if additional_email:
+                v = additional_email.split(',')
+                for i in v:
+                    emails.append(i)
+            value = send_email(subject, body, emails)
+            if value:
+                return 1
+            else:
+                return 0
+        else:
+            return 0
+    except Exception as e:
+        print(e)
         return 0
 
 
@@ -101,40 +105,40 @@ def assign_employee_data(hiringorg, name):
         frappe.error_log(e, "employee share")
         frappe.throw(e)
  
-@frappe.whitelist()
-def update_job_order(job_name, employee_filled, staffing_org, hiringorg, name):
+@frappe.whitelist(allow_guest=False)
+def update_job_order(user, company_type, job_name, employee_filled, staffing_org, hiringorg, name):
     try:
-        job = frappe.get_doc(jobOrder, job_name)
-        claimed = job.staff_org_claimed if job.staff_org_claimed else ""
-        frappe.db.set_value(jobOrder, job_name, "worker_filled", (int(employee_filled)+int(job.worker_filled)))
-        if(len(claimed)==0):
-            frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+str(staffing_org)))
-        else:
-            frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
+        if(company_type == "Hiring" and user == frappe.session.user):
+            job = frappe.get_doc(jobOrder, job_name)
+            claimed = job.staff_org_claimed if job.staff_org_claimed else ""
+            frappe.db.set_value(jobOrder, job_name, "worker_filled", (int(employee_filled)+int(job.worker_filled)))
+            if(len(claimed)==0):
+                frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+str(staffing_org)))
+            else:
+                frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
 
-        sub = f'New Message regarding {job_name} from {hiringorg} is available'
-        msg = f'Your Employees has been approved for Work Order {job_name}'
-
-        lst_sql = """ select user_id from `tabEmployee` where company = '{0}' and user_id IS NOT NULL""".format(staffing_org)
-        user_list = frappe.db.sql(lst_sql, as_dict=1)
-        users = [usr['user_id'] for usr in user_list]
-        make_system_notification(users,msg,jobOrder,job_name,sub)   
-        enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name)
-        return sendmail(users, msg, sub, assignEmployees, name)
+            sub = f'New Message regarding {job_name} from {hiringorg} is available'
+            msg = f'Your Employees has been approved for Work Order {job_name}'
+            lst_sql = """ select user_id from `tabEmployee` where company = '{0}' and user_id IS NOT NULL""".format(staffing_org)
+            user_list = frappe.db.sql(lst_sql, as_dict=1)
+            users = [usr['user_id'] for usr in user_list]
+            make_system_notification(users,msg,jobOrder,job_name,sub)   
+            enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name)
+            return sendmail(users, msg, sub, assignEmployees, name)
+        return []
     except Exception as e:
         frappe.db.rollback()
         frappe.error_log(e, "final_notification")
         frappe.throw(e)
 
 
-@frappe.whitelist()
-def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc_name,no_of_worker_req,is_single_share,job_title):
+@frappe.whitelist(allow_guest=False)
+def receive_hiring_notification(user, company_type, hiring_org, job_order, staffing_org, emp_detail, doc_name, no_of_worker_req, is_single_share, job_title):
     try:
-        import json
-        update_values=frappe.db.sql(''' select data from `tabVersion` where docname='{}' '''.format(doc_name),as_list=1)
-        if(len(update_values)<2):
-            bid_receive=frappe.get_doc(jobOrder,job_order)
-
+        if(company_type == "Staffing" and user == frappe.session.user):
+            update_values=frappe.db.sql(''' select data from `tabVersion` where docname='{}' '''.format(doc_name),as_list=1)
+            if(len(update_values)<2):
+                bid_receive=frappe.get_doc(jobOrder,job_order)
 
             if int(is_single_share):
                 check_partial_employee(bid_receive,staffing_org,emp_detail,no_of_worker_req,job_title,hiring_org,doc_name)
@@ -144,24 +148,20 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
             if(bid_receive.claim is None):
                 bid_receive.claim=staffing_org
                 chat_room_created(hiring_org,staffing_org,job_order)
-
             else:
                 if(staffing_org not in bid_receive.claim):
                     bid_receive.claim=str(bid_receive.claim)+str(",")+staffing_org
                     chat_room_created(hiring_org,staffing_org,job_order)
 
             bid_receive.save(ignore_permissions=True)
-
             job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
             job_detail = frappe.db.sql(job_sql, as_dict=1)
-
             lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)
             user_list = frappe.db.sql(lst_sql, as_list=1)
             v = json.loads(emp_detail)
             s = ''
             for i in v:
                 s += i['employee_name'] + ','
-
             l = [l[0] for l in user_list]
             for user in l:
                 add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)
@@ -170,7 +170,9 @@ def receive_hiring_notification(hiring_org,job_order,staffing_org,emp_detail,doc
             make_system_notification(l,msg,'Assign Employee',doc_name,sub)
             msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim .'
             link =  f'  href="/app/assign-employee/{doc_name}" '
-            return joborder_email_template(sub,msg,l,link)
+            return joborder_email_template(sub, msg, l, link)
+        else:
+            return "No Access"
     except Exception as e:
         print(e, frappe.get_traceback())
         frappe.db.rollback()
@@ -219,7 +221,7 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
         frappe.error_log(e, "Partial Job order Failed ")
                 
    
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None,staff_company=None):
     try:
         doc = frappe.get_doc(jobOrder,job_order)
@@ -278,7 +280,7 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
     except Exception as e:
         print(e)
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def update_exclusive_org(exclusive_email,staffing_email,staffing_comapny,exclusive_company):
     from frappe.share import add
     try:
@@ -288,7 +290,7 @@ def update_exclusive_org(exclusive_email,staffing_email,staffing_comapny,exclusi
     except Exception as e:
          frappe.log_error(e, "doc share error")
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def staff_org_details(company_details=None):
     comp_data=frappe.get_doc('Company',company_details)
 
@@ -303,7 +305,7 @@ def staff_org_details(company_details=None):
     return "success"
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def update_staffing_user_with_exclusive(company,company_name):
     from frappe.share import add
 
@@ -316,7 +318,7 @@ def update_staffing_user_with_exclusive(company,company_name):
     except Exception as e:
          frappe.log_error(e, "doc share error")
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def check_assign_employee(total_employee_required,employee_detail = None):
     import json
     total = int(total_employee_required)
@@ -336,7 +338,7 @@ def check_assign_employee(total_employee_required,employee_detail = None):
     except Exception:
         return 0
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def api_sec(frm=None):
     try:
         emp = frappe.get_doc("Employee",frm)
@@ -346,7 +348,7 @@ def api_sec(frm=None):
         frappe.log_error("No Employee in Database", "Warning")
     
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters):
     emp_company = filters.get('emp_company')
     job_category = filters.get('job_category')
@@ -363,13 +365,13 @@ def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters)
 
         return frappe.db.sql(sql)
     
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def get_org_site(doctype, txt, searchfield, page_len, start, filters):
     company=filters.get('job_order_company')
     sql = ''' select job_site from `tabCompany Site` where parent='{0}' '''.format(company)
     return frappe.db.sql(sql)
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def job_site_employee(doctype, txt, searchfield, page_len, start, filters):
 
     company=filters.get('job_order_company')
@@ -377,20 +379,20 @@ def job_site_employee(doctype, txt, searchfield, page_len, start, filters):
     return frappe.db.sql(sql)
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def hiring_category(doctype,txt,searchfield,page_len,start,filters):
     company=filters.get('hiring_company')
     sql = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''.format(company)
     return frappe.db.sql(sql)
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def org_industy_type(company=None):
     sql = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''.format(company)
     return frappe.db.sql(sql)
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def delete_file_data(file_name):
     sql = '''Delete from `tabFile` where file_name = "{}"'''.format(file_name)
     frappe.db.sql(sql)
@@ -402,7 +404,7 @@ def job_order_notification(job_order_title,hiring_org,job_order,subject,l):
     link = f' href="/app/assign-employee/{job_order}"'
     return joborder_email_template(subject,message,l,link)
     
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def disable_user(company, check):
     try:
         if check=="1":
@@ -417,7 +419,7 @@ def disable_user(company, check):
         frappe.msgprint(e)
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def update_job_order_status():
     job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','order_status'])
     now_date = get_datetime(now())
@@ -434,7 +436,7 @@ def update_job_order_status():
 
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def sales_invoice_notification(job_order=None,company=None,invoice_name=None):
     try:
         sql = '''  select workflow_state from `tabTimesheet` where job_order_detail='{0}' and employee_company='{1}' '''.format(job_order, company)
@@ -462,20 +464,20 @@ def sales_invoice_notification(job_order=None,company=None,invoice_name=None):
         frappe.error_log(e, "invoice notification")
         frappe.throw(e)
              
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def hiring_org_name(current_user):
     sql = ''' select company from `tabEmployee` where email='{0}' '''.format(current_user)
     user_company=frappe.db.sql(sql, as_list=1)
     if(len(user_company)==1):
         return 'success'
            
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def designation_activity_data(doc,method):
     docs=frappe.new_doc('Activity Type')
     docs.activity_type=doc.name
     docs.insert()
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def filter_company_employee(doctype, txt, searchfield, page_len, start, filters):
     try:
         company=filters.get('company')
@@ -486,13 +488,13 @@ def filter_company_employee(doctype, txt, searchfield, page_len, start, filters)
         frappe.error_log(e, "Staffing Company Error")
         frappe.throw(e)
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def contact_company(doctype, txt, searchfield, page_len, start, filters):
     company=filters.get('company')
     sql = """ select name from `tabCompany` where name='{}' """.format(company)
     return frappe.db.sql(sql) 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def email_recipient(doctype, txt, searchfield, page_len, start, filters):
     company=filters.get('company')
     sql = """ select name from `tabContact` where company='{}' """.format(company)
@@ -542,21 +544,24 @@ def chat_room_created(hiring_org,staffing_org,job_order):
     except Exception as e:
         frappe.error_log(e, "chat room creation error")
 
-@frappe.whitelist()
-def assign_employee_resume_update(employee,name):
-    sql = """ select resume from `tabEmployee` where name='{}' """.format(employee)
-    data = frappe.db.sql(sql,as_dict=1)
-    if (len(data)>0 and data[0]["resume"]):
-        sql =""" UPDATE `tabAssign Employee Details` SET resume='{0}' WHERE name='{1}'; """.format(data[0]["resume"],name)
-        frappe.db.sql( sql)
-        frappe.db.commit()
-    return True
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
+def assign_employee_resume_update(employee, name):
+    if(company_type == "Staffing" and user == frappe.session.user):
+        sql = """ select resume from `tabEmployee` where name='{}' """.format(employee)
+        data = frappe.db.sql(sql,as_dict=1)
+        if(len(data) > 0 and data[0]["resume"]):
+            sql =""" UPDATE `tabAssign Employee Details` SET resume='{0}' WHERE name='{1}'; """.format(data[0]["resume"],name)
+            frappe.db.sql(sql)
+            frappe.db.commit()
+        return True
+    else:
+        return "No Access"
+@frappe.whitelist(allow_guest=False)
 def joborder_resume(name):
     sql = """ select resume from `tabEmployee` where name='{}' """.format(name)
     return frappe.db.sql(sql,as_dict=1)
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def lead_org(current_user):
     sql = ''' select company from `tabEmployee` where email='{0}' '''.format(current_user)
     user_company=frappe.db.sql(sql, as_list=1)
@@ -564,7 +569,7 @@ def lead_org(current_user):
         return 'success'
     
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def timesheet_detail(job_order):
     sql = ''' select * from `tabTimesheet` where job_order_detail='{0}' '''.format(job_order)
     sales_sql= ''' select * from `tabSales Invoice` where job_order='{0}' '''.format(job_order)
@@ -579,7 +584,7 @@ def timesheet_detail(job_order):
         return 'success'
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def update_timesheet_is_check_in_sales_invoice(time_list):
     try:
         time_list = json.loads(time_list)
@@ -591,7 +596,7 @@ def update_timesheet_is_check_in_sales_invoice(time_list):
     except Exception as e:
         frappe.error_log(e, "Update time sheet Invoice")
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def assigned_employees(job_order):
     try:
         sql=f" select name from `tabAssign Employee` where job_order='{job_order}' and tag_status='Approved'"
@@ -602,7 +607,7 @@ def assigned_employees(job_order):
         frappe.error_log(e, "Assign Employee List")
 
     
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def assigned_employee_data(job_order):
     try:
         assigne_employee=f""" select `tabAssign Employee`.company as staff_company,`tabAssign Employee Details`.employee_name as employee_name,`tabAssign Employee Details`.employee as employee from `tabAssign Employee`,`tabAssign Employee Details` where `tabAssign Employee`.name=`tabAssign Employee Details`.parent and job_order="{job_order}" and tag_status="Approved" """;
@@ -631,7 +636,7 @@ def assigned_employee_data(job_order):
     except Exception as e:
         frappe.error_log(e, "Assigned Employee")
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def staff_assigned_employees(job_order):
     try:
         sql=f" select name from `tabAssign Employee` where job_order='{job_order}' and tag_status='Approved' and  company in (select company from `tabEmployee` where email='{frappe.session.user}')"
@@ -642,7 +647,7 @@ def staff_assigned_employees(job_order):
         frappe.error_log(e, "Staff Employee")
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def staffing_assigned_employee(job_order):
     try:
         assigned_emp=f""" select `tabAssign Employee`.company,`tabAssign Employee`.name,`tabAssign Employee Details`.employee_name as employee_name,`tabAssign Employee Details`.employee as employee from `tabAssign Employee`,`tabAssign Employee Details` where `tabAssign Employee`.name=`tabAssign Employee Details`.parent and job_order="{job_order}" and tag_status="Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email='{frappe.session.user}' )  """

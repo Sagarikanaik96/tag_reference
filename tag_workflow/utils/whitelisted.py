@@ -186,7 +186,7 @@ def get_user(company):
 @frappe.whitelist()
 def request_signature(staff_user, staff_company, hiring_user, name):
     try:
-        link = frappe.utils.get_link_to_form("Contract", name)
+        link = frappe.utils.get_link_to_form("Contract", name, label="Click Here For Signature")
         msg=f"{staff_user} from {staff_company} is requesting an electronic signature for your contract agreement."
         subject = "Signature Request"
         make_system_notification([hiring_user], msg, 'Contract', name, subject)

@@ -7,73 +7,75 @@ frappe.ui.form.on('Assign Employee', {
 		render_table(frm);
 		approved_employee(frm);
 		hide_resume(frm);
-		back_job_order_form(frm)
-	
-
+		back_job_order_form(frm);
 		$(document).on('click', '[data-fieldname="employee"]', function(){
 			if ($('[data-fieldname="employee"]').last().val() != '' ){
-  				frappe.call({
+				frappe.call({
 					method:"tag_workflow.tag_data.joborder_resume",
 					args: {
-								name: $('[data-fieldname="employee"]').last().val(),
-							},
-					callback:function(r)
-					{	
+						name: $('[data-fieldname="employee"]').last().val(),
+					},
+					callback:function(r){
 						if (r.message[0]["resume"]){
 							if ($('[data-fieldname="resume"]').last().text() == "Attach"){
-								$('[data-fieldname="resume"]').last().append(' <div class="static-area ellipsis" style="display: block;"> <a class="attached-file-link nani static-area ellipsis" target="_blank"  href='+r.message[0]["resume"]+'>' + r.message[0]["resume"]+ '</a></div>')
+								$('[data-fieldname="resume"]').last().append(' <div class="static-area ellipsis" style="display: block;"> <a class="attached-file-link nani static-area ellipsis" target="_blank"  href='+r.message[0]["resume"]+'>' + r.message[0]["resume"]+ '</a></div>');
 								$('[data-fieldname="resume"]').addClass("static-area ellipsis primary-action");
 							}
 						}
 					}
-				})
-  			}
+				});
+			}
 		});
 
 		$(document).on('click', '.nani', function(){
 			function show_popup(){
-			      $('.close-alt').click();
-			   }
-	   window.setTimeout( show_popup,1250 );
-		})
+				$('.close-alt').click();
+			}
+			window.setTimeout( show_popup,1250 );
+		});
 	},
+
 	onload:function(frm){
 		hide_resume(frm);
 		if (frm.doc.is_single_share && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 			console.log('single place order')
 		}
+
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
-			const li = []
+			const li = [];
 			document.querySelectorAll('a[data-doctype="Employee"]').forEach(element=>{
-			li.push(element.getAttribute("data-name"))
-			})
+				li.push(element.getAttribute("data-name"));
+			});
 			return {
 				query: "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.get_employee",
-				filters: {company: doc.hiring_organization, emp_company: doc.company,
-					job_category: doc.job_category,	distance_radius: doc.distance_radius, job_location: doc.job_location,
-					employee_lis : li
+				filters: {
+					company: doc.hiring_organization, emp_company: doc.company,
+					job_category: doc.job_category,	distance_radius: doc.distance_radius, job_location: doc.job_location, employee_lis : li
 				}
 			}
 		}
 	},
+	
 	before_save:function(frm){
 		check_employee_data(frm);
 	},
+	
 	after_save:function(frm){
 		if(frm.doc.tag_status=='Open'){
-			make_hiring_notification(frm)
+			make_hiring_notification(frm);
 		}
-		var table = frm.doc.employee_details
+
+		var table = frm.doc.employee_details;
 		for(var d in table){
-				frappe.call({
-					method:"tag_workflow.tag_data.assign_employee_resume_update",
-					args: {
-								employee: table[d].employee,
-								name : table[d].name
-							}
-					});
+			frappe.call({
+				method:"tag_workflow.tag_data.assign_employee_resume_update",
+				args: {
+					"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
+					employee: table[d].employee, name : table[d].name
+				}
+			});
 		}
-		 location.reload();
+		location.reload();
 	},
 	validate:function(frm){
 		var sign = cur_frm.doc.e_signature_full_name
@@ -93,9 +95,10 @@ frappe.ui.form.on('Assign Employee', {
 
 		if(message!="<b>Please Fill Mandatory Fields:</b>"){
 			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
-			frappe.validated=false
+			frappe.validated=false;
 		}
 	},
+
 	setup: function(frm){
 		frm.set_query("company", function(doc){
 			return {
@@ -103,23 +106,23 @@ frappe.ui.form.on('Assign Employee', {
 					["Company", "organization_type", "=", "Staffing"]
 				]
 			}
-		})
-	if (frappe.boot.tag.tag_user_info.company_type == "Staffing"){
-		frappe.call({
-			'method':"tag_workflow.tag_data.lead_org",
-			'args':{'current_user':frappe.session.user},
-			callback:function(r){
-				if(r.message=='success'){
-					frm.set_value('company',frappe.boot.tag.tag_user_info.company)
-					frm.refresh_fields();
-				}
-				else{
-					frm.refresh_fields();
-				}
-			}	
-		})
+		});
+		if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+			frappe.call({
+				'method': "tag_workflow.tag_data.lead_org",
+				'args': {'current_user':frappe.session.user},
+				'callback':function(r){
+					if(r.message=='success'){
+						frm.set_value('company',frappe.boot.tag.tag_user_info.company)
+						frm.refresh_fields();
+					}
+					else{
+						frm.refresh_fields();
+					}
+				}	
+			});
+		}
 	}
-}
 });
 
 
@@ -130,8 +133,10 @@ function make_hiring_notification(frm){
 		"freeze": true,
 		"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
 		"args":{
+			"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
 			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
-			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category
+			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
+			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category
 		}
 	});
 }
@@ -198,38 +203,37 @@ frappe.ui.form.on("Assign Employee Details", {
 				window.open(cur_frm.doc.employee_details[0]["resume"]);
 			}
 		});
-	}	
+	}
 });
 
 
 function approved_employee(frm){
 	if(cur_frm.doc.tag_status == "Approved" && frappe.boot.tag.tag_user_info.company_type=='Hiring'){
-		var current_date=new Date(frappe.datetime.now_datetime())
-		var approved_date=new Date(frm.doc.modified)
-		var diff=current_date.getTime()-approved_date.getTime()
-		diff=parseInt(diff/1000)
-		if (diff<60){
+		var current_date = new Date(frappe.datetime.now_datetime());
+		var approved_date = new Date(frm.doc.modified);
+		var diff = current_date.getTime()-approved_date.getTime();
+		diff = parseInt(diff/1000);
+		if(diff<60){
 			frappe.call({
 				method:"tag_workflow.tag_data.update_job_order",
 				"freeze": true,
 				"freeze_message": "<p><b>preparing notification for Staffing orgs...</b></p>",
 				args:{
-
+					"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
 					"job_name" : cur_frm.doc.job_order, "employee_filled" : cur_frm.doc.employee_details.length,
 					"staffing_org" : cur_frm.doc.company, "hiringorg" : cur_frm.doc.hiring_organization, "name": frm.doc.name
 				}
 			});
-
-		}	
+		}
 	}
 }
 
 function hide_resume(frm){
 	if (!frm.doc.resume_required){
 		var table=frappe.meta.get_docfield("Assign Employee Details", "resume",frm.doc.name);
-			table.hidden=1;
-			frm.refresh_fields();
-		}
+		table.hidden=1;
+		frm.refresh_fields();
+	}
 
 	$('[data-fieldname="resume"]').on({
 		'click': function () {
@@ -242,8 +246,8 @@ function hide_resume(frm){
 
 
 function back_job_order_form(frm){
-		frm.add_custom_button(__('Go Job Order'), function(){
-			frappe.set_route("Form", "Job Order", frm.doc.job_order);
-		})
+	frm.add_custom_button(__('Job Order'), function(){
+		frappe.set_route("Form", "Job Order", frm.doc.job_order);
+	},__("View"));
 }
 
