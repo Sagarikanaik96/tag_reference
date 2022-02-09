@@ -436,7 +436,7 @@ function assign_employe(frm) {
 
 function redirect_quotation(frm) {
   var doc = frappe.model.get_new_doc("Assign Employee");
-  var staff_company = frappe.boot.tag.tag_user_info.company || [];
+  var staff_company = staff_company_direct_or_general(frm)
   doc.transaction_date = frappe.datetime.now_date();
   doc.company = staff_company[0];
   doc.job_order = frm.doc.name;
@@ -466,6 +466,15 @@ function redirect_quotation(frm) {
     },
   });
 }
+function staff_company_direct_or_general(frm){
+  if (frm.doc.is_single_share){
+      return [frm.doc.staff_company]
+  }
+  else{
+      return frappe.boot.tag.tag_user_info.company || [];
+  }
+}
+
 
 function set_read_fields(frm) {
   var myStringArray = [

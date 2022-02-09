@@ -16,9 +16,6 @@ login.bind_events = function () {
 		e.preventDefault();
 	});
 
-	// hide chat bubble
-	$('.chat-app').hide()
-
 	$(".form-login").on("submit", function (event) {
 		event.preventDefault();
 		var args = {};
@@ -90,6 +87,7 @@ login.bind_events = function () {
 	{% endif %}
 }
 
+setTimeout(() => {$('.chat-app').hide();}, 400)
 
 login.route = function () {
 	var route = window.location.hash.slice(1);

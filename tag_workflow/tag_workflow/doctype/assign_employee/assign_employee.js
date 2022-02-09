@@ -38,7 +38,7 @@ frappe.ui.form.on('Assign Employee', {
 	onload:function(frm){
 		hide_resume(frm);
 		if (frm.doc.is_single_share && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-			console.log('single place order')
+			company_set_by_direct_order(frm)
 		}
 
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc, cdt, cdn) {
@@ -251,3 +251,10 @@ function back_job_order_form(frm){
 	},__("View"));
 }
 
+function company_set_by_direct_order(frm){
+	frm.set_value('company',frm.doc.company)
+
+	// to set value and makes read only in direct order
+	// frm.set_df_property('company', "read_only", 1);
+	frm.refresh_fields();
+}
