@@ -32,7 +32,6 @@ frappe.ui.form.on('Claim Order', {
 
 	},
 	refresh:function(frm){
-		$('[data-label="Save"]').text("Submit Claim")
 		if(frm.doc.__islocal==1){
 			if (!frm.doc.hiring_organization){
                 frappe.msgprint(__("Your claim is not completed. Please try again from Job Order!"));
@@ -43,6 +42,7 @@ frappe.ui.form.on('Claim Order', {
 			}    
 			frm.set_df_property('approved_no_of_workers', "hidden", 1);
 			cancel_claimorder(frm);
+			submit_claim(frm);
 			if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 				org_info(frm);	
 			}
@@ -58,6 +58,7 @@ frappe.ui.form.on('Claim Order', {
 
 	},
 	setup:function(frm){
+		$('[data-label="Save"]').hide()
 		frm.set_query("staffing_organization", function (doc) {
 			return {
 			  filters: [
@@ -73,6 +74,12 @@ frappe.ui.form.on('Claim Order', {
 		  });
 	}		
 });
+
+function submit_claim(frm){
+	frm.add_custom_button(__('Submit Claim'), function(){
+		frm.save()
+	}).addClass("btn btn-primary btn-sm primary-action");
+}
 
 function staffing_claim_joborder(frm){
 	frappe.call({
