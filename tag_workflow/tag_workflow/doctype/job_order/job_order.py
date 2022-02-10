@@ -31,7 +31,9 @@ def joborder_notification(organizaton,doc_name,company,job_title,posting_date,jo
         data=frappe.db.sql(sql, as_list=1)
         new_data=json.loads(data[0][0])
         if(new_data['changed'][0][0]=='no_of_workers'):
-            msg = 'The number of employees requested for '+doc_name+' on '+str(datetime.now())+' has been modified. '
+            now = datetime.now()
+            dt_string = now.strftime("%d/%m/%Y %H:%M")
+            msg = 'The number of employees requested for '+doc_name+' on '+dt_string+' has been modified. '
             is_send_mail_required(organizaton,doc_name,msg)
         else:
             msg = f'{company} has updated details for {job_title} work order at {job_site} for {posting_date}. Please review work order details.'

@@ -86,8 +86,7 @@
   "section_break_61",
   "employee_rating",
   "dispute_section",
-  "dispute_comment",
-  "section_break_html"
+  "dispute_comment"
  ],
  "fields": [
   {
@@ -451,16 +450,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_html",
-   "fieldtype": "Section Break",
-   "hidden": 1
-  },
-  {
-   "fieldname": "section_break_html",
-   "fieldtype": "Section Break",
-   "hidden": 1
-  },
-  {
    "fieldname": "html_2",
    "fieldtype": "HTML",
    "options": "<h3>You Have Claimed For This Order</h3>"
@@ -469,7 +458,7 @@
    "fieldname": "related_actions_section",
    "fieldtype": "Section Break",
    "hidden": 1,
-   "label": "Related Sections"
+   "label": "Related Actions"
   },
   {
    "fieldname": "related_details",
@@ -597,7 +586,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-07 07:10:54.623181",
+ "modified": "2022-02-10 09:50:25.386284",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
