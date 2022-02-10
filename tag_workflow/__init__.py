@@ -32,7 +32,8 @@ def get_key(key):
             try:
                 IP = "169.254.169.254"
                 reg = "/latest/meta-data/placement/region"
-                URL = "http://"+IP+reg
+                HTTP = "http://"
+                URL = HTTP++IP+reg
                 region = requests.get(URL)
                 client = boto3.client('ssm', region.text)
                 response = client.get_parameter(Name='env_details')
