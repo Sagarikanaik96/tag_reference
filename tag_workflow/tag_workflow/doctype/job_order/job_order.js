@@ -610,7 +610,7 @@ function check_from_date(frm) {
   let from_date = frm.doc.from_date || "";
   let to_date = frm.doc.to_date || "";
 
-  if (from_date && from_date <= frappe.datetime.now_date()) {
+  if (from_date && from_date < frappe.datetime.now_date()) {
     frappe.msgprint({
       message: __("<b>Start Date</b> Cannot be Today`s date or Past date"),
       title: __("Error"),
@@ -630,7 +630,7 @@ function check_from_date(frm) {
 function check_to_date(frm) {
   let from_date = frm.doc.from_date || "";
   let to_date = frm.doc.to_date || "";
-  if (to_date && frappe.datetime.now_date() >= to_date) {
+  if (to_date && frappe.datetime.now_date() > to_date) {
     frappe.msgprint({
       message: __("<b>End Date</b> Cannot be Today`s date or Past date"),
       title: __("Error"),
