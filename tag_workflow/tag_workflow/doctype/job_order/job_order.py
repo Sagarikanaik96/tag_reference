@@ -3,6 +3,7 @@
 import frappe
 from frappe.utils import user
 from frappe.share import add
+from tag_workflow.tag_data import hiring_org_name
 from tag_workflow.utils.notification import sendmail
 from tag_workflow.utils.notification import make_system_notification
 from frappe.model.document import Document
@@ -117,9 +118,11 @@ def make_sales_invoice(source_name, company, emp_list, emp_sql,target_doc=None, 
         return frappe.get_doc("Customer", {"name": source_name})
 
     def update_timesheet(company, source, doclist, target, emp_list,emp_sql):
-        income_account, cost_center, default_expense_account = frappe.db.get_value("Company", company, ["default_income_account", "cost_center", "default_expense_account"])
+        income_account, cost_center, default_expense_account,creater_company,creater_city,creater_state,creater_zip = frappe.db.get_value("Company", company, ["default_income_account", "cost_center", "default_expense_account","address","city","state","zip"])
         total_amount = 0
         total_hours = 0
+        hiring_org_name = frappe.db.get_value(ORD,source,["company"])
+        for_company,for_company_city,for_company_state,for_company_zip = frappe.db.get_value("Company",hiring_org_name,["address","city","state","zip"])
         sql = """ select name from `tabTimesheet` where job_order_detail = '{0}' and docstatus = 1 and employee in ({1}) and is_check_in_sales_invoice = 0 """.format(source, emp_sql)
         timesheet = frappe.db.sql(sql, as_dict=1)
 
@@ -134,6 +137,17 @@ def make_sales_invoice(source_name, company, emp_list, emp_sql,target_doc=None, 
 
         doclist.total_billing_amount = total_amount
         doclist.total_billing_hours = total_hours
+        # for company detail
+        doclist.creater_company = creater_company
+        doclist.creater_city = creater_city
+        doclist.creater_state = creater_state
+        doclist.creater_zip = creater_zip
+        # for receiver deatils
+        doclist.for_company = for_company
+        doclist.for_company_city = for_company_city
+        doclist.for_company_state = for_company_state
+        doclist.for_company_zip = for_company_zip
+
         timesheet_item = {"item_name": "Service", "description": "Service", "uom": "Nos", "qty": 1, "stock_uom": "Nos", "conversion_factor": 1, "stock_qty": 1, "rate": total_amount, "amount": total_amount, "income_account": income_account, "cost_center": cost_center, "default_expense_account": default_expense_account}
         doclist.append("items", timesheet_item)
         doclist.company = company
@@ -150,6 +164,9 @@ def make_sales_invoice(source_name, company, emp_list, emp_sql,target_doc=None, 
     doclist = make_invoice(source_name, target_doc)
     update_timesheet(company, source_name, doclist, target_doc, emp_list,emp_sql)
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
+    hiring_org_name = frappe.db.get_value(ORD,source_name,["company"])
+    doclist.customer = hiring_org_name
+
     return doclist
 
 #--------invoice-------#

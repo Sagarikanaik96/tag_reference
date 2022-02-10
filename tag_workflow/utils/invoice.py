@@ -117,17 +117,35 @@ def create_month_sales_invoice(source_name, company,month,year,first_day,last_da
 
     def update_item(company, source, doclist, target):
         total_amount = 0
+        grand_total = 0
         
-        income_account, cost_center, default_expense_account, tag_charges = frappe.db.get_value("Company", company, ["default_income_account", "cost_center", "default_expense_account", "tag_charges"])
+        income_account, cost_center, default_expense_account, tag_charges,creater_company,creater_city,creater_state,creater_zip = frappe.db.get_value("Company", company, ["default_income_account", "cost_center", "default_expense_account", "tag_charges","address","city","state","zip"])
+        for_company,for_company_city,for_company_state,for_company_zip = frappe.db.get_value("Company",source,["address","city","state","zip"])
 
         sql = """ select grand_total from `tabSales Invoice` where docstatus = 1 and company = '{0}' and posting_date between '{1}' and '{2}' """.format(source, start, end)
         invoice = frappe.db.sql(sql, as_dict=1)
 
         for inv in invoice:
             total_amount += (inv.grand_total * tag_charges)/100
+            grand_total += inv.grand_total
         
         item = {"item_name": "Service charges for "+str(source), "description": "Service", "uom": "Nos", "qty": 1, "stock_uom": "Nos", "conversion_factor": 1, "stock_qty": 1, "rate": total_amount, "amount": total_amount, "income_account": income_account, "cost_center": cost_center, "default_expense_account": default_expense_account}
         doclist.append("items", item)
+
+        doclist.tag_charge1 = tag_charges
+        doclist.tag_grand_total1 = grand_total
+
+        # tag company detail
+        doclist.creater_company = creater_company
+        doclist.creater_city = creater_city
+        doclist.creater_state = creater_state
+        doclist.creater_zip = creater_zip
+
+        # staffing company detail
+        doclist.for_company = for_company
+        doclist.for_company_city = for_company_city
+        doclist.for_company_state = for_company_state
+        doclist.for_company_zip = for_company_zip
 
     def update_salesinvoice_list(company, doclist, target,first_day,last_day):
         sql = f""" select name,company,job_order,total_billing_hours,total_billing_amount from `tabSales Invoice` where docstatus = 1 and company = '{company}' and posting_date between '{first_day}{time_format}' and '{last_day}{time_format}' """
@@ -137,7 +155,7 @@ def create_month_sales_invoice(source_name, company,month,year,first_day,last_da
             if d.job_order:
                 joborder = frappe.db.sql(f'''select company,select_job,from_date,to_date,rate from `tabJob Order` where name = "{d.job_order}"''', as_dict=True)
             
-                activity = {"sales_invoice_id":d.name,"job_order_id":d.job_order,"start_date":joborder[0].from_date,"end_date":joborder[0].to_date,"job_title":joborder[0].select_job,"total_hours":d.total_billing_hours,"total_rate":d.rate,"total_amount":d.total_billing_amount}
+                activity = {"sales_invoice_id":d.name,"job_order_id":d.job_order,"start_date":joborder[0].from_date,"end_date":joborder[0].to_date,"job_title":joborder[0].select_job,"total_hours":d.total_billing_hours,"total_amount":d.total_billing_amount}
                 doclist.append("sales_invoice_data", activity)
 
     def make_invoice(source_name, target_doc):
