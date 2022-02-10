@@ -81,7 +81,12 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
 
 @frappe.whitelist()
 def worker_data(job_order):
-    print(job_order)
     sql=f"select no_of_workers,worker_filled from `tabJob Order` where name='{job_order}'"
+    data=frappe.db.sql(sql,as_dict=True)
+    return data
+
+@frappe.whitelist()
+def approved_workers(job_order,staffing_org):
+    sql=f"select approved_no_of_workers from `tabClaim Order` where job_order='{job_order}' and staffing_organization='{staffing_org}' "
     data=frappe.db.sql(sql,as_dict=True)
     return data

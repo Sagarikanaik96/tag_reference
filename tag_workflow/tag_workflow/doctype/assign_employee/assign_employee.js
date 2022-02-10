@@ -4,6 +4,15 @@
  
 frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
+		if(frm.doc.__islocal==1){
+			if (!frm.doc.hiring_organization){
+				frappe.msgprint(__("Your Can't Assign Employye without job order detail"));
+				frappe.validated = false
+				setTimeout(() => {
+				frappe.set_route("List","Job Order")
+				}, 5000);
+			}
+		}   
 		staff_comp(frm);
 		worker_notification(frm)
 		render_table(frm);
@@ -134,12 +143,7 @@ function check_employee_data(frm){
 			msg.push('Employee(<b>'+table[d].employee+'</b>) job category not matched with Job Order job category');
 		}
 	}
-
-	if(frm.doc.tag_status=='Approved'){
-		(table.length > Number(frm.doc.no_of_employee_required)+1) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
-	}else{
-		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
-	}
+	table_emp(frm,table,msg);
 
 	for(var e in table){(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg.push('Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details');}
 	if(msg.length){frappe.msgprint({message: msg.join("\n\n"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
@@ -241,9 +245,8 @@ function staff_comp(frm){
 	}
 }
 
-
 function worker_notification(frm){
-	if(frm.doc.tag_status=="Open" && frappe.boot.tag.tag_user_info.company_type=="Staffing"){
+	if(frm.doc.tag_status=="Open" && frappe.boot.tag.tag_user_info.company_type=="Staffing" && frm.doc.__islocal!=1){
 		frappe.call({
 			"method":"tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.worker_data",
 			"args":{
@@ -259,5 +262,34 @@ function worker_notification(frm){
 				}
 			}
 		})
+	}
+	else if(frm.doc.tag_status=="Open" && frappe.boot.tag.tag_user_info.company_type=="Staffing" && frm.doc.__islocal==1 && frm.doc.resume_required==0 && frm.doc.job_order){
+		frappe.call({
+			"method":"tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.approved_workers",
+			"args":{
+				"job_order":frm.doc.job_order,
+				"staffing_org":frappe.boot.tag.tag_user_info.company
+			},
+			callback:function(r){
+				if(r.message.length!=0){
+					frm.set_value('claims_approved',r.message[0].approved_no_of_workers)
+					frm.set_df_property('claims_approved',"hidden",0)
+				}
+			
+			}
+		})
+
+	}
+}
+
+function table_emp(frm,table,msg){
+	if(frm.doc.tag_status=='Approved'){
+		(table.length > Number(frm.doc.no_of_employee_required)+1) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
+	}
+	else if(frm.doc.claims_approved){
+		(table.length > Number(frm.doc.claims_approved)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.claims_approved+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
+	}
+ 	else{
+		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 	}
 }
