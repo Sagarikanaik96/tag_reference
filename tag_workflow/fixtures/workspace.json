@@ -1620,7 +1620,7 @@
     "icon": null,
     "is_query_report": 1,
     "label": "Sales Register",
-    "link_to": "Sales Register",
+    "link_to": "Sales Register1",
     "link_type": "Report",
     "onboard": 0,
     "only_for": null,
@@ -1690,7 +1690,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2022-01-27 06:09:54.760285",
+  "modified": "2022-02-09 23:28:43.619661",
   "module": "Tag Workflow",
   "name": "Reports",
   "onboarding": null,
