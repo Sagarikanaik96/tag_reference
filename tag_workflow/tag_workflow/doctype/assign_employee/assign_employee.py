@@ -1,6 +1,6 @@
 # Copyright (c) 2021, SourceFuse and contributors
 # For license information, please see license.txt
-import frappe
+import frappe, tag_workflow
 from frappe import _
 import requests, json
 import googlemaps
@@ -11,6 +11,17 @@ class AssignEmployee(Document):
 
 
 distance_value = {"5 miles": 5, "10 miles": 10, "20 miles": 20, "50 miles": 50}
+
+def get_api_key():
+    try:
+        api_key = tag_workflow.get_key("gmap")
+        print(api_key)
+        if(api_key == 'Error'):
+            return frappe.db.get_value("Google Settings", "Google Settings", "api_key")
+        else:
+            return api_key
+    except:
+        return ''
 
 def get_souce(location=None):
     try:
@@ -28,9 +39,13 @@ def get_souce(location=None):
 
 def check_distance(emp, distance, location):
     try:
-        result = []
-        source = []
-        api_key = 'AIzaSyDRCtr2OCT1au8HCjMQPivkhIknFI7akIU'
+        result, source = [], []
+        api_key = get_api_key()
+
+        if not api_key:
+            frappe.msgprint(_("GMAP api key not found"))
+            return ()
+
         gmaps = googlemaps.Client(key=api_key)
         source = get_souce(location)
         for e in emp:
@@ -44,8 +59,6 @@ def check_distance(emp, distance, location):
                         result.append((e['name'], e['employee_name']))
             except Exception as e:
                 print(e)
-                pass
-
         return tuple(result)
     except Exception as e:
         print(e, "google")
