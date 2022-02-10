@@ -20,7 +20,8 @@ def get_api_key():
             return frappe.db.get_value("Google Settings", "Google Settings", "api_key")
         else:
             return api_key
-    except:
+    except Exception as e:
+        print(e)
         return ''
 
 def get_souce(location=None):
