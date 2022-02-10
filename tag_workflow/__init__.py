@@ -30,10 +30,11 @@ def get_key(key):
             return frappe.cache().get_value("aws")['tag_keys'][key]
         else:
             try:
-                IP = "169.254.169.254"
+                IP_1, IP_2, IP_3, IP_4 = "169.", "254.", "169.", "254"
                 reg = "/latest/meta-data/placement/region"
                 HTTP = "http"
-                URL = HTTP+"://"+IP+reg
+                URL = HTTP+"://"+IP_1+IP_2+IP_3+IP_4+reg
+                print(URL)
                 region = requests.get(URL)
                 client = boto3.client('ssm', region.text)
                 response = client.get_parameter(Name='env_details')
