@@ -534,6 +534,10 @@ input::-webkit-credentials-auto-fill-button {
 [data-route="List/Claim Order/List"] .modal-body label {
   color: #8d9cbc !important;
   font-size: 12px !important;
+  padding-right: 5px;
+}
+[data-route="List/Claim Order/List"] .modal-body .frappe-control {
+  font-size: 12px;
 }
 [data-route="List/Claim Order/List"] .modal-body table {
   width: 100%;
