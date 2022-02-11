@@ -516,6 +516,7 @@ function timer_value(frm) {
     frappe.datetime.now_datetime()
   );
   if (time < 24) {
+    frm.toggle_display('section_break_8',0)
     var myStringArray = [
       "company",
       "posting_date_time",

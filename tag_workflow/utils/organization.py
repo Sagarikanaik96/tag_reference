@@ -20,6 +20,7 @@ Job_Label = "Job Order"
 Custom_Label = "Custom Field"
 WEB_MAN = "Website Manager"
 USR, EMP, COM = "User", "Employee", "Company"
+Global_defaults="Global Defaults"
 
 ALL_ROLES = [role.name for role in frappe.db.get_list("Role") or []]
 
@@ -37,6 +38,11 @@ SPACE_PROFILE = ["CRM", "Users", tag_workflow, "Settings", "Home", "My Activitie
 #------setup data for TAG -------------#
 def setup_data():
     try:
+        frappe.db.set_value(Global_defaults,Global_defaults,"default_currency", "USD")
+        frappe.db.set_value(Global_defaults,Global_defaults,"hide_currency_symbol", "No")
+        frappe.db.set_value(Global_defaults,Global_defaults,"disable_rounded_total", "1")
+        frappe.db.set_value(Global_defaults,Global_defaults,"country", "United States")
+
         update_organization_data()
         update_roles()
         update_role_profile()
