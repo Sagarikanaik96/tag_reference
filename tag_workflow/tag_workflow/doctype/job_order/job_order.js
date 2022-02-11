@@ -225,8 +225,8 @@ frappe.ui.form.on("Job Order", {
               frm.doc.job_start_time +
               "<br><b>Job Site: </b>" +
               frm.doc.job_site +
-              "<br><b>Job Site Contact: </b>" +
-              job_site_contact +
+              "<br><b>Job Site Contact Person Name: </b>" +
+              frm.doc.contact_name +
              "<br><b>No. of Workers: </b>" +
               frm.doc.no_of_workers +
               "<br><b>Base Price: </b>" +
