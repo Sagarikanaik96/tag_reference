@@ -62,6 +62,7 @@ def update_organization_data():
         for data in ADD_ORGANIZATION_DATA:
             org_doc = frappe.get_doc(dict(doctype = Organization, organization = data))
             org_doc.save()
+        frappe.db.sql(""" delete from `tabDashboard` """)
     except Exception as e:
         print(e)
         frappe.log_error(e, "update_organization_data")

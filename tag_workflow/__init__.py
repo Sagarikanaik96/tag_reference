@@ -34,16 +34,13 @@ def get_key(key):
                 reg = "/latest/meta-data/placement/region"
                 HTTP = "http"
                 URL = HTTP+"://"+IP_1+IP_2+IP_3+IP_4+reg
-                print(URL)
                 region = requests.get(URL)
                 client = boto3.client('ssm', region.text)
                 response = client.get_parameter(Name='env_details')
                 server_details = json.loads(response['Parameter']['Value'])
                 frappe.cache().set_value("aws", server_details)
                 return server_details['tag_keys'][key]
-            except Exception as e:
-                print(e)
+            except Exception:
                 return "Error"
-    except Exception as e:
-        print(e)
+    except Exception:
         return "Error"
