@@ -29,10 +29,23 @@ frappe.ui.form.on("User", {
 					]
 				}
 			}else if(roles.includes('Hiring Admin')){
-				return {
-					filters: [
-						["Organization Type", "name", "=", "Hiring"]
-					]
+				if(frappe.boot.tag.tag_user_info.company_type=="Hiring"){
+
+					return {
+						filters: [
+							["Organization Type", "name", "=", "Hiring"]
+						]
+					}
+				}
+				else if(frappe.boot.tag.tag_user_info.company_type=="Exclusive Hiring")
+				{
+					return {
+						filters: [
+							["Organization Type", "name", "=", "Exclusive Hiring"]
+						]
+					}
+
+
 				}
 			}
 		});
