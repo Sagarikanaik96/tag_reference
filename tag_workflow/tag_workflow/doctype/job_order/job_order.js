@@ -170,6 +170,8 @@ frappe.ui.form.on("Job Order", {
             job_title: frm.doc.select_job,
             hiring_name: frm.doc.company,
           },
+          freeze: true,
+          freeze_message:"<p><b>Preparing notification for Hiring Organization</b><p>",
           callback: function (r) {
             cur_frm.refresh();
             cur_frm.reload_doc();
