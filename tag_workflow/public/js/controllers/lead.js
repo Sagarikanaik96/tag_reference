@@ -1,5 +1,6 @@
 frappe.ui.form.on("Lead", {
   refresh: function (frm) {
+    $('[data-original-title="Menu"]').hide()
     cur_frm.clear_custom_buttons();
     reqd_fields(frm);
     hide_details(frm);

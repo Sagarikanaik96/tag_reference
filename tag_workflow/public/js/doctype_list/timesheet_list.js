@@ -4,6 +4,7 @@ frappe.listview_settings['Timesheet'] = {
 	right_column: "name",
 
 	refresh: function(listview){
+		$('[data-original-title="Menu"]').hide()
 		cur_list.page.btn_primary[0].style.display = "none";
 	},
 

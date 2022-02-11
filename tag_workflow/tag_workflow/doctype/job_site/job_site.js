@@ -3,6 +3,7 @@
 
 frappe.ui.form.on('Job Site', {
 	refresh: function(frm){
+		$('[data-original-title="Menu"]').hide()
 		maps(frm);
 		if(frm.doc.__islocal==1){
 			cancel_jobsite(frm);
