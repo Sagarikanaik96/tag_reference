@@ -117,7 +117,6 @@ frappe.ui.form.on("Job Order", {
 
   },
   refresh: function (frm) {
-    $('[data-original-title="Menu"]').hide()
     if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=="Hiring" && frm.doc.order_status=="Upcoming"){
       hide_unnecessary_data(frm)
     }
@@ -171,8 +170,6 @@ frappe.ui.form.on("Job Order", {
             job_title: frm.doc.select_job,
             hiring_name: frm.doc.company,
           },
-          freeze: true,
-          freeze_message:"<p><b>Preparing notification for Hiring Organization</b><p>",
           callback: function (r) {
             cur_frm.refresh();
             cur_frm.reload_doc();
@@ -208,6 +205,7 @@ frappe.ui.form.on("Job Order", {
 
       }
       rate_hour_contract_change(frm);
+      let job_site_contact="Name:"+frm.doc.contact_name+ " Email:"+frm.doc.contact_email+" Phone Number:"+frm.doc.contact_number || " ";
 
       if (frappe.validated) {
         return new Promise(function (resolve, reject) {
@@ -224,8 +222,8 @@ frappe.ui.form.on("Job Order", {
               frm.doc.job_start_time +
               "<br><b>Job Site: </b>" +
               frm.doc.job_site +
-              "<br><b>Job Site Contact Person Name: </b>" +
-              frm.doc.contact_name +
+              "<br><b>Job Site Contact: </b>" +
+              job_site_contact +
              "<br><b>No. of Workers: </b>" +
               frm.doc.no_of_workers +
               "<br><b>Base Price: </b>" +
@@ -516,7 +514,6 @@ function timer_value(frm) {
     frappe.datetime.now_datetime()
   );
   if (time < 24) {
-    frm.toggle_display('section_break_8',0)
     var myStringArray = [
       "company",
       "posting_date_time",
@@ -862,9 +859,9 @@ function view_buttons_hiring(frm){
 	if(cur_frm.doc.__islocal != 1)
 
 	{	
-			let datad1 = `<div id="data" class="my-2" style="text-align: center;padding: 13px 15px;height: 50px;display: inline-flex;float:left; flex-direction: column;border-radius: var(--border-radius-md);box-shadow: var(--card-shadow);background-color: var(--card-bg);max-width: 165px;width: 100%;">
-			<p><b>Claims </b> ${frm.doc.bid}</p>
-			
+			let datad1 = `<div class="my-3" id="data" style="display: flex;justify-content: space-between;">
+			    <p> Claims  </p>
+          <label class="badge bg-danger rounded-circle text-white"> ${frm.doc.bid} </label>
 					</div>`;
       
           $('[data-fieldname = related_details]').click(function(){
@@ -876,8 +873,9 @@ function view_buttons_hiring(frm){
 		
 
 		if(frm.doc.claim){
-      let datad2 = `<div class="my-2" style="text-align: center;padding: 13px 15px;height: 50px;display: inline-flex;float:left; flex-direction: column; border-radius: var(--border-radius-md);box-shadow: var(--card-shadow);background-color: var(--card-bg);max-width: 165px;width: 100%;">
-          <p><b>Messages </b> ${frm.doc.bid}</p>
+      let datad2 = `<div class="my-3" style="display: flex;justify-content: space-between;">
+          <p>Messages </p>
+           <label class="badge bg-danger rounded-circle text-white"> ${frm.doc.bid} </label>
         </div>`;
         $('[data-fieldname = messages]').click(function() {
           messages(frm)
@@ -889,8 +887,9 @@ function view_buttons_hiring(frm){
 		}
 	
 		if(frm.doc.order_status=='Completed'){
-      let datad3 = `<div class="mx-2 my-2" style="text-align: center;padding: 13px 15px;height: 50px;display: inline-flex;float:left; flex-direction: column;border-radius: var(--border-radius-md);box-shadow: var(--card-shadow);background-color: var(--card-bg);max-width: 165px;width: 100%;">
-          <p><b>Timesheets </b>  <button class="btn-primary">View</button></p>
+      let datad3 = `<div class="my-3" style="display: flex;justify-content: space-between;">
+          <p>Timesheets  </p>
+          <button class="btn-light rounded border">View</button>
         </div>`;
         $('[data-fieldname = timesheets]').click(function() {
          timesheets_view(frm)
@@ -913,8 +912,9 @@ function view_buttons_hiring(frm){
 				},
 				callback:function(r){
 				if(r.message=='success'){
-          let datad4 = `<div class="mx-2 my-2" style="text-align: center;padding: 13px 15px;height: 50px;display: inline-flex;float:left; flex-direction: column;border-radius: var(--border-radius-md);box-shadow: var(--card-shadow);background-color: var(--card-bg);max-width: 165px;width: 100%;">
-								<p><b>Invoices </b> <button class="btn-primary">View</button></p>
+          let datad4 = `<div class="my-3" style="flex;justify-content: space-between;">
+								<p>Invoices </p>
+                <button class="btn-primary">View</button>
 							</div>`;
           $('[data-fieldname = invoices]').click(function() {
             sales_invoice_data(frm)

@@ -523,6 +523,39 @@ input::-webkit-credentials-auto-fill-button {
   z-index: 999 !important;
 }
 
+/* claim order */
+[data-route="List/Claim Order/List"] .modal-header .fill-width h4 {
+  font-size: 18px;
+  font-weight: 500;
+}
+[data-route="List/Claim Order/List"] .modal-body {
+  background: #fafbfc;
+}
+[data-route="List/Claim Order/List"] .modal-body label {
+  color: #8d9cbc !important;
+  font-size: 12px !important;
+}
+[data-route="List/Claim Order/List"] .modal-body table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 7px;
+  background: #fff;
+  border: 1px solid#ECECF1;
+  border-radius: 8px;
+  padding: 10px;
+}
+[data-route="List/Claim Order/List"] .modal-body table input {
+  border: 1px solid#ECECF1;
+  width: 55px;
+  border-radius: 5px;
+  padding: 2px 5px;
+}
+[data-route="List/Claim Order/List"] .modal-body table tbody tr th {
+  font-size: 12px;
+  color: #8d9cbc;
+  font-weight: 500;
+}
+
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
   .col-md-12.layout-main-section-wrapper {
