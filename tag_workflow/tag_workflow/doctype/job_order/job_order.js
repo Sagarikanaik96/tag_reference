@@ -862,7 +862,7 @@ function view_buttons_hiring(frm){
 	if(cur_frm.doc.__islocal != 1)
 
 	{	
-			let datad1 = `<div id="data" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+			let datad1 = `<div id="data" class="my-2" style="text-align: center;padding: 13px 15px;height: 50px;display: inline-flex;float:left; flex-direction: column;border-radius: var(--border-radius-md);box-shadow: var(--card-shadow);background-color: var(--card-bg);max-width: 165px;width: 100%;">
 			<p><b>Claims </b> ${frm.doc.bid}</p>
 			
 					</div>`;
@@ -876,7 +876,7 @@ function view_buttons_hiring(frm){
 		
 
 		if(frm.doc.claim){
-      let datad2 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+      let datad2 = `<div class="my-2" style="text-align: center;padding: 13px 15px;height: 50px;display: inline-flex;float:left; flex-direction: column; border-radius: var(--border-radius-md);box-shadow: var(--card-shadow);background-color: var(--card-bg);max-width: 165px;width: 100%;">
           <p><b>Messages </b> ${frm.doc.bid}</p>
         </div>`;
         $('[data-fieldname = messages]').click(function() {
@@ -889,7 +889,7 @@ function view_buttons_hiring(frm){
 		}
 	
 		if(frm.doc.order_status=='Completed'){
-      let datad3 = `<div class="my-2" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+      let datad3 = `<div class="mx-2 my-2" style="text-align: center;padding: 13px 15px;height: 50px;display: inline-flex;float:left; flex-direction: column;border-radius: var(--border-radius-md);box-shadow: var(--card-shadow);background-color: var(--card-bg);max-width: 165px;width: 100%;">
           <p><b>Timesheets </b>  <button class="btn-primary">View</button></p>
         </div>`;
         $('[data-fieldname = timesheets]').click(function() {
@@ -913,7 +913,7 @@ function view_buttons_hiring(frm){
 				},
 				callback:function(r){
 				if(r.message=='success'){
-          let datad4 = `<div class="my-2" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+          let datad4 = `<div class="mx-2 my-2" style="text-align: center;padding: 13px 15px;height: 50px;display: inline-flex;float:left; flex-direction: column;border-radius: var(--border-radius-md);box-shadow: var(--card-shadow);background-color: var(--card-bg);max-width: 165px;width: 100%;">
 								<p><b>Invoices </b> <button class="btn-primary">View</button></p>
 							</div>`;
           $('[data-fieldname = invoices]').click(function() {
