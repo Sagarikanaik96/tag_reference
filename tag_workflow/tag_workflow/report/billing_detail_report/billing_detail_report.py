@@ -1,7 +1,6 @@
 # Copyright (c) 2013, SourceFuse and contributors
 # For license information, please see license.txt
 
-from multiprocessing import Condition
 import frappe
 import datetime
 

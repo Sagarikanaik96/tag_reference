@@ -41,24 +41,19 @@ def execute(filters=None):
 		frappe.msgprint("To Date can't be before From Date")
 	else:
 		current_company=frappe.db.sql(''' select company from `tabUser` where email='{}' '''.format(frappe.session.user),as_list=1)
-		dataa= fields_data(current_company,filters,from_date,to_date,company_search,condition)
+		dataa= fields_data(current_company,filters,company_search,condition)
 		
 			
 	return columns, dataa
 
-def fields_data(current_company,filters,from_date,to_date,company_search,condition):
+def fields_data(current_company,filters,company_search,condition):
 	data=[]
-	if(len(current_company)==0 or current_company[0][0]=='TAG'):
-		if(filters.get('companies')):
-			data=frappe.db.sql(''' select T.employee_company,T.employee_name,min(JO.from_date),max(JO.to_date),ceil((sum(TD.hours))/JO.estimated_hours_per_day) as total_hours_worked,sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and T.employee_company like '{0}%' {1} group by employee_name;'''.format(company_search,condition))
-		else:
-			data=frappe.db.sql(''' select T.employee_company,T.employee_name,min(JO.from_date),max(JO.to_date),ceil((sum(TD.hours))/JO.estimated_hours_per_day) as total_hours_worked,sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name {0} group by employee_name;'''.format(condition))
-
-	
-	else:
+	if(frappe.session.user!="Administrator" and current_company[0][0]!='TAG'):
 		current_company=current_company[0][0]
-		if(filters.get('companies')):
-			data=frappe.db.sql(''' select T.employee_company,T.employee_name,min(JO.from_date),max(JO.to_date),ceil((sum(TD.hours))/JO.estimated_hours_per_day) as total_hours_worked,sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.company='{0}' and T.employee_company like '{1}%' {2} group by employee_name;'''.format(current_company,company_search,condition))
-		else:
-			data=frappe.db.sql(''' select T.employee_company,T.employee_name,min(JO.from_date),max(JO.to_date),ceil((sum(TD.hours))/JO.estimated_hours_per_day) as total_hours_worked,sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and JO.company='{0}' {1} group by employee_name;'''.format(current_company,condition))
+		condition+=f" and JO.company='{current_company}'"
+
+	if(filters.get('companies')):
+		data=frappe.db.sql(''' select T.employee_company,T.employee_name,min(JO.from_date),max(JO.to_date),ceil((sum(TD.hours))/JO.estimated_hours_per_day) as total_hours_worked,sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name and T.employee_company like '{0}%' {1} group by employee_name;'''.format(company_search,condition))
+	else:
+		data=frappe.db.sql(''' select T.employee_company,T.employee_name,min(JO.from_date),max(JO.to_date),ceil((sum(TD.hours))/JO.estimated_hours_per_day) as total_hours_worked,sum(TD.hours) from`tabJob Order` as JO,`tabTimesheet` as T,`tabTimesheet Detail` as TD where T.workflow_state='Approved' and T.name=TD.parent and T.job_order_detail=JO.name {0} group by employee_name;'''.format(condition))
 	return data
