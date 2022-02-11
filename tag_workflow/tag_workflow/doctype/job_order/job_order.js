@@ -208,7 +208,6 @@ frappe.ui.form.on("Job Order", {
 
       }
       rate_hour_contract_change(frm);
-      let job_site_contact="Name:"+frm.doc.contact_name+ " Email:"+frm.doc.contact_email+" Phone Number:"+frm.doc.contact_number || " ";
 
       if (frappe.validated) {
         return new Promise(function (resolve, reject) {
