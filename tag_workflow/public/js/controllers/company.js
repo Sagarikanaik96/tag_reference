@@ -34,6 +34,12 @@ frappe.ui.form.on("Company", {
 
     let ORG = "Organization Type";
     frm.set_query("organization_type", function (doc) {
+      if(frappe.session.user=="Administrator"){
+        return {
+          filters: [[ORG, "name", "in", ["TAG","Hiring","Staffing","Exclusive Hiring"]]],
+        };
+
+      }
       if (frappe.user_roles.includes("Tag Admin")) {
         return {
           filters: [[ORG, "name", "!=", "TAG"]],
