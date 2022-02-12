@@ -2,7 +2,7 @@
  "cards_label": " My Activities",
  "category": "Modules",
  "charts": [],
- "creation": "2021-12-27 16:09:01.950873",
+ "creation": "2022-02-12 02:52:12.834048",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
@@ -17,7 +17,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "TAG Master",
+   "label": "Operations (Settings)",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -52,7 +52,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "TAG Transaction",
+   "label": "Job Order Links (Resources)",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -94,7 +94,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-12-27 16:29:39.802204",
+ "modified": "2022-02-12 03:12:02.348471",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "My Activities",

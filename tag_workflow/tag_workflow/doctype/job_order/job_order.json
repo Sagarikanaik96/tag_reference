@@ -52,13 +52,13 @@
   "no_of_workers",
   "worker_filled",
   "column_break_45",
-  "extra_price_increase",
   "extra_notes",
   "additional_addons_section",
   "drug_screen",
   "background_check",
   "column_break_51",
   "driving_record",
+  "extra_price_increase",
   "shovel",
   "bill_rate_section",
   "base_price",
@@ -222,7 +222,7 @@
    "default": "0",
    "fieldname": "per_hour",
    "fieldtype": "Currency",
-   "label": "Per Hour",
+   "label": "Total Per Hour Rate",
    "precision": "2",
    "read_only": 1
   },
@@ -230,7 +230,7 @@
    "default": "0",
    "fieldname": "flat_rate",
    "fieldtype": "Currency",
-   "label": "Flat Rate",
+   "label": "Additional Flat Rate",
    "precision": "2",
    "read_only": 1
   },
@@ -280,6 +280,7 @@
   {
    "fieldname": "apply_for_quotation_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Employee Assignment"
   },
   {
@@ -346,7 +347,6 @@
    "label": "Basic Info"
   },
   {
-   "depends_on": "eval:doc.agree_to_contract==1",
    "fieldname": "view_contract",
    "fieldtype": "Button",
    "label": "View Contract Language"
@@ -417,7 +417,7 @@
   },
   {
    "default": "0",
-   "description": "<p style=\"font-size: 12px;\"><span style=\"color: red;\">&#42;</span>\nAgree To Contract Is compulsory To Save The Order</p>",
+   "description": "<p style=\"font-size: 12px;\"><span style=\"color: red;\">&#42;</span>\nAgree To Contract Is Required To Save The Order</p>",
    "fieldname": "agree_to_contract",
    "fieldtype": "Check",
    "label": "Agree To Contract <span style=\"color: red;\">&#42;</span>",
@@ -504,6 +504,7 @@
    "default": "Everyday",
    "fieldname": "availability",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Availability",
    "options": "\nEveryday\nMon-Fri\nSat & Sun\nCustom"
   },
@@ -588,7 +589,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-12 01:26:17.206427",
+ "modified": "2022-02-12 03:03:16.470404",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

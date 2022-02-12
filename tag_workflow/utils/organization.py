@@ -52,7 +52,6 @@ def setup_data():
         setup_company_permission()
         check_if_user_exists()
         share_company_with_user()
-        remove_column()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -206,12 +205,3 @@ def check_if_user_exists():
     except Exception as e:
         frappe.log_error(e, "user update")
         print(e)
-
-# remove custom columns
-def remove_column():
-    try:
-        for doc in [COM, EMP, USR]:
-            sql = """ Delete from `tabCustom Field` where dt = '{0}' and fieldtype = 'Column Break' """.format(doc)
-            frappe.db.sql(sql)
-    except Exception as e:
-        frappe.log_error(e, "user update")
