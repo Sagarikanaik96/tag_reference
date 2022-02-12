@@ -407,7 +407,7 @@
    "name": "Employee-job_category",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "Designation",
+   "options": "Activity Type",
    "organization": null,
    "owner": "Administrator",
    "parent": null,

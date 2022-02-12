@@ -237,3 +237,12 @@ def selected_days(doctype, txt, searchfield, page_len, start, filters):
    days="select name from `tabDays` order by creation desc"
    data=frappe.db.sql(days)
    return data
+
+@frappe.whitelist(allow_guest=False)
+def order_details():
+    current_user=frappe.session.user
+    sql=f'''select distinct company from `tabJob Order` where name in (select distinct share_name from `tabDocShare` where user='{current_user}' and share_doctype='Job Order') '''
+    dat=frappe.db.sql(sql,as_dict=1)
+    company_data = [c['company'] for c in dat]
+    comp_dat="\n".join(company_data)
+    return comp_dat

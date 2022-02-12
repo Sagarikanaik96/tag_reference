@@ -3,7 +3,7 @@ frappe.listview_settings['Job Order'] = {
 		frappe.route_options = {
 			"order_status": "",
 		};
-
+		
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 			frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
 				if(r.name===undefined){
@@ -14,11 +14,17 @@ frappe.listview_settings['Job Order'] = {
 		if(frappe.session.user=='Administrator' || frappe.boot.tag.tag_user_info.company_type=="TAG"){
 			$('.btn-primary').hide();
 		}
+		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+			listview.page.set_secondary_action('Hiring Company', () => refresh(listview), 'octicon octicon-sync');
+		}
+		
 	},
 	refresh:function(listview){
 		$('[data-original-title="Menu"]').hide()
 		$('div[data-fieldname="order_status"]').hide();
+		$('div[data-fieldname="company"]').hide();
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+			$('[class="filter-selector"]').hide();
 			frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
 				if(r.name===undefined){
 					$('button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs').hide();
@@ -151,4 +157,44 @@ frappe.listview_settings['Job Order'] = {
 			}
 		}
 	},
+}
+
+function refresh(listview){
+						
+
+                        let new_pop_up = new frappe.ui.Dialog({
+                            title: "Hiring Company",
+                            'fields': [
+								{"fieldname": "company",
+								"label": __("Hiring Company"),
+								"fieldtype": "Select",
+								"options": get_hiring_company_list(),}
+                            ],
+                            primary_action: function(){
+                                new_pop_up.hide();
+								let comp=new_pop_up.get_values().company
+								
+								$('.page-form').find('input:text')
+									.each(function () {
+										if($(this).attr('data-fieldname')=='company'){
+											$(this).val(comp);
+										}
+								});
+							cur_list.refresh()	        
+                            }
+                        })
+                        new_pop_up.show();
+
+}
+function get_hiring_company_list()
+{
+	let company = '\n';
+	frappe.call({
+	method:"tag_workflow.tag_workflow.doctype.job_order.job_order.order_details",
+	"async": 0,
+		"callback": function(r){
+			company += r.message;
+		}
+	});
+	return company
 }

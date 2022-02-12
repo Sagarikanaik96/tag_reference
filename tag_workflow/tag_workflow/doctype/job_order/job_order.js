@@ -205,7 +205,6 @@ frappe.ui.form.on("Job Order", {
 
       }
       rate_hour_contract_change(frm);
-      let job_site_contact="Name:"+frm.doc.contact_name+ " Email:"+frm.doc.contact_email+" Phone Number:"+frm.doc.contact_number || " ";
 
       if (frappe.validated) {
         return new Promise(function (resolve, reject) {
@@ -222,8 +221,8 @@ frappe.ui.form.on("Job Order", {
               frm.doc.job_start_time +
               "<br><b>Job Site: </b>" +
               frm.doc.job_site +
-              "<br><b>Job Site Contact: </b>" +
-              job_site_contact +
+              "<br><b>Job Site Contact Person Name: </b>" +
+              frm.doc.contact_name +
              "<br><b>No. of Workers: </b>" +
               frm.doc.no_of_workers +
               "<br><b>Base Price: </b>" +
@@ -514,6 +513,7 @@ function timer_value(frm) {
     frappe.datetime.now_datetime()
   );
   if (time < 24) {
+    frm.toggle_display('section_break_8',0)
     var myStringArray = [
       "company",
       "posting_date_time",
