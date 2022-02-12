@@ -112,6 +112,9 @@ frappe.ui.form.on("User", {
 		multi_company_setup(frm);
 	},
 	onload:function(frm){
+		if(frappe.session.user!='Administrator'){
+			$('.menu-btn-group').hide()
+        }
 		if(frm.doc.__islocal==1){
 			hiring_org(frm)
 		}

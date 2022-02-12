@@ -175,6 +175,9 @@ frappe.ui.form.on("Company", {
     }
   },
   onload: function (frm) {
+    if(frappe.session.user != 'Administrator'){
+      $('.menu-btn-group').hide()
+    }
     cur_frm.fields_dict["employees"].grid.get_field("employee").get_query =
       function (doc, cdt, cdn) {
         return {

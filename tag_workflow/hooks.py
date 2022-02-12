@@ -62,7 +62,10 @@ doctype_list_js = {
         "Company": "public/js/doctype_list/company_list.js",
         sales_invoice:"public/js/doctype_list/sales_invoice_list.js",
         "Report": "public/js/doctype_list/report_list.js",
-        "Timesheet": "public/js/doctype_list/timesheet_list.js"
+        "Timesheet": "public/js/doctype_list/timesheet_list.js",
+        "Contact": "public/js/doctype_list/contact_list.js",
+        "Lead": "public/js/doctype_list/lead_list.js",
+        "Contract": "public/js/doctype_list/contract_list.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]

@@ -34,6 +34,10 @@ frappe.views.Workspace = class Workspace {
 	}
 
 	setup_workspaces() {
+		if(frappe.session.user!='Administrator'){
+			$('.menu-btn-group').hide()
+			$('[data-label="Customize"]').hide()
+        }
 		// workspaces grouped by categories
 		this.workspaces = {};
 		for (let page of frappe.boot.allowed_workspaces) {

@@ -1,4 +1,9 @@
 frappe.ui.form.on("Sales Invoice", {
+	onload: function(frm){
+		if(frappe.session.user != 'Administrator'){
+            $('[data-label="Get%20Items%20From"]').hide()
+        }
+	},
 	refresh: function(frm){
 		$('[data-original-title="Menu"]').hide()
 		cur_frm.clear_custom_buttons();

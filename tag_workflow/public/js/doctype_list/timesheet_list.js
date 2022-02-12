@@ -9,11 +9,16 @@ frappe.listview_settings['Timesheet'] = {
 	},
 
 	onload: function(listview) {
+		if(frappe.session.user!='Administrator'){
+			$('.custom-actions.hidden-xs.hidden-md').hide();
+			$('[data-original-title="Refresh"]').hide()
+			$('.menu-btn-group').hide()
+		}
 		cur_list.page.btn_primary[0].style.display = "none";
 		if(frappe.boot.tag.tag_user_info.company_type == "Hiring" && frappe.boot.tag.tag_user_info.company){
-			listview.page.add_button(__(`<svg class="icon  icon-xs" style=""><use class="" href="#icon-add"></use></svg>Add Timesheet`), function() {
-				prepare_timesheet(listview);
-			}).addClass("btn-primary");
+			listview.page.set_secondary_action('<svg class="icon icon-xs" style=""><use class="" href="#icon-add"></use></svg>Add Timesheet', function(){
+                prepare_timesheet(listview);
+            }).addClass("btn-primary");
 		}
 	}
 }
@@ -215,7 +220,7 @@ function update_timesheet(values){
 			if(data == 1){
 				frappe.msgprint("<b>Timesheet</b> updated successfully");
 			}else{
-				frappe.msgprint("Some errors while updating timesheet. please try again.")
+				frappe.msgprint("Some errors while updating timesheet. Please try again.")
 			}
 		}
 	});
