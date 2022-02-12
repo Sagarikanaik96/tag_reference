@@ -573,6 +573,20 @@ input::-webkit-credentials-auto-fill-button {
   font-weight: bold;
   margin-left: -17px;
 }
+[data-fieldname="html_3"] h3 {
+  font-size: 14px;
+  margin: -5px 0 0 0;
+  font-weight: 500;
+}
+[data-fieldname="html_3"] h3:before {
+  content: "\2713";
+  display: inline-block;
+  color: #1da557;
+  padding: 0 6px 0 0;
+  font-size: 18px;
+  font-weight: bold;
+  margin-left: -17px;
+}
 [data-fieldname="time_remaining_for_make_edits"] p {
   margin: -5px 0 0 0;
 }

@@ -815,11 +815,13 @@ function job_order_duration(frm){
 
 
 function show_claim_bar(frm){
-	if (frm.doc.claim && (frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)){
+  if((frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company)){
+    cur_frm.toggle_display('section_break_html2', 1);
+  }
+	else if (frm.doc.claim && (frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)){
 		cur_frm.toggle_display('section_break_html1', 1);
 		frm.remove_custom_button('Claim')
-	}
-	
+	}	
 }
 
 function assign_employees(frm){
