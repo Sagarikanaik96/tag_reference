@@ -88,6 +88,7 @@ def update_roles():
 def update_role_profile():
     try:
         print("*------updating role profile----------------*\n")
+        frappe.db.sql(""" delete from `tabRole Profile` """)
         profiles = {k for role in ROLE_PROFILE for k in role.keys()}
         for profile in profiles:
             profile_data = [role[profile] for role in ROLE_PROFILE if profile in role][0]
