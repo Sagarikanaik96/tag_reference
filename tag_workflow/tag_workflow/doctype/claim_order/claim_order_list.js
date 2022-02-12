@@ -14,7 +14,7 @@ frappe.listview_settings['Claim Order'] = {
 
     },
 	hide_name_column: true,
-	button: {
+	/*button: {
 		show: function(doc) {
 			return doc.name;
 		},
@@ -28,7 +28,7 @@ frappe.listview_settings['Claim Order'] = {
 			frappe.set_route('Form', "Claim Order", doc.name);         
 
 		}
-	},
+	},*/
     formatters: {
 		staffing_organization(val, d, f) {
 			if (val) {
