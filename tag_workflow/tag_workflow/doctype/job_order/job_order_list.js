@@ -36,10 +36,58 @@ frappe.listview_settings['Job Order'] = {
 				}
 			});
 		}
-	},
-
+	},	
 
 	formatters: {
+		order_status(val, d, f) {
+			if (frappe.boot.tag.tag_user_info.company_type == 'Staffing' && val == 'Upcoming') {
+				let y
+				frappe.call({
+					method:'tag_workflow.tag_data.vals',
+					args:{
+						'name':f.name,
+						'comp':frappe.boot.tag.tag_user_info.company
+					},
+					async:0,
+					callback:function(r)
+					{
+						if(r.message=='success')
+						{
+							y="Upcoming"
+						}
+						else{
+							y='Available'
+						}
+	
+					}
+				})
+				if(y=="Available")
+				{
+					return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
+								<a class=" indicator-pill gray ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >Available</a>
+							</span>`
+	
+				}
+				else{
+					return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
+								<a class=" indicator-pill gray ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >Upcoming</a>
+							</span>`
+				}
+			
+	
+			}
+			else if(val == 'Completed'){
+				return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
+						<a class=" indicator-pill green ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a>
+					</span>`
+			}
+			else { 
+				return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
+						<a class=" indicator-pill gray ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a>
+					</span>`
+			}
+	
+		},
 		company(val, d, f) {
 			if (val) {
 				return `<span class=" ellipsis" title="" id="Hiring-${f.name}" >

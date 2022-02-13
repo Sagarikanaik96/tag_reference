@@ -6,6 +6,7 @@ from tag_workflow.utils.notification import sendmail, make_system_notification
 from frappe.utils import get_datetime,now
 from frappe.utils import date_diff
 import json
+import datetime
 
 jobOrder = "Job Order"
 assignEmployees = "Assign Employee"
@@ -421,19 +422,21 @@ def disable_user(company, check):
 
 @frappe.whitelist(allow_guest=False)
 def update_job_order_status():
-    job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','order_status'])
-    now_date = get_datetime(now())
-    for job in job_order_data:
-        start_date = job.from_date if job.from_date else ""
-        end_date = job.to_date if job.to_date else ""
-
-        if now_date<start_date:
-            frappe.db.set_value(jobOrder, job.name, "order_status", "Upcoming")
-        elif now_date>end_date:
-            frappe.db.set_value(jobOrder, job.name, "order_status", "Completed")
-        else:
-            frappe.db.set_value(jobOrder, job.name, "order_status", "Ongoing")
-
+    try:
+        job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','order_status'])
+        now_date=datetime.date.today()
+        for job in job_order_data:
+            start_date = job.from_date if job.from_date else ""
+            end_date = job.to_date if job.to_date else ""
+            if  start_date <= now_date <= end_date:
+                frappe.db.set_value(jobOrder, job.name, "order_status", "Ongoing")
+                unshare_job_order(job)
+            elif  now_date < start_date:
+                frappe.db.set_value(jobOrder, job.name, "order_status", "Upcoming")
+            elif now_date > end_date:
+                frappe.db.set_value(jobOrder, job.name, "order_status", "Completed")
+    except Exception as e:
+        frappe.msgprint(e)
 
 
 @frappe.whitelist(allow_guest=False)
@@ -676,3 +679,23 @@ def staffing_assigned_employee(job_order):
         return emp_list
     except Exception as e:
         frappe.error_log(e, "Approved Employee")
+
+def unshare_job_order(job):
+    if job.bid>0 and job.staff_org_claimed:
+        comp_name=f""" select distinct company from `tabUser` where organization_type='Staffing' and email in (select user from `tabDocShare` where share_doctype='Job Order' and share_name='{job.name}' )"""
+        comp_data=frappe.db.sql(comp_name,as_list=True)
+        for i in comp_data:
+            if i[0] not in job.staff_org_claimed:
+                user_name=f'select name from `tabUser` where company="{i[0]}"'
+                user_data=frappe.db.sql(user_name,as_list=0)
+                for i in user_data:
+                    del_data=f'''DELETE FROM `tabDocShare` where share_doctype='Job Order' and share_name="{job.name}" and user="{i[0]}"'''
+                    frappe.db.sql(del_data)
+                    frappe.db.commit()
+                
+@frappe.whitelist()
+def vals(name,comp):
+    data=frappe.get_doc('Job Order',name)
+    claims=data.claim
+    if claims is not None and comp in claims:
+        return "success"

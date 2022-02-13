@@ -102,7 +102,7 @@ override_doctype_dashboards = {
         "Customer": "tag_workflow.dashboard_data.customer_dashboard.get_data"
 }
 scheduler_events={
-        "all":  [
+        "daily":  [
 	        "tag_workflow.tag_data.update_job_order_status"
 	]
 }
