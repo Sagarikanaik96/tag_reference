@@ -71,8 +71,8 @@ function get_location(name){
 						<img src="${company_data['company_logo']}" style="height:50px;width:50px;">
 					</td>
 					<td>
-						<h3>${company_data['name']}</h3><h5>${company_data['address']}</h5><h4>${company_data['zip']}</h4>
-						</td>
+						<h3>${company_data['name']}</h3><h5>${company_data['address']},${company_data['city']}</h5><h4>${company_data['state']},${company_data['zip']}</h4>
+					</td>
 					<td>
 						<h3><span>&starf;</span>${company_data['average_rating']}</h3>
 						<a href=javascript:new_job_order(${name})><button>Place Order</button></a>

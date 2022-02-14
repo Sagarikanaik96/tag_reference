@@ -39,4 +39,9 @@ frappe.ui.form.on("Staffing Email", {
 			};
 		}
 	},
+	onload: function(frm){
+		if(frappe.session.user != 'Administrator'){
+            $('.menu-btn-group').hide()
+        }
+	}
 });

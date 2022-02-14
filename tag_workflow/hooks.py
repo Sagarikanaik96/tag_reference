@@ -62,7 +62,11 @@ doctype_list_js = {
         "Company": "public/js/doctype_list/company_list.js",
         sales_invoice:"public/js/doctype_list/sales_invoice_list.js",
         "Report": "public/js/doctype_list/report_list.js",
-        "Timesheet": "public/js/doctype_list/timesheet_list.js"
+        "Timesheet": "public/js/doctype_list/timesheet_list.js",
+        "Contact": "public/js/doctype_list/contact_list.js",
+        "Lead": "public/js/doctype_list/lead_list.js",
+        "Contract": "public/js/doctype_list/contract_list.js",
+        "Role Profile": "public/js/doctype_list/role_profile.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]
@@ -98,7 +102,7 @@ override_doctype_dashboards = {
         "Customer": "tag_workflow.dashboard_data.customer_dashboard.get_data"
 }
 scheduler_events={
-        "all":  [
+        "daily":  [
 	        "tag_workflow.tag_data.update_job_order_status"
 	]
 }

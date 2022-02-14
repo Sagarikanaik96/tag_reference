@@ -59,6 +59,9 @@ frappe.ui.form.on("Timesheet", {
 		}
 	},
 	onload:function(frm){
+		if(frappe.session.user != 'Administrator'){
+			$('.menu-btn-group').hide()
+    	}
 		if(frappe.user.has_role("Tag Admin")){
 			frm.set_query("company", function(){
 				return {

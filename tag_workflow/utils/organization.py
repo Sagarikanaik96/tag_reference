@@ -20,15 +20,16 @@ Job_Label = "Job Order"
 Custom_Label = "Custom Field"
 WEB_MAN = "Website Manager"
 USR, EMP, COM = "User", "Employee", "Company"
+Global_defaults="Global Defaults"
 
-ALL_ROLES = [role.name for role in frappe.db.get_list("Role") or []]
+ALL_ROLES = [role.name for role in frappe.db.get_list("Role", {"name": ["!=", "Employee"]}) or []]
 
 ADD_ORGANIZATION = ["Company", "Quotation", "Lead"]
 ADD_ORGANIZATION_DATA = ["TAG", "Hiring", "Staffing", "Exclusive Hiring"]
 
 ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag Admin", "Tag User", "CRM User", "Staff"]
 
-ROLE_PROFILE = [{ROLES[3]: ["Accounts User", "Sales User", ROLES[3], ROLES[6], "Employee"]}, {ROLES[2]: ["Accounts User", "Sales User", ROLES[6], "Employee", ROLES[2]]}, {ROLES[1]: [ROLES[1], ROLES[6], "Employee", "Projects User"]}, {ROLES[0]: [ROLES[6], "Employee", ROLES[0], "Projects User"]}, {ROLES[4]: ALL_ROLES}, {ROLES[5]: ALL_ROLES}]
+ROLE_PROFILE = [{ROLES[4]: ALL_ROLES}, {ROLES[5]: ALL_ROLES}, {ROLES[3]: ["Accounts User", "Sales User", ROLES[3], ROLES[6], "Employee"]}, {ROLES[2]: ["Accounts User", "Sales User", ROLES[6], "Employee", ROLES[2]]}, {ROLES[1]: [ROLES[1], ROLES[6], "Employee", "Projects User"]}, {ROLES[0]: [ROLES[6], "Employee", ROLES[0], "Projects User"]}]
 
 MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", tag_workflow, "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", tag_workflow, "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", tag_workflow, "Selling"]}]
 
@@ -37,6 +38,11 @@ SPACE_PROFILE = ["CRM", "Users", tag_workflow, "Settings", "Home", "My Activitie
 #------setup data for TAG -------------#
 def setup_data():
     try:
+        frappe.db.set_value(Global_defaults,Global_defaults,"default_currency", "USD")
+        frappe.db.set_value(Global_defaults,Global_defaults,"hide_currency_symbol", "No")
+        frappe.db.set_value(Global_defaults,Global_defaults,"disable_rounded_total", "1")
+        frappe.db.set_value(Global_defaults,Global_defaults,"country", "United States")
+
         update_organization_data()
         update_roles()
         update_role_profile()
@@ -46,7 +52,6 @@ def setup_data():
         setup_company_permission()
         check_if_user_exists()
         share_company_with_user()
-        remove_column()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -62,6 +67,7 @@ def update_organization_data():
         for data in ADD_ORGANIZATION_DATA:
             org_doc = frappe.get_doc(dict(doctype = Organization, organization = data))
             org_doc.save()
+        frappe.db.sql(""" delete from `tabDashboard` """)
     except Exception as e:
         print(e)
         frappe.log_error(e, "update_organization_data")
@@ -88,10 +94,15 @@ def update_role_profile():
 
             if not frappe.db.exists(Role_Profile, {"name": profile}):
                 profile_doc = frappe.new_doc(Role_Profile)
-                profile_doc.role_profile = profile 
+                profile_doc.role_profile = profile
                 for data in profile_data:
                     profile_doc.append("roles", {"role": data})
-                profile_doc.save()
+            else:
+                profile_doc = frappe.get_doc(Role_Profile, {"name": profile})
+                profile_doc.roles = []
+                for data in profile_data:
+                    profile_doc.append("roles", {"role": data})
+            profile_doc.save()
     except Exception as e:
         print(e)
         frappe.log_error(frappe.get_traceback(), "update_role_profile")
@@ -101,8 +112,7 @@ def update_module_profile():
     try:
         print("*------updating module profile--------------*\n")
         all_modules = [m.get("module_name") for m in get_modules_from_all_apps()]
-        modules = {k for module in MODULE_PROFILE for k in module.keys()}
-        
+        modules = {k for module in MODULE_PROFILE for k in module.keys()} 
         for mods in modules:
             module_data = [profile[mods] for profile in MODULE_PROFILE if mods in profile][0]
 
@@ -199,14 +209,4 @@ def check_if_user_exists():
     except Exception as e:
         frappe.log_error(e, "user update")
         print(e)
-
-
-# remove custom columns
-def remove_column():
-    try:
-        for doc in [COM, EMP, USR]:
-            sql = """ Delete from `tabCustom Field` where dt = '{0}' and fieldtype = 'Column Break' """.format(doc)
-            frappe.db.sql(sql)
-    except Exception as e:
-        frappe.log_error(e, "user update")
 

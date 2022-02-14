@@ -34,6 +34,10 @@ frappe.views.Workspace = class Workspace {
 	}
 
 	setup_workspaces() {
+		if(frappe.session.user!='Administrator'){
+			$('.menu-btn-group').hide()
+			$('[data-label="Customize"]').hide()
+        }
 		// workspaces grouped by categories
 		this.workspaces = {};
 		for (let page of frappe.boot.allowed_workspaces) {
@@ -437,6 +441,14 @@ class DesktopPage {
 					function update_list(){
 						$(".inner-search").css("display", "none");
 						let data = document.getElementById("staff").value;
+						var ignoreClickOnMeElement = document.getElementById('staff');
+						document.addEventListener('click', function(event) {
+							var isClickInsideElement = ignoreClickOnMeElement.contains(event.target);
+							if (!isClickInsideElement) {
+								$(".inner-search").css("display", "none");
+								document.getElementById("staff").value=""
+							}
+						});
 						frappe.call({
 							method: "tag_workflow.utils.whitelisted.search_staffing_by_hiring",
 							args: {"data": data},

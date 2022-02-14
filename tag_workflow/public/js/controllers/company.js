@@ -34,6 +34,12 @@ frappe.ui.form.on("Company", {
 
     let ORG = "Organization Type";
     frm.set_query("organization_type", function (doc) {
+      if(frappe.session.user=="Administrator"){
+        return {
+          filters: [[ORG, "name", "in", ["TAG","Hiring","Staffing","Exclusive Hiring"]]],
+        };
+
+      }
       if (frappe.user_roles.includes("Tag Admin")) {
         return {
           filters: [[ORG, "name", "!=", "TAG"]],
@@ -127,19 +133,17 @@ frappe.ui.form.on("Company", {
     let email = frm.doc.email;
     let receive_email = frm.doc.accounts_receivable_rep_email;
     let pay_email = frm.doc.accounts_payable_email;
-    var letters = /^[A-Za-z]+$/
-
 
     if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
         frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
         frappe.validated = false
 
     }
-		if (phone_no && (phone_no.length != 10 || isNaN(phone_no)) || phone_no.match(letters)){
+		if (phone_no && (phone_no.length != 10 || isNaN(phone_no))){
 			frappe.msgprint({message: __('Not Valid Accounts Payable phone number'), indicator: 'red'})
 			frappe.validated = false
     }
-    if (account_phone_no && (account_phone_no.length != 10 || isNaN(account_phone_no)) || account_phone_no.match(letters)){
+    if (account_phone_no && (account_phone_no.length != 10 || isNaN(account_phone_no))){
 			frappe.msgprint({message: __('Not Valid Accounts Receivable phone number'), indicator: 'red'})
 			frappe.validated = false
     }
@@ -171,6 +175,9 @@ frappe.ui.form.on("Company", {
     }
   },
   onload: function (frm) {
+    if(frappe.session.user != 'Administrator'){
+      $('.menu-btn-group').hide()
+    }
     cur_frm.fields_dict["employees"].grid.get_field("employee").get_query =
       function (doc, cdt, cdn) {
         return {
@@ -331,8 +338,7 @@ function validate_phone_and_zip(frm) {
   let phone = frm.doc.phone_no || '';
   let zip = frm.doc.zip;
   let is_valid = 1;
-  var letters = /^[A-Za-z]+$/
-  if (phone && phone.length != 10 && !isNaN(phone) || phone.match(letters)) {
+  if (phone && phone.length != 10 && !isNaN(phone)) {
     is_valid = 0;
     frappe.msgprint({
       message: __("Company Phone No. is not valid"),
@@ -340,7 +346,7 @@ function validate_phone_and_zip(frm) {
       indicator: "red",
     });
   }
-  if (zip && zip.length != 5 && !isNaN(zip) || zip.match(letters)) {
+  if (zip && zip.length != 5 && !isNaN(zip)) {
     is_valid = 0;
     frappe.msgprint({
       message: __("Enter valid zip"),

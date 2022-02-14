@@ -6,6 +6,7 @@ from tag_workflow.utils.notification import sendmail, make_system_notification
 from frappe.utils import get_datetime,now
 from frappe.utils import date_diff
 import json
+import datetime
 
 jobOrder = "Job Order"
 assignEmployees = "Assign Employee"
@@ -421,19 +422,21 @@ def disable_user(company, check):
 
 @frappe.whitelist(allow_guest=False)
 def update_job_order_status():
-    job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','order_status'])
-    now_date = get_datetime(now())
-    for job in job_order_data:
-        start_date = job.from_date if job.from_date else ""
-        end_date = job.to_date if job.to_date else ""
-
-        if now_date<start_date:
-            frappe.db.set_value(jobOrder, job.name, "order_status", "Upcoming")
-        elif now_date>end_date:
-            frappe.db.set_value(jobOrder, job.name, "order_status", "Completed")
-        else:
-            frappe.db.set_value(jobOrder, job.name, "order_status", "Ongoing")
-
+    try:
+        job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','order_status'])
+        now_date=datetime.date.today()
+        for job in job_order_data:
+            start_date = job.from_date if job.from_date else ""
+            end_date = job.to_date if job.to_date else ""
+            if  start_date <= now_date <= end_date:
+                frappe.db.set_value(jobOrder, job.name, "order_status", "Ongoing")
+                unshare_job_order(job)
+            elif  now_date < start_date:
+                frappe.db.set_value(jobOrder, job.name, "order_status", "Upcoming")
+            elif now_date > end_date:
+                frappe.db.set_value(jobOrder, job.name, "order_status", "Completed")
+    except Exception as e:
+        frappe.msgprint(e)
 
 
 @frappe.whitelist(allow_guest=False)
@@ -620,14 +623,14 @@ def assigned_employee_data(job_order):
             employees_data=frappe.db.sql(sql3,as_dict=True)
             if(len(employees_data)==0):
                 emp_dic["staff_company"]=emp_data[i].staff_company
-                emp_dic["employee"]=emp_data[i].employee
+                emp_dic["employee"]=emp_data[i].employee_name
                 emp_dic["no_show"]=""
                 emp_dic["non_satisfactory"]=""
                 emp_dic["dnr"]=""
                 emp_list.append(emp_dic)
             else:
                 emp_dic["staff_company"]=emp_data[i].staff_company
-                emp_dic["employee"]=emp_data[i].employee
+                emp_dic["employee"]=emp_data[i].employee_name
                 emp_dic["no_show"]=employees_data[0].no_show
                 emp_dic["non_satisfactory"]=employees_data[0].non_satisfactory
                 emp_dic["dnr"]=employees_data[0].dnr
@@ -650,7 +653,7 @@ def staff_assigned_employees(job_order):
 @frappe.whitelist(allow_guest=False)
 def staffing_assigned_employee(job_order):
     try:
-        assigned_emp=f""" select `tabAssign Employee`.company,`tabAssign Employee`.name,`tabAssign Employee Details`.employee_name as employee_name,`tabAssign Employee Details`.employee as employee from `tabAssign Employee`,`tabAssign Employee Details` where `tabAssign Employee`.name=`tabAssign Employee Details`.parent and job_order="{job_order}" and tag_status="Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email='{frappe.session.user}' )  """
+        assigned_emp=f""" select `tabAssign Employee`.company,`tabAssign Employee`.name as name,`tabAssign Employee Details`.employee_name as employee_name,`tabAssign Employee Details`.employee as employee from `tabAssign Employee`,`tabAssign Employee Details` where `tabAssign Employee`.name=`tabAssign Employee Details`.parent and job_order="{job_order}" and tag_status="Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email='{frappe.session.user}' )  """
         emp_data=frappe.db.sql(assigned_emp,as_dict=1)
         emp_list=[]
         for i in range(len(emp_data)):
@@ -658,15 +661,17 @@ def staffing_assigned_employee(job_order):
             sql3=f"""select IF(no_show=1, "No Show", " ") as no_show,IF(non_satisfactory=1,"Non Satisfactory"," ") as non_satisfactory,IF(dnr=1,"DNR"," ") as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
             employees_data=frappe.db.sql(sql3,as_dict=True)
             if(len(employees_data)==0):
+                emp_dic['assign_name']=emp_data[i].name
                 emp_dic["staff_company"]=emp_data[i].staff_company
-                emp_dic["employee"]=emp_data[i].employee
+                emp_dic["employee"]=emp_data[i].employee_name
                 emp_dic["no_show"]=""
                 emp_dic["non_satisfactory"]=""
                 emp_dic["dnr"]=""
                 emp_list.append(emp_dic)
             else:
+                emp_dic['assign_name']=emp_data[i].name
                 emp_dic["staff_company"]=emp_data[i].staff_company
-                emp_dic["employee"]=emp_data[i].employee
+                emp_dic["employee"]=emp_data[i].employee_name
                 emp_dic["no_show"]=employees_data[0].no_show
                 emp_dic["non_satisfactory"]=employees_data[0].non_satisfactory
                 emp_dic["dnr"]=employees_data[0].dnr
@@ -674,3 +679,53 @@ def staffing_assigned_employee(job_order):
         return emp_list
     except Exception as e:
         frappe.error_log(e, "Approved Employee")
+
+def unshare_job_order(job):
+    if job.bid>0 and job.staff_org_claimed:
+        comp_name=f""" select distinct company from `tabUser` where organization_type='Staffing' and email in (select user from `tabDocShare` where share_doctype='Job Order' and share_name='{job.name}' )"""
+        comp_data=frappe.db.sql(comp_name,as_list=True)
+        for i in comp_data:
+            if i[0] not in job.staff_org_claimed:
+                user_name=f'select name from `tabUser` where company="{i[0]}"'
+                user_data=frappe.db.sql(user_name,as_list=0)
+                for i in user_data:
+                    del_data=f'''DELETE FROM `tabDocShare` where share_doctype='Job Order' and share_name="{job.name}" and user="{i[0]}"'''
+                    frappe.db.sql(del_data)
+                    frappe.db.commit()
+                
+@frappe.whitelist()
+def vals(name,comp):
+    data=frappe.get_doc('Job Order',name)
+    claims=data.claim
+    if claims is not None and comp in claims:
+        return "success"
+
+
+@frappe.whitelist(allow_guest=False)
+def receive_hire_notification(user, company_type, hiring_org, job_order, staffing_org, emp_detail, doc_name,worker_fill):
+    try:
+        if(company_type == "Staffing" and user == frappe.session.user):
+            dat=f'update `tabAssign Employee` set tag_status="Approved" where name="{doc_name}"'
+            frappe.db.sql(dat)
+            frappe.db.commit()
+            job = frappe.get_doc(jobOrder, job_order)
+            frappe.db.set_value(jobOrder, job_order, "worker_filled", (int(worker_fill)+int(job.worker_filled)))
+            
+            job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
+            job_detail = frappe.db.sql(job_sql, as_dict=1)
+            lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)
+            user_list = frappe.db.sql(lst_sql, as_list=1)
+            l = [l[0] for l in user_list]
+            for user in l:
+                add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)
+            sub="Employee Assigned"
+            msg = f'{staffing_org} has assigned the Employees to the {job_detail[0]["select_job"]}'
+            make_system_notification(l,msg,'Assign Employee',doc_name,sub)
+            msg = f'{staffing_org} has assigned the Employees to the {job_detail[0]["select_job"]}'
+            link =  f'  href="/app/assign-employee/{doc_name}" '
+            return joborder_email_template(sub, msg, l, link)
+        else:
+            return "Something Went Access"
+    except Exception as e:
+        print(e, frappe.get_traceback())
+        frappe.db.rollback()

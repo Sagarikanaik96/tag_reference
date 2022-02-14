@@ -9,5 +9,12 @@ frappe.listview_settings['Employee'] = {
 				children[c].innerHTML = "\n\t\t\t\t\t\n\t\t\t\t\t\t<span>Employee ID</span>\n\t\t\t\t";
 			}
 		}
+	},
+	onload: function(){
+		if(frappe.session.user!='Administrator'){
+			$('.custom-actions.hidden-xs.hidden-md').hide()
+			$('[data-original-title="Refresh"]').hide()
+			$('.menu-btn-group').hide()
+		}
 	}
 };

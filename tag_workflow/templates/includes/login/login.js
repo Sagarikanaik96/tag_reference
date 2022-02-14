@@ -16,9 +16,6 @@ login.bind_events = function () {
 		e.preventDefault();
 	});
 
-	// hide chat bubble
-	$('.chat-app').hide()
-
 	$(".form-login").on("submit", function (event) {
 		event.preventDefault();
 		var args = {};
@@ -90,6 +87,7 @@ login.bind_events = function () {
 	{% endif %}
 }
 
+setTimeout(() => {$('.chat-app').hide();}, 400)
 
 login.route = function () {
 	var route = window.location.hash.slice(1);
@@ -174,6 +172,7 @@ login.login_handlers = (function () {
 		return function (xhr, data) {
 			if (xhr.responseJSON) {
 				data = xhr.responseJSON;
+				frappe.msgprint("Invalid login credentials");
 			}
 
 			var message = default_message;
@@ -259,7 +258,7 @@ login.login_handlers = (function () {
 				}
 			}
 		},
-		401: get_error_handler('{{ _("Invalid Login. Try again.") }}'),
+		401: get_error_handler('{{ _("Login") }}'),
 		417: get_error_handler('{{ _("Oops! Something went wrong") }}')
 	};
 

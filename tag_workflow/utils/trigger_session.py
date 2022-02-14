@@ -1,4 +1,4 @@
-import frappe
+import frappe, tag_workflow
 from frappe import _, msgprint, throw
 from frappe.share import add
 from frappe.utils import cint, cstr, flt
@@ -32,7 +32,11 @@ def get_user_info():
         user = frappe.session.user
         user_doc = frappe.get_doc(USR, user)
 
-        api_key = frappe.db.get_value("Google Settings", "Google Settings", "api_key") or ''
+        key = tag_workflow.get_key("gmap")
+        if(key == "Error"):
+            api_key = frappe.db.get_value("Google Settings", "Google Settings", "api_key") or ''
+        else:
+            api_key = key
         data = {"user_type": user_doc.tag_user_type, "company": user_doc.company, "company_type": user_doc.organization_type, "api_key": api_key}
         return data
     except Exception as e:

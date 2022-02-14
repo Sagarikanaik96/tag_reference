@@ -905,7 +905,7 @@
     "hidden": 0,
     "icon": null,
     "is_query_report": 0,
-    "label": "TAG Master",
+    "label": "Operations (Settings)",
     "link_to": null,
     "link_type": "DocType",
     "onboard": 0,
@@ -965,7 +965,7 @@
     "hidden": 0,
     "icon": null,
     "is_query_report": 0,
-    "label": "TAG Transaction",
+    "label": "Job Order Links (Resources)",
     "link_to": null,
     "link_type": "DocType",
     "onboard": 0,
@@ -1036,7 +1036,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2021-12-27 16:29:39.802204",
+  "modified": "2022-02-12 03:12:02.348471",
   "module": "Tag Workflow",
   "name": "My Activities",
   "onboarding": null,
@@ -1620,7 +1620,7 @@
     "icon": null,
     "is_query_report": 1,
     "label": "Sales Register",
-    "link_to": "Sales Register",
+    "link_to": "Sales Register1",
     "link_type": "Report",
     "onboard": 0,
     "only_for": null,
@@ -1690,7 +1690,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2022-01-27 06:09:54.760285",
+  "modified": "2022-02-09 23:28:43.619661",
   "module": "Tag Workflow",
   "name": "Reports",
   "onboarding": null,

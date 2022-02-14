@@ -14,7 +14,7 @@ frappe.listview_settings['Claim Order'] = {
 
     },
 	hide_name_column: true,
-	button: {
+	/*button: {
 		show: function(doc) {
 			return doc.name;
 		},
@@ -28,7 +28,7 @@ frappe.listview_settings['Claim Order'] = {
 			frappe.set_route('Form', "Claim Order", doc.name);         
 
 		}
-	},
+	},*/
     formatters: {
 		staffing_organization(val, d, f) {
 			if (val) {
@@ -47,9 +47,16 @@ frappe.listview_settings['Claim Order'] = {
             }
         },
         approved_no_of_workers(val, d, f) {
-			if (val) {
+            console.log(typeof(val))
+            if(typeof(val)=='number')
+            {
+                return `<span class=" ellipsis3" title="" id="${val}-${f.name}">
+                <a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">${val}</a>
+            </span>`
+            }
+			else{
 				return `<span class=" ellipsis3" title="" id="${val}-${f.name}">
-						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">${val}</a>
+						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">0</a>
 					</span>`
 
             }
@@ -89,13 +96,13 @@ function refresh(listview){
                         let new_pop_up = new frappe.ui.Dialog({
                             title: "Select Head Count",
                             'fields': [
-                                {fieldname: "html_job_title",fieldtype: "HTML",options:"Job Title:" + r['select_job']},
-                                {fieldname: "html_per_hour",fieldtype: "HTML",options: "Price:$"+r['per_hour']},
+                                {fieldname: "html_job_title",fieldtype: "HTML",options:"<label>Job Title:</label>" + r['select_job']},
+                                {fieldname: "html_per_hour",fieldtype: "HTML",options: "<label>Price:</label>$"+r['per_hour']},
     
                                 {'fieldname': 'inputdata2', 'fieldtype': 'Column Break',},
     
-                                {fieldname: "html_date",fieldtype: "HTML",options:"Date:"+ r['from_date']+'-' +r['to_date']},                            
-                                {fieldname: "html_workers",fieldtype: "HTML",options: "No. Of Workers Required:"+r['no_of_workers']},
+                                {fieldname: "html_date",fieldtype: "HTML",options:"<label>Date:</label>"+ r['from_date']+'-' +r['to_date']},                            
+                                {fieldname: "html_workers",fieldtype: "HTML",options: "<label>No. Of Workers Required:</label>"+r['no_of_workers']},
                                 {'fieldname': 'inputdata1', 'fieldtype': 'Section Break',},
                                 {fieldname: "staff_companies",fieldtype: "HTML",options:profile_html},
 
@@ -221,11 +228,11 @@ function modify_claims(listview){
                         let modified_pop_up = new frappe.ui.Dialog({
                             title: "Select Head Count",
                             'fields': [
-                                {fieldname: "html_job_title1",fieldtype: "HTML",options:"Job Title:" + r['select_job']},
-                                {fieldname: "html_per_hour1",fieldtype: "HTML",options: "Price:$"+r['per_hour']},
+                                {fieldname: "html_job_title1",fieldtype: "HTML",options:"<label>Job Title:</label>" + r['select_job']},
+                                {fieldname: "html_per_hour1",fieldtype: "HTML",options: "<label>Price:</label>$"+r['per_hour']},
                                 {'fieldname': 'inputdata3', 'fieldtype': 'Column Break',},
-                                {fieldname: "html_date1",fieldtype: "HTML",options:"Date:"+ r['from_date']+'-' +r['to_date']},                            
-                                {fieldname: "html_workers1",fieldtype: "HTML",options: "No. Of Workers Required:"+(r['no_of_workers']-r['worker_filled'])},
+                                {fieldname: "html_date1",fieldtype: "HTML",options:"<label>Date:</label>"+ r['from_date']+'-' +r['to_date']},                            
+                                {fieldname: "html_workers1",fieldtype: "HTML",options: "<label>No. Of Workers Required:</label>"+(r['no_of_workers']-r['worker_filled'])},
                                 {fieldname: 'inputdata2', 'fieldtype': 'Section Break',},
                                 {fieldname: "staff_companies1",fieldtype: "HTML",options:profile_html},
                             ],

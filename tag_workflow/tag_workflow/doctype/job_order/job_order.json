@@ -9,6 +9,8 @@
  "field_order": [
   "section_break_html1",
   "html_2",
+  "section_break_html2",
+  "html_3",
   "related_actions_section",
   "related_details",
   "messages",
@@ -50,15 +52,15 @@
   "contact_email",
   "contact_number",
   "no_of_workers",
-  "worker_filled",
   "column_break_45",
-  "extra_price_increase",
+  "worker_filled",
   "extra_notes",
   "additional_addons_section",
   "drug_screen",
   "background_check",
   "column_break_51",
   "driving_record",
+  "extra_price_increase",
   "shovel",
   "bill_rate_section",
   "base_price",
@@ -86,14 +88,15 @@
   "section_break_61",
   "employee_rating",
   "dispute_section",
-  "dispute_comment",
-  "section_break_html"
+  "dispute_comment"
  ],
  "fields": [
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_global_search": 1,
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -221,7 +224,7 @@
    "default": "0",
    "fieldname": "per_hour",
    "fieldtype": "Currency",
-   "label": "Per Hour",
+   "label": "Total Per Hour Rate",
    "precision": "2",
    "read_only": 1
   },
@@ -229,7 +232,7 @@
    "default": "0",
    "fieldname": "flat_rate",
    "fieldtype": "Currency",
-   "label": "Flat Rate",
+   "label": "Additional Flat Rate",
    "precision": "2",
    "read_only": 1
   },
@@ -279,6 +282,7 @@
   {
    "fieldname": "apply_for_quotation_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Employee Assignment"
   },
   {
@@ -345,7 +349,6 @@
    "label": "Basic Info"
   },
   {
-   "depends_on": "eval:doc.agree_to_contract==1",
    "fieldname": "view_contract",
    "fieldtype": "Button",
    "label": "View Contract Language"
@@ -416,7 +419,7 @@
   },
   {
    "default": "0",
-   "description": "<p style=\"font-size: 12px;\"><span style=\"color: red;\">&#42;</span>\nAgree To Contract Is compulsory To Save The Order</p>",
+   "description": "<p style=\"font-size: 12px;\"><span style=\"color: red;\">&#42;</span>\nAgree To Contract Is Required To Save The Order</p>",
    "fieldname": "agree_to_contract",
    "fieldtype": "Check",
    "label": "Agree To Contract <span style=\"color: red;\">&#42;</span>",
@@ -451,16 +454,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_html",
-   "fieldtype": "Section Break",
-   "hidden": 1
-  },
-  {
-   "fieldname": "section_break_html",
-   "fieldtype": "Section Break",
-   "hidden": 1
-  },
-  {
    "fieldname": "html_2",
    "fieldtype": "HTML",
    "options": "<h3>You Have Claimed For This Order</h3>"
@@ -469,7 +462,7 @@
    "fieldname": "related_actions_section",
    "fieldtype": "Section Break",
    "hidden": 1,
-   "label": "Related Sections"
+   "label": "Related Actions"
   },
   {
    "fieldname": "related_details",
@@ -513,6 +506,7 @@
    "default": "Everyday",
    "fieldname": "availability",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Availability",
    "options": "\nEveryday\nMon-Fri\nSat & Sun\nCustom"
   },
@@ -593,11 +587,21 @@
   {
    "fieldname": "column_break_51",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_html2",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "html_3",
+   "fieldtype": "HTML",
+   "options": "<h3>Your Claim Has Been Approved</h3>"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-07 07:10:54.623181",
+ "modified": "2022-02-12 13:45:08.894253",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

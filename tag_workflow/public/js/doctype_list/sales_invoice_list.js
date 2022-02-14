@@ -1,13 +1,14 @@
 frappe.listview_settings['Sales Invoice'] = {
-	refresh:function(listview){
-		$('.btn-primary').hide();
-		$('button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs').hide();
-	},
 	onload:function(listview){
-	if (frappe.boot.tag.tag_user_info.company == 'tag'){
-		listview.page.add_button(__("Create monthly Invoice"), function() {
-			create_monthly_invoice(listview)
-			}).addClass("btn-primary");
+		if(frappe.session.user!='Administrator'){
+			$('.custom-actions.hidden-xs.hidden-md').hide()
+			$('[data-original-title="Refresh"]').hide()
+			$('.menu-btn-group').hide()
+        }
+		if (frappe.boot.tag.tag_user_info.company_type == 'TAG'){
+			listview.page.add_button(__("Create monthly Invoice"), function() {
+				create_monthly_invoice(listview)
+				}).addClass("btn-primary");
 		}
 	},
 	hide_name_column: true,

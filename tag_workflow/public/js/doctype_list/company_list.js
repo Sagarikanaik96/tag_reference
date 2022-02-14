@@ -11,6 +11,11 @@ frappe.listview_settings["Company"] = {
     return indicator;
   },
   onload: function (listview) {
+    if(frappe.session.user != 'Administrator'){
+      $('.custom-actions.hidden-xs.hidden-md').hide()
+      $('[data-original-title="Refresh"]').hide()
+      $('.menu-btn-group').hide()
+    }
     if (!frappe.route_options && !frappe.user.has_role("Tag Admin")) {
       frappe.route_options = {
         make_organization_inactive: ["=", 0],

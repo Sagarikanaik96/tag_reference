@@ -31,6 +31,9 @@ frappe.ui.form.on("Job Order", {
     }
   },
   onload: function (frm) {
+    if(frappe.session.user != 'Administrator'){
+      $('.menu-btn-group').hide()
+    }
     hide_employee_rating(frm);
 
     if (cur_frm.doc.__islocal == 1) {
@@ -107,6 +110,14 @@ frappe.ui.form.on("Job Order", {
     ) {
       fields_setup(frm);
     }
+    frm.set_query("select_days",function(doc){
+      return{
+        query:"tag_workflow.tag_workflow.doctype.job_order.job_order.selected_days",
+
+      }
+
+    })
+
   },
   refresh: function (frm) {
     if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=="Hiring" && frm.doc.order_status=="Upcoming"){
@@ -115,15 +126,20 @@ frappe.ui.form.on("Job Order", {
     cur_frm.dashboard.hide();
     view_button(frm)
     if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
-		frm.add_custom_button(__('Claim Order'), function(){
-			if(frm.doc.resumes_required || frm.doc.is_single_share){
-				assign_employees(frm)
+      if(frm.doc.resumes_required || frm.doc.is_single_share){
+        frm.add_custom_button(__('Assign Employee'), function(){
+				  assign_employees(frm)
+        })
 			}
 			else{
-				claim_job_order_staffing(frm);
+        frm.add_custom_button(__('Claim Order'), function(){
+
+				  claim_job_order_staffing(frm);
+        })
 			}
-		});
-	}	
+
+  	}	
+
 
 	if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 		cur_frm.dashboard.hide();
@@ -197,36 +213,34 @@ frappe.ui.form.on("Job Order", {
 
       }
       rate_hour_contract_change(frm);
+
       if (frappe.validated) {
         return new Promise(function (resolve, reject) {
           frappe.confirm(
             "<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" +
               frm.doc.category +
-              "<br><b>Job Order Start Date: </b>" +
+              "<br><b>Start Date: </b>" +
               frm.doc.from_date +
-              "<br><b>Job Order End Date: </b>" +
+              "<br><b>End Date: </b>" +
               frm.doc.to_date +
-              "<br><b>Job Order Start Time: </b>" +
+              "<br><b>Est. Daily Hours: </b>" +
+              frm.doc.estimated_hours_per_day +
+              "<br><b>Start Time: </b>" +
               frm.doc.job_start_time +
-              "<br><b>Job Title: </b>" +
-              frm.doc.select_job +
-              "<br><b>Job Duration: </b>" +
-              frm.doc.job_order_duration +
               "<br><b>Job Site: </b>" +
               frm.doc.job_site +
-              "<br><b>Estimated Per Hour: </b>" +
-              frm.doc.estimated_hours_per_day +
-              "<br><b>Job Title Description: </b>" +
-              frm.doc.description +
+              "<br><b>Job Site Contact Person Name: </b>" +
+              frm.doc.contact_name +
+             "<br><b>No. of Workers: </b>" +
+              frm.doc.no_of_workers +
               "<br><b>Base Price: </b>" +
               frm.doc.rate +
               "<br><b>Rate Increase: </b>" +
               (frm.doc.per_hour-frm.doc.rate) +
               "<br><b>Total Per Hour Rate: </b>" +
               frm.doc.per_hour +
-              "<br><b>Total Flat Rate: </b>" +
-              frm.doc.flat_rate +
               "",
+
             function () {
               let resp = "frappe.validated = false";
               resolve(resp);
@@ -436,11 +450,14 @@ function assign_employe(frm) {
 
 function redirect_quotation(frm) {
   var doc = frappe.model.get_new_doc("Assign Employee");
-  var staff_company = frappe.boot.tag.tag_user_info.company || [];
+  var staff_company = staff_company_direct_or_general(frm)
   doc.transaction_date = frappe.datetime.now_date();
   doc.company = staff_company[0];
   doc.job_order = frm.doc.name;
   doc.no_of_employee_required = frm.doc.no_of_workers - frm.doc.worker_filled;
+  if(frm.doc.staff_company){
+    doc.company=frm.doc.staff_company;
+  }
   doc.hiring_organization = frm.doc.company;
   doc.job_category = frm.doc.select_job;
   doc.job_location = frm.doc.job_site;
@@ -466,6 +483,15 @@ function redirect_quotation(frm) {
     },
   });
 }
+function staff_company_direct_or_general(frm){
+  if (frm.doc.is_single_share){
+      return [frm.doc.staff_company]
+  }
+  else{
+      return frappe.boot.tag.tag_user_info.company || [];
+  }
+}
+
 
 function set_read_fields(frm) {
   var myStringArray = [
@@ -495,6 +521,7 @@ function timer_value(frm) {
     frappe.datetime.now_datetime()
   );
   if (time < 24) {
+    frm.toggle_display('section_break_8',0)
     var myStringArray = [
       "company",
       "posting_date_time",
@@ -587,19 +614,18 @@ function notification_joborder_change(frm) {
     },
   });
 }
-
 function check_from_date(frm) {
   let from_date = frm.doc.from_date || "";
   let to_date = frm.doc.to_date || "";
 
-  if (from_date && from_date <= frappe.datetime.now_date()) {
+  if (from_date && from_date < frappe.datetime.now_date()) {
     frappe.msgprint({
       message: __("<b>Start Date</b> Cannot be Today`s date or Past date"),
       title: __("Error"),
       indicator: "orange",
     });
     cur_frm.set_value("from_date", "");
-  } else if (to_date && from_date && from_date >= to_date) {
+  } else if (to_date && from_date && from_date > to_date) {
     frappe.msgprint({
       message: __("<b>End Date</b> Cannot be Less than Start Date"),
       title: __("Error"),
@@ -612,14 +638,14 @@ function check_from_date(frm) {
 function check_to_date(frm) {
   let from_date = frm.doc.from_date || "";
   let to_date = frm.doc.to_date || "";
-  if (to_date && frappe.datetime.now_date() >= to_date) {
+  if (to_date && frappe.datetime.now_date() > to_date) {
     frappe.msgprint({
       message: __("<b>End Date</b> Cannot be Today`s date or Past date"),
       title: __("Error"),
       indicator: "orange",
     });
     cur_frm.set_value("to_date", "");
-  } else if (to_date && from_date && from_date >= to_date) {
+  } else if (to_date && from_date && from_date > to_date) {
     frappe.msgprint({
       message: __("<b>End Date</b> Cannot be Less than Start Date"),
       title: __("Error"),
@@ -628,6 +654,7 @@ function check_to_date(frm) {
     cur_frm.set_value("to_date", "");
   }
 }
+
 
 function check_value(frm, field, name, value) {
   if (value && value < 0) {
@@ -794,13 +821,22 @@ function job_order_duration(frm){
 	frappe.set_route("Form", "Claim Order", doc.name);
 }
 
-
 function show_claim_bar(frm){
-	if (frm.doc.claim && (frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)){
+  if(frm.doc.staff_org_claimed &&(frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company)){
+    cur_frm.toggle_display('section_break_html2', 1);
+    frm.remove_custom_button('Assign Employee')
+    frm.remove_custom_button('Claim Order')
+  }
+	else if (frm.doc.claim && (frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company) && frm.doc.resumes_required==0){
 		cur_frm.toggle_display('section_break_html1', 1);
-		frm.remove_custom_button('Claim')
-	}
-	
+		frm.remove_custom_button('Claim Order')
+  }
+  else if(frm.doc.claim && (frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company) && frm.doc.resumes_required==1){
+    frm.remove_custom_button('Assign Employee')
+    cur_frm.toggle_display('section_break_html1', 1);
+
+
+  }
 }
 
 function assign_employees(frm){
@@ -840,9 +876,9 @@ function view_buttons_hiring(frm){
 	if(cur_frm.doc.__islocal != 1)
 
 	{	
-			let datad1 = `<div id="data" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-			<p><b>Claims </b> ${frm.doc.bid}</p>
-			
+			let datad1 = `<div class="my-3" id="data" style="display: flex;justify-content: space-between;">
+			    <p> Claims  </p>
+          <label class="badge bg-danger rounded-circle text-white"> ${frm.doc.bid} </label>
 					</div>`;
       
           $('[data-fieldname = related_details]').click(function(){
@@ -854,8 +890,8 @@ function view_buttons_hiring(frm){
 		
 
 		if(frm.doc.claim){
-      let datad2 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-          <p><b>Messages </b> ${frm.doc.bid}</p>
+      let datad2 = `<div class="my-3" style="display: flex;justify-content: space-between;">
+          <p>Messages </p>
         </div>`;
         $('[data-fieldname = messages]').click(function() {
           messages(frm)
@@ -866,9 +902,10 @@ function view_buttons_hiring(frm){
       frm.toggle_display('related_actions_section',1)
 		}
 	
-		if(frm.doc.order_status=='Completed'){
-      let datad3 = `<div class="my-2" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-          <p><b>Timesheets </b>  <button class="btn-primary">View</button></p>
+		if(frm.doc.order_status=='Completed' || frm.doc.order_status=='Ongoing'){
+      let datad3 = `<div class="my-3" style="display: flex;justify-content: space-between;">
+          <p>Timesheets  </p>
+          <button class="btn-light rounded border">View</button>
         </div>`;
         $('[data-fieldname = timesheets]').click(function() {
          timesheets_view(frm)
@@ -891,8 +928,9 @@ function view_buttons_hiring(frm){
 				},
 				callback:function(r){
 				if(r.message=='success'){
-          let datad4 = `<div class="my-2" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-								<p><b>Invoices </b> <button class="btn-primary">View</button></p>
+          let datad4 = `<div class="my-3" style="flex;justify-content: space-between;">
+								<p>Invoices </p>
+                <button class="btn-primary">View</button>
 							</div>`;
           $('[data-fieldname = invoices]').click(function() {
             sales_invoice_data(frm)
@@ -916,40 +954,7 @@ function view_buttons_hiring(frm){
 
 
 function view_buttons_staffing(frm){
-
-  if((frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company)){
-    frm.add_custom_button(__('Assign Employee'), function f1(){
-      assign_employe(frm);
-
-    }, __("View"));
-    let data1 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-    <p><b>Claims </b></p>
-    
-        </div>`;
-        $('[data-fieldname = related_details]').click(function() {
-          claim_orders(frm)
-        })
-    frm.set_df_property("related_details", "options", data1);
-    frm.toggle_display('related_actions_section',1)
-    staff_assigned_emp(frm)
-  }
-  else{
-    let data2 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-    <p><b>Claims </b></p>
-    
-        </div>`;
-        $('[data-fieldname = related_details]').click(function() {
-          claim_orders(frm)
-        })
-    frm.set_df_property("related_details", "options", data2);
-    frm.toggle_display('related_actions_section',1)
-  
-    frm.add_custom_button(__('Claims'), function(){
-      claim_orders(frm)
-
-    }, __("View"));
-
-  }
+  claim_assign_button(frm)
  
   if((frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)){
     let data3 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
@@ -1101,7 +1106,7 @@ function timesheets_view(frm){
   frappe.set_route("List", "Timesheet")
 }
 function claim_orders(frm){
-  if(frm.doc.order_status=='Upcoming')
+  if(frm.doc.order_status=='Upcoming' && frm.doc.resumes_required==0)
   {
     if(frm.doc.staff_org_claimed){
       frappe.route_options = {
@@ -1123,12 +1128,14 @@ function claim_orders(frm){
     } 
 
   }
-  else{
+  else if(frm.doc.resumes_required==0){
     frappe.route_options = {
       "job_order": ["=", frm.doc.name],
     };
     frappe.set_route("List", "Claim Order")
-
+  }
+  if(frm.doc.resumes_required==1){
+    staff_assign_redirect(frm)
   }
   
 }
@@ -1199,7 +1206,7 @@ function staff_assigned_emp(frm){
                           <td>${data[p].employee}</td>
                           <td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>`;                     
                         if(data[parseInt(p)].no_show=="No Show" || data[parseInt(p)].non_satisfactory=="Non Satisfactory"){
-                          profile_html+=`<td><button>Replace</button></td>`
+                          profile_html+=`<td class="replace" data-fieldname="replace" ><a href="/app/assign-employee/${data[p].assign_name}"><button>Replace</button></a></td>`
                         }
                       profile_html+= `   
 
@@ -1233,4 +1240,69 @@ function cancel_joborder(frm){
 	frm.add_custom_button(__('Cancel'), function(){
 		frappe.set_route("Form", "Job Order");
 	});
+}
+
+function claim_assign_button(frm){
+  if(frm.doc.resumes_required==1){
+    assign_button(frm)
+    staff_assigned_emp(frm)
+  }
+  else{
+    staff_claim_button(frm)
+
+  }
+}
+
+function assign_button(frm){
+      let data2 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+        <p><b>Claims </b></p>
+        
+            </div>`;
+            $('[data-fieldname = related_details]').click(function() {
+             staff_assign_redirect(frm)
+            })
+        frm.set_df_property("related_details", "options", data2);
+        frm.toggle_display('related_actions_section',1);
+
+}
+
+function staff_assign_redirect(frm){
+  frappe.route_options = {
+    "job_order": ["=", frm.doc.name]
+  };
+  frappe.set_route("List", "Assign Employee")
+}
+
+function staff_claim_button(frm){
+  if((frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company)){
+    frm.add_custom_button(__('Assign Employee'), function f1(){
+      assign_employe(frm);
+
+    }, __("View"));
+    let data1 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+    <p><b>Claims </b></p>
+    
+        </div>`;
+        $('[data-fieldname = related_details]').click(function() {
+          claim_orders(frm)
+        })
+    frm.set_df_property("related_details", "options", data1);
+    frm.toggle_display('related_actions_section',1)
+    staff_assigned_emp(frm)
+  }
+  else{
+    let data2 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+    <p><b>Claims </b></p>
+    
+        </div>`;
+        $('[data-fieldname = related_details]').click(function() {
+          claim_orders(frm)
+        })
+    frm.set_df_property("related_details", "options", data2);
+    frm.toggle_display('related_actions_section',1)
+  
+    frm.add_custom_button(__('Claims'), function(){
+      claim_orders(frm)
+    }, __("View"));
+  }
 }

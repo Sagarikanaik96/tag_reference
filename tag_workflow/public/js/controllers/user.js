@@ -29,10 +29,23 @@ frappe.ui.form.on("User", {
 					]
 				}
 			}else if(roles.includes('Hiring Admin')){
-				return {
-					filters: [
-						["Organization Type", "name", "=", "Hiring"]
-					]
+				if(frappe.boot.tag.tag_user_info.company_type=="Hiring"){
+
+					return {
+						filters: [
+							["Organization Type", "name", "=", "Hiring"]
+						]
+					}
+				}
+				else if(frappe.boot.tag.tag_user_info.company_type=="Exclusive Hiring")
+				{
+					return {
+						filters: [
+							["Organization Type", "name", "=", "Exclusive Hiring"]
+						]
+					}
+
+
 				}
 			}
 		});
@@ -55,6 +68,9 @@ frappe.ui.form.on("User", {
 		}
 		else if(frm.doc.organization_type == "Staffing"){
 			frm.set_value("tag_user_type", "Staffing Admin")
+		}
+		else if(frm.doc.organization_type == "TAG"){
+			frm.set_value("tag_user_type", "Tag Admin")
 		}
 		if(frappe.boot.tag.tag_user_info.company_type=="Hiring"){
 			org_info(frm);
@@ -96,6 +112,9 @@ frappe.ui.form.on("User", {
 		multi_company_setup(frm);
 	},
 	onload:function(frm){
+		if(frappe.session.user!='Administrator'){
+			$('.menu-btn-group').hide()
+        }
 		if(frm.doc.__islocal==1){
 			hiring_org(frm)
 		}
@@ -163,7 +182,7 @@ function set_options(frm){
 	let organization_type = frm.doc.organization_type;
 
 	if(organization_type == "TAG"){
-		options = "\nTag Admin\nTag User";
+		options = "\nTag Admin";
 	}else if(organization_type == "Hiring" || organization_type == "Exclusive Hiring"){
 		options = "\nHiring Admin\nHiring User";
 	}else if(organization_type == "Staffing"){

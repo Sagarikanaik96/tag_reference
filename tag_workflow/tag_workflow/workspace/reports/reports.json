@@ -2,7 +2,7 @@
  "cards_label": "Reports",
  "category": "Modules",
  "charts": [],
- "creation": "2022-01-27 06:03:34.141028",
+ "creation": "2022-02-09 05:48:18.497760",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
@@ -72,7 +72,7 @@
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Register",
-   "link_to": "Sales Register",
+   "link_to": "Sales Register1",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -114,7 +114,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-01-27 06:09:54.760285",
+ "modified": "2022-02-09 23:28:43.619661",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Reports",
