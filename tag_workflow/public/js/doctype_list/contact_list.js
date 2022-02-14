@@ -11,5 +11,6 @@ frappe.listview_settings["Contact"] = {
                 frappe.set_route('Form', 'Data Import', 'new-data-import');
             });
         }
-    }
+    },
+    hide_name_column: true,
 } 
