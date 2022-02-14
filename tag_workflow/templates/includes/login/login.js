@@ -172,6 +172,7 @@ login.login_handlers = (function () {
 		return function (xhr, data) {
 			if (xhr.responseJSON) {
 				data = xhr.responseJSON;
+				frappe.msgprint("Invalid login credentials");
 			}
 
 			var message = default_message;
@@ -257,7 +258,7 @@ login.login_handlers = (function () {
 				}
 			}
 		},
-		401: get_error_handler('{{ _("Invalid Login. Try again.") }}'),
+		401: get_error_handler('{{ _("Login") }}'),
 		417: get_error_handler('{{ _("Oops! Something went wrong") }}')
 	};
 

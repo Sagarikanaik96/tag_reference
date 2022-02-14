@@ -22,14 +22,14 @@ WEB_MAN = "Website Manager"
 USR, EMP, COM = "User", "Employee", "Company"
 Global_defaults="Global Defaults"
 
-ALL_ROLES = [role.name for role in frappe.db.get_list("Role") or []]
+ALL_ROLES = [role.name for role in frappe.db.get_list("Role", {"name": ["!=", "Employee"]}) or []]
 
 ADD_ORGANIZATION = ["Company", "Quotation", "Lead"]
 ADD_ORGANIZATION_DATA = ["TAG", "Hiring", "Staffing", "Exclusive Hiring"]
 
 ROLES = ["Hiring User", "Hiring Admin", "Staffing User", "Staffing Admin", "Tag Admin", "Tag User", "CRM User", "Staff"]
 
-ROLE_PROFILE = [{ROLES[3]: ["Accounts User", "Sales User", ROLES[3], ROLES[6], "Employee"]}, {ROLES[2]: ["Accounts User", "Sales User", ROLES[6], "Employee", ROLES[2]]}, {ROLES[1]: [ROLES[1], ROLES[6], "Employee", "Projects User"]}, {ROLES[0]: [ROLES[6], "Employee", ROLES[0], "Projects User"]}, {ROLES[4]: ALL_ROLES}, {ROLES[5]: ALL_ROLES}]
+ROLE_PROFILE = [{ROLES[4]: ALL_ROLES}, {ROLES[5]: ALL_ROLES}, {ROLES[3]: ["Accounts User", "Sales User", ROLES[3], ROLES[6], "Employee"]}, {ROLES[2]: ["Accounts User", "Sales User", ROLES[6], "Employee", ROLES[2]]}, {ROLES[1]: [ROLES[1], ROLES[6], "Employee", "Projects User"]}, {ROLES[0]: [ROLES[6], "Employee", ROLES[0], "Projects User"]}]
 
 MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", tag_workflow, "Accounts", "Selling"]}, {"Tag Admin": ["Core", "Workflow", "Desk", "CRM", "Projects", "Setup", tag_workflow, "Accounts", "Selling", "HR"]}, {"Hiring": ["CRM", tag_workflow, "Selling"]}]
 
@@ -88,17 +88,21 @@ def update_roles():
 def update_role_profile():
     try:
         print("*------updating role profile----------------*\n")
-        frappe.db.sql(""" delete from `tabRole Profile` """)
         profiles = {k for role in ROLE_PROFILE for k in role.keys()}
         for profile in profiles:
             profile_data = [role[profile] for role in ROLE_PROFILE if profile in role][0]
 
             if not frappe.db.exists(Role_Profile, {"name": profile}):
                 profile_doc = frappe.new_doc(Role_Profile)
-                profile_doc.role_profile = profile 
+                profile_doc.role_profile = profile
                 for data in profile_data:
                     profile_doc.append("roles", {"role": data})
-                profile_doc.save()
+            else:
+                profile_doc = frappe.get_doc(Role_Profile, {"name": profile})
+                profile_doc.roles = []
+                for data in profile_data:
+                    profile_doc.append("roles", {"role": data})
+            profile_doc.save()
     except Exception as e:
         print(e)
         frappe.log_error(frappe.get_traceback(), "update_role_profile")
@@ -108,8 +112,7 @@ def update_module_profile():
     try:
         print("*------updating module profile--------------*\n")
         all_modules = [m.get("module_name") for m in get_modules_from_all_apps()]
-        modules = {k for module in MODULE_PROFILE for k in module.keys()}
-        
+        modules = {k for module in MODULE_PROFILE for k in module.keys()} 
         for mods in modules:
             module_data = [profile[mods] for profile in MODULE_PROFILE if mods in profile][0]
 

@@ -32,6 +32,18 @@ def get_souce(location=None):
     except Exception:
         return ",".join(source)
 
+def get_dest(dest):
+    try:
+        street = dest['street_address'] if dest['street_address'] else ''
+        city = dest['city'] if dest['city'] else ''
+        state = dest['state'] if dest['state'] else ''
+        ZIP = str(dest['zip']) if dest['zip'] != 0 else ''
+        return street+","+city+","+state+","+ZIP
+    except Exception as e:
+        print(e)
+        return ''
+
+
 def check_distance(emp, distance, location):
     try:
         result, source = [], []
@@ -44,15 +56,16 @@ def check_distance(emp, distance, location):
         gmaps = googlemaps.Client(key=api_key)
         source = get_souce(location)
         for e in emp:
-            dest = [e['street_address'], e['city'], e['state'], str(e['zip'])]
             try:
+                dest = get_dest(e)
                 my_dist = gmaps.distance_matrix(source, ",".join(dest))
-                if(my_dist['status'] == 'OK'):
+                if(my_dist['status'] == 'OK' and my_dist['rows'][0]['elements'][0]['distance']):
                     km = my_dist['rows'][0]['elements'][0]['distance']['value']/1000
                     if(km is not None and ((km*0.62137) <= distance_value[distance] or km == 0)):
                         result.append((e['name'], e['employee_name']))
             except Exception as e:
                 print(e)
+                pass
         return tuple(result)
     except Exception as e:
         print(e, "google")

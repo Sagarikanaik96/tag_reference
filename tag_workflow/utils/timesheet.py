@@ -106,7 +106,9 @@ def update_timesheet_data(data, company, company_type, user):
                         "to_time": child_to,
                         "hrs": str(item['total_hours'])+" hrs",
                         "hours": float(item['total_hours']),
-                        "is_billable": 1
+                        "is_billable": 1,
+                        "billing_rate": job.per_hour,
+                        "flat_rate": job.flat_rate
                     })
                     timesheet.insert(ignore_permissions=True)
                     timesheet.workflow_state = "Approval Request"
