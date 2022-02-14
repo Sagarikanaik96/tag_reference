@@ -31,6 +31,9 @@ frappe.ui.form.on("Job Order", {
     }
   },
   onload: function (frm) {
+    if(frappe.session.user != 'Administrator'){
+      $('.menu-btn-group').hide()
+    }
     hide_employee_rating(frm);
 
     if (cur_frm.doc.__islocal == 1) {
