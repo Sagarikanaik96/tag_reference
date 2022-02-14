@@ -715,10 +715,6 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
             job_detail = frappe.db.sql(job_sql, as_dict=1)
             lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)
             user_list = frappe.db.sql(lst_sql, as_list=1)
-            v = json.loads(emp_detail)
-            s = ''
-            for i in v:
-                s += i['employee_name'] + ','
             l = [l[0] for l in user_list]
             for user in l:
                 add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)
@@ -729,7 +725,7 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
             link =  f'  href="/app/assign-employee/{doc_name}" '
             return joborder_email_template(sub, msg, l, link)
         else:
-            return "No Access"
+            return "Something Went Access"
     except Exception as e:
         print(e, frappe.get_traceback())
         frappe.db.rollback()
