@@ -699,3 +699,37 @@ def vals(name,comp):
     claims=data.claim
     if claims is not None and comp in claims:
         return "success"
+
+
+@frappe.whitelist(allow_guest=False)
+def receive_hire_notification(user, company_type, hiring_org, job_order, staffing_org, emp_detail, doc_name,worker_fill):
+    try:
+        if(company_type == "Staffing" and user == frappe.session.user):
+            dat=f'update `tabAssign Employee` set tag_status="Approved" where name="{doc_name}"'
+            frappe.db.sql(dat)
+            frappe.db.commit()
+            job = frappe.get_doc(jobOrder, job_order)
+            frappe.db.set_value(jobOrder, job_order, "worker_filled", (int(worker_fill)+int(job.worker_filled)))
+            
+            job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
+            job_detail = frappe.db.sql(job_sql, as_dict=1)
+            lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)
+            user_list = frappe.db.sql(lst_sql, as_list=1)
+            v = json.loads(emp_detail)
+            s = ''
+            for i in v:
+                s += i['employee_name'] + ','
+            l = [l[0] for l in user_list]
+            for user in l:
+                add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)
+            sub="Employee Assigned"
+            msg = f'{staffing_org} has assigned the Employees to the {job_detail[0]["select_job"]}'
+            make_system_notification(l,msg,'Assign Employee',doc_name,sub)
+            msg = f'{staffing_org} has assigned the Employees to the {job_detail[0]["select_job"]}'
+            link =  f'  href="/app/assign-employee/{doc_name}" '
+            return joborder_email_template(sub, msg, l, link)
+        else:
+            return "No Access"
+    except Exception as e:
+        print(e, frappe.get_traceback())
+        frappe.db.rollback()

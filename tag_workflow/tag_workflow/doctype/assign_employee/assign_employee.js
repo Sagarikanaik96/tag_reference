@@ -64,8 +64,11 @@ frappe.ui.form.on('Assign Employee', {
 	},
 	
 	after_save:function(frm){
-		if(frm.doc.tag_status=='Open'){
+		if(frm.doc.tag_status=='Open' && cur_frm.doc.resume_required==1){
 			make_hiring_notification(frm);
+		}
+		else{
+			make_notification_approved(frm);
 		}
 	},
 	validate:function(frm){
@@ -193,9 +196,8 @@ frappe.ui.form.on("Assign Employee Details", {
 	}
 });
 
-
 function approved_employee(frm){
-	if(cur_frm.doc.tag_status == "Approved" && frappe.boot.tag.tag_user_info.company_type=='Hiring'){
+	if(cur_frm.doc.tag_status == "Approved" && frappe.boot.tag.tag_user_info.company_type=='Hiring' && frm.doc.resume_required==1){
 		var current_date = new Date(frappe.datetime.now_datetime());
 		var approved_date = new Date(frm.doc.modified);
 		var diff = current_date.getTime()-approved_date.getTime();
@@ -287,9 +289,23 @@ function table_emp(frm,table,msg){
 		(table.length > Number(frm.doc.no_of_employee_required)+1) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 	}
 	else if(frm.doc.claims_approved){
-		(table.length > Number(frm.doc.claims_approved)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.claims_approved+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
+		(table.length != Number(frm.doc.claims_approved)) ? msg.push('Please Assign '+frm.doc.claims_approved+' Employees') : console.log("TAG");
 	}
  	else{
 		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 	}
+}
+
+function make_notification_approved(frm){
+	frappe.call({
+		"method":"tag_workflow.tag_data.receive_hire_notification",
+		"freeze": true,
+		"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
+		"args":{
+			"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
+			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
+			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
+			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,"worker_fill":frm.doc.claims_approved
+		}
+	});
 }
