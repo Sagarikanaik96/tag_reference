@@ -58,7 +58,7 @@ def check_distance(emp, distance, location):
         for e in emp:
             try:
                 dest = get_dest(e)
-                my_dist = gmaps.distance_matrix(source, ",".join(dest))
+                my_dist = gmaps.distance_matrix(source, dest)
                 if(my_dist['status'] == 'OK' and my_dist['rows'][0]['elements'][0]['distance']):
                     km = my_dist['rows'][0]['elements'][0]['distance']['value']/1000
                     if(km is not None and ((km*0.62137) <= distance_value[distance] or km == 0)):
