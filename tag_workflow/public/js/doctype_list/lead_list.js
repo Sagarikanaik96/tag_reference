@@ -5,5 +5,7 @@ frappe.listview_settings["Lead"] = {
             $('[data-original-title="Refresh"]').hide()
             $('.menu-btn-group').hide()
         }
-    }
+    },
+    hide_name_column: true,
+
 }
