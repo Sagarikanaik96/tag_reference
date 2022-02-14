@@ -65,7 +65,7 @@ def check_distance(emp, distance, location):
                         result.append((e['name'], e['employee_name']))
             except Exception as e:
                 print(e)
-                pass
+                continue
         return tuple(result)
     except Exception as e:
         print(e, "google")
