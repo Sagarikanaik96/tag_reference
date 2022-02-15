@@ -87,7 +87,7 @@ function staffing_claim_joborder(frm){
 		"freeze": true,
 		"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
 		"args":{
-			"job_order" :frm.doc.job_order,"hiring_org" : frm.doc.hiring_organization,"staffing_org" : frm.doc.staffing_organization,"doc_name" : frm.doc.name}
+			"job_order" :frm.doc.job_order,"hiring_org" : frm.doc.hiring_organization,"staffing_org" : frm.doc.staffing_organization,"doc_name" : frm.doc.name,"single_share":frm.doc.single_share,'no_assigned':frm.doc.staff_claims_no,'no_required':frm.doc.no_of_workers_joborder}
 	});
 	
 }

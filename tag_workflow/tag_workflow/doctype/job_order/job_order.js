@@ -126,7 +126,7 @@ frappe.ui.form.on("Job Order", {
     cur_frm.dashboard.hide();
     view_button(frm)
     if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
-      if(frm.doc.resumes_required || frm.doc.is_single_share){
+      if(frm.doc.resumes_required){
         frm.add_custom_button(__('Assign Employee'), function(){
 				  assign_employees(frm)
         })
@@ -811,10 +811,17 @@ function job_order_duration(frm){
 	}
 }
 
-   function claim_job_order_staffing(frm){
+function claim_job_order_staffing(frm){
 	var doc = frappe.model.get_new_doc("Claim Order");
-	var staff_company = frappe.boot.tag.tag_user_info.company || [];
-	doc.staffing_organization = staff_company[0];
+  if(frm.doc.is_single_share==1)
+  {
+    doc.staffing_organization = frm.doc.staff_company
+    doc.single_share=1
+  }
+  else{
+    var staff_company = frappe.boot.tag.tag_user_info.company || [];
+    doc.staffing_organization = staff_company[0];
+  }
 	doc.job_order = frm.doc.name;
 	doc.no_of_workers_joborder = frm.doc.no_of_workers
 	doc.hiring_organization = frm.doc.company;
