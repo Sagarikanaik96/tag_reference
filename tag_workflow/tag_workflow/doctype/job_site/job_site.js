@@ -57,7 +57,7 @@ frappe.ui.form.on('Job Site', {
 			}
 		})
 		frappe.call({
-			"method": "tag_workflow.tag_workflow.doctype.job_site.job_site.checkingjobsite",
+			"method": "tag_workflow.utils.doctype_method.checkingjobsite",
 			"args": {"job_site": frm.doc.job_site,
 
 					},

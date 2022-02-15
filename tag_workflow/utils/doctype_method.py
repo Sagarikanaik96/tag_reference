@@ -187,3 +187,14 @@ def update_cost(self):
                 data.costing_rate = cost_rate
                 data.billing_amount = ((data.billing_rate * (hours-data.extra_hours))+data.flat_rate)+(data.extra_hours*data.extra_rate)
                 data.costing_amount = data.costing_rate * costing_hours
+
+
+@frappe.whitelist()
+def checkingjobsite(job_site):
+    job_site = job_site.strip()
+    if not job_site.strip():
+        frappe.throw(_("Abbreviation is mandatory"))
+    sql = "select job_site from `tabJob Site` where job_site = '{0}' ".format(job_site)
+    if frappe.db.sql(sql):
+        return append_number_if_name_exists("Job Site", job_site, fieldname="job_site", separator="-", filters=None)
+    return job_site
