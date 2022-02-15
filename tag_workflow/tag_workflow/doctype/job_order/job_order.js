@@ -868,7 +868,7 @@ function assign_employees(frm){
 function view_button(frm){
   if (frappe.boot.tag.tag_user_info.company_type == "Staffing" && frm.doc.__islocal!=1) {
     cur_frm.dashboard.hide();
-     if((frm.doc.staff_org_claimed)){
+     if((frm.doc.claim)){
       view_buttons_staffing(frm);
     }
   }
@@ -978,7 +978,7 @@ function view_buttons_staffing(frm){
         messages(frm)
     }, __("View"));
   }
-  if( (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company) && (frm.doc.order_status=='Completed')){
+  if(frm.doc.staff_org_claimed && (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company) && (frm.doc.order_status=='Completed')){
     let data4 = `<div class="my-2"  style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
         <p><b>Timesheets </b>  <button class="btn-primary">View</button></p>
       </div>`;
@@ -991,7 +991,7 @@ function view_buttons_staffing(frm){
      timesheets_view(frm)
     }, __("View"));
   }
-  if( (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company) && (frm.doc.order_status=='Completed')){
+  if(frm.doc.staff_org_claimed && (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company) && (frm.doc.order_status=='Completed')){
     frappe.call({
       method:"tag_workflow.tag_data.timesheet_detail",
       args: {
@@ -1282,7 +1282,7 @@ function staff_assign_redirect(frm){
 }
 
 function staff_claim_button(frm){
-  if((frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company)){
+  if(frm.doc.staff_org_claimed && (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company)){
     frm.add_custom_button(__('Assign Employee'), function f1(){
       assign_employe(frm);
 

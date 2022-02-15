@@ -420,7 +420,7 @@ def disable_user(company, check):
         frappe.msgprint(e)
 
 
-@frappe.whitelist(allow_guest=False)
+@frappe.whitelist()
 def update_job_order_status():
     try:
         job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','order_status'])
