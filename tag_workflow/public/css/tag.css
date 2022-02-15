@@ -603,6 +603,17 @@ input::-webkit-credentials-auto-fill-button {
   margin-left: -17px;
 }
 
+/* job order Hiring button */
+[data-page-route="List/Job Order/List"] .btn.btn-secondary {
+  background-color: #21b9e4 !important;
+  color: #fff;
+  transition: 0.3s ease-in-out;
+}
+[data-page-route="List/Job Order/List"] .btn.btn-secondary:hover {
+  background-color: #0a97bfeb !important;
+  color: #fff !important;
+}
+
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
   .col-md-12.layout-main-section-wrapper {
