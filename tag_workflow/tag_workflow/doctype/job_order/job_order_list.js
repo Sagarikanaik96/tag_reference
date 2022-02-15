@@ -1,5 +1,7 @@
 frappe.listview_settings['Job Order'] = {
 	onload:function(listview){
+		$('[data-fieldname="name"]').attr('placeholder','Order ID')
+		$('[data-fieldname="category"]').attr('placeholder','Industry')
 		if(frappe.session.user!='Administrator'){
 			$('.custom-actions.hidden-xs.hidden-md').hide()
 			$('[data-original-title="Refresh"]').hide()
