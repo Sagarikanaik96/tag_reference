@@ -471,7 +471,7 @@ def sales_invoice_notification(user, sid, job_order=None, company=None, invoice_
 
 @frappe.whitelist(allow_guest=False)
 def hiring_org_name(current_user):
-    sql = ''' select company from `tabEmployee` where email='{0}' '''.format(current_user)
+    sql = ''' select company from `tabEmployee` where email='{0}' and company in (select name from `tabCompany` where make_organization_inactive='0') '''.format(current_user)
     user_company=frappe.db.sql(sql, as_list=1)
     if(len(user_company)==1):
         return 'success'

@@ -45,7 +45,7 @@ frappe.ui.form.on('Claim Order', {
 			cancel_claimorder(frm);
 			submit_claim(frm);
 			if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-				org_info(frm);	
+				setTimeout(()=>{org_info(frm);},500)	
 			}
 		}
 		else{
