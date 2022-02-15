@@ -441,26 +441,28 @@ def update_job_order_status():
 @frappe.whitelist(allow_guest=False)
 def sales_invoice_notification(user, sid, job_order=None, company=None, invoice_name=None):
     try:
-        if(user == frappe.session.user and sid == frappe.cache().get_value("sessions")[user]):
-            sql = '''  select workflow_state from `tabTimesheet` where job_order_detail='{0}' and employee_company='{1}' '''.format(job_order, company)
-            data=frappe.db.sql(sql, as_list=1)
-            for i in data:
-                if i[0]!="Approved":
-                    return
-                else:
-                    sql = """ Select company,select_job,job_site from `tabJob Order` where name='{0}' """.format(job_order)
-                    job_order_details=frappe.db.sql(sql, as_dict=1)
-                    msg=f'{company} has submitted an invoice for {job_order_details[0].select_job} at {job_order_details[0].job_site}.'
-                    subject="Invoice Submitted"
-                    sql = ''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL '''.format(job_order_details[0].company)
-                    user_list=frappe.db.sql(sql, as_list=1)
-                    users = [l[0] for l in user_list]
-                    for user in users:
-                        add("Sales Invoice", invoice_name, user, read=1, write = 0, share = 0, everyone = 0)
+        if(user != frappe.session.user and sid != frappe.cache().get_value("sessions")[user]):
+            return "No Access"
 
-                    if(users):
-                        make_system_notification(users, msg, 'Sales Invoice', invoice_name, subject)
-                        return send_email(subject, msg, users)
+        sql = '''  select workflow_state from `tabTimesheet` where job_order_detail='{0}' and employee_company='{1}' '''.format(job_order, company)
+        data = frappe.db.sql(sql, as_list=1)
+        for i in data:
+            if i[0] != "Approved":
+                return
+            else:
+                sql = """ Select company,select_job,job_site from `tabJob Order` where name='{0}' """.format(job_order)
+                job_order_details = frappe.db.sql(sql, as_dict=1)
+                msg = f'{company} has submitted an invoice for {job_order_details[0].select_job} at {job_order_details[0].job_site}.'
+                subject = "Invoice Submitted"
+                sql = ''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL '''.format(job_order_details[0].company)
+                user_list = frappe.db.sql(sql, as_list=1)
+                users = [l[0] for l in user_list]
+                for usr in users:
+                    add("Sales Invoice", invoice_name, usr, read=1, write = 0, share = 0, everyone = 0)
+
+                if(users):
+                    make_system_notification(users, msg, 'Sales Invoice', invoice_name, subject)
+                    return send_email(subject, msg, users)
     except Exception as e:
         frappe.db.rollback()
         frappe.error_log(e, "invoice notification")
