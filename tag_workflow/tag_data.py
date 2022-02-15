@@ -10,6 +10,7 @@ import datetime
 
 jobOrder = "Job Order"
 assignEmployees = "Assign Employee"
+NOASS = "No Access"
 
 @frappe.whitelist(allow_guest=False)
 def company_details(company_name=None):
@@ -104,12 +105,12 @@ def assign_employee_data(hiringorg, name):
     except Exception as e:
         frappe.db.rollback()
         frappe.error_log(e, "employee share")
-        frappe.throw(e)
- 
+
+
 @frappe.whitelist(allow_guest=False)
-def update_job_order(user, company_type, job_name, employee_filled, staffing_org, hiringorg, name):
+def update_job_order(user, company_type, sid, job_name, employee_filled, staffing_org, hiringorg, name):
     try:
-        if(company_type == "Hiring" and user == frappe.session.user):
+        if(company_type == "Hiring" and user == frappe.session.user and sid == frappe.cache().get_value("sessions")[user]):
             job = frappe.get_doc(jobOrder, job_name)
             claimed = job.staff_org_claimed if job.staff_org_claimed else ""
             frappe.db.set_value(jobOrder, job_name, "worker_filled", (int(employee_filled)+int(job.worker_filled)))
@@ -130,7 +131,6 @@ def update_job_order(user, company_type, job_name, employee_filled, staffing_org
     except Exception as e:
         frappe.db.rollback()
         frappe.error_log(e, "final_notification")
-        frappe.throw(e)
 
 
 @frappe.whitelist(allow_guest=False)
@@ -173,7 +173,7 @@ def receive_hiring_notification(user, company_type, hiring_org, job_order, staff
             link =  f'  href="/app/assign-employee/{doc_name}" '
             return joborder_email_template(sub, msg, l, link)
         else:
-            return "No Access"
+            return NOASS
     except Exception as e:
         print(e, frappe.get_traceback())
         frappe.db.rollback()
@@ -440,33 +440,35 @@ def update_job_order_status():
 
 
 @frappe.whitelist(allow_guest=False)
-def sales_invoice_notification(job_order=None,company=None,invoice_name=None):
+def sales_invoice_notification(user, sid, job_order=None, company=None, invoice_name=None):
     try:
+        if(user != frappe.session.user and sid != frappe.cache().get_value("sessions")[user]):
+            return NOASS
+
         sql = '''  select workflow_state from `tabTimesheet` where job_order_detail='{0}' and employee_company='{1}' '''.format(job_order, company)
-        data=frappe.db.sql(sql, as_list=1)
-        if(len(data)>0):
-            for i in data:
-                if i[0]!="Approved":
-                    break
+        data = frappe.db.sql(sql, as_list=1)
+        for i in data:
+            if i[0] != "Approved":
+                return
             else:
                 sql = """ Select company,select_job,job_site from `tabJob Order` where name='{0}' """.format(job_order)
-                job_order_details=frappe.db.sql(sql, as_dict=1)
-                msg=f'{company} has submitted an invoice for {job_order_details[0].select_job} at {job_order_details[0].job_site}.'
-                subject="Invoice Submitted"
-
+                job_order_details = frappe.db.sql(sql, as_dict=1)
+                msg = f'{company} has submitted an invoice for {job_order_details[0].select_job} at {job_order_details[0].job_site}.'
+                subject = "Invoice Submitted"
                 sql = ''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL '''.format(job_order_details[0].company)
-                user_list=frappe.db.sql(sql, as_list=1)
-                if(len(user_list)>0):
-                    l = [l[0] for l in user_list]
-                    for user in l:
-                        add("Sales Invoice", invoice_name, user, read=1, write = 0, share = 0, everyone = 0)
-                    make_system_notification(l,msg,'Sales Invoice',invoice_name,subject)   
-                    return send_email(subject,msg,l)
+                user_list = frappe.db.sql(sql, as_list=1)
+                users = [l[0] for l in user_list]
+                for usr in users:
+                    add("Sales Invoice", invoice_name, usr, read=1, write = 0, share = 0, everyone = 0)
+
+                if(users):
+                    make_system_notification(users, msg, 'Sales Invoice', invoice_name, subject)
+                    return send_email(subject, msg, users)
     except Exception as e:
         frappe.db.rollback()
         frappe.error_log(e, "invoice notification")
-        frappe.throw(e)
-             
+
+
 @frappe.whitelist(allow_guest=False)
 def hiring_org_name(current_user):
     sql = ''' select company from `tabEmployee` where email='{0}' '''.format(current_user)
@@ -558,7 +560,7 @@ def assign_employee_resume_update(employee, name):
             frappe.db.commit()
         return True
     else:
-        return "No Access"
+        return NOASS
 @frappe.whitelist(allow_guest=False)
 def joborder_resume(name):
     sql = """ select resume from `tabEmployee` where name='{}' """.format(name)

@@ -1,6 +1,9 @@
 // login.js
 // don't remove this line (used in test)
 
+var count = 5
+usr1 = ""
+
 window.disable_signup = {{ disable_signup and "true" or "false" }};
 
 window.login = {};
@@ -58,6 +61,30 @@ login.bind_events = function () {
 		login.call(args);
 		return false;
 	});
+
+	$(".form-login").on("submit", function (event) {
+		usr = frappe.utils.xss_sanitise(($("#login_email").val() || "").trim());
+		console.log(count)
+		if (usr !== usr1){
+			count -= 1
+			usr1 = usr
+			if (count == 0){
+				document.getElementById("login_email").disabled = true;
+				document.getElementById("login_password").disabled = true
+				pop_up()
+			}
+		}
+		if (count == 0){
+			frappe.msgprint("Your Email Field has been locked and will resume after 120 seconds")
+				document.getElementById("login_email").disabled = true;
+				document.getElementById("login_password").disabled = true
+		}
+	});
+
+	function pop_up(){
+		console.log("pop",count)
+		setTimeout(() => {count = 5;document.getElementById("login_email").disabled = false;document.getElementById("login_password").disabled = false}, 120000)
+	}
 
 	$(".toggle-password").click(function () {
 		var input = $($(this).attr("toggle"));

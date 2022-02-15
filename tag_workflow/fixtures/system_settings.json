@@ -1,7 +1,7 @@
 [
  {
   "allow_consecutive_login_attempts": 5,
-  "allow_error_traceback": 1,
+  "allow_error_traceback": 0,
   "allow_guests_to_upload_files": 0,
   "allow_login_after_fail": 120,
   "allow_login_using_mobile_number": 0,
@@ -35,7 +35,7 @@
   "lifespan_qrcode_image": 0,
   "logout_on_password_reset": 1,
   "minimum_password_score": "2",
-  "modified": "2022-02-07 07:38:42.282801",
+  "modified": "2022-02-14 23:40:16.720592",
   "name": "System Settings",
   "number_format": "#,###.##",
   "otp_issuer_name": "Frappe Framework",

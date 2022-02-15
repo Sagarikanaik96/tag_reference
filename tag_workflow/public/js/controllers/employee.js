@@ -1,5 +1,6 @@
 frappe.ui.form.on("Employee", {
 	refresh: function(frm){
+		$('.form-footer').hide()
 		trigger_hide(frm);
 		required_field(frm);
 		cur_frm.dashboard.hide()

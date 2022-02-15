@@ -4,6 +4,7 @@
  
 frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
+		$('.form-footer').hide()
 		if(frm.doc.__islocal==1){
 			if (!frm.doc.hiring_organization){
 				frappe.msgprint(__("Your Can't Assign Employye without job order detail"));
@@ -208,7 +209,7 @@ function approved_employee(frm){
 				"freeze": true,
 				"freeze_message": "<p><b>preparing notification for Staffing orgs...</b></p>",
 				args:{
-					"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
+					"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "sid": frappe.boot.tag.tag_user_info.sid,
 					"job_name" : cur_frm.doc.job_order, "employee_filled" : cur_frm.doc.employee_details.length,
 					"staffing_org" : cur_frm.doc.company, "hiringorg" : cur_frm.doc.hiring_organization, "name": frm.doc.name
 				}

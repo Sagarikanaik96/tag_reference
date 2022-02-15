@@ -17,8 +17,12 @@ jobOrder = 'Job Order'
 claimOrder = "Claim Order"
 
 @frappe.whitelist()
-def staffing_claim_joborder(job_order,hiring_org, staffing_org, doc_name):
+def staffing_claim_joborder(job_order,hiring_org, staffing_org, doc_name,single_share,no_required,no_assigned):
 	try:
+		if(int(single_share)==1):
+			check_partial_claim(job_order,staffing_org,single_share,no_required,no_assigned,hiring_org,doc_name)
+			return
+
 		bid_receive=frappe.get_doc(jobOrder,job_order)
 
 		bid_receive.bid=1+int(bid_receive.bid)
@@ -146,3 +150,52 @@ def save_modified_claims(my_data,doc_name):
 		print(e, frappe.get_traceback())
 		frappe.db.rollback()
 
+
+def check_partial_claim(job_order,staffing_org,single_share,no_required,no_assigned,hiring_org,doc_name):
+	try:
+		job_order_data=frappe.get_doc(jobOrder,job_order)
+		job_order_data.is_single_share = '0'
+		job_order_data.bid=1+int(job_order_data.bid)
+		if(job_order_data.claim is None):
+			job_order_data.claim=staffing_org
+			chat_room_created(hiring_org,staffing_org,job_order)
+
+		else:
+			if(staffing_org not in job_order_data.claim):
+				job_order_data.claim=str(job_order_data.claim)+str(",")+staffing_org
+				chat_room_created(hiring_org,staffing_org,job_order)
+
+		job_order_data.save(ignore_permissions=True)
+
+		sql1 = '''select email from `tabUser` where organization_type='hiring' and company = "{}"'''.format(hiring_org)
+		hiring_list = frappe.db.sql(sql1,as_list=True)
+		hiring_user_list = [user[0] for user in hiring_list]
+
+		if int(no_required) > int(no_assigned):
+			sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org)
+			share_list = frappe.db.sql(sql, as_list = True)
+			assign_notification(share_list,hiring_user_list,doc_name,job_order) 
+			subject = 'Job Order Notification' 
+			msg=f'{staffing_org} placed partial claim on your work order: {job_order_data.select_job}. Please review.'
+			make_system_notification(hiring_user_list,msg,claimOrder,doc_name,subject)
+			link =  f'  href="/app/claim-order/{doc_name}" '
+			joborder_email_template(subject,msg,hiring_user_list,link)
+		else:
+			if hiring_user_list:
+				subject = 'Job Order Notification' 
+				for user in hiring_user_list:
+					add(claimOrder, doc_name, user, read=1, write = 0, share = 0, everyone = 0,flags={"ignore_share_permission": 1})   
+			
+				msg=f'{staffing_org} placed Full claim on your work order: {job_order_data.select_job}. Please review.'
+				make_system_notification(hiring_user_list,msg,claimOrder,doc_name,subject)
+				link =  f'  href="/app/claim-order/{doc_name}" '
+				joborder_email_template(subject,msg,hiring_user_list,link)
+	except Exception as e:
+		frappe.error_log(e, "Partial Job order Failed ")
+def assign_notification(share_list,hiring_user_list,doc_name,job_order):
+	if share_list:
+		for user in share_list:
+			add(jobOrder, job_order, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
+	for user in hiring_user_list:
+		add(claimOrder, doc_name, user, read=1, write = 0, share = 0, everyone = 0,flags={"ignore_share_permission": 1})  
+   
