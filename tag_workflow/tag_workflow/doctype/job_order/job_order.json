@@ -456,7 +456,7 @@
   {
    "fieldname": "html_2",
    "fieldtype": "HTML",
-   "options": "<h3>You Have Claimed For This Order</h3>"
+   "options": "<h3>You Have Submitted a Claim For This Order</h3>"
   },
   {
    "fieldname": "related_actions_section",
@@ -601,7 +601,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-12 13:45:08.894253",
+ "modified": "2022-02-15 05:58:37.536996",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
