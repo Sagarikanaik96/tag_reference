@@ -3,6 +3,7 @@
 
 frappe.ui.form.on("Staffing Email", {
 	refresh: function (frm) {
+		$('.form-footer').hide()
 		frm.disable_save();
 		if (frm.doc.__islocal) {
 			frm.add_custom_button(__("Send"), function () {

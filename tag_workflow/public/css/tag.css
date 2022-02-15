@@ -231,7 +231,14 @@ input::-webkit-credentials-auto-fill-button {
   width: 100%;
 }
 
-.form-footer {
+.comment-box{
+  display: none !important;
+
+}
+.timeline-actions{
+  display: none !important;
+}
+.timeline-dot{
   display: none !important;
 }
 /* Inner report Table UI update  */

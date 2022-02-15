@@ -120,6 +120,7 @@ frappe.ui.form.on("Job Order", {
 
   },
   refresh: function (frm) {
+    $('.form-footer').hide()
     if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=="Hiring" && frm.doc.order_status=="Upcoming"){
       hide_unnecessary_data(frm)
     }

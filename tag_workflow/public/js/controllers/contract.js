@@ -1,5 +1,6 @@
 frappe.ui.form.on("Contract", {
 	refresh: function(frm){
+		$('.form-footer').hide()
 		toggle_field(frm);
 		update_contract(frm);
 		update_hiring(frm);

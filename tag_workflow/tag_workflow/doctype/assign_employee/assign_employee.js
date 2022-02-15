@@ -4,6 +4,7 @@
  
 frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
+		$('.form-footer').hide()
 		if(frm.doc.__islocal==1){
 			if (!frm.doc.hiring_organization){
 				frappe.msgprint(__("Your Can't Assign Employye without job order detail"));

@@ -5,6 +5,7 @@ frappe.ui.form.on("Sales Invoice", {
         }
 	},
 	refresh: function(frm){
+		$('.form-footer').hide()
 		$('[data-original-title="Menu"]').hide()
 		cur_frm.clear_custom_buttons();
 		let is_table = '';

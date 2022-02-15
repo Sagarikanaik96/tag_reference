@@ -45,7 +45,7 @@ frappe.ui.form.on("Lead", {
     }
   },
   setup: function (frm) {
-    if(frappe.session.user!='Administrator'){
+    if(frappe.session.user!='Administrator' && frm.doc.__islocal==1){
       setting_owner_company(frm);
     }
   },
@@ -60,14 +60,7 @@ frappe.ui.form.on("Lead", {
       });
     }
   },
-  owner_company: function (frm) {
-      if (frm.doc.owner_company) {
-        frm.set_value("owner_company", frm.doc.owner_company);
-      }
-    else{
-      frm.set_value("lead_owner", "");
-    }
-  },
+
   lead_owner: function (frm) {
     frm.set_query("lead_owner", function (doc) {
       return {
@@ -81,7 +74,23 @@ frappe.ui.form.on("Lead", {
   before_save: function(frm){
    if (frappe.boot.tag.tag_user_info.company_type=='Staffing') {
     frm.set_value("organization_type", "Exclusive Hiring");} 
-  }
+    if(frm.doc.notes)
+    {
+      frappe.call({
+        "method": "frappe.desk.form.utils.add_comment",
+        'async':0,
+        "args": {
+          reference_doctype: frm.doctype,
+          reference_name: frm.docname,
+          content: frm.doc.notes,
+          comment_email: frappe.session.user,
+          comment_by: frappe.session.user_fullname,
+          comment_type:'Comment'
+            }
+          });
+      frm.set_value('notes','')
+    }
+  },
 });
 
 /*-------reqd------*/
@@ -265,7 +274,7 @@ function setting_owner_company(frm) {
     frm.set_value("organization_type", "Exclusive Hiring")
     frm.set_query("owner_company", function (doc) {
       return {
-        filters: [["Company", "organization_type", "in", ["Staffing"]]],
+        filters: [["Company", "organization_type", "in", ["Staffing"]],["Company", "make_organization_inactive", "=", 0]],
       };
     });
     frappe.call({
