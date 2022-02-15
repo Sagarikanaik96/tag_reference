@@ -10,6 +10,7 @@ import datetime
 
 jobOrder = "Job Order"
 assignEmployees = "Assign Employee"
+NOASS = "No Access"
 
 @frappe.whitelist(allow_guest=False)
 def company_details(company_name=None):
@@ -172,7 +173,7 @@ def receive_hiring_notification(user, company_type, hiring_org, job_order, staff
             link =  f'  href="/app/assign-employee/{doc_name}" '
             return joborder_email_template(sub, msg, l, link)
         else:
-            return "No Access"
+            return NOASS
     except Exception as e:
         print(e, frappe.get_traceback())
         frappe.db.rollback()
@@ -442,7 +443,7 @@ def update_job_order_status():
 def sales_invoice_notification(user, sid, job_order=None, company=None, invoice_name=None):
     try:
         if(user != frappe.session.user and sid != frappe.cache().get_value("sessions")[user]):
-            return "No Access"
+            return NOASS
 
         sql = '''  select workflow_state from `tabTimesheet` where job_order_detail='{0}' and employee_company='{1}' '''.format(job_order, company)
         data = frappe.db.sql(sql, as_list=1)
@@ -559,7 +560,7 @@ def assign_employee_resume_update(employee, name):
             frappe.db.commit()
         return True
     else:
-        return "No Access"
+        return NOASS
 @frappe.whitelist(allow_guest=False)
 def joborder_resume(name):
     sql = """ select resume from `tabEmployee` where name='{}' """.format(name)
