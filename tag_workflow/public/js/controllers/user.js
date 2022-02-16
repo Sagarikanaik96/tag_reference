@@ -116,8 +116,6 @@ frappe.ui.form.on("User", {
 		if(frappe.session.user!='Administrator'){
 			$('.menu-btn-group').hide();
 		}
-
-		//if(frm.doc.__islocal==1){hiring_org(frm)}
 	},
 	validate:function(frm){
 		let phone = frm.doc.mobile_no

@@ -22,6 +22,7 @@ STANDARD = ["Administrator", "Guest"]
 HIR = ["Hiring", "Exclusive Hiring"]
 HIR_TYPE = ["Hiring Admin", "Hiring User"]
 STF_TYPE = ["Staffing Admin", "Staffing User"]
+#--------------------------#
 
 class MasterController(base_controller.BaseController):
     def validate_master(self):
