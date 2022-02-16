@@ -848,7 +848,7 @@ function show_claim_bar(frm){
 }
 
 function assign_employees(frm){
-	if(frm.doc.to_date  < frappe.datetime.now_datetime()){
+	if(frm.doc.to_date  < frappe.datetime.nowdate()){
 		frappe.msgprint({message:__('Date has been past to claim this order'), title:__('Job Order filled'),indicator: 'blue'})
 	}
 	else if(frm.doc.__islocal != 1 && cur_frm.doc.owner != frappe.session.user && frm.doc.worker_filled < frm.doc.no_of_workers){

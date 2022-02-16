@@ -7,7 +7,7 @@ frappe.ui.form.on('Assign Employee', {
 		$('.form-footer').hide()
 		if(frm.doc.__islocal==1){
 			if (!frm.doc.hiring_organization){
-				frappe.msgprint(__("Your Can't Assign Employye without job order detail"));
+				frappe.msgprint(__("Your Can't Assign Employee without job order detail"));
 				frappe.validated = false
 				setTimeout(() => {
 				frappe.set_route("List","Job Order")
@@ -132,6 +132,11 @@ function make_hiring_notification(frm){
 			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
 			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
 			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category
+		},
+		callback:function(r){
+			setTimeout(function () {
+				window.location.href='/app/job-order/'+frm.doc.job_order
+			}, 3000);
 		}
 	});
 }
@@ -147,7 +152,16 @@ function check_employee_data(frm){
 			msg.push('Employee(<b>'+table[d].employee+'</b>) job category not matched with Job Order job category');
 		}
 	}
-	table_emp(frm,table,msg);
+	
+	if(frm.doc.resume_required==1){
+		for(var r in table){
+			if(table[r].resume===null){
+				msg.push('Attach the Resume to Assign the Employee.');
+			}
+		}
+
+	}
+	table_emp(frm,table,msg)
 
 	for(var e in table){(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg.push('Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details');}
 	if(msg.length){frappe.msgprint({message: msg.join("\n\n"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
@@ -271,11 +285,14 @@ function worker_notification(frm){
 			"method":"tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.approved_workers",
 			"args":{
 				"job_order":frm.doc.job_order,
-				"staffing_org":frappe.boot.tag.tag_user_info.company
+				"user_email":frappe.session.user_email
 			},
+			async:0,
 			callback:function(r){
 				if(r.message.length!=0){
 					frm.set_value('claims_approved',r.message[0].approved_no_of_workers)
+					frm.set_value('company',r.message[0].staffing_organization)
+					frm.set_df_property('company','read_only',1)
 					frm.set_df_property('claims_approved',"hidden",0)
 				}
 			
