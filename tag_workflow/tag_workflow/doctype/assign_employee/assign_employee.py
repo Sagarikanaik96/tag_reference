@@ -105,7 +105,7 @@ def worker_data(job_order):
     return data
 
 @frappe.whitelist()
-def approved_workers(job_order,staffing_org):
-    sql=f"select approved_no_of_workers from `tabClaim Order` where job_order='{job_order}' and staffing_organization='{staffing_org}' "
+def approved_workers(job_order,user_email):
+    sql=f"select staffing_organization,approved_no_of_workers from `tabClaim Order` where job_order='{job_order}' and staffing_organization in (select company from `tabEmployee` where user_id='{user_email}') "
     data=frappe.db.sql(sql,as_dict=True)
     return data
