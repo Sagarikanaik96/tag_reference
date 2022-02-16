@@ -618,6 +618,25 @@ input::-webkit-credentials-auto-fill-button {
   background-color: #0a97bfeb !important;
   color: #fff !important;
 }
+/* New timeline UI */
+.new-timeline {
+  max-width: 750px;
+  width: 100%;
+  margin: auto;
+  padding-left: 0;
+}
+.new-timeline .timeline-badge {
+  background: #7b68ef !important;
+}
+.new-timeline .timeline-badge svg {
+  fill: #fff !important;
+}
+.new-timeline .nav-pills .nav-link.active {
+  background-color: #21b9e4 !important;
+}
+.new-timeline .activity-toggle h4 {
+  font-weight: 600;
+}
 
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
