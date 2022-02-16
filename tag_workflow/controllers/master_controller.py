@@ -19,6 +19,9 @@ COM = "Company"
 JOB = "Job Order"
 USR = "User"
 STANDARD = ["Administrator", "Guest"]
+HIR = ["Hiring", "Exclusive Hiring"]
+HIR_TYPE = ["Hiring Admin", "Hiring User"]
+STF_TYPE = ["Staffing Admin", "Staffing User"]
 
 class MasterController(base_controller.BaseController):
     def validate_master(self):
@@ -34,6 +37,7 @@ class MasterController(base_controller.BaseController):
         elif(self.dt == "User"):
             if(frappe.session.user not in STANDARD and (not self.doc.tag_user_type or not self.doc.organization_type)):
                 frappe.msgprint(_("Please select <b>Organization Type</b> and <b>TAG User Type</b> before saving the User."))
+            self.check_profile()
         elif(self.dt == "Item"):
             self.check_activity_type()
 
@@ -58,6 +62,12 @@ class MasterController(base_controller.BaseController):
     def apply_user_permissions(self):
         if(self.dt == "User" and self.doc.enabled):
             check_employee(self.doc.email, self.doc.first_name, self.doc.company, self.doc.last_name, self.doc.gender, self.doc.birth_date, self.doc.date_of_joining, self.doc.organization_type)
+
+    def check_profile(self):
+        if(self.doc.organization_type in HIR and self.doc.tag_user_type not in HIR_TYPE):
+            frappe.throw(_("Incorrect value for <b>User Type</b> or <b>Company Type</b>"))
+        elif(self.doc.organization_type == "Staffing" and self.doc.tag_user_type not in STF_TYPE):
+            frappe.throw(_("Incorrect value for <b>User Type</b> or <b>Company Type</b>"))
 
 
 #-----------data update--------------#

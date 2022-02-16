@@ -114,11 +114,10 @@ frappe.ui.form.on("User", {
 	},
 	onload:function(frm){
 		if(frappe.session.user!='Administrator'){
-			$('.menu-btn-group').hide()
-        }
-		if(frm.doc.__islocal==1){
-			hiring_org(frm)
+			$('.menu-btn-group').hide();
 		}
+
+		//if(frm.doc.__islocal==1){hiring_org(frm)}
 	},
 	validate:function(frm){
 		let phone = frm.doc.mobile_no
