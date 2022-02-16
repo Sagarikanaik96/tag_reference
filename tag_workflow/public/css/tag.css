@@ -231,20 +231,18 @@ input::-webkit-credentials-auto-fill-button {
   width: 100%;
 }
 
-.comment-box{
-  display: none !important;
-
-}
-.timeline-actions{
+.comment-box {
   display: none !important;
 }
-.timeline-dot{
+.timeline-actions {
+  display: none !important;
+}
+.timeline-dot {
   display: none !important;
 }
 /* Inner report Table UI update  */
 .layout-main-section .datatable.dt-instance-1 .dt-cell {
   border: none;
-  margin: 6px 0;
 }
 .layout-main-section .datatable .dt-header .dt-cell--header .dt-cell__content {
   color: #8d9cbc;
