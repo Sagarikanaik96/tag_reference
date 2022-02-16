@@ -134,7 +134,7 @@ frappe.ui.Page = Class.extend({
 		this.standard_actions = this.page_actions.find(".standard-actions");
 		this.custom_actions = this.page_actions.find(".custom-actions");
 		
-		if(frappe.boot.tag.tag_user_info.company_type == "Hiring" && window.location.pathname == '/app/job-order'){
+		if((frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring") && window.location.pathname == '/app/job-order'){
 			this.hiring_filter = $(`
 				<div class="page-form row" id="hiring_filter">
 					<div class="filter-selector">
@@ -146,6 +146,9 @@ frappe.ui.Page = Class.extend({
 						</button>
 						<button class="btn btn-default btn-sm filter-button" onclick="hiring_click('Completed');">
 							<span class="button-label hidden-xs">Completed Order<span></span></span>
+						</button>
+						<button class="btn btn-default btn-sm filter-button" onclick="hiring_click('All');">
+							<span class="button-label hidden-xs">All Order<span></span></span>
 						</button>
 						<script>
 							function hiring_click(value){
