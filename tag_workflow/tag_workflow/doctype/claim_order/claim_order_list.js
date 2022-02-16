@@ -47,7 +47,6 @@ frappe.listview_settings['Claim Order'] = {
             }
         },
         approved_no_of_workers(val, d, f) {
-            console.log(typeof(val))
             if(typeof(val)=='number')
             {
                 return `<span class=" ellipsis3" title="" id="${val}-${f.name}">
