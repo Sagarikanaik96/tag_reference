@@ -40,6 +40,8 @@ frappe.ui.form.on('Assign Employee', {
 				});
 			}
 		});
+
+		$('[data-fieldname="company"]').css('display','block');
 	},
 
 	onload:function(frm){
