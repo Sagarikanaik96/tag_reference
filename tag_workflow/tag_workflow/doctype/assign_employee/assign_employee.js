@@ -63,6 +63,10 @@ frappe.ui.form.on('Assign Employee', {
 	before_save:function(frm){
 		check_employee_data(frm);
 	},
+	company:function(frm){
+		cur_frm.clear_table("employee_details")
+		cur_frm.refresh_fields();
+	},
 	
 	after_save:function(frm){
 		if(frm.doc.tag_status=='Open' && cur_frm.doc.resume_required==1){
@@ -157,6 +161,8 @@ function check_employee_data(frm){
 		for(var r in table){
 			if(table[r].resume===null){
 				msg.push('Attach the Resume to Assign the Employee.');
+				frappe.validated=false
+
 			}
 		}
 
@@ -324,6 +330,11 @@ function make_notification_approved(frm){
 			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
 			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
 			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,"worker_fill":frm.doc.claims_approved
+		},
+		callback:function(r){
+			setTimeout(function () {
+				window.location.href='/app/job-order/'+frm.doc.job_order
+			}, 4000);
 		}
 	});
 }
