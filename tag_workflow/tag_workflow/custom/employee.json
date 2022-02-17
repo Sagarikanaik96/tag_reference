@@ -1200,7 +1200,7 @@
    "name": "Employee-state",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "\nWest Virginia\nFlorida\nIllinois\nMinnesota\nMaryland\nRhode Island\nIdaho\nNew Hampshire\nNorth Carolina\nVermont\nConnecticut\nDelaware\nNew Mexico\nCalifornia\nNew Jersey\nWisconsin\nOregon\nNebraska\nPennsylvania\nWashington\nLouisiana\nGeorgia\nAlabama\nUtah\nOhio\nTexas\nColorado\nSouth Carolina\nOklahoma\nTennessee\nWyoming\nHawaii\nNorth Dakota\nKentucky\nMaine\nNew York\nNevada\nAlaska\nMichigan\nArkansas\nMississippi\nMissouri\nMontana\nKansas\nIndiana\nSouth Dakota\nMassachusetts\nVirginia\nIowa\nArizona",
+   "options": "\nAlabama\nAlaska\nArizona\nArkansas\nCalifornia\nColorado\nConnecticut\nDelaware\nFlorida\nGeorgia\nHawaii\nIdaho\nIllinois\nIndiana\nIowa\nKansas\nKentucky\nLouisiana\nMaine\nMaryland\nMassachusetts\nMichigan\nMinnesota\nMississippi\nMissouri\nMontana\nNebraska\nNevada\nNew Hampshire\nNew Jersey\nNew Mexico\nNew York\nNorth Carolina\nNorth Dakota\nOhio\nOklahoma\nOregon\nPennsylvania\nRhode Island\nSouth Carolina\nSouth Dakota\nTennessee\nTexas\nUtah\nVermont\nVirginia\nWashington\nWest Virginia\nWisconsin\nWyoming",
    "organization": null,
    "owner": "Administrator",
    "parent": null,
