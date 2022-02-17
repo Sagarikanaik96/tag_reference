@@ -88,11 +88,10 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
             else:
                 value =value+i
         if job_category is None:
-            sql = """ select name, employee_name from `tabEmployee` where company='{0}' and status='Active' and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{1}') and (name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{0}')) and (name NOT IN (select parent from `tabDNR` BE where dnr='{1}'))) and name NOT IN ('{2}') and name employee_like '{3}' """.format(emp_company, company,value, '%%%s%%' % txt)
+            sql = """ select name, employee_name from `tabEmployee` where company='{0}' and status='Active' and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{1}') and (name NOT IN (select parent from `tabUnsatisfied Organization`  where unsatisfied_organization_name='{0}')) and (name NOT IN (select parent from `tabDNR` BE where dnr='{1}'))) and name NOT IN ('{2}') and name employee_like '{3}' and (name NOT IN (select employee from `tabAssign Employee Details` ))  """.format(emp_company, company,value, '%%%s%%' % txt)
         else:
-            sql = """select name, employee_name, street_address, city, state, zip from `tabEmployee` where company='{0}' and status='Active' and (job_category = '{1}' or job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{2}')) and (name NOT IN (select parent from `tabDNR`  where dnr='{2}' )) and (name NOT IN (select parent from `tabUnsatisfied Organization` where unsatisfied_organization_name = '{2}')) and name NOT IN ('{3}') and employee_name like '{4}' """.format(emp_company, job_category, company, value, '%%%s%%' % txt)
+            sql = """select name, employee_name, street_address, city, state, zip from `tabEmployee` where company='{0}' and status='Active' and  ((name IN(select parent from `tabJob Category`where job_category= '{1}')) or  job_category IS NULL) and (name NOT IN (select parent from `tabBlocked Employees`  where blocked_from='{2}')) and (name NOT IN (select parent from `tabDNR`  where dnr='{2}' )) and (name NOT IN (select parent from `tabUnsatisfied Organization` where unsatisfied_organization_name = '{2}')) and name NOT IN ('{3}') and employee_name like '{4}' and (name NOT IN (select employee from `tabAssign Employee Details` )) """.format(emp_company, job_category, company, value, '%%%s%%' % txt)
         emp = frappe.db.sql(sql, as_dict=1)
-        
         result = check_distance(emp, distance, job_location)
         return result
     except Exception:

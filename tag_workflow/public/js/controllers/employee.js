@@ -84,6 +84,13 @@ frappe.ui.form.on("Employee", {
 			frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
 			frappe.validated = false
 		}
+		if ((frm.doc.employee_job_category.length)>0){
+			frm.set_value("job_category",frm.doc.employee_job_category[0]["job_category"])
+
+		}else{
+			frm.set_value("job_category",null)
+		}
+
  
 	},
 	setup:function(frm){

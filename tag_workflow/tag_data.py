@@ -732,6 +732,15 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
         print(e, frappe.get_traceback())
         frappe.db.rollback()
 
+
+@frappe.whitelist()
+def jobcategory_data(job_order):
+    print(job_order,"job_order")
+    sql = """ select job_category from `tabJob Category` where parent='{}' """.format(job_order)
+    print(sql,"sqllll")
+    print(frappe.db.sql(sql),"sql")
+    return frappe.db.sql(sql)
+
 @frappe.whitelist()
 def claim_order_company(user_name,claimed):
     data=f'select company from `tabEmployee` where email="{user_name}"'
