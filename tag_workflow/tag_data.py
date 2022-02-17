@@ -750,7 +750,7 @@ def claim_order_company(user_name,claimed):
     data=f'select company from `tabEmployee` where email="{user_name}"'
     sq=frappe.db.sql(data,as_list=True)
     for i in sq:
-        if i in claimed:
+        if i[0] in claimed:
             break
     else:
         return 'unsuccess'
