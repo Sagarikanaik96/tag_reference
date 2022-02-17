@@ -63,6 +63,10 @@ frappe.ui.form.on('Assign Employee', {
 	before_save:function(frm){
 		check_employee_data(frm);
 	},
+	company:function(frm){
+		cur_frm.clear_table("employee_details")
+		cur_frm.refresh_fields();
+	},
 	
 	after_save:function(frm){
 		if(frm.doc.tag_status=='Open' && cur_frm.doc.resume_required==1){
@@ -157,6 +161,8 @@ function check_employee_data(frm){
 		for(var r in table){
 			if(table[r].resume===null){
 				msg.push('Attach the Resume to Assign the Employee.');
+				frappe.validated=false
+
 			}
 		}
 
@@ -212,7 +218,7 @@ frappe.ui.form.on("Assign Employee Details", {
 });
 
 function approved_employee(frm){
-	if(cur_frm.doc.tag_status == "Approved" && frappe.boot.tag.tag_user_info.company_type=='Hiring' && frm.doc.resume_required==1){
+	if(cur_frm.doc.tag_status == "Approved" && frappe.boot.tag.tag_user_info.company_type=='Hiring' && frm.doc.resume_required==1 && frm.doc.approve_employee_notification===1){
 		var current_date = new Date(frappe.datetime.now_datetime());
 		var approved_date = new Date(frm.doc.modified);
 		var diff = current_date.getTime()-approved_date.getTime();
@@ -229,6 +235,9 @@ function approved_employee(frm){
 				}
 			});
 		}
+
+		cur_frm.set_value('approve_employee_notification',0)
+		cur_frm.refresh_field('approve_employee_notification')
 	}
 }
 
@@ -324,6 +333,11 @@ function make_notification_approved(frm){
 			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
 			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
 			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,"worker_fill":frm.doc.claims_approved
+		},
+		callback:function(r){
+			setTimeout(function () {
+				window.location.href='/app/job-order/'+frm.doc.job_order
+			}, 4000);
 		}
 	});
 }

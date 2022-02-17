@@ -29,7 +29,8 @@
   "digital_sign",
   "agree_contract",
   "amended_from",
-  "is_single_share"
+  "is_single_share",
+  "approve_employee_notification"
  ],
  "fields": [
   {
@@ -188,12 +189,19 @@
    "hidden": 1,
    "label": "Claims Approved",
    "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "approve_employee_notification",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Approve Employee Notification"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-10 03:12:43.353941",
+ "modified": "2022-02-16 21:59:27.646719",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",

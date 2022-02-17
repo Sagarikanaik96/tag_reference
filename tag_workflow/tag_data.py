@@ -126,6 +126,10 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
             users = [usr['user_id'] for usr in user_list]
             make_system_notification(users,msg,jobOrder,job_name,sub)   
             enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name)
+
+            sql = """ UPDATE `tabAssign Employee` SET approve_employee_notification = 0 where name="{0}" """.format(name)
+            frappe.db.sql(sql)
+            frappe.db.commit()
             return sendmail(users, msg, sub, assignEmployees, name)
         return []
     except Exception as e:
@@ -423,21 +427,21 @@ def disable_user(company, check):
 @frappe.whitelist()
 def update_job_order_status():
     try:
-        job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','order_status'])
+        job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','bid','staff_org_claimed','order_status'])
         now_date=datetime.date.today()
         for job in job_order_data:
             start_date = job.from_date if job.from_date else ""
             end_date = job.to_date if job.to_date else ""
-            if  start_date <= now_date <= end_date:
-                frappe.db.set_value(jobOrder, job.name, "order_status", "Ongoing")
-                unshare_job_order(job)
-            elif  now_date < start_date:
-                frappe.db.set_value(jobOrder, job.name, "order_status", "Upcoming")
-            elif now_date > end_date:
-                frappe.db.set_value(jobOrder, job.name, "order_status", "Completed")
+            if(type(start_date) is not str):
+                if start_date <= now_date <= end_date:
+                    frappe.db.set_value(jobOrder, job.name, "order_status", "Ongoing")
+                    unshare_job_order(job)
+                elif  now_date < start_date:
+                    frappe.db.set_value(jobOrder, job.name, "order_status", "Upcoming")
+                elif now_date > end_date:
+                    frappe.db.set_value(jobOrder, job.name, "order_status", "Completed")
     except Exception as e:
         frappe.msgprint(e)
-
 
 @frappe.whitelist(allow_guest=False)
 def sales_invoice_notification(user, sid, job_order=None, company=None, invoice_name=None):
@@ -731,3 +735,22 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
     except Exception as e:
         print(e, frappe.get_traceback())
         frappe.db.rollback()
+
+
+@frappe.whitelist()
+def jobcategory_data(job_order):
+    print(job_order,"job_order")
+    sql = """ select job_category from `tabJob Category` where parent='{}' """.format(job_order)
+    print(sql,"sqllll")
+    print(frappe.db.sql(sql),"sql")
+    return frappe.db.sql(sql)
+
+@frappe.whitelist()
+def claim_order_company(user_name,claimed):
+    data=f'select company from `tabEmployee` where email="{user_name}"'
+    sq=frappe.db.sql(data,as_list=True)
+    for i in sq:
+        if i[0] in claimed:
+            break
+    else:
+        return 'unsuccess'

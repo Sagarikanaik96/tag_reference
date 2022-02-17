@@ -10,7 +10,7 @@ frappe.ui.form.on("Timesheet", {
 			}, 700);
 		}
 
-		if(cur_frm.doc.status=='Submitted' && frm.doc.workflow_state == "Approved"){
+		if(cur_frm.doc.status=='Submitted' && frm.doc.workflow_state == "Approved" && frm.doc.approval_notification == 1){
 			frappe.call({
 				"method": "tag_workflow.utils.timesheet.approval_notification",
 				"args": {"job_order": frm.doc.job_order_detail,"hiring_company":frm.doc.company,"staffing_company": frm.doc.employee_company, "timesheet_name":cur_frm.doc.name,'timesheet_approved_time':frm.doc.modified,'current_time':frappe.datetime.now_datetime()}

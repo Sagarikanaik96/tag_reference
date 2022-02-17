@@ -830,20 +830,45 @@ function claim_job_order_staffing(frm){
 }
 
 function show_claim_bar(frm){
-  if(frm.doc.staff_org_claimed &&(frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company)){
-    cur_frm.toggle_display('section_break_html2', 1);
-    frm.remove_custom_button('Assign Employee')
-    frm.remove_custom_button('Claim Order')
-  }
-	else if (frm.doc.claim && (frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company) && frm.doc.resumes_required==0){
-		cur_frm.toggle_display('section_break_html1', 1);
-		frm.remove_custom_button('Claim Order')
-  }
-  else if(frm.doc.claim && (frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company) && frm.doc.resumes_required==1){
-    frm.remove_custom_button('Assign Employee')
-    cur_frm.toggle_display('section_break_html1', 1);
+  if(frm.doc.staff_org_claimed){
+    frappe.call({
+      'method':'tag_workflow.tag_data.claim_order_company',
+      'args':{'user_name':frappe.session.user,'claimed':frm.doc.staff_org_claimed},
+      callback:function(r){
+        if(r.message!='unsuccess'){
+          cur_frm.toggle_display('section_break_html2', 1);
+          frm.remove_custom_button('Assign Employee')
+          frm.remove_custom_button('Claim Order')
+        }
+      }
 
+    })	
+   
+  }
+	else if (frm.doc.claim && frm.doc.resumes_required==0){
+    frappe.call({
+      'method':'tag_workflow.tag_data.claim_order_company',
+      'args':{'user_name':frappe.session.user,'claimed':frm.doc.claim},
+      callback:function(r){
+        if(r.message!='unsuccess'){
+          cur_frm.toggle_display('section_break_html1', 1);
+          frm.remove_custom_button('Claim Order')
+        }
+      }
 
+    })	
+  }
+  else if(frm.doc.claim  && frm.doc.resumes_required==1){
+    frappe.call({
+      'method':'tag_workflow.tag_data.claim_order_company',
+      'args':{'user_name':frappe.session.user,'claimed':frm.doc.claim},
+      callback:function(r){
+        if(r.message!='unsuccess'){
+          frm.remove_custom_button('Assign Employee')
+          cur_frm.toggle_display('section_break_html1', 1);
+        }
+      }
+    })	
   }
 }
 
@@ -869,7 +894,16 @@ function view_button(frm){
   if (frappe.boot.tag.tag_user_info.company_type == "Staffing" && frm.doc.__islocal!=1) {
     cur_frm.dashboard.hide();
      if((frm.doc.claim)){
-      view_buttons_staffing(frm);
+      frappe.call({
+        'method':'tag_workflow.tag_data.claim_order_company',
+        'args':{'user_name':frappe.session.user,'claimed':frm.doc.claim},
+        callback:function(r){
+          if(r.message!='unsuccess'){
+            view_buttons_staffing(frm);
+
+          }
+        }
+      })	
     }
   }
   else if (frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"  && frm.doc.__islocal!=1){
@@ -910,7 +944,7 @@ function view_buttons_hiring(frm){
       frm.toggle_display('related_actions_section',1)
 		}
 	
-		if(frm.doc.order_status=='Completed' || frm.doc.order_status=='Ongoing'){
+    if(frm.doc.from_date<=frappe.datetime.nowdate()){
       let datad3 = `<div class="my-3" style="display: flex;justify-content: space-between;">
           <p>Timesheets  </p>
           <button class="btn-light rounded border">View</button>
@@ -936,9 +970,9 @@ function view_buttons_hiring(frm){
 				},
 				callback:function(r){
 				if(r.message=='success'){
-          let datad4 = `<div class="my-3" style="flex;justify-content: space-between;">
+          let datad4 = `<div class="my-3" style="display:flex;justify-content: space-between;">
 								<p>Invoices </p>
-                <button class="btn-primary">View</button>
+                <button class="btn-light rounded border">View</button>
 							</div>`;
           $('[data-fieldname = invoices]').click(function() {
             sales_invoice_data(frm)
@@ -978,18 +1012,27 @@ function view_buttons_staffing(frm){
         messages(frm)
     }, __("View"));
   }
-  if(frm.doc.staff_org_claimed && (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company) && (frm.doc.order_status=='Completed')){
-    let data4 = `<div class="my-2"  style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
-        <p><b>Timesheets </b>  <button class="btn-primary">View</button></p>
-      </div>`;
-      $('[data-fieldname = timesheets]').click(function() {
-       timesheets_view(frm)
-      })
-    frm.set_df_property("timesheets", "options", data4);
-    frm.toggle_display('related_actions_section',1)
-    frm.add_custom_button(__('Timesheets'), function(){
-     timesheets_view(frm)
-    }, __("View"));
+  if(frm.doc.staff_org_claimed && (frm.doc.order_status=='Completed')){
+    frappe.call({
+      'method':'tag_workflow.tag_data.claim_order_company',
+      'args':{'user_name':frappe.session.user,'claimed':frm.doc.staff_org_claimed},
+      callback:function(r){
+        if(r.message!='unsuccess'){
+          let data4 = `<div class="my-2"  style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
+            <p><b>Timesheets </b>  <button class="btn-primary">View</button></p>
+            </div>`;
+            $('[data-fieldname = timesheets]').click(function() {
+            timesheets_view(frm)
+            })
+          frm.set_df_property("timesheets", "options", data4);
+          frm.toggle_display('related_actions_section',1)
+          frm.add_custom_button(__('Timesheets'), function(){
+          timesheets_view(frm)
+          }, __("View"));
+        }
+      }
+    })	
+   
   }
   if(frm.doc.staff_org_claimed && (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company) && (frm.doc.order_status=='Completed')){
     frappe.call({
@@ -1282,11 +1325,24 @@ function staff_assign_redirect(frm){
 }
 
 function staff_claim_button(frm){
-  if(frm.doc.staff_org_claimed && (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company)){
-    frm.add_custom_button(__('Assign Employee'), function f1(){
-      assign_employe(frm);
-
-    }, __("View"));
+  if(frm.doc.staff_org_claimed ){
+    frappe.call({
+      'method':'tag_workflow.tag_data.claim_order_company',
+      'args':{'user_name':frappe.session.user,'claimed':frm.doc.staff_org_claimed},
+      callback:function(r){
+        if(r.message!='unsuccess'){
+          frappe.db.get_value("Assign Employee", {'job_order': frm.doc.name,'company':frappe.boot.tag.tag_user_info.company},["name"],function (rr) {
+            if(rr.name===undefined){
+              frm.add_custom_button(__('Assign Employee'), function f1(){
+                assign_employe(frm);
+              }, __("View"));
+            }  
+         })
+        }
+      }
+    })	
+    
+   
     let data1 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
     <p><b>Claims </b></p>
     
