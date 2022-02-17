@@ -427,21 +427,21 @@ def disable_user(company, check):
 @frappe.whitelist()
 def update_job_order_status():
     try:
-        job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','order_status'])
+        job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','bid','staff_org_claimed','order_status'])
         now_date=datetime.date.today()
         for job in job_order_data:
             start_date = job.from_date if job.from_date else ""
             end_date = job.to_date if job.to_date else ""
-            if  start_date <= now_date <= end_date:
-                frappe.db.set_value(jobOrder, job.name, "order_status", "Ongoing")
-                unshare_job_order(job)
-            elif  now_date < start_date:
-                frappe.db.set_value(jobOrder, job.name, "order_status", "Upcoming")
-            elif now_date > end_date:
-                frappe.db.set_value(jobOrder, job.name, "order_status", "Completed")
+            if(type(start_date) is not str):
+                if start_date <= now_date <= end_date:
+                    frappe.db.set_value(jobOrder, job.name, "order_status", "Ongoing")
+                    unshare_job_order(job)
+                elif  now_date < start_date:
+                    frappe.db.set_value(jobOrder, job.name, "order_status", "Upcoming")
+                elif now_date > end_date:
+                    frappe.db.set_value(jobOrder, job.name, "order_status", "Completed")
     except Exception as e:
         frappe.msgprint(e)
-
 
 @frappe.whitelist(allow_guest=False)
 def sales_invoice_notification(user, sid, job_order=None, company=None, invoice_name=None):
