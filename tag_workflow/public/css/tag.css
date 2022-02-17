@@ -640,13 +640,7 @@ input::-webkit-credentials-auto-fill-button {
 [data-fieldname="related_details"] p {
   margin: 0 !important;
 }
-[data-fieldname="messages"] p {
-  margin: 0 !important;
-}
 [data-fieldname="related_details"] {
-  margin-bottom: 10px;
-}
-[data-fieldname="messages"] p {
   margin-bottom: 10px;
 }
 

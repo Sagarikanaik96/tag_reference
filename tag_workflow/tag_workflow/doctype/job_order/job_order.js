@@ -970,9 +970,9 @@ function view_buttons_hiring(frm){
 				},
 				callback:function(r){
 				if(r.message=='success'){
-          let datad4 = `<div class="my-3" style="flex;justify-content: space-between;">
+          let datad4 = `<div class="my-3" style="display:flex;justify-content: space-between;">
 								<p>Invoices </p>
-                <button class="btn-primary">View</button>
+                <button class="btn-light rounded border">View</button>
 							</div>`;
           $('[data-fieldname = invoices]').click(function() {
             sales_invoice_data(frm)
