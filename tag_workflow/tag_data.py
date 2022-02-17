@@ -126,6 +126,10 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
             users = [usr['user_id'] for usr in user_list]
             make_system_notification(users,msg,jobOrder,job_name,sub)   
             enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name)
+
+            sql = """ UPDATE `tabAssign Employee` SET approve_employee_notification = 0 where name="{0}" """.format(name)
+            frappe.db.sql(sql)
+            frappe.db.commit()
             return sendmail(users, msg, sub, assignEmployees, name)
         return []
     except Exception as e:

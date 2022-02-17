@@ -234,6 +234,9 @@ def approval_notification(job_order=None,staffing_company=None,date=None,hiring_
             user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL'''.format(hiring_company),as_list=1)        
             hiring_user = [hiring_user[0] for hiring_user in user_list]
             make_system_notification(hiring_user,msg,'Timesheet',timesheet_name,subject)
+            sql = """ UPDATE `tabTimesheet` SET approval_notification = 0 where name="{0}" """.format(timesheet_name)
+            frappe.db.sql(sql)
+            frappe.db.commit()
             sendmail(hiring_user, msg, subject, 'Timesheet', timesheet_name)
     except Exception as e:
         frappe.error_log(e, "Timesheet Approved")

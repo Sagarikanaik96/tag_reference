@@ -218,7 +218,7 @@ frappe.ui.form.on("Assign Employee Details", {
 });
 
 function approved_employee(frm){
-	if(cur_frm.doc.tag_status == "Approved" && frappe.boot.tag.tag_user_info.company_type=='Hiring' && frm.doc.resume_required==1){
+	if(cur_frm.doc.tag_status == "Approved" && frappe.boot.tag.tag_user_info.company_type=='Hiring' && frm.doc.resume_required==1 && frm.doc.approve_employee_notification===1){
 		var current_date = new Date(frappe.datetime.now_datetime());
 		var approved_date = new Date(frm.doc.modified);
 		var diff = current_date.getTime()-approved_date.getTime();
@@ -235,6 +235,9 @@ function approved_employee(frm){
 				}
 			});
 		}
+
+		cur_frm.set_value('approve_employee_notification',0)
+		cur_frm.refresh_field('approve_employee_notification')
 	}
 }
 
