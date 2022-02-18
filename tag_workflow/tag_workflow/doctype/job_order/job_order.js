@@ -97,7 +97,7 @@ frappe.ui.form.on("Job Order", {
 	refresh: function(frm) {
 		if(frappe.route_history.length > 1){
 			window.location.reload();
-		};
+		}
 		
 		setTimeout(function() {
 			view_button(frm);
