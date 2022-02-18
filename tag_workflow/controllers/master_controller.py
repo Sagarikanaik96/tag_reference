@@ -81,7 +81,7 @@ def update_user_info(company, make_organization_inactive):
                 if(u.enabled == 0 and len(frappe.db.get_list("Employee", {"user_id": u.name}, "name")) == 1):
                     frappe.sessions.clear_sessions(user=u.name, keep_current=False, device=None, force=True)
     except Exception as e:
-        frappe.error_log(e, "User disabled")
+        frappe.log_error(e, "User disabled")
 
 @frappe.whitelist()
 def make_update_comp_perm(docname):
@@ -95,7 +95,7 @@ def make_update_comp_perm(docname):
             enqueue("tag_workflow.controllers.master_controller.update_job_order_permission", user_list=user_list, company=doc.name)
         update_user_info(doc.name, doc.make_organization_inactive)
     except Exception as e:
-        frappe.error_log(e, "Quotation and Job Order Permission")
+        frappe.log_error(e, "Quotation and Job Order Permission")
 
 
 @frappe.whitelist()
@@ -106,7 +106,7 @@ def check_item_group():
             group = frappe.get_doc(dict(doctype=item_group, item_group_name="Services", is_group=0))
             group.save(ignore_permissions=True)
     except Exception as e:
-        frappe.error_log(e, item_group)
+        frappe.log_error(e, item_group)
 
 
 #-----------after company insert update-------------#
@@ -126,7 +126,7 @@ def update_job_order_permission(user_list, company):
                 perm_doc = frappe.get_doc(dict(doctype=PERMISSION, user=user['name'], allow=COM, for_value=company, applicable_for=JOB, apply_to_all_doctypes=0))
                 perm_doc.save(ignore_permissions=True)
     except Exception as e:
-        frappe.error_log(e, "Quotation and Job Order Permission")
+        frappe.log_error(e, "Quotation and Job Order Permission")
 
 def update_exclusive_perm(user_list, company):
     try:
@@ -136,7 +136,7 @@ def update_exclusive_perm(user_list, company):
                 perm = frappe.get_doc(dict(doctype=PERMISSION, user=user['name'], allow=COM, for_value=company, apply_to_all_doctypes = 1))
                 perm.save(ignore_permissions=True)
     except Exception as e:
-        frappe.error_log(e, "Exclusive Permission")
+        frappe.log_error(e, "Exclusive Permission")
 
 
 # remove message on user creation
@@ -146,7 +146,7 @@ def make_employee_permission(user, emp, company):
             perm_doc = frappe.get_doc(dict(doctype=PERMISSION,user=user, allow=COM, for_value=company, apply_to_all_doctypes=1))
             perm_doc.save(ignore_permissions=True)
     except Exception as e:
-        frappe.error_log(e, PERMISSION)
+        frappe.log_error(e, PERMISSION)
 
 # user permission for order and exclusive
 def new_user_job_perm(user):
@@ -156,7 +156,7 @@ def new_user_job_perm(user):
         for com in company:
             update_job_order_permission(user_list, com['name'])
     except Exception as e:
-        frappe.error_log(e, "new_user_job_perm")
+        frappe.log_error(e, "new_user_job_perm")
 
 def user_exclusive_perm(user, company, organization_type=None):
     try:
@@ -172,7 +172,7 @@ def user_exclusive_perm(user, company, organization_type=None):
         sql = """ delete from `tabUser Permission` where user = '{0}' and allow = "Employee" """.format(user)
         frappe.db.sql(sql)
     except Exception as e:
-        frappe.error_log(e, "user_exclusive_permission")
+        frappe.log_error(e, "user_exclusive_permission")
 
 def remove_tag_permission(user, emp, company):
     try:
@@ -181,7 +181,7 @@ def remove_tag_permission(user, emp, company):
         for per in perms:
             frappe.delete_doc(PERMISSION, per.name, force=1)
     except Exception as e:
-        frappe.error_log(e, "remove_tag_permission")
+        frappe.log_error(e, "remove_tag_permission")
 
 @frappe.whitelist()
 def check_employee(name, first_name, company, last_name=None, gender=None, date_of_birth=None, date_of_joining=None, organization_type=None):
