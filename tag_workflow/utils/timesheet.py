@@ -41,8 +41,6 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
         return True
     except Exception as e:
         frappe.error_log(e, "Job Order Approval")
-        continue
-
 
 #----------timesheet------------------#
 @frappe.whitelist()
