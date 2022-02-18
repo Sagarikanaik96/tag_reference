@@ -250,7 +250,6 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
                 staff_email_notification_cont(hiring_org, job_order, job_order_title,doc,subject)
     except Exception as e:
         print(e, frappe.get_traceback())
-        frappe.db.rollback()
 
 def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title=None,doc=None,subject=None):
     try:
