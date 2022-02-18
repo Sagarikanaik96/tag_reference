@@ -40,8 +40,7 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
         sendmail(staffing_user, msg, subject, 'Timesheet', docname)
         return True
     except Exception as e:
-        print(e)
-        frappe.error_log(e, "Job Order Approval")
+        frappe.log_error(e, "Job Order Approval")
 
 #----------timesheet------------------#
 @frappe.whitelist()
@@ -179,7 +178,7 @@ def check_employee_editable(job_order, name, creation):
     except Exception as e:
         print(e)
         is_editable = 1
-        frappe.error_log(frappe.get_traceback(), "check_employee_editable")
+        frappe.log_error(frappe.get_traceback(), "check_employee_editable")
         return is_editable
 
 @frappe.whitelist()
@@ -217,7 +216,7 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
                 doc.save()
         return "success"
     except Exception as e:
-        frappe.error_log(e, "Hiring Company Rating")
+        frappe.log_error(e, "Hiring Company Rating")
         frappe.throw(e)
 
 @frappe.whitelist()
@@ -238,7 +237,7 @@ def approval_notification(job_order=None,staffing_company=None,date=None,hiring_
             frappe.db.commit()
             sendmail(hiring_user, msg, subject, 'Timesheet', timesheet_name)
     except Exception as e:
-        frappe.error_log(e, "Timesheet Approved")
+        frappe.log_error(e, "Timesheet Approved")
         frappe.throw(e)
 def unsatisfied_organization(emp_doc,company,job_order):
     emp_doc.append('unsatisfied_from', {
@@ -342,7 +341,7 @@ def assigned_job_order(doctype,txt,searchfield,page_len,start,filters):
         sql = ''' select name from `tabJob Order` where company = '{0}' and from_date<'{1}' and name in (select job_order from `tabAssign Employee` where hiring_organization = '{0}')'''.format(company,today)
         return frappe.db.sql(sql)
     except Exception as e:
-        frappe.error_log(e, "Job Order For Timesheet")
+        frappe.log_error(e, "Job Order For Timesheet")
         frappe.throw(e)
 
 @frappe.whitelist()
@@ -361,7 +360,7 @@ def jb_ord_dispute_comment_box(comment,job_order):
 
             return True
     except Exception as e:
-        frappe.error_log(e, "Dispute Message")
+        frappe.log_error(e, "Dispute Message")
         frappe.throw(e)
 
 
@@ -397,7 +396,7 @@ def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None
                 doc.save()
         return "success"
     except Exception as e:
-        frappe.error_log(e, "Hiring Company Rating")
+        frappe.log_error(e, "Hiring Company Rating")
         frappe.throw(e)
 
 
@@ -422,7 +421,7 @@ def staffing_emp_rating(employee,id,up,down,job_order,comment,timesheet_name):
         timesheet.save(ignore_permissions=True)
         return True
     except Exception as e:
-        frappe.error_log(e, "Staffing Employee Rating")
+        frappe.log_error(e, "Staffing Employee Rating")
         frappe.throw(e)
 
 
@@ -464,7 +463,7 @@ def denied_notification(job_order,hiring_company,staffing_company,timesheet_name
         make_system_notification(hiring_user,msg,'Timesheet',timesheet_name,subject)
         sendmail(hiring_user, msg, subject, 'Timesheet', timesheet_name)
     except Exception as e:
-        frappe.error_log(e, "Timesheet Denied")
+        frappe.log_error(e, "Timesheet Denied")
         frappe.throw(e)
 
 @frappe.whitelist()
@@ -481,7 +480,7 @@ def timesheet_dispute_comment_box(comment,timesheet):
             timesheet_doc.save(ignore_permissions=True)
             return True
     except Exception as e:
-        frappe.error_log(e, "Dispute Message")
+        frappe.log_error(e, "Dispute Message")
         frappe.throw(e)
 
 @frappe.whitelist()
@@ -491,7 +490,7 @@ def job_name(doctype,txt,searchfield,page_len,start,filters):
         sql = ''' select select_job from `tabJob Order` where name="{0}" '''.format(job)
         return frappe.db.sql(sql)
     except Exception as e:
-        frappe.error_log(e, "Job Order For Timesheet")
+        frappe.log_error(e, "Job Order For Timesheet")
         frappe.throw(e)
 def no_show(job_order,value,subject,company,employee):
     if(subject=='No Show' and int(value)==1):

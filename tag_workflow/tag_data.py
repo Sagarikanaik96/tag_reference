@@ -104,7 +104,7 @@ def assign_employee_data(hiringorg, name):
                     add("Employee", emp.employee, usr.name, read=1, write = 0, share = 0, everyone = 0,notify = 0, flags={"ignore_share_permission": 1})
     except Exception as e:
         frappe.db.rollback()
-        frappe.error_log(e, "employee share")
+        frappe.log_error(e, "employee share")
 
 
 @frappe.whitelist(allow_guest=False)
@@ -134,7 +134,7 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
         return []
     except Exception as e:
         frappe.db.rollback()
-        frappe.error_log(e, "final_notification")
+        frappe.log_error(e, "final_notification")
 
 
 @frappe.whitelist(allow_guest=False)
@@ -223,7 +223,7 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
                 return send_email(subject,msg,hiring_user_list)
             
     except Exception as e:
-        frappe.error_log(e, "Partial Job order Failed ")
+        frappe.log_error(e, "Partial Job order Failed ")
                 
    
 @frappe.whitelist(allow_guest=False)
@@ -469,7 +469,7 @@ def sales_invoice_notification(user, sid, job_order=None, company=None, invoice_
                     return send_email(subject, msg, users)
     except Exception as e:
         frappe.db.rollback()
-        frappe.error_log(e, "invoice notification")
+        frappe.log_error(e, "invoice notification")
 
 
 @frappe.whitelist(allow_guest=False)
@@ -493,7 +493,7 @@ def filter_company_employee(doctype, txt, searchfield, page_len, start, filters)
         return frappe.db.sql(sql)
     except Exception as e:
         frappe.db.rollback()
-        frappe.error_log(e, "Staffing Company Error")
+        frappe.log_error(e, "Staffing Company Error")
         frappe.throw(e)
 
 @frappe.whitelist(allow_guest=False)
@@ -518,7 +518,7 @@ def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l
         message=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with your Company . Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
         return send_email(subject,message,l)
     except Exception as e:
-        frappe.error_log(e, "Single Job Order Notification Error")
+        frappe.log_error(e, "Single Job Order Notification Error")
 
 def assign_notification(share_list,hiring_user_list,doc_name,job_order):
     if share_list:
@@ -550,7 +550,7 @@ def chat_room_created(hiring_org,staffing_org,job_order):
         doc.members=members
         doc.save()
     except Exception as e:
-        frappe.error_log(e, "chat room creation error")
+        frappe.log_error(e, "chat room creation error")
 
 @frappe.whitelist(allow_guest=False)
 def assign_employee_resume_update(employee, name):
@@ -602,7 +602,7 @@ def update_timesheet_is_check_in_sales_invoice(time_list):
             frappe.db.sql(sql)
             frappe.db.commit()
     except Exception as e:
-        frappe.error_log(e, "Update time sheet Invoice")
+        frappe.log_error(e, "Update time sheet Invoice")
 
 @frappe.whitelist(allow_guest=False)
 def assigned_employees(job_order):
@@ -612,7 +612,7 @@ def assigned_employees(job_order):
         if(len(assigned_data)>0):
             return "success1"
     except Exception as e:
-        frappe.error_log(e, "Assign Employee List")
+        frappe.log_error(e, "Assign Employee List")
 
     
 @frappe.whitelist(allow_guest=False)
@@ -642,7 +642,7 @@ def assigned_employee_data(job_order):
                 emp_list.append(emp_dic)
         return emp_list
     except Exception as e:
-        frappe.error_log(e, "Assigned Employee")
+        frappe.log_error(e, "Assigned Employee")
 
 @frappe.whitelist(allow_guest=False)
 def staff_assigned_employees(job_order):
@@ -652,7 +652,7 @@ def staff_assigned_employees(job_order):
         if(len(assigned_data)>0):
             return "success1"
     except Exception as e:
-        frappe.error_log(e, "Staff Employee")
+        frappe.log_error(e, "Staff Employee")
 
 
 @frappe.whitelist(allow_guest=False)
@@ -683,7 +683,7 @@ def staffing_assigned_employee(job_order):
                 emp_list.append(emp_dic)
         return emp_list
     except Exception as e:
-        frappe.error_log(e, "Approved Employee")
+        frappe.log_error(e, "Approved Employee")
 
 def unshare_job_order(job):
     if job.bid>0 and job.staff_org_claimed:

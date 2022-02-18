@@ -9,7 +9,7 @@ def sendmail(emails, message, subject, doctype, docname):
         frappe.sendmail(emails, subject=subject, delayed=False, reference_doctype=doctype, reference_name=docname, message=message, template="email_template_custom", args = dict(content=message,subject=subject))
         frappe.msgprint(_("Notification has been sent successfully"))
     except Exception as e:
-        frappe.error_log(e, "Frappe Mail")
+        frappe.log_error(e, "Frappe Mail")
 
 def make_system_notification(users, message, doctype, docname, subject):
     try:
