@@ -753,3 +753,11 @@ def claim_order_company(user_name,claimed):
             break
     else:
         return 'unsuccess'
+
+
+@frappe.whitelist(allow_guest=False)
+def staffing_exclussive_org_name(job_order):
+    sql = ''' select staff_company from `tabJob Order` where name='{0}' '''.format(job_order)
+    return frappe.db.sql(sql, as_dict=1)
+    
+    

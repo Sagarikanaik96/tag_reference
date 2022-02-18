@@ -105,16 +105,32 @@ function cancel_claimorder(frm){
 }
 
 function org_info(frm){
-	frappe.call({
-		'method':"tag_workflow.tag_data.hiring_org_name",
-		'args':{'current_user':frappe.session.user},
-		callback:function(r){
-			if(r.message=='success'){
-				frm.set_value('staffing_organization',frappe.boot.tag.tag_user_info.company)
-			}
-			else{
-				frm.set_value('staffing_organization','')
-			}
-		}	
-	})
+	if(frm.doc.__islocal==1 && frm.doc.single_share==1){
+		frappe.call({
+			'method':"tag_workflow.tag_data.staffing_exclussive_org_name",
+			'args':{'job_order':cur_frm.doc.job_order},
+			"async": 0,
+			callback:function(r){
+				if(r.message){
+					frm.set_value('staffing_organization',r.message[0]["staff_company"])
+					frm.refresh_field("staffing_organization");
+				}
+			}	
+		})
+		frm.set_df_property("staffing_organization","read_only",1)
+	}else{
+		frappe.call({
+			'method':"tag_workflow.tag_data.hiring_org_name",
+			'args':{'current_user':frappe.session.user},
+			callback:function(r){
+				if(r.message=='success'){
+					frm.set_value('staffing_organization',frappe.boot.tag.tag_user_info.company)
+				}
+				else{
+					frm.set_value('staffing_organization','')
+				}
+			}	
+		})
+	}
 }
+
