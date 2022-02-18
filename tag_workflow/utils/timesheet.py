@@ -40,6 +40,7 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
         sendmail(staffing_user, msg, subject, 'Timesheet', docname)
         return True
     except Exception as e:
+        print(e)
         frappe.error_log(e, "Job Order Approval")
 
 #----------timesheet------------------#
