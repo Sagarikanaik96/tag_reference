@@ -191,7 +191,7 @@ def check_partial_claim(job_order,staffing_org,single_share,no_required,no_assig
 				link =  f'  href="/app/claim-order/{doc_name}" '
 				joborder_email_template(subject,msg,hiring_user_list,link)
 	except Exception as e:
-		frappe.error_log(e, "Partial Job order Failed ")
+		frappe.log_error(e, "Partial Job order Failed ")
 def assign_notification(share_list,hiring_user_list,doc_name,job_order):
 	if share_list:
 		for user in share_list:

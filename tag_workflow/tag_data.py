@@ -445,7 +445,7 @@ def update_job_order_status():
 @frappe.whitelist(allow_guest=False)
 def sales_invoice_notification(user, sid, job_order=None, company=None, invoice_name=None):
     try:
-        if(user != frappe.session.user and sid != frappe.cache().get_value("sessions")[user]):
+        if(user != frappe.session.user):
             return NOASS
 
         sql = '''  select workflow_state from `tabTimesheet` where job_order_detail='{0}' and employee_company='{1}' '''.format(job_order, company)
@@ -462,7 +462,7 @@ def sales_invoice_notification(user, sid, job_order=None, company=None, invoice_
                 user_list = frappe.db.sql(sql, as_list=1)
                 users = [l[0] for l in user_list]
                 for usr in users:
-                    add("Sales Invoice", invoice_name, usr, read=1, write = 0, share = 0, everyone = 0)
+                    add("Sales Invoice", invoice_name, usr, read=1, write = 0, share = 0, everyone = 0, flags={"ignore_share_permission": 1})
 
                 if(users):
                     make_system_notification(users, msg, 'Sales Invoice', invoice_name, subject)

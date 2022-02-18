@@ -39,7 +39,7 @@ def comp(comp_id=None,company_name=None):
 
         return data
     except Exception as e:
-        frappe.error_log(e, "Staffing Company Error")
+        frappe.log_error(e, "Staffing Company Error")
 
 def company_data(company_name):
     det_sql = """ select * from `tabCompany` where name="{}" """.format(company_name)

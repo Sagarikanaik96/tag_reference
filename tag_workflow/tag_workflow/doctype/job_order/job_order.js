@@ -96,7 +96,11 @@ frappe.ui.form.on("Job Order", {
 
 	refresh: function(frm) {
 		if(frappe.route_history.length > 1){
-			window.location.reload();
+			for(let i in frappe.route_history){
+				if(frappe.route_history[i][1] != "Job Order"){
+					window.location.reload();
+				}
+			}
 		}
 		
 		setTimeout(function() {

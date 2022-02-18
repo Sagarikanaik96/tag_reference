@@ -4,21 +4,27 @@ frappe.listview_settings['Timesheet'] = {
 	right_column: "name",
 
 	refresh: function(listview){
-		$('[data-original-title="Menu"]').hide()
-		cur_list.page.btn_primary[0].style.display = "none";
+		$('[data-original-title="Menu"]').hide();
+		if(cur_list.doctype == "Timesheet"){
+			cur_list.page.btn_primary[0].style.display = "none";
+		}
 	},
 
 	onload: function(listview) {
+		if(cur_list.doctype == "Timesheet"){
+			cur_list.page.btn_primary[0].style.display = "none";
+		}
+
 		if(frappe.session.user!='Administrator'){
 			$('.custom-actions.hidden-xs.hidden-md').hide();
 			$('[data-original-title="Refresh"]').hide()
 			$('.menu-btn-group').hide()
 		}
-		cur_list.page.btn_primary[0].style.display = "none";
+		
 		if(frappe.boot.tag.tag_user_info.company_type == "Hiring" && frappe.boot.tag.tag_user_info.company){
 			listview.page.set_secondary_action('<svg class="icon icon-xs" style=""><use class="" href="#icon-add"></use></svg>Add Timesheet', function(){
-                prepare_timesheet(listview);
-            }).addClass("btn-primary");
+				prepare_timesheet(listview);
+			}).addClass("btn-primary");
 		}
 	}
 }
@@ -54,14 +60,14 @@ function prepare_timesheet(listview){
 		{fieldtype:'Read Only', fieldname:'employee_name', label:'Employee Name', in_list_view: 1, options: "employee.employee_name"},
 		{fieldtype:'Section Break', fieldname: 'section_1', label: "Enter/Exit Time"},
 		{
-			fieldtype:'Time', fieldname:'enter_time', label:'Enter Time', in_list_view: 1, default: frappe.datetime.now_time(),
+			fieldtype:'Time', fieldname:'enter_time', label:'Enter Time', in_list_view: 1,
 			onchange: function(){
 				update_hours_child(dialog);
 			}
 		},
 		{fieldtype:'Column Break', fieldname: 'column_2'},
 		{
-			fieldtype:'Time', fieldname:'exit_time', label:'Exit Time', in_list_view: 1, default: frappe.datetime.now_time(),
+			fieldtype:'Time', fieldname:'exit_time', label:'Exit Time', in_list_view: 1,
 			onchange: function(){
 				update_hours_child(dialog);
 			}
@@ -89,21 +95,21 @@ function prepare_timesheet(listview){
 			},
 			{fieldtype:'Column Break', fieldname: 'column'},
 			{
-				fieldtype:'Date', fieldname: 'posting_date', label: "Date", default: frappe.datetime.now_date(), reqd: 1,
+				fieldtype:'Date', fieldname: 'posting_date', label: "Date", reqd: 1,
 				onchange: function(){
 					check_posting_date(dialog);
 				}
 			},
 			{fieldtype:'Section Break', fieldname: 'section_1', label: "Enter/Exit Time"},
 			{
-				fieldtype:'Time', fieldname:'enter_time', label:'Enter Time', in_list_view: 1, default: frappe.datetime.now_time(), reqd: 1,
+				fieldtype:'Time', fieldname:'enter_time', label:'Enter Time', in_list_view: 1, reqd: 1,
 				onchange: function(){
 					update_hours(dialog);
 				}
 			},
 			{fieldtype:'Column Break', fieldname: 'column_2'},
 			{
-				fieldtype:'Time', fieldname:'exit_time', label:'Exit Time', in_list_view: 1, default: frappe.datetime.now_time(), reqd: 1,
+				fieldtype:'Time', fieldname:'exit_time', label:'Exit Time', in_list_view: 1, reqd: 1,
 				onchange: function(){
 					update_hours(dialog);
 				}
@@ -128,6 +134,7 @@ function prepare_timesheet(listview){
 	dialog.show();
 	dialog.$wrapper.find('.modal-dialog').css('max-width', '880px');
 	dialog.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
+	update_job_order(listview, dialog);
 }
 
 
@@ -229,9 +236,9 @@ function update_timesheet(values){
 /*------------------------------------*/
 function check_posting_date(dialog){
 	let date = dialog.get_value("posting_date");
-	date = new Date(date);
 	let order = dialog.get_value("job_order");
 	if(order && date){
+		date = new Date(date);
 		frappe.db.get_value("Job Order", {"name": dialog.get_value("job_order")}, ["from_date", "to_date"], function(r){
 			let from_date = new Date(r.from_date);
 			let to_date = new Date(r.to_date);
@@ -241,5 +248,18 @@ function check_posting_date(dialog){
 				frappe.msgprint("Date must be in between Job order start and end date");
 			}
 		});
+	}
+}
+
+/*-------------------------------*/
+function update_job_order(listview, dialog){
+	let flt = listview.filters || [];
+	for(let f in flt){
+		if(flt[f][1] == "job_order_detail"){
+			setTimeout(function() {
+				dialog.set_value("job_order", flt[f][3]);
+				get_data();
+			}, 300);
+		}
 	}
 }
