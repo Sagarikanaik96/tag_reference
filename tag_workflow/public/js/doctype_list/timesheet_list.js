@@ -162,6 +162,8 @@ function get_data(){
 /*--------------------------*/
 function update_hours(dialog){
 	check_posting_date(dialog);
+	check_posting_time(dialog);
+
 	dialog.fields_dict.items.df.data.some(d => {
 		let enter = cur_dialog.get_value("enter_time") || null;
 		let exit = cur_dialog.get_value("exit_time") || null;
@@ -261,5 +263,21 @@ function update_job_order(listview, dialog){
 				get_data();
 			}, 300);
 		}
+	}
+}
+
+
+function check_posting_time(dialog){
+	let date = dialog.get_value("posting_date");
+	let exit = cur_dialog.get_value("exit_time") || null;
+	var order_date=new Date(date+' '+exit)
+	var current_date=new Date(frappe.datetime.now_datetime())
+	var diff=current_date.getTime()-order_date.getTime()
+
+    diff=diff/60000
+	if(date && exit && diff<0){
+		frappe.msgprint("You Can't Create Timesheet For Future Time");
+		cur_dialog.set_value('exit_time','')
+
 	}
 }

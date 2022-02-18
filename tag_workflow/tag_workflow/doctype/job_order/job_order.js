@@ -188,9 +188,7 @@ frappe.ui.form.on("Job Order", {
 
 	before_save: function(frm) {
 		if (frm.doc.__islocal === 1) {
-			if (frm.doc.availability == "Custom") {
-				set_custom_days(frm);
-			}
+			set_custom_base_price(frm)
 			rate_hour_contract_change(frm);
 			if (frappe.validated) {
 				return new Promise(function(resolve, reject) {
@@ -294,6 +292,9 @@ frappe.ui.form.on("Job Order", {
 		let value = frm.doc.flat_rate;
 		check_value(frm, field, name, value);
 	},
+	job_start_time:function(frm){
+		time_validation(frm)
+	   },
 
 	availability: function(frm) {
 		if(frm.doc.availability == "Custom") {
@@ -308,6 +309,7 @@ frappe.ui.form.on("Job Order", {
 	validate: function(frm) {
 		job_order_duration(frm);
 		rate_calculation(frm);
+		time_validation(frm)
 		var l = {Company: frm.doc.company, "Select Job": frm.doc.select_job, Category: frm.doc.category, "Job Order Start Date": cur_frm.doc.from_date, "Job Site": cur_frm.doc.job_site, "No Of Workers": cur_frm.doc.no_of_workers, Rate: cur_frm.doc.rate, "Job Order End Date": cur_frm.doc.to_date, "Job Duration": cur_frm.doc.job_order_duration, "Estimated Hours Per Day": cur_frm.doc.estimated_hours_per_day, "E-Signature Full Name": cur_frm.doc.e_signature_full_name,};
 
 		var message = "<b>Please Fill Mandatory Fields:</b>";
@@ -982,21 +984,13 @@ function sales_invoice_data(frm) {
     frappe.set_route("List", "Sales Invoice")
 }
 
-function set_custom_days(frm) {
-    let selected = ""
-    let data = frm.doc.select_days.length
-    for (let i = 0; i < data; i++) {
-        if (frm.doc.select_days[i] != "None") {
-            selected = selected + frm.doc.select_days[i].days + ","
-        }
 
-    }
+function set_custom_base_price(frm){
 
-    frm.set_value("selected_days", selected)
-    frm.set_value("base_price", frm.doc.rate)
-    frm.set_value("rate_increase", frm.doc.per_hour - frm.doc.rate)
-
-}
+	frm.set_value("base_price",frm.doc.rate)
+	frm.set_value("rate_increase",frm.doc.per_hour-frm.doc.rate)
+	
+  }
 
 
 function hide_unnecessary_data(frm) {
@@ -1138,3 +1132,24 @@ function staff_claim_button(frm) {
 		}, __("View"));
 	}
 }
+
+
+function time_validation(frm){
+	if(frm.doc.from_date && frm.doc.from_date==frappe.datetime.nowdate()){
+	  var order_date=new Date(frm.doc.from_date+' '+frm.doc.job_start_time)
+	  var current_date=new Date(frappe.datetime.now_datetime())
+	  var diff=current_date.getTime()-order_date.getTime()
+	  diff=diff/60000
+	  if(diff>=0){
+		frappe.msgprint({
+		  message: __('Past Time Is Not Acceptable'),
+		  title: __("Error"),
+		  indicator: "orange",
+		});
+		cur_frm.set_value('job_start_time',(current_date.getHours())+':'+(current_date.getMinutes()+1))
+		// cur_frm.clear_field('job_start_time')
+		cur_frm.refresh_field('job_start_time')
+		frappe.validated=false
+	  }
+	}
+  }

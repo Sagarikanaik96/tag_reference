@@ -540,7 +540,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "job_site.contact_name",
+   "fetch_from": "job_site.contact_email",
    "fetch_if_empty": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
@@ -601,7 +601,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-15 05:58:37.536996",
+ "modified": "2022-02-18 05:27:08.353675",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
