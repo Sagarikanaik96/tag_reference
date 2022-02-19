@@ -114,7 +114,7 @@ def update_timesheet_data(data, company, company_type, user):
                     enqueue("tag_workflow.utils.timesheet.send_timesheet_for_approval", employee=item['employee'],docname=timesheet.name,company=company,job_order=data['job_order'])
                     added = 1
                 else:
-                    frappe.msgprint(_("Timesheet already filled for employee <b>{0}</b> for given datetime").format(item['employee']))
+                    frappe.msgprint(_("Timesheet already filled for employee <b>{0}</b>(<b>{1}</b>) for given datetime").format(item["employee_name"],item['employee']))
         else:
             frappe.msgprint(_("Date must be in between Job Order start date and end date for timesheets"))
 
