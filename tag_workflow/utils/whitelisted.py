@@ -342,3 +342,14 @@ def search_staffing_by_hiring(data=None):
     except Exception as e:
         print(e)
         return []
+
+
+
+@frappe.whitelist()
+def validated_primarykey(company):
+    try:
+        sql = """  select * from  `tabContact` where company = "{0}" AND is_primary=1 """.format(company)
+        return frappe.db.sql(sql)
+    except Exception as e:
+        print(e)
+        

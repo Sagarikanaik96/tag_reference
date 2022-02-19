@@ -50,7 +50,25 @@ frappe.ui.form.on("Contact", {
 		if (is_valid == 0){
 			frappe.validated = false
 		}
-	}
+	},
+	validate: function(frm) {
+		if (cur_frm.doc.is_primary == 1){
+			frappe.call({
+				"method": "tag_workflow.utils.whitelisted.validated_primarykey",
+				"args": {"company": frm.doc.company},
+				"async": 0,
+				"callback": function(r){
+					if (r.message.length > 0){
+						frappe.msgprint({message: __('Is Primary already exist'), indicator: 'red'})
+						frappe.validated = false;
+					}
+					
+				}
+			});
+		}
+		
+		
+	},
 });
 
 
