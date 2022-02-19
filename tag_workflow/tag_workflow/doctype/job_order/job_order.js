@@ -811,7 +811,7 @@ function view_buttons_hiring(frm){
 function view_buttons_staffing(frm) {
 	claim_assign_button(frm);
 	if ((frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)) {
-		let data3 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);"><p><b>Messages </b></p></div>`;
+		let data3 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Messages </p></div>`;
 		$('[data-fieldname = messages]').click(function() {
 			messages(frm);
 		});
@@ -832,7 +832,7 @@ function view_buttons_staffing(frm) {
 			},
 			callback: function(r) {
 				if (r.message != 'unsuccess') {
-					let data4 = `<div class="my-2"  style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);"><p><b>Timesheets </b>  <button class="btn-primary">View</button></p></div>`;
+					let data4 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p><b>Timesheets </b>  <button class="btn-light rounded border">View</button></p></div>`;
 					$('[data-fieldname = timesheets]').click(function() {
 						timesheets_view(frm);
 					});
@@ -854,7 +854,7 @@ function view_buttons_staffing(frm) {
 			},
 			callback: function(r) {
 				if (r.message == 'success1') {
-					let data5 = `<div class="my-2" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);"><p><b>Invoices </b> <button class="btn-primary">View</button></p></div>`;
+					let data5 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p><b>Invoices </b> <button class="btn-light rounded border">View</button></p></div>`;
 					$('[data-fieldname = invoices]').click(function() {
 						sales_invoice_data(frm);
 					});
@@ -864,7 +864,7 @@ function view_buttons_staffing(frm) {
 						sales_invoice_data(frm);
 					}, __("View"));
 				} else if (r.message == 'success') {
-					let data6 = `<div class="my-2" style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);"><p><b>Invoices </b> <button class="btn-primary">View</button></p></div>`;
+					let data6 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p><b>Invoices </b> <button class="btn-light rounded border">View</button></p></div>`;
 					$('[data-fieldname = invoices]').click(function() {
 						sales_invoice_data(frm);
 					});
@@ -1079,7 +1079,7 @@ function claim_assign_button(frm) {
 }
 
 function assign_button(frm) {
-	let data2 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);"><p><b>Claims </b></p></div>`;
+	let data2 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Claims </p></div>`;
 	$('[data-fieldname = related_details]').click(function() {
 		staff_assign_redirect(frm);
 	});
@@ -1115,7 +1115,7 @@ function staff_claim_button(frm) {
 			}
 		});
 
-		let data1 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);"><p><b>Claims </b></p></div>`;
+		let data1 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Claims </p></div>`;
 		$('[data-fieldname = related_details]').click(function() {
 			claim_orders(frm);
 		});
@@ -1123,7 +1123,7 @@ function staff_claim_button(frm) {
 		frm.toggle_display('related_actions_section', 1);
 		staff_assigned_emp(frm);
 	} else {
-		let data2 = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);"><p><b>Claims </b></p></div>`;
+		let data2 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Claims </p></div>`;
 		$('[data-fieldname = related_details]').click(function() {
 			claim_orders(frm);
 		});
