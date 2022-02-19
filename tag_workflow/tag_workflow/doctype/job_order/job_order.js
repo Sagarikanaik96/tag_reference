@@ -591,12 +591,14 @@ function make_invoice(frm) {
 	if (cur_frm.doc.__islocal != 1 && roles.includes("Staffing Admin", "Staffing User") && frappe.boot.tag.tag_user_info.company) {
 		frappe.db.get_value("Assign Employee", { company: frappe.boot.tag.tag_user_info.company, tag_status: "Approved", "job_order": frm.doc.name},"name", function(r) {
 			if (r.name) {
-				frm.add_custom_button(__("Make Invoice"), function() {
-					frappe.model.open_mapped_doc({
-						method: "tag_workflow.tag_workflow.doctype.job_order.job_order.make_invoice",
-						frm: cur_frm,
-					});
-				}).addClass("btn-primary");
+				if (!(cur_frm.doc.order_status == "Upcoming")){
+					frm.add_custom_button(__("Create Invoice"), function() {
+						frappe.model.open_mapped_doc({
+							method: "tag_workflow.tag_workflow.doctype.job_order.job_order.make_invoice",
+							frm: cur_frm,
+						});
+					}).addClass("btn-primary");
+				}
 			}
 		});
 	}
