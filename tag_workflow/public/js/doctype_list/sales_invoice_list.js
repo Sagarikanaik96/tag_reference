@@ -12,7 +12,9 @@ frappe.listview_settings['Sales Invoice'] = {
 		}
 	},
 	refresh:function(listview){
+		$('[class="btn btn-primary btn-sm primary-action"]').hide()
 		$('[class="btn btn-default btn-sm ellipsis"]').hide()
+		$('button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs').hide();
 	},
 	hide_name_column: true,
 	// add_fields: ['type', 'reference_doctype', 'reference_name'],

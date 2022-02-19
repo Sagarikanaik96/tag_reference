@@ -5,6 +5,7 @@ frappe.listview_settings['Timesheet'] = {
 
 	refresh: function(listview){
 		$('[data-original-title="Menu"]').hide();
+		$('button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs').hide();
 		if(cur_list.doctype == "Timesheet"){
 			cur_list.page.btn_primary[0].style.display = "none";
 		}
