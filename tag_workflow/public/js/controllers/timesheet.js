@@ -1,6 +1,7 @@
 frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
 		$('.form-footer').hide()
+		$('[data-label="Resume%20Timer"]').hide()
 		if(frm.doc.__islocal==1){
 			cancel_timesheet(frm);
 			frm.set_value("employee","");
