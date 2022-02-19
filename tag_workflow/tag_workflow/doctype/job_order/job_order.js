@@ -899,7 +899,7 @@ function hiring_buttons(frm) {
 							},
 							callback: function(rm) {
 								var data = rm.message;
-								let profile_html = `<table><th>Employee Name</th><th>Status</th><th>Staffing Company</th>`;
+								let profile_html = `<table><th>Employee Name</th><th>Marked As</th><th>Staffing Company</th>`;
 								for (let p in data) {
 									profile_html += `<tr>
 										<td>${data[p].employee}</td>
