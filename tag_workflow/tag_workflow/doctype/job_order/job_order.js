@@ -832,7 +832,7 @@ function view_buttons_staffing(frm) {
 			},
 			callback: function(r) {
 				if (r.message != 'unsuccess') {
-					let data4 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p><b>Timesheets </b>  <button class="btn-light rounded border">View</button></p></div>`;
+					let data4 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Timesheets </p>  <button class="btn-light rounded border">View</button></div>`;
 					$('[data-fieldname = timesheets]').click(function() {
 						timesheets_view(frm);
 					});
@@ -854,7 +854,7 @@ function view_buttons_staffing(frm) {
 			},
 			callback: function(r) {
 				if (r.message == 'success1') {
-					let data5 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p><b>Invoices </b> <button class="btn-light rounded border">View</button></p></div>`;
+					let data5 = `<div class="my-3" style="display:flex;justify-content: space-between;"> <p> Invoices  </p> <button class="btn-light rounded border">View</button></div>`;
 					$('[data-fieldname = invoices]').click(function() {
 						sales_invoice_data(frm);
 					});
