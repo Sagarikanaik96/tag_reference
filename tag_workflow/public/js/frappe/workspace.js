@@ -271,6 +271,13 @@ class DesktopPage {
 		if(frappe.boot.tag.tag_user_info.company_type != "TAG" && frappe.boot.tag.tag_user_info.company_type && frappe.desk_page.page_name == 'My Activities'){
 			this.make_order_list();
 			this.get_order_data();
+			if(frappe.route_history.length > 1){
+				for(let i in frappe.route_history){
+					if(frappe.route_history[i][1] != ""){
+						window.location.reload();
+					}
+				}
+			}
 		}
 		this.make_shortcuts();
 		this.make_cards();
