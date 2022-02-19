@@ -65,6 +65,14 @@ frappe.ui.form.on("Company", {
       };
     });
   },
+  organization_type:function(frm){
+    if(frm.doc.organization_type && frm.doc.organization_type=='Exclusive Hiring'){
+      org_info(frm)
+    }
+    else{
+      frm.set_value('parent_staffing','')
+    }
+  },
   set_primary_contact_as_account_receivable_contact: function (frm) {
     if (cur_frm.doc.set_primary_contact_as_account_receivable_contact == 1) {
       if (
@@ -452,4 +460,18 @@ function cancel_company(frm){
 	frm.add_custom_button(__('Cancel'), function(){
 		frappe.set_route("Form", "Company");
 	});
+}
+function org_info(frm){
+  frappe.call({
+    'method':"tag_workflow.tag_data.hiring_org_name",
+    'args':{'current_user':frappe.session.user},
+    callback:function(r){
+      if(r.message=='success'){
+        frm.set_value('parent_staffing',frappe.boot.tag.tag_user_info.company)
+      }
+      else{
+        frm.set_value('parent_staffing','')
+      }
+    }	
+  })
 }
