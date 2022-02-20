@@ -129,7 +129,12 @@ def make_sales_invoice(source_name, company, emp_list, emp_sql,target_doc=None, 
         timesheet = frappe.db.sql(sql, as_dict=1)
 
         for time in timesheet:
-            sheet = frappe.get_doc("Timesheet", {"name": time.name})
+            try:
+                add("Timesheet", time.name, user=frappe.session.user, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
+            except Exception:
+                continue
+
+            sheet = frappe.get_doc("Timesheet", {"name": time.name}, ignore_permissions=True)
             total_amount += sheet.total_billable_amount
             total_hours += sheet.total_billable_hours
 

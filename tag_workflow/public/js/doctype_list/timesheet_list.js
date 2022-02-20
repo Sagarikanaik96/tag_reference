@@ -122,8 +122,7 @@ function prepare_timesheet(listview){
 
 	dialog.set_primary_action(__('Save'), function() {
 		let values = dialog.get_values();
-		update_timesheet(values);
-		dialog.hide();
+		update_timesheet(values, dialog);
 		cur_list.refresh();
 	});
 
@@ -221,7 +220,7 @@ function update_hours_child(dialog){
 }
 
 
-function update_timesheet(values){
+function update_timesheet(values, dialog){
 	frappe.call({
 		method: "tag_workflow.utils.timesheet.update_timesheet_data",
 		args: {"data": values, "company": frappe.boot.tag.tag_user_info.company, "company_type": frappe.boot.tag.tag_user_info.company_type, user: frappe.session.user},
@@ -229,6 +228,7 @@ function update_timesheet(values){
 			let data = r.message;
 			if(data == 1){
 				frappe.msgprint("<b>Timesheet</b> updated successfully");
+				dialog.hide();
 			}else{
 				frappe.msgprint("Some errors while updating timesheet. Please try again.")
 			}
@@ -261,7 +261,9 @@ function update_job_order(listview, dialog){
 		if(flt[f][1] == "job_order_detail"){
 			setTimeout(function() {
 				dialog.set_value("job_order", flt[f][3]);
-				get_data();
+				setTimeout(function() {
+					get_data();
+				}, 200);
 			}, 300);
 		}
 	}
@@ -271,14 +273,12 @@ function update_job_order(listview, dialog){
 function check_posting_time(dialog){
 	let date = dialog.get_value("posting_date");
 	let exit = cur_dialog.get_value("exit_time") || null;
-	var order_date=new Date(date+' '+exit)
-	var current_date=new Date(frappe.datetime.now_datetime())
-	var diff=current_date.getTime()-order_date.getTime()
-
-    diff=diff/60000
+	var order_date=new Date(date+' '+exit);
+	var current_date=new Date(frappe.datetime.now_datetime());
+	var diff=current_date.getTime()-order_date.getTime();
+	diff=diff/60000;
 	if(date && exit && diff<0){
 		frappe.msgprint("You Can't Create Timesheet For Future Time");
-		cur_dialog.set_value('exit_time','')
-
+		cur_dialog.set_value('exit_time','');
 	}
 }

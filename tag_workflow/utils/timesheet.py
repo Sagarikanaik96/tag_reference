@@ -78,6 +78,20 @@ def check_old_timesheet(child_from, child_to, employee, job_order):
     except Exception as e:
         print(e)
         return 0
+
+def check_if_employee_assign(items):
+    try:
+        is_employee = 1
+        for item in items['items']:
+            sql = """ select employee from `tabAssign Employee Details` where employee = '{0}' and parent in (select name from `tabAssign Employee` where tag_status = "Approved" and job_order = '{1}') """.format(item['employee'], items['job_order'])
+            result = frappe.db.sql(sql, as_dict=1)
+            if(len(result) == 0):
+                frappe.msgprint(_("Employee with ID <b>{0}</b> not assigned to this Job Order(<b>{1}</b>). Please fill the details correctly.").format(item['employee'], items['job_order']))
+                is_employee = 0
+        return is_employee
+    except Exception as e:
+        frappe.msgprint(e)
+        return False
         
 
 @frappe.whitelist()
@@ -88,6 +102,10 @@ def update_timesheet_data(data, company, company_type, user):
             return
 
         data = json.loads(data)
+        is_employee = check_if_employee_assign(data)
+        if(is_employee == 0):
+            return False
+
         job = frappe.get_doc("Job Order", {"name": data['job_order']})
         posting_date = datetime.datetime.strptime(data['posting_date'], "%Y-%m-%d").date()
         if(posting_date >= job.from_date and posting_date <= job.to_date):
