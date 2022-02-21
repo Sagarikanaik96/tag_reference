@@ -2,6 +2,8 @@ frappe.ui.form.on("Contact", {
 	refresh: function(frm){
 		$('.form-footer').hide()
 		$('[data-original-title="Menu"]').hide()
+		$('[data-label="Invite%20as%20User"]').hide()
+		$('[data-label="Links"]').hide()
 		init_fields(frm);
 		make_field_mandatory(frm);
 		if(frm.doc.__islocal==1){
