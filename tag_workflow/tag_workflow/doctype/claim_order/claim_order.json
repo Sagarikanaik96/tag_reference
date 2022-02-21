@@ -17,7 +17,8 @@
   "html_4",
   "e_signature",
   "agree_to_contract",
-  "single_share"
+  "single_share",
+  "view_contract"
  ],
  "fields": [
   {
@@ -92,11 +93,16 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Single Share"
+  },
+  {
+   "fieldname": "view_contract",
+   "fieldtype": "Button",
+   "label": "View Contract Language"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-14 22:49:23.382176",
+ "modified": "2022-02-21 05:44:35.259928",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Claim Order",

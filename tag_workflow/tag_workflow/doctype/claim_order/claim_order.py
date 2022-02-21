@@ -41,7 +41,7 @@ def staffing_claim_joborder(job_order,hiring_org, staffing_org, doc_name,single_
 		job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
 		job_detail = frappe.db.sql(job_sql, as_dict=1)
 
-		lst_sql = ''' select user_id from `tabEmployee` where user_id IS NOT NULL and company = "{}" '''.format(hiring_org)
+		lst_sql = ''' select name from `tabUser` where company = "{}" '''.format(hiring_org)
 		user_list = frappe.db.sql(lst_sql, as_list=1)
 
 		l = [l[0] for l in user_list]
@@ -56,6 +56,7 @@ def staffing_claim_joborder(job_order,hiring_org, staffing_org, doc_name,single_
 		return joborder_email_template(sub,msg,l,link)
 
 	except Exception as e:
+		frappe.msgprint(e)
 		print(e, frappe.get_traceback())
 		frappe.db.rollback()
 
@@ -67,7 +68,7 @@ def save_claims(my_data,doc_name):
 		my_data=json.loads(my_data)
 		for key in my_data:
 			companies.append(key)
-		
+
 		for i in companies:
 			job = frappe.get_doc(jobOrder, doc_name)
 			claimed = job.staff_org_claimed if job.staff_org_claimed else ""
@@ -110,7 +111,6 @@ def modify_heads(doc_name):
 		claim_data=f''' select staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{doc_name}" and staffing_organization not in (select company from `tabAssign Employee` where job_order="{doc_name}" and tag_status="Approved")'''
 		claims=frappe.db.sql(claim_data,as_dict=True)
 		return claims
-		
 	except Exception as e:
 		print(e,frappe.get_traceback())
 		frappe.db.rollback()
@@ -122,7 +122,7 @@ def save_modified_claims(my_data,doc_name):
 		my_data=json.loads(my_data)
 		for key in my_data:
 			companies.append(key)
-		
+
 		for i in companies:
 			job = frappe.get_doc(jobOrder, doc_name)
 			claimed = job.staff_org_claimed if job.staff_org_claimed else ""
@@ -130,7 +130,7 @@ def save_modified_claims(my_data,doc_name):
 				frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+str(i)))
 			elif(str(i) not in claimed):
 				frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+", "+str(i)))
-			
+
 			sql=f'select name from `tabClaim Order` where job_order="{doc_name}" and staffing_organization="{i}"'
 			claim_order_name=frappe.db.sql(sql,as_dict=1)
 			doc=frappe.get_doc('Claim Order',claim_order_name[0].name)
@@ -174,18 +174,18 @@ def check_partial_claim(job_order,staffing_org,single_share,no_required,no_assig
 		if int(no_required) > int(no_assigned):
 			sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org)
 			share_list = frappe.db.sql(sql, as_list = True)
-			assign_notification(share_list,hiring_user_list,doc_name,job_order) 
-			subject = 'Job Order Notification' 
+			assign_notification(share_list,hiring_user_list,doc_name,job_order)
+			subject = 'Job Order Notification'
 			msg=f'{staffing_org} placed partial claim on your work order: {job_order_data.select_job}. Please review.'
 			make_system_notification(hiring_user_list,msg,claimOrder,doc_name,subject)
 			link =  f'  href="/app/claim-order/{doc_name}" '
 			joborder_email_template(subject,msg,hiring_user_list,link)
 		else:
 			if hiring_user_list:
-				subject = 'Job Order Notification' 
+				subject = 'Job Order Notification'
 				for user in hiring_user_list:
-					add(claimOrder, doc_name, user, read=1, write = 0, share = 0, everyone = 0,flags={"ignore_share_permission": 1})   
-			
+					add(claimOrder, doc_name, user, read=1, write = 0, share = 0, everyone = 0,flags={"ignore_share_permission": 1})
+
 				msg=f'{staffing_org} placed Full claim on your work order: {job_order_data.select_job}. Please review.'
 				make_system_notification(hiring_user_list,msg,claimOrder,doc_name,subject)
 				link =  f'  href="/app/claim-order/{doc_name}" '
@@ -197,5 +197,5 @@ def assign_notification(share_list,hiring_user_list,doc_name,job_order):
 		for user in share_list:
 			add(jobOrder, job_order, user[0], read=1,write=0, share=1, everyone=0, notify=0,flags={"ignore_share_permission": 1})
 	for user in hiring_user_list:
-		add(claimOrder, doc_name, user, read=1, write = 0, share = 0, everyone = 0,flags={"ignore_share_permission": 1})  
-   
+		add(claimOrder, doc_name, user, read=1, write = 0, share = 0, everyone = 0,flags={"ignore_share_permission": 1})
+
