@@ -823,7 +823,7 @@ function view_buttons_staffing(frm) {
 		}, __("View"));
 	}
 
-	if (frm.doc.staff_org_claimed && (frm.doc.order_status == 'Completed')) {
+	if (frm.doc.staff_org_claimed && ((frm.doc.order_status == 'Completed') || (frm.doc.order_status == 'Ongoing'))) {
 		frappe.call({
 			'method': 'tag_workflow.tag_data.claim_order_company',
 			'args': {
