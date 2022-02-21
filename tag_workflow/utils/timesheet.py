@@ -18,7 +18,7 @@ TM_FT = "%Y-%m-%d %H:%M:%S"
 @frappe.whitelist()
 def send_timesheet_for_approval(employee, docname, company, job_order):
     try:
-        sql = """ select parent from `tabHas Role` where role = "Staffing Admin" and parent in(select user_id from `tabEmployee` where user_id != '' and company = (select company from `tabEmployee` where name = '{0}')) """.format(employee)
+        sql = """ select parent from `tabHas Role` where role in ("Staffing Admin", "Staffing User") and parent in(select user_id from `tabEmployee` where user_id != '' and company = (select company from `tabEmployee` where name = '{0}')) """.format(employee)
         user_list = frappe.db.sql(sql, as_dict=1)
         staffing_user=[]
 
