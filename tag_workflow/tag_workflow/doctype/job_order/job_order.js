@@ -783,7 +783,7 @@ function view_buttons_hiring(frm){
 			}, __("View"));
 		}
 
-		if (frm.doc.order_status == 'Completed') {
+		if((frm.doc.order_status == 'Completed')  || (frm.doc.order_status == 'Ongoing')) {
 			frappe.call({
 				method: "tag_workflow.tag_data.timesheet_detail",
 				args: {
@@ -846,7 +846,7 @@ function view_buttons_staffing(frm) {
 		});
 	}
 
-	if (frm.doc.staff_org_claimed && (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company) && (frm.doc.order_status == 'Completed')) {
+	if (frm.doc.staff_org_claimed && (frm.doc.staff_org_claimed).includes(frappe.boot.tag.tag_user_info.company) && ((frm.doc.order_status == 'Completed') || (frm.doc.order_status == 'Ongoing'))) {
 		frappe.call({
 			method: "tag_workflow.tag_data.timesheet_detail",
 			args: {
