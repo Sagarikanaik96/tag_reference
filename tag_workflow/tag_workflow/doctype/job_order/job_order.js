@@ -864,7 +864,7 @@ function view_buttons_staffing(frm) {
 						sales_invoice_data(frm);
 					}, __("View"));
 				} else if (r.message == 'success') {
-					let data6 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p><b>Invoices </b> <button class="btn-light rounded border">View</button></p></div>`;
+					let data6 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Invoices </p> <button class="btn-light rounded border">View</button> </div>`;
 					$('[data-fieldname = invoices]').click(function() {
 						sales_invoice_data(frm);
 					});
