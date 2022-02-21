@@ -115,7 +115,7 @@ def update_timesheet_data(data, company, company_type, user):
                 child_from, child_to = get_child_time(data['posting_date'], from_time, to_time, item['enter_time'], item['exit_time'])
                 is_ok = check_old_timesheet(child_from, child_to, item['employee'], data['job_order'])
                 if(is_ok == 0):
-                    timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=company, job_order_detail=data['job_order'], employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate))
+                    timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=company, job_order_detail=data['job_order'], employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate,status_of_work_order = job.order_status,date_of_timesheet=data['posting_date']))
                     timesheet.append("time_logs", {
                         "activity_type": job.select_job,
                         "from_time": child_from,
