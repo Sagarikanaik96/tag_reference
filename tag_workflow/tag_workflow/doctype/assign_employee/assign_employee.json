@@ -145,25 +145,25 @@
   },
   {
    "default": "0",
-   "depends_on": "eval: doc.resumes_required == 1",
+   "depends_on": "eval: doc.resume_required == 1",
    "description": "Agree to Contract Mention in JOB ORDER",
    "fieldname": "agree_contract",
    "fieldtype": "Check",
    "label": "Agree Contract",
-   "mandatory_depends_on": "eval: doc.resumes_required == 1"
+   "mandatory_depends_on": "eval: doc.resume_required == 1"
   },
   {
-   "depends_on": "eval: doc.resumes_required == 1",
+   "depends_on": "eval: doc.resume_required == 1",
    "fieldname": "html_37",
    "fieldtype": "HTML",
    "options": "<b>Important Note Regarding Signature</b> By typing your full name below and submitting this agreement. You acknowledge and agree that your typed name represents your signed name(signature) and that you intend for this electronic signature to having the same force and effects as a manual(handwritten) signature.<br>\n"
   },
   {
-   "depends_on": "eval: doc.resumes_required == 1",
+   "depends_on": "eval: doc.resume_required == 1",
    "fieldname": "e_signature_full_name",
    "fieldtype": "Data",
    "label": "E Signature Full Name",
-   "mandatory_depends_on": "eval: doc.resumes_required == 1"
+   "mandatory_depends_on": "eval: doc.resume_required == 1"
   },
   {
    "default": "0",
@@ -202,17 +202,16 @@
    "label": "Approve Employee Notification"
   },
   {
-   "depends_on": "eval: doc.resumes_required == 1",
+   "depends_on": "eval: doc.resume_required == 1",
    "fieldname": "view_contract",
    "fieldtype": "Button",
-   "label": "View Contract Language",
-   "mandatory_depends_on": "eval: doc.resumes_required == 1"
+   "label": "View Contract Language"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-21 06:24:43.331309",
+ "modified": "2022-02-21 06:39:13.792424",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",
