@@ -79,7 +79,7 @@ frappe.ui.form.on('Assign Employee', {
 		}
 	},
 	validate:function(frm){
-		var sign = cur_frm.doc.e_signature_full_name
+		var sign = cur_frm.doc.e_signature_full_name;
 		var emp_tab=frm.doc.employee_details;
 		var message="<b>Please Fill Mandatory Fields:</b>";
 		if(sign===undefined || !sign){
@@ -94,7 +94,7 @@ frappe.ui.form.on('Assign Employee', {
 			message=message+"<br>Agree To Contract";
 		}
 
-		if(message!="<b>Please Fill Mandatory Fields:</b>"){
+		if(message!="<b>Please Fill Mandatory Fields:</b>" && frm.doc.resume_required == 1){
 			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
 			frappe.validated=false;
 		}
