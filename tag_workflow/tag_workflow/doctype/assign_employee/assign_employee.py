@@ -12,15 +12,6 @@ class AssignEmployee(Document):
 
 distance_value = {"5 miles": 5, "10 miles": 10, "20 miles": 20, "50 miles": 50}
 
-def get_api_key():
-    try:
-        api_key = tag_workflow.get_key("gmap")
-        if(api_key == 'Error'):
-            return "AIzaSyDRCtr2OCT1au8HCjMQPivkhIknFI7akIU"
-        return api_key
-    except Exception:
-        return ''
-
 def get_souce(location=None):
     try:
         source = []
@@ -47,13 +38,13 @@ def get_dest(dest):
 def check_distance(emp, distance, location):
     try:
         result, source = [], []
-        api_key = get_api_key()
+        tag_gmap_key = ""
 
-        if not api_key:
+        if not tag_gmap_key:
             frappe.msgprint(_("GMAP api key not found"))
             return ()
 
-        gmaps = googlemaps.Client(key=api_key)
+        gmaps = googlemaps.Client(key=tag_gmap_key)
         source = get_souce(location)
         for e in emp:
             try:
