@@ -201,15 +201,17 @@
    "label": "Approve Employee Notification"
   },
   {
+   "depends_on": "eval: doc.resumes_required == 1",
    "fieldname": "view_contract",
    "fieldtype": "Button",
-   "label": "View Contract Language"
+   "label": "View Contract Language",
+   "mandatory_depends_on": "eval: doc.resumes_required == 1"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-21 06:16:53.950798",
+ "modified": "2022-02-21 06:22:19.727029",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",
