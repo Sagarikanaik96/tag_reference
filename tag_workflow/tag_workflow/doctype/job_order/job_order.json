@@ -157,6 +157,7 @@
   },
   {
    "default": "1",
+   "description": "Accepted Type : Numerical Value\n",
    "fieldname": "no_of_workers",
    "fieldtype": "Int",
    "label": "No. of workers",
@@ -456,7 +457,7 @@
   {
    "fieldname": "html_2",
    "fieldtype": "HTML",
-   "options": "<h3>You Have Submitted a Claim For This Order</h3>"
+   "options": "<h3>You have submitted a claim for this order</h3>"
   },
   {
    "fieldname": "related_actions_section",
@@ -540,7 +541,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "job_site.contact_name",
+   "fetch_from": "job_site.contact_email",
    "fetch_if_empty": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
@@ -596,12 +597,12 @@
   {
    "fieldname": "html_3",
    "fieldtype": "HTML",
-   "options": "<h3>Your Claim Has Been Approved</h3>"
+   "options": "<h3>Your claim has been approved</h3>"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-15 05:58:37.536996",
+ "modified": "2022-02-19 02:08:51.194172",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

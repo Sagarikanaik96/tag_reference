@@ -67,6 +67,7 @@ def onboard_org(lead, exclusive, staffing, email, person_name, organization_type
 # add orgs
 def make_company(lead, exclusive, staffing, org_type):
     try:
+        contract=''
         if(frappe.db.exists("Contract", {"lead": lead})):
             contract = frappe.get_doc("Contract", {"lead": lead})
 

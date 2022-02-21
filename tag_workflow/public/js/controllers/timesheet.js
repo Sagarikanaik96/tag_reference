@@ -1,6 +1,11 @@
 frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
 		$('.form-footer').hide()
+		$('[data-label="Resume%20Timer"]').hide()
+		$('[data-label="Create%20Salary%20Slip"]').hide()
+		$('[data-label="Create%20Sales%20Invoice"]').hide()
+		$('[data-label="Cancel"]').hide()
+		cur_frm.dashboard.hide();
 		if(frm.doc.__islocal==1){
 			cancel_timesheet(frm);
 			frm.set_value("employee","");

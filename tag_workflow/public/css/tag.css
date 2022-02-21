@@ -631,6 +631,9 @@ input::-webkit-credentials-auto-fill-button {
 .new-timeline .timeline-badge svg {
   fill: #fff !important;
 }
+.new-timeline .timeline-badge svg.icon-sm {
+  --icon-stroke: #fff;
+}
 .new-timeline .nav-pills .nav-link.active {
   background-color: #21b9e4 !important;
 }

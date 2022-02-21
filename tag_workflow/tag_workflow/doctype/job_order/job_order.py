@@ -123,13 +123,18 @@ def make_sales_invoice(source_name, company, emp_list, emp_sql,target_doc=None, 
         income_account, cost_center, default_expense_account,creater_company,creater_city,creater_state,creater_zip = frappe.db.get_value("Company", company, ["default_income_account", "cost_center", "default_expense_account","address","city","state","zip"])
         total_amount = 0
         total_hours = 0
-        hiring_org_name = frappe.db.get_value(ORD,source,["company"])
+        hiring_org_name,job_title= frappe.db.get_value(ORD,source,["company","select_job"])
         for_company,for_company_city,for_company_state,for_company_zip = frappe.db.get_value("Company",hiring_org_name,["address","city","state","zip"])
         sql = """ select name from `tabTimesheet` where job_order_detail = '{0}' and docstatus = 1 and employee in ({1}) and is_check_in_sales_invoice = 0 """.format(source, emp_sql)
         timesheet = frappe.db.sql(sql, as_dict=1)
 
         for time in timesheet:
-            sheet = frappe.get_doc("Timesheet", {"name": time.name})
+            try:
+                add("Timesheet", time.name, user=frappe.session.user, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
+            except Exception:
+                continue
+
+            sheet = frappe.get_doc("Timesheet", {"name": time.name}, ignore_permissions=True)
             total_amount += sheet.total_billable_amount
             total_hours += sheet.total_billable_hours
 
@@ -150,7 +155,7 @@ def make_sales_invoice(source_name, company, emp_list, emp_sql,target_doc=None, 
         doclist.for_company_state = for_company_state
         doclist.for_company_zip = for_company_zip
 
-        timesheet_item = {"item_name": "Service", "description": "Service", "uom": "Nos", "qty": 1, "stock_uom": "Nos", "conversion_factor": 1, "stock_qty": 1, "rate": total_amount, "amount": total_amount, "income_account": income_account, "cost_center": cost_center, "default_expense_account": default_expense_account}
+        timesheet_item = {"item_name": job_title, "description": "Service", "uom": "Nos", "qty": 1, "stock_uom": "Nos", "conversion_factor": 1, "stock_qty": 1, "rate": total_amount, "amount": total_amount, "income_account": income_account, "cost_center": cost_center, "default_expense_account": default_expense_account}
         doclist.append("items", timesheet_item)
         doclist.company = company
 

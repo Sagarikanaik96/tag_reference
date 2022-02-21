@@ -1,7 +1,7 @@
 frappe.listview_settings['Sales Invoice'] = {
 	onload:function(listview){
 		if(frappe.session.user!='Administrator'){
-			$('.custom-actions.hidden-xs.hidden-md').hide()
+			// $('.custom-actions.hidden-xs.hidden-md').hide()
 			$('[data-original-title="Refresh"]').hide()
 			$('.menu-btn-group').hide()
         }
@@ -10,6 +10,11 @@ frappe.listview_settings['Sales Invoice'] = {
 				create_monthly_invoice(listview)
 				}).addClass("btn-primary");
 		}
+	},
+	refresh:function(listview){
+		$('[class="btn btn-primary btn-sm primary-action"]').hide()
+		$('[class="btn btn-default btn-sm ellipsis"]').hide()
+		$('button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs').hide();
 	},
 	hide_name_column: true,
 	// add_fields: ['type', 'reference_doctype', 'reference_name'],

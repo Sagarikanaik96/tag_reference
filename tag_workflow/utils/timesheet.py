@@ -18,13 +18,13 @@ TM_FT = "%Y-%m-%d %H:%M:%S"
 @frappe.whitelist()
 def send_timesheet_for_approval(employee, docname, company, job_order):
     try:
-        sql = """ select parent from `tabHas Role` where role = "Staffing Admin" and parent in(select user_id from `tabEmployee` where user_id != '' and company = (select company from `tabEmployee` where name = '{0}')) """.format(employee)
+        sql = """ select parent from `tabHas Role` where role in ("Staffing Admin", "Staffing User") and parent in(select user_id from `tabEmployee` where user_id != '' and company = (select company from `tabEmployee` where name = '{0}')) """.format(employee)
         user_list = frappe.db.sql(sql, as_dict=1)
         staffing_user=[]
 
         for user in user_list:
             if not frappe.db.exists("User Permission",{"user": user.parent,"allow": "Timesheet","apply_to_all_doctypes":1, "for_value": docname}):
-                add("Timesheet", docname, user=user.parent, read=1, write=1, submit=1, notify=0)
+                add("Timesheet", docname, user=user.parent, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
                 perm_doc = frappe.get_doc(dict(doctype="User Permission",user=user.parent,allow="Timesheet",for_value=docname,apply_to_all_doctypes=1))
                 perm_doc.save(ignore_permissions=True)
             if user.parent not in staffing_user:
@@ -40,9 +40,7 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
         sendmail(staffing_user, msg, subject, 'Timesheet', docname)
         return True
     except Exception as e:
-        frappe.error_log(e, "Job Order Approval")
-        frappe.throw(e)
-
+        frappe.log_error(e, "Job Order Approval")
 
 #----------timesheet------------------#
 @frappe.whitelist()
@@ -80,6 +78,20 @@ def check_old_timesheet(child_from, child_to, employee, job_order):
     except Exception as e:
         print(e)
         return 0
+
+def check_if_employee_assign(items):
+    try:
+        is_employee = 1
+        for item in items['items']:
+            sql = """ select employee from `tabAssign Employee Details` where employee = '{0}' and parent in (select name from `tabAssign Employee` where tag_status = "Approved" and job_order = '{1}') """.format(item['employee'], items['job_order'])
+            result = frappe.db.sql(sql, as_dict=1)
+            if(len(result) == 0):
+                frappe.msgprint(_("Employee with ID <b>{0}</b> not assigned to this Job Order(<b>{1}</b>). Please fill the details correctly.").format(item['employee'], items['job_order']))
+                is_employee = 0
+        return is_employee
+    except Exception as e:
+        frappe.msgprint(e)
+        return False
         
 
 @frappe.whitelist()
@@ -90,6 +102,10 @@ def update_timesheet_data(data, company, company_type, user):
             return
 
         data = json.loads(data)
+        is_employee = check_if_employee_assign(data)
+        if(is_employee == 0):
+            return False
+
         job = frappe.get_doc("Job Order", {"name": data['job_order']})
         posting_date = datetime.datetime.strptime(data['posting_date'], "%Y-%m-%d").date()
         if(posting_date >= job.from_date and posting_date <= job.to_date):
@@ -99,7 +115,7 @@ def update_timesheet_data(data, company, company_type, user):
                 child_from, child_to = get_child_time(data['posting_date'], from_time, to_time, item['enter_time'], item['exit_time'])
                 is_ok = check_old_timesheet(child_from, child_to, item['employee'], data['job_order'])
                 if(is_ok == 0):
-                    timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=company, job_order_detail=data['job_order'], employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate))
+                    timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=company, job_order_detail=data['job_order'], employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate,status_of_work_order = job.order_status,date_of_timesheet=data['posting_date']))
                     timesheet.append("time_logs", {
                         "activity_type": job.select_job,
                         "from_time": child_from,
@@ -116,7 +132,7 @@ def update_timesheet_data(data, company, company_type, user):
                     enqueue("tag_workflow.utils.timesheet.send_timesheet_for_approval", employee=item['employee'],docname=timesheet.name,company=company,job_order=data['job_order'])
                     added = 1
                 else:
-                    frappe.msgprint(_("Timesheet already filled for employee <b>{0}</b> for given datetime").format(item['employee']))
+                    frappe.msgprint(_("Timesheet already filled for employee <b>{0}</b>(<b>{1}</b>) for given datetime").format(item["employee_name"],item['employee']))
         else:
             frappe.msgprint(_("Date must be in between Job Order start date and end date for timesheets"))
 
@@ -180,7 +196,7 @@ def check_employee_editable(job_order, name, creation):
     except Exception as e:
         print(e)
         is_editable = 1
-        frappe.error_log(frappe.get_traceback(), "check_employee_editable")
+        frappe.log_error(frappe.get_traceback(), "check_employee_editable")
         return is_editable
 
 @frappe.whitelist()
@@ -218,7 +234,7 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
                 doc.save()
         return "success"
     except Exception as e:
-        frappe.error_log(e, "Hiring Company Rating")
+        frappe.log_error(e, "Hiring Company Rating")
         frappe.throw(e)
 
 @frappe.whitelist()
@@ -239,7 +255,7 @@ def approval_notification(job_order=None,staffing_company=None,date=None,hiring_
             frappe.db.commit()
             sendmail(hiring_user, msg, subject, 'Timesheet', timesheet_name)
     except Exception as e:
-        frappe.error_log(e, "Timesheet Approved")
+        frappe.log_error(e, "Timesheet Approved")
         frappe.throw(e)
 def unsatisfied_organization(emp_doc,company,job_order):
     emp_doc.append('unsatisfied_from', {
@@ -343,7 +359,7 @@ def assigned_job_order(doctype,txt,searchfield,page_len,start,filters):
         sql = ''' select name from `tabJob Order` where company = '{0}' and from_date<'{1}' and name in (select job_order from `tabAssign Employee` where hiring_organization = '{0}')'''.format(company,today)
         return frappe.db.sql(sql)
     except Exception as e:
-        frappe.error_log(e, "Job Order For Timesheet")
+        frappe.log_error(e, "Job Order For Timesheet")
         frappe.throw(e)
 
 @frappe.whitelist()
@@ -362,7 +378,7 @@ def jb_ord_dispute_comment_box(comment,job_order):
 
             return True
     except Exception as e:
-        frappe.error_log(e, "Dispute Message")
+        frappe.log_error(e, "Dispute Message")
         frappe.throw(e)
 
 
@@ -398,7 +414,7 @@ def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None
                 doc.save()
         return "success"
     except Exception as e:
-        frappe.error_log(e, "Hiring Company Rating")
+        frappe.log_error(e, "Hiring Company Rating")
         frappe.throw(e)
 
 
@@ -423,7 +439,7 @@ def staffing_emp_rating(employee,id,up,down,job_order,comment,timesheet_name):
         timesheet.save(ignore_permissions=True)
         return True
     except Exception as e:
-        frappe.error_log(e, "Staffing Employee Rating")
+        frappe.log_error(e, "Staffing Employee Rating")
         frappe.throw(e)
 
 
@@ -465,7 +481,7 @@ def denied_notification(job_order,hiring_company,staffing_company,timesheet_name
         make_system_notification(hiring_user,msg,'Timesheet',timesheet_name,subject)
         sendmail(hiring_user, msg, subject, 'Timesheet', timesheet_name)
     except Exception as e:
-        frappe.error_log(e, "Timesheet Denied")
+        frappe.log_error(e, "Timesheet Denied")
         frappe.throw(e)
 
 @frappe.whitelist()
@@ -482,7 +498,7 @@ def timesheet_dispute_comment_box(comment,timesheet):
             timesheet_doc.save(ignore_permissions=True)
             return True
     except Exception as e:
-        frappe.error_log(e, "Dispute Message")
+        frappe.log_error(e, "Dispute Message")
         frappe.throw(e)
 
 @frappe.whitelist()
@@ -492,7 +508,7 @@ def job_name(doctype,txt,searchfield,page_len,start,filters):
         sql = ''' select select_job from `tabJob Order` where name="{0}" '''.format(job)
         return frappe.db.sql(sql)
     except Exception as e:
-        frappe.error_log(e, "Job Order For Timesheet")
+        frappe.log_error(e, "Job Order For Timesheet")
         frappe.throw(e)
 def no_show(job_order,value,subject,company,employee):
     if(subject=='No Show' and int(value)==1):

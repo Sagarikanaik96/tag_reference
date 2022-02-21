@@ -74,7 +74,19 @@ frappe.ui.form.on("Lead", {
   before_save: function(frm){
    if (frappe.boot.tag.tag_user_info.company_type=='Staffing') {
     frm.set_value("organization_type", "Exclusive Hiring");} 
-    if(frm.doc.notes)
+    if(frm.doc.notes && frm.doc.user_notes){
+      if(frm.doc.user_notes!=frm.doc.notes){
+        cur_frm.set_value('user_notes',frm.doc.notes)
+        cur_frm.set_value('notes','')
+      }
+    }
+    else{
+      cur_frm.set_value('user_notes',frm.doc.notes)  
+      cur_frm.set_value('notes','')
+    }
+  },
+  after_save:function(frm){
+    if(frm.doc.user_notes && frm.doc.user_notes!=frm.doc.notes)
     {
       frappe.call({
         "method": "frappe.desk.form.utils.add_comment",
@@ -82,15 +94,15 @@ frappe.ui.form.on("Lead", {
         "args": {
           reference_doctype: frm.doctype,
           reference_name: frm.docname,
-          content: frm.doc.notes,
+          content: frm.doc.user_notes,
           comment_email: frappe.session.user,
           comment_by: frappe.session.user_fullname,
           comment_type:'Comment'
             }
           });
-      frm.set_value('notes','')
+          frm.reload_doc()
     }
-  },
+  }
 });
 
 /*-------reqd------*/

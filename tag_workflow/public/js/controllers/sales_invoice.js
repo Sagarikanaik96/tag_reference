@@ -1,8 +1,8 @@
 frappe.ui.form.on("Sales Invoice", {
 	onload: function(frm){
 		if(frappe.session.user != 'Administrator'){
-            $('[data-label="Get%20Items%20From"]').hide()
-        }
+			$('[data-label="Get%20Items%20From"]').hide();
+		}
 	},
 	refresh: function(frm){
 		$('.form-footer').hide()
@@ -24,18 +24,24 @@ frappe.ui.form.on("Sales Invoice", {
 				"freeze": true,
 				"freeze_message": "<p><b>preparing notification for hiring orgs...</b></p>",
 				"args":{
+					"user": frappe.session.user,
+					"sid": frappe.boot.tag.tag_user_info.sid,
 					"job_order":frm.doc.job_order,
 					"company":frm.doc.company,
 					"invoice_name":frm.doc.name
 				}
-			})
-		let table = frm.doc.timesheets
-		frappe.call({
-			"method":"tag_workflow.tag_data.update_timesheet_is_check_in_sales_invoice",
-			"args":{
-				"time_list":table
-				}
 			});
+
+			let table = frm.doc.timesheets || [];
+
+			if(table){
+				frappe.call({
+					"method":"tag_workflow.tag_data.update_timesheet_is_check_in_sales_invoice",
+					"args":{
+						"time_list":table
+					}
+				});
+			}
 		}
 	},
 	before_save: function(frm){

@@ -125,7 +125,7 @@ def make_jazzhr_request(api_key, company):
             error = json.loads(response.text)['error']
             frappe.throw(_("{0}").format(error))
     except Exception as e:
-        frappe.error_log(e, "JazzHR")
+        frappe.log_error(e, "JazzHR")
         frappe.throw(e)
 
 
@@ -205,7 +205,7 @@ def update_lead(lead, staff_company, date, staff_user, name):
         make_system_notification([staff_user], message, 'Contract', name, "Hiring Prospect signs a contract")
         frappe.sendmail([staff_user], subject="Hiring Prospect signs a contract", delayed=False, reference_doctype='Contract', reference_name=name, template="digital_signature", args = dict(subject="Signature Request", staff_user=staff_user, staff_company=staff_company, date=date))
     except Exception as e:
-        frappe.error_log(frappe.get_traceback(), "update_lead")
+        frappe.log_error(frappe.get_traceback(), "update_lead")
         print(e)
 
 #-------company list-------#
@@ -342,3 +342,14 @@ def search_staffing_by_hiring(data=None):
     except Exception as e:
         print(e)
         return []
+
+
+
+@frappe.whitelist()
+def validated_primarykey(company):
+    try:
+        sql = """  select * from  `tabContact` where company = "{0}" AND is_primary=1 """.format(company)
+        return frappe.db.sql(sql)
+    except Exception as e:
+        print(e)
+        
