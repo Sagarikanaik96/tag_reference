@@ -68,8 +68,8 @@ def check_distance(emp, distance, location):
                 continue
         return tuple(result)
     except Exception as e:
-        frappe.msgprint(e)
         print(e, "google")
+        frappe.msgprint(e)
         return ()
 
 
