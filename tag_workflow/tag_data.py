@@ -746,7 +746,7 @@ def claim_order_company(user_name,claimed):
     sq=frappe.db.sql(data,as_list=True)
     for i in sq:
         if i[0] in claimed:
-            break
+            return "success"
     else:
         return 'unsuccess'
 

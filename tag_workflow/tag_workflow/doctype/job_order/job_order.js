@@ -105,14 +105,7 @@ frappe.ui.form.on("Job Order", {
 
 	},
 	refresh: function(frm) {
-		if(frappe.route_history.length > 1){
-			for(let i in frappe.route_history){
-				if(frappe.route_history[i][1] != "Job Order" && frm.doc.__islocal!=1){
-					window.location.reload();
-				}
-			}
-		}
-		
+		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
 		setTimeout(function() {
 			view_button(frm);
 			make_invoice(frm);
