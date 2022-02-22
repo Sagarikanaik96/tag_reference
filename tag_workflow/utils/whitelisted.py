@@ -300,14 +300,14 @@ def get_order_data():
             orders = [o['name'] for o in orders]
             for j in job_order:
                 if((j in orders) and len(result) <= 5):
-                    date, job_site, company, per_hour, select_job = frappe.db.get_value(JO, {"name": j}, ["from_date", "job_site", "company", "per_hour", "select_job"])
-                    result.append({"name": j, "date": date.strftime("%d %b, %Y %H:%M %p"), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
+                    date,time, job_site, company, per_hour, select_job = frappe.db.get_value(JO, {"name": j}, ["from_date","job_start_time","job_site", "company", "per_hour", "select_job"])
+                    result.append({"name": j, "date": date.strftime("%d %b, %Y "),"time":convertTime(time), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
             return result
 
         elif(company_type in ["Hiring", "Exclusive Hiring"]):
-            order = frappe.db.get_list(JO, {"company": company, "order_status": "Ongoing"}, ["name", "from_date", "job_site", "company", "per_hour", "order_status", "select_job"], order_by="creation desc", limit=5)
+            order = frappe.db.get_list(JO, {"company": company, "order_status": "Ongoing"}, ["name", "from_date","job_start_time","job_site", "company", "per_hour", "order_status", "select_job"], order_by="creation desc", limit=5)
             for o in order:
-                result.append({"name":o['name'], "date":o['from_date'].strftime("%d %b, %Y %H:%M %p"), "job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour'], "select_job": o['select_job']})
+                result.append({"name":o['name'], "date":o['from_date'].strftime("%d %b, %Y "),"time":convertTime(o['job_start_time']),"job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour'], "select_job": o['select_job']})
             return result
     except Exception as e:
         frappe.msgprint(e)
@@ -357,3 +357,6 @@ def validated_primarykey(company):
     except Exception as e:
         print(e)
         
+from datetime import datetime
+def convertTime(s):
+    return  datetime.strptime(str(s), '%H:%M:%S').strftime('%I:%M %p')
