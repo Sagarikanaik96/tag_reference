@@ -297,6 +297,12 @@ login.login_handlers = (function () {
 frappe.ready(function () {
 
 	login.bind_events();
+	setTimeout(()=>{
+		if(frappe.is_user_logged_in()){
+			window.location="/app/home"
+		}
+	},2000)
+	
 
 	if (!window.location.hash) {
 		window.location.hash = "#login";
