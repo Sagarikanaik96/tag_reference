@@ -742,13 +742,12 @@ def jobcategory_data(job_order):
 
 @frappe.whitelist()
 def claim_order_company(user_name,claimed):
-    data=f'select company from `tabEmployee` where email="{user_name}"'
-    sq=frappe.db.sql(data,as_list=True)
+    data = f'select company from `tabEmployee` where email="{user_name}"'
+    sq = frappe.db.sql(data,as_list=True)
     for i in sq:
         if i[0] in claimed:
             return "success"
-    else:
-        return 'unsuccess'
+    return 'unsuccess'
 
 
 @frappe.whitelist(allow_guest=False)
