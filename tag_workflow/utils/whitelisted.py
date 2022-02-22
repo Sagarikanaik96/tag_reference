@@ -190,7 +190,9 @@ def request_signature(staff_user, staff_company, hiring_user, name):
         msg=f"{staff_user} from {staff_company} is requesting an electronic signature for your contract agreement."
         subject = "Signature Request"
         make_system_notification([hiring_user], msg, 'Contract', name, subject)
-        frappe.sendmail([hiring_user], subject=subject, delayed=False, reference_doctype='Contract', reference_name=name, template="digital_signature", args = dict(subject=subject, staff_user=staff_user, staff_company=staff_company, link = link))
+        site= frappe.utils.get_url().split('/')
+        sitename=site[0]+'//'+site[2]
+        frappe.sendmail([hiring_user], subject=subject, delayed=False, reference_doctype='Contract', reference_name=name, template="digital_signature", args = dict(sitename=sitename, subject=subject, staff_user=staff_user, staff_company=staff_company, link = link))
         share_doc("Contract", name, hiring_user)
     except Exception as e:
         print(e)
@@ -203,7 +205,9 @@ def update_lead(lead, staff_company, date, staff_user, name):
         frappe.db.set_value("Lead", lead, "status", 'Close')
         message = f"Congratulations! A Hiring contract has been signed on \033[1m{date}\033[0m for \033[1m{staff_company}\033[0m"
         make_system_notification([staff_user], message, 'Contract', name, "Hiring Prospect signs a contract")
-        frappe.sendmail([staff_user], subject="Hiring Prospect signs a contract", delayed=False, reference_doctype='Contract', reference_name=name, template="digital_signature", args = dict(subject="Signature Request", staff_user=staff_user, staff_company=staff_company, date=date))
+        site= frappe.utils.get_url().split('/')
+        sitename=site[0]+'//'+site[2]
+        frappe.sendmail([staff_user], subject="Hiring Prospect signs a contract", delayed=False, reference_doctype='Contract', reference_name=name, template="digital_signature", args = dict(sitename=sitename, subject="Signature Request", staff_user=staff_user, staff_company=staff_company, date=date))
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "update_lead")
         print(e)
@@ -296,14 +300,14 @@ def get_order_data():
             orders = [o['name'] for o in orders]
             for j in job_order:
                 if((j in orders) and len(result) <= 5):
-                    date, job_site, company, per_hour, select_job = frappe.db.get_value(JO, {"name": j}, ["from_date", "job_site", "company", "per_hour", "select_job"])
-                    result.append({"name": j, "date": date.strftime("%d %b, %Y %H:%M %p"), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
+                    date,time, job_site, company, per_hour, select_job = frappe.db.get_value(JO, {"name": j}, ["from_date","job_start_time","job_site", "company", "per_hour", "select_job"])
+                    result.append({"name": j, "date": date.strftime("%d %b, %Y "),"time":converttime(time), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
             return result
 
         elif(company_type in ["Hiring", "Exclusive Hiring"]):
-            order = frappe.db.get_list(JO, {"company": company, "order_status": "Ongoing"}, ["name", "from_date", "job_site", "company", "per_hour", "order_status", "select_job"], order_by="creation desc", limit=5)
+            order = frappe.db.get_list(JO, {"company": company, "order_status": "Ongoing"}, ["name", "from_date","job_start_time","job_site", "company", "per_hour", "order_status", "select_job"], order_by="creation desc", limit=5)
             for o in order:
-                result.append({"name":o['name'], "date":o['from_date'].strftime("%d %b, %Y %H:%M %p"), "job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour'], "select_job": o['select_job']})
+                result.append({"name":o['name'], "date":o['from_date'].strftime("%d %b, %Y "),"time":converttime(o['job_start_time']),"job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour'], "select_job": o['select_job']})
             return result
     except Exception as e:
         frappe.msgprint(e)
@@ -353,3 +357,6 @@ def validated_primarykey(company):
     except Exception as e:
         print(e)
         
+from datetime import datetime
+def converttime(s):
+    return  datetime.strptime(str(s), '%H:%M:%S').strftime('%I:%M %p')

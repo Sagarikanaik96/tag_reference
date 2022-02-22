@@ -212,3 +212,28 @@ def multi_company_setup(user, company):
     company = company.split(",")
     for com in company:
         check_employee(user.name, user.first_name, com, user.last_name, user.gender, user.birth_date, user.date_of_joining, user.organization_type)
+
+
+@frappe.whitelist()
+def addjob_order(current_user,company):
+    try:
+        sql = """ select * from `tabUser` where company = '{0}' ORDER BY creation """.format(company)
+        user_list = frappe.db.sql(sql,as_dict=1)
+        if user_list:
+            sql1 = """ select share_name from `tabDocShare` where user = '{0}' and share_doctype ='Job Order' """.format(user_list[0]['name'])
+            job_list = frappe.db.sql(sql1,  as_dict=1)
+
+            sql1 = """ select share_name from `tabDocShare` where user = '{0}' and share_doctype ='Timesheet' """.format(user_list[0]['name'])
+            timesheet_list = frappe.db.sql(sql1,  as_dict=1)
+
+            sql = """ select name from `tabSales Invoice` where company = '{0}' """.format(company)
+            invoice_list = frappe.db.sql(sql, as_dict=1)
+            for job in job_list:
+                add(JOB, job.share_name, user=current_user, share= 1,read=1,write=1,flags={"ignore_share_permission": 1})
+            for time in timesheet_list:
+                add("Timesheet", time.share_name, user=current_user, share= 1,read=1,write=1,submit=1,flags={"ignore_share_permission": 1})
+            for invoice in invoice_list:
+                add("Sales Invoice", invoice.name, user=current_user, share= 1,read=1,write=1,flags={"ignore_share_permission": 1})
+    except Exception as e:
+        frappe.error_log(e, "old Job Order ")
+        frappe.throw(e) 

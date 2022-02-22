@@ -93,11 +93,21 @@ frappe.ui.form.on("Job Order", {
 			}
 		});
 	},
+	e_signature_full_name:function(frm){
+		if(frm.doc.e_signature_full_name){
+			var regex = /[^0-9A-Za-z ]/g;
+			if (regex.test(frm.doc.e_signature_full_name) === true){
+				frappe.msgprint(__("E-Signature Full Name: Only alphabets and numbers are allowed."));
+				frm.set_value('e_signature_full_name','')
+				frappe.validated = false;
+			}
+		}
 
+	},
 	refresh: function(frm) {
 		if(frappe.route_history.length > 1){
 			for(let i in frappe.route_history){
-				if(frappe.route_history[i][1] != "Job Order"){
+				if(frappe.route_history[i][1] != "Job Order" && frm.doc.__islocal!=1){
 					window.location.reload();
 				}
 			}
@@ -157,6 +167,8 @@ frappe.ui.form.on("Job Order", {
 						job_title: frm.doc.select_job,
 						hiring_name: frm.doc.company,
 					},
+					freeze: true,
+					freeze_message: "<p><b>preparing notification for hiring orgs...</b></p>",
 					callback: function(r) {
 						cur_frm.refresh();
 						cur_frm.reload_doc();

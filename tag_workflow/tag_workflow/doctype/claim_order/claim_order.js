@@ -31,6 +31,17 @@ frappe.ui.form.on('Claim Order', {
 		}
 
 	},
+	e_signature:function(frm){
+		if(frm.doc.e_signature){
+			var regex = /[^0-9A-Za-z ]/g;
+			if (regex.test(frm.doc.e_signature) === true){
+				frappe.msgprint(__("E signature: Only alphabets and numbers are allowed."));
+				frm.set_value('e_signature','')
+				frappe.validated = false;
+			}
+		}
+
+	},
 	refresh:function(frm){
 		$('.form-footer').hide()
 		if(frm.doc.__islocal==1){
