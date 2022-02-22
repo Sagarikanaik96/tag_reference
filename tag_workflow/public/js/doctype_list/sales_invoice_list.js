@@ -37,26 +37,29 @@ frappe.listview_settings['Sales Invoice'] = {
 
 function create_monthly_invoice(listview){
 		var pop_up = new frappe.ui.Dialog({
-			title: __('Monthly Staffing Report'),
+			title: __('Monthly Staffing Sales Invoice'),
 			'fields': [
-				{
-					"fieldname":"month",
-					"label":"Month",
-					"fieldtype": "Select",
-					"options":'January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember',
-					"width":"80",
-					"default": "January",
-					"reqd": 1,
-					
-				},
 				{
 					"fieldname":"year",
 					"label": __("Start Year"),
 					"fieldtype": "Select",
-					"options": "2021\n2022\n2023\n2024",
+					"options": year_list(cur_dialog),
 					"reqd": 1,
-					"default": '2022'
+					"default": new Date().getUTCFullYear(),
+					onchange:function(){
+						month_list(cur_dialog)
+					}
 		
+				},
+				{
+					"fieldname":"month",
+					"label":"Month",
+					"fieldtype": "Select",
+					"options":current_month_year(cur_dialog),
+					"width":"80",
+					"default": "January",
+					"reqd": 1,
+					
 				},
 				{
 					'fieldname': 'company',
@@ -64,6 +67,16 @@ function create_monthly_invoice(listview){
 					'options':get_staffing_company_list(),
 					'label':'staffing company',
 					"reqd": 1,
+					onchange:function(){
+						tag_staffing_charges(cur_dialog)
+					}
+				},
+				{
+					'fieldname': 'tag_charges',
+					'fieldtype': 'Data',
+					'label':'Tag Charges',
+					'read_only':1,
+					"depends_on": "eval: doc.company",
 				}
 
 			],
@@ -72,6 +85,8 @@ function create_monthly_invoice(listview){
 				var staff_detail=pop_up.get_values()
 				frappe.call({
 					method: "tag_workflow.utils.invoice.make_month_invoice",
+					freeze: true,
+					freeze_message: "<p><b>Creating Monthly invoice ....</b></p>",
 					args:{
 						frm: staff_detail
 					},
@@ -79,9 +94,7 @@ function create_monthly_invoice(listview){
 						if (rm.message){
 							frappe.show_alert({message:__('Monthly Invoive created Succesfully'),indicator:'green'}, 5);
 
-						}
-						
-						
+						}	
 					}
 				})
 			}
@@ -91,9 +104,67 @@ function create_monthly_invoice(listview){
 }
 
 
+function month_list(dialog){
+	let year = parseInt(dialog.get_value("year"));
+	let current_year = new Date().getUTCFullYear()
+
+	if (year > current_year){
+		frappe.msgprint('future year is not accepted')
+		cur_dialog.set_value("year",current_year)
+		var op = current_month_year(dialog)
+		dialog.set_df_property("month", "options", op);
+
+	}
+	else if(year < current_year){
+		var options1 = 'January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember'
+		dialog.set_df_property("month", "options", options1);
+	}
+	else{
+		var month = current_month_year(dialog)
+		dialog.set_df_property("month", "options", month);
+	}
+	
+}
+
+function tag_staffing_charges(dialog){
+	let company = dialog.get_value("company");
+	if (company){
+	frappe.db.get_value("Company", {"name": company }, ["tag_charges"], function(r){
+		if (r.tag_charges){
+			cur_dialog.set_value("tag_charges",r.tag_charges)
+		}
+
+	});
+}
+}
+
+function current_month_year(dialog){
+	let months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+	let options='January';
+
+	let cur_month = new Date().getMonth()
+
+	for (let i = 1;i <= cur_month;i++){
+		options += '\n'+ months[i]
+
+	}
+	return options
+}
+
+function  year_list(cur_dialog){
+		let year_opt = '2021'
+		let start_year = 2021
+		let current_year = new Date().getUTCFullYear()
+
+		for (let i = start_year +1;i <=current_year;i++){
+			year_opt += '\n' + i
+		}
+	return year_opt
+}
+
 
 function get_staffing_company_list(){
-	let company = '\n';
+	let company = '';
 	frappe.call({
 		"method": "tag_workflow.utils.whitelisted.get_staffing_company_list",
 		"args": {"company_type": "Hiring"},

@@ -1,9 +1,13 @@
 from calendar import month
+from socket import SO_BINDTODEVICE, SO_DONTROUTE
 import frappe
 from frappe import _
 import datetime
 from dateutil.relativedelta import relativedelta
 from frappe.model.mapper import get_mapped_doc
+from frappe.share import add
+from tag_workflow.tag_data import joborder_email_template
+from tag_workflow.utils.notification import make_system_notification
 
 start = datetime.datetime.now().date() + relativedelta(day=1)
 end = datetime.datetime.now().date() + relativedelta(day=31)
@@ -14,6 +18,7 @@ COM = "Company"
 payment = "Payment Schedule"
 taxes= "Sales Taxes and Charges"
 team = "Sales Team"
+SO = "Sales Invoice"
 
 #-----------------------------------#
 def set_missing_values(source, target, customer=None, ignore_permissions=True):
@@ -45,7 +50,7 @@ def make_sales_invoice(source_name, company, target_doc=None, ignore_permissions
 
     def make_invoice(source_name, target_doc):
         return get_mapped_doc(COM, source_name, {
-            COM: {"doctype": "Sales Invoice", "validation": {"docstatus": ["=", 0]}},
+            COM: {"doctype": SO, "validation": {"docstatus": ["=", 0]}},
             taxes: {"doctype": taxes, "add_if_empty": True},
             team: {"doctype": team, "add_if_empty": True},
             payment: {"doctype": payment,"add_if_empty": True}
@@ -75,7 +80,7 @@ def make_invoice(source_name, target_doc=None):
 
 
 #--------------
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def make_month_invoice(frm):
     import json
     frm_value = json.loads(frm)
@@ -85,11 +90,11 @@ def make_month_invoice(frm):
     year = frm_value['year']
     company = frm_value['company']
     get_month_digit = months[date]
-# get previous month start date and end date
+    # get current month start date and end date
     current_month_str = str(year)+'-'+str(get_month_digit)+'-'+'01' 
     current_date = frappe.utils.getdate(current_month_str)
-    previous_month = frappe.utils.add_months(current_date, months=-1)
-    first_day = frappe.utils.get_first_day(previous_month)
+
+    first_day = frappe.utils.get_first_day(current_date)
     last_day = frappe.utils.get_last_day(first_day)
     
     tag_company = frappe.db.get_value("User", frappe.session.user, "company") or "TAG"
@@ -160,7 +165,7 @@ def create_month_sales_invoice(source_name, company,month,year,first_day,last_da
 
     def make_invoice(source_name, target_doc):
         return get_mapped_doc(COM, source_name, {
-            COM: {"doctype": "Sales Invoice", "validation": {"docstatus": ["=", 0]}},
+            COM: {"doctype": SO, "validation": {"docstatus": ["=", 0]}},
             taxes: {"doctype": taxes, "add_if_empty": True},
             team: {"doctype": team, "add_if_empty": True},
             payment: {"doctype": payment,"add_if_empty": True}
@@ -178,4 +183,17 @@ def create_month_sales_invoice(source_name, company,month,year,first_day,last_da
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
     doclist.save()
     doclist.submit()
+    # sharing  list of staffing user
+    sql = ''' select name from `tabUser` where company='{}' and tag_user_type = "Staffing Admin" '''.format(source_name)
+    user_list = frappe.db.sql(sql, as_dict=1)
+
+    users = [l.name for l in user_list]
+    for usr in users:
+        add("Sales Invoice", doclist.name, usr, read=1, write = 0, share = 0, everyone = 0, flags={"ignore_share_permission": 1})
+    if(users):
+        msg = f'{company} has submitted a Monthly invoice for {month}-{year}'
+        subject = " Monthly Invoice Submitted"
+        make_system_notification(users, msg, SO, doclist.name, subject)
+        link = frappe.utils.get_url_to_form(SO, doclist.name)
+        joborder_email_template(subject = subject,content = msg,recipients = users,link=link)
     return doclist.name
