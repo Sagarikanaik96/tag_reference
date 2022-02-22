@@ -29,6 +29,26 @@ frappe.ui.form.on("Contract", {
 
 	before_save: function(frm){
 		update_lead(frm);
+	},
+	signe_company:function(frm){
+		if(frm.doc.signe_company){
+			var regex = /[^0-9A-Za-z ]/g;
+			if (regex.test(frm.doc.signe_company) === true){
+				frappe.msgprint(__("Signature: Only alphabets and numbers are allowed."));
+				frm.set_value('signe_company','')
+				frappe.validated = false;
+			}
+		}
+	},
+	signe_hiring:function(frm){
+		if(frm.doc.signe_hiring){
+			var regex = /[^0-9A-Za-z ]/g;
+			if (regex.test(frm.doc.signe_hiring) === true){
+				frappe.msgprint(__("Signature: Only alphabets and numbers are allowed."));
+				frm.set_value('signe_hiring','')
+				frappe.validated = false;
+			}
+		}
 	}
 });
 

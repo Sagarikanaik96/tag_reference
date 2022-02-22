@@ -21,6 +21,17 @@ frappe.ui.form.on("Lead", {
 			cancel_lead(frm);
 		}
   },
+  sign:function(frm){
+    if(frm.doc.sign){
+			var regex = /[^0-9A-Za-z ]/g;
+			if (regex.test(frm.doc.sign) === true){
+				frappe.msgprint(__("Signature: Only alphabets and numbers are allowed."));
+				frm.set_value('sign','')
+				frappe.validated = false;
+			}
+		}
+
+  },
   validate: function (frm) {
     let phone = frm.doc.phone_no;
     let email = frm.doc.email_id;

@@ -43,6 +43,17 @@ frappe.ui.form.on('Assign Employee', {
 
 		$('[data-fieldname="company"]').css('display','block');
 	},
+	e_signature_full_name:function(frm){
+		if(frm.doc.e_signature_full_name){
+			var regex = /[^0-9A-Za-z ]/g;
+			if (regex.test(frm.doc.e_signature_full_name) === true){
+				frappe.msgprint(__("E-Signature Full Name: Only alphabets and numbers are allowed."));
+				frm.set_value('e_signature_full_name','')
+				frappe.validated = false;
+			}
+		}
+
+	},
 
 	onload:function(frm){
 		hide_resume(frm);

@@ -93,7 +93,17 @@ frappe.ui.form.on("Job Order", {
 			}
 		});
 	},
+	e_signature_full_name:function(frm){
+		if(frm.doc.e_signature_full_name){
+			var regex = /[^0-9A-Za-z ]/g;
+			if (regex.test(frm.doc.e_signature_full_name) === true){
+				frappe.msgprint(__("E-Signature Full Name: Only alphabets and numbers are allowed."));
+				frm.set_value('e_signature_full_name','')
+				frappe.validated = false;
+			}
+		}
 
+	},
 	refresh: function(frm) {
 		if(frappe.route_history.length > 1){
 			for(let i in frappe.route_history){
