@@ -97,7 +97,7 @@ frappe.ui.form.on("Job Order", {
 	refresh: function(frm) {
 		if(frappe.route_history.length > 1){
 			for(let i in frappe.route_history){
-				if(frappe.route_history[i][1] != "Job Order"){
+				if(frappe.route_history[i][1] != "Job Order" && frm.doc.__islocal!=1){
 					window.location.reload();
 				}
 			}
@@ -157,6 +157,8 @@ frappe.ui.form.on("Job Order", {
 						job_title: frm.doc.select_job,
 						hiring_name: frm.doc.company,
 					},
+					freeze: true,
+					freeze_message: "<p><b>preparing notification for hiring orgs...</b></p>",
 					callback: function(r) {
 						cur_frm.refresh();
 						cur_frm.reload_doc();
