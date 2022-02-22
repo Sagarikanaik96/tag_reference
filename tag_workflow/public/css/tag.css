@@ -640,12 +640,6 @@ input::-webkit-credentials-auto-fill-button {
 .new-timeline .activity-toggle h4 {
   font-weight: 600;
 }
-[data-fieldname="related_details"] p {
-  margin: 0 !important;
-}
-[data-fieldname="related_details"] {
-  margin-bottom: 10px;
-}
 
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,

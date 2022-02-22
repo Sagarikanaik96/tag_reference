@@ -47,8 +47,10 @@ def update_timesheet(job_order_detail):
 def send_email(subject = None,content = None,recipients = None):
     from frappe.core.doctype.communication.email import make
     try:
-        make(subject = subject, content=frappe.render_template("templates/emails/email_template_custom.html",{"content":content,"subject":subject}), recipients= recipients,send_email=True)
-        frappe.msgprint("Email Sent Succesfully")
+        site= frappe.utils.get_url().split('/')
+        sitename=site[0]+'//'+site[2]
+        make(subject = subject, content=frappe.render_template("templates/emails/email_template_custom.html",{"sitename": sitename,"content":content,"subject":subject}), recipients= recipients,send_email=True)
+        frappe.msgprint("Email Sent Successfully")
         return True
     except Exception as e:
         frappe.log_error(e, "Doc Share Error")
@@ -58,10 +60,12 @@ def send_email(subject = None,content = None,recipients = None):
 def joborder_email_template(subject = None,content = None,recipients = None,link=None):
     try:
         from frappe.core.doctype.communication.email import make
+        site= frappe.utils.get_url().split('/')
+        sitename=site[0]+'//'+site[2]
         make(subject = subject, content=frappe.render_template("templates/emails/email_template_custom.html",
-            {"content":content,"subject":subject,"link":link}),
+            {"sitename": sitename, "content":content,"subject":subject,"link":link}),
             recipients= recipients,send_email=True)
-        frappe.msgprint("Email Sent Succesfully")
+        frappe.msgprint("Email Sent Successfully")
         return True
     except Exception as e:
         frappe.log_error(e, "Doc Share Error")
@@ -505,9 +509,9 @@ def email_recipient(doctype, txt, searchfield, page_len, start, filters):
  
 def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l):
     try:
-        msg=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with your Company.  Please respond.'
+        msg=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with your Company. Please respond.'
         make_system_notification(l,msg,jobOrder,job_order,subject)   
-        message=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with your Company . Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
+        message=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with your Company. Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
         return send_email(subject,message,l)
     except Exception as e:
         frappe.log_error(e, "Single Job Order Notification Error")
