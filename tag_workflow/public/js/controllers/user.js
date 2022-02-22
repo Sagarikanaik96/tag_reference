@@ -104,6 +104,7 @@ frappe.ui.form.on("User", {
 
 	after_save: function(frm){
 		update_employee(frm);
+		add_old_joborder(frm);
 	},
 	birth_date: function(frm){
 		check_bd(frm);
@@ -349,4 +350,12 @@ function cancel_user(frm){
 	frm.add_custom_button(__('Cancel'), function(){
 		frappe.set_route("Form", "User");
 	});
+}
+
+function add_old_joborder(frm){
+	if (frm.doc.organization_type == "Staffing"){
+		frappe.call({method: "tag_workflow.controllers.master_controller.addjob_order",
+			args: {'current_user':frm.doc.name,"company":frm.doc.company}
+		});
+	}
 }
