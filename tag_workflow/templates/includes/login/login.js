@@ -199,7 +199,9 @@ login.login_handlers = (function () {
 		return function (xhr, data) {
 			if (xhr.responseJSON) {
 				data = xhr.responseJSON;
-				frappe.msgprint("Invalid login credentials");
+				if (data.exc_type != "ValidationError"){
+					frappe.msgprint("Invalid login credentials");
+				}
 			}
 
 			var message = default_message;
