@@ -759,7 +759,7 @@ function view_button(frm){
 function view_buttons_hiring(frm){
 	hiring_buttons(frm);
 	if (cur_frm.doc.__islocal != 1){
-		let datad1 = `<div class="my-3" id="data" style="display: flex;justify-content: space-between;"><p> Claims  </p><label class="badge bg-danger rounded-circle text-white"> ${frm.doc.bid} </label></div>`;
+		let datad1 = `<div class="my-2 p-3 border rounded" id="data" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Claims  </p><label class="badge m-0 bg-danger rounded-circle font-weight-normal mr-4 text-white"> ${frm.doc.bid} </label></div>`;
 
 		$('[data-fieldname = related_details]').click(function() {
 			claim_orders(frm);
@@ -767,7 +767,7 @@ function view_buttons_hiring(frm){
 		frm.set_df_property("related_details", "options", datad1);
 		frm.toggle_display('related_actions_section', 1);
 		if (frm.doc.claim) {
-			let datad2 = `<div class="my-3" style="display: flex;justify-content: space-between;"><p>Messages </p></div>`;
+			let datad2 = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg">Messages </p></div>`;
 			$('[data-fieldname = messages]').click(function() {
 				messages(frm);
 			});
@@ -777,7 +777,7 @@ function view_buttons_hiring(frm){
 		}
 
 		if (frm.doc.from_date <= frappe.datetime.nowdate()) {
-			let datad3 = `<div class="my-3" style="display: flex;justify-content: space-between;"><p>Timesheets  </p><button class="btn-light rounded border">View</button></div>`;
+			let datad3 = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Timesheets  </p> </div>`;
 			$('[data-fieldname = timesheets]').click(function() {
 				timesheets_view(frm);
 			});
@@ -796,7 +796,7 @@ function view_buttons_hiring(frm){
 				},
 				callback: function(r) {
 					if (r.message == 'success') {
-					let datad4 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Invoices </p><button class="btn-light rounded border">View</button></div>`;
+					let datad4 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg"> Invoices </p> </div>`;
 						$('[data-fieldname = invoices]').click(function() {
 							sales_invoice_data(frm);
 						});
@@ -816,7 +816,7 @@ function view_buttons_hiring(frm){
 function view_buttons_staffing(frm) {
 	claim_assign_button(frm);
 	if ((frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)) {
-		let data3 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Messages </p></div>`;
+		let data3 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Messages </p></div>`;
 		$('[data-fieldname = messages]').click(function() {
 			messages(frm);
 		});
@@ -837,7 +837,7 @@ function view_buttons_staffing(frm) {
 			},
 			callback: function(r) {
 				if (r.message != 'unsuccess') {
-					let data4 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Timesheets </p>  <button class="btn-light rounded border">View</button></div>`;
+					let data4 = `<div class=" p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Timesheets </p>  </div>`;
 					$('[data-fieldname = timesheets]').click(function() {
 						timesheets_view(frm);
 					});
@@ -859,7 +859,7 @@ function view_buttons_staffing(frm) {
 			},
 			callback: function(r) {
 				if (r.message == 'success1') {
-					let data5 = `<div class="my-3" style="display:flex;justify-content: space-between;"> <p> Invoices  </p> <button class="btn-light rounded border">View</button></div>`;
+					let data5 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"> <p class="m-0 msg"> Invoices  </p> </div>`;
 					$('[data-fieldname = invoices]').click(function() {
 						sales_invoice_data(frm);
 					});
@@ -869,7 +869,7 @@ function view_buttons_staffing(frm) {
 						sales_invoice_data(frm);
 					}, __("View"));
 				} else if (r.message == 'success') {
-					let data6 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Invoices </p> <button class="btn-light rounded border">View</button> </div>`;
+					let data6 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Invoices </p> </div>`;
 					$('[data-fieldname = invoices]').click(function() {
 						sales_invoice_data(frm);
 					});
@@ -1084,7 +1084,7 @@ function claim_assign_button(frm) {
 }
 
 function assign_button(frm) {
-	let data2 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Claims </p></div>`;
+	let data2 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Claims </p></div>`;
 	$('[data-fieldname = related_details]').click(function() {
 		staff_assign_redirect(frm);
 	});
@@ -1120,7 +1120,7 @@ function staff_claim_button(frm) {
 			}
 		});
 
-		let data1 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Claims </p></div>`;
+		let data1 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Claims </p></div>`;
 		$('[data-fieldname = related_details]').click(function() {
 			claim_orders(frm);
 		});
@@ -1128,7 +1128,7 @@ function staff_claim_button(frm) {
 		frm.toggle_display('related_actions_section', 1);
 		staff_assigned_emp(frm);
 	} else {
-		let data2 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Claims </p></div>`;
+		let data2 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Claims </p></div>`;
 		$('[data-fieldname = related_details]').click(function() {
 			claim_orders(frm);
 		});
