@@ -197,7 +197,7 @@ frappe.ui.form.on("Job Order", {
 			rate_hour_contract_change(frm);
 			if (frappe.validated) {
 				return new Promise(function(resolve, reject) {
-					frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>" + frm.doc.rate + "<br><b>Rate Increase: </b>" + (frm.doc.per_hour - frm.doc.rate) + "<br><b>Total Per Hour Rate: </b>" + frm.doc.per_hour + "",
+					frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>" + frm.doc.rate + "<br><b>Rate Increase: </b>" + (frm.doc.per_hour - frm.doc.rate) + "<br><b>Total Per Hour Rate: </b>" + frm.doc.per_hour + "",
 						function() {
 							let resp = "frappe.validated = false";
 							resolve(resp);
@@ -312,7 +312,6 @@ frappe.ui.form.on("Job Order", {
 	},
 
 	validate: function(frm) {
-		job_order_duration(frm);
 		rate_calculation(frm);
 		time_validation(frm)
 		set_custom_base_price(frm)
@@ -498,7 +497,7 @@ function check_from_date(frm) {
 
 	if (from_date && from_date < frappe.datetime.now_date()) {
 		frappe.msgprint({
-			message: __("<b>Start Date</b> Cannot be Today`s date or Past date"),
+			message: __("<b>Start Date</b> Cannot be Past Date"),
 			title: __("Error"),
 			indicator: "orange",
 		});
@@ -512,6 +511,9 @@ function check_from_date(frm) {
 		cur_frm.set_value("from_date", "");
 		cur_frm.set_value("to_date", "");
 	}
+	else{
+		job_order_duration(frm);
+	}
 }
 
 function check_to_date(frm) {
@@ -519,7 +521,7 @@ function check_to_date(frm) {
 	let to_date = frm.doc.to_date || "";
 	if (to_date && frappe.datetime.now_date() > to_date) {
 		frappe.msgprint({
-			message: __("<b>End Date</b> Cannot be Today`s date or Past date"),
+			message: __("<b>End Date</b> Cannot be Past Date"),
 			title: __("Error"),
 			indicator: "orange",
 		});
@@ -531,6 +533,9 @@ function check_to_date(frm) {
 			indicator: "orange",
 		});
 		cur_frm.set_value("to_date", "");
+	}
+	else{
+		job_order_duration(frm);
 	}
 }
 
@@ -636,16 +641,21 @@ function fields_setup(frm) {
 }
 
 function job_order_duration(frm) {
-	const to_date = cur_frm.doc.to_date.split(" ")[0].split("-");
-	const from_date = cur_frm.doc.from_date.split(" ")[0].split("-");
-	let to_date2 = new Date(to_date[1] + '/' + to_date[2] + '/' + to_date[0]);
-	let from_date2 = new Date(from_date[1] + '/' + from_date[2] + '/' + from_date[0]);
-	let diff = Math.abs(to_date2 - from_date2);
-	let days = diff / (1000 * 3600 * 24) + 1;
-	if (days == 1) {
-		cur_frm.set_value('job_order_duration', days + ' Day');
-	} else {
-		cur_frm.set_value('job_order_duration', days + ' Days');
+	if(!frm.doc.from_date || !frm.doc.to_date){
+		frm.set_value('job_order_duration', '')
+	}
+	else{
+		const to_date = cur_frm.doc.to_date.split(" ")[0].split("-");
+		const from_date = cur_frm.doc.from_date.split(" ")[0].split("-");
+		let to_date2 = new Date(to_date[1] + '/' + to_date[2] + '/' + to_date[0]);
+		let from_date2 = new Date(from_date[1] + '/' + from_date[2] + '/' + from_date[0]);
+		let diff = Math.abs(to_date2 - from_date2);
+		let days = diff / (1000 * 3600 * 24) + 1;
+		if (days == 1) {
+			cur_frm.set_value('job_order_duration', days + ' Day');
+		} else {
+			cur_frm.set_value('job_order_duration', days + ' Days');
+		}
 	}
 }
 
