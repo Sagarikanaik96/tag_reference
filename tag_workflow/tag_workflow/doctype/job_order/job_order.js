@@ -315,6 +315,7 @@ frappe.ui.form.on("Job Order", {
 		job_order_duration(frm);
 		rate_calculation(frm);
 		time_validation(frm)
+		set_custom_base_price(frm)
 		var l = {Company: frm.doc.company, "Select Job": frm.doc.select_job, Category: frm.doc.category, "Job Order Start Date": cur_frm.doc.from_date, "Job Site": cur_frm.doc.job_site, "No Of Workers": cur_frm.doc.no_of_workers, Rate: cur_frm.doc.rate, "Job Order End Date": cur_frm.doc.to_date, "Job Duration": cur_frm.doc.job_order_duration, "Estimated Hours Per Day": cur_frm.doc.estimated_hours_per_day, "E-Signature Full Name": cur_frm.doc.e_signature_full_name,};
 
 		var message = "<b>Please Fill Mandatory Fields:</b>";
@@ -428,7 +429,7 @@ function staff_company_direct_or_general(frm) {
 }
 
 function set_read_fields(frm) {
-	var myStringArray = ["phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email", "select_job", "rate", "description",];
+	var myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description"];
 	var arrayLength = myStringArray.length;
 	for (var i = 0; i < arrayLength; i++) {
 		frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -436,12 +437,9 @@ function set_read_fields(frm) {
 }
 
 function timer_value(frm) {
-	var new_date = new Date(String(cur_frm.doc.from_date) + " " + String(cur_frm.doc.job_start_time));
-	var time = frappe.datetime.get_hour_diff(new_date, frappe.datetime.now_datetime());
-
-	if (time < 24) {
+	if (frm.doc.order_status=='Completed') {
 		frm.toggle_display('section_break_8', 0)
-		var myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",];
+		var myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
 		var arrayLength = myStringArray.length;
 		for (var i = 0; i < arrayLength; i++) {
 			frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -466,11 +464,16 @@ function time_value(frm){
 	var entry_date = new Date(frappe.datetime.now_datetime().split(" ")[0]);
 	var exit_date = new Date(cur_frm.doc.from_date.split(" ")[0]);
 	var diffTime = Math.abs(exit_date - entry_date);
-	var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-	var x = parseInt(diffDays * (24 * 60) + totalMinsOfExit - totalMinsOfEntry);
-	let data1 = Math.floor(x / 24 / 60) - 1 + " Days:" + Math.floor((x / 60) % 24) + " Hours:" + (x % 60) + " Minutes";
-	let data = `<p><b>Time Remaining for Make Edits: </b> ${[data1]}</p>`;
-	frm.set_df_property("time_remaining_for_make_edits", "options", data);
+	if(exit_date-entry_date>0){
+		var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+		var x = parseInt(diffDays * (24 * 60) + totalMinsOfExit - totalMinsOfEntry);
+		let data1 = Math.floor(x / 24 / 60) + " Days:" + Math.floor((x / 60) % 24) + " Hours:" + (x % 60) + " Minutes";
+		let data = `<p><b>Time Remaining for Job Order Start: </b> ${[data1]}</p>`;
+		frm.set_df_property("time_remaining_for_make_edits", "options", data);
+	}
+	else{
+		frm.set_df_property("time_remaining_for_make_edits", "hidden", 1);
+	}
 }
 
 function notification_joborder_change(frm) {
@@ -1002,7 +1005,7 @@ function set_custom_base_price(frm){
 
 
 function hide_unnecessary_data(frm) {
-    let field_name = ['company', 'order_status', 'category', 'select_days', 'job_order_duration', "rate", "worker_filled", "extra_price_increase", "e_signature_for_order_request_section"]
+    let field_name = ['select_days', "worker_filled"]
     var arrayLength = field_name.length;
     for (var i = 0; i < arrayLength; i++) {
         frm.set_df_property(field_name[i], "hidden", 1);
