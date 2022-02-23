@@ -4,7 +4,12 @@ frappe.listview_settings['Claim Order'] = {
         listview.page.clear_primary_action()
         $("button.btn.btn-default.btn-sm.filter-button").hide();
         $("button.btn.btn-sm.filter-button.btn-primary-light").hide();
-        if((listview.filters).length==2 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
+        if((listview.data[0]["approved_no_of_workers"])!=0 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
+            listview.page.set_secondary_action('Modify Head Count', () => modify_claims(listview), 'octicon octicon-sync');
+
+        }
+
+        else if((listview.filters).length==2 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
             listview.page.set_secondary_action('Select Head Count', () => refresh(listview), 'octicon octicon-sync');
         }
         else if((listview.filters).length==3 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
@@ -247,6 +252,7 @@ function modify_claims(listview){
                                 dict=update_claims(data_len,l,dict,job_data,r)
                                 if(Object.keys(dict.dict).length>0 && (dict.valid1!="False"))
                                 {
+
                                     frappe.call({
                                         method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_modified_claims",
                                         args:{

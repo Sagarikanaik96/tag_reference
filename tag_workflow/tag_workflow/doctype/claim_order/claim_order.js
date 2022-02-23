@@ -4,6 +4,10 @@
 frappe.ui.form.on('Claim Order', {
 	after_save:function(frm){
 		staffing_claim_joborder(frm)
+		if (frm.doc.single_share==1){
+			claim_order_save(frm)
+		}
+		
 	},
 	before_save:function(frm){
 		if (!frm.doc.hiring_organization){
@@ -132,9 +136,13 @@ function staffing_claim_joborder(frm){
 		"args":{
 			"job_order" :frm.doc.job_order,"hiring_org" : frm.doc.hiring_organization,"staffing_org" : frm.doc.staffing_organization,"doc_name" : frm.doc.name,"single_share":frm.doc.single_share,'no_assigned':frm.doc.staff_claims_no,'no_required':frm.doc.no_of_workers_joborder},
 		callback:function(r){
+			if (frm.doc.single_share !=1){
 				setTimeout(function () {
 					window.location.href='/app/job-order/'+frm.doc.job_order
 				}, 3000);
+			
+			}
+				
 			}
 	});
 	
@@ -176,3 +184,32 @@ function org_info(frm){
 	}
 }
 
+
+
+function claim_order_save(frm){
+    frappe.call({
+        method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.order_details",
+        args:{
+            'doc_name':frm.doc.job_order
+        },
+        callback:function(rm){
+        	var dict = {}
+        	dict[frm.doc.staffing_organization]=frm.doc.staff_claims_no
+    		frappe.call({
+                method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_claims",
+                args:{
+                    'my_data':dict,
+                    'doc_name':frm.doc.job_order
+                },
+                callback:function(rmdata){  
+                    setTimeout(function () {
+                        window.location.href='/app/job-order/'+frm.doc.job_order
+                    }, 3000);
+                        frappe.msgprint('Notification send successfully')	
+                }
+            })
+        }
+    })
+}
+                                
+                                   
