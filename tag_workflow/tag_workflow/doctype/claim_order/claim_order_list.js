@@ -274,7 +274,7 @@ function update_claims(data_len,l,dict,job_data,r){
                                
         let y=document.getElementById("_"+job_data[i].staffing_organization).value
         if(y.length==0){
-            y=0
+            continue
         }
         y=parseInt(y)
         l=parseInt(l)+parseInt(y)
@@ -288,7 +288,7 @@ function update_claims(data_len,l,dict,job_data,r){
 
               setTimeout(function () {
                 location.reload()                                    
-              }, 6000);
+              }, 5000);
 
 
         }
@@ -302,7 +302,7 @@ function update_claims(data_len,l,dict,job_data,r){
 
               setTimeout(function () {
                 location.reload()                                    
-              }, 6000);
+              }, 5000);
 
         }
     
@@ -317,7 +317,7 @@ function update_claims(data_len,l,dict,job_data,r){
 
               setTimeout(function () {
                 location.reload()                                    
-              }, 6000);
+              }, 5000);
         }
         else if(l>(r['no_of_workers']-r['worker_filled']))
         {
@@ -330,7 +330,7 @@ function update_claims(data_len,l,dict,job_data,r){
 
               setTimeout(function () {
                 location.reload()                                    
-              }, 6000);
+              }, 5000);
         }
         else{
                 dict[job_data[i].staffing_organization]=y
