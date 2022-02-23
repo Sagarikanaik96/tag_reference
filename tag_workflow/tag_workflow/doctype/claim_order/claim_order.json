@@ -35,7 +35,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Staffing Organization",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "html_4",
