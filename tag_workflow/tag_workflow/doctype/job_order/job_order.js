@@ -658,6 +658,7 @@ function claim_job_order_staffing(frm) {
 	doc.job_order = frm.doc.name;
 	doc.no_of_workers_joborder = frm.doc.no_of_workers;
 	doc.hiring_organization = frm.doc.company;
+	doc.contract_add_on = frm.doc.contract_add_on;
 	frappe.set_route("Form", "Claim Order", doc.name);
 }
 
