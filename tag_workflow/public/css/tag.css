@@ -651,6 +651,13 @@ input::-webkit-credentials-auto-fill-button {
   position: absolute;
   right: 10px;
 }
+[data-route="Workspaces/My Activities"] #page-Workspaces .page-head {
+  display: none;
+}
+[data-route="Workspaces/My Activities"] #page-Workspaces {
+  padding: 20px 0;
+  transition: 2s ease-in-out;
+}
 
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
@@ -695,6 +702,32 @@ input::-webkit-credentials-auto-fill-button {
     font-weight: 500;
     font-size: 18px;
     color: #4e4e4e;
+  }
+  [data-fieldtype="Table"] .form-grid {
+    overflow: auto;
+  }
+  [data-fieldtype="Table"] .form-grid .grid-heading-row,
+  [data-fieldtype="Table"] .form-grid .grid-body .grid-row {
+    width: 700px;
+  }
+  [data-fieldtype="Table"]
+    .form-grid
+    .grid-body
+    .grid-row.grid-row-open
+    .form-in-grid {
+    width: 100% !important;
+    position: absolute;
+    top: 5%;
+  }
+  #page-staff_company_list table {
+    font-size: 13px !important;
+  }
+  .hiring-home .tittle h3 {
+    font-size: 25px;
+    margin-left: 20px;
+  }
+  #terms-and-conditions {
+    padding: 0 20px !important;
   }
 }
 
