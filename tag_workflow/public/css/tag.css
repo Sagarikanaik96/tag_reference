@@ -136,7 +136,7 @@ input:visited {
 }
 .form-section .section-head {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
   color: #21b9e4 !important;
 }
 .editable-form .layout-main-section-wrapper .layout-main-section,
@@ -660,6 +660,16 @@ input::-webkit-credentials-auto-fill-button {
 }
 .notification-settings {
   display: none;
+}
+.page-title .title-area .title-text {
+  font-weight: 400;
+  font-size: 18px;
+}
+.chat-list .chat-rooms-container .chat-room .chat-profile-info .chat-name {
+  font-weight: 500 !important;
+}
+.widget-group .widget-group-head .widget-group-title {
+  font-weight: 500;
 }
 
 @media (max-width: 1300px) {
