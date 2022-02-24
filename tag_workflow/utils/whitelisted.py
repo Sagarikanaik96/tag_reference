@@ -293,19 +293,26 @@ def get_order_data():
             return result
 
         if(company_type == "Staffing"):
-            job_order = []
-            assign = frappe.db.get_list("Assign Employee", {"company": company}, "job_order", group_by="job_order", order_by="creation desc")
-            job_order = [a['job_order'] for a in assign]
-            orders = frappe.db.get_list(JO, {"to_date": [">=", frappe.utils.nowdate()], "order_status": ["!=", "Completed"]}, "name", ignore_permissions = 1)
-            orders = [o['name'] for o in orders]
+            job_list = set()
+            claim  = frappe.db.sql(''' select job_order from `tabClaim Order` where staffing_organization = "{}" and approved_no_of_workers != 0 order by creation desc'''.format(company),as_list = 1)
+            for i in claim:
+                job_list.add(i[0])
+            assign = frappe.db.sql(''' select job_order from `tabAssign Employee` where company = "{}" and tag_status = "Approved"'''.format(company),as_list = 1)
+            print(assign)
+            for i in assign:
+                job_list.add(i[0])
+
+            sqlj  = f'select name from `tabJob Order`  where "{frappe.utils.nowdate()}"  between from_date and to_date order by creation desc'
+            job_order = frappe.db.sql(sqlj,as_list=1)
             for j in job_order:
-                if((j in orders) and len(result) <= 5):
-                    date,time, job_site, company, per_hour, select_job = frappe.db.get_value(JO, {"name": j}, ["from_date","job_start_time","job_site", "company", "per_hour", "select_job"])
+                if((j[0] in job_list) and len(result) <= 5):
+                    date,time, job_site, company, per_hour, select_job = frappe.db.get_value(JO, {"name": j[0]}, ["from_date","job_start_time","job_site", "company", "per_hour", "select_job"])
                     result.append({"name": j, "date": date.strftime("%d %b, %Y "),"time":converttime(time), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
             return result
 
         elif(company_type in ["Hiring", "Exclusive Hiring"]):
-            order = frappe.db.get_list(JO, {"company": company, "order_status": "Ongoing"}, ["name", "from_date","job_start_time","job_site", "company", "per_hour", "order_status", "select_job"], order_by="creation desc", limit=5)
+            order1 = f" select name,from_date,job_start_time,job_site, company, per_hour, order_status,select_job from `tabJob Order` where company = '{company}' and '{frappe.utils.nowdate()}'  between from_date and to_date  order by creation desc limit 5"
+            order = frappe.db.sql(order1,as_dict=1)
             for o in order:
                 result.append({"name":o['name'], "date":o['from_date'].strftime("%d %b, %Y "),"time":converttime(o['job_start_time']),"job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour'], "select_job": o['select_job']})
             return result

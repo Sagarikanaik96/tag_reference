@@ -658,6 +658,9 @@ input::-webkit-credentials-auto-fill-button {
   padding: 20px 0;
   transition: 2s ease-in-out;
 }
+.notification-settings {
+  display: none;
+}
 
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
