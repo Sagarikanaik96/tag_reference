@@ -935,21 +935,6 @@
     "hidden": 0,
     "icon": null,
     "is_query_report": 0,
-    "label": "Employee",
-    "link_to": "Employee",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "parent": "My Activities",
-    "parentfield": "links",
-    "parenttype": "Workspace",
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
     "label": "Company",
     "link_to": "Company",
     "link_type": "DocType",
@@ -1036,7 +1021,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2022-02-12 03:12:02.348471",
+  "modified": "2022-02-24 08:22:51.090194",
   "module": "Tag Workflow",
   "name": "My Activities",
   "onboarding": null,

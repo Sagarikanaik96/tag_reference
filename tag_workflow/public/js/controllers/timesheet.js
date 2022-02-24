@@ -14,7 +14,6 @@ frappe.ui.form.on("Timesheet", {
 				frm.set_df_property("job_details", "options", " ");
 			}, 700);
 		}
-
 		if(cur_frm.doc.status=='Submitted' && frm.doc.workflow_state == "Approved" && frm.doc.approval_notification == 1){
 			frappe.call({
 				"method": "tag_workflow.utils.timesheet.approval_notification",
@@ -25,15 +24,9 @@ frappe.ui.form.on("Timesheet", {
 				approval_timesheet(frm);
 			}
 		}
-
-		if (cur_frm.doc.status == 'Draft' && cur_frm.doc.workflow_state == "Denied"){
-			denied_timesheet(frm)
-		}
-
 		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
 		hide_timesheet_field(timesheet_fields);
 	},
-
 	setup: function(frm){
 		job_order_details(frm);
 
@@ -83,6 +76,44 @@ frappe.ui.form.on("Timesheet", {
 			}
 		}
 	},
+	validate:function(frm){
+		if (frm.doc.workflow_state === 'Denied'){
+			return new Promise(function(resolve, reject) {
+				if((frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User')) && frappe.session.user!='Administrator'){
+					var pop_up = new frappe.ui.Dialog({
+						title: __('Please provide an explanation for the timesheet denial '),
+						'fields': [
+							{'fieldname': 'Comment', 'fieldtype': 'Long Text','label':'comment','reqd':1}
+						],
+						primary_action: function(){
+							pop_up.hide();
+							
+							var comment=pop_up.get_values()
+							denied_timesheet(frm)
+							frappe.call({
+								method:"tag_workflow.utils.timesheet.timesheet_dispute_comment_box",
+								freeze:true,
+								freeze_message:__("Please Wait ......."),
+								args:{
+									'comment':comment,
+									'timesheet':cur_frm.doc.name //fetch timesheet name
+								},
+								callback:function(rm){
+									if (rm.message){
+										resolve();
+										frappe.msgprint('Comment Submitted Successfully')
+										setTimeout(() => {location.reload()}, 2000);
+									}	
+								}
+							})
+						}
+					});
+					pop_up.show();
+				}
+				reject()
+			});	
+	}
+},
 	job_order_detail: function(frm){
 		job_order_details(frm);
 		update_job_detail(frm);
@@ -102,7 +133,8 @@ frappe.ui.form.on("Timesheet", {
 
 	workflow_state: function(frm){
 		check_update_timesheet(frm);
-	}
+	},
+	
 });
 
 
@@ -233,45 +265,11 @@ function notify_email(frm, type, value){
 }
 
 function denied_timesheet(frm){
-		var current_date=new Date(frappe.datetime.now_datetime())
-		var approved_date=new Date(frm.doc.modified)
-		var diff=current_date.getTime()-approved_date.getTime()
-		diff=parseInt(diff/1000)
-		if (diff<30)
-		{
 			frappe.call({
-				"method": "tag_workflow.utils.timesheet.denied_notification",
+				"method": "tag_workflow.utils.timesheet.denied_notification",freeze:true,freeze_message:__("Please Wait ......."),
 				"args": {"job_order": frm.doc.job_order_detail,"hiring_company":frm.doc.company,"staffing_company": frm.doc.employee_company, "timesheet_name":cur_frm.doc.name}
 			});
 
-			if((frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User')) && frappe.session.user!='Administrator'){
-				var pop_up = new frappe.ui.Dialog({
-					title: __('Dispute Message'),
-					'fields': [
-						{'fieldname': 'Comment', 'fieldtype': 'Long Text','label':'comment'}
-					],
-					primary_action: function(){
-						pop_up.hide();
-						var comment=pop_up.get_values()
-						frappe.call({
-							
-                            method:"tag_workflow.utils.timesheet.timesheet_dispute_comment_box",
-							args:{
-                                'comment':comment,
-                                'timesheet':cur_frm.doc.name //fetch timesheet name
-                            },
-							callback:function(rm){
-								if (rm.message){
-									frappe.msgprint('Comment Submitted Successfully')
-								}
-								
-							}
-						})
-					}
-				});
-				pop_up.show();
-			}
-	}
 }
 
 function employee_timesheet_rating(frm){

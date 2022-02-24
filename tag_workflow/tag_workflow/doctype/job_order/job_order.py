@@ -252,3 +252,41 @@ def order_details():
     company_data = [c['company'] for c in dat]
     comp_dat="\n".join(company_data)
     return comp_dat
+
+@frappe.whitelist(allow_guest=False)
+def data_deletion(job_order):
+    try:
+        sales_invoice_date=f"select name from `tabSales Invoice` where job_order='{job_order}' "
+        invoice=frappe.db.sql(sales_invoice_date,as_list=True)
+        if len(invoice)>0:
+            for i in invoice:
+                del_data=f'''DELETE FROM `tabSales Invoice` where name="{i[0]}" '''
+                frappe.db.sql(del_data)
+                frappe.db.commit()
+        timesheet_data=f"select name from `tabTimesheet` where job_order_detail='{job_order}'"
+        timesheet=frappe.db.sql(timesheet_data,as_list=True)
+        if len(timesheet)>0:
+            for i in timesheet:
+                del_data=f'''DELETE FROM `tabTimesheet` where name="{i[0]}" '''
+                frappe.db.sql(del_data)
+                frappe.db.commit()
+        assigned_emp=f"select name from `tabAssign Employee` where job_order='{job_order}'"
+        assign_emp=frappe.db.sql(assigned_emp,as_list=True)
+        if len(assign_emp)>0:
+            for i in assign_emp:
+                del_data=f'''DELETE FROM `tabAssign Employee` where name="{i[0]}" '''
+                frappe.db.sql(del_data)
+                frappe.db.commit()
+        claim_order=f"select name from `tabClaim Order` where job_order='{job_order}'"
+        claims=frappe.db.sql(claim_order,as_list=True)
+        if len(claims)>0:
+            for i in claims:
+                del_data=f'''DELETE FROM `tabClaim Order` where name="{i[0]}" '''
+                frappe.db.sql(del_data)
+                frappe.db.commit()
+        del_data=f'''DELETE FROM `tabJob Order` where name="{job_order}" '''
+        frappe.db.sql(del_data)
+        frappe.db.commit()
+        return 'success'
+    except Exception as e:
+        frappe.log_error(e, 'Some Deletion error')

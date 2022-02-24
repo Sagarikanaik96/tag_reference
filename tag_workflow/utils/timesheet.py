@@ -494,6 +494,7 @@ def timesheet_dispute_comment_box(comment,timesheet):
                 timesheet_doc.dispute += '\n' +'-'*15 + '\n'+ comment['Comment']
             else:
                 timesheet_doc.dispute = comment['Comment']
+            timesheet_doc.workflow_state = 'Denied'
             timesheet_doc.flags.ignore_mandatory = True
             timesheet_doc.save(ignore_permissions=True)
             return True

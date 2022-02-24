@@ -106,6 +106,7 @@ frappe.ui.form.on("Job Order", {
 	},
 	refresh: function(frm) {
 		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
+		job_order_cancel_button(frm);
 		setTimeout(function() {
 			view_button(frm);
 			make_invoice(frm);
@@ -1188,5 +1189,45 @@ function assigned_emp(frm){
 			dialog1.$wrapper.find('.modal-dialog').css('max-width', '880px');
 			dialog1.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
 		}
+	})
+}
+
+function job_order_cancel_button(frm){
+	if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type=='Exclusive Hiring'){
+		frm.add_custom_button(__("Cancel"),function(){
+			cancel_job_order(frm);
+
+		})
+	}
+}
+function cancel_job_order(frm){
+	return new Promise(function(resolve, reject) {
+		frappe.confirm("<h4>Are you sure you want to discard this Job Order? </h4><h5>This Process is irreversiable . Your whole data related to this order will be delete</h5>",
+			function() {
+				let resp = "frappe.validated = false";
+				resolve(resp);
+				deleting_data(frm);
+			},
+			function() {
+				reject();
+			}
+		);
+	});
+}
+function deleting_data(frm){
+	frappe.call({
+		method:"tag_workflow.tag_workflow.doctype.job_order.job_order.data_deletion",
+		args:{job_order:frm.doc.name},
+		callback:function(r){
+			if(r.message=='success')
+			{
+				frappe.msgprint('Order Deleted Successfully')
+				setTimeout(function () {
+					window.location.href='/app/job-order'
+				}, 3000);
+			}
+			
+		}
+
 	})
 }
