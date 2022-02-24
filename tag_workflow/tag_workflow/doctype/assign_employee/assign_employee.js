@@ -180,13 +180,7 @@ function check_employee_data(frm){
 	}
 	
 	if(frm.doc.resume_required==1){
-		for(var r in table){
-			if(table[r].resume===null){
-				msg.push('Attach the Resume to Assign the Employee.');
-				frappe.validated=false
-
-			}
-		}
+		resume_data(frm,msg,table)
 
 	}
 	table_emp(frm,table,msg)
@@ -344,7 +338,7 @@ function table_emp(frm,table,msg){
 		(table.length > Number(frm.doc.no_of_employee_required)+1) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 	}
 	else if(frm.doc.claims_approved){
-		(table.length != Number(frm.doc.claims_approved)) ? msg.push('Please Assign '+frm.doc.claims_approved+' Employees') : console.log("TAG");
+        (table.length > Number(frm.doc.claims_approved)) ? msg.push('Please Assign '+frm.doc.claims_approved+' Employees') : console.log("TAG");
 	}
  	else{
 		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
@@ -368,4 +362,13 @@ function make_notification_approved(frm){
 			}, 4000);
 		}
 	});
+}
+
+function resume_data(frm,msg,table){
+	for(var r in table){
+		if(table[r].resume===null || table[r].resume==undefined){
+			msg.push('Attach the Resume to Assign the Employee.');
+			frappe.validated=false
+		}
+	}
 }

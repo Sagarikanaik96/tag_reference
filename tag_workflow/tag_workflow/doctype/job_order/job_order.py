@@ -139,7 +139,7 @@ def make_sales_invoice(source_name, company, emp_list, emp_sql,target_doc=None, 
             total_hours += sheet.total_billable_hours
 
             for logs in sheet.time_logs:
-                activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'is_dnr':sheet.dnr,"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours}
+                activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'is_dnr':sheet.dnr,"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours,"per_hour_rate1":logs.billing_rate}
                 doclist.append("timesheets", activity)
 
         doclist.total_billing_amount = total_amount

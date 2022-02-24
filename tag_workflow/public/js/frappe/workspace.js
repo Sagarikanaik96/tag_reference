@@ -433,11 +433,11 @@ class DesktopPage {
 				</div>
 
 				<div class="row widget-group">
-					<div class="col-md-10 widget-group-head  col-sm-6">
+					<div class="col-md-10 widget-group-head col-xs-6 col-sm-6">
 						<div class="widget-group-title mt-2">Today's Orders</div>
 						<div class="widget-group-control"></div>
 					</div>
-					<div class="col-md-2 col-sm-6">
+					<div class="col-md-2 col-xs-6 col-sm-6">
 					<button class="btn btn-xs btn-primary px-2 float-right restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">View All</button>
 					</div>
 					<div class="col-xs-12">
@@ -479,11 +479,11 @@ class DesktopPage {
 		}else{
 			this.page.append(`
 				<div class="row widget-group">
-					<div class="col-md-10 widget-group-head">
-						<div class="widget-group-title mt-2  col-sm-6">Today's Orders</div>
+					<div class="col-md-10 col-xs-8 widget-group-head">
+						<div class="widget-group-title mt-0 mt-md-2 ml-3 ml-md-0 col-sm-6">Today's Orders</div>
 						<div class="widget-group-control"></div>
 					</div>
-					<div class="col-md-2  col-sm-6">
+					<div class="col-md-2 col-xs-4 col-sm-6">
 					<button class="btn btn-xs px-2 float-right btn-primary restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">View All</button>
 					</div>
 					<div class="col-md-12">

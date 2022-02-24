@@ -105,14 +105,7 @@ frappe.ui.form.on("Job Order", {
 
 	},
 	refresh: function(frm) {
-		if(frappe.route_history.length > 1){
-			for(let i in frappe.route_history){
-				if(frappe.route_history[i][1] != "Job Order" && frm.doc.__islocal!=1){
-					window.location.reload();
-				}
-			}
-		}
-		
+		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
 		setTimeout(function() {
 			view_button(frm);
 			make_invoice(frm);
@@ -204,7 +197,7 @@ frappe.ui.form.on("Job Order", {
 			rate_hour_contract_change(frm);
 			if (frappe.validated) {
 				return new Promise(function(resolve, reject) {
-					frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>" + frm.doc.rate + "<br><b>Rate Increase: </b>" + (frm.doc.per_hour - frm.doc.rate) + "<br><b>Total Per Hour Rate: </b>" + frm.doc.per_hour + "",
+					frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>" + frm.doc.rate + "<br><b>Rate Increase: </b>" + (frm.doc.per_hour - frm.doc.rate) + "<br><b>Total Per Hour Rate: </b>" + frm.doc.per_hour + "",
 						function() {
 							let resp = "frappe.validated = false";
 							resolve(resp);
@@ -319,9 +312,9 @@ frappe.ui.form.on("Job Order", {
 	},
 
 	validate: function(frm) {
-		job_order_duration(frm);
 		rate_calculation(frm);
 		time_validation(frm)
+		set_custom_base_price(frm)
 		var l = {Company: frm.doc.company, "Select Job": frm.doc.select_job, Category: frm.doc.category, "Job Order Start Date": cur_frm.doc.from_date, "Job Site": cur_frm.doc.job_site, "No Of Workers": cur_frm.doc.no_of_workers, Rate: cur_frm.doc.rate, "Job Order End Date": cur_frm.doc.to_date, "Job Duration": cur_frm.doc.job_order_duration, "Estimated Hours Per Day": cur_frm.doc.estimated_hours_per_day, "E-Signature Full Name": cur_frm.doc.e_signature_full_name,};
 
 		var message = "<b>Please Fill Mandatory Fields:</b>";
@@ -435,7 +428,7 @@ function staff_company_direct_or_general(frm) {
 }
 
 function set_read_fields(frm) {
-	var myStringArray = ["phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email", "select_job", "rate", "description",];
+	var myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description"];
 	var arrayLength = myStringArray.length;
 	for (var i = 0; i < arrayLength; i++) {
 		frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -443,12 +436,9 @@ function set_read_fields(frm) {
 }
 
 function timer_value(frm) {
-	var new_date = new Date(String(cur_frm.doc.from_date) + " " + String(cur_frm.doc.job_start_time));
-	var time = frappe.datetime.get_hour_diff(new_date, frappe.datetime.now_datetime());
-
-	if (time < 24) {
+	if (frm.doc.order_status=='Completed') {
 		frm.toggle_display('section_break_8', 0)
-		var myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",];
+		var myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
 		var arrayLength = myStringArray.length;
 		for (var i = 0; i < arrayLength; i++) {
 			frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -473,11 +463,16 @@ function time_value(frm){
 	var entry_date = new Date(frappe.datetime.now_datetime().split(" ")[0]);
 	var exit_date = new Date(cur_frm.doc.from_date.split(" ")[0]);
 	var diffTime = Math.abs(exit_date - entry_date);
-	var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-	var x = parseInt(diffDays * (24 * 60) + totalMinsOfExit - totalMinsOfEntry);
-	let data1 = Math.floor(x / 24 / 60) - 1 + " Days:" + Math.floor((x / 60) % 24) + " Hours:" + (x % 60) + " Minutes";
-	let data = `<p><b>Time Remaining for Make Edits: </b> ${[data1]}</p>`;
-	frm.set_df_property("time_remaining_for_make_edits", "options", data);
+	if(exit_date-entry_date>0){
+		var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+		var x = parseInt(diffDays * (24 * 60) + totalMinsOfExit - totalMinsOfEntry);
+		let data1 = Math.floor(x / 24 / 60) + " Days:" + Math.floor((x / 60) % 24) + " Hours:" + (x % 60) + " Minutes";
+		let data = `<p><b>Time Remaining for Job Order Start: </b> ${[data1]}</p>`;
+		frm.set_df_property("time_remaining_for_make_edits", "options", data);
+	}
+	else{
+		frm.set_df_property("time_remaining_for_make_edits", "hidden", 1);
+	}
 }
 
 function notification_joborder_change(frm) {
@@ -502,7 +497,7 @@ function check_from_date(frm) {
 
 	if (from_date && from_date < frappe.datetime.now_date()) {
 		frappe.msgprint({
-			message: __("<b>Start Date</b> Cannot be Today`s date or Past date"),
+			message: __("<b>Start Date</b> Cannot be Past Date"),
 			title: __("Error"),
 			indicator: "orange",
 		});
@@ -516,6 +511,9 @@ function check_from_date(frm) {
 		cur_frm.set_value("from_date", "");
 		cur_frm.set_value("to_date", "");
 	}
+	else{
+		job_order_duration(frm);
+	}
 }
 
 function check_to_date(frm) {
@@ -523,7 +521,7 @@ function check_to_date(frm) {
 	let to_date = frm.doc.to_date || "";
 	if (to_date && frappe.datetime.now_date() > to_date) {
 		frappe.msgprint({
-			message: __("<b>End Date</b> Cannot be Today`s date or Past date"),
+			message: __("<b>End Date</b> Cannot be Past Date"),
 			title: __("Error"),
 			indicator: "orange",
 		});
@@ -535,6 +533,9 @@ function check_to_date(frm) {
 			indicator: "orange",
 		});
 		cur_frm.set_value("to_date", "");
+	}
+	else{
+		job_order_duration(frm);
 	}
 }
 
@@ -640,16 +641,21 @@ function fields_setup(frm) {
 }
 
 function job_order_duration(frm) {
-	const to_date = cur_frm.doc.to_date.split(" ")[0].split("-");
-	const from_date = cur_frm.doc.from_date.split(" ")[0].split("-");
-	let to_date2 = new Date(to_date[1] + '/' + to_date[2] + '/' + to_date[0]);
-	let from_date2 = new Date(from_date[1] + '/' + from_date[2] + '/' + from_date[0]);
-	let diff = Math.abs(to_date2 - from_date2);
-	let days = diff / (1000 * 3600 * 24) + 1;
-	if (days == 1) {
-		cur_frm.set_value('job_order_duration', days + ' Day');
-	} else {
-		cur_frm.set_value('job_order_duration', days + ' Days');
+	if(!frm.doc.from_date || !frm.doc.to_date){
+		frm.set_value('job_order_duration', '')
+	}
+	else{
+		const to_date = cur_frm.doc.to_date.split(" ")[0].split("-");
+		const from_date = cur_frm.doc.from_date.split(" ")[0].split("-");
+		let to_date2 = new Date(to_date[1] + '/' + to_date[2] + '/' + to_date[0]);
+		let from_date2 = new Date(from_date[1] + '/' + from_date[2] + '/' + from_date[0]);
+		let diff = Math.abs(to_date2 - from_date2);
+		let days = diff / (1000 * 3600 * 24) + 1;
+		if (days == 1) {
+			cur_frm.set_value('job_order_duration', days + ' Day');
+		} else {
+			cur_frm.set_value('job_order_duration', days + ' Days');
+		}
 	}
 }
 
@@ -665,6 +671,7 @@ function claim_job_order_staffing(frm) {
 	doc.job_order = frm.doc.name;
 	doc.no_of_workers_joborder = frm.doc.no_of_workers;
 	doc.hiring_organization = frm.doc.company;
+	doc.contract_add_on = frm.doc.contract_add_on;
 	frappe.set_route("Form", "Claim Order", doc.name);
 }
 
@@ -766,7 +773,7 @@ function view_button(frm){
 function view_buttons_hiring(frm){
 	hiring_buttons(frm);
 	if (cur_frm.doc.__islocal != 1){
-		let datad1 = `<div class="my-3" id="data" style="display: flex;justify-content: space-between;"><p> Claims  </p><label class="badge bg-danger rounded-circle text-white"> ${frm.doc.bid} </label></div>`;
+		let datad1 = `<div class="my-2 p-3 border rounded" id="data" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Claims  </p><label class="badge m-0 bg-danger rounded-circle font-weight-normal mr-4 text-white"> ${frm.doc.bid} </label></div>`;
 
 		$('[data-fieldname = related_details]').click(function() {
 			claim_orders(frm);
@@ -774,7 +781,7 @@ function view_buttons_hiring(frm){
 		frm.set_df_property("related_details", "options", datad1);
 		frm.toggle_display('related_actions_section', 1);
 		if (frm.doc.claim) {
-			let datad2 = `<div class="my-3" style="display: flex;justify-content: space-between;"><p>Messages </p></div>`;
+			let datad2 = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg">Messages </p></div>`;
 			$('[data-fieldname = messages]').click(function() {
 				messages(frm);
 			});
@@ -784,7 +791,7 @@ function view_buttons_hiring(frm){
 		}
 
 		if (frm.doc.from_date <= frappe.datetime.nowdate()) {
-			let datad3 = `<div class="my-3" style="display: flex;justify-content: space-between;"><p>Timesheets  </p><button class="btn-light rounded border">View</button></div>`;
+			let datad3 = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Timesheets  </p> </div>`;
 			$('[data-fieldname = timesheets]').click(function() {
 				timesheets_view(frm);
 			});
@@ -803,7 +810,7 @@ function view_buttons_hiring(frm){
 				},
 				callback: function(r) {
 					if (r.message == 'success') {
-					let datad4 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Invoices </p><button class="btn-light rounded border">View</button></div>`;
+					let datad4 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg"> Invoices </p> </div>`;
 						$('[data-fieldname = invoices]').click(function() {
 							sales_invoice_data(frm);
 						});
@@ -823,7 +830,7 @@ function view_buttons_hiring(frm){
 function view_buttons_staffing(frm) {
 	claim_assign_button(frm);
 	if ((frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)) {
-		let data3 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Messages </p></div>`;
+		let data3 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Messages </p></div>`;
 		$('[data-fieldname = messages]').click(function() {
 			messages(frm);
 		});
@@ -844,7 +851,7 @@ function view_buttons_staffing(frm) {
 			},
 			callback: function(r) {
 				if (r.message != 'unsuccess') {
-					let data4 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Timesheets </p>  <button class="btn-light rounded border">View</button></div>`;
+					let data4 = `<div class=" p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Timesheets </p>  </div>`;
 					$('[data-fieldname = timesheets]').click(function() {
 						timesheets_view(frm);
 					});
@@ -866,7 +873,7 @@ function view_buttons_staffing(frm) {
 			},
 			callback: function(r) {
 				if (r.message == 'success1') {
-					let data5 = `<div class="my-3" style="display:flex;justify-content: space-between;"> <p> Invoices  </p> <button class="btn-light rounded border">View</button></div>`;
+					let data5 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"> <p class="m-0 msg"> Invoices  </p> </div>`;
 					$('[data-fieldname = invoices]').click(function() {
 						sales_invoice_data(frm);
 					});
@@ -876,7 +883,7 @@ function view_buttons_staffing(frm) {
 						sales_invoice_data(frm);
 					}, __("View"));
 				} else if (r.message == 'success') {
-					let data6 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Invoices </p> <button class="btn-light rounded border">View</button> </div>`;
+					let data6 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Invoices </p> </div>`;
 					$('[data-fieldname = invoices]').click(function() {
 						sales_invoice_data(frm);
 					});
@@ -904,37 +911,14 @@ function hiring_buttons(frm) {
 			callback: function(r) {
 				if (r.message == 'success1') {
 					frm.add_custom_button(__('Approved Employees'), function() {
-						frappe.call({
-							method: "tag_workflow.tag_data.assigned_employee_data",
-							args: {
-								'job_order': cur_frm.doc.name
-							},
-							callback: function(rm) {
-								var data = rm.message;
-								let profile_html = `<table><th>Employee Name</th><th>Marked As</th><th>Staffing Company</th>`;
-								for (let p in data) {
-									profile_html += `<tr>
-										<td>${data[p].employee}</td>
-										<td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>
-										<td style="margin-right:20px;" >${data[p].staff_company}</td>
-									</tr>`;
-								}
-								profile_html += `</table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`
-
-								var dialog = new frappe.ui.Dialog({
-									title: __('Assigned Employee'),
-									fields: [{fieldname: "staff_companies", fieldtype: "HTML", options: profile_html},]
-								});
-								dialog.set_primary_action(__('Close'), function() {
-									dialog.hide();
-								});
-
-								dialog.show();
-								dialog.$wrapper.find('.modal-dialog').css('max-width', '880px');
-								dialog.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
-							}
-						});
+						approved_emp(frm)
 					}, __("View"));
+					let data = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
+                    $('[data-fieldname = assigned_employees_hiring]').click(function() {
+                        approved_emp(frm);
+                    });
+                    frm.set_df_property("assigned_employees_hiring", "options", data);
+                    frm.toggle_display('related_actions_section', 1);
 				}
 			}
 		});
@@ -1008,7 +992,7 @@ function set_custom_base_price(frm){
 
 
 function hide_unnecessary_data(frm) {
-    let field_name = ['company', 'order_status', 'category', 'select_days', 'job_order_duration', "rate", "worker_filled", "extra_price_increase", "e_signature_for_order_request_section"]
+    let field_name = ['select_days', "worker_filled"]
     var arrayLength = field_name.length;
     for (var i = 0; i < arrayLength; i++) {
         frm.set_df_property(field_name[i], "hidden", 1);
@@ -1030,46 +1014,14 @@ function staff_assigned_emp(frm) {
         callback: function(r) {
             if (r.message == 'success1') {
                 frm.add_custom_button(__('Assigned Employees'), function() {
-                    frappe.call({
-                        method: "tag_workflow.tag_data.staffing_assigned_employee",
-                        args: {
-                            'job_order': cur_frm.doc.name,
-                        },
-                        callback: function(rm) {
-                            var data = rm.message;
-                            let profile_html = `<table><th>Employee Name</th><th>Marked As</th><th>Actions</th>`;
-                            for (let p in data) {
-
-                                profile_html += `<tr>
-                          <td>${data[p].employee}</td>
-                          <td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>`;
-                                if (data[parseInt(p)].no_show == "No Show" || data[parseInt(p)].non_satisfactory == "Non Satisfactory") {
-                                    profile_html += `<td class="replace" data-fieldname="replace" ><a href="/app/assign-employee/${data[p].assign_name}"><button class="btn btn-primary btn-sm mt-2">Replace </button></a></td>`
-                                }
-                                profile_html += `   
-                          </tr>`;
-                            }
-                            profile_html += `</table><style>th, td {
-                    padding-left: 50px;padding-right:50px;
-                  } input{width:100%;}
-                </style>`
-                            var dialog1 = new frappe.ui.Dialog({
-                                title: __('Assigned Employee'),
-                                fields: [{
-                                    fieldname: "staff_companies",
-                                    fieldtype: "HTML",
-                                    options: profile_html
-                                }, ]
-                            });
-                            dialog1.set_primary_action(__('Close'), function() {
-                                dialog1.hide();
-                            });
-                            dialog1.show();
-                            dialog1.$wrapper.find('.modal-dialog').css('max-width', '880px');
-                            dialog1.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
-                        }
-                    })
+                    assigned_emp(frm)
                 }, __("View"));
+				let data = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
+                $('[data-fieldname = assigned_employees]').click(function() {
+                    assigned_emp(frm);
+                });
+                frm.set_df_property("assigned_employees", "options", data);
+                frm.toggle_display('related_actions_section', 1);
             }
         }
     })
@@ -1091,7 +1043,7 @@ function claim_assign_button(frm) {
 }
 
 function assign_button(frm) {
-	let data2 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Claims </p></div>`;
+	let data2 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Claims </p></div>`;
 	$('[data-fieldname = related_details]').click(function() {
 		staff_assign_redirect(frm);
 	});
@@ -1127,7 +1079,7 @@ function staff_claim_button(frm) {
 			}
 		});
 
-		let data1 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Claims </p></div>`;
+		let data1 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Claims </p></div>`;
 		$('[data-fieldname = related_details]').click(function() {
 			claim_orders(frm);
 		});
@@ -1135,7 +1087,7 @@ function staff_claim_button(frm) {
 		frm.toggle_display('related_actions_section', 1);
 		staff_assigned_emp(frm);
 	} else {
-		let data2 = `<div class="my-3" style="display:flex;justify-content: space-between;"><p>Claims </p></div>`;
+		let data2 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Claims </p></div>`;
 		$('[data-fieldname = related_details]').click(function() {
 			claim_orders(frm);
 		});
@@ -1167,3 +1119,74 @@ function time_validation(frm){
 	  }
 	}
   }
+
+function approved_emp(frm){
+	frappe.call({
+		method: "tag_workflow.tag_data.assigned_employee_data",
+		args: {
+			'job_order': cur_frm.doc.name
+		},
+		callback: function(rm) {
+			var data = rm.message;
+			let profile_html = `<table><th>Employee Name</th><th>Marked As</th><th>Staffing Company</th>`;
+			for (let p in data) {
+				profile_html += `<tr>
+					<td>${data[p].employee}</td>
+					<td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>
+					<td style="margin-right:20px;" >${data[p].staff_company}</td>
+				</tr>`;
+			}
+			profile_html += `</table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`
+
+			var dialog = new frappe.ui.Dialog({
+				title: __('Assigned Employee'),
+				fields: [{fieldname: "staff_companies", fieldtype: "HTML", options: profile_html},]
+			});
+			dialog.set_primary_action(__('Close'), function() {
+				dialog.hide();
+			});
+
+			dialog.show();
+			dialog.$wrapper.find('.modal-dialog').css('max-width', '880px');
+			dialog.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
+		}
+	});
+}
+
+function assigned_emp(frm){
+	frappe.call({
+		method: "tag_workflow.tag_data.staffing_assigned_employee",
+		args: {
+			'job_order': cur_frm.doc.name,
+		},
+		callback: function(rm) {
+			var data = rm.message;
+			let profile_html = `<table><th>Employee Name</th><th>Marked As</th><th>Actions</th>`;
+			for (let p in data) {
+
+				profile_html += `<tr>
+			<td>${data[p].employee}</td>
+			<td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>`;
+				if (data[parseInt(p)].no_show == "No Show" || data[parseInt(p)].non_satisfactory == "Non Satisfactory") {
+					profile_html += `<td class="replace" data-fieldname="replace" ><a href="/app/assign-employee/${data[p].assign_name}"><button class="btn btn-primary btn-sm mt-2">Replace </button></a></td>`
+				}
+				profile_html += `</tr>`;
+			}
+			profile_html += `</table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`
+			var dialog1 = new frappe.ui.Dialog({
+				title: __('Assigned Employee'),
+				fields: [{
+					fieldname: "staff_companies",
+					fieldtype: "HTML",
+					options: profile_html
+				}, ]
+			});
+			dialog1.set_primary_action(__('Close'), function() {
+				dialog1.hide();
+			});
+			dialog1.show();
+			dialog1.$wrapper.find('.modal-dialog').css('max-width', '880px');
+			dialog1.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
+		}
+	})
+}

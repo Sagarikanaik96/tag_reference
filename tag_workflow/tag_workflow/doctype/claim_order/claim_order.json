@@ -18,7 +18,8 @@
   "e_signature",
   "agree_to_contract",
   "single_share",
-  "view_contract"
+  "view_contract",
+  "contract_add_on"
  ],
  "fields": [
   {
@@ -34,7 +35,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Staffing Organization",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "html_4",
@@ -98,11 +100,17 @@
    "fieldname": "view_contract",
    "fieldtype": "Button",
    "label": "View Contract Language"
+  },
+  {
+   "fieldname": "contract_add_on",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Contract Add On"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-21 05:44:35.259928",
+ "modified": "2022-02-23 03:08:11.521152",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Claim Order",
