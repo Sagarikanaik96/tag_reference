@@ -27,7 +27,6 @@ frappe.listview_settings['Job Order'] = {
 		$('div[data-fieldname="order_status"]').hide();
 		$('div[data-fieldname="company"]').hide();
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-			//$('[class="filter-selector"]').hide();
 			frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
 				if(r.name===undefined){
 					$('button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs').hide();
