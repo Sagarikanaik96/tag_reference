@@ -501,7 +501,6 @@ class DesktopPage {
 		let html = ``;
 		console.log(data,"data")
 		for(let d in data){
-			console.log(${data[d].time})
 			html += `<tr><td>${data[d].select_job}</td><td>${data[d].date}  ${data[d].time}</td><td>${data[d].job_site}</td><td>${data[d].company}</td><td>$ ${data[d].per_hour.toFixed(2)}</td><td><button class="btn btn-primary btn-sm primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${data[d].name}')">Order<span class="alt-underline">Det</span>ails</button></td></tr>`;
 		}
 		if(html){
