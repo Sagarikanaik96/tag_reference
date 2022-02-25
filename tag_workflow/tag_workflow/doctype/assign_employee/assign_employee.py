@@ -38,8 +38,7 @@ def get_dest(dest):
 def check_distance(emp, distance, location):
     try:
         result, source = [], []
-        tag_gmap_key = ""
-
+        tag_gmap_key = frappe.get_site_config().tag_gmap_key or ''
         if not tag_gmap_key:
             frappe.msgprint(_("GMAP api key not found"))
             return ()
