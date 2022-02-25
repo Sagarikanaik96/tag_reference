@@ -212,13 +212,11 @@ function update_child_time(child, frm){
 		let break_s = ((break_end - break_start)/(1000*60*60));
 		
 		if(break_s < 0){
-			frappe.model.set_value(child.doctype, child.name, "break_from", "");
-			frappe.model.set_value(child.doctype, child.name, "break_to", "");
+			make_break_zero(child);
 		}else if(break_start >= time_start && break_start <= time_end && break_end <= time_end && break_end >= time_start && break_start <= break_end){
 			breaks = break_s;
 		}else{
-			frappe.model.set_value(child.doctype, child.name, "break_from", "");
-			frappe.model.set_value(child.doctype, child.name, "break_to", "");
+			make_break_zero(child);
 		}
 	}
 
@@ -228,6 +226,11 @@ function update_child_time(child, frm){
 		frappe.model.set_value(child.doctype, child.name, "hours", 0);
 		frappe.model.set_value(child.doctype, child.name, "amount", 0);
 	}
+}
+
+function make_break_zero(child){
+	frappe.model.set_value(child.doctype, child.name, "break_from", "");
+	frappe.model.set_value(child.doctype, child.name, "break_to", "");
 }
 
 /*------------------------------------------*/

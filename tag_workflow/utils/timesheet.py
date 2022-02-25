@@ -327,9 +327,8 @@ def employee_unsatisfactory(company,emp_doc,job_order):
     else:
         for i in emp_doc.unsatisfied_from:
             if(i.unsatisfied_organization_name == company):
-                break
-        else:
-            unsatisfied_organization(emp_doc,company,job_order)
+                return
+        unsatisfied_organization(emp_doc,company,job_order)
 
 
 def removing_unsatisfied_employee(company,emp_doc,job_order):
@@ -449,9 +448,8 @@ def employee_dnr(company,emp_doc,job_order):
     else:
         for i in emp_doc.dnr_employee_list:
             if i.dnr == company:
-                break
-        else:
-            do_not_return(emp_doc,company,job_order)
+                return
+        do_not_return(emp_doc,company,job_order)
             
       
 def removing_dnr_employee(company,emp_doc,job_order):
@@ -527,9 +525,8 @@ def employee_no_show(company,emp_doc,job_order,):
     else:
         for i in emp_doc.no_show:
             if(i.no_show_company == company and i.job_order==job_order):
-                break
-        else:
-            no_show_org(emp_doc,company,job_order)
+                return
+        no_show_org(emp_doc,company,job_order)
 
 def no_show_org(emp_doc,company,job_order):
     emp_doc.append('no_show', {
