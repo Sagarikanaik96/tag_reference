@@ -65,9 +65,7 @@ class MasterController(base_controller.BaseController):
             check_employee(self.doc.email, self.doc.first_name, self.doc.company, self.doc.last_name, self.doc.gender, self.doc.birth_date, self.doc.date_of_joining, self.doc.organization_type)
 
     def check_profile(self):
-        if(self.doc.organization_type in HIR and self.doc.tag_user_type not in HIR_TYPE):
-            frappe.throw(_("Incorrect value for <b>User Type</b> or <b>Company Type</b>"))
-        elif(self.doc.organization_type == "Staffing" and self.doc.tag_user_type not in STF_TYPE):
+        if((self.doc.organization_type in HIR and self.doc.tag_user_type not in HIR_TYPE) or (self.doc.organization_type == "Staffing" and self.doc.tag_user_type not in STF_TYPE)):
             frappe.throw(_("Incorrect value for <b>User Type</b> or <b>Company Type</b>"))
 
 

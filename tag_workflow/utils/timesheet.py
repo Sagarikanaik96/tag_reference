@@ -178,7 +178,6 @@ def check_employee_editable(job_order, name, creation):
         is_editable = 0
         order = frappe.get_doc(JOB, job_order)
         time_format = TM_FT
-        from_date = order.from_date#datetime.datetime.strptime(str(order.from_date), time_format)
         to_date = order.to_date#datetime.datetime.strptime(str(order.to_date), time_format)
         creation = datetime.datetime.strptime(str(creation[0:19]), time_format)
         today = datetime.datetime.now()
