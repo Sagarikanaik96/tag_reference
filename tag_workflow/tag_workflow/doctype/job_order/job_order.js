@@ -117,7 +117,7 @@ frappe.ui.form.on("Job Order", {
 			hide_unnecessary_data(frm);
 		}
 
-		if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))) {
+		if ((cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
 			if (frm.doc.resumes_required) {
 				frm.add_custom_button(__('Assign Employee'), function() {
 					assign_employees(frm);
@@ -128,7 +128,18 @@ frappe.ui.form.on("Job Order", {
 				})
 			}
 		}
-
+		else if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))) {
+			if (frm.doc.resumes_required) {
+				cur_frm.add_custom_button(__('Assign Employee'), function() {
+					assign_employees(frm);
+				})
+			} else {
+				frm.add_custom_button(__('Claim Order'), function() {
+					claim_job_order_staffing(frm);
+				})
+			}
+		}
+		
 		if (frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
 			show_claim_bar(frm);
 		}
@@ -940,7 +951,7 @@ function timesheets_view(frm) {
 }
 
 function claim_orders(frm) {
-    if (frm.doc.order_status == 'Upcoming' && frm.doc.resumes_required == 0) {
+    if ((frm.doc.order_status == 'Upcoming' || (cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date && cur_frm.doc.from_date == frappe.datetime.now_date())) && frm.doc.resumes_required == 0 ) {
         if (frm.doc.staff_org_claimed) {
             frappe.route_options = {
                 "job_order": ["=", frm.doc.name],
