@@ -91,6 +91,7 @@ tag_workflow/public/js/file_upload.js
 tag_workflow/public/js/map.js
 tag_workflow/public/js/tag.js
 tag_workflow/public/js/controllers/company.js
+tag_workflow/public/js/controllers/designation.js
 tag_workflow/public/js/controllers/contact.js
 tag_workflow/public/js/controllers/contract.js
 tag_workflow/public/js/controllers/employee.js
