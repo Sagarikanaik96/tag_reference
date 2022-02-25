@@ -186,11 +186,14 @@ function add_pre_data(child, frm){
 function update_child_time(child, frm){
 	let hours = child.hours;
 	let breaks = 0;
+	let time_start = new Date();
+	let time_end = new Date();
+	let break_start = new Date();
+	let break_end = new Date();
+
 	if(child.from_time && child.to_time){
-		var time_start = new Date();
-		var time_end = new Date();
-		var value_start = child.from_time.split(':');
-		var value_end = child.to_time.split(':');
+		let value_start = child.from_time.split(':');
+		let value_end = child.to_time.split(':');
 		
 		time_start.setHours(value_start[0], value_start[1], 0, 0);
 		time_end.setHours(value_end[0], value_end[1], 0, 0);
@@ -201,17 +204,15 @@ function update_child_time(child, frm){
 	}
 
 	if(child.break_from && child.break_to && child.from_time && child.to_time){
-		var break_start = new Date();
-		var break_end = new Date();
-		var value_start = child.break_from.split(':');
-		var value_end = child.break_to.split(':');
+		let bvalue_start = child.break_from.split(':');
+		let bvalue_end = child.break_to.split(':');
 
-		break_start.setHours(value_start[0], value_start[1], 0, 0);
-		break_end.setHours(value_end[0], value_end[1], 0, 0);
+		break_start.setHours(bvalue_start[0], bvalue_start[1], 0, 0);
+		break_end.setHours(bvalue_end[0], bvalue_end[1], 0, 0);
 		let break_s = ((break_end - break_start)/(1000*60*60));
 		if(breaks < 0){
 			breaks = 0;
-		}else if(break_start >= time_start && break_start <= time_end && break_end <= time_end && break_end >= time_start){
+		}else if(break_start >= time_start && break_start <= time_end && break_end <= time_end && break_end >= time_start && break_start <= break_end){
 			breaks = break_s;
 		}else{
 			frappe.model.set_value(child.doctype, child.name, "break_from", "");
@@ -299,7 +300,7 @@ function update_timesheet(frm){
 			freeze_message: "Please wait while we are adding timesheet(s)...",
 			callback: function(r){
 				if(r){
-					if(r.message == true){
+					if(r.message == 1){
 						frappe.msgprint({message: __("Timesheet(s) has been added successfully"), title: __('Successful'), indicator: 'green'});
 						cur_frm.reload_doc();
 					}
