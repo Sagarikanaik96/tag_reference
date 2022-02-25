@@ -5,20 +5,23 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "job_order_column",
   "job_order",
   "total_per_hour_rate",
   "additional_flat_rate",
   "from_date",
   "to_date",
-  "estimated_daily_hours",
   "date",
+  "estimated_daily_hours",
   "column_break_2",
+  "working_time",
   "from_time",
   "to_time",
   "column_break_7",
+  "break_time",
   "break_from_time",
   "break_to_time",
-  "section_break_9",
+  "section_break_15",
   "items"
  ],
  "fields": [
@@ -54,6 +57,7 @@
    "label": "Break From Time"
   },
   {
+   "bold": 1,
    "fieldname": "column_break_7",
    "fieldtype": "Column Break"
   },
@@ -67,10 +71,6 @@
    "fieldname": "break_to_time",
    "fieldtype": "Time",
    "label": "Break To Time"
-  },
-  {
-   "fieldname": "section_break_9",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "items",
@@ -117,12 +117,31 @@
    "hidden": 1,
    "label": "Estimated Daily Hours",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "job_order_column",
+   "fieldtype": "Heading",
+   "label": "Job Order Detail"
+  },
+  {
+   "fieldname": "working_time",
+   "fieldtype": "Heading",
+   "label": "Working Time "
+  },
+  {
+   "fieldname": "break_time",
+   "fieldtype": "Heading",
+   "label": "Break Time"
   }
  ],
  "hide_toolbar": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-02-24 01:17:06.113038",
+ "modified": "2022-02-25 06:31:47.703885",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Add Timesheet",

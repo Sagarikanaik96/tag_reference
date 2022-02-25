@@ -671,6 +671,74 @@ input::-webkit-credentials-auto-fill-button {
 .widget-group .widget-group-head .widget-group-title {
   font-weight: 500;
 }
+[data-route="Form/Add Timesheet/Add Timesheet"]
+  .layout-main-section-wrapper
+  .layout-main-section
+  .form-message
+  p
+  b {
+  color: #4365ad;
+  font-weight: 500;
+  font-size: 12px;
+  display: flex;
+}
+[data-route="Form/Add Timesheet/Add Timesheet"]
+  .layout-main-section-wrapper
+  .layout-main-section
+  .form-message
+  div {
+  justify-content: space-around;
+}
+[data-route="Form/Add Timesheet/Add Timesheet"]
+  .layout-main-section-wrapper
+  .layout-main-section
+  .form-message
+  p {
+  margin-bottom: 0;
+  font-size: 12px;
+}
+[data-route="Form/Add Timesheet/Add Timesheet"]
+  .layout-main-section-wrapper
+  .layout-main-section
+  .form-layout
+  .form-page
+  .row
+  .section-body
+  .form-column
+  form {
+  border: 1px solid #cccccc85;
+  padding: 15px 20px;
+  border-radius: 10px;
+}
+[data-route="Form/Add Timesheet/Add Timesheet"]
+  .layout-main-section-wrapper
+  .layout-main-section
+  .form-layout
+  .form-page
+  .row:nth-last-child(1)
+  .section-body
+  .form-column
+  form {
+  border: none;
+  padding: 0;
+  border-radius: 0px;
+}
+[data-route="Form/Add Timesheet/Add Timesheet"]
+  .layout-main-section-wrapper
+  .layout-main-section
+  .form-message
+  div {
+  flex-wrap: wrap;
+}
+[data-route="Form/Add Timesheet/Add Timesheet"] .form-section .form-column h4 {
+  font-weight: 500;
+  color: #21b9e4 !important;
+  font-size: 16px;
+  margin-bottom: 10px !important;
+}
+[data-route="Form/Add Timesheet/Add Timesheet"] .form-message {
+  background: #d3e8fcba !important;
+}
 
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
