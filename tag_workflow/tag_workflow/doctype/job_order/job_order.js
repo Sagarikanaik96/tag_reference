@@ -198,7 +198,7 @@ frappe.ui.form.on("Job Order", {
 			rate_hour_contract_change(frm);
 			if (frappe.validated) {
 				return new Promise(function(resolve, reject) {
-					frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>" + frm.doc.rate + "<br><b>Rate Increase: </b>" + (frm.doc.per_hour - frm.doc.rate) + "<br><b>Total Per Hour Rate: </b>" + frm.doc.per_hour + "",
+					frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time.slice(0, -3) + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>" + frm.doc.rate + "<br><b>Rate Increase: </b>" + (frm.doc.per_hour - frm.doc.rate) + "<br><b>Total Per Hour Rate: </b>" + frm.doc.per_hour + "",
 						function() {
 							let resp = "frappe.validated = false";
 							resolve(resp);
