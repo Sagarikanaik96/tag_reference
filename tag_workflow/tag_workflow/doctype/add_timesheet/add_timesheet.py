@@ -93,8 +93,7 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
                     })
 
                     timesheet.insert(ignore_permissions=True)
-                    if(item['status']):
-                        timesheet = add_status(timesheet, item['status'], item['employee'], job.company, job_order)
+                    timesheet = add_status(timesheet, item['status'], item['employee'], job.company, job_order)
                     timesheet.workflow_state = "Approval Request"
                     timesheet.save(ignore_permissions=True)
                     timesheets.append({"employee": item['employee'], "docname": timesheet.name, "company": job.company, "job_title": job.select_job})
