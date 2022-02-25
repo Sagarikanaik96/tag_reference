@@ -210,9 +210,11 @@ function update_child_time(child, frm){
 		break_start.setHours(bvalue_start[0], bvalue_start[1], 0, 0);
 		break_end.setHours(bvalue_end[0], bvalue_end[1], 0, 0);
 		let break_s = ((break_end - break_start)/(1000*60*60));
-
-		if(break_s <= 0){
+		
+		if(break_s < 0){
 			breaks = 0;
+			frappe.model.set_value(child.doctype, child.name, "break_from", "");
+			frappe.model.set_value(child.doctype, child.name, "break_to", "");
 		}else if(break_start >= time_start && break_start <= time_end && break_end <= time_end && break_end >= time_start && break_start <= break_end){
 			breaks = break_s;
 		}else{
