@@ -6,6 +6,7 @@ from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
 
 # user method update
 STANDARD_USERS = ("Guest", "Administrator")
+Abbr = "Abbreviation is mandatory"
 
 def validate_username(self):
     if not self.username and self.is_new() and self.first_name:
@@ -111,7 +112,7 @@ def validate_abbr(self):
     self.abbr = self.abbr.strip()
 
     if not self.abbr.strip():
-        frappe.throw(_("Abbreviation is mandatory"))
+        frappe.throw(_(Abbr))
 
     sql = "select abbr from tabCompany where name != '{0}' and abbr = '{1}' ".format(self.name, self.abbr)
     if frappe.db.sql(sql):
@@ -188,13 +189,32 @@ def update_cost(self):
                 data.billing_amount = ((data.billing_rate * (hours-data.extra_hours))+data.flat_rate)+(data.extra_hours*data.extra_rate)
                 data.costing_amount = data.costing_rate * costing_hours
 
+def validate_mandatory_fields(self):
+    for data in self.time_logs:
+        if not data.from_time and not data.to_time:
+            frappe.throw(_("Row {0}: From Time and To Time is mandatory.").format(data.idx))
+
+        if not data.activity_type and self.employee:
+            frappe.throw(_("Row {0}: Activity Type is mandatory.").format(data.idx))
+
+#-----------------------------------------------------#
 
 @frappe.whitelist()
 def checkingjobsite(job_site):
     job_site = job_site.strip()
     if not job_site.strip():
-        frappe.throw(_("Abbreviation is mandatory"))
+        frappe.throw(_(Abbr))
     sql = "select job_site from `tabJob Site` where job_site = '{0}' ".format(job_site)
     if frappe.db.sql(sql):
         return append_number_if_name_exists("Job Site", job_site, fieldname="job_site", separator="-", filters=None)
     return job_site
+
+@frappe.whitelist()
+def checkingdesignation_name(designation_name):
+    designation_name = designation_name.strip()
+    if not designation_name.strip():
+        frappe.throw(_(Abbr))
+    sql = "select designation_name from `tabDesignation` where designation_name = '{0}' ".format(designation_name)
+    if frappe.db.sql(sql):
+        return append_number_if_name_exists("Designation", designation_name, fieldname="designation_name", separator="-", filters=None)
+    return designation_name 

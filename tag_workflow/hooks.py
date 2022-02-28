@@ -42,6 +42,7 @@ web_include_css = [
 doctype_js = {
         "User" : "public/js/controllers/user.js",
         "Company": "public/js/controllers/company.js",
+        "Designation":"public/js/controllers/designation.js",
         "Item": "public/js/controllers/item.js",
         "Timesheet": "public/js/controllers/timesheet.js",
         "Quotation": "public/js/controllers/quotation.js",
@@ -111,3 +112,7 @@ override_whitelisted_methods = {
         "frappe.desk.query_report.run": "tag_workflow.utils.whitelisted.run",
         "frappe.desk.desktop.get_desktop_page": "tag_workflow.utils.whitelisted.get_desktop_page"
 }
+
+override_doctype_class = {
+    "Designation":"tag_workflow.dashboard_data.designation.DesignationOverride"
+} 

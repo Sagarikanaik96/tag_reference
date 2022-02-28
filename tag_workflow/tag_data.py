@@ -756,3 +756,9 @@ def staffing_exclussive_org_name(job_order):
     return frappe.db.sql(sql, as_dict=1)
     
     
+@frappe.whitelist()
+def checkingdesignationandorganization(designation_name,company=None):
+    sql = "select designation,organization from `tabDesignation` where designation = '{0}' and organization = '{1}' ".format(designation_name,company)
+    if frappe.db.sql(sql):
+        return False
+    return True 

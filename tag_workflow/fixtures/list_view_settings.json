@@ -12,5 +12,19 @@
   "parentfield": null,
   "parenttype": null,
   "total_fields": "7"
+ },
+ {
+  "disable_auto_refresh": 0,
+  "disable_count": 0,
+  "disable_sidebar_stats": 0,
+  "docstatus": 0,
+  "doctype": "List View Settings",
+  "fields": "[{\"label\":\"Company Name\",\"fieldname\":\"company_name\"},{\"label\":\"Contact Name\",\"fieldname\":\"lead_name\"},{\"label\":\"Email Address\",\"fieldname\":\"email_id\"},{\"label\":\"Phone\",\"fieldname\":\"phone_no\"},{\"label\":\"Status\",\"fieldname\":\"status\"}]",
+  "modified": "2022-02-25 02:17:25.754919",
+  "name": "Lead",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "total_fields": "6"
  }
 ]

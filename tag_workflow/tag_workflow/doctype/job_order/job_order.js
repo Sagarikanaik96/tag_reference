@@ -117,7 +117,7 @@ frappe.ui.form.on("Job Order", {
 			hide_unnecessary_data(frm);
 		}
 
-		if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))) {
+		if ((cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
 			if (frm.doc.resumes_required) {
 				frm.add_custom_button(__('Assign Employee'), function() {
 					assign_employees(frm);
@@ -128,7 +128,18 @@ frappe.ui.form.on("Job Order", {
 				})
 			}
 		}
-
+		else if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))) {
+			if (frm.doc.resumes_required) {
+				cur_frm.add_custom_button(__('Assign Employee'), function() {
+					assign_employees(frm);
+				})
+			} else {
+				frm.add_custom_button(__('Claim Order'), function() {
+					claim_job_order_staffing(frm);
+				})
+			}
+		}
+		
 		if (frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
 			show_claim_bar(frm);
 		}
@@ -198,7 +209,7 @@ frappe.ui.form.on("Job Order", {
 			rate_hour_contract_change(frm);
 			if (frappe.validated) {
 				return new Promise(function(resolve, reject) {
-					frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>" + frm.doc.rate + "<br><b>Rate Increase: </b>" + (frm.doc.per_hour - frm.doc.rate) + "<br><b>Total Per Hour Rate: </b>" + frm.doc.per_hour + "",
+					frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time.slice(0, -3) + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>" + frm.doc.rate + "<br><b>Rate Increase: </b>" + (frm.doc.per_hour - frm.doc.rate) + "<br><b>Total Per Hour Rate: </b>" + frm.doc.per_hour + "",
 						function() {
 							let resp = "frappe.validated = false";
 							resolve(resp);
@@ -940,7 +951,7 @@ function timesheets_view(frm) {
 }
 
 function claim_orders(frm) {
-    if (frm.doc.order_status == 'Upcoming' && frm.doc.resumes_required == 0) {
+    if ((frm.doc.order_status == 'Upcoming' || (cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date && cur_frm.doc.from_date == frappe.datetime.now_date())) && frm.doc.resumes_required == 0 ) {
         if (frm.doc.staff_org_claimed) {
             frappe.route_options = {
                 "job_order": ["=", frm.doc.name],

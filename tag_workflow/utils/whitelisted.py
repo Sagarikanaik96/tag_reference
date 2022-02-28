@@ -307,14 +307,14 @@ def get_order_data():
             for j in job_order:
                 if((j[0] in job_list) and len(result) <= 5):
                     date,time, job_site, company, per_hour, select_job = frappe.db.get_value(JO, {"name": j[0]}, ["from_date","job_start_time","job_site", "company", "per_hour", "select_job"])
-                    result.append({"name": j, "date": date.strftime("%d %b, %Y "),"time":converttime(time), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
+                    result.append({"name": j, "date": (str(date.strftime("%d %b, %Y "))+ ' '+str(converttime(time))), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
             return result
 
         elif(company_type in ["Hiring", "Exclusive Hiring"]):
             order1 = f" select name,from_date,job_start_time,job_site, company, per_hour, order_status,select_job from `tabJob Order` where company = '{company}' and '{frappe.utils.nowdate()}'  between from_date and to_date  order by creation desc limit 5"
             order = frappe.db.sql(order1,as_dict=1)
             for o in order:
-                result.append({"name":o['name'], "date":o['from_date'].strftime("%d %b, %Y "),"time":converttime(o['job_start_time']),"job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour'], "select_job": o['select_job']})
+                result.append({"name":o['name'], "date":(str(o['from_date'].strftime("%d %b, %Y "))+' ' +str(converttime(o['job_start_time']))),"job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour'], "select_job": o['select_job']})
             return result
     except Exception as e:
         frappe.msgprint(e)
