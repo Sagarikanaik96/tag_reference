@@ -140,49 +140,11 @@ frappe.ui.form.on("Job Order", {
 			}
 		}
 		
-		if (frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
-			show_claim_bar(frm);
-		}
+		cancel_job_order_deatils(frm)
 
-		if (cur_frm.doc.__islocal == 1) {
-			check_company_detail(frm);
-			frappe.db.get_doc("Company", cur_frm.doc.company).then((doc) => {
-				if (doc.organization_type === "Staffing") {
-					cur_frm.set_value("company", "");
-				}
-			});
-			cancel_joborder(frm);
-		} else {
-			timer_value(frm);
-			let roles = frappe.user_roles;
-			if (roles.includes("Hiring User") || roles.includes("Hiring Admin")) {
-				if (frappe.datetime.now_datetime() >= cur_frm.doc.from_date && cur_frm.doc.to_date >= frappe.datetime.now_datetime()) {
-					frm.set_df_property("no_of_workers", "read_only", 0);
-				}
-			}
-		}
+		deny_job_order(frm)
 
-		if (cur_frm.doc.is_single_share == 1 && frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
-			frm.add_custom_button(__("Deny Job Order"), function() {
-				frappe.call({
-					method: "tag_workflow.tag_workflow.doctype.job_order.job_order.after_denied_joborder",
-					args: {
-						staff_company: frm.doc.staff_company,
-						joborder_name: frm.doc.name,
-						job_title: frm.doc.select_job,
-						hiring_name: frm.doc.company,
-					},
-					freeze: true,
-					freeze_message: "<p><b>preparing notification for hiring orgs...</b></p>",
-					callback: function(r) {
-						cur_frm.refresh();
-						cur_frm.reload_doc();
-					},
-				});
-			});
-		} else {
-			frm.remove_custom_button("Deny Job Order");
-		}
+		
 	},
 
 	select_job: function(frm) {
@@ -1241,4 +1203,54 @@ function deleting_data(frm){
 		}
 
 	})
+}
+
+function deny_job_order(frm) {
+	if (cur_frm.doc.is_single_share == 1 && frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
+			frm.add_custom_button(__("Deny Job Order"), function() {
+				frappe.call({
+					method: "tag_workflow.tag_workflow.doctype.job_order.job_order.after_denied_joborder",
+					args: {
+						staff_company: frm.doc.staff_company,
+						joborder_name: frm.doc.name,
+						job_title: frm.doc.select_job,
+						hiring_name: frm.doc.company,
+					},
+					freeze: true,
+					freeze_message: "<p><b>preparing notification for hiring orgs...</b></p>",
+					callback: function(r) {
+						cur_frm.refresh();
+						cur_frm.reload_doc();
+					},
+				});
+			});
+		} else {
+			frm.remove_custom_button("Deny Job Order");
+		}
+	
+}
+
+
+function cancel_job_order_deatils(frm) {
+	if (frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
+			show_claim_bar(frm);
+		}
+
+		if (cur_frm.doc.__islocal == 1) {
+			check_company_detail(frm);
+			frappe.db.get_doc("Company", cur_frm.doc.company).then((doc) => {
+				if (doc.organization_type === "Staffing") {
+					cur_frm.set_value("company", "");
+				}
+			});
+			cancel_joborder(frm);
+		} else {
+			timer_value(frm);
+			let roles = frappe.user_roles;
+			if (roles.includes("Hiring User") || roles.includes("Hiring Admin")) {
+				if (frappe.datetime.now_datetime() >= cur_frm.doc.from_date && cur_frm.doc.to_date >= frappe.datetime.now_datetime()) {
+					frm.set_df_property("no_of_workers", "read_only", 0);
+				}
+			}
+		}
 }

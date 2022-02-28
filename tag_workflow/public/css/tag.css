@@ -688,6 +688,7 @@ input::-webkit-credentials-auto-fill-button {
   .form-message
   div {
   justify-content: space-around;
+  flex-wrap: wrap;
 }
 [data-route="Form/Add Timesheet/Add Timesheet"]
   .layout-main-section-wrapper
@@ -722,13 +723,6 @@ input::-webkit-credentials-auto-fill-button {
   border: none;
   padding: 0;
   border-radius: 0px;
-}
-[data-route="Form/Add Timesheet/Add Timesheet"]
-  .layout-main-section-wrapper
-  .layout-main-section
-  .form-message
-  div {
-  flex-wrap: wrap;
 }
 [data-route="Form/Add Timesheet/Add Timesheet"] .form-section .form-column h4 {
   font-weight: 500;
