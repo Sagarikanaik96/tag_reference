@@ -227,7 +227,7 @@ def get_company_details(comp_name):
 @frappe.whitelist(allow_guest=False)
 def get_joborder_value(user, sid, company_type, name):
     try:
-        if(company_type in ["Staffing", "Hiring", "TAG", "Exclusive Hiring"] and user == frappe.session.user and sid == frappe.cache().get_value("sessions")[user]):
+        if(company_type in ["Staffing", "Hiring", "TAG", "Exclusive Hiring"] and frappe.session.user and user and user == frappe.session.user and sid == frappe.cache().get_value("sessions")[user]):
             sql = ''' select name,category,from_date,to_date,select_job,job_order_duration,job_site,no_of_workers,rate from `tabJob Order` where name = "{0}" '''.format(name)
             value = frappe.db.sql(sql,as_dict=True)
             if value:
@@ -237,7 +237,7 @@ def get_joborder_value(user, sid, company_type, name):
     except Exception as e:
         print(e)
         frappe.log_error(e, 'Job order list')
-        return []
+        return 'error_occur'
 @frappe.whitelist()
 def selected_days(doctype, txt, searchfield, page_len, start, filters):
    days="select name from `tabDays` order by creation desc"

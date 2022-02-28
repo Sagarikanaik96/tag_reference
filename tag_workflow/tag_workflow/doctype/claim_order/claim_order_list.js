@@ -9,7 +9,7 @@ frappe.listview_settings['Claim Order'] = {
 
         }
 
-        else if((listview.filters).length==2 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
+        else if((listview.filters).length==2 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){  
             listview.page.set_secondary_action('Select Head Count', () => refresh(listview), 'octicon octicon-sync');
         }
         else if((listview.filters).length==3 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
@@ -105,7 +105,7 @@ function refresh(listview){
     
                                 {'fieldname': 'inputdata2', 'fieldtype': 'Column Break',},
     
-                                {fieldname: "html_date",fieldtype: "HTML",options:"<label>Date:</label>"+ r['from_date']+'-' +r['to_date']},                            
+                                {fieldname: "html_date",fieldtype: "HTML",options:"<label>Date:</label>"+ frappe.format(r['from_date'], {'fieldtype': 'Date'})+'--' +frappe.format(r['to_date'], {'fieldtype': 'Date'})},                            
                                 {fieldname: "html_workers",fieldtype: "HTML",options: "<label>No. Of Workers Required:</label>"+r['no_of_workers']},
                                 {'fieldname': 'inputdata1', 'fieldtype': 'Section Break',},
                                 {fieldname: "staff_companies",fieldtype: "HTML",options:profile_html},
@@ -132,7 +132,7 @@ function refresh(listview){
                                             setTimeout(function () {
                                                 window.location.href='/app/job-order/'+listview.data[0].job_order
                                             }, 3000);
-                                                frappe.msgprint('Notification send successfully')	
+                                                frappe.show_alert({message:__('Notification send successfully'),indicator:'green'}, 5);	
                                         }
                                     })
                                 }
@@ -238,7 +238,7 @@ function modify_claims(listview){
                                 {fieldname: "html_job_title1",fieldtype: "HTML",options:"<label>Job Title:</label>" + r['select_job']},
                                 {fieldname: "html_per_hour1",fieldtype: "HTML",options: "<label>Price:</label>$"+r['per_hour']},
                                 {'fieldname': 'inputdata3', 'fieldtype': 'Column Break',},
-                                {fieldname: "html_date1",fieldtype: "HTML",options:"<label>Date:</label>"+ r['from_date']+'-' +r['to_date']},                            
+                                {fieldname: "html_date1",fieldtype: "HTML",options:"<label>Date:</label>"+ frappe.format(r['from_date'], {'fieldtype': 'Date'})+'--' +frappe.format(r['to_date'], {'fieldtype': 'Date'})},                            
                                 {fieldname: "html_workers1",fieldtype: "HTML",options: "<label>No. Of Workers Required:</label>"+(r['no_of_workers']-r['worker_filled'])},
                                 {fieldname: 'inputdata2', 'fieldtype': 'Section Break',},
                                 {fieldname: "staff_companies1",fieldtype: "HTML",options:profile_html},
@@ -263,7 +263,8 @@ function modify_claims(listview){
                                             setTimeout(function () {
                                                 window.location.href='/app/job-order/'+listview.data[0].job_order
                                             }, 2000); 
-                                                frappe.msgprint('Notification send successfully')	
+                                                frappe.show_alert({message:__('Notification send successfully'),indicator:'green'}, 5);	
+	
                                         }
                                     })
                                 }
@@ -276,10 +277,12 @@ function modify_claims(listview){
 }
 function update_claims(data_len,l,dict,job_data,r){
     let valid1=""
+    let total_count = 0
     for(let i=0;i<data_len;i++){     
                                
         let y=document.getElementById("_"+job_data[i].staffing_organization).value
         if(y.length==0){
+            total_count  += job_data[i].approved_no_of_workers
             continue
         }
         y=parseInt(y)
@@ -328,7 +331,7 @@ function update_claims(data_len,l,dict,job_data,r){
         else if(l>(r['no_of_workers']-r['worker_filled']))
         {
             frappe.msgprint({
-                message: __("No Of Workers Exceed For Then required"),
+                message: __("No Of Workers Exceed For Than required"),
                 title: __("Error"),
                 indicator: "red",
               });
@@ -339,12 +342,22 @@ function update_claims(data_len,l,dict,job_data,r){
               }, 5000);
         }
         else{
-                dict[job_data[i].staffing_organization]=y
-
-           
-
+            total_count += y
+            dict[job_data[i].staffing_organization]=y
         }
     
+    }
+    if (total_count > r['no_of_workers']-r['worker_filled']){
+        frappe.msgprint({
+            message: __("No Of Workers Exceed For Than required"),
+            title: __("Error"),
+            indicator: "red",
+          });
+          valid1="False"
+
+          setTimeout(function () {
+            location.reload()                                    
+          }, 5000);
     }
     return {dict,valid1}
 }
