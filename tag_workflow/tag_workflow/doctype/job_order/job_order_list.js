@@ -178,9 +178,12 @@ frappe.listview_settings['Job Order'] = {
 								method: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_joborder_value",
 								args: {"name": cname, "user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "sid": frappe.boot.tag.tag_user_info.sid},
 								callback: function(res) {
-									if (!res.exc) {
-										$('#'+div_id).html(popup_content1(res.message));
+									if(res.message=='error_occur'){
+										window.location.reload()
 									}
+									else if (!res.exc) {
+										$('#'+div_id).html(popup_content1(res.message));
+									}		 
 								}
 							});
 							return '<div id="'+ div_id +'">Loading...</div>';
