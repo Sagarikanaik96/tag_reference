@@ -1,13 +1,13 @@
 
 function sorted(n){
-  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  var table, rows, switching, i, shouldSwitch, dir, switchcount = 0;
   table = document.getElementById("sorting");
   switching = true;
   dir = "asc";
   while (switching) {
     switching = false;
     rows = table.rows;
-    names = checking(rows,n,dir)
+    let names = checking(rows,n,dir,shouldSwitch)
     shouldSwitch = names.shouldSwitch
     i = names.i
     if (shouldSwitch) {
@@ -24,12 +24,12 @@ function sorted(n){
 }
 
 
-function checking(rows,n,dir) {
+function checking(rows,n,dir,shouldSwitch) {
   
-  for (i = 1; i < (rows.length - 1); i++) {
+  for (let i = 1; i < (rows.length - 1); i++) {
     shouldSwitch = false;
-    x = rows[i].getElementsByTagName("TD")[n];
-    y = rows[i + 1].getElementsByTagName("TD")[n];
+    var x = rows[i].getElementsByTagName("TD")[n];
+    var y = rows[i + 1].getElementsByTagName("TD")[n];
     if (dir == "asc") {
       if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
         shouldSwitch = true;
