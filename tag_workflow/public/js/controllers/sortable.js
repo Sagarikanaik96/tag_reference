@@ -7,7 +7,8 @@ function sorted(n){
   while (switching) {
     switching = false;
     rows = table.rows;
-    let names = checking(rows,n,dir)
+    shouldSwitch = false;
+    let names = checking(rows,n,dir,shouldSwitch)
     shouldSwitch = names.shouldSwitch
     i = names.i
     if (shouldSwitch) {
@@ -24,10 +25,10 @@ function sorted(n){
 }
 
 
-function checking(rows,n,dir) {
+function checking(rows,n,dir,shouldSwitch) {
   
   for (let i = 1; i < (rows.length - 1); i++) {
-    var shouldSwitch = false;
+    shouldSwitch = false;
     var x = rows[i].getElementsByTagName("TD")[n];
     var y = rows[i + 1].getElementsByTagName("TD")[n];
     if (dir == "asc") {
