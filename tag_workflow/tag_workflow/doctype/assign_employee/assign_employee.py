@@ -38,7 +38,7 @@ def get_dest(dest):
 def check_distance(emp, distance, location):
     try:
         result, source = [], []
-        tag_gmap_key = frappe.get_site_config().tag_gmap_key or ''
+        tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
         if not tag_gmap_key:
             frappe.msgprint(_("GMAP api key not found"))
             return ()
@@ -81,7 +81,7 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
         if not job_category:
             sql = """ select name, employee_name, street_address, city, state, zip from `tabEmployee` where company = '{0}' and status = 'Active' and name NOT IN (select parent from `tabBlocked Employees` where blocked_from = '{2}') and name NOT IN (select parent from `tabDNR`  where dnr = '{2}') and name NOT IN ('{2}') and employee_name like '%%{3}%%' and name NOT IN (select e.employee from `tabAssign Employee Details` e inner join `tabAssign Employee` a where a.name = e.parent and a.hiring_organization = '{1}' and a.job_order not in (select name from `tabJob Order` where company = '{1}' and order_status = "Completed")) """.format(emp_company, company, value, '%s' % txt)
         else:
-            sql = """ select name, employee_name, street_address, city, state, zip from `tabEmployee` where company = '{0}' and status = 'Active' and name in (select parent from `tabJob Category` where job_category = '{1}' or job_category IS NULL) and name NOT IN (select parent from `tabBlocked Employees` where blocked_from = '{2}') and name NOT IN (select parent from `tabDNR`  where dnr = '{2}') and (name NOT IN (select parent from `tabUnsatisfied Organization` where unsatisfied_organization_name = '{2}')) and name NOT IN ('{3}') and employee_name like '%%{4}%%' """.format(emp_company, job_category, company, value, '%s' % txt)
+            sql = """ select name, employee_name, street_address, city, state, zip from `tabEmployee` where company = '{0}'and status = 'Active' and name in (select parent from `tabJob Category` where job_category = '{1}') or name in (select name from `tabEmployee` where job_category is null and company = '{0}' and user_id is null) and name NOT IN (select parent from `tabBlocked Employees` where blocked_from = '{2}') and name NOT IN (select parent from `tabDNR`  where dnr = '{2}') and (name NOT IN (select parent from `tabUnsatisfied Organization` where unsatisfied_organization_name = '{2}')) and name NOT IN ('{3}') and employee_name like '%%{4}%%' """.format(emp_company, job_category, company, value, '%s' % txt)
         emp = frappe.db.sql(sql, as_dict=1)
         result = check_distance(emp, distance, job_location)
         return result
