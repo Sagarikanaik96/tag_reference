@@ -28,7 +28,7 @@ function sorted(n){
 function checking(rows,n,dir,shouldSwitch) {
   
   for (let i = 1; i < (rows.length - 1); i++) {
-    shouldSwitch = false;
+    
     var x = rows[i].getElementsByTagName("TD")[n];
     var y = rows[i + 1].getElementsByTagName("TD")[n];
     if (dir == "asc") {
