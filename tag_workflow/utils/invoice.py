@@ -125,19 +125,19 @@ def create_month_sales_invoice(source_name, company,month,year,first_day,last_da
         grand_total = 0
         
         income_account, cost_center, default_expense_account, tag_charges,creater_company,creater_city,creater_state,creater_zip = frappe.db.get_value("Company", company, ["default_income_account", "cost_center", "default_expense_account", "tag_charges","address","city","state","zip"])
-        for_company,for_company_city,for_company_state,for_company_zip = frappe.db.get_value("Company",source,["address","city","state","zip"])
+        for_company,for_company_city,for_company_state,for_company_zip,staff_tag_charge = frappe.db.get_value("Company",source,["address","city","state","zip","tag_charges"])
 
         sql = """ select grand_total from `tabSales Invoice` where docstatus = 1 and company = '{0}' and posting_date between '{1}' and '{2}' """.format(source, start, end)
         invoice = frappe.db.sql(sql, as_dict=1)
 
         for inv in invoice:
-            total_amount += (inv.grand_total * tag_charges)/100
+            total_amount += (inv.grand_total * staff_tag_charge)/100
             grand_total += inv.grand_total
         
         item = {"item_name": "Service charges for "+str(source), "description": "Service", "uom": "Nos", "qty": 1, "stock_uom": "Nos", "conversion_factor": 1, "stock_qty": 1, "rate": total_amount, "amount": total_amount, "income_account": income_account, "cost_center": cost_center, "default_expense_account": default_expense_account}
         doclist.append("items", item)
 
-        doclist.tag_charge1 = tag_charges
+        doclist.tag_charge1 = staff_tag_charge
         doclist.tag_grand_total1 = grand_total
 
         # tag company detail
