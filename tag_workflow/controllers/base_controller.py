@@ -8,6 +8,7 @@ from frappe import _, msgprint, throw
 
 MASTER = ["Company", "User", "Item"]
 CRM = ["Lead"]
+PROJECT = ["Timesheet"]
 
 def validate_controller(doc, method):
     doctype = doc.meta.get("name")
@@ -25,6 +26,10 @@ def validate_controller(doc, method):
             from tag_workflow.controllers.crm_controller import CRMController
             if method == "validate":
                 CRMController(doc, doctype, method).validate_crm()
+        elif doctype in PROJECT:
+            from tag_workflow.controllers.project_controller import ProjectController
+            if method == "validate":
+                ProjectController(doc, doctype, method).validate_project()
     except Exception as e:
         frappe.throw(_("{0}").format(e))
         print(e)

@@ -8,7 +8,7 @@ from erpnext.hr.doctype.employee.employee import Employee
 from erpnext.setup.doctype.company.company import Company
 from erpnext.crm.doctype.lead.lead import Lead
 from erpnext.projects.doctype.timesheet.timesheet import Timesheet
-from tag_workflow.utils.doctype_method import validate_username, suggest_username, send_login_mail, raise_no_permission_to, validate_duplicate_user_id, validate_abbr, validate_standard_navbar_items, create_contact, update_cost, validate_mandatory_fields
+from tag_workflow.utils.doctype_method import validate_username, suggest_username, send_login_mail, raise_no_permission_to, validate_duplicate_user_id, validate_abbr, validate_standard_navbar_items, create_contact, update_cost, validate_mandatory_fields, run_post_save_methods
 import requests, json
 
 __version__ = '0.0.1'
@@ -18,6 +18,7 @@ User.validate_username = validate_username
 User.suggest_username = suggest_username
 User.send_login_mail = send_login_mail
 Document.raise_no_permission_to = raise_no_permission_to
+Document.run_post_save_methods = run_post_save_methods
 Employee.validate_duplicate_user_id = validate_duplicate_user_id
 Company.validate_abbr = validate_abbr
 NavbarSettings.validate_standard_navbar_items =validate_standard_navbar_items
