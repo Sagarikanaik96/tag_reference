@@ -112,6 +112,7 @@ frappe.ui.form.on('Assign Employee', {
 	},
 
 	setup: function(frm){
+		frm.set_value('company', frappe.boot.tag.tag_user_info.company)
 		frm.set_query("company", function(doc){
 			return {
 				filters: [
@@ -366,7 +367,7 @@ function make_notification_approved(frm){
 
 function resume_data(frm,msg,table){
 	for(var r in table){
-		if(table[r].resume===null || table[r].resume==undefined){
+		if(table[r].resume===null || table[r].resume==undefined || table[r].resume==''){
 			msg.push('Attach the Resume to Assign the Employee.');
 			frappe.validated=false
 		}
