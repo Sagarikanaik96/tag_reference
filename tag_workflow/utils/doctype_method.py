@@ -200,6 +200,7 @@ def validate_mandatory_fields(self):
 
 def run_post_save_methods(self):
     doc_before_save = self.get_doc_before_save()
+    print(doc_before_save)
 
     if self._action=="save":
         self.run_method("on_update")
