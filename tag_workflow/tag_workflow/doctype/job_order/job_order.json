@@ -309,13 +309,13 @@
   },
   {
    "fieldname": "claim",
-   "fieldtype": "Data",
+   "fieldtype": "Long Text",
    "hidden": 1,
    "label": "Claimed By"
   },
   {
    "fieldname": "staff_org_claimed",
-   "fieldtype": "Data",
+   "fieldtype": "Long Text",
    "hidden": 1,
    "label": "Staffing Org Claimed"
   },
@@ -602,7 +602,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-22 04:32:48.594216",
+ "modified": "2022-03-02 01:12:05.966167",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

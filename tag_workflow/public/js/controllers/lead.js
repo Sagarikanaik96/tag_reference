@@ -30,7 +30,21 @@ frappe.ui.form.on("Lead", {
 				frappe.validated = false;
 			}
 		}
-
+  },
+  status:function(frm){
+    if(frm.doc.__islocal!=1){
+      frappe.db.get_value('Lead',{name:frm.doc.name},['status'],function(r){
+        if(r.status=='Close' && frm.doc.status=='On Hold'){
+          frappe.msgprint({
+            message: __("You can not change the status from 'Close' to 'On-Hold' "),
+            title: __("Error"),
+            indicator: "red",
+          });
+          frappe.validated='False'
+          frm.set_value('status',r.status)
+        }
+      })
+    }
   },
   validate: function (frm) {
     let phone = frm.doc.phone_no;
