@@ -138,12 +138,26 @@ function request_sign(frm){
 	if(cur_frm.doc.__islocal != 1 && cur_frm.doc.signe_company && cur_frm.doc.owner == frappe.session.user){
 		frm.add_custom_button("Request Signature", function() {
 			frappe.call({
-				method: "tag_workflow.utils.whitelisted.request_signature",
-				freeze: true,
-				freeze_message: "<p><b>sending signature request...</b></p>",
-				args: {
-					"staff_user": frm.doc.contract_prepared_by ? frm.doc.contract_prepared_by : frappe.session.user,
-					"staff_company": frm.doc.staffing_company, "hiring_user": frm.doc.end_party_user, "name": frm.doc.name
+				'method':'tag_workflow.tag_data.company_exist',
+				'args':{'hiring_company':frm.doc.hiring_company},
+				callback:function(r){
+					if(r.message=='yes'){
+						frappe.call({
+							method: "tag_workflow.utils.whitelisted.request_signature",
+							freeze: true,
+							freeze_message: "<p><b>sending signature request...</b></p>",
+							args: {
+								"staff_user": frm.doc.contract_prepared_by ? frm.doc.contract_prepared_by : frappe.session.user,
+								"staff_company": frm.doc.staffing_company, "hiring_user": frm.doc.end_party_user, "name": frm.doc.name
+							},
+							callback:function(rm){
+								frappe.msgprint('Signature Request Sent Successfully')
+							}
+						});
+					}
+					else{
+						frappe.msgprint('Firstly OnBoard the Company')
+					}	
 				}
 			});
 		}).addClass("btn-primary");
