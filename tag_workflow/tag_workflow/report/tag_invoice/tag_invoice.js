@@ -42,19 +42,32 @@ frappe.query_reports["Tag Invoice"] = {
 			"fieldname":"from_fiscal_year",
 			"label": __("Start Year"),
 			"fieldtype": "Select",
-			"options": "\n2021\n2022\n2023\n2024",
+			"options": year_list(),
 			"reqd": 1,
-			"default": '2022'
+			"default": new Date().getUTCFullYear()
 
 		},
-	]
+	],
+	onload:function(frm){
+		if (!frappe.user_roles.includes('Tag Admin')){
+			// setTimeout(hide_field,100)
+			hide_field()
+		}
+	}	
 };
-
-if (frappe.user_roles.includes('Tag Admin')){
-	setTimeout(hide_field,100)
-}
 
 function hide_field(){
 	frappe.query_report.get_filter("company").toggle(false)
 
+}
+
+function  year_list(){
+	let year_opt = '2021'
+	let start_year = 2021
+	let current_year = new Date().getUTCFullYear()
+
+	for (let i = start_year +1;i <=current_year;i++){
+		year_opt += '\n' + i
+	}
+return year_opt
 }
