@@ -107,6 +107,12 @@ frappe.ui.form.on("Job Order", {
 	refresh: function(frm) {
 		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
 		job_order_cancel_button(frm);
+		$(document).on('click', '[data-fieldname="job_start_time"]', function(){
+			$('.datepicker').show()
+			time_validation(frm)
+
+		});
+
 		setTimeout(function() {
 			view_button(frm);
 			make_invoice(frm);
@@ -1081,16 +1087,17 @@ function time_validation(frm){
 	  var diff=current_date.getTime()-order_date.getTime()
 	  diff=diff/60000
 	  if(diff>=0){
+		cur_frm.set_value('job_start_time',(current_date.getHours())+':'+(current_date.getMinutes()+1))
+		cur_frm.refresh_field('job_start_time')
+		cur_frm.refresh_field('from_date')
+		$('.datepicker').hide()
 		frappe.msgprint({
 		  message: __('Past Time Is Not Acceptable'),
 		  title: __("Error"),
 		  indicator: "orange",
 		});
-		cur_frm.set_value('job_start_time',(current_date.getHours())+':'+(current_date.getMinutes()+1))
-		// cur_frm.clear_field('job_start_time')
-		cur_frm.refresh_field('job_start_time')
 		frappe.validated=false
-	  }
+	}
 	}
   }
 
