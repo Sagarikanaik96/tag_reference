@@ -81,7 +81,7 @@ frappe.ui.form.ControlAttach = frappe.ui.form.ControlData.extend({
 			this.$input.toggle(false);
 			// value can also be using this format: FILENAME,DATA_URL
 			// Important: We have to be careful because normal filenames may also contain ","
-			const matches = new RegExp('^([^:]+),(.+):(.+)$');
+			const matches = '^([^:]+),(.+):(.+)$';
 			let file_url_parts = this.value.match(matches);
 			let filename;
 			if (file_url_parts) {
