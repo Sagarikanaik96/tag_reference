@@ -12,7 +12,6 @@ app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.svg"
 sales_invoice="Sales Invoice"
 # Includes in <head>
 # ------------------
-
 fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow", "Workflow State", "Workflow Action Master"]
 
 boot_session = "tag_workflow.utils.trigger_session.update_boot"
@@ -31,7 +30,8 @@ app_include_js = [
         "/assets/tag_workflow/js/controllers/sortable.js",
         "/assets/tag-template.min.js",
         "/assets/js/file_upload.min.js",
-        "/assets/js/tag-min.js"
+        "/assets/js/tag-min.js",
+        "/assets/tag_workflow/js/frappe/form/controls/attach.js"
 ]
 
 web_include_css = [

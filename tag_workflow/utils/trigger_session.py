@@ -31,8 +31,9 @@ def get_user_info():
     try:
         user = frappe.session.user
         user_doc = frappe.get_doc(USR, user)
-        api_key = frappe.get_site_config().tag_gmap_key
-        data = {"user_type": user_doc.tag_user_type, "company": user_doc.company, "company_type": user_doc.organization_type, "api_key": api_key, "sid": frappe.session.sid}
+        api_key = frappe.get_site_config().tag_gmap_key or ''
+        org = frappe.get_site_config()._fs_org or ''
+        data = {"user_type": user_doc.tag_user_type, "company": user_doc.company, "company_type": user_doc.organization_type, "api_key": api_key, "sid":frappe.session.sid, 'org':org}
         frappe.cache().set_value("sessions", {user: frappe.session.sid})
         return data
     except Exception as e:
