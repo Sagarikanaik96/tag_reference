@@ -56,6 +56,11 @@ frappe.ui.form.on("Job Order", {
 	},
 	
 	setup: function(frm) {
+		if(frm.order_status != 'Completed'){
+			$('div.row:nth-child(6) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'div_rate');
+			$('div.row:nth-child(9) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id','div_extra');
+		}
+
 		frm.set_query("job_site", function(doc) {
 			return {
 				query: "tag_workflow.tag_data.get_org_site",

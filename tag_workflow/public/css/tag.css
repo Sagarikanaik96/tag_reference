@@ -651,6 +651,19 @@ input::-webkit-credentials-auto-fill-button {
   position: absolute;
   right: 10px;
 }
+[data-page-route="Job Order"] #div_rate, #div_extra{
+  position:relative;
+}
+[data-page-route="Job Order"] #div_rate>input, #div_extra>input{
+  padding-left: 18px;
+}
+[data-page-route="Job Order"] #div_rate:after, #div_extra:after{
+  position: absolute;
+  left: 6px;
+  top: 21.5%;
+  font-size: 13px;
+  content: '$';
+}
 [data-route="Workspaces/My Activities"] #page-Workspaces .page-head {
   display: none;
 }
@@ -851,4 +864,20 @@ span.frappe-timestamp.mini {
 
 .sort-selector {
   display: none;
+}
+
+[data-page-route="Company"] #drug_flat, #drug_hour, #bg_flat, #bg_hour, #mvr_flat, #mvr_hour, #shovel_flat, #shovel_hour{
+  position:relative;
+}
+
+[data-page-route="Company"] #drug_flat>input, #drug_hour>input, #bg_flat>input, #bg_hour>input, #mvr_flat>input, #mvr_hour>input, #shovel_flat>input, #shovel_hour>input{
+  padding-left: 18px;
+}
+
+[data-page-route="Company"] #drug_flat:after, #drug_hour:after, #mvr_flat:after, #mvr_hour:after, #bg_flat:after, #bg_hour:after, #shovel_flat:after, #shovel_hour:after{
+  position: absolute;
+  left: 6px;
+  top: 22%;
+  font-size: 13px;
+  content: '$';
 }
