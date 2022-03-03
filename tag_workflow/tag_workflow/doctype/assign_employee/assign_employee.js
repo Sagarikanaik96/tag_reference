@@ -355,7 +355,7 @@ function make_notification_approved(frm){
 			"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
 			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
 			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
-			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,"worker_fill":frm.doc.claims_approved
+			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,"worker_fill":cur_frm.doc.employee_details.length
 		},
 		callback:function(r){
 			setTimeout(function () {
