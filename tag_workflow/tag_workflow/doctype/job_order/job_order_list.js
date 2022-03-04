@@ -1,11 +1,12 @@
 frappe.listview_settings['Job Order'] = {
 	onload:function(listview){
-		$('[data-fieldname="name"]').attr('placeholder','Order ID')
-		$('[data-fieldname="category"]').attr('placeholder','Industry')
+		$('.list-header-subject > div:nth-child(7) > span:nth-child(1)').html('Industry');
+		$('[data-fieldname="name"]').attr('placeholder','Order ID');
+		$('[data-fieldname="category"]').attr('placeholder','Industry');
 		if(frappe.session.user!='Administrator'){
-			$('.custom-actions.hidden-xs.hidden-md').hide()
-			$('[data-original-title="Refresh"]').hide()
-			$('.menu-btn-group').hide()
+			$('.custom-actions.hidden-xs.hidden-md').hide();
+			$('[data-original-title="Refresh"]').hide();
+			$('.menu-btn-group').hide();
         }
 		frappe.route_options = {
 			"order_status": "",
