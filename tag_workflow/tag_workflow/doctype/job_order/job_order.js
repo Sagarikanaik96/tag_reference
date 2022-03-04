@@ -56,6 +56,11 @@ frappe.ui.form.on("Job Order", {
 	},
 	
 	setup: function(frm) {
+		if(frm.order_status != 'Completed'){
+			$('div.row:nth-child(6) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'div_rate');
+			$('div.row:nth-child(9) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id','div_extra');
+		}
+
 		frm.set_query("job_site", function(doc) {
 			return {
 				query: "tag_workflow.tag_data.get_org_site",
@@ -107,6 +112,12 @@ frappe.ui.form.on("Job Order", {
 	refresh: function(frm) {
 		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
 		job_order_cancel_button(frm);
+		$(document).on('click', '[data-fieldname="job_start_time"]', function(){
+			$('.datepicker').show()
+			time_validation(frm)
+
+		});
+
 		setTimeout(function() {
 			view_button(frm);
 			make_invoice(frm);
@@ -140,49 +151,11 @@ frappe.ui.form.on("Job Order", {
 			}
 		}
 		
-		if (frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
-			show_claim_bar(frm);
-		}
+		cancel_job_order_deatils(frm)
 
-		if (cur_frm.doc.__islocal == 1) {
-			check_company_detail(frm);
-			frappe.db.get_doc("Company", cur_frm.doc.company).then((doc) => {
-				if (doc.organization_type === "Staffing") {
-					cur_frm.set_value("company", "");
-				}
-			});
-			cancel_joborder(frm);
-		} else {
-			timer_value(frm);
-			let roles = frappe.user_roles;
-			if (roles.includes("Hiring User") || roles.includes("Hiring Admin")) {
-				if (frappe.datetime.now_datetime() >= cur_frm.doc.from_date && cur_frm.doc.to_date >= frappe.datetime.now_datetime()) {
-					frm.set_df_property("no_of_workers", "read_only", 0);
-				}
-			}
-		}
+		deny_job_order(frm)
 
-		if (cur_frm.doc.is_single_share == 1 && frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
-			frm.add_custom_button(__("Deny Job Order"), function() {
-				frappe.call({
-					method: "tag_workflow.tag_workflow.doctype.job_order.job_order.after_denied_joborder",
-					args: {
-						staff_company: frm.doc.staff_company,
-						joborder_name: frm.doc.name,
-						job_title: frm.doc.select_job,
-						hiring_name: frm.doc.company,
-					},
-					freeze: true,
-					freeze_message: "<p><b>preparing notification for hiring orgs...</b></p>",
-					callback: function(r) {
-						cur_frm.refresh();
-						cur_frm.reload_doc();
-					},
-				});
-			});
-		} else {
-			frm.remove_custom_button("Deny Job Order");
-		}
+		
 	},
 
 	select_job: function(frm) {
@@ -209,7 +182,7 @@ frappe.ui.form.on("Job Order", {
 			rate_hour_contract_change(frm);
 			if (frappe.validated) {
 				return new Promise(function(resolve, reject) {
-					frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time.slice(0, -3) + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>" + frm.doc.rate + "<br><b>Rate Increase: </b>" + (frm.doc.per_hour - frm.doc.rate) + "<br><b>Total Per Hour Rate: </b>" + frm.doc.per_hour + "",
+					frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time.slice(0, -3) + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>" + (frm.doc.rate).toFixed(2) + "<br><b>Rate Increase: </b>" + (frm.doc.per_hour - frm.doc.rate).toFixed(2) + "<br><b>Total Per Hour Rate: </b>" + (frm.doc.per_hour).toFixed(2) + "",
 						function() {
 							let resp = "frappe.validated = false";
 							resolve(resp);
@@ -1119,16 +1092,17 @@ function time_validation(frm){
 	  var diff=current_date.getTime()-order_date.getTime()
 	  diff=diff/60000
 	  if(diff>=0){
+		cur_frm.set_value('job_start_time',(current_date.getHours())+':'+(current_date.getMinutes()+1))
+		cur_frm.refresh_field('job_start_time')
+		cur_frm.refresh_field('from_date')
+		$('.datepicker').hide()
 		frappe.msgprint({
 		  message: __('Past Time Is Not Acceptable'),
 		  title: __("Error"),
 		  indicator: "orange",
 		});
-		cur_frm.set_value('job_start_time',(current_date.getHours())+':'+(current_date.getMinutes()+1))
-		// cur_frm.clear_field('job_start_time')
-		cur_frm.refresh_field('job_start_time')
 		frappe.validated=false
-	  }
+	}
 	}
   }
 
@@ -1241,4 +1215,54 @@ function deleting_data(frm){
 		}
 
 	})
+}
+
+function deny_job_order(frm) {
+	if (cur_frm.doc.is_single_share == 1 && frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
+			frm.add_custom_button(__("Deny Job Order"), function() {
+				frappe.call({
+					method: "tag_workflow.tag_workflow.doctype.job_order.job_order.after_denied_joborder",
+					args: {
+						staff_company: frm.doc.staff_company,
+						joborder_name: frm.doc.name,
+						job_title: frm.doc.select_job,
+						hiring_name: frm.doc.company,
+					},
+					freeze: true,
+					freeze_message: "<p><b>preparing notification for hiring orgs...</b></p>",
+					callback: function(r) {
+						cur_frm.refresh();
+						cur_frm.reload_doc();
+					},
+				});
+			});
+		} else {
+			frm.remove_custom_button("Deny Job Order");
+		}
+	
+}
+
+
+function cancel_job_order_deatils(frm) {
+	if (frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
+			show_claim_bar(frm);
+		}
+
+		if (cur_frm.doc.__islocal == 1) {
+			check_company_detail(frm);
+			frappe.db.get_doc("Company", cur_frm.doc.company).then((doc) => {
+				if (doc.organization_type === "Staffing") {
+					cur_frm.set_value("company", "");
+				}
+			});
+			cancel_joborder(frm);
+		} else {
+			timer_value(frm);
+			let roles = frappe.user_roles;
+			if (roles.includes("Hiring User") || roles.includes("Hiring Admin")) {
+				if (frappe.datetime.now_datetime() >= cur_frm.doc.from_date && cur_frm.doc.to_date >= frappe.datetime.now_datetime()) {
+					frm.set_df_property("no_of_workers", "read_only", 0);
+				}
+			}
+		}
 }

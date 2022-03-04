@@ -30,7 +30,21 @@ frappe.ui.form.on("Lead", {
 				frappe.validated = false;
 			}
 		}
-
+  },
+  status:function(frm){
+    if(frm.doc.__islocal!=1){
+      frappe.db.get_value('Lead',{name:frm.doc.name},['status'],function(r){
+        if(r.status=='Close' && frm.doc.status=='On Hold'){
+          frappe.msgprint({
+            message: __("You can not change the status from 'Close' to 'On-Hold' "),
+            title: __("Error"),
+            indicator: "red",
+          });
+          frappe.validated='False'
+          frm.set_value('status',r.status)
+        }
+      })
+    }
   },
   validate: function (frm) {
     let phone = frm.doc.phone_no;
@@ -265,14 +279,24 @@ function make_contract(frm) {
 }
 
 function run_contract(frm) {
-  let contract = frappe.model.get_new_doc("Contract");
-  contract.lead = frm.doc.name;
-  contract.contract_prepared_by = frappe.session.user;
-  contract.party_type = "Customer";
-  contract.contract_terms = _contract;
-  contract.staffing_company = cur_frm.doc.company;
-  contract.hiring_company = "";
-  frappe.set_route("form", contract.doctype, contract.name);
+  frappe.db.get_value('Contract',{'staffing_company':cur_frm.doc.company,'hiring_company':cur_frm.doc.company_name,'lead':frm.doc.name},['name'],function(r){
+    if(r.name){
+      window.location.href='/app/contract/'+r.name
+    }
+    else{
+      let contract = frappe.model.get_new_doc("Contract");
+      contract.lead = frm.doc.name;
+      contract.contract_prepared_by = frappe.session.user;
+      contract.party_type = "Customer";
+      contract.contract_terms = _contract;
+      contract.staffing_company = cur_frm.doc.company;
+      contract.hiring_company=cur_frm.doc.company_name;
+      contract.end_party_user=cur_frm.doc.email_id;
+      contract.party_name=cur_frm.doc.company;
+      frappe.set_route("form", contract.doctype, contract.name);
+    }
+  })
+  
 }
 
 /*---------hide details----------*/

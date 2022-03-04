@@ -3,6 +3,7 @@ from frappe import _
 import re
 from frappe.utils import (cint, flt, has_gravatar, escape_html, format_datetime, now_datetime, get_formatted_email, today)
 from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
+from frappe.utils.global_search import update_global_search
 
 # user method update
 STANDARD_USERS = ("Guest", "Administrator")
@@ -197,6 +198,33 @@ def validate_mandatory_fields(self):
         if not data.activity_type and self.employee:
             frappe.throw(_("Row {0}: Activity Type is mandatory.").format(data.idx))
 
+def run_post_save_methods(self):
+    doc_before_save = self.get_doc_before_save()
+    print(doc_before_save)
+
+    if self._action=="save":
+        self.run_method("on_update")
+    elif self._action=="submit":
+        self.run_method("on_update")
+        self.run_method("on_submit")
+    elif self._action=="cancel":
+        self.run_method("on_cancel")
+        self.check_no_back_links_exist()
+    elif self._action=="update_after_submit":
+        self.run_method("on_update_after_submit")
+
+    self.clear_cache()
+    self.notify_update()
+
+    if(self.doctype != "Timesheet"):
+        update_global_search(self)
+
+    self.save_version()
+    self.run_method('on_change')
+
+    if (self.doctype, self.name) in frappe.flags.currently_saving:
+        frappe.flags.currently_saving.remove((self.doctype, self.name))
+    self.latest = None
 #-----------------------------------------------------#
 
 @frappe.whitelist()

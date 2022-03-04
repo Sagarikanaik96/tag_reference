@@ -51,6 +51,7 @@
   "time_format": "HH:mm",
   "time_zone": "America/New_York",
   "two_factor_method": "OTP App",
-  "use_original_name_for_amended_document": 0
+  "use_original_name_for_amended_document": 0,
+  "password_reset_limit": 100
  }
 ]

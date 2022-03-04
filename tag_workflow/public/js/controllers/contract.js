@@ -92,8 +92,7 @@ let _contract = `<p><b>Staffing/Vendor Contract</b></p>
 <p>(18) Governing Law. This Contract is governed by the laws of the state of Florida, regardless of its conflicts of laws rules.</p>
 <p>(19) If Hiring Company utilizes a Staffing Company employee to work on a prevailing wage job, Hiring Company agrees to notify Staffing Company with the correct prevailing wage rate and correct job classification for duties Staffing Company employees will be performing. Failure to provide this information or providing incorrect information may result in the improper reporting of wages, resulting in fines or penalties being imposed upon Staffing Company. The Hiring Company agrees to reimburse Staffing Company for any and all fines, penalties, wages, lost revenue, administrative and/or supplemental charges incurred by Staffing Company.</p>
 <p>(20) WORKERS' COMPENSATION COSTS: Staffing Company represents and warrants that it has a strong safety program, and it is Staffing Company’s highest priority to bring its Workers home safely every day. AFFORDABLE CARE ACT (ACA): Staffing Company represents and warrants that it is in compliance with all aspects of the ACA.</p>
-<p>(21) Representatives. The Hiring Company and the Staffing Company each certifies that its authorized representative has read all of the terms and conditions of this Contract and understands and agrees to the same.</p>
-<p>(22) Extra Contract Language.</p>`
+<p>(21) Representatives. The Hiring Company and the Staffing Company each certifies that its authorized representative has read all of the terms and conditions of this Contract and understands and agrees to the same.</p>`
 
 function update_contract(frm){
 	if(cur_frm.doc.__islocal == 1){
@@ -139,12 +138,26 @@ function request_sign(frm){
 	if(cur_frm.doc.__islocal != 1 && cur_frm.doc.signe_company && cur_frm.doc.owner == frappe.session.user){
 		frm.add_custom_button("Request Signature", function() {
 			frappe.call({
-				method: "tag_workflow.utils.whitelisted.request_signature",
-				freeze: true,
-				freeze_message: "<p><b>sending signature request...</b></p>",
-				args: {
-					"staff_user": frm.doc.contract_prepared_by ? frm.doc.contract_prepared_by : frappe.session.user,
-					"staff_company": frm.doc.staffing_company, "hiring_user": frm.doc.end_party_user, "name": frm.doc.name
+				'method':'tag_workflow.tag_data.company_exist',
+				'args':{'hiring_company':frm.doc.hiring_company},
+				callback:function(r){
+					if(r.message=='yes'){
+						frappe.call({
+							method: "tag_workflow.utils.whitelisted.request_signature",
+							freeze: true,
+							freeze_message: "<p><b>sending signature request...</b></p>",
+							args: {
+								"staff_user": frm.doc.contract_prepared_by ? frm.doc.contract_prepared_by : frappe.session.user,
+								"staff_company": frm.doc.staffing_company, "hiring_user": frm.doc.end_party_user, "name": frm.doc.name
+							},
+							callback:function(rm){
+								frappe.msgprint('Signature Request Sent Successfully')
+							}
+						});
+					}
+					else{
+						frappe.msgprint('Firstly OnBoard the Company')
+					}	
 				}
 			});
 		}).addClass("btn-primary");

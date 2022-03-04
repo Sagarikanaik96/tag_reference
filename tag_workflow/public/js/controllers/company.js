@@ -31,6 +31,14 @@ frappe.ui.form.on("Company", {
     });
   },
   setup: function (frm) {
+    $('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(1) > form:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'drug_flat');
+    $('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(1) > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'drug_hour');
+    $('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(1) > form:nth-child(1) > div:nth-child(7) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'bg_flat');
+    $('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(1) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'bg_hour');
+    $('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'mvr_flat');
+    $('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'mvr_hour');
+    $('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(7) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'shovel_flat');
+    $('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'shovel_hour');
     init_values(frm);
 
     let ORG = "Organization Type";
@@ -143,15 +151,7 @@ frappe.ui.form.on("Company", {
     let receive_email = frm.doc.accounts_receivable_rep_email;
     let pay_email = frm.doc.accounts_payable_email;
 
-    if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
-        frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
-        frappe.validated = false
-
-    }
-		if (phone_no && (phone_no.length != 10 || isNaN(phone_no))){
-			frappe.msgprint({message: __('Not Valid Accounts Payable phone number'), indicator: 'red'})
-			frappe.validated = false
-    }
+    validate_email_phone(email,phone_no)
     if (account_phone_no && (account_phone_no.length != 10 || isNaN(account_phone_no))){
 			frappe.msgprint({message: __('Not Valid Accounts Receivable phone number'), indicator: 'red'})
 			frappe.validated = false
@@ -474,4 +474,17 @@ function org_info(frm){
       }
     }	
   })
+}
+
+
+function validate_email_phone(email,phone_no) {
+  if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
+        frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
+        frappe.validated = false
+
+    }
+    if (phone_no && (phone_no.length != 10 || isNaN(phone_no))){
+      frappe.msgprint({message: __('Not Valid Accounts Payable phone number'), indicator: 'red'})
+      frappe.validated = false
+    }
 }

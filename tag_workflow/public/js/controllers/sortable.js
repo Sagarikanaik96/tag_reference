@@ -1,28 +1,15 @@
 
 function sorted(n){
-  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  var table, rows, switching, i, shouldSwitch, dir, switchcount = 0;
   table = document.getElementById("sorting");
   switching = true;
   dir = "asc";
   while (switching) {
     switching = false;
     rows = table.rows;
-    for (i = 1; i < (rows.length - 1); i++) {
-      shouldSwitch = false;
-      x = rows[i].getElementsByTagName("TD")[n];
-      y = rows[i + 1].getElementsByTagName("TD")[n];
-      if (dir == "asc") {
-        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-          shouldSwitch = true;
-          break;
-        }
-      } else{
-        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-          shouldSwitch = true;
-          break;
-        }
-      }
-    }
+    let names = checking(rows,n,dir)
+    shouldSwitch = names.shouldSwitch
+    i = names.i
     if (shouldSwitch) {
       rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
       switching = true;
@@ -34,4 +21,28 @@ function sorted(n){
       }
     }
   }
+}
+
+
+function checking(rows,n,dir) {
+  var shouldSwitch = false;
+  var i;
+  for (i = 1; i < (rows.length - 1); i++) {
+    var x = rows[i].getElementsByTagName("TD")[n];
+    var y = rows[i + 1].getElementsByTagName("TD")[n];
+    if (dir == "asc") {
+      if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+        shouldSwitch = true;
+        break;
+      }
+    } else{
+      if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+        shouldSwitch = true;
+        break;
+      }
+    }
+  }
+
+  return {shouldSwitch,i};
+
 }

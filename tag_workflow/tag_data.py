@@ -762,3 +762,11 @@ def checkingdesignationandorganization(designation_name,company=None):
     if frappe.db.sql(sql):
         return False
     return True 
+@frappe.whitelist()
+def company_exist(hiring_company):
+    comp=f'select name from `tabCompany` where name="{hiring_company}"'
+    sql=frappe.db.sql(comp,as_list=True)
+    if sql:
+        return 'yes'
+    else:
+        return 'no'
