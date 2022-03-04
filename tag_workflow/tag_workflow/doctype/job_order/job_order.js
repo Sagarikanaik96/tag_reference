@@ -1178,12 +1178,15 @@ function assigned_emp(frm){
 }
 
 function job_order_cancel_button(frm){
-	if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type=='Exclusive Hiring'){
-		frm.add_custom_button(__("Cancel"),function(){
-			cancel_job_order(frm);
-
-		})
-	}
+	frappe.db.get_value('User',{'name':frm.doc.owner},['organization_type'],function(r){
+		if((frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type=='Exclusive Hiring' || frappe.boot.tag.tag_user_info.company_type=='TAG') || (frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.company_type=='Exclusive' && r.organization_type=='Staffing')){
+			frm.add_custom_button(__("Cancel"),function(){
+				cancel_job_order(frm);
+	
+			})
+		}
+	})
+	
 }
 function cancel_job_order(frm){
 	return new Promise(function(resolve, reject) {
