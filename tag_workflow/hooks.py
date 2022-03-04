@@ -9,6 +9,8 @@ app_color = "grey"
 app_email = "shadab.sutar@sourcefuse.com"
 app_license = "MIT"
 app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.svg"
+
+# global
 sales_invoice="Sales Invoice"
 # Includes in <head>
 # ------------------
