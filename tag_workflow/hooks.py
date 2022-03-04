@@ -32,7 +32,8 @@ app_include_js = [
         "/assets/tag_workflow/js/controllers/sortable.js",
         "/assets/tag-template.min.js",
         "/assets/js/file_upload.min.js",
-        "/assets/js/tag-min.js"
+        "/assets/js/tag-min.js",
+        "/assets/tag_workflow/js/frappe/form/controls/attach.js"
 ]
 
 web_include_css = [
