@@ -3,6 +3,7 @@ frappe.ui.form.on("Employee", {
 		$('.form-footer').hide()
 		trigger_hide(frm);
 		required_field(frm);
+		download_document(frm)
 		cur_frm.dashboard.hide()
 		uploaded_file_format(frm);
 		if (frm.doc.__islocal == 1) {
@@ -147,4 +148,42 @@ function tag_company(frm){
 	if(frappe.boot.tag.tag_user_info.company_type=='TAG'){
 		frm.set_value('company','')
 	}
+}
+
+function download_document(frm){
+	if(frm.doc.resume && frm.doc.resume.length>1){
+		$('[data-fieldname="resume"]').on('click',(e)=> {
+			doc_download(e,frm)
+		});
+	}
+	if(frm.doc.w4 && frm.doc.w4.length>1){
+		$('[data-fieldname="w4"]').on('click',(e)=> {
+			doc_download(e,frm)
+		});
+	}
+	$('[data-fieldname="attachments"]').on('click',(e)=> {
+		doc_download(e,frm)
+	});
+}
+
+function doc_download(e,frm){
+	let file=e.target.innerText
+	let link=''
+  	if(file.includes('.')){
+		if(file.length>1){
+			if(file.includes('/files/')){
+				link=window.location.origin+file
+			}
+			else{
+				link=window.location.origin+'/files/'+file
+			}			
+			let data=file.split('/')
+			const anchor = document.createElement('a');
+			anchor.href = link;
+			anchor.download = data[data.length-1];
+			document.body.appendChild(anchor);
+			anchor.click();
+			document.body.removeChild(anchor);  
+		}
+  }
 }

@@ -20,6 +20,7 @@ frappe.ui.form.on('Assign Employee', {
 		approved_employee(frm);
 		hide_resume(frm);
 		back_job_order_form(frm);
+		document_download(frm)
 		$(document).on('click', '[data-fieldname="employee"]', function(){
 			if ($('[data-fieldname="employee"]').last().val() != '' ){
 				frappe.call({
@@ -372,4 +373,27 @@ function resume_data(frm,msg,table){
 			frappe.validated=false
 		}
 	}
+}
+function document_download(frm){
+	$('[data-fieldname="resume"]').on('click',(e)=> {
+	let file=e.target.innerText
+	let link=''
+	if(file.includes('.')){
+		if(file.length>1){
+			if(file.includes('/files/')){
+				link=window.location.origin+file
+			}
+			else{
+				link=window.location.origin+'/files/'+file
+			}
+			let data=file.split('/')
+			const anchor = document.createElement('a');
+			anchor.href = link;
+			anchor.download = data[data.length-1];
+			document.body.appendChild(anchor);
+			anchor.click();
+			document.body.removeChild(anchor);  
+		}
+	}
+	});
 }
