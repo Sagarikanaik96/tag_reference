@@ -96,6 +96,16 @@ frappe.ui.form.on("Lead", {
       };
     });
   },
+  contact_by:function(frm){
+    frm.set_query("contact_by", function (doc) {
+      return {
+        query: "tag_workflow.utils.lead.contact_person",
+        filters: {
+          owner_company: doc.owner_company,
+        },
+      };
+    });
+  },
   before_save: function(frm){
    if (frappe.boot.tag.tag_user_info.company_type=='Staffing') {
     frm.set_value("organization_type", "Exclusive Hiring");} 
