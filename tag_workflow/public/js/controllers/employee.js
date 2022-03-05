@@ -169,21 +169,19 @@ function download_document(frm){
 function doc_download(e,frm){
 	let file=e.target.innerText
 	let link=''
-  	if(file.includes('.')){
-		if(file.length>1){
-			if(file.includes('/files/')){
-				link=window.location.origin+file
-			}
-			else{
-				link=window.location.origin+'/files/'+file
-			}			
-			let data=file.split('/')
-			const anchor = document.createElement('a');
-			anchor.href = link;
-			anchor.download = data[data.length-1];
-			document.body.appendChild(anchor);
-			anchor.click();
-			document.body.removeChild(anchor);  
+  	if(file.includes('.') && file.length>1){
+		if(file.includes('/files/')){
+			link=window.location.origin+file
 		}
+		else{
+			link=window.location.origin+'/files/'+file
+		}			
+		let data=file.split('/')
+		const anchor = document.createElement('a');
+		anchor.href = link;
+		anchor.download = data[data.length-1];
+		document.body.appendChild(anchor);
+		anchor.click();
+		document.body.removeChild(anchor);  
   }
 }

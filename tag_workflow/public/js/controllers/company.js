@@ -519,9 +519,8 @@ function download_document(frm){
 
 function doc_download(e,frm){
   let file=e.target.innerText
-  let link=''
-  if(file.includes('.')){
-    if(file.length>1){
+  if(file.includes('.') && file.length>1){
+      let link=''
       if(file.includes('/files/')){
 				link=window.location.origin+file
 			}
@@ -535,6 +534,5 @@ function doc_download(e,frm){
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);  
-    }
   }
 }
