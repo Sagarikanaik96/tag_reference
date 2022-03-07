@@ -437,8 +437,10 @@ class DesktopPage {
 						<div class="widget-group-title mt-2">Today's Orders</div>
 						<div class="widget-group-control"></div>
 					</div>
-					<div class="col-md-2 col-xs-6 col-sm-6">
-					<button class="btn btn-xs btn-primary px-2 float-right restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">View All</button>
+					<div class="col-md-2 col-xs-6 col-sm-6 ">
+						<button class="btn btn-xs btn-primary px-2 float-right restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">
+							View All
+						</button>
 					</div>
 					<div class="col-xs-12">
 						<div class="widget widget-shadow hiring_dashboard_table shortcut-widget-box table-responsive" id="data"></div>
