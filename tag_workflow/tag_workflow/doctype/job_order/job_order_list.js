@@ -1,5 +1,6 @@
 frappe.listview_settings['Job Order'] = {
 	onload:function(listview){
+		$('h3[title = "Job Order"]').html('Job Orders');
 		$('.list-header-subject > div:nth-child(7) > span:nth-child(1)').html('Industry');
 		$('[data-fieldname="name"]').attr('placeholder','Order ID');
 		$('[data-fieldname="category"]').attr('placeholder','Industry');
@@ -24,7 +25,8 @@ frappe.listview_settings['Job Order'] = {
 		}	
 	},
 	refresh:function(listview){
-		$('[data-original-title="Menu"]').hide()
+		$('#navbar-breadcrumbs > li:nth-child(2) > a').html('Job Orders');
+		$('[data-original-title="Menu"]').hide();
 		$('div[data-fieldname="order_status"]').hide();
 		$('div[data-fieldname="company"]').hide();
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){

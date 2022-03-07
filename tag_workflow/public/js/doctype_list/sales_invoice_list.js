@@ -1,5 +1,6 @@
 frappe.listview_settings['Sales Invoice'] = {
 	onload:function(listview){
+		$('h3[title = "Invoice"]').html('Invoices');
 		if(frappe.session.user!='Administrator'){
 			// $('.custom-actions.hidden-xs.hidden-md').hide()
 			$('[data-original-title="Refresh"]').hide()
@@ -8,12 +9,13 @@ frappe.listview_settings['Sales Invoice'] = {
 		if (frappe.boot.tag.tag_user_info.company_type == 'TAG'){
 			listview.page.add_button(__("Create monthly Invoice"), function() {
 				create_monthly_invoice(listview)
-				}).addClass("btn-primary");
+			}).addClass("btn-primary");
 		}
 	},
 	refresh:function(listview){
-		$('[class="btn btn-primary btn-sm primary-action"]').hide()
-		$('[class="btn btn-default btn-sm ellipsis"]').hide()
+		$('#navbar-breadcrumbs > li > a').html('Invoices');
+		$('[class="btn btn-primary btn-sm primary-action"]').hide();
+		$('[class="btn btn-default btn-sm ellipsis"]').hide();
 		$('button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs').hide();
 	},
 	hide_name_column: true,
