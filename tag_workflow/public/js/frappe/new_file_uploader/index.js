@@ -47,9 +47,8 @@ export default class FileUploader {
 		});
 
 		this.uploader = this.$fileuploader.$children[0];
-
-		this.uploader.$watch('files', (files) => {
-			let all_private = files.every(file => file.private);
+		this.uploader.$watch('files', (files_one) => {
+			let all_private = files_one.every(file => file.private);
 			if (this.dialog) {
 				this.dialog.set_secondary_action_label(all_private ? __('Set all public') : __('Set all private'));
 			}

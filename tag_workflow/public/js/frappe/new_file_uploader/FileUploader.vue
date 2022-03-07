@@ -365,31 +365,8 @@ export default {
 					reject();
 				})
 				xhr.onreadystatechange = () => {
-					if (xhr.readyState == XMLHttpRequest.DONE) {
-						if (xhr.status === 200) {
-							let r = null;
-							let file_doc = null;
-							try {
-								r = JSON.parse(xhr.responseText);
-								if (r.message.doctype === 'File') {
-									file_doc = r.message;
-								}
-							} catch(e) {
-								r = xhr.responseText;
-							}
 
-							file.doc = file_doc;
-
-							if (this.on_success) {
-								this.on_success(file_doc, r);
-							}
-						} else 
-						{
-							xhr_new(file,xhr);
-
-
-						}
-					}
+					readystate_one(xhr,XMLHttpRequest.DONE,this,file)
 				}
 				xhr.open('POST', '/api/method/upload_file', true);
 				xhr.setRequestHeader('Accept', 'application/json');
@@ -486,6 +463,37 @@ function xhr_new(file,xhr){
 							frappe.request.cleanup({}, error);
 						}
 }
+
+
+function readystate_one(xhr,XMLHTTP,that,file){
+	if (xhr.readyState == XMLHTTP) {
+		if (xhr.status === 200) {
+			let r = null;
+			let file_doc = null;
+			try {
+				r = JSON.parse(xhr.responseText);
+				if (r.message.doctype === 'File') {
+					file_doc = r.message;
+				}
+			} catch(e) {
+				r = xhr.responseText;
+			}
+
+			file.doc = file_doc;
+
+			if (that.on_success) {
+				that.on_success(file_doc, r);
+			}
+		} else 
+		{
+			xhr_new(file,xhr);
+
+
+		}
+	}
+}
+
+
 </script>
 <style>
 .file-upload-area {
