@@ -11,10 +11,11 @@ frappe.listview_settings["Company"] = {
     return indicator;
   },
   onload: function (listview) {
+    $('h3[title="Company"]').html('Affiliate Companies');
     if(frappe.session.user != 'Administrator'){
-      $('.custom-actions.hidden-xs.hidden-md').hide()
-      $('[data-original-title="Refresh"]').hide()
-      $('.menu-btn-group').hide()
+      $('.custom-actions.hidden-xs.hidden-md').hide();
+      $('[data-original-title="Refresh"]').hide();
+      $('.menu-btn-group').hide();
     }
     if (!frappe.route_options && !frappe.user.has_role("Tag Admin")) {
       frappe.route_options = {
@@ -22,4 +23,7 @@ frappe.listview_settings["Company"] = {
       };
     }
   },
+  refresh: function(listview){
+    $('#navbar-breadcrumbs > li > a').html('Affiliate Companies');
+  }
 };
