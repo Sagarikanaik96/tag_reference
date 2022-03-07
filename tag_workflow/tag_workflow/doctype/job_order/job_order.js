@@ -898,9 +898,12 @@ function hiring_buttons(frm) {
 					frm.add_custom_button(__('Approved Employees'), function() {
 						approved_emp(frm)
 					}, __("View"));
+					$('[data-fieldname = assigned_employees_hiring]').attr('id', 'approved_inactive')
 					let data = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
                     $('[data-fieldname = assigned_employees_hiring]').click(function() {
-                        approved_emp(frm);
+						if($('[data-fieldname = assigned_employees_hiring]').attr('id')=='approved_inactive'){
+							approved_emp(frm);
+						}
                     });
                     frm.set_df_property("assigned_employees_hiring", "options", data);
                     frm.toggle_display('related_actions_section', 1);
@@ -1001,10 +1004,13 @@ function staff_assigned_emp(frm) {
                 frm.add_custom_button(__('Assigned Employees'), function() {
                     assigned_emp(frm)
                 }, __("View"));
+				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_inactive');
 				let data = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
                 $('[data-fieldname = assigned_employees]').click(function() {
-                    assigned_emp(frm);
-                });
+					if($('[data-fieldname = assigned_employees]').attr('id')=='assigned_inactive'){
+						assigned_emp(frm);
+					}
+				});
                 frm.set_df_property("assigned_employees", "options", data);
                 frm.toggle_display('related_actions_section', 1);
             }
@@ -1125,16 +1131,20 @@ function approved_emp(frm){
 			profile_html += `</table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`
 
 			var dialog = new frappe.ui.Dialog({
-				title: __('Assigned Employee'),
+				title: __('Assigned Employees'),
 				fields: [{fieldname: "staff_companies", fieldtype: "HTML", options: profile_html},]
 			});
+			dialog.no_cancel();
 			dialog.set_primary_action(__('Close'), function() {
 				dialog.hide();
+				$('[data-fieldname = assigned_employees_hiring]').attr('id', 'approved_inactive');
 			});
-
-			dialog.show();
-			dialog.$wrapper.find('.modal-dialog').css('max-width', '880px');
-			dialog.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
+			if($('[data-fieldname = assigned_employees_hiring]').attr('id') == 'approved_inactive'){
+				dialog.show();
+				dialog.$wrapper.find('.modal-dialog').css('max-width', '880px');
+				dialog.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
+				$('[data-fieldname = assigned_employees_hiring]').attr('id', 'approved_active');
+			}
 		}
 	});
 }
@@ -1160,19 +1170,24 @@ function assigned_emp(frm){
 			}
 			profile_html += `</table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`
 			var dialog1 = new frappe.ui.Dialog({
-				title: __('Assigned Employee'),
+				title: __('Assigned Employees'),
 				fields: [{
 					fieldname: "staff_companies",
 					fieldtype: "HTML",
 					options: profile_html
 				}, ]
 			});
+			dialog1.no_cancel();
 			dialog1.set_primary_action(__('Close'), function() {
 				dialog1.hide();
+				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_inactive');
 			});
-			dialog1.show();
-			dialog1.$wrapper.find('.modal-dialog').css('max-width', '880px');
-			dialog1.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
+			if($('[data-fieldname = assigned_employees]').attr('id')=='assigned_inactive'){
+				dialog1.show();
+				dialog1.$wrapper.find('.modal-dialog').css('max-width', '880px');
+				dialog1.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
+				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_active');
+			}
 		}
 	})
 }
