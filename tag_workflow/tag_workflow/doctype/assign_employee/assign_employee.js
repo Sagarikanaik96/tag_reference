@@ -113,7 +113,6 @@ frappe.ui.form.on('Assign Employee', {
 	},
 
 	setup: function(frm){
-		frm.set_value('company', frappe.boot.tag.tag_user_info.company)
 		frm.set_query("company", function(doc){
 			return {
 				filters: [
