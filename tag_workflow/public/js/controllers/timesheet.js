@@ -1,11 +1,13 @@
 frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
-		$('.form-footer').hide()
-		$('[data-label="Resume%20Timer"]').hide()
-		$('[data-label="Create%20Salary%20Slip"]').hide()
-		$('[data-label="Create%20Sales%20Invoice"]').hide()
-		$('[data-label="Cancel"]').hide()
+		$('.form-footer').hide();
+		$('[data-label="Resume%20Timer"]').hide();
+		$('[data-label="Create%20Salary%20Slip"]').hide();
+		$('[data-label="Create%20Sales%20Invoice"]').hide();
+		$('[data-label="Cancel"]').hide();
+		$('.custom-actions.hidden-xs.hidden-md').show();
 		cur_frm.dashboard.hide();
+		add_back_button(frm);
 		if(frm.doc.__islocal==1){
 			cancel_timesheet(frm);
 			frm.set_value("employee","");
@@ -419,3 +421,13 @@ function cancel_timesheet(frm){
 		frappe.set_route("Form", "Timesheet");
 	});
 }
+
+/*---------------------*/
+function add_back_button(frm){
+	frm.add_custom_button(__("Go To Bulk Approval/Deny"), function(){
+		localStorage.setItem("order", frm.doc.job_order_detail);
+		localStorage.setItem("date", frm.doc.date_of_timesheet);
+		localStorage.setItem("name", frm.doc.name);
+		window.location.href = "/app/timesheet-approval";
+	}).addClass("btn-primary");
+};

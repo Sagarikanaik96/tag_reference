@@ -936,10 +936,13 @@ function hiring_buttons(frm) {
 }
 
 function timesheets_view(frm) {
-	frappe.route_options = {
-		"job_order_detail": ["=", frm.doc.name]
-	};
-	frappe.set_route("List", "Timesheet");
+	if(frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User")){
+		localStorage.setItem("order", frm.doc.name);
+		window.location.href = "/app/timesheet-approval";
+	}else{
+		frappe.route_options = {"job_order_detail": ["=", frm.doc.name]};
+		frappe.set_route("List", "Timesheet");
+	}
 }
 
 function claim_orders(frm) {
