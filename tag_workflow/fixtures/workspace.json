@@ -1438,8 +1438,8 @@
     "hidden": 0,
     "icon": null,
     "is_query_report": 1,
-    "label": "Tag Earning",
-    "link_to": "TAG Earning",
+    "label": "Tag Earnings",
+    "link_to": "TAG Earnings",
     "link_type": "Report",
     "onboard": 0,
     "only_for": null,
@@ -1494,7 +1494,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2022-02-09 23:28:43.619661",
+  "modified": "2022-03-08 00:44:14.028996",
   "module": "Tag Workflow",
   "name": "Reports",
   "onboarding": null,
