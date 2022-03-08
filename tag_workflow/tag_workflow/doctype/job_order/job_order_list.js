@@ -1,11 +1,13 @@
 frappe.listview_settings['Job Order'] = {
 	onload:function(listview){
-		$('[data-fieldname="name"]').attr('placeholder','Order ID')
-		$('[data-fieldname="category"]').attr('placeholder','Industry')
+		$('h3[title = "Job Order"]').html('Job Orders');
+		$('.list-header-subject > div:nth-child(7) > span:nth-child(1)').html('Industry');
+		$('[data-fieldname="name"]').attr('placeholder','Order ID');
+		$('[data-fieldname="category"]').attr('placeholder','Industry');
 		if(frappe.session.user!='Administrator'){
-			$('.custom-actions.hidden-xs.hidden-md').hide()
-			$('[data-original-title="Refresh"]').hide()
-			$('.menu-btn-group').hide()
+			$('.custom-actions.hidden-xs.hidden-md').hide();
+			$('[data-original-title="Refresh"]').hide();
+			$('.menu-btn-group').hide();
         }
 		frappe.route_options = {
 			"order_status": "",
@@ -23,7 +25,8 @@ frappe.listview_settings['Job Order'] = {
 		}	
 	},
 	refresh:function(listview){
-		$('[data-original-title="Menu"]').hide()
+		$('#navbar-breadcrumbs > li:nth-child(2) > a').html('Job Orders');
+		$('[data-original-title="Menu"]').hide();
 		$('div[data-fieldname="order_status"]').hide();
 		$('div[data-fieldname="company"]').hide();
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
@@ -32,6 +35,19 @@ frappe.listview_settings['Job Order'] = {
 					$('button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs').hide();
 				}
 			});
+		}
+
+		let children = listview.$list_head_subject[0].children;
+		for(var c in children){
+			if(children[c].innerText && children[c].innerText =="Name"){
+				children[c].innerHTML = `<input class="level-item list-check-all" type="checkbox" title="Select All">
+			<span class="level-item list-liked-by-me hidden-xs">
+				<span title="Likes"><svg class="icon  icon-sm" style="">
+			<use class="like-icon" href="#icon-heart"></use>
+		</svg></span>
+			</span>
+			<span class="level-item">Order ID</span>`
+			}
 		}
 	},	
 

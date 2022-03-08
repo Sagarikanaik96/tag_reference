@@ -31,7 +31,7 @@ def validate_controller(doc, method):
             if method == "validate":
                 ProjectController(doc, doctype, method).validate_project()
     except Exception as e:
-        frappe.throw(_("{0}").format(e))
+        frappe.throw(_(" "))
         print(e)
         print("----"*10)
         print("----"*10)

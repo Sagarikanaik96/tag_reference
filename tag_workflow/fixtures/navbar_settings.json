@@ -61,7 +61,7 @@
    }
   ],
   "logo_width": 0,
-  "modified": "2022-01-18 03:15:23.980593",
+  "modified": "2022-03-04 02:15:20.957697",
   "name": "Navbar Settings",
   "parent": null,
   "parentfield": null,
@@ -69,7 +69,7 @@
   "settings_dropdown": [
    {
     "action": null,
-    "hidden": 0,
+    "hidden": 1,
     "is_standard": 1,
     "item_label": "My Profile",
     "item_type": "Route",
@@ -77,6 +77,17 @@
     "parentfield": "settings_dropdown",
     "parenttype": "Navbar Settings",
     "route": "/app/user-profile"
+   },
+   {
+    "action": "frappe.ui.toolbar.route_to_user()",
+    "hidden": 0,
+    "is_standard": 0,
+    "item_label": "My Profile",
+    "item_type": "Action",
+    "parent": "Navbar Settings",
+    "parentfield": "settings_dropdown",
+    "parenttype": "Navbar Settings",
+    "route": null
    },
    {
     "action": "frappe.ui.toolbar.route_to_user()",

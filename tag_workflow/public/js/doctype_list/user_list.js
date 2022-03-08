@@ -1,13 +1,15 @@
 frappe.listview_settings['User'] = {
 	onload: function(){
+		$('h3[title="User"]').html('Company Users');
 		if(frappe.session.user!='Administrator'){
-			$('.custom-actions.hidden-xs.hidden-md').hide()
-			$('[data-original-title="Refresh"]').hide()
-			$('.menu-btn-group').hide()
+			$('.custom-actions.hidden-xs.hidden-md').hide();
+			$('[data-original-title="Refresh"]').hide();
+			$('.menu-btn-group').hide();
 		}
     },
 	hide_name_column: true,
 	refresh: function(listview){
+		$('#navbar-breadcrumbs > li > a').html('Company Users');
 		listview.$page.find(`div[data-fieldname="name"]`).addClass("hide");
 		let view = listview;
 		let children = view.$list_head_subject[0].children;
@@ -24,7 +26,6 @@ frappe.listview_settings['User'] = {
 					"email":i["name"]
 				},
 				callback:function(r){
-					console.log(r)
 					if (r.message.length > 1){
 						listview.$page.find(`a[data-filter="company,=,${r.message[0]}"]`).addClass("indicator-pill green");
 					}

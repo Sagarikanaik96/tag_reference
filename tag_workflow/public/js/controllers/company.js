@@ -9,6 +9,7 @@ frappe.ui.form.on("Company", {
     jazzhr_data(frm);
     make_invoice(frm); 
     uploaded_file_format(frm);
+    download_document(frm)
     if (frappe.user.has_role("Tag Admin")) {
       frm.set_df_property("employees", "read_only", 1);
     }
@@ -487,4 +488,51 @@ function validate_email_phone(email,phone_no) {
       frappe.msgprint({message: __('Not Valid Accounts Payable phone number'), indicator: 'red'})
       frappe.validated = false
     }
+}
+
+function download_document(frm){
+  if(frm.doc.upload_docs && frm.doc.upload_docs.length>1){
+    $('[data-fieldname="upload_docs"]').on('click',(e)=> {
+      doc_download(e,frm)
+    });
+  }
+  if(frm.doc.cert_of_insurance && frm.doc.cert_of_insurance.length>1){
+    $('[data-fieldname="cert_of_insurance"]').on('click',(e)=> {
+      doc_download(e,frm)
+    });
+  }
+  if(frm.doc.w9 && frm.doc.w9.length>1){
+    $('[data-fieldname="w9"]').on('click',(e)=> {
+      doc_download(e,frm)
+    });
+  }
+  if(frm.doc.safety_manual && frm.doc.safety_manual.length>1){
+    $('[data-fieldname="safety_manual"]').on('click',(e)=> {
+      doc_download(e,frm)
+    });
+  }
+  $('[data-fieldname="resume"]').on('click',(e)=> {
+		doc_download(e,frm)
+	});
+
+}
+
+function doc_download(e,frm){
+  let file=e.target.innerText
+  if(file.includes('.') && file.length>1){
+      let link=''
+      if(file.includes('/files/')){
+				link=window.location.origin+file
+			}
+			else{
+				link=window.location.origin+'/files/'+file
+			}
+      let data=file.split('/')
+      const anchor = document.createElement('a');
+      anchor.href = link;
+      anchor.download = data[data.length-1];
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);  
+  }
 }

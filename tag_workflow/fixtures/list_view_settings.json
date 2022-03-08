@@ -6,12 +6,12 @@
   "docstatus": 0,
   "doctype": "List View Settings",
   "fields": null,
-  "modified": "2022-02-24 03:32:09.915877",
+  "modified": "2022-03-04 02:43:44.283002",
   "name": "Job Order",
   "parent": null,
   "parentfield": null,
   "parenttype": null,
-  "total_fields": "7"
+  "total_fields": "8"
  },
  {
   "disable_auto_refresh": 0,

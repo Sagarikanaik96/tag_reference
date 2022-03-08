@@ -1,6 +1,7 @@
 frappe.provide("frappe.toolbar");
 frappe.provide("tag_workflow");
 
+
 $(document).bind('toolbar_setup', function() {
         $(".dropdown-help").empty();
         $('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
@@ -98,50 +99,7 @@ frappe.ui.form.States = Class.extend({
 						if(action  == "Reject"){
 							me.frm.doc.__tran_state = d;
 						}else{
-							var doc_before_action = copy_dict(me.frm.doc);
-							// set new state
-							var next_state = d.next_state;
-							me.frm.doc[me.state_fieldname] = next_state;
-
-							var new_state = frappe.workflow.get_document_state(me.frm.doctype, next_state);
-							new_state.update_field = me.state_fieldname;
-							var new_docstatus = cint(new_state.doc_status);
-
-							if(new_state.update_field) {
-								me.frm.set_value(new_state.update_field, "");
-								me.frm.set_value(new_state.update_field, new_state.update_value);
-								cur_frm.refresh_field(new_state.update_field);
-							}
-
-							// revert state on error
-							var on_error = function() {
-								// reset in locals
-								frappe.model.add_to_locals(doc_before_action);
-								me.frm.refresh();
-							}
-
-							// success - add a comment
-							var success = function() {
-								console.log("sahil is here");
-							}
-
-							me.frm.doc.__tran_state = d;
-
-							if(new_docstatus==1 && me.frm.doc.docstatus==0) {
-								me.frm.savesubmit(null, success, on_error);
-							} else if(new_docstatus==0 && me.frm.doc.docstatus==0) {
-								me.frm.save("Save", success, null, on_error);
-							} else if(new_docstatus==1 && me.frm.doc.docstatus==1) {
-								me.frm.save("Update", success, null, on_error);
-							} else if(new_docstatus==2 && me.frm.doc.docstatus==1) {
-								me.frm.savecancel(null, success, on_error);
-							} else {
-								frappe.msgprint(__("Document Status transition from ") + me.frm.doc.docstatus + " "
-									+ __("to") +
-									new_docstatus + " " + __("is not allowed."));
-								frappe.msgprint(__("Document Status transition from {0} to {1} is not allowed", [me.frm.doc.docstatus, new_docstatus]));
-								return 0;
-							}
+							unreject(me,d)
 						}
 					});
 				}
@@ -184,5 +142,51 @@ frappe.form.link_formatters['Employee'] = function(value, doc) {
 		return value ? doc.employee_name + ': ' + value : doc.employee_name;
 	} else {
 		return value;
+	}
+}
+function unreject(me,d) {
+	var doc_before_action = copy_dict(me.frm.doc);
+	// set new state
+	var next_state = d.next_state;
+	me.frm.doc[me.state_fieldname] = next_state;
+
+	var new_state = frappe.workflow.get_document_state(me.frm.doctype, next_state);
+	new_state.update_field = me.state_fieldname;
+	var new_docstatus = cint(new_state.doc_status);
+
+	if(new_state.update_field) {
+		me.frm.set_value(new_state.update_field, "");
+		me.frm.set_value(new_state.update_field, new_state.update_value);
+		cur_frm.refresh_field(new_state.update_field);
+	}
+
+	// revert state on error
+	var on_error = function() {
+		// reset in locals
+		frappe.model.add_to_locals(doc_before_action);
+		me.frm.refresh();
+	}
+
+	// success - add a comment
+	var success = function() {
+		console.log("sahil is here");
+	}
+
+	me.frm.doc.__tran_state = d;
+
+	if(new_docstatus==1 && me.frm.doc.docstatus==0) {
+		me.frm.savesubmit(null, success, on_error);
+	} else if(new_docstatus==0 && me.frm.doc.docstatus==0) {
+		me.frm.save("Save", success, null, on_error);
+	} else if(new_docstatus==1 && me.frm.doc.docstatus==1) {
+		me.frm.save("Update", success, null, on_error);
+	} else if(new_docstatus==2 && me.frm.doc.docstatus==1) {
+		me.frm.savecancel(null, success, on_error);
+	} else {
+		frappe.msgprint(__("Document Status transition from ") + me.frm.doc.docstatus + " "
+			+ __("to") +
+			new_docstatus + " " + __("is not allowed."));
+		frappe.msgprint(__("Document Status transition from {0} to {1} is not allowed", [me.frm.doc.docstatus, new_docstatus]));
+		return 0;
 	}
 }

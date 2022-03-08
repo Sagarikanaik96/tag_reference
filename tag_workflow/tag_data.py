@@ -157,10 +157,9 @@ def receive_hiring_notification(user, company_type, hiring_org, job_order, staff
             if(bid_receive.claim is None):
                 bid_receive.claim=staffing_org
                 chat_room_created(hiring_org,staffing_org,job_order)
-            else:
-                if(staffing_org not in bid_receive.claim):
-                    bid_receive.claim=str(bid_receive.claim)+str(",")+staffing_org
-                    chat_room_created(hiring_org,staffing_org,job_order)
+            elif(staffing_org not in bid_receive.claim):
+                bid_receive.claim=str(bid_receive.claim)+str(",")+staffing_org
+                chat_room_created(hiring_org,staffing_org,job_order)
 
             bid_receive.save(ignore_permissions=True)
             job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)

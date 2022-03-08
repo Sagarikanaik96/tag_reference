@@ -4,6 +4,7 @@ frappe.listview_settings['Timesheet'] = {
 	right_column: "name",
 
 	refresh: function(listview){
+		$('#navbar-breadcrumbs > li > a').html('Timesheets');
 		$('.custom-actions.hidden-xs.hidden-md').hide();
 		$('[data-original-title="Menu"]').hide();
 		$('button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs').hide();
@@ -15,6 +16,7 @@ frappe.listview_settings['Timesheet'] = {
 	},
 
 	onload: function(listview) {
+		$('h3[title = "Timesheet"]').html('Timesheets');
 		if(cur_list.doctype == "Timesheet"){
 			cur_list.page.btn_primary[0].style.display = "none";
 		}

@@ -20,6 +20,7 @@ frappe.ui.form.on('Assign Employee', {
 		approved_employee(frm);
 		hide_resume(frm);
 		back_job_order_form(frm);
+		document_download(frm)
 		$(document).on('click', '[data-fieldname="employee"]', function(){
 			if ($('[data-fieldname="employee"]').last().val() != '' ){
 				frappe.call({
@@ -355,7 +356,7 @@ function make_notification_approved(frm){
 			"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
 			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
 			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
-			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,"worker_fill":frm.doc.claims_approved
+			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,"worker_fill":cur_frm.doc.employee_details.length
 		},
 		callback:function(r){
 			setTimeout(function () {
@@ -372,4 +373,27 @@ function resume_data(frm,msg,table){
 			frappe.validated=false
 		}
 	}
+}
+function document_download(frm){
+	$('[data-fieldname="resume"]').on('click',(e)=> {
+	let file=e.target.innerText
+	let link=''
+	if(file.includes('.')){
+		if(file.length>1){
+			if(file.includes('/files/')){
+				link=window.location.origin+file
+			}
+			else{
+				link=window.location.origin+'/files/'+file
+			}
+			let data=file.split('/')
+			const anchor = document.createElement('a');
+			anchor.href = link;
+			anchor.download = data[data.length-1];
+			document.body.appendChild(anchor);
+			anchor.click();
+			document.body.removeChild(anchor);  
+		}
+	}
+	});
 }

@@ -140,12 +140,12 @@ frappe.ui.form.on("Timesheet", {
 
 function job_order_details(frm){
 	if(frm.doc.job_order_detail){
-		frappe.db.get_value("Job Order", {"name": frm.doc.job_order_detail}, ["select_job", "job_site", "job_duration", "per_hour","from_date","to_date","per_hour","flat_rate"], function(r){
+		frappe.db.get_value("Job Order", {"name": frm.doc.job_order_detail}, ["select_job", "job_site", "job_order_duration", "per_hour","from_date","to_date","per_hour","flat_rate"], function(r){
 			if(r){
 				let data = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
 					<p><b>Job Title: </b> ${r['select_job']}</p>
 					<p><b>Job Site: </b> ${r['job_site']}</p>
-					<p><b>Job Duration: </b> ${r['job_duration']}</p>
+					<p><b>Job Duration: </b> ${r['job_order_duration']}</p>
 					<p><b>Rate Per Hour: </b> ${r['per_hour']}</p>
 				</div>`;
 				frm.set_df_property("job_details", "options", data);

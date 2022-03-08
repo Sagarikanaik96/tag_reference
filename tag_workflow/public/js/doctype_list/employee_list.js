@@ -1,7 +1,8 @@
 frappe.listview_settings['Employee'] = {
 	hide_name_column: true,
-	filters: [["status","=", "Active"], ["company", "=", frappe.boot.tag.tag_user_info.company]],
+	filters: [["status","=", "Active"], ["company", "=", frappe.boot.tag.tag_user_info.company],["user_id","is","not set"]],
 	refresh: function(listview){
+		$('#navbar-breadcrumbs > li > a').html('Employees');
 		let view = listview;
 		let children = view.$list_head_subject[0].children;
 		for(var c in children){
@@ -10,7 +11,6 @@ frappe.listview_settings['Employee'] = {
 			}
 		}
 	},
-
 	formatters: {
 
 		job_category(val, d, f) {
@@ -77,10 +77,11 @@ frappe.listview_settings['Employee'] = {
 	},
 	
 	onload: function(){
+		$('h3[title="Employee"]').html('Employees');
 		if(frappe.session.user!='Administrator'){
-			$('.custom-actions.hidden-xs.hidden-md').hide()
-			$('[data-original-title="Refresh"]').hide()
-			$('.menu-btn-group').hide()
+			$('.custom-actions.hidden-xs.hidden-md').hide();
+			$('[data-original-title="Refresh"]').hide();
+			$('.menu-btn-group').hide();
 		}
 	}
 };

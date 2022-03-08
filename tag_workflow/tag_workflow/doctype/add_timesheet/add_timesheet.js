@@ -63,12 +63,12 @@ frappe.ui.form.on('Add Timesheet', {
 
 /*---------------------------------*/
 function update_title(frm){
-	frappe.db.get_value("Job Order", {"name": frm.doc.job_order}, ["select_job", "job_site", "job_duration", "per_hour","from_date","to_date","per_hour","flat_rate", "estimated_hours_per_day"], function(r){
+	frappe.db.get_value("Job Order", {"name": frm.doc.job_order}, ["select_job", "job_site", "job_order_duration", "per_hour","from_date","to_date","per_hour","flat_rate", "estimated_hours_per_day"], function(r){
 		if(r){
 			let data = `<div style="display: flex;flex-direction: inherit;">
 					<p><b>Job Title: </b> ${r['select_job']}</p>&nbsp;&nbsp;
 					<p><b>Job Site: </b> ${r['job_site']}</p>&nbsp;&nbsp;
-					<p><b>Job Duration: </b> ${r['job_duration']}</p>&nbsp;&nbsp;
+					<p><b>Job Duration: </b> ${r['job_order_duration']}</p>&nbsp;&nbsp;
 					<p><b>Daily Hour: </b> ${r['estimated_hours_per_day'].toFixed(2)} hrs</p>&nbsp;&nbsp;
 					<p><b>Rate Per Hour: </b>$${r['per_hour'].toFixed(2)}</p>&nbsp;&nbsp;
 					<p><b>Flat Rate: </b>$${r['flat_rate'].toFixed(2)}</p>&nbsp;&nbsp;
