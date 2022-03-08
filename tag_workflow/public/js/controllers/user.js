@@ -15,6 +15,9 @@ frappe.ui.form.on("User", {
 	},
 	setup: function(frm){
 		let roles = frappe.user_roles;
+		if(frm.doc.__islocal==1){
+			frm.set_value('company','')
+		}
 
 		frm.set_query("organization_type", function(doc){
 			if(roles.includes('Tag Admin')){
