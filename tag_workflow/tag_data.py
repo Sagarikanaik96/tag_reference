@@ -769,3 +769,29 @@ def company_exist(hiring_company):
         return 'yes'
     else:
         return 'no'
+
+from frappe.share import add
+
+@frappe.whitelist(allow_guest=False)
+def claim_order_insert(hiring_org=None,job_order=None,no_of_workers_joborder=None,e_signature_full_name=None,staff_company=None):
+    try:
+        doc = frappe.new_doc('Claim Order')
+        doc.agree_to_contract = 1
+        doc.hiring_organization = hiring_org
+        doc.approved_no_of_workers=no_of_workers_joborder
+        doc.contract_add_on="clam order"
+        doc.job_order =  job_order
+        doc.no_of_workers_joborder=no_of_workers_joborder
+        doc.staff_claims_no = no_of_workers_joborder
+        doc.staffing_organization = staff_company
+        doc.e_signature = e_signature_full_name
+        doc.insert()
+        sql1 = '''select email from `tabUser` where  company = "{}"'''.format(hiring_org)
+        hiring_list = frappe.db.sql(sql1,as_dict=1)
+        for  i in hiring_list:
+            add("Claim Order", doc.name, user=i["email"], share= 1,read=1,write=1,flags={"ignore_share_permission": 1})
+        sql = """ UPDATE `tabJob Order` SET bid = 1,claim="{0}",staff_org_claimed="{0}" where name="{1}" """.format(staff_company,job_order)
+        frappe.db.sql(sql)
+        frappe.db.commit()
+    except Exception as e:
+        print(e, frappe.get_traceback())        

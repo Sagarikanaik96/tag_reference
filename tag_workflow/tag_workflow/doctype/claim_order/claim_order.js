@@ -65,11 +65,17 @@ frappe.ui.form.on('Claim Order', {
 		}
 		else{
 			let company_field = [
-				"job_order","staffing_organization","agree_to_contract","e_signature","staff_claims_no"
+				"job_order","staffing_organization","agree_to_contract","e_signature"
 			  ];
 			  for (let f in company_field) {
 				cur_frm.toggle_enable(company_field[f], 0);
-			  }
+			}
+
+		}
+		if (cur_frm.doc.approved_no_of_workers== 0){
+			submit_claim(frm);
+		}else{
+			cur_frm.toggle_enable("staff_claims_no", 0);
 		}
 
 	},

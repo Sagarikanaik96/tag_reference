@@ -211,6 +211,22 @@ frappe.ui.form.on("Job Order", {
 				},
 			});
 		}
+
+		if (frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+			frappe.call({
+				method: "tag_workflow.tag_data.claim_order_insert",
+				args: {
+					hiring_org: cur_frm.doc.company,
+					job_order: cur_frm.doc.name,
+					no_of_workers_joborder: cur_frm.doc.no_of_workers,
+					e_signature_full_name:cur_frm.doc.e_signature_full_name,
+					staff_company: frappe.boot.tag.tag_user_info.company,
+				},
+			});
+			setTimeout(function () {
+                location.reload()
+            }, 150);
+		}
 	},
 
 	view_contract: function(frm) {
