@@ -959,7 +959,12 @@ function claim_orders(frm) {
 }
 
 function messages(frm) {
+	var x = document.getElementsByClassName('li.nav-item.dropdown.dropdown-notifications.dropdown-mobile.chat-navbar-icon');
+
     $('li.nav-item.dropdown.dropdown-notifications.dropdown-mobile.chat-navbar-icon').click()
+	if(frappe.route_history.length>1){	
+		$(x.css("display", "block")); 
+	}
 
 }
 
