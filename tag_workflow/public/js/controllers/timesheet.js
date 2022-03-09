@@ -430,4 +430,4 @@ function add_back_button(frm){
 		localStorage.setItem("name", frm.doc.name);
 		window.location.href = "/app/timesheet-approval";
 	}).addClass("btn-primary");
-};
+}

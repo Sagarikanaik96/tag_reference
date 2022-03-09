@@ -107,7 +107,6 @@ frappe.TimesheetApproval = Class.extend({
 	},
 
 	no_data: function(wrapper, page){
-		var me = this;
 		let html = `<tr><td style="text-align: center; width: 10%;"></td><td style="text-align: center; width: 20%;"></td><td style="text-align: center; width: 25%;">No Data Found</td><td style="text-align: center; width: 20%;"></td><td style="text-align: center; width: 25%;"></td></tr>`;
 		$("#child").empty();
 		$("#data_approval").empty();
@@ -117,8 +116,7 @@ frappe.TimesheetApproval = Class.extend({
 	make_main_table: function(wrapper, page, data, company){
 		var me = this;
 		me.main_data = ``;
-		for(var i=0;i<data.length;i++){
-
+		for(var i in data){
 			$("#data_approval").empty();
 			let date = data[i].date_of_timesheet ? data[i].date_of_timesheet : '';
 			let workflow = get_state(data[i].workflow_state);
@@ -146,7 +144,7 @@ frappe.TimesheetApproval = Class.extend({
 		me.value = [];
 		for(let r=0;r<rowCount;r++){
 			let id = $("#_"+String(r))[0];
-			if(id.checked == true){
+			if(id.checked == 1){
 				me.count.push(r);
 				me.value.push(id.value);
 			}
@@ -163,12 +161,12 @@ frappe.TimesheetApproval = Class.extend({
 		var me = this;
 		if(count.length && value.length){
 			frappe.call({
-				method: "tag_workflow.tag_workflow.page.timesheet_approval.timesheet_approval.approve_timesheets",
-				args: {"timesheet": value, "action": action},
-				async: 1,
-				freeze: true,
-				freeze_message: "Please wait while we are updating data...",
-				callback: function(r){
+				"method": "tag_workflow.tag_workflow.page.timesheet_approval.timesheet_approval.approve_timesheets",
+				"args": {"timesheet": value, "action": action},
+				"async": 1,
+				"freeze": true,
+				"freeze_message": "Please wait while we are updating data...",
+				"callback": function(r){
 					frappe.msgprint("Timesheet(s) has been updated.");
 					let data = r.message || {};
 					render_child_data(me.order, data.date, data.timesheet);
@@ -294,7 +292,7 @@ function select_all(){
 	let rowCount = $("#child tr").length || 0;
 	for(let r=0;r<rowCount;r++){
 		let id = $("#_"+String(r));
-		if(all == true && id.is(':disabled') == false){
+		if(all == 1 && id.is(':disabled') == 0){
 			id[0].checked = true;
 		}else{
 			id[0].checked = false;

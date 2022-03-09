@@ -110,6 +110,8 @@ frappe.ui.form.on("Job Order", {
 
 	},
 	refresh: function(frm) {
+		$('.form-footer').hide();
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
 		job_order_cancel_button(frm);
 		$(document).on('click', '[data-fieldname="job_start_time"]', function(){
@@ -123,39 +125,34 @@ frappe.ui.form.on("Job Order", {
 			make_invoice(frm);
                 }, 10);
 
-		$('.form-footer').hide();
 		if (frm.doc.__islocal != 1 && frappe.boot.tag.tag_user_info.company_type == "Hiring" && frm.doc.order_status == "Upcoming") {
 			hide_unnecessary_data(frm);
 		}
 
-		if ((cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
-			if (frm.doc.resumes_required) {
-				frm.add_custom_button(__('Assign Employee'), function() {
+		if ((cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+			if (frm.doc.resumes_required){
+				frm.add_custom_button(__('Assign Employee'), function(){
 					assign_employees(frm);
-				})
-			} else {
+				});
+			}else{
 				frm.add_custom_button(__('Claim Order'), function() {
 					claim_job_order_staffing(frm);
-				})
+				});
 			}
-		}
-		else if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))) {
-			if (frm.doc.resumes_required) {
-				cur_frm.add_custom_button(__('Assign Employee'), function() {
+		}else if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
+			if (frm.doc.resumes_required){
+				cur_frm.add_custom_button(__('Assign Employee'), function(){
 					assign_employees(frm);
-				})
-			} else {
-				frm.add_custom_button(__('Claim Order'), function() {
+				});
+			}else{
+				frm.add_custom_button(__('Claim Order'), function(){
 					claim_job_order_staffing(frm);
-				})
+				});
 			}
 		}
-		
-		cancel_job_order_deatils(frm)
 
-		deny_job_order(frm)
-
-		
+		cancel_job_order_deatils(frm);
+		deny_job_order(frm);
 	},
 
 	select_job: function(frm) {
@@ -198,9 +195,9 @@ frappe.ui.form.on("Job Order", {
 	},
 
 	after_save: function(frm) {
-		if (frm.doc.staff_org_claimed) {
+		if(frm.doc.staff_org_claimed){
 			notification_joborder_change(frm);
-		} else {
+		}else{
 			frappe.call({
 				method: "tag_workflow.tag_data.staff_email_notification",
 				args: {
@@ -212,7 +209,7 @@ frappe.ui.form.on("Job Order", {
 			});
 		}
 
-		if (frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 			frappe.call({
 				method: "tag_workflow.tag_data.claim_order_insert",
 				args: {
@@ -223,16 +220,16 @@ frappe.ui.form.on("Job Order", {
 					staff_company: frappe.boot.tag.tag_user_info.company,
 				},
 			});
-			setTimeout(function () {
-                location.reload()
-            }, 150);
+			setTimeout(function(){
+				location.reload();
+			}, 150);
 		}
 	},
 
 	view_contract: function(frm) {
 		var contracts = "<div class='contract_div'><h3>Staffing/Vendor Contract</h3>This Staffing/Vendor Contract (“Contract”) is entered into by and between Staffing Company and Hiring Company as further described and as set forth below. By agreeing to the Temporary Assistance Guru, Inc. (“TAG”) End-User License Agreement, and using the TAG application service and website (the “Service”) Staffing Company and Hiring Company agree that they have a contractual relationship with each other and that the following terms apply to such relationship: <br> <ol> <li> The billing rate Hiring Company shall pay Staffing Company to hire each temporary worker provided by Staffing Company (the “Worker”) is the rate set forth by the TAG Service for the location and position sought to be filled, and this rate includes all wages, worker’s compensation premiums, unemployment insurance, payroll taxes, and all other employer burdens recruiting, administration, payroll funding, and liability insurance.</li><li> Hiring Company agrees not to directly hire and employ the Worker until the Worker has completed at least 720 work hours. Hiring Company agrees to pay Staffing Company an administrative placement fee of $3,000.00 if Hiring Company directly employs the Worker prior to completion of 720 work hours.</li> <li> Hiring Company acknowledges that it has complete care, custody, and control of workplaces and job sites. Hiring Company agrees to comply with all applicable laws, regulations, and ordinances relating to health and safety, and agrees to provide any site/task specific training and/or safety devices and protective equipment necessary or required by law. Hiring Company will not, without prior written consent of Staffing Company, entrust Staffing Company employees with the handling of cash, checks, credit cards, jewelry, equipment, tools, or other valuables.</li> <li> Hiring Company agrees that it will maintain a written safety program, a hazard communication program, and an accident investigation program. Hiring Company agrees that it will make first aid kits available to Workers, that proper lifting techniques are to be used, that fall protection is to be used, and that Hiring Company completes regular inspections on electrical cords and equipment. Hiring Company represents, warrants, and covenants that it handles and stores hazardous materials properly and in compliance with all applicable laws. </li> <li> Hiring Company agrees to post Occupational Safety and Health Act (“OSHA”) of 1970 information and other safety information, as required by law. Hiring Company agrees to log all accidents in its OSHA 300 logs. Hiring Company agrees to indemnify and hold harmless Staffing Company for all claims, damages, or penalties arising out of violations of the OSHA or any state law with respect to workplaces or equipment owned, leased, or supervised by Hiring Company and to which employees are assigned. </li> <li>  Hiring Company will not, without prior written consent of Staffing Company, utilize Workers to operate machinery, equipment, or vehicles. Hiring Company agrees to indemnify and save Staffing Company and Workers harmless from any and all claims and expenses (including litigation) for bodily injury or property damage or other loss as asserted by Hiring Company, its employees, agents, the owner of any such vehicles and/or equipment or contents thereof, or by members of the general public, or any other third party, arising out of the operation or use of said vehicles and/or equipment by Workers. </li> <li> Commencement of work by dispatched Workers, or Hiring Company’s signature on work ticket serves as confirmation of Hiring Company’s agreement to conditions of service listed in or referred to by this Contract. </li> <li> Hiring Company agrees not to place Workers in a supervisory position except for a Worker designated as a “lead,” and, in that position, Hiring Company agrees to supervise all Workers at all times. </li> <li> Billable time begins at the time Workers report to the workplace as designated by the Hiring Company. </li> <li> Jobs must be canceled a minimum of 24 hours prior to start time to avoid a minimum of four hours billing per Worker. </li> <li> Staffing Company guarantees that its Workers will satisfy Hiring Company, or the first two hours are free of charge. If Hiring Company is not satisfied with the Workers, Hiring Company is to call the designated phone number for the Staffing Company within the first two hours, and Staffing Company will replace them free of charge.</li> <li> Staffing Company agrees that it will comply with Hiring Company’s safety program rules. </li> <li> Overtime will be billed at one and one-half times the regular billing rate for all time worked over forty hours in a pay period and/or eight hours in a day as provided by state law. </li> <li> Invoices are due 30 days from receipt, unless other arrangements have been made and agreed to by each of the parties. </li> <li> Interest Rate: Any outstanding balance due to Staffing Company is subject to an interest rate of two percent (2%) per month, commencing on the 90th day after the date the balance was due, until the balance is paid in full by Hiring Company. </li> <li> Severability. If any provision of this Contract is held to be invalid and unenforceable, then the remainder of this Contract shall nevertheless remain in full force and effect. </li> <li> Attorney’s Fees. Hiring Company agrees to pay reasonable attorney’s fees and/or collection fees for any unpaid account balances or in any action incurred to enforce this Contract. </li> <li> Governing Law. This Contract is governed by the laws of the state of Florida, regardless of its conflicts of laws rules. </li> <li>  If Hiring Company utilizes a Staffing Company employee to work on a prevailing wage job, Hiring Company agrees to notify Staffing Company with the correct prevailing wage rate and correct job classification for duties Staffing Company employees will be performing. Failure to provide this information or providing incorrect information may result in the improper reporting of wages, resulting in fines or penalties being imposed upon Staffing Company. The Hiring Company agrees to reimburse Staffing Company for any and all fines, penalties, wages, lost revenue, administrative and/or supplemental charges incurred by Staffing Company.</li> <li> WORKERS' COMPENSATION COSTS: Staffing Company represents and warrants that it has a strong safety program, and it is Staffing Company’s highest priority to bring its Workers home safely every day. AFFORDABLE CARE ACT (ACA): Staffing Company represents and warrants that it is in compliance with all aspects of the ACA. </li> <li> Representatives. The Hiring Company and the Staffing Company each certifies that its authorized representative has read all of the terms and conditions of this Contract and understands and agrees to the same. </li> ";
 
-		if (cur_frm.doc.contract_add_on) {
+		if(cur_frm.doc.contract_add_on){
 			frappe.db.get_value("Company", {name: cur_frm.doc.company}, ["contract_addendums"], function(r) {
 				let contract = new frappe.ui.Dialog({
 					title: "Contract Details",
@@ -240,7 +237,7 @@ frappe.ui.form.on("Job Order", {
 				});
 				contract.show();
 			});
-		} else {
+		}else{
 			let contract = new frappe.ui.Dialog({
 				title: "Contract Details",
 				fields: [{fieldname: "html_37", fieldtype: "HTML", options: contracts,},],
@@ -298,12 +295,13 @@ frappe.ui.form.on("Job Order", {
 		let value = frm.doc.flat_rate;
 		check_value(frm, field, name, value);
 	},
-	job_start_time:function(frm){
-		time_validation(frm)
-	   },
 
-	availability: function(frm) {
-		if(frm.doc.availability == "Custom") {
+	job_start_time:function(frm){
+		time_validation(frm);
+	},
+
+	availability: function(frm){
+		if(frm.doc.availability == "Custom"){
 			cur_frm.set_value("select_days", "");
 		}
 	},
@@ -393,7 +391,8 @@ function redirect_quotation(frm) {
 	doc.company = staff_company[0];
 	doc.job_order = frm.doc.name;
 	doc.no_of_employee_required = frm.doc.no_of_workers - frm.doc.worker_filled;
-	if (frm.doc.staff_company) {
+
+	if(frm.doc.staff_company){
 		doc.company = frm.doc.staff_company;
 	}
 	doc.hiring_organization = frm.doc.company;
@@ -420,24 +419,24 @@ function redirect_quotation(frm) {
 	});
 }
 
-function staff_company_direct_or_general(frm) {
-	if (frm.doc.is_single_share) {
+function staff_company_direct_or_general(frm){
+	if(frm.doc.is_single_share){
 		return [frm.doc.staff_company]
-	} else {
+	}else{
 		return frappe.boot.tag.tag_user_info.company || [];
 	}
 }
 
-function set_read_fields(frm) {
+function set_read_fields(frm){
 	var myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description"];
 	var arrayLength = myStringArray.length;
-	for (var i = 0; i < arrayLength; i++) {
+	for(var i = 0; i < arrayLength; i++){
 		frm.set_df_property(myStringArray[i], "read_only", 1);
 	}
 }
 
 function timer_value(frm) {
-	if (frm.doc.order_status=='Completed') {
+	if(frm.doc.order_status=='Completed'){
 		frm.toggle_display('section_break_8', 0)
 		var myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
 		var arrayLength = myStringArray.length;
@@ -445,7 +444,7 @@ function timer_value(frm) {
 			frm.set_df_property(myStringArray[i], "read_only", 1);
 		}
 		frm.set_df_property("time_remaining_for_make_edits", "options", " ");
-	} else {
+	}else{
 		set_read_fields(frm);
 		time_value(frm);
 		setTimeout(function() {
@@ -492,62 +491,40 @@ function notification_joborder_change(frm) {
 	});
 }
 
-function check_from_date(frm) {
+function check_from_date(frm){
 	let from_date = frm.doc.from_date || "";
 	let to_date = frm.doc.to_date || "";
 
-	if (from_date && from_date < frappe.datetime.now_date()) {
-		frappe.msgprint({
-			message: __("<b>Start Date</b> Cannot be Past Date"),
-			title: __("Error"),
-			indicator: "orange",
-		});
+	if(from_date && from_date < frappe.datetime.now_date()){
+		frappe.msgprint({message: __("<b>Start Date</b> Cannot be Past Date"), title: __("Error"), indicator: "orange",});
 		cur_frm.set_value("from_date", "");
-	} else if (to_date && from_date && from_date > to_date) {
-		frappe.msgprint({
-			message: __("<b>End Date</b> Cannot be Less than Start Date"),
-			title: __("Error"),
-			indicator: "orange",
-		});
+	}else if(to_date && from_date && from_date > to_date){
+		frappe.msgprint({message: __("<b>End Date</b> Cannot be Less than Start Date"),title: __("Error"),indicator: "orange",});
 		cur_frm.set_value("from_date", "");
 		cur_frm.set_value("to_date", "");
-	}
-	else{
+	}else{
 		job_order_duration(frm);
 	}
 }
 
-function check_to_date(frm) {
+function check_to_date(frm){
 	let from_date = frm.doc.from_date || "";
 	let to_date = frm.doc.to_date || "";
-	if (to_date && frappe.datetime.now_date() > to_date) {
-		frappe.msgprint({
-			message: __("<b>End Date</b> Cannot be Past Date"),
-			title: __("Error"),
-			indicator: "orange",
-		});
+	if(to_date && frappe.datetime.now_date() > to_date){
+		frappe.msgprint({message: __("<b>End Date</b> Cannot be Past Date"),title: __("Error"),indicator: "orange",});
 		cur_frm.set_value("to_date", "");
-	} else if (to_date && from_date && from_date > to_date) {
-		frappe.msgprint({
-			message: __("<b>End Date</b> Cannot be Less than Start Date"),
-			title: __("Error"),
-			indicator: "orange",
-		});
+	}else if(to_date && from_date && from_date > to_date){
+		frappe.msgprint({message: __("<b>End Date</b> Cannot be Less than Start Date"),	title: __("Error"),indicator: "orange",});
 		cur_frm.set_value("to_date", "");
-	}
-	else{
+	}else{
 		job_order_duration(frm);
 	}
 }
 
 
 function check_value(frm, field, name, value){
-	if (value && value < 0) {
-		frappe.msgprint({
-			message: __("<b>" + field + "</b> Cannot be Less Than Zero"),
-			title: __("Error"),
-			indicator: "orange",
-		});
+	if(value && value < 0){
+		frappe.msgprint({message: __("<b>" + field + "</b> Cannot be Less Than Zero"),	title: __("Error"),indicator: "orange",});
 		cur_frm.set_value(name, "");
 	}
 }
@@ -561,6 +538,7 @@ function rate_hour_contract_change(frm) {
 		});
 		frappe.validated = false;
 	}
+
 	if (frappe.validated) {
 		rate_calculation(frm);
 	}
@@ -573,21 +551,20 @@ function rate_calculation(frm) {
 	const optional_field_data = [frm.doc.drug_screen, frm.doc.background_check, frm.doc.driving_record, frm.doc.shovel,];
 	const optional_fields = ["drug_screen", "background_check", "driving_record", "shovel",];
 
-	for (let i = 0; i < optional_fields.length; i++) {
+	for(let i = 0; i < optional_fields.length; i++){
 		if (optional_field_data[i] && optional_field_data[i] != "None") {
 			let y = optional_field_data[i];
-			if (y.includes("Flat")) {
+			if(y.includes("Flat")){
 				y = y.split("$");
 				total_flat_rate = total_flat_rate + parseFloat(y[1]);
-			} else if (y.includes("Hour")) {
+			}else if(y.includes("Hour")){
 				y = y.split("$");
 				total_per_hour = total_per_hour + parseFloat(y[1]);
 			}
-		} else {
+		}else{
 			cur_frm.set_value(optional_fields[i], "None");
 		}
 	}
-
 	frm.set_value("flat_rate", total_flat_rate);
 	frm.set_value("per_hour", total_per_hour);
 }
@@ -600,13 +577,13 @@ function hide_employee_rating(frm) {
 }
 
 /*----------make invoice---------*/
-function make_invoice(frm) {
+function make_invoice(frm){
 	let roles = frappe.user_roles;
-	if (cur_frm.doc.__islocal != 1 && roles.includes("Staffing Admin", "Staffing User") && frappe.boot.tag.tag_user_info.company) {
-		frappe.db.get_value("Assign Employee", { company: frappe.boot.tag.tag_user_info.company, tag_status: "Approved", "job_order": frm.doc.name},"name", function(r) {
-			if (r.name) {
-				if (cur_frm.doc.order_status != "Upcoming"){
-					frm.add_custom_button(__("Create Invoice"), function() {
+	if(cur_frm.doc.__islocal != 1 && roles.includes("Staffing Admin", "Staffing User") && frappe.boot.tag.tag_user_info.company){
+		frappe.db.get_value("Assign Employee", { company: frappe.boot.tag.tag_user_info.company, tag_status: "Approved", "job_order": frm.doc.name},"name", function(r){
+			if(r.name){
+				if(cur_frm.doc.order_status != "Upcoming"){
+					frm.add_custom_button(__("Create Invoice"), function(){
 						frappe.model.open_mapped_doc({
 							method: "tag_workflow.tag_workflow.doctype.job_order.job_order.make_invoice",
 							frm: cur_frm,
@@ -641,34 +618,34 @@ function fields_setup(frm) {
 	}
 }
 
-function job_order_duration(frm) {
+function job_order_duration(frm){
 	if(!frm.doc.from_date || !frm.doc.to_date){
-		frm.set_value('job_order_duration', '')
-	}
-	else{
+		frm.set_value('job_order_duration', '');
+	}else{
 		const to_date = cur_frm.doc.to_date.split(" ")[0].split("-");
 		const from_date = cur_frm.doc.from_date.split(" ")[0].split("-");
 		let to_date2 = new Date(to_date[1] + '/' + to_date[2] + '/' + to_date[0]);
 		let from_date2 = new Date(from_date[1] + '/' + from_date[2] + '/' + from_date[0]);
 		let diff = Math.abs(to_date2 - from_date2);
 		let days = diff / (1000 * 3600 * 24) + 1;
-		if (days == 1) {
+		if(days == 1){
 			cur_frm.set_value('job_order_duration', days + ' Day');
-		} else {
+		}else{
 			cur_frm.set_value('job_order_duration', days + ' Days');
 		}
 	}
 }
 
-function claim_job_order_staffing(frm) {
+function claim_job_order_staffing(frm){
 	var doc = frappe.model.get_new_doc("Claim Order");
-	if (frm.doc.is_single_share == 1) {
+	if(frm.doc.is_single_share == 1){
 		doc.staffing_organization = frm.doc.staff_company;
 		doc.single_share = 1;
-	} else {
+	}else{
 		var staff_company = frappe.boot.tag.tag_user_info.company || [];
 		doc.staffing_organization = staff_company[0];
 	}
+
 	doc.job_order = frm.doc.name;
 	doc.no_of_workers_joborder = frm.doc.no_of_workers;
 	doc.hiring_organization = frm.doc.company;
@@ -692,7 +669,7 @@ function show_claim_bar(frm) {
 				}
 			}
 		});
-	} else if (frm.doc.claim && frm.doc.resumes_required == 0) {
+	}else if(frm.doc.claim && frm.doc.resumes_required == 0){
 		frappe.call({
 			'method': 'tag_workflow.tag_data.claim_order_company',
 			'args': {
@@ -706,7 +683,7 @@ function show_claim_bar(frm) {
 				}
 			}
 		});
-	} else if (frm.doc.claim && frm.doc.resumes_required == 1) {
+	}else if(frm.doc.claim && frm.doc.resumes_required == 1){
 		frappe.call({
 			'method': 'tag_workflow.tag_data.claim_order_company',
 			'args': {
@@ -723,24 +700,24 @@ function show_claim_bar(frm) {
 	}
 }
 
-function assign_employees(frm) {
-	if (frm.doc.to_date < frappe.datetime.nowdate()) {
+function assign_employees(frm){
+	if(frm.doc.to_date < frappe.datetime.nowdate()){
 		frappe.msgprint({
 			message: __('Date has been past to claim this order'),
 			title: __('Job Order filled'),
 			indicator: 'blue'
 		});
-	} else if (frm.doc.__islocal != 1 && cur_frm.doc.owner != frappe.session.user && frm.doc.worker_filled < frm.doc.no_of_workers) {
-		if (cur_frm.is_dirty()) {
+	}else if(frm.doc.__islocal != 1 && cur_frm.doc.owner != frappe.session.user && frm.doc.worker_filled < frm.doc.no_of_workers){
+		if(cur_frm.is_dirty()){
 			frappe.msgprint({
 				message: __('Please save the form before creating Quotation'),
 				title: __('Save Job Order'),
 				indicator: 'red'
 			});
-		} else {
+		}else{
 			assign_employe(frm);
 		}
-	} else if (frm.doc.worker_filled >= frm.doc.no_of_workers) {
+	}else if(frm.doc.worker_filled >= frm.doc.no_of_workers){
 		frappe.msgprint({
 			message: __('No of workers already filled for this job order'),
 			title: __('Worker Filled'),
@@ -750,23 +727,23 @@ function assign_employees(frm) {
 }
 
 function view_button(frm){
-	if(frappe.boot.tag.tag_user_info.company_type == "Staffing" && frm.doc.__islocal != 1) {
+	if(frappe.boot.tag.tag_user_info.company_type == "Staffing" && frm.doc.__islocal != 1){
 		cur_frm.dashboard.hide();
-		if ((frm.doc.claim)) {
+		if((frm.doc.claim)){
 			frappe.call({
 				'method': 'tag_workflow.tag_data.claim_order_company',
 				'args': {
 					'user_name': frappe.session.user,
 					'claimed': frm.doc.claim
 				},
-				callback: function(r) {
-					if (r.message != 'unsuccess') {
+				callback: function(r){
+					if(r.message != 'unsuccess'){
 						view_buttons_staffing(frm);
 					}
 				}
 			});
 		}
-	} else if (frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" && frm.doc.__islocal != 1) {
+	}else if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" && frm.doc.__islocal != 1){
 		view_buttons_hiring(frm);
 	}
 }
@@ -946,113 +923,101 @@ function timesheets_view(frm) {
 }
 
 function claim_orders(frm) {
-    if ((frm.doc.order_status == 'Upcoming' || (cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date && cur_frm.doc.from_date == frappe.datetime.now_date())) && frm.doc.resumes_required == 0 ) {
-        if (frm.doc.staff_org_claimed) {
-            frappe.route_options = {
-                "job_order": ["=", frm.doc.name],
-                "hiring_organization": ["=", frm.doc.company],
-                "no_of_workers_joborder": ["=", frm.doc.no_of_workers]
-            };
-            frappe.set_route("List", "Claim Order")
-
-        } else {
-            frappe.route_options = {
-                "job_order": ["=", frm.doc.name],
-                "no_of_workers_joborder": ["=", frm.doc.no_of_workers]
-
-            };
-            frappe.set_route("List", "Claim Order")
-
-        }
-
-    } else if (frm.doc.resumes_required == 0) {
-        frappe.route_options = {
-            "job_order": ["=", frm.doc.name],
-        };
-        frappe.set_route("List", "Claim Order")
-    }
-    if (frm.doc.resumes_required == 1) {
-        staff_assign_redirect(frm)
-    }
-
-}
-
-function messages(frm) {
-	var x = document.getElementsByClassName('li.nav-item.dropdown.dropdown-notifications.dropdown-mobile.chat-navbar-icon');
-
-    $('li.nav-item.dropdown.dropdown-notifications.dropdown-mobile.chat-navbar-icon').click()
-	if(frappe.route_history.length>1){	
-		$(x.css("display", "block")); 
+	if((frm.doc.order_status == 'Upcoming' || (cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date && cur_frm.doc.from_date == frappe.datetime.now_date())) && frm.doc.resumes_required == 0 ){
+		if (frm.doc.staff_org_claimed){
+			frappe.route_options = {
+				"job_order": ["=", frm.doc.name],
+				"hiring_organization": ["=", frm.doc.company],
+				"no_of_workers_joborder": ["=", frm.doc.no_of_workers]
+			};
+			frappe.set_route("List", "Claim Order");
+		}else{
+			frappe.route_options = {
+				"job_order": ["=", frm.doc.name],
+				"no_of_workers_joborder": ["=", frm.doc.no_of_workers]
+			};
+			frappe.set_route("List", "Claim Order");
+		}
+	}else if(frm.doc.resumes_required == 0){
+		frappe.route_options = {
+			"job_order": ["=", frm.doc.name],
+		};
+		frappe.set_route("List", "Claim Order");
 	}
 
+	if (frm.doc.resumes_required == 1) {
+		staff_assign_redirect(frm);
+	}
 }
 
-function sales_invoice_data(frm) {
-    frappe.route_options = {
-        "job_order": ["=", frm.doc.name]
-    };
-    frappe.set_route("List", "Sales Invoice")
+function messages(frm){
+	var x = document.getElementsByClassName('li.nav-item.dropdown.dropdown-notifications.dropdown-mobile.chat-navbar-icon');
+	$('li.nav-item.dropdown.dropdown-notifications.dropdown-mobile.chat-navbar-icon').click();
+	if(frappe.route_history.length>1){
+		$(x.css("display", "block"));
+	}
 }
 
+function sales_invoice_data(frm){
+	frappe.route_options = {
+		"job_order": ["=", frm.doc.name]
+	};
+	frappe.set_route("List", "Sales Invoice");
+}
 
 function set_custom_base_price(frm){
-
-	frm.set_value("base_price",frm.doc.rate)
-	frm.set_value("rate_increase",frm.doc.per_hour-frm.doc.rate)
-	
-  }
-
-
-function hide_unnecessary_data(frm) {
-    let field_name = ['select_days', "worker_filled"]
-    var arrayLength = field_name.length;
-    for (var i = 0; i < arrayLength; i++) {
-        frm.set_df_property(field_name[i], "hidden", 1);
-    }
-    let display_fields = ["base_price", "rate_increase"]
-    var display_length = display_fields.length;
-    for (var j = 0; j < display_length; j++) {
-        frm.set_df_property(display_fields[j], "hidden", 0);
-    }
-
+	frm.set_value("base_price",frm.doc.rate);
+	frm.set_value("rate_increase",frm.doc.per_hour-frm.doc.rate);
 }
 
-function staff_assigned_emp(frm) {
-    frappe.call({
-        method: "tag_workflow.tag_data.staff_assigned_employees",
-        args: {
-            job_order: cur_frm.doc.name,
-        },
-        callback: function(r) {
-            if (r.message == 'success1') {
-                frm.add_custom_button(__('Assigned Employees'), function() {
-                    assigned_emp(frm)
-                }, __("View"));
+function hide_unnecessary_data(frm){
+	let field_name = ['select_days', "worker_filled"];
+	var arrayLength = field_name.length;
+	for(var i = 0; i < arrayLength; i++){
+		frm.set_df_property(field_name[i], "hidden", 1);
+	}
+
+	let display_fields = ["base_price", "rate_increase"];
+	var display_length = display_fields.length;
+	for(var j = 0; j < display_length; j++){
+		frm.set_df_property(display_fields[j], "hidden", 0);
+	}
+}
+
+function staff_assigned_emp(frm){
+	frappe.call({
+		method: "tag_workflow.tag_data.staff_assigned_employees",
+		args: {job_order: cur_frm.doc.name,},
+		callback: function(r) {
+			if (r.message == 'success1') {
+				frm.add_custom_button(__('Assigned Employees'), function(){
+					assigned_emp(frm);
+				}, __("View"));
 				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_inactive');
 				let data = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
-                $('[data-fieldname = assigned_employees]').click(function() {
+				$('[data-fieldname = assigned_employees]').click(function() {
 					if($('[data-fieldname = assigned_employees]').attr('id')=='assigned_inactive'){
 						assigned_emp(frm);
 					}
 				});
-                frm.set_df_property("assigned_employees", "options", data);
-                frm.toggle_display('related_actions_section', 1);
-            }
-        }
-    })
+				frm.set_df_property("assigned_employees", "options", data);
+				frm.toggle_display('related_actions_section', 1);
+			}
+		}
+	});
 }
 
-function cancel_joborder(frm) {
+function cancel_joborder(frm){
 	frm.add_custom_button(__('Cancel'), function() {
 		frappe.set_route("Form", "Job Order");
 	});
 }
 
-function claim_assign_button(frm) {
-	if (frm.doc.resumes_required == 1) {
+function claim_assign_button(frm){
+	if(frm.doc.resumes_required == 1){
 		assign_button(frm);
 		staff_assigned_emp(frm);
-	} else {
+	}else{
 		staff_claim_button(frm);
 	}
 }
@@ -1073,8 +1038,8 @@ function staff_assign_redirect(frm) {
 	frappe.set_route("List", "Assign Employee");
 }
 
-function staff_claim_button(frm) {
-	if (frm.doc.staff_org_claimed) {
+function staff_claim_button(frm){
+	if(frm.doc.staff_org_claimed){
 		frappe.call({
 			'method': 'tag_workflow.tag_data.claim_order_company',
 			'args': {
@@ -1101,7 +1066,7 @@ function staff_claim_button(frm) {
 		frm.set_df_property("related_details", "options", data1);
 		frm.toggle_display('related_actions_section', 1);
 		staff_assigned_emp(frm);
-	} else {
+	}else{
 		let data2 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Claims </p></div>`;
 		$('[data-fieldname = related_details]').click(function() {
 			claim_orders(frm);
@@ -1117,24 +1082,20 @@ function staff_claim_button(frm) {
 
 function time_validation(frm){
 	if(frm.doc.from_date && frm.doc.from_date==frappe.datetime.nowdate()){
-	  var order_date=new Date(frm.doc.from_date+' '+frm.doc.job_start_time)
-	  var current_date=new Date(frappe.datetime.now_datetime())
-	  var diff=current_date.getTime()-order_date.getTime()
-	  diff=diff/60000
-	  if(diff>=0){
-		cur_frm.set_value('job_start_time',(current_date.getHours())+':'+(current_date.getMinutes()+1))
-		cur_frm.refresh_field('job_start_time')
-		cur_frm.refresh_field('from_date')
-		$('.datepicker').hide()
-		frappe.msgprint({
-		  message: __('Past Time Is Not Acceptable'),
-		  title: __("Error"),
-		  indicator: "orange",
-		});
-		frappe.validated=false
+		var order_date=new Date(frm.doc.from_date+' '+frm.doc.job_start_time);
+		var current_date=new Date(frappe.datetime.now_datetime());
+		var diff=current_date.getTime()-order_date.getTime();
+		diff=diff/60000;
+		if(diff>=0){
+			cur_frm.set_value('job_start_time',(current_date.getHours())+':'+(current_date.getMinutes()+1));
+			cur_frm.refresh_field('job_start_time');
+			cur_frm.refresh_field('from_date');
+			$('.datepicker').hide();
+			frappe.msgprint({message: __('Past Time Is Not Acceptable'), title: __("Error"), indicator: "orange",});
+			frappe.validated=false
+		}
 	}
-	}
-  }
+}
 
 function approved_emp(frm){
 	frappe.call({
@@ -1176,36 +1137,32 @@ function approved_emp(frm){
 function assigned_emp(frm){
 	frappe.call({
 		method: "tag_workflow.tag_data.staffing_assigned_employee",
-		args: {
-			'job_order': cur_frm.doc.name,
-		},
+		args: {'job_order': cur_frm.doc.name,},
 		callback: function(rm) {
 			var data = rm.message;
 			let profile_html = `<table><th>Employee Name</th><th>Marked As</th><th>Actions</th>`;
 			for (let p in data) {
+				profile_html += `<tr><td>${data[p].employee}</td><td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>`;
 
-				profile_html += `<tr>
-			<td>${data[p].employee}</td>
-			<td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>`;
 				if (data[parseInt(p)].no_show == "No Show" || data[parseInt(p)].non_satisfactory == "Non Satisfactory") {
-					profile_html += `<td class="replace" data-fieldname="replace" ><a href="/app/assign-employee/${data[p].assign_name}"><button class="btn btn-primary btn-sm mt-2">Replace </button></a></td>`
+					profile_html += `<td class="replace" data-fieldname="replace" ><a href="/app/assign-employee/${data[p].assign_name}"><button class="btn btn-primary btn-sm mt-2">Replace </button></a></td>`;
 				}
+
 				profile_html += `</tr>`;
 			}
-			profile_html += `</table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`
+
+			profile_html += `</table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`;
 			var dialog1 = new frappe.ui.Dialog({
 				title: __('Assigned Employees'),
-				fields: [{
-					fieldname: "staff_companies",
-					fieldtype: "HTML",
-					options: profile_html
-				}, ]
+				fields: [{fieldname: "staff_companies",	fieldtype: "HTML", options: profile_html}, ]
 			});
+
 			dialog1.no_cancel();
 			dialog1.set_primary_action(__('Close'), function() {
 				dialog1.hide();
 				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_inactive');
 			});
+
 			if($('[data-fieldname = assigned_employees]').attr('id')=='assigned_inactive'){
 				dialog1.show();
 				dialog1.$wrapper.find('.modal-dialog').css('max-width', '880px');
@@ -1213,7 +1170,7 @@ function assigned_emp(frm){
 				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_active');
 			}
 		}
-	})
+	});
 }
 
 function job_order_cancel_button(frm){
@@ -1221,12 +1178,11 @@ function job_order_cancel_button(frm){
 		if((frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type=='Exclusive Hiring' || frappe.boot.tag.tag_user_info.company_type=='TAG') || (frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.company_type=='Exclusive' && r.organization_type=='Staffing')){
 			frm.add_custom_button(__("Delete"),function(){
 				cancel_job_order(frm);
-	
-			})
+			});
 		}
-	})
-	
+	});
 }
+
 function cancel_job_order(frm){
 	return new Promise(function(resolve, reject) {
 		frappe.confirm("<h4>Are you sure you want to discard this Job Order? </h4><h5>This Process is irreversiable . Your whole data related to this order will be delete</h5>",
@@ -1241,70 +1197,67 @@ function cancel_job_order(frm){
 		);
 	});
 }
+
 function deleting_data(frm){
 	frappe.call({
 		method:"tag_workflow.tag_workflow.doctype.job_order.job_order.data_deletion",
 		args:{job_order:frm.doc.name},
 		callback:function(r){
-			if(r.message=='success')
-			{
-				frappe.msgprint('Order Deleted Successfully')
+			if(r.message=='success'){
+				frappe.msgprint('Order Deleted Successfully');
 				setTimeout(function () {
 					window.location.href='/app/job-order'
 				}, 3000);
 			}
-			
 		}
-
-	})
+	});
 }
 
-function deny_job_order(frm) {
-	if (cur_frm.doc.is_single_share == 1 && frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
-			frm.add_custom_button(__("Deny Job Order"), function() {
-				frappe.call({
-					method: "tag_workflow.tag_workflow.doctype.job_order.job_order.after_denied_joborder",
-					args: {
-						staff_company: frm.doc.staff_company,
-						joborder_name: frm.doc.name,
-						job_title: frm.doc.select_job,
-						hiring_name: frm.doc.company,
-					},
-					freeze: true,
-					freeze_message: "<p><b>preparing notification for hiring orgs...</b></p>",
-					callback: function(r) {
-						cur_frm.refresh();
-						cur_frm.reload_doc();
-					},
-				});
+function deny_job_order(frm){
+	if(cur_frm.doc.is_single_share == 1 && frappe.boot.tag.tag_user_info.company_type == 'Staffing'){
+		frm.add_custom_button(__("Deny Job Order"), function() {
+			frappe.call({
+				method: "tag_workflow.tag_workflow.doctype.job_order.job_order.after_denied_joborder",
+				args: {
+					staff_company: frm.doc.staff_company,
+					joborder_name: frm.doc.name,
+					job_title: frm.doc.select_job,
+					hiring_name: frm.doc.company,
+				},
+				freeze: true,
+				freeze_message: "<p><b>preparing notification for hiring orgs...</b></p>",
+				callback: function(r) {
+					cur_frm.refresh();
+					cur_frm.reload_doc();
+				},
 			});
-		} else {
-			frm.remove_custom_button("Deny Job Order");
-		}
-	
+		});
+	}else{
+		frm.remove_custom_button("Deny Job Order");
+	}
 }
 
 
-function cancel_job_order_deatils(frm) {
-	if (frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
-			show_claim_bar(frm);
-		}
+function cancel_job_order_deatils(frm){
+	if(frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
+		show_claim_bar(frm);
+	}
 
-		if (cur_frm.doc.__islocal == 1) {
-			check_company_detail(frm);
-			frappe.db.get_doc("Company", cur_frm.doc.company).then((doc) => {
-				if (doc.organization_type === "Staffing") {
-					cur_frm.set_value("company", "");
-				}
-			});
-			cancel_joborder(frm);
-		} else {
-			timer_value(frm);
-			let roles = frappe.user_roles;
-			if (roles.includes("Hiring User") || roles.includes("Hiring Admin")) {
-				if (frappe.datetime.now_datetime() >= cur_frm.doc.from_date && cur_frm.doc.to_date >= frappe.datetime.now_datetime()) {
-					frm.set_df_property("no_of_workers", "read_only", 0);
-				}
+	if(cur_frm.doc.__islocal == 1){
+		check_company_detail(frm);
+		frappe.db.get_doc("Company", cur_frm.doc.company).then((doc) => {
+			if(doc.organization_type === "Staffing"){
+				cur_frm.set_value("company", "");
+			}
+		});
+		cancel_joborder(frm);
+	}else{
+		timer_value(frm);
+		let roles = frappe.user_roles;
+		if(roles.includes("Hiring User") || roles.includes("Hiring Admin")){
+			if(frappe.datetime.now_datetime() >= cur_frm.doc.from_date && cur_frm.doc.to_date >= frappe.datetime.now_datetime()){
+				frm.set_df_property("no_of_workers", "read_only", 0);
 			}
 		}
+	}
 }
