@@ -67,7 +67,7 @@ frappe.ui.form.on('Assign Employee', {
 			return {
 				query: "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.get_employee",
 				filters: {
-					company: doc.hiring_organization, emp_company: doc.company,
+					company: doc.hiring_organization, emp_company: doc.company,all_employees:doc.show_all_employees,
 					job_category: doc.job_category,	distance_radius: doc.distance_radius, job_location: doc.job_location, employee_lis : li
 				}
 			}
@@ -78,6 +78,10 @@ frappe.ui.form.on('Assign Employee', {
 		check_employee_data(frm);
 	},
 	company:function(frm){
+		cur_frm.clear_table("employee_details")
+		cur_frm.refresh_fields();
+	},
+	show_all_employees:function(frm){
 		cur_frm.clear_table("employee_details")
 		cur_frm.refresh_fields();
 	},
@@ -391,3 +395,16 @@ function document_download(frm){
 	}
 	});
 }
+
+frappe.ui.form.on("Assign Employee Details", {
+	employee:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn]
+		if(frm.doc.show_all_employees==0){
+			frappe.db.get_value("Employee", {name: child.employee}, ["job_category"], function(r) {
+				if(r.job_category && r.job_category!='null'){
+					frappe.model.set_value(cdt,cdn,"job_category",frm.doc.job_category)
+				}
+			})
+		}
+	}	
+});
