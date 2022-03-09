@@ -199,7 +199,7 @@ frappe.listview_settings['Job Order'] = {
 								args: {"name": cname, "user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "sid": frappe.boot.tag.tag_user_info.sid},
 								callback: function(res) {
 									if(res.message=='error_occur'){
-										window.location.reload()
+										console.log('some error occur')
 									}
 									else if (!res.exc) {
 										$('#'+div_id).html(popup_content1(res.message));
