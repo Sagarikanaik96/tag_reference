@@ -84,7 +84,10 @@ function update_title(frm){
 /*------------------------------------*/
 function check_date(frm){
 	if(frm.doc.from_date && frm.doc.to_date){
-		if(frm.doc.date >= frm.doc.from_date && frm.doc.date <= frm.doc.to_date){
+		if(frm.doc.date > frappe.datetime.now_date()){
+			frappe.msgprint("Date can't be future date.");
+			frm.set_value("date", "");
+		}else if(frm.doc.date >= frm.doc.from_date && frm.doc.date <= frm.doc.to_date){
 			console.log("TAG");
 		}else{
 			frappe.msgprint("Date must be in between Job order start and end date");

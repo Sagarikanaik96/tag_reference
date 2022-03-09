@@ -4,6 +4,16 @@ import json, ast
 from frappe.share import add
 
 #-----------------------------#
+def get_status(order, company, date):
+    sheets = frappe.db.get_list("Timesheet", {"job_order_detail": order, "employee_company": company, "date_of_timesheet": date}, "workflow_state")
+    status = [s['workflow_state'] for s in sheets]
+    if("Approval Request" in status):
+        return "Approval Request"
+    elif("Denied" in status):
+        return "In Progress"
+    elif("Approved" in status):
+        return "Approved"
+
 @frappe.whitelist()
 def get_data(company, order):
     try:
@@ -20,12 +30,15 @@ def get_data(company, order):
         data = frappe.db.get_list("Timesheet", {"job_order_detail": order, "employee_company": company}, ["date_of_timesheet", "workflow_state", "job_order_detail", "name"], group_by="date_of_timesheet", order_by="creation asc")
 
         for d in data:
-            d.update({"order_status": job_order_status})
-            result.append(d)
-            try:
-                add("Timesheet", d.name, user=frappe.session.user, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
-            except Exception:
-                continue
+            if(d['workflow_state'] != "Open"):
+                d.update({"order_status": job_order_status})
+                status = get_status(order, company, d['date_of_timesheet'])
+                d.update({"workflow_state": status})
+                result.append(d)
+
+                if not frappe.db.exists("DocShare", {"user": frappe.session.user, "share_name": d['name'], "read": 1, "write": 1, "submit": 1}):
+                    add("Timesheet", d.name, user=frappe.session.user, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
+
         return result
     except Exception as e:
         frappe.msgprint(e)

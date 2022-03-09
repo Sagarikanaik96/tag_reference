@@ -122,6 +122,7 @@ def add_status(timesheet, status, employee, company, job_order):
                 item.is_billable = 0
                 item.billing_rate = 0
                 item.flat_rate = 0
+                item.billing_amount = 0
             no_show_org(emp, company, job_order)
         elif(status == "Non Satisfactory"):
             timesheet.non_satisfactory = 1

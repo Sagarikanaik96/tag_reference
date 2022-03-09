@@ -169,6 +169,7 @@ frappe.TimesheetApproval = Class.extend({
 				"callback": function(r){
 					frappe.msgprint("Timesheet(s) has been updated.");
 					let data = r.message || {};
+					page.fields_dict.job_order.set_value(me.order);
 					render_child_data(me.order, data.date, data.timesheet);
 				}
 			});
@@ -192,7 +193,7 @@ frappe.TimesheetApproval = Class.extend({
 				{fieldtype:'Data', fieldname:'timesheet'+String(v), label:'Timesheet', read_only: 1, default: value[v]},
 				{fieldtype:'Data', fieldname:'employee'+String(v), label: "Employee", read_only: 1, default: employee},
 				{fieldtype:'Column Break', fieldname: 'column'+String(v)},
-				{fieldtype:'Small Text', fieldname: 'reason'+String(v), label: "Reason", default: "N/A"},
+				{fieldtype:'Small Text', fieldname: 'reason'+String(v), label: "Reason", default: "N/A", reqd: 1},
 				{fieldtype:'Section Break', fieldname: 'section'+String(v)},
 			);
 		}
@@ -238,6 +239,8 @@ function get_state(state){
 		workflow = `<p class="indicator-pill gray filterable ellipsis">${state}</p>`;
 	}else if(state == "Approved"){
 		workflow = `<p class="indicator-pill green filterable ellipsis">${state}</p>`;
+	}else if(state == "In Progress"){
+		workflow = `<p class="indicator-pill red filterable ellipsis">${state}</p>`;
 	}else{
 		workflow = `<p class="indicator-pill red filterable ellipsis">${state}</p>`;
 	}
@@ -254,7 +257,7 @@ function render_child_data(order, date, timesheet){
 			for(var d in data){
 				let workflow = get_state(data[d].workflow_state);
 				let state = data[d].state ? `<p class="indicator-pill red filterable ellipsis">${data[d].state}</p>` : '';
-				let inp = data[d].workflow_state == "Approved" ? `<input type='checkbox' class='grid-row-check pull-left' id="_${d}" value="${data[d].name}" disabled>` : `<input type='checkbox' class='grid-row-check pull-left' id="_${d}" value="${data[d].name}">`; 
+				let inp = ["Approved", "Denied", "In Progress"].includes(data[d].workflow_state) ? `<input type='checkbox' class='grid-row-check pull-left' id="_${d}" value="${data[d].name}" disabled>` : `<input type='checkbox' class='grid-row-check pull-left' id="_${d}" value="${data[d].name}">`; 
 
 				html += `
 					<tr>
@@ -263,7 +266,7 @@ function render_child_data(order, date, timesheet){
 								${inp}
 							</div>
 						</td>
-						<td style='text-align: center; width: 20%;' onclick=show_timesheet('${order}','${date}','${data[d].name}')>
+						<td style='text-align: left; width: 20%;' onclick=show_timesheet('${order}','${date}','${data[d].name}')>
 							<b id="emp_${d}" value="${data[d].employee_name}:${data[d].employee}">${data[d].employee_name} </br><small>${data[d].employee}</small></b>
 						</td>
 						<td style='text-align: center; width: 10%;' onclick=show_timesheet('${order}','${date}','${data[d].name}')>${workflow}</td>
@@ -280,6 +283,7 @@ function render_child_data(order, date, timesheet){
 			$("#child").append(html);
 			$("#data_head").css("display", "none");
 			$("#child_info").css("display", "block");
+			document.getElementById("all").checked = 0;
 			localStorage.setItem("date", "");
 			localStorage.setItem("name", "");
 		}

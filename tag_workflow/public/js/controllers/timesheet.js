@@ -7,7 +7,6 @@ frappe.ui.form.on("Timesheet", {
 		$('[data-label="Cancel"]').hide();
 		$('.custom-actions.hidden-xs.hidden-md').show();
 		cur_frm.dashboard.hide();
-		add_back_button(frm);
 		if(frm.doc.__islocal==1){
 			cancel_timesheet(frm);
 			frm.set_value("employee","");
@@ -420,14 +419,4 @@ function cancel_timesheet(frm){
 	frm.add_custom_button(__('Cancel'), function(){
 		frappe.set_route("Form", "Timesheet");
 	});
-}
-
-/*---------------------*/
-function add_back_button(frm){
-	frm.add_custom_button(__("Go To Bulk Approval/Deny"), function(){
-		localStorage.setItem("order", frm.doc.job_order_detail);
-		localStorage.setItem("date", frm.doc.date_of_timesheet);
-		localStorage.setItem("name", frm.doc.name);
-		window.location.href = "/app/timesheet-approval";
-	}).addClass("btn-primary");
 }
