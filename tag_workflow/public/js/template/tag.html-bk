@@ -144,7 +144,7 @@
 
 							<a href="/app/job-order">
 								<div class="tab-button custom-btn">
-									<img src="/assets/tag_workflow/images/ico-order.svg" class="pr-3 pl-5" alt="order">Order
+									<img src="/assets/tag_workflow/images/ico-order.svg" class="pr-3 pl-5" alt="order">Orders
 								</div>
 							</a>
 
@@ -165,7 +165,7 @@
 											<ul class="inner-menu pl-5 ml-5 list-unstyled collapse" id="submenu1" role="menu" aria-labelledby="btn-1">
 												<li class="py-2 mt-2"><a href="/app/contact">Contacts</a></li>
 												<li class="py-2"><a href="/app/lead">Deals</a></li>
-												<li class="py-2"><a href="#">Email</a></li>
+												<li class="py-2"><a href="#">Emails</a></li>
 											</ul>
 										</li>
 									</ul>
