@@ -199,7 +199,7 @@ frappe.TimesheetApproval = Class.extend({
 		}
 
 		var dialog = new frappe.ui.Dialog({
-			title: __('Give us reason to deny'),
+			title: __('Please provide an explanation for the timesheet denial'),
 			fields: fields
 		});
 		dialog.set_primary_action(__('Deny'), function() {
