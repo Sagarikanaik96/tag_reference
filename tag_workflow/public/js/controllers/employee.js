@@ -98,6 +98,17 @@ frappe.ui.form.on("Employee", {
 		});
 
 	},
+	after_save:function(frm){
+		if(!frm.doc.user_id){
+			frappe.call({
+				'method':'tag_workflow.tag_data.update_company_employee',
+				'args':{
+					'doc_name':frm.doc.name,
+					'employee_company':frm.doc.company
+				}
+			})
+		}
+	}
 	
 		
 });

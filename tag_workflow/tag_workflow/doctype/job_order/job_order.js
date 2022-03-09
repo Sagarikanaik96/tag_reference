@@ -113,6 +113,7 @@ frappe.ui.form.on("Job Order", {
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
+		staffing_company_remove(frm);
 		job_order_cancel_button(frm);
 		$(document).on('click', '[data-fieldname="job_start_time"]', function(){
 			$('.datepicker').show()
@@ -1270,3 +1271,9 @@ function cancel_job_order_deatils(frm){
 		}
 	}
 }
+
+function staffing_company_remove(frm){
+	if(frm.doc.__islocal==1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		frm.set_value('company','')
+	}
+}  

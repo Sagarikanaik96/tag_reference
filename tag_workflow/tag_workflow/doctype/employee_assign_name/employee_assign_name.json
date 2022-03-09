@@ -19,6 +19,8 @@
    "options": "Employee"
   },
   {
+   "fetch_from": "employee.resume",
+   "fetch_if_empty": 1,
    "fieldname": "resume",
    "fieldtype": "Attach",
    "in_list_view": 1,
@@ -35,7 +37,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-12-07 04:43:30.321802",
+ "modified": "2022-03-09 08:40:37.179462",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Employee Assign Name",

@@ -795,3 +795,22 @@ def claim_order_insert(hiring_org=None,job_order=None,no_of_workers_joborder=Non
         frappe.db.commit()
     except Exception as e:
         print(e, frappe.get_traceback())        
+
+@frappe.whitelist(allow_guest=False)
+def employee_company(doc,method):
+   if not doc.user_id:
+       comp_doc=frappe.get_doc('Company',doc.company)
+       comp_doc.append('employees', {'employee': doc.name,'employee_name':doc.employee_name,'resume': doc.resume if doc.resume else ''})
+       comp_doc.save(ignore_permissions=True)
+
+@frappe.whitelist(allow_guest=False)
+def update_company_employee(doc_name,employee_company):
+   emp_doc=frappe.get_doc('Employee',doc_name)
+   comp_doc=frappe.get_doc('Company',employee_company)
+   for i in comp_doc.employees:
+       if(doc_name in i.employee):
+           if(emp_doc.employee_name!=i.employee_name):
+               i.employee_name=emp_doc.employee_name
+           if(emp_doc.resume!=i.resume):
+               i.resume=emp_doc.resume
+           comp_doc.save(ignore_permissions=True)

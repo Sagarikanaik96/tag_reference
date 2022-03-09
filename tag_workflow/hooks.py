@@ -88,7 +88,10 @@ doc_events = {
         },
         "Designation":{
                 "after_insert":'tag_workflow.tag_data.designation_activity_data'
-        }
+        },
+        "Employee":{
+               "after_insert":'tag_workflow.tag_data.employee_company'
+       }
 }
 
 # logo
