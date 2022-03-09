@@ -1154,7 +1154,7 @@ function assigned_emp(frm){
 			for (let p in data) {
 				profile_html += `<tr><td>${data[p].employee}</td><td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>`;
 
-				if (data[parseInt(p)].no_show == "No Show" || data[parseInt(p)].non_satisfactory == "Non Satisfactory") {
+				if (data[parseInt(p)].no_show == "No Show" || data[parseInt(p)].non_satisfactory == "Non Satisfactory" || data[parseInt(p)].dnr == "DNR") {
 					profile_html += `<td class="replace" data-fieldname="replace" ><a href="/app/assign-employee/${data[p].assign_name}"><button class="btn btn-primary btn-sm mt-2">Replace </button></a></td>`;
 				}
 

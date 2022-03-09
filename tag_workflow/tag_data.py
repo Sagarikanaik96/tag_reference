@@ -619,7 +619,7 @@ def assigned_employee_data(job_order):
         emp_list=[]
         for i in range(len(emp_data)):
             emp_dic={}
-            sql3=f"""select IF(no_show=1, "No Show", " ") as no_show,IF(non_satisfactory=1,"Non Satisfactory"," ") as non_satisfactory,IF(dnr=1,"DNR"," ") as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
+            sql3=f"""select max(IF(no_show=1, "No Show", " ")) as no_show,max(IF(non_satisfactory=1,"Non Satisfactory"," ")) as non_satisfactory,max(IF(dnr=1,"DNR"," ")) as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
             employees_data=frappe.db.sql(sql3,as_dict=True)
             if(len(employees_data)==0):
                 emp_dic["staff_company"]=emp_data[i].staff_company
@@ -658,7 +658,7 @@ def staffing_assigned_employee(job_order):
         emp_list=[]
         for i in range(len(emp_data)):
             emp_dic={}
-            sql3=f"""select IF(no_show=1, "No Show", " ") as no_show,IF(non_satisfactory=1,"Non Satisfactory"," ") as non_satisfactory,IF(dnr=1,"DNR"," ") as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
+            sql3=f"""select max(IF(no_show=1, "No Show", " ")) as no_show,max(IF(non_satisfactory=1,"Non Satisfactory"," ")) as non_satisfactory,max(IF(dnr=1,"DNR"," ")) as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
             employees_data=frappe.db.sql(sql3,as_dict=True)
             if(len(employees_data)==0):
                 emp_dic['assign_name']=emp_data[i].name
