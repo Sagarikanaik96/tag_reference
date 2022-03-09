@@ -174,11 +174,6 @@ function check_employee_data(frm){
 	let table = frm.doc.employee_details || [];
 	let employees = [];
 
-	for(var d in table){
-		if(table[d].job_category!=null && table[d].job_category != frm.doc.job_category){
-			msg.push('Employee(<b>'+table[d].employee+'</b>) job category not matched with Job Order job category');
-		}
-	}
 	
 	if(frm.doc.resume_required==1){
 		resume_data(frm,msg,table)
