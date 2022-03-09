@@ -179,16 +179,25 @@ frappe.ui.form.on("Job Order", {
 			rate_hour_contract_change(frm);
 			if (frappe.validated) {
 				return new Promise(function(resolve, reject) {
-					frappe.confirm("<br><h4>Do you want to save?</h4><br><b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time.slice(0, -3) + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>" + (frm.doc.rate).toFixed(2) + "<br><b>Rate Increase: </b>" + (frm.doc.per_hour - frm.doc.rate).toFixed(2) + "<br><b>Total Per Hour Rate: </b>" + (frm.doc.per_hour).toFixed(2) + "",
-						function() {
-							let resp = "frappe.validated = false";
-							resolve(resp);
-							check_company_detail(frm);
-						},
-						function() {
-							reject();
-						}
-					);
+					let profile_html = "<span style='font-size: 14px;'>"+"<b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time.slice(0, -3) + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>$" + (frm.doc.rate).toFixed(2) + "<br><b>Rate Increase: </b>$" + (frm.doc.per_hour - frm.doc.rate).toFixed(2) + "<br><b>Additional Flat Rate: </b>$" + (frm.doc.flat_rate).toFixed(2) + "<br><b>Total Per Hour Rate: </b>$" + (frm.doc.per_hour).toFixed(2) + "</span>";
+					var confirm_joborder = new frappe.ui.Dialog({
+						title: __('Confirm Job Order Details'),
+						fields: [{fieldname: "save_joborder", fieldtype: "HTML", options: profile_html},]
+					});
+					confirm_joborder.no_cancel();
+					confirm_joborder.set_primary_action(__('Confirm'), function() {
+						let resp = "frappe.validated = false";
+						resolve(resp);
+						check_company_detail(frm);
+						confirm_joborder.hide();
+					});
+					confirm_joborder.set_secondary_action_label(__('Cancel'));
+					confirm_joborder.set_secondary_action(() => {
+						reject();
+						confirm_joborder.hide();
+					});
+					confirm_joborder.show();
+					confirm_joborder.$wrapper.find('.modal-dialog').css('width', 'fit-content');
 				});
 			}
 		}
@@ -1185,7 +1194,7 @@ function job_order_cancel_button(frm){
 
 function cancel_job_order(frm){
 	return new Promise(function(resolve, reject) {
-		frappe.confirm("<h4>Are you sure you want to discard this Job Order? </h4><h5>This Process is irreversiable . Your whole data related to this order will be delete</h5>",
+		frappe.confirm("<h4>Are you sure you want to discard this Job Order? </h4><h5>This Process is irreversible. Your whole data related to this order will be deleted.</h5>",
 			function() {
 				let resp = "frappe.validated = false";
 				resolve(resp);
