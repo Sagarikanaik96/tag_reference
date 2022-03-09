@@ -5,6 +5,12 @@ frappe.provide("tag_workflow");
 $(document).bind('toolbar_setup', function() {
         $(".dropdown-help").empty();
         $('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
+			if(window.screen.width>768) {
+				$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
+			}
+			else {
+				$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo-Emblem.png">`);
+			}
 
 	frappe.ui.toolbar.route_to_company = function() {
 		frappe.set_route('Form', 'Company', frappe.boot.tag.tag_user_info.company);
