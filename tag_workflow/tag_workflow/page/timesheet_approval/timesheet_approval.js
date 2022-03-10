@@ -193,7 +193,15 @@ frappe.TimesheetApproval = Class.extend({
 				{fieldtype:'Data', fieldname:'timesheet'+String(v), label:'Timesheet', read_only: 1, default: value[v]},
 				{fieldtype:'Data', fieldname:'employee'+String(v), label: "Employee", read_only: 1, default: employee},
 				{fieldtype:'Column Break', fieldname: 'column'+String(v)},
-				{fieldtype:'Small Text', fieldname: 'reason'+String(v), label: "Reason", default: "N/A", reqd: 1},
+				{
+					fieldtype:'Small Text', fieldname: 'reason'+String(v), label: "Reason", default: "N/A", reqd: 1,
+					onchange: function(){
+						let pattern = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.\/?]*$/;
+						if(pattern.test(this.value) == 0){
+							this.set_value("");
+						}
+					}
+				},
 				{fieldtype:'Section Break', fieldname: 'section'+String(v)},
 			);
 		}
