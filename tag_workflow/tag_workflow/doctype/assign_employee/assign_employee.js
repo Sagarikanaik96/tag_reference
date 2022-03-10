@@ -186,7 +186,7 @@ function check_employee_data(frm){
 	table_emp(frm,table,msg)
 
 	for(var e in table){(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg.push('Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details');}
-	if(msg.length){frappe.msgprint({message: msg.join("\n\n"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
+	if(msg.length){frappe.msgprint({message: msg.join("<br>"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
 }
 
 
@@ -335,13 +335,13 @@ function worker_notification(frm){
 
 function table_emp(frm,table,msg){
 	if(frm.doc.tag_status=='Approved'){
-		(table.length > Number(frm.doc.no_of_employee_required)+1) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
+		(table.length > Number(frm.doc.no_of_employee_required)+1) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more than No. Of Employees Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 	}
 	else if(frm.doc.claims_approved){
         (table.length > Number(frm.doc.claims_approved)) ? msg.push('Please Assign '+frm.doc.claims_approved+' Employees') : console.log("TAG");
 	}
  	else{
-		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
+		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more than No. Of Employees Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 	}
 }
 
@@ -367,7 +367,10 @@ function make_notification_approved(frm){
 function resume_data(frm,msg,table){
 	for(var r in table){
 		if(table[r].resume===null || table[r].resume==undefined || table[r].resume==''){
-			msg.push('Attach the Resume to Assign the Employee.');
+			let message = 'Attach the Resume to Assign the Employee.';
+			if(!msg.includes(message)){
+				msg.push(message);
+			}
 			frappe.validated=false
 		}
 	}
