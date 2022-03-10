@@ -60,6 +60,8 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	onload:function(frm){
+		window.start = cur_frm.doc.time_logs[0].break_start_time
+		window.end = cur_frm.doc.time_logs[0].break_end_time
 		if(frappe.session.user != 'Administrator'){
 			$('.menu-btn-group').hide();
 		}
@@ -139,7 +141,7 @@ frappe.ui.form.on("Timesheet", {
 	workflow_state: function(frm){
 		check_update_timesheet(frm);
 	},
-	
+
 });
 
 
@@ -391,10 +393,8 @@ frappe.ui.form.on("Timesheet Detail", {
 		}
 
 		frappe.model.set_value(cdt,cdn,"billing_hours",child.hours);
-		let sec=(moment(child.to_time).diff(moment(child.from_time), "seconds"));
-		let hour   = Math.floor(sec / 3600); // get hours
-		let minutes = Math.floor((sec - (hour * 3600)) / 60); // get minutes
-		frappe.model.set_value(cdt,cdn,"hrs",hour+'hr '+minutes+'min');
+		update_time(frm,cdt,cdn)
+		
 	},
 
 	from_time:function(frm,cdt,cdn){
@@ -413,6 +413,37 @@ frappe.ui.form.on("Timesheet Detail", {
 			frappe.model.set_value(cdt, cdn, "hrs", "");
 			frappe.model.set_value(cdt, cdn, "to_time","");
 		}
+	},
+	break_start_time:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn];
+		if((child.break_start_time).slice(0,10)<((child.from_time).slice(0,10))){
+			setTimeout(() => {
+				frappe.model.set_value(cdt, cdn, "break_start_time", window.start);
+				frappe.msgprint('break start date  before Job Order Start Date');
+			},1000);
+		}else if((child.break_start_time).slice(0,10)>(child.break_end_time).slice(0,10)){
+			setTimeout(() => {
+				frappe.model.set_value(cdt, cdn, "break_start_time",window.start);
+				frappe.msgprint('break start date After Job Order End Date');
+			},1000);
+		}
+
+		update_time(frm,cdt,cdn)
+	},
+	break_end_time:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn];
+		if((child.break_end_time).slice(0,10)<((child.break_start_time).slice(0,10))){
+			setTimeout(() => {
+				frappe.model.set_value(cdt, cdn, "break_start_time", window.end);
+				frappe.msgprint('break end date  before break start date');
+			},1000);
+		}else if((child.break_end_time).slice(0,10)>(child.to_time).slice(0,10)){
+			setTimeout(() => {
+				frappe.model.set_value(cdt, cdn, "break_start_time",window.end);
+				frappe.msgprint('break end date After Job Order End Date');
+			},1000);
+		}
+		update_time(frm,cdt,cdn)
 	}
 });
 
@@ -421,4 +452,19 @@ function cancel_timesheet(frm){
 	frm.add_custom_button(__('Cancel'), function(){
 		frappe.set_route("Form", "Timesheet");
 	});
+}
+
+
+function update_time(frm,cdt,cdn){
+	var child=locals[cdt][cdn];
+	let sec =(moment(child.to_time).diff(moment(child.from_time), "seconds"));
+	console.log(sec)
+	let break_sec=(moment(child.break_end_time).diff(moment(child.break_start_time), "seconds"));
+	console.log('break',break_sec)
+
+	let time_diff = sec - break_sec
+	let hour   = Math.floor(time_diff / 3600);
+	let minutes = Math.floor((time_diff - (hour * 3600)) / 60); // get minutes
+	frappe.model.set_value(cdt,cdn,"hrs",hour+'hr '+minutes+'min');
+
 }
