@@ -787,10 +787,14 @@ input::-webkit-credentials-auto-fill-button {
 }
 [data-route="timesheet-approval"] .table tbody tr td {
   font-size: 13px;
-  padding: 10px 5px 0 5px;
+  padding: 10px;
+  vertical-align: baseline;
 }
 [data-route="timesheet-approval"] .table {
   margin: 0;
+}
+[data-route="List/Employee/List"] .popover .popover-body b {
+  font-weight: 400;
 }
 
 span.frappe-timestamp.mini {
