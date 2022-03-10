@@ -458,9 +458,7 @@ function cancel_timesheet(frm){
 function update_time(frm,cdt,cdn){
 	var child=locals[cdt][cdn];
 	let sec =(moment(child.to_time).diff(moment(child.from_time), "seconds"));
-	console.log(sec)
 	let break_sec=(moment(child.break_end_time).diff(moment(child.break_start_time), "seconds"));
-	console.log('break',break_sec)
 
 	let time_diff = sec - break_sec
 	let hour   = Math.floor(time_diff / 3600);
