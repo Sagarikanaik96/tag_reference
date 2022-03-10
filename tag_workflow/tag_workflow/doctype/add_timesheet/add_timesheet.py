@@ -94,8 +94,10 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
 
                     timesheet.insert(ignore_permissions=True)
                     timesheet = add_status(timesheet, item['status'], item['employee'], job.company, job_order)
-                    timesheet.workflow_state = "Approval Request"
                     timesheet.save(ignore_permissions=True)
+                    timesheet_status_data=f'update `tabTimesheet` set workflow_state="Approval Request" where name="{timesheet.name}"'
+                    frappe.db.sql(timesheet_status_data)
+                    frappe.db.commit()
                     timesheets.append({"employee": item['employee'], "docname": timesheet.name, "company": job.company, "job_title": job.select_job})
                     added = 1
                 else:
@@ -154,3 +156,15 @@ def send_timesheet_for_approval(timesheets):
             sendmail(staffing_user, msg, subject, 'Timesheet', time['docname'])
     except Exception as e:
         frappe.log_error(e, "Timesheet Approval")
+
+@frappe.whitelist()
+def job_order_name(doctype,txt,searchfield,page_len,start,filters):
+    try:
+        company=filters.get('company')
+        company_type=filters.get('company_type')
+        if(company_type=='Staffing'):
+            sql=f'''select name from `tabJob Order` where company_type="Exclusive" and bid>0 and company in (select name from `tabCompany` where parent_staffing="{company}") '''
+            return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.log_error(e, "Job Order For Timesheet")
+        frappe.throw(e)

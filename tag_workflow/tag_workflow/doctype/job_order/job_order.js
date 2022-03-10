@@ -1255,11 +1255,6 @@ function cancel_job_order_deatils(frm){
 
 	if(cur_frm.doc.__islocal == 1){
 		check_company_detail(frm);
-		frappe.db.get_doc("Company", cur_frm.doc.company).then((doc) => {
-			if(doc.organization_type === "Staffing"){
-				cur_frm.set_value("company", "");
-			}
-		});
 		cancel_joborder(frm);
 	}else{
 		timer_value(frm);

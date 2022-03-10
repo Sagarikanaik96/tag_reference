@@ -3,6 +3,13 @@
 
 frappe.ui.form.on('Add Timesheet', {
 	refresh: function(frm) {
+		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+				frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
+					if(!r.name){
+						window.location.href='/app/job-order'
+					}
+				});
+		}
 		cur_frm.disable_save();
 		frm.dashboard.set_headline(__(`<div style="display: flex;flex-direction: inherit;"><p>Job Order description will be available here...</p></div>`));
 		$(".help-box.small.text-muted").css("display", "none");
@@ -36,6 +43,17 @@ frappe.ui.form.on('Add Timesheet', {
 			cur_frm.clear_table("items");
 			cur_frm.refresh_field("items");
 		}
+	},
+	setup:function(frm){
+		frm.set_query("job_order", function(){
+			return {
+				query: "tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.job_order_name",
+				filters: {
+					"company_type": frappe.boot.tag.tag_user_info.company_type,
+					"company":frappe.boot.tag.tag_user_info.company
+				}	
+			}
+		});
 	},
 
 	date: function(frm){

@@ -40,8 +40,6 @@ frappe.TimesheetApproval = Class.extend({
 			}
 		});
 
-		page.add_action_item('Approve', () => me.make_action(wrapper, page, "Approved"));
-		page.add_action_item('Deny', () => me.make_action(wrapper, page, "Denied"));
 		page.set_secondary_action('', () => me.get_details(wrapper, page), 'refresh');
 
 		if(localStorage.getItem("order")){
@@ -50,6 +48,26 @@ frappe.TimesheetApproval = Class.extend({
 				render_child_data(localStorage.getItem("order"), localStorage.getItem("date"), localStorage.getItem("name"));
 			}
 		}
+		frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
+			if(r.name){
+				frappe.db.get_value('Job Order',{'name':$('[data-fieldname="job_order"]')[0].fieldobj.value},['company_type','owner'],function(r){
+					frappe.db.get_value('User',{'name':r.owner},['organization_type'],function(r){
+						if(r.organization_type=='Staffing'){
+							page.set_primary_action('Add Timesheet', () => me.make_timesheet(wrapper, page));
+							page.add_action_item('Approve', () => me.make_action(wrapper, page, "Approved"));
+						}
+						else{
+							page.add_action_item('Approve', () => me.make_action(wrapper, page, "Approved"));
+							page.add_action_item('Deny', () => me.make_action(wrapper, page, "Denied"));
+						}							
+					})
+				})
+			}
+			else{
+				page.add_action_item('Approve', () => me.make_action(wrapper, page, "Approved"));
+				page.add_action_item('Deny', () => me.make_action(wrapper, page, "Denied"));
+			}	
+		})
         },
 
 	order_info: function(wrapper, page){
@@ -235,7 +253,11 @@ frappe.TimesheetApproval = Class.extend({
 		dialog.show();
 		dialog.$wrapper.find('.modal-dialog').css('max-width', '880px');
 		dialog.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
-	}
+	},
+	make_timesheet(wrapper, page){
+		frappe.route_options = {"job_order":$('[data-fieldname="job_order"]')[0].fieldobj.value };
+		frappe.set_route("form", "add-timesheet");
+	},		
 });
 
 /*-------------------------------------------------------------*/
