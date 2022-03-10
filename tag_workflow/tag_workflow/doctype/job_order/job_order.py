@@ -125,7 +125,7 @@ def make_sales_invoice(source_name, company, emp_list, emp_sql,target_doc=None, 
         total_hours = 0
         hiring_org_name,job_title= frappe.db.get_value(ORD,source,["company","select_job"])
         for_company,for_company_city,for_company_state,for_company_zip = frappe.db.get_value("Company",hiring_org_name,["address","city","state","zip"])
-        sql = """ select name from `tabTimesheet` where job_order_detail = '{0}' and docstatus = 1 and employee in ({1}) and is_check_in_sales_invoice = 0 """.format(source, emp_sql)
+        sql = """ select name,no_show,non_satisfactory,dnr from `tabTimesheet` where job_order_detail = '{0}' and docstatus = 1 and employee in ({1}) and is_check_in_sales_invoice = 0 """.format(source, emp_sql)
         timesheet = frappe.db.sql(sql, as_dict=1)
 
         for time in timesheet:
@@ -135,11 +135,28 @@ def make_sales_invoice(source_name, company, emp_list, emp_sql,target_doc=None, 
                 continue
 
             sheet = frappe.get_doc("Timesheet", {"name": time.name}, ignore_permissions=True)
-            total_amount += sheet.total_billable_amount
-            total_hours += sheet.total_billable_hours
+            if time.no_show == 1:
+                total_amount += 0
+                total_hours += 0
+            else:
+                total_amount += sheet.total_billable_amount
+                total_hours += sheet.total_billable_hours
 
             for logs in sheet.time_logs:
-                activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'is_dnr':sheet.dnr,"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours,"per_hour_rate1":logs.billing_rate}
+                status = '-'
+                if sheet.no_show:
+                    status = 'No Show'
+                elif sheet.non_satisfactory:
+                    status = 'Non Satisfactory'
+                elif sheet.dnr:
+                    status = 'DNR'
+
+
+                if time.no_show == 1:
+                    # add zero all value in time sheet in invoice
+                    activity = {"activity_type": logs.activity_type, "billing_amount": 0, "billing_hours": 0, "time_sheet": logs.parent, "from_time": 0, "to_time": 0, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":0,"overtime_hours":0,"per_hour_rate1":0}
+                else:
+                    activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours,"per_hour_rate1":logs.billing_rate}
                 doclist.append("timesheets", activity)
 
         doclist.total_billing_amount = total_amount
