@@ -369,6 +369,15 @@ frappe.ui.form.on("Timesheet Detail", {
 
 	to_time:function(frm,cdt,cdn){
 		var child=locals[cdt][cdn];
+
+		let f_time = new Date(child.from_time);
+		let t_time = new Date(child.to_time);
+		
+		if(t_time.toDateString() != f_time.toDateString()){
+			frappe.msgprint("Timesheet can't be for multiple days.");
+			frappe.model.set_value(cdt, cdn, "to_time", child.from_time);
+		}
+
 		if((child.to_time).slice(0,10)<(frm.doc.from_date)){
 			setTimeout(() => {
 				frappe.model.set_value(cdt, cdn, "to_time", frm.doc.from_date);
@@ -390,6 +399,7 @@ frappe.ui.form.on("Timesheet Detail", {
 
 	from_time:function(frm,cdt,cdn){
 		var child=locals[cdt][cdn];
+		
 		if((child.from_time).slice(0,10)<(frm.doc.from_date)){
 			frappe.msgprint('Start Date cant be before Job Order Start Date');
 			frappe.model.set_value(cdt, cdn, "from_time", frm.doc.from_date);
