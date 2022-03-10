@@ -50,9 +50,9 @@ frappe.TimesheetApproval = Class.extend({
 		}
 		frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
 			if(r.name){
-				frappe.db.get_value('Job Order',{'name':$('[data-fieldname="job_order"]')[0].fieldobj.value},['company_type','owner'],function(r){
-					frappe.db.get_value('User',{'name':r.owner},['organization_type'],function(r){
-						if(r.organization_type=='Staffing'){
+				frappe.db.get_value('Job Order',{'name':$('[data-fieldname="job_order"]')[0].fieldobj.value},['company_type','owner'],function(rm){
+					frappe.db.get_value('User',{'name':rm.owner},['organization_type'],function(rmm){
+						if(rmm.organization_type=='Staffing'){
 							page.set_primary_action('Add Timesheet', () => me.make_timesheet(wrapper, page));
 							page.add_action_item('Approve', () => me.make_action(wrapper, page, "Approved"));
 						}
