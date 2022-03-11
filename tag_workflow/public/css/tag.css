@@ -642,6 +642,7 @@ input::-webkit-credentials-auto-fill-button {
 }
 [data-page-route="Job Order"] .msg {
   cursor: pointer;
+  display: -webkit-flex;
 }
 [data-page-route="Job Order"] .msg:after {
   content: "\003E";
