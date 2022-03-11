@@ -483,8 +483,6 @@ function update_time(frm, cdt, cdn){
 		if(break_sec < 0){
 			break_sec = 0;
 		}
-	}else{
-		break_sec = 0;
 	}
 	
 	let time_diff = sec - break_sec
