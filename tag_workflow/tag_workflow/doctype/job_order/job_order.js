@@ -1117,9 +1117,19 @@ function approved_emp(frm){
 			var data = rm.message;
 			let profile_html = `<table><th>Employee Name</th><th>Marked As</th><th>Staffing Company</th>`;
 			for (let p in data) {
+				var marked_as = ''
+				if (data[p].no_show){
+					marked_as  += ' '+ data[p].no_show
+				}
+				if (data[p].non_satisfactory){
+					marked_as += ' ' + data[p].non_satisfactory
+				}
+				if (data[p].dnr){
+					marked_as += ' '+ data[p].dnr
+				}
 				profile_html += `<tr>
 					<td>${data[p].employee}</td>
-					<td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>
+					<td>${marked_as}</td>
 					<td style="margin-right:20px;" >${data[p].staff_company}</td>
 				</tr>`;
 			}
@@ -1152,7 +1162,18 @@ function assigned_emp(frm){
 			var data = rm.message;
 			let profile_html = `<table><th>Employee Name</th><th>Marked As</th><th>Actions</th>`;
 			for (let p in data) {
-				profile_html += `<tr><td>${data[p].employee}</td><td>${data[p].no_show} ${data[p].non_satisfactory} ${data[p].dnr}</td>`;
+				var marked_as = ''
+				if (data[p].no_show){
+					marked_as  += ' '+ data[p].no_show
+				}
+				if (data[p].non_satisfactory){
+					marked_as += ' '+ data[p].non_satisfactory
+				}
+				if (data[p].dnr){
+					marked_as += ' '+ data[p].dnr
+				}
+
+				profile_html += `<tr><td>${data[p].employee}</td><td>${marked_as}</td>`;
 
 				if (data[parseInt(p)].no_show == "No Show" || data[parseInt(p)].non_satisfactory == "Non Satisfactory" || data[parseInt(p)].dnr == "DNR") {
 					profile_html += `<td class="replace" data-fieldname="replace" ><a href="/app/assign-employee/${data[p].assign_name}"><button class="btn btn-primary btn-sm mt-2">Replace </button></a></td>`;
