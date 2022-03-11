@@ -196,7 +196,7 @@ frappe.ui.form.on("Job Order", {
 						confirm_joborder.hide();
 					});
 					confirm_joborder.show();
-					confirm_joborder.$wrapper.find('.modal-dialog').css('width', 'fit-content');
+					confirm_joborder.$wrapper.find('.modal-dialog').css('width', '450px');
 				});
 			}
 		}
