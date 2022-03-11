@@ -146,11 +146,7 @@ frappe.ui.form.on("Job Order", {
 					assign_employees(frm);
 				});
 			}else{
-				if (frm.doc.__islocal != 1){
-					frm.add_custom_button(__('Claim Order'), function(){
-						claim_job_order_staffing(frm);
-					});
-				}
+				claim_order_button(frm);
 			}
 		}
 
@@ -1297,3 +1293,11 @@ function staffing_company_remove(frm){
 		frm.set_value('company','')
 	}
 }  
+
+function claim_order_button(frm) {
+	if (frm.doc.__islocal != 1){
+		frm.add_custom_button(__('Claim Order'), function(){
+			claim_job_order_staffing(frm);
+		});
+	}
+}
