@@ -430,3 +430,11 @@ function doc_download(e,frm){
 		document.body.removeChild(anchor);  
 	}
 }
+
+// for prevent Enter on company page 
+$(document).keypress(
+  function(event){
+    if (event.which == '13') {
+      event.preventDefault();
+    }
+});
