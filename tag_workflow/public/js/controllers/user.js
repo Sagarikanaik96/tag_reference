@@ -57,14 +57,28 @@ frappe.ui.form.on("User", {
 	organization_type: function(frm){
 		set_options(frm);
 		init_values(frm);
-		if(frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring'){
-			let company=cur_frm.doc.organization_type
-			setup_company_value(frm,company);
+		if(!frm.doc.organization_type){
+			frm.set_query("company", function (doc) {
+				return {
+				  query: "tag_workflow.tag_data.user_company",
+				  filters: {
+					owner_company: doc.organization_type,
+				  },
+				};
+			  });
+
 		}
 		else{
-			let company='Exclusive Hiring'
-			frm.set_value('company',frappe.boot.tag.tag_user_info.company)
-			setup_company_value(frm,company)
+		
+			if(frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring'){
+				let company=cur_frm.doc.organization_type
+				setup_company_value(frm,company);
+			}
+			else{
+				let company='Exclusive Hiring'
+				frm.set_value('company',frappe.boot.tag.tag_user_info.company)
+				setup_company_value(frm,company)
+			}
 
 		}
 		if(frm.doc.organization_type == "Hiring"){

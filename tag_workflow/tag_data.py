@@ -814,3 +814,13 @@ def update_company_employee(doc_name,employee_company):
            if(emp_doc.resume!=i.resume):
                i.resume=emp_doc.resume
            comp_doc.save(ignore_permissions=True)
+
+@frappe.whitelist()
+def user_company(doctype,txt,searchfield,page_len,start,filters):
+    try:
+        owner_company=filters.get('owner_company')
+        sql = ''' select name from `tabCompany` where organization_type="{0}" '''.format(owner_company)
+        return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.log_error(e, "User Company Error")
+        frappe.throw(e)
