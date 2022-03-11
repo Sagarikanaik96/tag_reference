@@ -153,6 +153,9 @@ def send_timesheet_for_approval(timesheets):
             msg = f'{time["company"]} has submitted a timesheet on {today} for {time["job_title"]} for approval.'
             subject = 'Timesheet For Approval'
             make_system_notification(staffing_user, msg, 'Timesheet', time['docname'], subject)
+            dnr_notification(time,staffing_user)
+            subject = 'Timesheet For Approval'
+
             sendmail(staffing_user, msg, subject, 'Timesheet', time['docname'])
     except Exception as e:
         frappe.log_error(e, "Timesheet Approval")
@@ -168,3 +171,20 @@ def job_order_name(doctype,txt,searchfield,page_len,start,filters):
     except Exception as e:
         frappe.log_error(e, "Job Order For Timesheet")
         frappe.throw(e)
+@frappe.whitelist()
+def dnr_notification(time,staffing_user):
+    dnr_timesheet=frappe.get_doc('Timesheet',time['docname'])
+
+    if(dnr_timesheet.dnr==1):
+                message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>DNR</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>. There is time to substitute this employee for today’s work order {datetime.date.today()}'
+                subject = 'DNR'
+                make_system_notification(staffing_user, message, 'Timesheet', time['docname'], subject)
+    if(dnr_timesheet.non_satisfactory==1):
+        message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>Non Satisfactory</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>.'
+        subject = 'Non Satisfactory'
+        make_system_notification(staffing_user, message, 'Timesheet', time['docname'], subject)
+    if(dnr_timesheet.no_show==1):
+        message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>No Show</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>.'
+        subject = 'No Show'
+        make_system_notification(staffing_user, message, 'Timesheet', time['docname'], subject)
+       
