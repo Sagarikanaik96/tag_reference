@@ -127,6 +127,7 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	no_show: function(frm){
+		update_child_amount(frm);
 		trigger_email(frm, "no_show", frm.doc.no_show, "No Show");
 	},
 
@@ -174,8 +175,14 @@ function job_order_details(frm){
 /*-----------timesheet-----------------*/
 function check_update_timesheet(frm){
 	if(frm.doc.workflow_state == "Approval Request"){
-		frappe.call({method: "tag_workflow.utils.timesheet.send_timesheet_for_approval",freeze:true,
-			freeze_message:__("Preparing notification ......."),args: {"employee": frm.doc.employee, "docname": frm.doc.name,'company':frm.doc.company,'job_order':frm.doc.job_order_detail }});
+		var current_date = new Date(frappe.datetime.now_datetime());
+		var approved_date = new Date(frm.doc.modified);
+		var diff=current_date.getTime()-approved_date.getTime();
+		diff = parseInt(diff/1000);
+
+		if (diff<30){
+			frappe.call({method: "tag_workflow.utils.timesheet.send_timesheet_for_approval",args: {"employee": frm.doc.employee, "docname": frm.doc.name,'company':frm.doc.company,'job_order':frm.doc.job_order_detail }});
+		}
 
 		if((frappe.user_roles.includes('Hiring Admin') || frappe.user_roles.includes('Hiring User')) && frappe.session.user!='Administrator'){
 			frappe.db.get_value("Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
@@ -387,8 +394,6 @@ frappe.ui.form.on("Timesheet Detail", {
 		}
 
 		frappe.model.set_value(cdt,cdn,"billing_hours",child.hours);
-		update_time(frm,cdt,cdn)
-		
 	},
 
 	from_time:function(frm,cdt,cdn){
@@ -449,14 +454,44 @@ function cancel_timesheet(frm){
 }
 
 
-function update_time(frm,cdt,cdn){
-	var child=locals[cdt][cdn];
-	let sec =(moment(child.to_time).diff(moment(child.from_time), "seconds"));
-	let break_sec=(moment(child.break_end_time).diff(moment(child.break_start_time), "seconds"));
+/*-----------------------------------*/
+function update_child_amount(frm){
+	let items = frm.doc.time_logs || [];
+	
+	if(frm.doc.no_show == 1){
+		for(let i in items){
+			frappe.model.set_value(items[i].doctype, items[i].name, "is_billable", 0);
+			frappe.model.set_value(items[i].doctype, items[i].name, "billing_rate", 0);
+			frappe.model.set_value(items[i].doctype, items[i].name, "flat_rate", 0);
+		}
+	}else{
+		for(let i in items){
+			frappe.model.set_value(items[i].doctype, items[i].name, "is_billable", 1);
+			frappe.model.set_value(items[i].doctype, items[i].name, "billing_rate", frm.doc.per_hour_rate);
+			frappe.model.set_value(items[i].doctype, items[i].name, "flat_rate", frm.doc.flat_rate);
+		}
+	}
+}
 
+function update_time(frm, cdt, cdn){
+	var child = locals[cdt][cdn];
+	let sec = (moment(child.to_time).diff(moment(child.from_time), "seconds"));
+	let break_sec = 0;
+
+	if(child.break_start_time && child.break_end_time && child.break_start_time >= child.from_time && child.break_end_time <= child.to_time){
+		break_sec = (moment(child.break_end_time).diff(moment(child.break_start_time), "seconds"));
+		if(break_sec < 0){
+			break_sec = 0;
+		}
+	}else{
+		break_sec = 0;
+	}
+	
 	let time_diff = sec - break_sec
-	let hour   = Math.floor(time_diff / 3600);
+	let hour = Math.floor(time_diff / 3600);
 	let minutes = Math.floor((time_diff - (hour * 3600)) / 60); // get minutes
-	frappe.model.set_value(cdt,cdn,"hrs",hour+'hr '+minutes+'min');
-
+	let hours = String(hour)+"."+String(minutes);
+	
+	frappe.model.set_value(cdt, cdn, "hrs", (hour+'hr '+minutes+'min'));
+	frappe.model.set_value(cdt, cdn, "hours", parseFloat(hours));
 }
