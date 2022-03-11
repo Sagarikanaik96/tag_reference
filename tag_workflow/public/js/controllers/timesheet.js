@@ -127,7 +127,6 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	no_show: function(frm){
-		update_child_amount(frm);
 		trigger_email(frm, "no_show", frm.doc.no_show, "No Show");
 	},
 
@@ -251,9 +250,11 @@ function trigger_email(frm, key, value, type){
 			function(){
 				notify_email(frm, type, value);
 				frappe.msgprint('Employee <b>'+frm.doc.employee_name+'</b> updated as '+type+'.');
+				update_child_amount(frm);
 			},function(){
 				cur_frm.doc[key] = (value == 1 ? 0 : 1);
 				cur_frm.fields_dict[key].refresh_input();
+				update_child_amount(frm);
 			}
 		);
 	}else if(order && local && value){
@@ -392,8 +393,8 @@ frappe.ui.form.on("Timesheet Detail", {
 				frappe.msgprint('End Date cant be After Job Order End Date');
 			},1000);
 		}
-
-		frappe.model.set_value(cdt,cdn,"billing_hours",child.hours);
+		update_time(frm, cdt, cdn);
+		frappe.model.set_value(cdt, cdn, "billing_hours", child.hours);
 	},
 
 	from_time:function(frm,cdt,cdn){
@@ -442,7 +443,15 @@ frappe.ui.form.on("Timesheet Detail", {
 				frappe.msgprint('break end date After Job Order End Date');
 			},1000);
 		}
-		update_time(frm,cdt,cdn)
+		update_time(frm,cdt,cdn);
+	},
+
+	flat_rate: function(frm, cdt, cdn){
+		update_time(frm,cdt,cdn);
+	},
+
+	billing_rate: function(frm, cdt, cdn){
+		update_time(frm,cdt,cdn);
 	}
 });
 
@@ -477,6 +486,7 @@ function update_time(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
 	let sec = (moment(child.to_time).diff(moment(child.from_time), "seconds"));
 	let break_sec = 0;
+	let amount = 0;
 
 	if(child.break_start_time && child.break_end_time && child.break_start_time >= child.from_time && child.break_end_time <= child.to_time){
 		break_sec = (moment(child.break_end_time).diff(moment(child.break_start_time), "seconds"));
@@ -488,8 +498,31 @@ function update_time(frm, cdt, cdn){
 	let time_diff = sec - break_sec
 	let hour = Math.floor(time_diff / 3600);
 	let minutes = Math.floor((time_diff - (hour * 3600)) / 60); // get minutes
-	let hours = String(hour)+"."+String(minutes);
 	
 	frappe.model.set_value(cdt, cdn, "hrs", (hour+'hr '+minutes+'min'));
-	frappe.model.set_value(cdt, cdn, "hours", parseFloat(hours));
+	let mnt = minutes/60;
+	let hours = hour+mnt;
+	frappe.model.set_value(cdt, cdn, "hours", hours);
+
+	if(hours > 8){
+		let ex_rate = frm.doc.per_hour_rate*1.5;
+		let ex_hour = hours-8;
+		frappe.model.set_value(cdt, cdn, "extra_rate", ex_rate);
+		frappe.model.set_value(cdt, cdn, "extra_hours", ex_hour);
+		let extra = ex_rate*ex_hour;
+		amount = 8*child.billing_rate+child.flat_rate + extra;
+	}else{
+		amount = hours*child.billing_rate+child.flat_rate;
+	}
+
+	setTimeout(() => {
+		frappe.model.set_value(cdt, cdn, "base_billing_amount", amount);
+		frappe.model.set_value(cdt, cdn, "billing_amount", amount);
+	}, 500);
 }
+
+
+var calculate_end_time = function(frm, cdt, cdn) {
+        let child = locals[cdt][cdn];
+	console.log(child.hours);
+};
