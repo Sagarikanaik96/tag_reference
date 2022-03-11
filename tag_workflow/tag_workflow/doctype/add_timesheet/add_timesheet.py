@@ -176,9 +176,9 @@ def dnr_notification(time,staffing_user):
     dnr_timesheet=frappe.get_doc('Timesheet',time['docname'])
 
     if(dnr_timesheet.dnr==1):
-                message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>DNR</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>. There is time to substitute this employee for today’s work order {datetime.date.today()}'
-                subject = 'DNR'
-                make_system_notification(staffing_user, message, 'Timesheet', time['docname'], subject)
+        message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>DNR</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>. There is time to substitute this employee for today’s work order {datetime.date.today()}'
+        subject = 'DNR'
+        make_system_notification(staffing_user, message, 'Timesheet', time['docname'], subject)
     if(dnr_timesheet.non_satisfactory==1):
         message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>Non Satisfactory</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>.'
         subject = 'Non Satisfactory'
