@@ -214,7 +214,7 @@ frappe.TimesheetApproval = Class.extend({
 				{
 					fieldtype:'Small Text', fieldname: 'reason'+String(v), label: "Reason", default: "N/A", reqd: 1,
 					onchange: function(){
-						let pattern = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.\/?]*$/;
+						let pattern = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.\/? ]*$/;
 						if(pattern.test(this.value) == 0){
 							this.set_value("");
 						}
