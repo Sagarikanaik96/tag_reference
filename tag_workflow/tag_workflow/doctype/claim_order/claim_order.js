@@ -65,12 +65,15 @@ frappe.ui.form.on('Claim Order', {
 		}
 		else{
 			let company_field = [
-				"job_order","staffing_organization","agree_to_contract","e_signature","staff_claims_no"
+				"job_order","staffing_organization","agree_to_contract","e_signature"
 			  ];
-			  for (let f in company_field) {
+			for (let f in company_field) {
 				cur_frm.toggle_enable(company_field[f], 0);
-			  }
+			}
+
 		}
+		update_claim_by_staffing(frm)
+
 
 	},
 	setup:function(frm){
@@ -203,4 +206,18 @@ function claim_order_save(frm){
     })
 }
                                 
-                                   
+function update_claim_by_staffing(frm){
+	if(cur_frm.doc.__islocal != 1){
+	frappe.db.get_value('User',{'name':frm.doc.modified_by},['organization_type'],function(r){
+		console.log(r)
+		if(r.organization_type !='Staffing' || r  == null){
+			console.log(r)
+			frm.set_df_property('staff_claims_no', 'read_only', 1)
+			// $('[data-label="Save"]').hide()
+		}
+		else{
+			submit_claim(frm)
+		}			
+}) 
+	} 
+}         

@@ -67,7 +67,7 @@ frappe.ui.form.on('Assign Employee', {
 			return {
 				query: "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.get_employee",
 				filters: {
-					company: doc.hiring_organization, emp_company: doc.company,
+					company: doc.hiring_organization, emp_company: doc.company,all_employees:doc.show_all_employees,
 					job_category: doc.job_category,	distance_radius: doc.distance_radius, job_location: doc.job_location, employee_lis : li
 				}
 			}
@@ -78,6 +78,10 @@ frappe.ui.form.on('Assign Employee', {
 		check_employee_data(frm);
 	},
 	company:function(frm){
+		cur_frm.clear_table("employee_details")
+		cur_frm.refresh_fields();
+	},
+	show_all_employees:function(frm){
 		cur_frm.clear_table("employee_details")
 		cur_frm.refresh_fields();
 	},
@@ -113,7 +117,6 @@ frappe.ui.form.on('Assign Employee', {
 	},
 
 	setup: function(frm){
-		frm.set_value('company', frappe.boot.tag.tag_user_info.company)
 		frm.set_query("company", function(doc){
 			return {
 				filters: [
@@ -175,11 +178,6 @@ function check_employee_data(frm){
 	let table = frm.doc.employee_details || [];
 	let employees = [];
 
-	for(var d in table){
-		if(table[d].job_category!=null && table[d].job_category != frm.doc.job_category){
-			msg.push('Employee(<b>'+table[d].employee+'</b>) job category not matched with Job Order job category');
-		}
-	}
 	
 	if(frm.doc.resume_required==1){
 		resume_data(frm,msg,table)
@@ -188,7 +186,7 @@ function check_employee_data(frm){
 	table_emp(frm,table,msg)
 
 	for(var e in table){(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg.push('Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details');}
-	if(msg.length){frappe.msgprint({message: msg.join("\n\n"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
+	if(msg.length){frappe.msgprint({message: msg.join("<br>"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
 }
 
 
@@ -337,13 +335,13 @@ function worker_notification(frm){
 
 function table_emp(frm,table,msg){
 	if(frm.doc.tag_status=='Approved'){
-		(table.length > Number(frm.doc.no_of_employee_required)+1) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
+		(table.length > Number(frm.doc.no_of_employee_required)+1) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more than No. Of Employees Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 	}
 	else if(frm.doc.claims_approved){
         (table.length > Number(frm.doc.claims_approved)) ? msg.push('Please Assign '+frm.doc.claims_approved+' Employees') : console.log("TAG");
 	}
  	else{
-		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more then No. Of Employee Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
+		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more than No. Of Employees Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 	}
 }
 
@@ -369,7 +367,10 @@ function make_notification_approved(frm){
 function resume_data(frm,msg,table){
 	for(var r in table){
 		if(table[r].resume===null || table[r].resume==undefined || table[r].resume==''){
-			msg.push('Attach the Resume to Assign the Employee.');
+			let message = 'Attach the Resume to Assign the Employee.';
+			if(!msg.includes(message)){
+				msg.push(message);
+			}
 			frappe.validated=false
 		}
 	}
@@ -397,3 +398,16 @@ function document_download(frm){
 	}
 	});
 }
+
+frappe.ui.form.on("Assign Employee Details", {
+	employee:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn]
+		if(frm.doc.show_all_employees==0){
+			frappe.db.get_value("Employee", {name: child.employee}, ["job_category"], function(r) {
+				if(r.job_category && r.job_category!='null'){
+					frappe.model.set_value(cdt,cdn,"job_category",frm.doc.job_category)
+				}
+			})
+		}
+	}	
+});

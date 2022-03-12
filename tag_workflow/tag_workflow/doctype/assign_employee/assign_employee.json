@@ -22,6 +22,7 @@
   "resume_required",
   "section_break_6",
   "distance_radius",
+  "show_all_employees",
   "employee_details",
   "replaced_employees",
   "html_37",
@@ -206,12 +207,18 @@
    "fieldname": "view_contract",
    "fieldtype": "Button",
    "label": "View Contract Language"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_all_employees",
+   "fieldtype": "Check",
+   "label": "Show All Employees"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-24 02:43:57.683400",
+ "modified": "2022-03-09 04:01:51.303907",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",

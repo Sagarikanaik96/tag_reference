@@ -1,5 +1,10 @@
 frappe.listview_settings['Sales Invoice'] = {
 	onload:function(listview){
+		if(frappe.boot.tag.tag_user_info.company_type=='Hiring'){
+		frappe.route_options = {
+			"company": "",
+		}
+	}
 		$('h3[title = "Invoice"]').html('Invoices');
 		if(frappe.session.user!='Administrator'){
 			// $('.custom-actions.hidden-xs.hidden-md').hide()

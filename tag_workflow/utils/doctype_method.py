@@ -183,12 +183,16 @@ def update_cost(self):
             rate = get_activity_cost(self.employee, data.activity_type)
             hours = data.billing_hours or 0
             costing_hours = data.billing_hours or data.hours or 0
-            if rate:
+            if rate and self.no_show == 0:
                 bill_rate, cost_rate = get_bill_cost(rate, data)
                 data.billing_rate = bill_rate
                 data.costing_rate = cost_rate
                 data.billing_amount = ((data.billing_rate * (hours-data.extra_hours))+data.flat_rate)+(data.extra_hours*data.extra_rate)
                 data.costing_amount = data.costing_rate * costing_hours
+                data.base_billing_amount = data.billing_amount
+            else:
+                data.billing_amount = 0.00
+                data.base_billing_amount = 0.00
 
 def validate_mandatory_fields(self):
     for data in self.time_logs:

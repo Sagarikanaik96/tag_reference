@@ -94,8 +94,10 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
 
                     timesheet.insert(ignore_permissions=True)
                     timesheet = add_status(timesheet, item['status'], item['employee'], job.company, job_order)
-                    timesheet.workflow_state = "Approval Request"
                     timesheet.save(ignore_permissions=True)
+                    timesheet_status_data=f'update `tabTimesheet` set workflow_state="Approval Request" where name="{timesheet.name}"'
+                    frappe.db.sql(timesheet_status_data)
+                    frappe.db.commit()
                     timesheets.append({"employee": item['employee'], "docname": timesheet.name, "company": job.company, "job_title": job.select_job})
                     added = 1
                 else:
@@ -122,6 +124,7 @@ def add_status(timesheet, status, employee, company, job_order):
                 item.is_billable = 0
                 item.billing_rate = 0
                 item.flat_rate = 0
+                item.billing_amount = 0
             no_show_org(emp, company, job_order)
         elif(status == "Non Satisfactory"):
             timesheet.non_satisfactory = 1
@@ -150,6 +153,38 @@ def send_timesheet_for_approval(timesheets):
             msg = f'{time["company"]} has submitted a timesheet on {today} for {time["job_title"]} for approval.'
             subject = 'Timesheet For Approval'
             make_system_notification(staffing_user, msg, 'Timesheet', time['docname'], subject)
+            dnr_notification(time,staffing_user)
+            subject = 'Timesheet For Approval'
+
             sendmail(staffing_user, msg, subject, 'Timesheet', time['docname'])
     except Exception as e:
         frappe.log_error(e, "Timesheet Approval")
+
+@frappe.whitelist()
+def job_order_name(doctype,txt,searchfield,page_len,start,filters):
+    try:
+        company=filters.get('company')
+        company_type=filters.get('company_type')
+        if(company_type=='Staffing'):
+            sql=f'''select name from `tabJob Order` where company_type="Exclusive" and bid>0 and company in (select name from `tabCompany` where parent_staffing="{company}") '''
+            return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.log_error(e, "Job Order For Timesheet")
+        frappe.throw(e)
+@frappe.whitelist()
+def dnr_notification(time,staffing_user):
+    dnr_timesheet=frappe.get_doc('Timesheet',time['docname'])
+
+    if(dnr_timesheet.dnr==1):
+        message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>DNR</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>. There is time to substitute this employee for today’s work order {datetime.date.today()}'
+        subject = 'DNR'
+        make_system_notification(staffing_user, message, 'Timesheet', time['docname'], subject)
+    if(dnr_timesheet.non_satisfactory==1):
+        message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>Non Satisfactory</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>.'
+        subject = 'Non Satisfactory'
+        make_system_notification(staffing_user, message, 'Timesheet', time['docname'], subject)
+    if(dnr_timesheet.no_show==1):
+        message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>No Show</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>.'
+        subject = 'No Show'
+        make_system_notification(staffing_user, message, 'Timesheet', time['docname'], subject)
+       

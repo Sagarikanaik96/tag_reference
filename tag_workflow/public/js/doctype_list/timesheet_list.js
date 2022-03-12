@@ -27,7 +27,7 @@ frappe.listview_settings['Timesheet'] = {
 			$('.menu-btn-group').hide()
 		}
 		
-		if(frappe.boot.tag.tag_user_info.company_type == "Hiring" && frappe.boot.tag.tag_user_info.company){
+		if((frappe.boot.tag.tag_user_info.company_type == "Hiring" && frappe.boot.tag.tag_user_info.company)|| (frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" && frappe.boot.tag.tag_user_info.company)){
 			listview.page.set_secondary_action('<svg class="icon icon-xs" style=""><use class="" href="#icon-add"></use></svg>Add Timesheet', function(){
 				update_job_order(listview);
 			}).addClass("btn-primary");

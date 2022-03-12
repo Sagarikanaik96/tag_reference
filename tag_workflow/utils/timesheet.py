@@ -46,6 +46,8 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
 @frappe.whitelist()
 def get_timesheet_data(job_order, user, company_type):
     try:
+        if(company_type=='Staffing'):
+            company_type='Exclusive Hiring'
         if(company_type in ["Hiring", "Exclusive Hiring"]):
             sql = """ select employee, employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
             data = frappe.db.sql(sql, as_dict=1)

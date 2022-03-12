@@ -619,7 +619,7 @@ def assigned_employee_data(job_order):
         emp_list=[]
         for i in range(len(emp_data)):
             emp_dic={}
-            sql3=f"""select IF(no_show=1, "No Show", " ") as no_show,IF(non_satisfactory=1,"Non Satisfactory"," ") as non_satisfactory,IF(dnr=1,"DNR"," ") as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
+            sql3=f"""select max(IF(no_show=1, "No Show", " ")) as no_show,max(IF(non_satisfactory=1,"Non Satisfactory"," ")) as non_satisfactory,max(IF(dnr=1,"DNR"," ")) as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
             employees_data=frappe.db.sql(sql3,as_dict=True)
             if(len(employees_data)==0):
                 emp_dic["staff_company"]=emp_data[i].staff_company
@@ -658,7 +658,7 @@ def staffing_assigned_employee(job_order):
         emp_list=[]
         for i in range(len(emp_data)):
             emp_dic={}
-            sql3=f"""select IF(no_show=1, "No Show", " ") as no_show,IF(non_satisfactory=1,"Non Satisfactory"," ") as non_satisfactory,IF(dnr=1,"DNR"," ") as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
+            sql3=f"""select max(IF(no_show=1, "No Show", " ")) as no_show,max(IF(non_satisfactory=1,"Non Satisfactory"," ")) as non_satisfactory,max(IF(dnr=1,"DNR"," ")) as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
             employees_data=frappe.db.sql(sql3,as_dict=True)
             if(len(employees_data)==0):
                 emp_dic['assign_name']=emp_data[i].name
@@ -769,3 +769,58 @@ def company_exist(hiring_company):
         return 'yes'
     else:
         return 'no'
+
+from frappe.share import add
+
+@frappe.whitelist(allow_guest=False)
+def claim_order_insert(hiring_org=None,job_order=None,no_of_workers_joborder=None,e_signature_full_name=None,staff_company=None):
+    try:
+        doc = frappe.new_doc('Claim Order')
+        doc.agree_to_contract = 1
+        doc.hiring_organization = hiring_org
+        doc.approved_no_of_workers=no_of_workers_joborder
+        doc.contract_add_on="clam order"
+        doc.job_order =  job_order
+        doc.no_of_workers_joborder=no_of_workers_joborder
+        doc.staff_claims_no = no_of_workers_joborder
+        doc.staffing_organization = staff_company
+        doc.e_signature = e_signature_full_name
+        doc.insert()
+        sql1 = '''select email from `tabUser` where  company = "{}"'''.format(hiring_org)
+        hiring_list = frappe.db.sql(sql1,as_dict=1)
+        for  i in hiring_list:
+            add("Claim Order", doc.name, user=i["email"], share= 1,read=1,write=1,flags={"ignore_share_permission": 1})
+        sql = """ UPDATE `tabJob Order` SET bid = 1,claim="{0}",staff_org_claimed="{0}" where name="{1}" """.format(staff_company,job_order)
+        frappe.db.sql(sql)
+        frappe.db.commit()
+    except Exception as e:
+        print(e, frappe.get_traceback())        
+
+@frappe.whitelist(allow_guest=False)
+def employee_company(doc,method):
+   if not doc.user_id:
+       comp_doc=frappe.get_doc('Company',doc.company)
+       comp_doc.append('employees', {'employee': doc.name,'employee_name':doc.employee_name,'resume': doc.resume if doc.resume else ''})
+       comp_doc.save(ignore_permissions=True)
+
+@frappe.whitelist(allow_guest=False)
+def update_company_employee(doc_name,employee_company):
+   emp_doc=frappe.get_doc('Employee',doc_name)
+   comp_doc=frappe.get_doc('Company',employee_company)
+   for i in comp_doc.employees:
+       if(doc_name in i.employee):
+           if(emp_doc.employee_name!=i.employee_name):
+               i.employee_name=emp_doc.employee_name
+           if(emp_doc.resume!=i.resume):
+               i.resume=emp_doc.resume
+           comp_doc.save(ignore_permissions=True)
+
+@frappe.whitelist()
+def user_company(doctype,txt,searchfield,page_len,start,filters):
+    try:
+        owner_company=filters.get('owner_company')
+        sql = ''' select name from `tabCompany` where organization_type="{0}" '''.format(owner_company)
+        return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.log_error(e, "User Company Error")
+        frappe.throw(e)

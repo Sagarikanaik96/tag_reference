@@ -38,17 +38,21 @@ frappe.listview_settings['Job Order'] = {
 		}
 
 		let children = listview.$list_head_subject[0].children;
-		for(var c in children){
-			if(children[c].innerText && children[c].innerText =="Name"){
-				children[c].innerHTML = `<input class="level-item list-check-all" type="checkbox" title="Select All">
-			<span class="level-item list-liked-by-me hidden-xs">
-				<span title="Likes"><svg class="icon  icon-sm" style="">
-			<use class="like-icon" href="#icon-heart"></use>
-		</svg></span>
-			</span>
-			<span class="level-item">Order ID</span>`
+		setTimeout( function() {
+			for(var c in children){
+				if(children[c].innerText && children[c].innerText =="Name"){
+					children[c].innerHTML = `<input class="level-item list-check-all" type="checkbox" title="Select All">
+						<span class="level-item list-liked-by-me hidden-xs">
+							<span title="Likes"><svg class="icon  icon-sm" style="">
+						<use class="like-icon" href="#icon-heart"></use>
+						</svg></span>
+						</span>
+						<span class="level-item">Order ID</span>`
+				}
 			}
-		}
+             
+         }, 50 );
+		
 	},	
 
 	formatters: {
@@ -195,7 +199,7 @@ frappe.listview_settings['Job Order'] = {
 								args: {"name": cname, "user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "sid": frappe.boot.tag.tag_user_info.sid},
 								callback: function(res) {
 									if(res.message=='error_occur'){
-										window.location.reload()
+										console.log('some error occur')
 									}
 									else if (!res.exc) {
 										$('#'+div_id).html(popup_content1(res.message));

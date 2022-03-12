@@ -1,10 +1,11 @@
 frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
-		$('.form-footer').hide()
-		$('[data-label="Resume%20Timer"]').hide()
-		$('[data-label="Create%20Salary%20Slip"]').hide()
-		$('[data-label="Create%20Sales%20Invoice"]').hide()
-		$('[data-label="Cancel"]').hide()
+		$('.form-footer').hide();
+		$('[data-label="Resume%20Timer"]').hide();
+		$('[data-label="Create%20Salary%20Slip"]').hide();
+		$('[data-label="Create%20Sales%20Invoice"]').hide();
+		$('[data-label="Cancel"]').hide();
+		$('.custom-actions.hidden-xs.hidden-md').show();
 		cur_frm.dashboard.hide();
 		if(frm.doc.__islocal==1){
 			cancel_timesheet(frm);
@@ -57,10 +58,14 @@ frappe.ui.form.on("Timesheet", {
 			}
 		}
 	},
+
 	onload:function(frm){
+		window.start = cur_frm.doc.time_logs[0].break_start_time
+		window.end = cur_frm.doc.time_logs[0].break_end_time
 		if(frappe.session.user != 'Administrator'){
-			$('.menu-btn-group').hide()
-    	}
+			$('.menu-btn-group').hide();
+		}
+
 		if(frappe.user.has_role("Tag Admin")){
 			frm.set_query("company", function(){
 				return {
@@ -70,16 +75,18 @@ frappe.ui.form.on("Timesheet", {
 				}
 			});
 		}
+
 		if(!frm.doc.is_employee_rating_done && frm.doc.workflow_state == "Approved" && frm.doc.status == "Submitted"){
 			if((frappe.user_roles.includes('Hiring Admin') || frappe.user_roles.includes('Hiring User')) && frappe.session.user!='Administrator'){
-				employee_timesheet_rating(frm)
+				employee_timesheet_rating(frm);
 			}
 		}
 	},
+
 	validate:function(frm){
-		if (frm.doc.workflow_state === 'Denied'){
-			return new Promise(function(resolve, reject) {
-				if((frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User')) && frappe.session.user!='Administrator'){
+		if(frm.doc.workflow_state === 'Denied' && (frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User'))){
+			return new Promise(function(resolve, reject){
+				if(frappe.session.user!='Administrator'){
 					var pop_up = new frappe.ui.Dialog({
 						title: __('Please provide an explanation for the timesheet denial '),
 						'fields': [
@@ -87,9 +94,8 @@ frappe.ui.form.on("Timesheet", {
 						],
 						primary_action: function(){
 							pop_up.hide();
-							
-							var comment=pop_up.get_values()
-							denied_timesheet(frm)
+							var comment=pop_up.get_values();
+							denied_timesheet(frm);
 							frappe.call({
 								method:"tag_workflow.utils.timesheet.timesheet_dispute_comment_box",
 								freeze:true,
@@ -101,19 +107,20 @@ frappe.ui.form.on("Timesheet", {
 								callback:function(rm){
 									if (rm.message){
 										resolve();
-										frappe.msgprint('Comment Submitted Successfully')
+										frappe.msgprint('Comment Submitted Successfully');
 										setTimeout(() => {location.reload()}, 2000);
-									}	
+									}
 								}
-							})
+							});
 						}
 					});
 					pop_up.show();
 				}
-				reject()
-			});	
-	}
-},
+				reject();
+			});
+		}
+	},
+
 	job_order_detail: function(frm){
 		job_order_details(frm);
 		update_job_detail(frm);
@@ -134,7 +141,7 @@ frappe.ui.form.on("Timesheet", {
 	workflow_state: function(frm){
 		check_update_timesheet(frm);
 	},
-	
+
 });
 
 
@@ -241,9 +248,11 @@ function trigger_email(frm, key, value, type){
 		frappe.confirm(
 			'You are about to update this employee <b>'+frm.doc.employee_name+'</b> to <b>'+type+'</b>. Do you want to continue?',
 			function(){
+				update_child_amount(frm);
 				notify_email(frm, type, value);
 				frappe.msgprint('Employee <b>'+frm.doc.employee_name+'</b> updated as '+type+'.');
 			},function(){
+				update_child_amount(frm);
 				cur_frm.doc[key] = (value == 1 ? 0 : 1);
 				cur_frm.fields_dict[key].refresh_input();
 			}
@@ -265,61 +274,54 @@ function notify_email(frm, type, value){
 }
 
 function denied_timesheet(frm){
-			frappe.call({
-				"method": "tag_workflow.utils.timesheet.denied_notification",freeze:true,freeze_message:__("Please Wait ......."),
-				"args": {"job_order": frm.doc.job_order_detail,"hiring_company":frm.doc.company,"staffing_company": frm.doc.employee_company, "timesheet_name":cur_frm.doc.name}
-			});
-
+	frappe.call({
+		"method": "tag_workflow.utils.timesheet.denied_notification",freeze:true,freeze_message:__("Please Wait ......."),
+		"args": {"job_order": frm.doc.job_order_detail,"hiring_company":frm.doc.company,"staffing_company": frm.doc.employee_company, "timesheet_name":cur_frm.doc.name}
+	});
 }
 
 function employee_timesheet_rating(frm){
-		var pop_up = new frappe.ui.Dialog({
-			title: __('Employee Rating'),
-			'fields': [
-				{'fieldname': 'thumbs_up', 'fieldtype': 'Check','label':"<i class='fa fa-thumbs-up' type='radio' style='font-size: 50px;' value='up' id = '1'> "},
-				{'fieldtype':"Column Break"},
-				{'fieldname': 'thumbs_down', 'fieldtype': 'Check','label':"<i class='fa fa-thumbs-down' style='font-size: 50px;'>"},
-				{'fieldtype':"Section Break"},
-				{'fieldname': 'Comment', 'fieldtype': 'Data','label':'Review'}
-			],
-			primary_action: function(){
-				let up = pop_up.get_value('thumbs_up')
-				let down = pop_up.get_value('thumbs_down')
-				if (up === down){
-					msgprint('both value can not select')
-				}
-				else{
-					pop_up.hide();
-					frappe.call({
-						method:"tag_workflow.utils.timesheet.staffing_emp_rating",
-						args:{
-							'employee':frm.doc.employee_name,
-							'id':frm.doc.employee,
-							'up':up,
-							'down':down,
-							'job_order':frm.doc.job_order_detail,
-							'comment':pop_up.get_value('Comment'),
-							'timesheet_name':frm.doc.name
-						},
-						callback:function(rm){
-							if (rm.message){
-								frappe.msgprint('Employee Rating is Submitted')
-							}
-							
+	var pop_up = new frappe.ui.Dialog({
+		title: __('Employee Rating'),
+		'fields': [
+			{'fieldname': 'thumbs_up', 'fieldtype': 'Check','label':"<i class='fa fa-thumbs-up' type='radio' style='font-size: 50px;' value='up' id = '1'> "},
+			{'fieldtype':"Column Break"},
+			{'fieldname': 'thumbs_down', 'fieldtype': 'Check','label':"<i class='fa fa-thumbs-down' style='font-size: 50px;'>"},
+			{'fieldtype':"Section Break"},
+			{'fieldname': 'Comment', 'fieldtype': 'Data','label':'Review'}
+		],
+		primary_action: function(){
+			let up = pop_up.get_value('thumbs_up');
+			let down = pop_up.get_value('thumbs_down');
+			if (up === down){
+				msgprint('both value can not select');
+			}else{
+				pop_up.hide();
+				frappe.call({
+					method:"tag_workflow.utils.timesheet.staffing_emp_rating",
+					args:{
+						'employee':frm.doc.employee_name, 'id':frm.doc.employee,
+						'up':up, 'down':down, 'job_order':frm.doc.job_order_detail,
+						'comment':pop_up.get_value('Comment'), 'timesheet_name':frm.doc.name
+					},
+					callback:function(rm){
+						if (rm.message){
+							frappe.msgprint('Employee Rating is Submitted');
 						}
-				})
+					}
+				});
 			}
 		}
-		});
-		pop_up.show();
-		$(document).on('click', '[data-fieldname="thumbs_up"]', function(){
-    		$('[data-fieldname="thumbs_down"]').prop('checked', false);
-		});
+	});
+	pop_up.show();
+	$(document).on('click', '[data-fieldname="thumbs_up"]', function(){
+		$('[data-fieldname="thumbs_down"]').prop('checked', false);
+	});
 
-		$(document).on('click', '[data-fieldname="thumbs_down"]', function(){
-    		$('[data-fieldname="thumbs_up"]').prop('checked', false);
-		});		
-	}
+	$(document).on('click', '[data-fieldname="thumbs_down"]', function(){
+		$('[data-fieldname="thumbs_up"]').prop('checked', false);
+	});
+}
 
 function approval_timesheet(frm){
 	frappe.db.get_value("Hiring Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
@@ -356,61 +358,101 @@ function approval_timesheet(frm){
 
 frappe.ui.form.on("Timesheet Detail", {
 	activity_type:function(frm,cdt,cdn){
-		frappe.model.set_value(cdt,cdn,"is_billable",1)
+		frappe.model.set_value(cdt,cdn,"is_billable",1);
 		frappe.model.set_value(cdt, cdn, "billing_rate", frm.doc.per_hour_rate);
 		frappe.model.set_value(cdt, cdn, "flat_rate", frm.doc.flat_rate);
-
-
 	},
+
 	is_billable:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn]
+		var child=locals[cdt][cdn];
 		if(child.is_billable==1){
 			frappe.model.set_value(cdt, cdn, "billing_rate", frm.doc.per_hour_rate);
 			frappe.model.set_value(cdt, cdn, "flat_rate", frm.doc.flat_rate);
-	
-
 		}
 	},
 
 	to_time:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn]
+		var child=locals[cdt][cdn];
+
+		let f_time = new Date(child.from_time);
+		let t_time = new Date(child.to_time);
+		
+		if(t_time.toDateString() != f_time.toDateString()){
+			frappe.msgprint("Timesheet can't be for multiple days.");
+			frappe.model.set_value(cdt, cdn, "to_time", child.from_time);
+		}
+
 		if((child.to_time).slice(0,10)<(frm.doc.from_date)){
 			setTimeout(() => {
 				frappe.model.set_value(cdt, cdn, "to_time", frm.doc.from_date);
-				frappe.msgprint('End Date cant be before Job Order Start Date')
-			},1000)
-		
-		}
-		else if((child.to_time).slice(0,10)>(frm.doc.to_date)){
+				frappe.msgprint('End Date cant be before Job Order Start Date');
+			},1000);
+		}else if((child.to_time).slice(0,10)>(frm.doc.to_date)){
 			setTimeout(() => {
-			frappe.model.set_value(cdt, cdn, "to_time",frm.doc.to_date);
-			frappe.msgprint('End Date cant be After Job Order End Date')
-		},1000)
-
+				frappe.model.set_value(cdt, cdn, "to_time",frm.doc.to_date);
+				frappe.msgprint('End Date cant be After Job Order End Date');
+			},1000);
 		}
-		frappe.model.set_value(cdt,cdn,"billing_hours",child.hours)
-		let sec=(moment(child.to_time).diff(moment(child.from_time), "seconds"))
-		let hour   = Math.floor(sec / 3600); // get hours
-		let minutes = Math.floor((sec - (hour * 3600)) / 60); // get minutes
-		frappe.model.set_value(cdt,cdn,"hrs",hour+'hr '+minutes+'min')
+		update_time(frm, cdt, cdn);
+		frappe.model.set_value(cdt, cdn, "billing_hours", child.hours);
 	},
+
 	from_time:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn]
+		var child=locals[cdt][cdn];
+		
 		if((child.from_time).slice(0,10)<(frm.doc.from_date)){
-			frappe.msgprint('Start Date cant be before Job Order Start Date')
+			frappe.msgprint('Start Date cant be before Job Order Start Date');
+			frappe.model.set_value(cdt, cdn, "from_time", frm.doc.from_date);
+		}else if((child.from_time).slice(0,10)>(frm.doc.to_date)){
+			frappe.msgprint('Start Date cant be After Job Order End Date');
 			frappe.model.set_value(cdt, cdn, "from_time", frm.doc.from_date);
 		}
-		else if((child.from_time).slice(0,10)>(frm.doc.to_date)){
-			frappe.msgprint('Start Date cant be After Job Order End Date')
-			frappe.model.set_value(cdt, cdn, "from_time", frm.doc.from_date);
-		}
+
 		if(child.to_time){
 			frappe.model.set_value(cdt, cdn, "hours", "");
 			frappe.model.set_value(cdt, cdn, "hrs", "");
 			frappe.model.set_value(cdt, cdn, "to_time","");
 		}
+	},
+	break_start_time:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn];
+		if((child.break_start_time).slice(0,10)<((child.from_time).slice(0,10))){
+			setTimeout(() => {
+				frappe.model.set_value(cdt, cdn, "break_start_time", window.start);
+				frappe.msgprint('break start date  before Job Order Start Date');
+			},1000);
+		}else if((child.break_start_time).slice(0,10)>(child.break_end_time).slice(0,10)){
+			setTimeout(() => {
+				frappe.model.set_value(cdt, cdn, "break_start_time",window.start);
+				frappe.msgprint('break start date After Job Order End Date');
+			},1000);
+		}
+
+		update_time(frm,cdt,cdn)
+	},
+	break_end_time:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn];
+		if((child.break_end_time).slice(0,10)<((child.break_start_time).slice(0,10))){
+			setTimeout(() => {
+				frappe.model.set_value(cdt, cdn, "break_start_time", window.end);
+				frappe.msgprint('break end date  before break start date');
+			},1000);
+		}else if((child.break_end_time).slice(0,10)>(child.to_time).slice(0,10)){
+			setTimeout(() => {
+				frappe.model.set_value(cdt, cdn, "break_start_time",window.end);
+				frappe.msgprint('break end date After Job Order End Date');
+			},1000);
+		}
+		update_time(frm,cdt,cdn);
+	},
+
+	flat_rate: function(frm, cdt, cdn){
+		update_time(frm,cdt,cdn);
+	},
+
+	billing_rate: function(frm, cdt, cdn){
+		update_time(frm,cdt,cdn);
 	}
-	
 });
 
 
@@ -419,3 +461,72 @@ function cancel_timesheet(frm){
 		frappe.set_route("Form", "Timesheet");
 	});
 }
+
+
+/*-----------------------------------*/
+function update_child_amount(frm){
+	let items = frm.doc.time_logs || [];
+	
+	if(frm.doc.no_show == 1){
+		for(let i in items){
+			frappe.model.set_value(items[i].doctype, items[i].name, "is_billable", 0);
+			frappe.model.set_value(items[i].doctype, items[i].name, "billing_rate", 0);
+			frappe.model.set_value(items[i].doctype, items[i].name, "flat_rate", 0);
+		}
+	}else{
+		for(let i in items){
+			frappe.model.set_value(items[i].doctype, items[i].name, "is_billable", 1);
+			frappe.model.set_value(items[i].doctype, items[i].name, "billing_rate", frm.doc.per_hour_rate);
+			frappe.model.set_value(items[i].doctype, items[i].name, "flat_rate", frm.doc.flat_rate);
+		}
+	}
+}
+
+function update_time(frm, cdt, cdn){
+	var child = locals[cdt][cdn];
+	let sec = (moment(child.to_time).diff(moment(child.from_time), "seconds"));
+	let break_sec = 0;
+	let amount = 0;
+
+	if(child.break_start_time && child.break_end_time && child.break_start_time >= child.from_time && child.break_end_time <= child.to_time){
+		break_sec = (moment(child.break_end_time).diff(moment(child.break_start_time), "seconds"));
+		if(break_sec < 0){
+			break_sec = 0;
+		}
+	}
+	
+	let time_diff = sec - break_sec
+	let hour = Math.floor(time_diff / 3600);
+	let minutes = Math.floor((time_diff - (hour * 3600)) / 60); // get minutes
+	
+	let mnt = minutes/60;
+	let hours = hour+mnt;
+	
+	frappe.model.set_value(cdt, cdn, "hours", hours);
+	frappe.model.set_value(cdt, cdn, "billing_hours", hours);
+	frappe.model.set_value(cdt, cdn, "hrs", (hour+'hr '+minutes+'min'));
+	
+	if(hours > frm.doc.estimated_daily_hours && frm.doc.no_show == 0){
+		let ex_rate = frm.doc.per_hour_rate*1.5;
+		let ex_hour = hours-frm.doc.estimated_daily_hours;
+		frappe.model.set_value(cdt, cdn, "extra_rate", ex_rate);
+		frappe.model.set_value(cdt, cdn, "extra_hours", ex_hour);
+		let extra = ex_rate*ex_hour;
+		amount = frm.doc.estimated_daily_hours*child.billing_rate+child.flat_rate + extra;
+	}else{
+		amount = hours*child.billing_rate+child.flat_rate;
+		frappe.model.set_value(cdt, cdn, "extra_rate", 0);
+		frappe.model.set_value(cdt, cdn, "extra_hours", 0);
+	}
+
+	setTimeout(() => {
+		frappe.model.set_value(cdt, cdn, "base_billing_amount", amount);
+		frappe.model.set_value(cdt, cdn, "billing_amount", amount);
+	}, 10);
+}
+
+
+var calculate_end_time = function(frm, cdt, cdn) {
+        let child = locals[cdt][cdn];
+	console.log(child.name);
+};

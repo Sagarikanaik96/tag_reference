@@ -642,6 +642,7 @@ input::-webkit-credentials-auto-fill-button {
 }
 [data-page-route="Job Order"] .msg {
   cursor: pointer;
+  display: -webkit-flex;
 }
 [data-page-route="Job Order"] .msg:after {
   content: "\003E";
@@ -749,6 +750,54 @@ input::-webkit-credentials-auto-fill-button {
 [data-route="Form/Add Timesheet/Add Timesheet"] .form-message {
   background: #d3e8fcba !important;
 }
+/* New approved timsheet */
+[data-route="timesheet-approval"]
+  .layout-main-section-wrapper
+  .layout-main-section
+  .form-message
+  p
+  b {
+  color: #4365ad;
+  font-weight: 500;
+  font-size: 12px;
+  display: flex;
+}
+[data-route="timesheet-approval"]
+  .layout-main-section-wrapper
+  .layout-main-section
+  .form-message
+  div {
+  justify-content: space-around;
+  flex-wrap: wrap;
+  width: 100%;
+}
+[data-route="timesheet-approval"]
+  .layout-main-section-wrapper
+  .layout-main-section
+  .form-message
+  p {
+  margin-bottom: 0;
+  font-size: 12px;
+}
+[data-route="timesheet-approval"] .table thead th {
+  color: #8d9cbc;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 10px;
+  border-top: none;
+}
+[data-route="timesheet-approval"] .table tbody tr td {
+  font-size: 13px;
+  padding: 10px;
+  vertical-align: baseline;
+}
+[data-route="timesheet-approval"] .table {
+  margin: 0;
+}
+[data-route="List/Employee/List"] .popover .popover-body b {
+  font-weight: 400;
+}
+
 span.frappe-timestamp.mini {
   display: none;
 }
@@ -903,4 +952,20 @@ span.frappe-timestamp.mini {
     left: 0rem;
     max-width: 100%;
   }
+}
+
+.control-value.like-disabled-input {
+  background-color: white;
+  border: 1px solid#f4f5f6;
+}
+input.input-with-feedback.form-control.bold,
+select.input-with-feedback.form-control.ellipsis,
+input.input-with-feedback,
+textarea.input-with-feedback.form-control,
+.attached-file.flex.justify-between.align-center,
+input#showPassword,
+input.input-with-feedback.form-control,
+.ace_content {
+  border: 1px solid#21b7e170;
+  background-color: white;
 }
