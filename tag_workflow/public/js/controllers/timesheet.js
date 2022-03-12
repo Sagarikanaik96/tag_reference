@@ -248,13 +248,13 @@ function trigger_email(frm, key, value, type){
 		frappe.confirm(
 			'You are about to update this employee <b>'+frm.doc.employee_name+'</b> to <b>'+type+'</b>. Do you want to continue?',
 			function(){
+				update_child_amount(frm);
 				notify_email(frm, type, value);
 				frappe.msgprint('Employee <b>'+frm.doc.employee_name+'</b> updated as '+type+'.');
-				update_child_amount(frm);
 			},function(){
+				update_child_amount(frm);
 				cur_frm.doc[key] = (value == 1 ? 0 : 1);
 				cur_frm.fields_dict[key].refresh_input();
-				update_child_amount(frm);
 			}
 		);
 	}else if(order && local && value){
@@ -499,30 +499,34 @@ function update_time(frm, cdt, cdn){
 	let hour = Math.floor(time_diff / 3600);
 	let minutes = Math.floor((time_diff - (hour * 3600)) / 60); // get minutes
 	
-	frappe.model.set_value(cdt, cdn, "hrs", (hour+'hr '+minutes+'min'));
 	let mnt = minutes/60;
 	let hours = hour+mnt;
+	
 	frappe.model.set_value(cdt, cdn, "hours", hours);
-
-	if(hours > 8){
+	frappe.model.set_value(cdt, cdn, "billing_hours", hours);
+	frappe.model.set_value(cdt, cdn, "hrs", (hour+'hr '+minutes+'min'));
+	
+	if(hours > frm.doc.estimated_daily_hours && frm.doc.no_show == 0){
 		let ex_rate = frm.doc.per_hour_rate*1.5;
-		let ex_hour = hours-8;
+		let ex_hour = hours-frm.doc.estimated_daily_hours;
 		frappe.model.set_value(cdt, cdn, "extra_rate", ex_rate);
 		frappe.model.set_value(cdt, cdn, "extra_hours", ex_hour);
 		let extra = ex_rate*ex_hour;
-		amount = 8*child.billing_rate+child.flat_rate + extra;
+		amount = frm.doc.estimated_daily_hours*child.billing_rate+child.flat_rate + extra;
 	}else{
 		amount = hours*child.billing_rate+child.flat_rate;
+		frappe.model.set_value(cdt, cdn, "extra_rate", 0);
+		frappe.model.set_value(cdt, cdn, "extra_hours", 0);
 	}
 
 	setTimeout(() => {
 		frappe.model.set_value(cdt, cdn, "base_billing_amount", amount);
 		frappe.model.set_value(cdt, cdn, "billing_amount", amount);
-	}, 500);
+	}, 10);
 }
 
 
 var calculate_end_time = function(frm, cdt, cdn) {
         let child = locals[cdt][cdn];
-	console.log(child.hours);
+	console.log("TAG");
 };
