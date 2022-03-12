@@ -528,5 +528,5 @@ function update_time(frm, cdt, cdn){
 
 var calculate_end_time = function(frm, cdt, cdn) {
         let child = locals[cdt][cdn];
-	console.log("TAG");
+	console.log(child.name);
 };
