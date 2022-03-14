@@ -4,6 +4,18 @@
  
 frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
+
+window.onclick = function(event) {
+	attachrefresh()
+}
+$('*[data-fieldname="employee_details"]').find('.grid-add-row')[0].addEventListener("click",function(){
+		attachrefresh()
+});
+
+$("[data-fieldname=employee_details]").mouseover(function(){
+attachrefresh()
+})
+attachrefresh()
 		$('.form-footer').hide()
 		if(frm.doc.__islocal==1){
 			if (!frm.doc.hiring_organization){
@@ -411,3 +423,16 @@ frappe.ui.form.on("Assign Employee Details", {
 		}
 	}	
 });
+
+
+
+
+function attachrefresh(){
+	console.log("hihih")
+	setTimeout(()=>{
+		document.querySelectorAll('div[data-fieldname="resume"]').forEach(function(oInput){
+				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)[0]
+				
+		});
+	},200)
+}
