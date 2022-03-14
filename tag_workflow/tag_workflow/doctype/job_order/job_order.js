@@ -30,25 +30,27 @@ frappe.ui.form.on("Job Order", {
 
 			frm.set_value("from_date", "");
 			frm.set_df_property("time_remaining_for_make_edits", "options", " ");
-			frappe.call({
-				method: "tag_workflow.tag_data.org_industy_type",
-				args: {company: cur_frm.doc.company,},
-				callback: function(r) {
-					if (r.message.length == 1) {
-						cur_frm.set_df_property("category", "read_only", 1);
-						cur_frm.set_value("category", r.message[0][0]);
-					} else {
-						frm.set_query("category", function(doc) {
-							return {
-								query: "tag_workflow.tag_data.hiring_category",
-								filters: {
-									hiring_company: doc.company,
-								},
-							};
-						});
-					}
-				},
-			});
+			if(frappe.boot.tag.tag_user_info.company_type!='Staffing'){
+				frappe.call({
+					method: "tag_workflow.tag_data.org_industy_type",
+					args: {company: cur_frm.doc.company,},
+					callback: function(r) {
+						if (r.message.length == 1) {
+							cur_frm.set_df_property("category", "read_only", 1);
+							cur_frm.set_value("category", r.message[0][0]);
+						} else {
+							frm.set_query("category", function(doc) {
+								return {
+									query: "tag_workflow.tag_data.hiring_category",
+									filters: {
+										hiring_company: doc.company,
+									},
+								};
+							});
+						}
+					},
+				});
+			}
 		}
 		if (frappe.boot.tag.tag_user_info.company_type != "Staffing") {
 			fields_setup(frm);
@@ -82,6 +84,14 @@ frappe.ui.form.on("Job Order", {
 		frm.set_query("select_job", function(doc) {
 			return {
 				query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_jobtitle_list",
+				filters: {
+					job_order_company: doc.company,
+				},
+			};
+		});
+		frm.set_query("category", function(doc) {
+			return {
+				query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_industry_type_list",
 				filters: {
 					job_order_company: doc.company,
 				},
