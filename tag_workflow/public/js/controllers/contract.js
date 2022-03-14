@@ -10,11 +10,14 @@ frappe.ui.form.on("Contract", {
 		if(frm.doc.__islocal==1){
 			cancel_cantract(frm);
 		}
-	},
+		if(cur_frm.doc.lead){
+			
+			frm.set_df_property('hiring_company','read_only', 1)
+			frm.set_df_property('end_party_user','read_only', 1)
+			frm.set_df_property('staffing_company','read_only', 1)
 
-	hiring_company: function(frm){
-		cur_frm.set_value("party_name", cur_frm.doc.hiring_company);
-		update_user(frm);
+
+		}
 	},
 
 	setup: function(frm){
@@ -49,7 +52,7 @@ frappe.ui.form.on("Contract", {
 				frappe.validated = false;
 			}
 		}
-	}
+	},
 });
 
 /*-----------field-----------*/
