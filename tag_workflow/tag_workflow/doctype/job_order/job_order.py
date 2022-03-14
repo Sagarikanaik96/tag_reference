@@ -307,3 +307,12 @@ def data_deletion(job_order):
         return 'success'
     except Exception as e:
         frappe.log_error(e, 'Some Deletion error')
+
+@frappe.whitelist()
+def get_industry_type_list(doctype, txt, searchfield, page_len, start, filters):
+    company=filters.get('job_order_company')
+    if company is None:
+        return None
+    else:
+        sql = ''' select industry_type from `tabIndustry Types` where parent = '{0}' '''.format(company)
+        return frappe.db.sql(sql)
