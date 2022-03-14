@@ -6,6 +6,13 @@ frappe.ui.form.on("Timesheet", {
 		$('[data-label="Create%20Sales%20Invoice"]').hide();
 		$('[data-label="Cancel"]').hide();
 		$('.custom-actions.hidden-xs.hidden-md').show();
+		$(document).on('click', '[data-fieldname="from_time"]', function(){
+			$('.datepicker').show()
+		});
+		$(document).on('click', '[data-fieldname="to_time"]', function(){
+			$('.datepicker').show()
+		});
+		
 		cur_frm.dashboard.hide();
 		if(frm.doc.__islocal==1){
 			cancel_timesheet(frm);
@@ -378,6 +385,7 @@ frappe.ui.form.on("Timesheet Detail", {
 		let t_time = new Date(child.to_time);
 		
 		if(t_time.toDateString() != f_time.toDateString()){
+			$('.datepicker').hide()
 			frappe.msgprint("Timesheet can't be for multiple days.");
 			frappe.model.set_value(cdt, cdn, "to_time", child.from_time);
 		}
