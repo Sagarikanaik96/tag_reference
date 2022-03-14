@@ -114,6 +114,7 @@ frappe.ui.form.on("Job Order", {
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
 		staffing_company_remove(frm);
+		staff_company_read_only(frm)
 		job_order_cancel_button(frm);
 		$(document).on('click', '[data-fieldname="job_start_time"]', function(){
 			$('.datepicker').show()
@@ -1300,4 +1301,16 @@ function claim_order_button(frm) {
 			claim_job_order_staffing(frm);
 		});
 	}
+}
+
+
+function staff_company_read_only(frm){
+    if(frm.doc.__islocal!=1 && frm.doc.company_type=='Non Exclusive' && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		$('[data-label="Save"]').hide()
+        var myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
+        var arrayLength = myStringArray.length;
+        for (var i = 0; i < arrayLength; i++) {
+            frm.set_df_property(myStringArray[i], "read_only", 1);
+        }
+    }
 }
