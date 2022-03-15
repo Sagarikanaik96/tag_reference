@@ -9,7 +9,8 @@
   "employee",
   "employee_name",
   "resume",
-  "job_category"
+  "job_category",
+  "company"
  ],
  "fields": [
   {
@@ -37,12 +38,18 @@
    "fieldtype": "Attach",
    "in_list_view": 1,
    "label": "Resume"
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Read Only",
+   "label": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-20 09:53:17.091077",
+ "modified": "2022-03-15 10:22:48.554326",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee Details",

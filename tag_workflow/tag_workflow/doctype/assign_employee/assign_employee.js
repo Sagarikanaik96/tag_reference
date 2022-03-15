@@ -196,6 +196,7 @@ function check_employee_data(frm){
 
 	}
 	table_emp(frm,table,msg)
+	company_check(frm,table,msg)
 
 	for(var e in table){(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg.push('Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details');}
 	if(msg.length){frappe.msgprint({message: msg.join("<br>"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
@@ -434,4 +435,11 @@ function attachrefresh(){
 				
 		});
 	},200)
+}
+function company_check(frm,table,msg){
+	for(var d in table){
+		if(table[d].company!=null && table[d].company != frm.doc.company && table[d].company){
+			msg.push('Employee <b>'+table[d].employee+' </b>doesnot belong to '+frm.doc.company);
+		}
+	}
 }
