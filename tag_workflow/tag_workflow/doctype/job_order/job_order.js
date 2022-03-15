@@ -216,11 +216,7 @@ frappe.ui.form.on("Job Order", {
 	after_save: function(frm) {
 		if(frm.doc.staff_org_claimed){
 			notification_joborder_change(frm);
-		}
-		else if(frm.doc.claim && frm.doc.claim.length>1){
-			job_order_claim_update(frm);
-		}
-		else{
+		}else{
 			frappe.call({
 				method: "tag_workflow.tag_data.staff_email_notification",
 				args: {
@@ -1328,15 +1324,3 @@ function staff_company_read_only(frm){
         }
     }
 }
-
-function job_order_claim_update(frm){
-	frappe.call({
-		method: "tag_workflow.tag_workflow.doctype.job_order.job_order.job_order_claim_update",
-		args: {
-			doc_name: frm.doc.name,
-		},
-		callback:function(r){
-			window.location.href='/app/job-order/'+frm.doc.name
-			}
-	});
-} 

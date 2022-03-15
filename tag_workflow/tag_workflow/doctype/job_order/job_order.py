@@ -316,36 +316,3 @@ def get_industry_type_list(doctype, txt, searchfield, page_len, start, filters):
     else:
         sql = ''' select industry_type from `tabIndustry Types` where parent = '{0}' '''.format(company)
         return frappe.db.sql(sql)
-@frappe.whitelist(allow_guest=True)
-def job_order_claim_update(doc_name):
-    sql = '''select data from `tabVersion` where docname = "{}" '''.format(doc_name)
-    change = frappe.db.sql(sql, as_dict= True)
-    if len(change) > 2:
-        sql = ''' select data from `tabVersion` where docname='{}' order by modified DESC'''.format(doc_name)
-        data=frappe.db.sql(sql, as_list=1)
-        new_data=json.loads(data[0][0])
-        if(new_data['changed'][0][0]=='resumes_required'):
-            doc=frappe.get_doc('Job Order',doc_name)
-            staffing_company=doc.claim
-            doc.claim=''
-            doc.bid=0
-            doc.save()
-            order_deletion(doc_name)
-            msg=f"The Resume required option for {doc_name} has been changed by {doc.company}"
-            is_send_mail_required(staffing_company,doc_name,msg)
-
-def order_deletion(doc_name):
-    assigned_emp=f"select name from `tabAssign Employee` where job_order='{doc_name}'"
-    assign_emp=frappe.db.sql(assigned_emp,as_list=True)
-    if len(assign_emp)>0:
-        for i in assign_emp:
-            del_data=f'''DELETE FROM `tabAssign Employee` where name="{i[0]}" '''
-            frappe.db.sql(del_data)
-            frappe.db.commit()
-    claim_order=f"select name from `tabClaim Order` where job_order='{doc_name}'"
-    claims=frappe.db.sql(claim_order,as_list=True)
-    if len(claims)>0:
-        for i in claims:
-            del_data=f'''DELETE FROM `tabClaim Order` where name="{i[0]}" '''
-            frappe.db.sql(del_data)
-            frappe.db.commit() 
