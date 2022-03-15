@@ -9,19 +9,9 @@ frappe.listview_settings['Job Order'] = {
 			$('[data-original-title="Refresh"]').hide();
 			$('.menu-btn-group').hide();
         }
-		
-		if (window.location.search){
-	        $("button.btn.btn-default.btn-sm.filter-button").hide();
-	        $("button.btn.btn-sm.filter-button.btn-primary-light").hide();
-        	frappe.route_options = {
-				"order_status": "",
-				"is_single_share":1,
-			};
-		}else{
-			frappe.route_options = {
+		frappe.route_options = {
 			"order_status": "",
-			};
-		}
+		};
 		
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 			frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
