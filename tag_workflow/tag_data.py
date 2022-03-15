@@ -382,7 +382,7 @@ def get_org_site(doctype, txt, searchfield, page_len, start, filters):
 def job_site_employee(doctype, txt, searchfield, page_len, start, filters):
 
     company=filters.get('job_order_company')
-    sql = ''' select name,employee_name,user_id from `tabEmployee` where company='{0}' '''.format(company)
+    sql = ''' select name,employee_name,user_id,contact_number from `tabEmployee` where company='{0}' '''.format(company)
     return frappe.db.sql(sql)
 
 
@@ -733,10 +733,7 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
 
 @frappe.whitelist()
 def jobcategory_data(job_order):
-    print(job_order,"job_order")
     sql = """ select job_category from `tabJob Category` where parent='{}' """.format(job_order)
-    print(sql,"sqllll")
-    print(frappe.db.sql(sql),"sql")
     return frappe.db.sql(sql)
 
 @frappe.whitelist()
