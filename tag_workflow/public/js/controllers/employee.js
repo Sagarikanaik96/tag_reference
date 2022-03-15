@@ -35,6 +35,20 @@ frappe.ui.form.on("Employee", {
 				}
 			});
 		});
+
+		window.onclick = function(event) {
+			attachrefresh()
+		}
+		
+		$('*[data-fieldname="miscellaneous"]').find('.grid-add-row')[0].addEventListener("click",function(){
+				attachrefresh()
+		});
+
+		$("[data-fieldname=miscellaneous]").mouseover(function(){
+			attachrefresh()
+		})
+		
+		attachrefresh()
 	},
 	decrypt_ssn: function(frm) {
 		frappe.call({
@@ -196,4 +210,14 @@ function doc_download(e,frm){
 		anchor.click();
 		document.body.removeChild(anchor);  
   }
+}
+
+function attachrefresh(){
+	setTimeout(()=>{
+		console.log("method called ")
+		document.querySelectorAll('div[data-fieldname="Attachments"]').forEach(function(oInput){
+				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)[0]
+				
+		});
+	},200)
 }
