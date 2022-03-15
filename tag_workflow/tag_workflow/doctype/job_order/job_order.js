@@ -941,7 +941,7 @@ function timesheets_view(frm) {
 	}
 }
 
-function claim_orders(frm) {
+function claim_orders(frm){
 	if((frm.doc.order_status == 'Upcoming' || (cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date && cur_frm.doc.from_date == frappe.datetime.now_date())) && frm.doc.resumes_required == 0 ){
 		if (frm.doc.staff_org_claimed){
 			frappe.route_options = {

@@ -20,7 +20,10 @@ frappe.TimesheetApproval = Class.extend({
 	setup: function(wrapper, page){
 		var me = this;
 		this.body = $('<div></div>').appendTo(this.page.main);
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
 		$(frappe.render_template('timesheet_approval', "")).appendTo(this.body);
+
 		me.job_order = page.add_field({
 			label: 'Job Order', fieldtype: 'Link',fieldname: 'job_order', options: "Job Order", reqd: 1, onchange: function(){
 				me.order_info(wrapper, page);
@@ -29,7 +32,7 @@ frappe.TimesheetApproval = Class.extend({
 		});
 
                 me.company = page.add_field({
-			label: 'Company', fieldtype: "Link", fieldname: "company", options: "Company", reqd: 1, default: frappe.boot.sysdefaults.company, onchange: function(){
+			label: 'Company', fieldtype: "Link", fieldname: "company", options: "Company", reqd: 1, default: frappe.boot.tag.tag_user_info.company, onchange: function(){
 				me.get_details(wrapper, page);
 			}, get_query: function(){
 				return {
