@@ -428,7 +428,6 @@ frappe.ui.form.on("Assign Employee Details", {
 
 
 function attachrefresh(){
-	console.log("hihih")
 	setTimeout(()=>{
 		document.querySelectorAll('div[data-fieldname="resume"]').forEach(function(oInput){
 				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)[0]
