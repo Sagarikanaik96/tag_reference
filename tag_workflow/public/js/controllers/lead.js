@@ -1,5 +1,9 @@
 frappe.ui.form.on("Lead", {
   refresh: function (frm) {
+    setTimeout(()=>{
+      $('[data-label="Create"]').addClass("hide");
+    }, 3000);
+    view_contract(frm);
 	  cur_frm.dashboard.hide();
     $('[data-original-title="Menu"]').hide()
     cur_frm.clear_custom_buttons();
@@ -361,4 +365,19 @@ function cancel_lead(frm){
 	frm.add_custom_button(__('Cancel'), function(){
 		frappe.set_route("Form", "User");
 	});
+}
+
+function view_contract(frm){
+  if(frm.doc.__islocal!=1){
+    cur_frm.page.set_secondary_action(__('View Contract'), function(){
+      frappe.db.get_value('Contract',{'staffing_company':cur_frm.doc.company,'hiring_company':cur_frm.doc.company_name,'lead':frm.doc.name},['name'],function(r){
+        if(r.name){
+          window.location.href='/app/contract/'+r.name;
+        }
+        else{
+          frappe.show_alert({message:__('No contract found! Please prepare a contract first.'), indicator:'red'});
+        }
+      });
+    });
+  }
 }
