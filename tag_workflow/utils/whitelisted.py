@@ -100,13 +100,14 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=True):
 def preparing_employee_data(data, company):
     try:
         is_emp,is_exists,total = 0,0,0
-        total += 1
-        if not frappe.db.exists("Employee", {"first_name": data['first_name'], "last_name": data['last_name'], "company": company}):
-            employee = frappe.get_doc(dict(doctype="Employee", first_name=data['first_name'], last_name=data['last_name'], company=company, status="Active"))
-            employee.save(ignore_permissions=True)
-            is_emp += 1
-        else:
-            is_exists += 1
+        total = len(data)
+        for i in data:
+            if not frappe.db.exists("Employee", {"first_name": i['first_name'], "last_name": i['last_name'], "company": company,"contact_number":i['prospect_phone']}):
+                employee = frappe.get_doc(dict(doctype="Employee", first_name=i['first_name'], last_name=i['last_name'], company=company, status="Active",contact_number=i['prospect_phone']))
+                employee.save(ignore_permissions=True)
+                is_emp += 1
+            else:
+                is_exists += 1
         return "Total <b>"+str(total)+"</b> records found, out of these newly created recored are <b>"+str(is_emp)+"</b> and <b>"+str(is_exists)+"</b> already exists."
     except Exception as e:
         frappe.throw(e)
@@ -117,7 +118,7 @@ def make_jazzhr_request(api_key, company):
     try:
         url = "https://api.resumatorapi.com/v1/applicants?apikey="+api_key
         response = requests.get(url)
-        if(response.status_code == 200):
+        if(response.status_code == 200 and len(response.json())>0):
             data = response.json()
             result = preparing_employee_data(data, company)
             return result
