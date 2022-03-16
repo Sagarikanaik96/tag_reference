@@ -47,7 +47,30 @@ frappe.ui.form.on("Employee", {
 		$("[data-fieldname=miscellaneous]").mouseover(function(){
 			attachrefresh()
 		})
-		
+
+		$('*[data-fieldname="background_check_or_drug_screen"]').find('.grid-add-row')[0].addEventListener("click",function(){
+				attachrefresh()
+		});
+
+		$("[data-fieldname=background_check_or_drug_screen]").mouseover(function(){
+			attachrefresh()
+		})
+
+		$('*[data-fieldname="id_requirements"]').find('.grid-add-row')[0].addEventListener("click",function(){
+				attachrefresh()
+		});
+
+		$("[data-fieldname=id_requirements]").mouseover(function(){
+			attachrefresh()
+		})
+
+		$('*[data-fieldname="direct_deposit_letter"]').find('.grid-add-row')[0].addEventListener("click",function(){
+				attachrefresh()
+		});
+
+		$("[data-fieldname=direct_deposit_letter]").mouseover(function(){
+			attachrefresh()
+		})
 		attachrefresh()
 	},
 	decrypt_ssn: function(frm) {
@@ -159,7 +182,23 @@ function uploaded_file_format(frm){
 	    restrictions: {
 	    allowed_file_types: ['.pdf','.txt','.docx']
 		}
+	};
+	frm.get_field('e_verify').df.options = {
+	    restrictions: {
+	    allowed_file_types: ['.pdf','.txt','.docx']
+		}
+	};
+	frm.get_field('i_9').df.options = {
+	    restrictions: {
+	    allowed_file_types: ['.pdf','.txt','.docx']
+		}
 	};	
+	
+	frm.get_field('hire_paperwork').df.options = {
+	    restrictions: {
+	    allowed_file_types: ['.pdf','.txt','.docx']
+		}
+	};
 }
 
 function cancel_employee(frm){
@@ -214,10 +253,20 @@ function doc_download(e,frm){
 
 function attachrefresh(){
 	setTimeout(()=>{
-		console.log("method called ")
-		document.querySelectorAll('div[data-fieldname="Attachments"]').forEach(function(oInput){
-				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)[0]
-				
+		document.querySelectorAll('div[data-fieldname="attachments"]').forEach(function(oInput){
+				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)
+		});
+
+		document.querySelectorAll('div[data-fieldname="id_requirements"]').forEach(function(oInput){
+				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)
+		});
+
+		document.querySelectorAll('div[data-fieldname="direct_deposit_letter"]').forEach(function(oInput){
+				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)
+		});
+
+		document.querySelectorAll('div[data-fieldname="drug_screen"]').forEach(function(oInput){
+				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)
 		});
 	},200)
 }
