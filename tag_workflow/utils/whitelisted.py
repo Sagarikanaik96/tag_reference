@@ -114,14 +114,22 @@ def preparing_employee_data(data, company):
 
 
 @frappe.whitelist()
-def make_jazzhr_request(api_key, company):
+def make_jazzhr_request(api_key, company,count):
     try:
-        url = "https://api.resumatorapi.com/v1/applicants?apikey="+api_key
-        response = requests.get(url)
-        if(response.status_code == 200 and len(response.json())>0):
+        if(count==str(0)):
+            url = "https://api.resumatorapi.com/v1/applicants?apikey="+api_key
+            response = requests.get(url)
+        else:
+            url="https://api.resumatorapi.com/v1/applicants/page/"+str(count)+"?apikey="+api_key
+            response = requests.get(url)
+        if(response.status_code == 200 and len(response.json())>0 and len(response.json())==100):
             data = response.json()
             result = preparing_employee_data(data, company)
             return result
+        elif(response.status_code == 200 and len(response.json())>0 and len(response.json())!=100):
+            data = response.json()
+            result = preparing_employee_data(data, company)
+            return 'success'
         else:
             error = json.loads(response.text)['error']
             frappe.throw(_("{0}").format(error))
