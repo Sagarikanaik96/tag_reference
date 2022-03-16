@@ -102,26 +102,40 @@ def preparing_employee_data(data, company):
         is_emp,is_exists,total = 0,0,0
         total = len(data)
         for i in data:
-            if not frappe.db.exists("Employee", {"first_name": i['first_name'], "last_name": i['last_name'], "company": company,"contact_number":i['prospect_phone']}):
-                employee = frappe.get_doc(dict(doctype="Employee", first_name=i['first_name'], last_name=i['last_name'], company=company, status="Active",contact_number=i['prospect_phone']))
-                employee.save(ignore_permissions=True)
+            name=i['id']
+            sql_data=f'SELECT EXISTS(SELECT * from `tabEmployee` WHERE name="{name}");'
+            sql=frappe.db.sql(sql_data,as_list=1)
+            if(sql[0][0]==0):
+                b_id=i['id'].strip('"')
+                first_name=i['first_name'].strip('"')
+                last_name=i['last_name'].strip('"')
                 is_emp += 1
+                my_db=f'''insert into `tabEmployee` (name,employee_name,first_name,last_name,company,contact_number) values("{b_id}","{first_name} {last_name}","{first_name}","{last_name}","{company}","{i['prospect_phone']}");'''
+                frappe.db.sql(my_db)
+                frappe.db.commit()
             else:
                 is_exists += 1
         return "Total <b>"+str(total)+"</b> records found, out of these newly created recored are <b>"+str(is_emp)+"</b> and <b>"+str(is_exists)+"</b> already exists."
     except Exception as e:
         frappe.throw(e)
 
-
 @frappe.whitelist()
-def make_jazzhr_request(api_key, company):
+def make_jazzhr_request(api_key, company,count):
     try:
-        url = "https://api.resumatorapi.com/v1/applicants?apikey="+api_key
-        response = requests.get(url)
-        if(response.status_code == 200 and len(response.json())>0):
+        if(count==str(0)):
+            url = "https://api.resumatorapi.com/v1/applicants?apikey="+api_key
+            response = requests.get(url)
+        else:
+            url="https://api.resumatorapi.com/v1/applicants/page/"+str(count)+"?apikey="+api_key
+            response = requests.get(url)
+        if(response.status_code == 200 and len(response.json())>0 and len(response.json())==100):
             data = response.json()
             result = preparing_employee_data(data, company)
             return result
+        elif(response.status_code == 200 and len(response.json())>0 and len(response.json())!=100):
+            data = response.json()
+            result = preparing_employee_data(data, company)
+            return 'success'
         else:
             error = json.loads(response.text)['error']
             frappe.throw(_("{0}").format(error))

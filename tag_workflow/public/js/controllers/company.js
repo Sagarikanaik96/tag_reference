@@ -267,24 +267,29 @@ function validate_phone_and_zip(frm){
 
 /*--------jazzhr------------*/
 function jazzhr_data(frm){
+	let a=0
 	let roles = frappe.user_roles;
 	if (roles.includes("Staffing Admin") || roles.includes("Staffing User")) {
 		frm.add_custom_button("Get data from JazzHR", function () {
-			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm);
+			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm,a);
 		}).addClass("btn-primary");
 	}
 }
 
-function make_jazzhr_request(frm){
+function make_jazzhr_request(frm,a){
 	if(frm.doc.jazzhr_api_key){
 		frappe.call({
 			method: "tag_workflow.utils.whitelisted.make_jazzhr_request",
-			args: { api_key: frm.doc.jazzhr_api_key, company: frm.doc.name },
+			args: { api_key: frm.doc.jazzhr_api_key, company: frm.doc.name,count:a },
 			freeze: true,
-			freeze_message: "<p><b>sending request to JazzHR...</b></p>",
+			freeze_message: "<p><b>Fetching records from JazzHR...</b></p>",
 			callback: function (r) {
-				if (r && r.message) {
-					frappe.msgprint(r.message);
+				if (r && r.message!='success') {
+					a=a+1
+					make_jazzhr_request(frm,a)
+				}
+				else{
+					frappe.msgprint('Employees added successfully to TAG')
 				}
 			},
 		});
@@ -293,6 +298,7 @@ function make_jazzhr_request(frm){
 		frappe.msgprint("<b>JazzHR API Key</b> is required");
 	}
 }
+
 
 /*---------make invoice------------*/
 function hide_tag_charges(frm){
