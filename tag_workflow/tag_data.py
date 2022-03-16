@@ -280,7 +280,7 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
 
             usr_sql = ''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL '''.format(company_info[0][0])
             user_list = frappe.db.sql(usr_sql, as_list=1)
-            l = [l[0] for l in user_list]
+            l = [l[0] for l in user_list if l[0]!=frappe.session.user]
             for user in l:
                 add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
             job_order_notification(job_order_title,hiring_org,job_order,subject,l)
