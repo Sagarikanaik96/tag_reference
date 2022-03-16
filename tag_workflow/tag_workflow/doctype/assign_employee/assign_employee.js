@@ -359,6 +359,10 @@ function table_emp(frm,table,msg){
 }
 
 function make_notification_approved(frm){
+	var count = cur_frm.doc.employee_details.length
+	if (cur_frm.doc.replaced_employees.length > 0){
+		count = 0
+	}
 	frappe.call({
 		"method":"tag_workflow.tag_data.receive_hire_notification",
 		"freeze": true,
@@ -367,7 +371,7 @@ function make_notification_approved(frm){
 			"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
 			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
 			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
-			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,"worker_fill":cur_frm.doc.employee_details.length
+			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,"worker_fill":count
 		},
 		callback:function(r){
 			setTimeout(function () {
