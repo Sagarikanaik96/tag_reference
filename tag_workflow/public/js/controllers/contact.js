@@ -1,5 +1,8 @@
 frappe.ui.form.on("Contact", {
 	refresh: function(frm){
+		if(frappe.route_history.length>1){
+			frappe.ui.toolbar.clear_cache();
+		}
 		$('.form-footer').hide()
 		$('[data-original-title="Menu"]').hide()
 		$('[data-label="Invite%20as%20User"]').hide()
