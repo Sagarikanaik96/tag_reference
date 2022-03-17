@@ -4,6 +4,7 @@ from frappe import _, msgprint, throw
 from frappe.utils import cint, cstr, flt, now_datetime, getdate, nowdate
 from frappe.model.mapper import get_mapped_doc
 from erpnext.selling.doctype.quotation.quotation import _make_customer
+from tag_workflow.tag_data import employee_company
 from tag_workflow.utils.notification import sendmail, make_system_notification, share_doc
 from frappe.desk.query_report import get_report_doc, generate_report_result
 from frappe.desk.desktop import Workspace
@@ -103,14 +104,22 @@ def preparing_employee_data(data, company):
         total = len(data)
         for i in data:
             name=i['id']
-            sql_data=f'SELECT EXISTS(SELECT * from `tabEmployee` WHERE name="{name}");'
+            sql_data=f'SELECT EXISTS(SELECT * from `tabEmployee` WHERE employee_number="{name}");'
             sql=frappe.db.sql(sql_data,as_list=1)
             if(sql[0][0]==0):
+                data=frappe.db.sql('''select name from `tabEmployee` order by name desc limit 1''',as_list=1)
+                last_series_name=data[0][0]
+                name=str(last_series_name).split('-')
+                series_number=name[0:-1]
+                series_last_no=name[-1]
+                new_series_number=str(int(series_last_no)+1).rjust(len(series_last_no), '0')
+                series_name_data = '-'.join(series_number)
+                new_series=series_name_data+'-'+str(new_series_number)
                 b_id=i['id'].strip('"')
                 first_name=i['first_name'].strip('"')
                 last_name=i['last_name'].strip('"')
                 is_emp += 1
-                my_db=f'''insert into `tabEmployee` (name,employee_name,first_name,last_name,company,contact_number) values("{b_id}","{first_name} {last_name}","{first_name}","{last_name}","{company}","{i['prospect_phone']}");'''
+                my_db=f'''insert into `tabEmployee` (name,employee_number,employee_name,first_name,last_name,company,contact_number) values("{new_series}","{b_id}","{first_name} {last_name}","{first_name}","{last_name}","{company}","{i['prospect_phone']}");'''
                 frappe.db.sql(my_db)
                 frappe.db.commit()
             else:
