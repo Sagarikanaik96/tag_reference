@@ -1059,7 +1059,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2021-11-17 19:48:30.203617",
+  "modified": "2022-03-16 13:25:05.646098",
   "module": "CRM",
   "name": "CRM",
   "onboarding": "CRM",
@@ -1111,20 +1111,6 @@
     "restrict_to_domain": null,
     "stats_filter": null,
     "type": "DocType"
-   },
-   {
-    "color": null,
-    "doc_view": null,
-    "format": null,
-    "icon": null,
-    "label": "Dashboard",
-    "link_to": "CRM",
-    "parent": "CRM",
-    "parentfield": "shortcuts",
-    "parenttype": "Workspace",
-    "restrict_to_domain": null,
-    "stats_filter": null,
-    "type": "Dashboard"
    }
   ],
   "shortcuts_label": null

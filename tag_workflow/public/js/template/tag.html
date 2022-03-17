@@ -292,6 +292,26 @@
                 </div>
               </a>
               {% endif %}
+              {% if frappe.boot.tag.tag_user_info.company_type == "Hiring" ||  frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" %}
+              <div class="tab-button custom-btn">
+                <ul class="nav crm">
+                  <li>
+                    <a href="#" id="btn-1" data-toggle="collapse" data-target="#submenu2" aria-expanded="false">
+                      <span class="pl-3 ml-3">
+                         <img src="/assets/tag_workflow/images/ico-crm.svg" class="pr-3 pl-3" alt="crm" />
+                      </span>
+                      <span class="slide-text">CRM </span>
+                      <span>
+                        <i class="fa fa-angle-down" aria-hidden="true"></i>
+                      </span>
+                    </a>
+                    <ul class="inner-menu pl-5 ml-5 list-unstyled collapse" id="submenu2" role="menu" aria-labelledby="btn-1">
+                      <li class="py-2"><a href="/app/contract">Contract</a></li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              {% endif %}
               <a href="/app/reports">
                 <div class="tab-button custom-btn">
                   <img
