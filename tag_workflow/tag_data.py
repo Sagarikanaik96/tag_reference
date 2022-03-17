@@ -248,7 +248,7 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
                 l = [l[0] for l in user_list]
                 for user in l:
                     add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
-                single_job_order_notification(job_order_title,hiring_org,job_order,subject,l)
+                single_job_order_notification(job_order_title,hiring_org,job_order,subject,l,staff_company)
             else:
                 staff_email_notification_cont(hiring_org, job_order, job_order_title,doc,subject)
     except Exception as e:
@@ -506,11 +506,11 @@ def email_recipient(doctype, txt, searchfield, page_len, start, filters):
 
 
  
-def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l):
+def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l,staff_company):
     try:
-        msg=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with your Company. Please respond.'
+        msg=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with {staff_company}. Please respond.'
         make_system_notification(l,msg,jobOrder,job_order,subject)   
-        message=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with your Company. Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
+        message=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with {staff_company}. Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
         return send_email(subject,message,l)
     except Exception as e:
         frappe.log_error(e, "Single Job Order Notification Error")
