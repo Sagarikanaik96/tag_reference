@@ -103,7 +103,7 @@ frappe.ui.form.on("Job Order", {
 			};
 		});
 
-		if(frappe.boot.tag.tag_user_info.company_type != "Staffing" && cur_frm.doc.__islocal == 1) {
+		if(cur_frm.doc.__islocal == 1) {
 			fields_setup(frm);
 		}
 
@@ -387,6 +387,26 @@ frappe.ui.form.on("Job Order", {
 			frappe.validated = false;
 		}
 	},
+	company: function(frm){
+		if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.company){
+			fields_setup(frm);
+			frappe.call({
+				method: "tag_workflow.tag_data.company_details",
+				args: {
+					company_name: frm.doc.company
+				},
+				callback: function(r) {
+					if (r.message != "success") {
+						msgprint("You can't create a Job Order until <b>"+frm.doc.company+"'s</b> details are complete.");
+						frappe.validated = false;
+						setTimeout(() => {
+							frappe.set_route("List","Job Order");
+						}, 3000);
+					}
+				},
+			});
+		}
+	}
 });
 
 /*-------check company details---------*/
@@ -401,7 +421,12 @@ function check_company_detail(frm) {
 			},
 			callback: function(r) {
 				if (r.message != "success") {
-					msgprint("You can't Create Job Order Unless Your Company Details are Complete");
+					if(frappe.boot.tag.tag_user_info.company_type == 'Exclusive Hiring'){
+						frappe.msgprint(__("You can't create a Job Order until <b>"+frm.doc.company+"'s</b> details are complete."));
+					}
+					else{
+						frappe.msgprint(__("You can't create a Job Order until your Company Details are complete."));
+					}
 					frappe.validated = false;
 				}
 			},
