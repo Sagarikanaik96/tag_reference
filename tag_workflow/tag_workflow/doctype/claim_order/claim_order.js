@@ -91,13 +91,6 @@ frappe.ui.form.on('Claim Order', {
 			  ],
 			};
 		});
-		frm.set_query("staffing_organization", function(doc){
-		    return {
-				filters: [
-					["Company", "organization_type", "=", "Staffing"]
-				]
-			}
-		});
 		if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
 			frappe.call({
 				'method': "tag_workflow.tag_data.lead_org",
