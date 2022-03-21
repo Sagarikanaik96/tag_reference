@@ -16,7 +16,7 @@ frappe.ui.form.on("Job Order", {
 	},
 
 	onload: function(frm) {
-		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		if(frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.__islocal==1){
 			frm.set_value('e_signature_full_name', frappe.session.user_fullname);
 			frm.set_df_property("e_signature_full_name", "read_only", 1);
 		}
