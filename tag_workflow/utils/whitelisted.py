@@ -100,27 +100,50 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=True):
 def preparing_employee_data(data, company):
     try:
         is_emp,is_exists,total = 0,0,0
-        total += 1
-        if not frappe.db.exists("Employee", {"first_name": data['first_name'], "last_name": data['last_name'], "company": company}):
-            employee = frappe.get_doc(dict(doctype="Employee", first_name=data['first_name'], last_name=data['last_name'], company=company, status="Active"))
-            employee.save(ignore_permissions=True)
-            is_emp += 1
-        else:
-            is_exists += 1
+        total = len(data)
+        for i in data:
+            name=i['id']
+            sql_data=f'SELECT EXISTS(SELECT * from `tabEmployee` WHERE employee_number="{name}");'
+            sql=frappe.db.sql(sql_data,as_list=1)
+            if(sql[0][0]==0):
+                data=frappe.db.sql('''select name from `tabEmployee` order by name desc limit 1''',as_list=1)
+                last_series_name=data[0][0]
+                name=str(last_series_name).split('-')
+                series_number=name[0:-1]
+                series_last_no=name[-1]
+                new_series_number=str(int(series_last_no)+1).rjust(len(series_last_no), '0')
+                series_name_data = '-'.join(series_number)
+                new_series=series_name_data+'-'+str(new_series_number)
+                b_id=i['id'].strip('"')
+                first_name=i['first_name'].strip('"')
+                last_name=i['last_name'].strip('"')
+                is_emp += 1
+                my_db=f'''insert into `tabEmployee` (name,employee_number,employee_name,first_name,last_name,company,contact_number) values("{new_series}","{b_id}","{first_name} {last_name}","{first_name}","{last_name}","{company}","{i['prospect_phone']}");'''
+                frappe.db.sql(my_db)
+                frappe.db.commit()
+            else:
+                is_exists += 1
         return "Total <b>"+str(total)+"</b> records found, out of these newly created recored are <b>"+str(is_emp)+"</b> and <b>"+str(is_exists)+"</b> already exists."
     except Exception as e:
         frappe.throw(e)
 
-
 @frappe.whitelist()
-def make_jazzhr_request(api_key, company):
+def make_jazzhr_request(api_key, company,count):
     try:
-        url = "https://api.resumatorapi.com/v1/applicants?apikey="+api_key
-        response = requests.get(url)
-        if(response.status_code == 200):
+        if(count==str(0)):
+            url = "https://api.resumatorapi.com/v1/applicants?apikey="+api_key
+            response = requests.get(url)
+        else:
+            url="https://api.resumatorapi.com/v1/applicants/page/"+str(count)+"?apikey="+api_key
+            response = requests.get(url)
+        if(response.status_code == 200 and len(response.json())>0 and len(response.json())==100):
             data = response.json()
             result = preparing_employee_data(data, company)
             return result
+        elif(response.status_code == 200 and len(response.json())>0 and len(response.json())!=100):
+            data = response.json()
+            result = preparing_employee_data(data, company)
+            return 'success'
         else:
             error = json.loads(response.text)['error']
             frappe.throw(_("{0}").format(error))

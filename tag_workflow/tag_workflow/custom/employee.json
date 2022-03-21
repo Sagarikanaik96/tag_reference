@@ -1444,7 +1444,7 @@
    "name": "Employee-contact_number",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "Phone",
+   "options": "",
    "organization": null,
    "owner": "Administrator",
    "parent": null,
