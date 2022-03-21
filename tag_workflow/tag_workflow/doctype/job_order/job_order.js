@@ -303,6 +303,7 @@ frappe.ui.form.on("Job Order", {
 		let name = "rate";
 		let value = parseFloat(frm.doc.rate);
 		check_value(frm, field, name, value);
+		rate_calculation(frm)
 	},
 
 	extra_price_increase: function(frm) {
@@ -310,6 +311,7 @@ frappe.ui.form.on("Job Order", {
 		let name = "extra_price_increase";
 		let value = frm.doc.extra_price_increase;
 		check_value(frm, field, name, value);
+		rate_calculation(frm)
 	},
 
 	per_hour: function(frm) {
@@ -387,6 +389,20 @@ frappe.ui.form.on("Job Order", {
 			frappe.validated = false;
 		}
 	},
+
+	drug_screen: (frm) => {
+        if (frm.doc.drug_screen) rate_calculation(frm);
+    },
+    driving_record: (frm) => {
+        if (frm.doc.driving_record) rate_calculation(frm);
+    },
+    shovel: (frm) => {
+        if (frm.doc.shovel) rate_calculation(frm);
+    },
+    background_check: (frm) => {
+        if (frm.doc.background_check) rate_calculation(frm);
+    },
+
 	company: function(frm){
 		if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.company){
 			fields_setup(frm);
@@ -600,8 +616,9 @@ function rate_hour_contract_change(frm) {
 }
 
 function rate_calculation(frm) {
+	const rate = frm.doc.rate || 0;
 	var extra_price_increase = frm.doc.extra_price_increase || 0;
-	var total_per_hour = extra_price_increase + parseFloat(cur_frm.doc.rate);
+	var total_per_hour = extra_price_increase + parseFloat(rate);
 	var total_flat_rate = 0;
 	const optional_field_data = [frm.doc.drug_screen, frm.doc.background_check, frm.doc.driving_record, frm.doc.shovel,];
 	const optional_fields = ["drug_screen", "background_check", "driving_record", "shovel",];
