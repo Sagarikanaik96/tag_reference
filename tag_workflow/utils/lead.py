@@ -19,3 +19,12 @@ def contact_person(doctype,txt,searchfield,page_len,start,filters):
     except Exception as e:
         frappe.log_error(e,'Next Contact person')
         frappe.throw(e)
+
+def update_contact(doc,method):
+    try:
+        if doc.mobile_no:
+            frappe.db.set_value(doc.doctype,doc.name, 'phone_number', doc.mobile_no)
+            frappe.db.commit()
+    except Exception as e:
+        frappe.log_error(e,'Contact Update')
+        frappe.throw(e)

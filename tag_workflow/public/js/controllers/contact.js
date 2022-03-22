@@ -24,6 +24,7 @@ frappe.ui.form.on("Contact", {
 				};
 			};
 		}
+		frm.set_df_property('mobile_no','hidden',1);
 	},
 	before_save:function(frm){
 		let name = frm.doc.first_name

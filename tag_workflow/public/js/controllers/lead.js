@@ -141,6 +141,9 @@ frappe.ui.form.on("Lead", {
           });
           frm.reload_doc()
     }
+  },
+  dob:function(frm){
+    check_bd(frm);
   }
 });
 
@@ -170,8 +173,10 @@ function onboard_org(frm) {
   var exclusive = frm.doc.company_name;
   var person_name = frm.doc.lead_name;
   var organization_type = frm.doc.organization_type;
-  var lead = frm.doc.name
-  console.log(lead)
+  var lead = frm.doc.name;
+  var gender = frm.doc.gender;
+  var phone = frm.doc.phone_no;
+  var dob = frm.doc.dob;
 
   frappe.db.get_value(
     "User",
@@ -188,6 +193,9 @@ function onboard_org(frm) {
                   r.company,
                   email,
                   person_name,
+                  gender,
+                  phone,
+                  dob,
                   organization_type
                 )
               : console.log("TAG");
@@ -214,6 +222,9 @@ function onboard_orgs(
   staffing,
   email,
   person_name,
+  gender,
+  phone,
+  dob,
   organization_type
 ) {
   if (exclusive && email) {
@@ -228,6 +239,9 @@ function onboard_orgs(
         staffing: staffing,
         email: email,
         person_name: person_name,
+        gender:gender,
+        phone:phone,
+        dob:dob,
         organization_type: organization_type,
       },
       callback: function (r) {
@@ -319,7 +333,6 @@ function hide_details(frm) {
     "source",
     "designation",
     "campaign_name",
-    "gender",
     "mobile_no",
   ];
   for (let data in fields) {
@@ -379,5 +392,14 @@ function view_contract(frm){
         }
       });
     });
+  }
+}
+
+/*------birth date-------*/
+function check_bd(frm){
+  let date = frm.doc.dob || "";
+  if(date && date >= frappe.datetime.now_date()){
+    frappe.msgprint({message: __('<b>DOB</b> Cannot be Today`s date or Future date'), title: __('Error'), indicator: 'orange'});
+    cur_frm.set_value("dob", "");
   }
 }
