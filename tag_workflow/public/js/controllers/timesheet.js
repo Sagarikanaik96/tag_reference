@@ -419,7 +419,11 @@ frappe.ui.form.on("Timesheet Detail", {
 		if(child.to_time){
 			frappe.model.set_value(cdt, cdn, "hours", "");
 			frappe.model.set_value(cdt, cdn, "hrs", "");
-			frappe.model.set_value(cdt, cdn, "to_time","");
+			setTimeout(function(){
+
+				frappe.model.set_value(cdt, cdn, "to_time",undefined);
+
+			},100)
 		}
 	},
 	break_start_time:function(frm,cdt,cdn){

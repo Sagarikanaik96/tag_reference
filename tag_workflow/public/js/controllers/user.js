@@ -389,6 +389,7 @@ function exclusive_fields(frm){
 				for (var i = 0; i < arrayLength; i++) {
 					frm.set_df_property(myStringArray[i], "read_only", 1);
 				}
+				frm.set_df_property('change_password','hidden',1);
 			}          
 	})
 	}

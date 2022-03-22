@@ -2,7 +2,7 @@
  "cards_label": " My Activities",
  "category": "Modules",
  "charts": [],
- "creation": "2022-02-12 02:52:12.834048",
+ "creation": "2022-03-22 03:02:41.664101",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
@@ -34,15 +34,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Employee",
-   "link_to": "Employee",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Company",
    "link_to": "Company",
    "link_type": "DocType",
@@ -52,7 +43,16 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Job Order Links (Resources)",
+   "label": "Contracts",
+   "link_to": "Contract",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Job Order Resources",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -94,7 +94,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-02-12 03:12:02.348471",
+ "modified": "2022-03-22 03:30:03.526188",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "My Activities",
