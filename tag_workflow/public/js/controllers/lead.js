@@ -174,9 +174,6 @@ function onboard_org(frm) {
   var person_name = frm.doc.lead_name;
   var organization_type = frm.doc.organization_type;
   var lead = frm.doc.name;
-  var gender = frm.doc.gender;
-  var phone = frm.doc.phone_no;
-  var dob = frm.doc.dob;
 
   frappe.db.get_value(
     "User",
@@ -193,9 +190,7 @@ function onboard_org(frm) {
                   r.company,
                   email,
                   person_name,
-                  gender,
-                  phone,
-                  dob,
+                  frm,
                   organization_type
                 )
               : console.log("TAG");
@@ -222,9 +217,7 @@ function onboard_orgs(
   staffing,
   email,
   person_name,
-  gender,
-  phone,
-  dob,
+  frm,
   organization_type
 ) {
   if (exclusive && email) {
@@ -239,9 +232,9 @@ function onboard_orgs(
         staffing: staffing,
         email: email,
         person_name: person_name,
-        gender:gender,
-        phone:phone,
-        dob:dob,
+        gender:frm.doc.gender,
+        phone:frm.doc.phone_no,
+        dob:frm.doc.dob,
         organization_type: organization_type,
       },
       callback: function (r) {
