@@ -34,6 +34,8 @@ frappe.ui.form.on("Timesheet", {
 		}
 		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
 		hide_timesheet_field(timesheet_fields);
+
+		check_update_timesheet(frm);
 	},
 	setup: function(frm){
 		job_order_details(frm);
@@ -143,11 +145,7 @@ frappe.ui.form.on("Timesheet", {
 
 	dnr: function(frm){
 		trigger_email(frm, "dnr", frm.doc.dnr, "DNR");
-	},
-
-	workflow_state: function(frm){
-		check_update_timesheet(frm);
-	},
+	}
 
 });
 
@@ -210,6 +208,7 @@ function check_update_timesheet(frm){
 									'ratings':comp_rating,
 									'job_order':cur_frm.doc.job_order_detail
 								},
+								"async": 0,
 								callback:function(rm){
 									frappe.msgprint('Review Submitted Successfully');
 								}
@@ -220,6 +219,7 @@ function check_update_timesheet(frm){
 				}
 			});
 		}
+
 	}
 }
 
