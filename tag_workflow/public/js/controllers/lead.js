@@ -7,6 +7,13 @@ frappe.ui.form.on("Lead", {
 	  cur_frm.dashboard.hide();
     $('[data-original-title="Menu"]').hide()
     cur_frm.clear_custom_buttons();
+
+    if(!frm.is_new()){
+      frm.add_custom_button(__("Send Email"), function () {
+        email_box(frm);
+      });
+
+    }
     reqd_fields(frm);
     hide_details(frm);
     make_contract(frm);
@@ -395,4 +402,36 @@ function check_bd(frm){
     frappe.msgprint({message: __('<b>DOB</b> Cannot be Today`s date or Future date'), title: __('Error'), indicator: 'orange'});
     cur_frm.set_value("dob", "");
   }
+}
+
+function email_box(frm){
+      var pop_up = new frappe.ui.Dialog({
+        title: __('Send Email '),
+        'fields': [
+          {'fieldname': 'Email', 'fieldtype': 'Data','label':'To','reqd':1},
+          {'fieldname': 'CC', 'fieldtype': 'Data','label':'CC'},
+          {'fieldname': 'BCC', 'fieldtype': 'Data','label':'BCC'},
+          {'fieldname': 'Subject', 'fieldtype': 'Data','label':'Subject'},
+          {'fieldname': 'Content', 'fieldtype': 'Long Text','label':'Message'},
+        ],
+        primary_action: function(){
+          pop_up.hide();
+          var comment=pop_up.get_values();
+          frappe.call({
+            method:"tag_workflow.tag_data.send_email1",
+            freeze:true,
+            freeze_message:__("Please Wait ......."),
+            args:{
+              "user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "sid": frappe.boot.tag.tag_user_info.sid,
+              "name": frm.doc.name, "recepients":comment["Email"], "subject":comment["Subject"], "content":comment["Content"], "cc":comment["CC"],
+              "bcc":comment["BCC"],"doctype": frm.doc.doctype
+            },
+            callback: function(r) {
+              frm.reload_doc()
+            }
+          });
+        
+        }
+      });
+      pop_up.show();
 }

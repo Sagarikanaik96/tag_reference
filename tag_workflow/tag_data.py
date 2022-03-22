@@ -821,3 +821,21 @@ def user_company(doctype,txt,searchfield,page_len,start,filters):
     except Exception as e:
         frappe.log_error(e, "User Company Error")
         frappe.throw(e)
+
+@frappe.whitelist()
+def send_email1(user, company_type, sid, name, doctype, recepients, subject=None, content=None, cc=None, bcc=None):
+    site= frappe.utils.get_url().split('/')
+    sitename=site[0]+'//'+site[2]
+    frappe.sendmail(recipients=recepients,cc=cc, bcc=bcc,subject=subject, reference_name=name, message=content, template="email_template_custom", args = dict(sitename=sitename,content=content,subject=subject))
+    
+    frappe.get_doc({
+		"doctype":"Communication",
+		"subject": subject,
+		"content": content,
+		"sender": user,
+		"recipients": recepients,
+		"cc": cc or None,
+		"bcc": bcc or None,
+		"reference_doctype": doctype,
+		"reference_name": name,
+	}).insert(ignore_permissions=True)
