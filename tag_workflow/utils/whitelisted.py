@@ -226,7 +226,9 @@ def request_signature(staff_user, staff_company, hiring_user, name):
 def update_lead(lead, staff_company, date, staff_user, name):
     try:
         frappe.db.set_value("Lead", lead, "status", 'Close')
-        message = f"Congratulations! A Hiring contract has been signed on \033[1m{date}\033[0m for \033[1m{staff_company}\033[0m"
+        date = date.split('-')
+        new_date = date[1]+'-'+date[2]+'-'+date[0]
+        message = f"Congratulations! A Hiring contract has been signed on <b>{new_date}</b> for <b>{staff_company}</b>."
         make_system_notification([staff_user], message, 'Contract', name, "Hiring Prospect signs a contract")
         site= frappe.utils.get_url().split('/')
         sitename=site[0]+'//'+site[2]
