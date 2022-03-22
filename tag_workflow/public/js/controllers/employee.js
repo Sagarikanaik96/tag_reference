@@ -72,6 +72,18 @@ frappe.ui.form.on("Employee", {
 			attachrefresh()
 		})
 		attachrefresh()
+
+		
+
+
+		$(document).on('click', '[data-fieldtype="Attach"]', function(){
+			setTimeout(() => {
+				document.getElementsByClassName("modal-title")[0].innerHTML='Upload <h6>(Accepted File Type : pdf, txt or docx ,png ,jpg only, file size 10mb) </h6>'
+  			}, 300)
+		});
+
+
+		
 	},
 	decrypt_ssn: function(frm) {
 		frappe.call({
@@ -86,7 +98,7 @@ frappe.ui.form.on("Employee", {
 		})
 	},
 	resume:function(frm){
-		if (frm.doc.resume && !hasExtensions(frm.doc.resume, [".pdf", ".txt", ".docx"])){
+		if (frm.doc.resume && !hasExtensions(frm.doc.resume, [".pdf", ".txt", ".docx",'.png','jpg'])){
 			var array = frm.doc.resume.split("/")
 			var file_name = array[array.length -1]
 			frappe.call({
@@ -175,28 +187,28 @@ function required_field(frm){
 function uploaded_file_format(frm){
 	frm.get_field('resume').df.options = {
 	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx']
+	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
 		}
 	};
 	frm.get_field('w4').df.options = {
 	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx']
+	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
 		}
 	};
 	frm.get_field('e_verify').df.options = {
 	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx']
+	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
 		}
 	};
 	frm.get_field('i_9').df.options = {
 	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx']
+	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
 		}
 	};	
 	
 	frm.get_field('hire_paperwork').df.options = {
 	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx']
+	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
 		}
 	};
 }
@@ -270,3 +282,4 @@ function attachrefresh(){
 		});
 	},200)
 }
+
