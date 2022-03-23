@@ -60,7 +60,7 @@ def execute(filters=None):
         for d in data:
             joborder = frappe.db.sql(f'''select company,select_job,from_date,rate,order_status from `tabJob Order` where name = "{d.job_order}" and order_status{status}''', as_dict=True)
             tag_charge = frappe.db.get_value("Company", {"name": d.company}, ["tag_charges"])
-            row.append({"invoice": d.name, "company": d.company, "hiring_company": joborder[0].company, "job_order": d.job_order, "select_job": joborder[0].select_job, "start_date": joborder[0].from_date, "total_billing_hours": float(d.total_billing_hours), "rate": joborder[0].rate, "total_invoiced": (float(d.total_billing_hours)*float(joborder[0].rate)), "status": joborder[0].order_status, "total_to_tag": (float(d.total_billing_hours)*float(joborder[0].rate)*float(tag_charge/100))})
+            row.append({"invoice": d.name, "company": d.company, "hiring_company": joborder[0].company, "job_order": d.job_order, "select_job": joborder[0].select_job, "start_date": joborder[0].from_date, "total_billing_hours": float(d.total_billing_hours), "rate": joborder[0].rate, "total_invoiced": d.total_billing_amount, "status": joborder[0].order_status, "total_to_tag": (d.total_billing_amount*float(tag_charge/100))})
         return columns,row
     except Exception as e:
         print(e)
