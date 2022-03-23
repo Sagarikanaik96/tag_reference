@@ -413,7 +413,7 @@ frappe.ui.form.on("Job Order", {
 				},
 				callback: function(r) {
 					if (r.message != "success") {
-						msgprint("You can't create a Job Order until <b>"+frm.doc.company+"'s</b> details are complete.");
+						msgprint("You can't create a Job Order until <b>"+frm.doc.company+"'s</b> details are completed.");
 						frappe.validated = false;
 						setTimeout(() => {
 							frappe.set_route("List","Job Order");
@@ -438,10 +438,10 @@ function check_company_detail(frm) {
 			callback: function(r) {
 				if (r.message != "success") {
 					if(frappe.boot.tag.tag_user_info.company_type == 'Exclusive Hiring'){
-						frappe.msgprint(__("You can't create a Job Order until <b>"+frm.doc.company+"'s</b> details are complete."));
+						frappe.msgprint(__("You can't create a Job Order until <b>"+frm.doc.company+"'s</b> details are completed."));
 					}
 					else{
-						frappe.msgprint(__("You can't create a Job Order until your Company Details are complete."));
+						frappe.msgprint(__("You can't create a Job Order until your Company Details are completed."));
 					}
 					frappe.validated = false;
 				}
@@ -481,7 +481,7 @@ function redirect_quotation(frm) {
 		},
 		callback: function(r) {
 			if (r.message == "failed") {
-				msgprint("You can't Assign Employees Unless Your Company Details are Complete");
+				msgprint("You can't Assign Employees Until Your Company Details are Completed.");
 				frappe.validated = false;
 			} else {
 				frappe.set_route("Form", "Assign Employee", doc.name);

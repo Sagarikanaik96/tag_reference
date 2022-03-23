@@ -35,6 +35,9 @@ frappe.listview_settings['Job Order'] = {
 		}	
 	},
 	refresh:function(listview){
+		if(frappe.route_history.length>1){
+			frappe.ui.toolbar.clear_cache();
+		}
 		$('#navbar-breadcrumbs > li:nth-child(2) > a').html('Job Orders');
 		$('[data-original-title="Menu"]').hide();
 		$('div[data-fieldname="order_status"]').hide();
