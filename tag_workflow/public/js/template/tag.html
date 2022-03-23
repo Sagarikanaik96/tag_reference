@@ -231,12 +231,19 @@
                       aria-labelledby="btn-1"
                     >
                       <li class="py-2 mt-2">
-                        <a href="/app/job-order">All</a>
+                        <a href="#" onclick=job_order_page()>All</a>
                       </li>
                       {% if frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" %}
                       <li class="py-2">
                         <a href="/app/staff_company_list">Direct Order</a>
                       </li>
+                      {% endif %}
+
+                      {% if frappe.boot.tag.tag_user_info.company_type == "Staffing" %}
+                      <li class="py-2">
+                        <a href="#" onclick=show_more_menu() >Direct Order</a>
+                      </li>
+                      
                       {% endif %}
                     </ul>
                   </li>
@@ -388,6 +395,14 @@
     $(".crm li ul li").removeClass("active");
     $(this).addClass("active");
   });
+
+  function show_more_menu() {
+    location.href = "/app/job-order?data=direct";
+  }
+
+  function job_order_page() {
+    location.href = "/app/job-order";
+  }
 </script>
 
 <script>

@@ -140,6 +140,10 @@ frappe.ui.form.on("Employee", {
 			frm.set_value("job_category",null)
 		} 
 	},
+	before_save:function (frm) {
+		
+		frm.doc.decrypt_ssn = 0
+	},
 	
 	setup:function(frm){
 		frm.set_query("company", function(doc) {
@@ -159,7 +163,7 @@ frappe.ui.form.on("Employee", {
 				}
 			})
 		}
-		frm.set_value("decrypt_ssn",0)
+		
 	}
 	
 		
