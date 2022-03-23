@@ -97,6 +97,6 @@ function make_field_mandatory(frm){
 
 function cancel_cantact(frm){
 	frm.add_custom_button(__('Cancel'), function(){
-		frappe.set_route("Form", "User");
+		frappe.set_route("Form", "Contact");
 	});
 }

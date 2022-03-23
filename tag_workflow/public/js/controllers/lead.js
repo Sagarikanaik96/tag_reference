@@ -376,7 +376,7 @@ function tag_staff_company(frm) {
 
 function cancel_lead(frm){
 	frm.add_custom_button(__('Cancel'), function(){
-		frappe.set_route("Form", "User");
+		frappe.set_route("Form", "Lead");
 	});
 }
 
