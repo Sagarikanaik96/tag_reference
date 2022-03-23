@@ -140,6 +140,7 @@ frappe.ui.form.on("Employee", {
 			frm.set_value("job_category",null)
 		} 
 	},
+	
 	setup:function(frm){
 		frm.set_query("company", function(doc) {
 			return {
@@ -158,6 +159,7 @@ frappe.ui.form.on("Employee", {
 				}
 			})
 		}
+		frm.set_value("decrypt_ssn",0)
 	}
 	
 		
