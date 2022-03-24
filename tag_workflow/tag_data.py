@@ -508,9 +508,9 @@ def email_recipient(doctype, txt, searchfield, page_len, start, filters):
  
 def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l,staff_company):
     try:
-        msg=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with {staff_company}. Please respond.'
+        msg=f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond.'
         make_system_notification(l,msg,jobOrder,job_order,subject)   
-        message=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with {staff_company}. Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
+        message=f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
         return send_email(subject,message,l)
     except Exception as e:
         frappe.log_error(e, "Single Job Order Notification Error")
