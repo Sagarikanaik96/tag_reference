@@ -242,9 +242,9 @@ def get_company_details(comp_name):
     
 
 @frappe.whitelist(allow_guest=False)
-def get_joborder_value(user, sid, company_type, name):
+def get_joborder_value(user, company_type, name):
     try:
-        if(company_type and company_type in ["Staffing", "Hiring", "TAG", "Exclusive Hiring"] and frappe.session.user and user and user == frappe.session.user and sid == frappe.cache().get_value("sessions")[user] and name):
+        if(company_type and company_type in ["Staffing", "Hiring", "TAG", "Exclusive Hiring"] and frappe.session.user and user and user == frappe.session.user and name):
             sql = ''' select name,category,from_date,to_date,select_job,job_order_duration,job_site,no_of_workers,rate from `tabJob Order` where name = "{0}" '''.format(name)
             value = frappe.db.sql(sql,as_dict=True)
             if value:
