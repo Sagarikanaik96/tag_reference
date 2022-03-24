@@ -862,6 +862,30 @@ input.input-with-feedback.form-control,
   border: 1px solid#21b7e170;
   background-color: white;
 }
+[data-route="query-report/TAG Earnings"]
+  select.input-with-feedback.form-control.ellipsis,
+[data-route="query-report/Orders"]
+  select.input-with-feedback.form-control.ellipsis,
+[data-route="query-report/Employee Timesheet Report"]
+  select.input-with-feedback.form-control.ellipsis,
+[data-route="query-report/Tag Invoice"]
+  select.input-with-feedback.form-control.ellipsis {
+  padding-top: 3px;
+}
+[data-route="query-report/Work Orders"]
+  .datatable
+  .dt-row-filter
+  .dt-filter.dt-input,
+[data-route="query-report/Sales Register1"]
+  .datatable
+  .dt-row-filter
+  .dt-filter.dt-input,
+[data-route="query-report/Orders"]
+  .datatable
+  .dt-row-filter
+  .dt-filter.dt-input {
+  padding: 0 7px;
+}
 
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
