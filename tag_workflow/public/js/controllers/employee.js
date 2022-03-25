@@ -35,6 +35,55 @@ frappe.ui.form.on("Employee", {
 				}
 			});
 		});
+
+		window.onclick = function(event) {
+			attachrefresh()
+		}
+		
+		$('*[data-fieldname="miscellaneous"]').find('.grid-add-row')[0].addEventListener("click",function(){
+				attachrefresh()
+		});
+
+		$("[data-fieldname=miscellaneous]").mouseover(function(){
+			attachrefresh()
+		})
+
+		$('*[data-fieldname="background_check_or_drug_screen"]').find('.grid-add-row')[0].addEventListener("click",function(){
+				attachrefresh()
+		});
+
+		$("[data-fieldname=background_check_or_drug_screen]").mouseover(function(){
+			attachrefresh()
+		})
+
+		$('*[data-fieldname="id_requirements"]').find('.grid-add-row')[0].addEventListener("click",function(){
+				attachrefresh()
+		});
+
+		$("[data-fieldname=id_requirements]").mouseover(function(){
+			attachrefresh()
+		})
+
+		$('*[data-fieldname="direct_deposit_letter"]').find('.grid-add-row')[0].addEventListener("click",function(){
+				attachrefresh()
+		});
+
+		$("[data-fieldname=direct_deposit_letter]").mouseover(function(){
+			attachrefresh()
+		})
+		attachrefresh()
+
+		
+
+
+		$(document).on('click', '[data-fieldtype="Attach"]', function(){
+			setTimeout(() => {
+				document.getElementsByClassName("modal-title")[0].innerHTML='Upload <h6>(Accepted File Type : pdf, txt or docx ,png ,jpg only, file size 10mb) </h6>'
+  			}, 300)
+		});
+
+
+		
 	},
 	decrypt_ssn: function(frm) {
 		frappe.call({
@@ -49,7 +98,7 @@ frappe.ui.form.on("Employee", {
 		})
 	},
 	resume:function(frm){
-		if (frm.doc.resume && !hasExtensions(frm.doc.resume, [".pdf", ".txt", ".docx"])){
+		if (frm.doc.resume && !hasExtensions(frm.doc.resume, [".pdf", ".txt", ".docx",'.png','jpg'])){
 			var array = frm.doc.resume.split("/")
 			var file_name = array[array.length -1]
 			frappe.call({
@@ -87,9 +136,15 @@ frappe.ui.form.on("Employee", {
 		}
 		if ((frm.doc.employee_job_category) && (frm.doc.employee_job_category.length)>0){
 			frm.set_value("job_category",frm.doc.employee_job_category[0]["job_category"])
-
+		}else{
+			frm.set_value("job_category",null)
 		} 
 	},
+	before_save:function (frm) {
+		
+		frm.doc.decrypt_ssn = 0
+	},
+	
 	setup:function(frm){
 		frm.set_query("company", function(doc) {
 			return {
@@ -108,6 +163,7 @@ frappe.ui.form.on("Employee", {
 				}
 			})
 		}
+		
 	}
 	
 		
@@ -137,14 +193,30 @@ function required_field(frm){
 function uploaded_file_format(frm){
 	frm.get_field('resume').df.options = {
 	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx']
+	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
 		}
 	};
 	frm.get_field('w4').df.options = {
 	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx']
+	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+		}
+	};
+	frm.get_field('e_verify').df.options = {
+	    restrictions: {
+	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+		}
+	};
+	frm.get_field('i_9').df.options = {
+	    restrictions: {
+	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
 		}
 	};	
+	
+	frm.get_field('hire_paperwork').df.options = {
+	    restrictions: {
+	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+		}
+	};
 }
 
 function cancel_employee(frm){
@@ -196,3 +268,24 @@ function doc_download(e,frm){
 		document.body.removeChild(anchor);  
   }
 }
+
+function attachrefresh(){
+	setTimeout(()=>{
+		document.querySelectorAll('div[data-fieldname="attachments"]').forEach(function(oInput){
+				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)
+		});
+
+		document.querySelectorAll('div[data-fieldname="id_requirements"]').forEach(function(oInput){
+				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)
+		});
+
+		document.querySelectorAll('div[data-fieldname="direct_deposit_letter"]').forEach(function(oInput){
+				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)
+		});
+
+		document.querySelectorAll('div[data-fieldname="drug_screen"]').forEach(function(oInput){
+				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)
+		});
+	},200)
+}
+

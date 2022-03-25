@@ -7,6 +7,7 @@ frappe.ui.form.on("User", {
 		field_toggle(frm);
 		field_reqd(frm);
 		field_check(frm);
+		exclusive_fields(frm);
 		cur_frm.dashboard.hide()
 		if(frm.doc.__islocal==1){
 			cancel_user(frm);
@@ -376,3 +377,21 @@ function add_old_joborder(frm){
 		});
 	}
 }
+function exclusive_fields(frm){
+	if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.organization_type=='Exclusive Hiring'){
+		frappe.db.get_value('User',{'name':frm.doc.owner},['organization_type'],function(r){
+			if(r.organization_type !='Staffing' || r  == null){
+				$('[data-label="Save"]').hide()
+				$('[data-label="Assign%20Multi%20Company"]').hide()
+  
+				var myStringArray = ["first_name", "last_name", "enabled", "terminated", "gender", "birth_date", "location", "mobile_no", "new_password", "logout_all_sessions"];
+				var arrayLength = myStringArray.length;
+				for (var i = 0; i < arrayLength; i++) {
+					frm.set_df_property(myStringArray[i], "read_only", 1);
+				}
+				frm.set_df_property('change_password','hidden',1);
+			}          
+	})
+	}
+ }
+ 

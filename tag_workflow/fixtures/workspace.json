@@ -1059,7 +1059,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2021-11-17 19:48:30.203617",
+  "modified": "2022-03-16 13:25:05.646098",
   "module": "CRM",
   "name": "CRM",
   "onboarding": "CRM",
@@ -1111,20 +1111,6 @@
     "restrict_to_domain": null,
     "stats_filter": null,
     "type": "DocType"
-   },
-   {
-    "color": null,
-    "doc_view": null,
-    "format": null,
-    "icon": null,
-    "label": "Dashboard",
-    "link_to": "CRM",
-    "parent": "CRM",
-    "parentfield": "shortcuts",
-    "parenttype": "Workspace",
-    "restrict_to_domain": null,
-    "stats_filter": null,
-    "type": "Dashboard"
    }
   ],
   "shortcuts_label": null
@@ -1575,6 +1561,21 @@
     "hidden": 0,
     "icon": null,
     "is_query_report": 0,
+    "label": "Contracts",
+    "link_to": "Contract",
+    "link_type": "DocType",
+    "onboard": 0,
+    "only_for": null,
+    "parent": "My Activities",
+    "parentfield": "links",
+    "parenttype": "Workspace",
+    "type": "Link"
+   },
+   {
+    "dependencies": null,
+    "hidden": 0,
+    "icon": null,
+    "is_query_report": 0,
     "label": "Job Order Resources",
     "link_to": null,
     "link_type": "DocType",
@@ -1646,7 +1647,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2022-03-04 00:55:45.988877",
+  "modified": "2022-03-22 03:30:03.526188",
   "module": "Tag Workflow",
   "name": "My Activities",
   "onboarding": null,

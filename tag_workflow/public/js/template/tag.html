@@ -185,7 +185,7 @@
             <div class="sub-menu w-100 border-top border-right" id="myDIV">
               {% if frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" %}
 
-              <div class="p-4">
+              <div class="p-md-4 mt-5 mt-md-0 px-3 pb-0 pt-2">
                 <button type="button" class="btn btn-primary btn-block">
                   <span class="px-2">&#x2b;</span>New Order
                 </button>
@@ -231,12 +231,19 @@
                       aria-labelledby="btn-1"
                     >
                       <li class="py-2 mt-2">
-                        <a href="/app/job-order">All</a>
+                        <a href="#" onclick=job_order_page()>All</a>
                       </li>
                       {% if frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" %}
                       <li class="py-2">
                         <a href="/app/staff_company_list">Direct Order</a>
                       </li>
+                      {% endif %}
+
+                      {% if frappe.boot.tag.tag_user_info.company_type == "Staffing" %}
+                      <li class="py-2">
+                        <a href="#" onclick=show_more_menu() >Direct Order</a>
+                      </li>
+                      
                       {% endif %}
                     </ul>
                   </li>
@@ -292,6 +299,26 @@
                 </div>
               </a>
               {% endif %}
+              {% if frappe.boot.tag.tag_user_info.company_type == "Hiring" ||  frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" %}
+              <div class="tab-button custom-btn">
+                <ul class="nav crm">
+                  <li>
+                    <a href="#" id="btn-1" data-toggle="collapse" data-target="#submenu2" aria-expanded="false">
+                      <span class="pl-3 ml-3">
+                         <img src="/assets/tag_workflow/images/ico-crm.svg" class="pr-3 pl-3" alt="crm" />
+                      </span>
+                      <span class="slide-text">CRM </span>
+                      <span>
+                        <i class="fa fa-angle-down" aria-hidden="true"></i>
+                      </span>
+                    </a>
+                    <ul class="inner-menu pl-5 ml-5 list-unstyled collapse" id="submenu2" role="menu" aria-labelledby="btn-1">
+                      <li class="py-2"><a href="/app/contract">Contract</a></li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              {% endif %}
               <a href="/app/reports">
                 <div class="tab-button custom-btn">
                   <img
@@ -332,11 +359,6 @@
                       frappe.boot.tag.tag_user_info.user_type }} {% endif %}
                     </span>
                   </div>
-                  <div>
-                    <span class="ml-1 pr-2">
-                      <i class="fa fa-angle-right" aria-hidden="true"></i>
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -373,6 +395,14 @@
     $(".crm li ul li").removeClass("active");
     $(this).addClass("active");
   });
+
+  function show_more_menu() {
+    location.href = "/app/job-order?data=direct";
+  }
+
+  function job_order_page() {
+    location.href = "/app/job-order";
+  }
 </script>
 
 <script>

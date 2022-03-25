@@ -4,6 +4,18 @@
  
 frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
+
+window.onclick = function(event) {
+	attachrefresh()
+}
+$('*[data-fieldname="employee_details"]').find('.grid-add-row')[0].addEventListener("click",function(){
+		attachrefresh()
+});
+
+$("[data-fieldname=employee_details]").mouseover(function(){
+attachrefresh()
+})
+attachrefresh()
 		$('.form-footer').hide()
 		if(frm.doc.__islocal==1){
 			if (!frm.doc.hiring_organization){
@@ -184,6 +196,7 @@ function check_employee_data(frm){
 
 	}
 	table_emp(frm,table,msg)
+	company_check(frm,table,msg)
 
 	for(var e in table){(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg.push('Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details');}
 	if(msg.length){frappe.msgprint({message: msg.join("<br>"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
@@ -224,12 +237,6 @@ frappe.ui.form.on("Assign Employee Details", {
 		if(frm.doc.tag_status == "Approved" && child.__islocal != 1){
 			cur_frm.fields_dict["employee_details"].grid.grid_rows_by_docname[child.name].toggle_editable("employee", 0);
 		}
-
-		$('[data-fieldname="resume"]').on({
-			'click': function () {
-				window.open(cur_frm.doc.employee_details[0]["resume"]);
-			}
-		});
 	}
 });
 
@@ -263,14 +270,6 @@ function hide_resume(frm){
 		table.hidden=1;
 		frm.refresh_fields();
 	}
-
-	$('[data-fieldname="resume"]').on({
-		'click': function () {
-			if (document.querySelectorAll('[data-fieldname="resume"]')[$('[data-fieldname="resume"]').index(this)].children[1].innerText){
-				window.open(document.querySelectorAll('[data-fieldname="resume"]')[$('[data-fieldname="resume"]').index(this)].children[1].innerText);
-			}
-		}
-	});
 }
 
 
@@ -346,6 +345,10 @@ function table_emp(frm,table,msg){
 }
 
 function make_notification_approved(frm){
+	var count = cur_frm.doc.employee_details.length
+	if (cur_frm.doc.replaced_employees.length > 0){
+		count = 0
+	}
 	frappe.call({
 		"method":"tag_workflow.tag_data.receive_hire_notification",
 		"freeze": true,
@@ -354,7 +357,7 @@ function make_notification_approved(frm){
 			"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
 			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
 			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
-			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,"worker_fill":cur_frm.doc.employee_details.length
+			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,"worker_fill":count
 		},
 		callback:function(r){
 			setTimeout(function () {
@@ -411,3 +414,27 @@ frappe.ui.form.on("Assign Employee Details", {
 		}
 	}	
 });
+
+
+
+
+function attachrefresh(){
+	setTimeout(()=>{
+		document.querySelectorAll('div[data-fieldname="resume"]').forEach(function(oInput){
+			try {
+				  oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)[0]
+			} catch (error) {
+				  console.log(error);
+			}
+				
+		});
+	},200)
+}
+
+function company_check(frm,table,msg){
+	for(var d in table){
+		if(table[d].company!=null && table[d].company != frm.doc.company && table[d].company){
+			msg.push('Employee <b>'+table[d].employee+' </b>does not belong to '+frm.doc.company);
+		}
+	}
+}

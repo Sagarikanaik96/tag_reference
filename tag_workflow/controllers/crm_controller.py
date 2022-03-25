@@ -38,7 +38,7 @@ def get_org_types(staffing, organization_type=None):
 
 
 @frappe.whitelist()
-def onboard_org(lead, exclusive, staffing, email, person_name, organization_type=None):
+def onboard_org(lead, exclusive, staffing, email, person_name, gender, phone, dob, organization_type=None):
     try:
         is_company, is_user = 1, 1
         company_doc, user = "", ""
@@ -54,13 +54,14 @@ def onboard_org(lead, exclusive, staffing, email, person_name, organization_type
             is_company = 0
 
         if not frappe.db.exists("User", email):
-            user = make_user(exclusive, staffing, email, person_name, org_type, user_type, tag_user_type)
+            user = make_user(exclusive, staffing, email, person_name, org_type, user_type, tag_user_type, gender, phone,dob)
             is_user = 0
 
         enqueue("tag_workflow.controllers.master_controller.make_update_comp_perm", docname=exclusive)
         return is_company, is_user, company_doc, user
     except Exception as e:
         frappe.db.rollback()
+        print(e)
         frappe.throw(e)
 
 
@@ -85,9 +86,9 @@ def make_company(lead, exclusive, staffing, org_type):
         frappe.throw(e)
 
 
-def make_user(exclusive, staffing, email, person_name, org_type, user_type, tag_user_type):
+def make_user(exclusive, staffing, email, person_name, org_type, user_type, tag_user_type, gender, phone, dob):
     try:
-        user = frappe.get_doc(dict(doctype="User", organization_type=org_type, tag_user_type=tag_user_type, company=exclusive, email=email, first_name=person_name, module_profile=user_type, role_profile_name=tag_user_type, date_of_joining=frappe.utils.nowdate()))
+        user = frappe.get_doc(dict(doctype="User", organization_type=org_type, tag_user_type=tag_user_type, company=exclusive, email=email, first_name=person_name, module_profile=user_type, role_profile_name=tag_user_type, date_of_joining=frappe.utils.nowdate(),gender=gender, mobile_no=phone, birth_date=dob))
         user.save(ignore_permissions=True)
         return user.name
     except Exception as e:

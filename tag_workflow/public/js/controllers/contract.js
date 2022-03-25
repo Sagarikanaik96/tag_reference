@@ -10,11 +10,25 @@ frappe.ui.form.on("Contract", {
 		if(frm.doc.__islocal==1){
 			cancel_cantract(frm);
 		}
-	},
+		else{
+			if(frm.doc.signe_company){
+				let fields = ['signe_company', 'contract_terms', 'signee_staffing', 'signe_company', 'requires_fulfilment', 'fulfilment_deadline', 'start_date', 'end_date', 'staffing_company', 'hiring_company', 'end_party_user', 'signe_company', '_industry_types', 'job_titles', 'lead'];
+				for(let f in fields){
+					frm.set_df_property(fields[f], "read_only", 1);
+				}
+			}
+			if(frm.doc.signe_hiring){
+				frm.set_df_property('signe_hiring','read_only', 1);
+			}
+		}
+		if(cur_frm.doc.lead){
+			
+			frm.set_df_property('hiring_company','read_only', 1)
+			frm.set_df_property('end_party_user','read_only', 1)
+			frm.set_df_property('staffing_company','read_only', 1)
 
-	hiring_company: function(frm){
-		cur_frm.set_value("party_name", cur_frm.doc.hiring_company);
-		update_user(frm);
+
+		}
 	},
 
 	setup: function(frm){
@@ -29,6 +43,7 @@ frappe.ui.form.on("Contract", {
 
 	before_save: function(frm){
 		update_lead(frm);
+		frm.set_df_property('signe_hiring','read_only', 1);
 	},
 	signe_company:function(frm){
 		if(frm.doc.signe_company){
@@ -41,6 +56,7 @@ frappe.ui.form.on("Contract", {
 		}
 	},
 	signe_hiring:function(frm){
+		$('[data-label = "Save"]').css('display', 'block');
 		if(frm.doc.signe_hiring){
 			var regex = /[^0-9A-Za-z ]/g;
 			if (regex.test(frm.doc.signe_hiring) === true){
@@ -49,7 +65,7 @@ frappe.ui.form.on("Contract", {
 				frappe.validated = false;
 			}
 		}
-	}
+	},
 });
 
 /*-----------field-----------*/
@@ -57,7 +73,9 @@ function toggle_field(frm){
 	cur_frm.toggle_display("party_name", 0);
 	let roles = frappe.user_roles;
 	if((roles.includes("Hiring Admin") || roles.includes("Hiring User")) && (!roles.includes("Tag Admin") || !roles.includes("Tag User"))){
-		let fields = ['signe_company', 'contract_terms', 'signee_staffing', 'signe_company', 'requires_fulfilment', 'fulfilment_deadline', 'fulfilment_deadline', 'start_date', 'end_date', 'staffing_company', 'hiring_company', 'end_party_user', 'signe_company'];
+		$('[data-label = "Submit"]').hide();
+		$('.form-message').hide();
+		let fields = ['signe_company', 'contract_terms', 'signee_staffing', 'signe_company', 'requires_fulfilment', 'fulfilment_deadline', 'start_date', 'end_date', 'staffing_company', 'hiring_company', 'end_party_user', 'signe_company', '_industry_types', 'job_titles', 'lead'];
 		for(let f in fields){
 			cur_frm.toggle_enable(fields[f], 0);
 		}
@@ -166,7 +184,7 @@ function request_sign(frm){
 
 /*------update lead status-------*/
 function update_lead(frm){
-	if(frm.doc.signe_hiring && frm.doc.lead && !frm.doc.sign_date_hiring){
+	if(frm.doc.signe_hiring && frm.doc.lead && frm.doc.sign_date_hiring){
 		cur_frm.set_value("sign_date_hiring", frappe.datetime.now_date());
 		frappe.call({
 			method: "tag_workflow.utils.whitelisted.update_lead",

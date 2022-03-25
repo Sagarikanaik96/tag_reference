@@ -6,6 +6,13 @@ frappe.ui.form.on("Timesheet", {
 		$('[data-label="Create%20Sales%20Invoice"]').hide();
 		$('[data-label="Cancel"]').hide();
 		$('.custom-actions.hidden-xs.hidden-md').show();
+		$(document).on('click', '[data-fieldname="from_time"]', function(){
+			$('.datepicker').show()
+		});
+		$(document).on('click', '[data-fieldname="to_time"]', function(){
+			$('.datepicker').show()
+		});
+		
 		cur_frm.dashboard.hide();
 		if(frm.doc.__islocal==1){
 			cancel_timesheet(frm);
@@ -27,6 +34,8 @@ frappe.ui.form.on("Timesheet", {
 		}
 		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
 		hide_timesheet_field(timesheet_fields);
+
+		check_update_timesheet(frm);
 	},
 	setup: function(frm){
 		job_order_details(frm);
@@ -136,11 +145,7 @@ frappe.ui.form.on("Timesheet", {
 
 	dnr: function(frm){
 		trigger_email(frm, "dnr", frm.doc.dnr, "DNR");
-	},
-
-	workflow_state: function(frm){
-		check_update_timesheet(frm);
-	},
+	}
 
 });
 
@@ -203,6 +208,7 @@ function check_update_timesheet(frm){
 									'ratings':comp_rating,
 									'job_order':cur_frm.doc.job_order_detail
 								},
+								"async": 0,
 								callback:function(rm){
 									frappe.msgprint('Review Submitted Successfully');
 								}
@@ -213,6 +219,7 @@ function check_update_timesheet(frm){
 				}
 			});
 		}
+
 	}
 }
 
@@ -378,6 +385,7 @@ frappe.ui.form.on("Timesheet Detail", {
 		let t_time = new Date(child.to_time);
 		
 		if(t_time.toDateString() != f_time.toDateString()){
+			$('.datepicker').hide()
 			frappe.msgprint("Timesheet can't be for multiple days.");
 			frappe.model.set_value(cdt, cdn, "to_time", child.from_time);
 		}
@@ -411,7 +419,11 @@ frappe.ui.form.on("Timesheet Detail", {
 		if(child.to_time){
 			frappe.model.set_value(cdt, cdn, "hours", "");
 			frappe.model.set_value(cdt, cdn, "hrs", "");
-			frappe.model.set_value(cdt, cdn, "to_time","");
+			setTimeout(function(){
+
+				frappe.model.set_value(cdt, cdn, "to_time",undefined);
+
+			},100)
 		}
 	},
 	break_start_time:function(frm,cdt,cdn){

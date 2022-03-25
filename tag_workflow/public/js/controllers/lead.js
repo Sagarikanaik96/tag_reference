@@ -1,8 +1,19 @@
 frappe.ui.form.on("Lead", {
   refresh: function (frm) {
+    setTimeout(()=>{
+      $('[data-label="Create"]').addClass("hide");
+    }, 3000);
+    view_contract(frm);
 	  cur_frm.dashboard.hide();
     $('[data-original-title="Menu"]').hide()
     cur_frm.clear_custom_buttons();
+
+    if(!frm.is_new()){
+      frm.add_custom_button(__("Send Email"), function () {
+        email_box(frm);
+      });
+
+    }
     reqd_fields(frm);
     hide_details(frm);
     make_contract(frm);
@@ -137,6 +148,9 @@ frappe.ui.form.on("Lead", {
           });
           frm.reload_doc()
     }
+  },
+  dob:function(frm){
+    check_bd(frm);
   }
 });
 
@@ -166,8 +180,7 @@ function onboard_org(frm) {
   var exclusive = frm.doc.company_name;
   var person_name = frm.doc.lead_name;
   var organization_type = frm.doc.organization_type;
-  var lead = frm.doc.name
-  console.log(lead)
+  var lead = frm.doc.name;
 
   frappe.db.get_value(
     "User",
@@ -184,6 +197,7 @@ function onboard_org(frm) {
                   r.company,
                   email,
                   person_name,
+                  frm,
                   organization_type
                 )
               : console.log("TAG");
@@ -210,6 +224,7 @@ function onboard_orgs(
   staffing,
   email,
   person_name,
+  frm,
   organization_type
 ) {
   if (exclusive && email) {
@@ -224,6 +239,9 @@ function onboard_orgs(
         staffing: staffing,
         email: email,
         person_name: person_name,
+        gender:frm.doc.gender,
+        phone:frm.doc.phone_no,
+        dob:frm.doc.dob,
         organization_type: organization_type,
       },
       callback: function (r) {
@@ -315,7 +333,6 @@ function hide_details(frm) {
     "source",
     "designation",
     "campaign_name",
-    "gender",
     "mobile_no",
   ];
   for (let data in fields) {
@@ -359,6 +376,62 @@ function tag_staff_company(frm) {
 
 function cancel_lead(frm){
 	frm.add_custom_button(__('Cancel'), function(){
-		frappe.set_route("Form", "User");
+		frappe.set_route("Form", "Lead");
 	});
+}
+
+function view_contract(frm){
+  if(frm.doc.__islocal!=1){
+    cur_frm.page.set_secondary_action(__('View Contract'), function(){
+      frappe.db.get_value('Contract',{'staffing_company':cur_frm.doc.company,'hiring_company':cur_frm.doc.company_name,'lead':frm.doc.name},['name'],function(r){
+        if(r.name){
+          window.location.href='/app/contract/'+r.name;
+        }
+        else{
+          frappe.show_alert({message:__('No contract found! Please prepare a contract first.'), indicator:'red'});
+        }
+      });
+    });
+  }
+}
+
+/*------birth date-------*/
+function check_bd(frm){
+  let date = frm.doc.dob || "";
+  if(date && date >= frappe.datetime.now_date()){
+    frappe.msgprint({message: __('<b>DOB</b> Cannot be Today`s date or Future date'), title: __('Error'), indicator: 'orange'});
+    cur_frm.set_value("dob", "");
+  }
+}
+
+function email_box(frm){
+      var pop_up = new frappe.ui.Dialog({
+        title: __('Send Email '),
+        'fields': [
+          {'fieldname': 'Email', 'fieldtype': 'Data','label':'To','reqd':1},
+          {'fieldname': 'CC', 'fieldtype': 'Data','label':'CC'},
+          {'fieldname': 'BCC', 'fieldtype': 'Data','label':'BCC'},
+          {'fieldname': 'Subject', 'fieldtype': 'Data','label':'Subject'},
+          {'fieldname': 'Content', 'fieldtype': 'Long Text','label':'Message'},
+        ],
+        primary_action: function(){
+          pop_up.hide();
+          var comment=pop_up.get_values();
+          frappe.call({
+            method:"tag_workflow.tag_data.send_email1",
+            freeze:true,
+            freeze_message:__("Please Wait ......."),
+            args:{
+              "user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "sid": frappe.boot.tag.tag_user_info.sid,
+              "name": frm.doc.name, "recepients":comment["Email"], "subject":comment["Subject"], "content":comment["Content"], "cc":comment["CC"],
+              "bcc":comment["BCC"],"doctype": frm.doc.doctype
+            },
+            callback: function(r) {
+              frm.reload_doc()
+            }
+          });
+        
+        }
+      });
+      pop_up.show();
 }

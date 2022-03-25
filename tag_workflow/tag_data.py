@@ -248,7 +248,7 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
                 l = [l[0] for l in user_list]
                 for user in l:
                     add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
-                single_job_order_notification(job_order_title,hiring_org,job_order,subject,l)
+                single_job_order_notification(job_order_title,hiring_org,job_order,subject,l,staff_company)
             else:
                 staff_email_notification_cont(hiring_org, job_order, job_order_title,doc,subject)
     except Exception as e:
@@ -280,7 +280,7 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
 
             usr_sql = ''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL '''.format(company_info[0][0])
             user_list = frappe.db.sql(usr_sql, as_list=1)
-            l = [l[0] for l in user_list]
+            l = [l[0] for l in user_list if l[0]!=frappe.session.user]
             for user in l:
                 add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
             job_order_notification(job_order_title,hiring_org,job_order,subject,l)
@@ -382,7 +382,7 @@ def get_org_site(doctype, txt, searchfield, page_len, start, filters):
 def job_site_employee(doctype, txt, searchfield, page_len, start, filters):
 
     company=filters.get('job_order_company')
-    sql = ''' select name,employee_name,user_id from `tabEmployee` where company='{0}' '''.format(company)
+    sql = ''' select name,employee_name,user_id,contact_number from `tabEmployee` where company='{0}' '''.format(company)
     return frappe.db.sql(sql)
 
 
@@ -506,11 +506,11 @@ def email_recipient(doctype, txt, searchfield, page_len, start, filters):
 
 
  
-def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l):
+def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l,staff_company):
     try:
-        msg=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with your Company. Please respond.'
+        msg=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with {staff_company}. Please respond.'
         make_system_notification(l,msg,jobOrder,job_order,subject)   
-        message=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with your Company. Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
+        message=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with {staff_company}. Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
         return send_email(subject,message,l)
     except Exception as e:
         frappe.log_error(e, "Single Job Order Notification Error")
@@ -733,10 +733,7 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
 
 @frappe.whitelist()
 def jobcategory_data(job_order):
-    print(job_order,"job_order")
     sql = """ select job_category from `tabJob Category` where parent='{}' """.format(job_order)
-    print(sql,"sqllll")
-    print(frappe.db.sql(sql),"sql")
     return frappe.db.sql(sql)
 
 @frappe.whitelist()
@@ -824,3 +821,21 @@ def user_company(doctype,txt,searchfield,page_len,start,filters):
     except Exception as e:
         frappe.log_error(e, "User Company Error")
         frappe.throw(e)
+
+@frappe.whitelist()
+def send_email1(user, company_type, sid, name, doctype, recepients, subject=None, content=None, cc=None, bcc=None):
+    site= frappe.utils.get_url().split('/')
+    sitename=site[0]+'//'+site[2]
+    frappe.sendmail(recipients=recepients,cc=cc, bcc=bcc,subject=subject, reference_name=name, message=content, template="email_template_custom", args = dict(sitename=sitename,content=content,subject=subject))
+    
+    frappe.get_doc({
+		"doctype":"Communication",
+		"subject": subject,
+		"content": content,
+		"sender": user,
+		"recipients": recepients,
+		"cc": cc or None,
+		"bcc": bcc or None,
+		"reference_doctype": doctype,
+		"reference_name": name,
+	}).insert(ignore_permissions=True)

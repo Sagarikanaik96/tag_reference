@@ -16,8 +16,13 @@ frappe.ui.form.on("Job Order", {
 	},
 
 	onload: function(frm) {
+		if(frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.__islocal==1){
+			frm.set_value('e_signature_full_name', frappe.session.user_fullname);
+			frm.set_df_property("e_signature_full_name", "read_only", 1);
+		}
 		make_invoice(frm);
 		hide_employee_rating(frm);
+		direct_order_staff_company(frm)
 		
 		if (frappe.session.user != 'Administrator') {
 			$('.menu-btn-group').hide();
@@ -98,7 +103,7 @@ frappe.ui.form.on("Job Order", {
 			};
 		});
 
-		if(frappe.boot.tag.tag_user_info.company_type != "Staffing" && cur_frm.doc.__islocal == 1) {
+		if(cur_frm.doc.__islocal == 1) {
 			fields_setup(frm);
 		}
 
@@ -189,7 +194,13 @@ frappe.ui.form.on("Job Order", {
 			rate_hour_contract_change(frm);
 			if (frappe.validated) {
 				return new Promise(function(resolve, reject) {
-					let profile_html = "<span style='font-size: 14px;'>"+"<b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time.slice(0, -3) + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact Person Name: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>$" + (frm.doc.rate).toFixed(2) + "<br><b>Rate Increase: </b>$" + (frm.doc.per_hour - frm.doc.rate).toFixed(2) + "<br><b>Additional Flat Rate: </b>$" + (frm.doc.flat_rate).toFixed(2) + "<br><b>Total Per Hour Rate: </b>$" + (frm.doc.per_hour).toFixed(2) + "</span>";
+					let profile_html;
+					if(frm.doc.contact_number){
+						profile_html = "<span style='font-size: 14px;'>"+"<b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time.slice(0, -3) + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact: </b>" + frm.doc.contact_name + "<br><b>Contact Phone Number: </b>" + frm.doc.contact_number + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>$" + (frm.doc.rate).toFixed(2) + "<br><b>Rate Increase: </b>$" + (frm.doc.per_hour - frm.doc.rate).toFixed(2) + "<br><b>Additional Flat Rate: </b>$" + (frm.doc.flat_rate).toFixed(2) + "<br><b>Total Per Hour Rate: </b>$" + (frm.doc.per_hour).toFixed(2) + "</span>";
+					}
+					else{
+						profile_html = "<span style='font-size: 14px;'>"+"<b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time.slice(0, -3) + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>$" + (frm.doc.rate).toFixed(2) + "<br><b>Rate Increase: </b>$" + (frm.doc.per_hour - frm.doc.rate).toFixed(2) + "<br><b>Additional Flat Rate: </b>$" + (frm.doc.flat_rate).toFixed(2) + "<br><b>Total Per Hour Rate: </b>$" + (frm.doc.per_hour).toFixed(2) + "</span>";
+					}
 					var confirm_joborder = new frappe.ui.Dialog({
 						title: __('Confirm Job Order Details'),
 						fields: [{fieldname: "save_joborder", fieldtype: "HTML", options: profile_html},]
@@ -292,6 +303,7 @@ frappe.ui.form.on("Job Order", {
 		let name = "rate";
 		let value = parseFloat(frm.doc.rate);
 		check_value(frm, field, name, value);
+		rate_calculation(frm)
 	},
 
 	extra_price_increase: function(frm) {
@@ -299,6 +311,7 @@ frappe.ui.form.on("Job Order", {
 		let name = "extra_price_increase";
 		let value = frm.doc.extra_price_increase;
 		check_value(frm, field, name, value);
+		rate_calculation(frm)
 	},
 
 	per_hour: function(frm) {
@@ -376,6 +389,40 @@ frappe.ui.form.on("Job Order", {
 			frappe.validated = false;
 		}
 	},
+
+	drug_screen: (frm) => {
+        if (frm.doc.drug_screen) rate_calculation(frm);
+    },
+    driving_record: (frm) => {
+        if (frm.doc.driving_record) rate_calculation(frm);
+    },
+    shovel: (frm) => {
+        if (frm.doc.shovel) rate_calculation(frm);
+    },
+    background_check: (frm) => {
+        if (frm.doc.background_check) rate_calculation(frm);
+    },
+
+	company: function(frm){
+		if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.company){
+			fields_setup(frm);
+			frappe.call({
+				method: "tag_workflow.tag_data.company_details",
+				args: {
+					company_name: frm.doc.company
+				},
+				callback: function(r) {
+					if (r.message != "success") {
+						msgprint("You can't create a Job Order until <b>"+frm.doc.company+"'s</b> details are completed.");
+						frappe.validated = false;
+						setTimeout(() => {
+							frappe.set_route("List","Job Order");
+						}, 3000);
+					}
+				},
+			});
+		}
+	}
 });
 
 /*-------check company details---------*/
@@ -390,7 +437,12 @@ function check_company_detail(frm) {
 			},
 			callback: function(r) {
 				if (r.message != "success") {
-					msgprint("You can't Create Job Order Unless Your Company Details are Complete");
+					if(frappe.boot.tag.tag_user_info.company_type == 'Exclusive Hiring'){
+						frappe.msgprint(__("You can't create a Job Order until <b>"+frm.doc.company+"'s</b> details are completed."));
+					}
+					else{
+						frappe.msgprint(__("You can't create a Job Order until your Company Details are completed."));
+					}
 					frappe.validated = false;
 				}
 			},
@@ -429,7 +481,7 @@ function redirect_quotation(frm) {
 		},
 		callback: function(r) {
 			if (r.message == "failed") {
-				msgprint("You can't Assign Employees Unless Your Company Details are Complete");
+				msgprint("You can't Assign Employees Until Your Company Details are Completed.");
 				frappe.validated = false;
 			} else {
 				frappe.set_route("Form", "Assign Employee", doc.name);
@@ -564,8 +616,9 @@ function rate_hour_contract_change(frm) {
 }
 
 function rate_calculation(frm) {
+	const rate = frm.doc.rate || 0;
 	var extra_price_increase = frm.doc.extra_price_increase || 0;
-	var total_per_hour = extra_price_increase + parseFloat(cur_frm.doc.rate);
+	var total_per_hour = extra_price_increase + parseFloat(rate);
 	var total_flat_rate = 0;
 	const optional_field_data = [frm.doc.drug_screen, frm.doc.background_check, frm.doc.driving_record, frm.doc.shovel,];
 	const optional_fields = ["drug_screen", "background_check", "driving_record", "shovel",];
@@ -1324,3 +1377,10 @@ function staff_company_read_only(frm){
         }
     }
 }
+
+function direct_order_staff_company(frm){
+	if(frm.doc.staff_company){
+		frm.toggle_display('staff_company', 1)
+		frm.set_df_property('staff_company','read_only',1)
+	}
+ }
