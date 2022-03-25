@@ -35,13 +35,11 @@ frappe.listview_settings['Job Order'] = {
 		}	
 	},
 	refresh:function(listview){
-		if(frappe.route_history.length>1){
-			frappe.ui.toolbar.clear_cache();
-		}
+		$('.custom-actions.hidden-xs.hidden-md').hide();
 		$('#navbar-breadcrumbs > li:nth-child(2) > a').html('Job Orders');
 		$('[data-original-title="Menu"]').hide();
 		$('div[data-fieldname="order_status"]').hide();
-		$('div[data-fieldname="company"]').hide();
+		$('div[data-original-title="Company"]').hide();
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 			frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
 				if(r.name===undefined){

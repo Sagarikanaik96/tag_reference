@@ -125,6 +125,7 @@ frappe.ui.form.on("Job Order", {
 
 	},
 	refresh: function(frm) {
+		$('[data-fieldname="company"]').show();
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
