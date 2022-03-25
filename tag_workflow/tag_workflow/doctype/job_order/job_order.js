@@ -1377,10 +1377,10 @@ function staff_company_read_only(frm){
         }
     }
 }
+
 function direct_order_staff_company(frm){
 	if(frm.doc.staff_company){
 		frm.toggle_display('staff_company', 1)
 		frm.set_df_property('staff_company','read_only',1)
 	}
  }
- 

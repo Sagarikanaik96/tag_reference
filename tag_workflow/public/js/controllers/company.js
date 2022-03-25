@@ -299,6 +299,7 @@ function make_jazzhr_request(frm,a){
 	}
 }
 
+
 /*---------make invoice------------*/
 function hide_tag_charges(frm){
 	let roles = frappe.user_roles;
