@@ -391,7 +391,10 @@ function exclusive_fields(frm){
 				}
 				frm.set_df_property('change_password','hidden',1);
 			}          
-	})
+		})
+	}
+	else if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		$('[data-label="Save"]').show()
 	}
  }
  

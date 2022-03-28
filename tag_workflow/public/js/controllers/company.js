@@ -10,6 +10,7 @@ frappe.ui.form.on("Company", {
 		make_invoice(frm);
 		uploaded_file_format(frm);
 		download_document(frm);
+		exclusive_staff_company_fields(frm);
 		if(frappe.user.has_role("Tag Admin")){
 			frm.set_df_property("employees", "read_only", 1);
 		}
@@ -444,3 +445,27 @@ $(document).keypress(
       event.preventDefault();
     }
 });
+function exclusive_staff_company_fields(frm){
+	if(frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" && frm.doc.__islocal!=1 && frm.doc.organization_type=='Staffing') {
+		let company_field = ["organization_type", "country", "industry", "default_currency", "parent_staffing", "name", "jazzhr_api_key", "make_organization_inactive", "company_name", "fein", "title", "primary_language", "contact_name", "phone_no", "email", "set_primary_contact_as_account_payable_contact", "set_primary_contact_as_account_receivable_contact", "accounts_payable_contact_name", "accounts_payable_email", "accounts_payable_phone_number", "accounts_receivable_name", "accounts_receivable_rep_email", "accounts_receivable_phone_number", "cert_of_insurance", "w9", "safety_manual", "industry_type", "employees", "address", "city", "state", "zip", "drug_screen", "drug_screen_rate", "background_check", "background_check_rate", "upload_docs", "about_organization", "mvr", "mvr_rate", "shovel", "shovel_rate", "contract_addendums", "rating", "average_rating", "click_here", "hour_per_person_drug","background_check_flat_rate","mvr_per","shovel_per_person","suite_or_apartment_no","registration_details","job_site"];
+		for (let f in company_field) {
+			cur_frm.toggle_enable(company_field[f], 0);
+		}
+		$('[data-label="Save"]').hide()
+
+	}
+	else if(frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" && frm.doc.__islocal!=1 && frm.doc.organization_type=='Exclusive Hiring') {
+		$('[data-label="Save"]').show()
+	}
+}
+
+frappe.ui.form.on("Job Titles", {
+	job_titles:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn];
+			frappe.db.get_value("Designation", {name:child.job_titles }, ["description","price"], function(r) {
+				frappe.model.set_value(cdt,cdn,"description",r.description);
+				frappe.model.set_value(cdt,cdn,"wages",r.price);
+			})
+	},
+})
+	

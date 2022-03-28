@@ -4,6 +4,9 @@ frappe.listview_settings['Timesheet'] = {
 	right_column: "name",
 
 	refresh: function(listview){
+		if(frappe.route_history.length>1){
+			frappe.ui.toolbar.clear_cache();
+		}
 		$('#navbar-breadcrumbs > li > a').html('Timesheets');
 		$('.custom-actions.hidden-xs.hidden-md').hide();
 		$('[data-original-title="Menu"]').hide();
