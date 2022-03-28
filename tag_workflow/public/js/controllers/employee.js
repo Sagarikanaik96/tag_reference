@@ -82,6 +82,18 @@ frappe.ui.form.on("Employee", {
   			}, 300)
 		});
 
+		$(document).on('click', '[data-fieldname="resume"]', function(){
+			filerestriction()
+		});
+
+		$(document).on('click', '[data-fieldname="w4"]', function(){
+			filerestriction()
+		});
+
+		$(document).on('click', '[data-fieldname="miscellaneous"]', function(){
+			filerestriction()
+		});
+
 
 		
 	},
@@ -193,12 +205,12 @@ function required_field(frm){
 function uploaded_file_format(frm){
 	frm.get_field('resume').df.options = {
 	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+	    allowed_file_types: ['.pdf','.txt','.docx']
 		}
 	};
 	frm.get_field('w4').df.options = {
 	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+	    allowed_file_types: ['.pdf','.txt','.docx']
 		}
 	};
 	frm.get_field('e_verify').df.options = {
@@ -216,6 +228,25 @@ function uploaded_file_format(frm){
 	    restrictions: {
 	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
 		}
+	};
+
+	frappe.meta.get_docfield("Employee ID requirements","id_requirements", cur_frm.doc.name).options = {
+		    restrictions: {
+		    	allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+			}
+	};
+	
+	
+	frappe.meta.get_docfield("Employee Direct Deposit letter","direct_deposit_letter", cur_frm.doc.name).options = {
+		    restrictions: {
+		    	allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+			}
+	};
+
+	frappe.meta.get_docfield("Employee Drug Screen","drug_screen", cur_frm.doc.name).options = {
+		    restrictions: {
+		    	allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+			}
 	};
 }
 
@@ -289,3 +320,9 @@ function attachrefresh(){
 	},200)
 }
 
+
+function filerestriction() {
+	setTimeout(() => {
+				document.getElementsByClassName("modal-title")[0].innerHTML='Upload <h6>(Accepted File Type : pdf, txt or docx  file size 10mb) </h6>'
+  	}, 300)
+}
