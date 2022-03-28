@@ -422,6 +422,13 @@ frappe.ui.form.on("Job Order", {
 				},
 			});
 		}
+	},
+	claim:(frm)=>{
+		if ((cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+			frm.add_custom_button(__('Assign Employee'), function(){
+				assign_employees(frm);
+			});
+		}
 	}
 });
 
@@ -878,6 +885,7 @@ function view_buttons_hiring(frm){
 
 
 function view_buttons_staffing(frm) {
+	assign_employee_button(frm);
 	claim_assign_button(frm);
 	if ((frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)) {
 		let data3 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Messages </p></div>`;
@@ -1383,4 +1391,7 @@ function direct_order_staff_company(frm){
 		frm.set_df_property('staff_company','read_only',1)
 	}
  }
- 
+function assign_employee_button(frm){
+	if(frm.doc.claim && frm.doc.resumes_required)
+ 		frm.trigger('claim')
+ }
