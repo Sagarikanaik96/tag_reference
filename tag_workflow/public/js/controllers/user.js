@@ -281,7 +281,7 @@ function make_multicompany(frm){
 	let org_data = get_data(frm);
 	let table_fields = [
 		{
-			fieldname: "company", fieldtype: "Link", in_list_view: 1, label: "Organisation", options: "Company", reqd: 1,
+			fieldname: "company", fieldtype: "Link", in_list_view: 1, label: "Organization", options: "Company", reqd: 1,
 			get_query: function(){
 				return{
 					filters: [["Company", "name", "not in", cur_frm.doc.company], ["Company", "organization_type", "=", cur_frm.doc.organization_type]]
@@ -291,7 +291,7 @@ function make_multicompany(frm){
 	];
 
 	let dialog = new frappe.ui.Dialog({
-		title: 'Multi-Organisarion Setup',
+		title: 'Multi-Organization Setup',
 		fields: [
 			{label: "Current User", fieldname: "user", fieldtype: "Link", options: "User", default: cur_frm.doc.name, read_only: 1},
 			{fieldname:"company", fieldtype:"Table", label:"", cannot_add_rows:false, in_place_edit:true, reqd:1, data:org_data, fields:table_fields},
