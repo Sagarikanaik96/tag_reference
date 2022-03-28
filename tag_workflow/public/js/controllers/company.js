@@ -457,3 +457,14 @@ function exclusive_staff_company_fields(frm){
 		$('[data-label="Save"]').show()
 	}
 }
+
+frappe.ui.form.on("Job Titles", {
+	job_titles:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn];
+			frappe.db.get_value("Designation", {name:child.job_titles }, ["description","price"], function(r) {
+				frappe.model.set_value(cdt,cdn,"description",r.description);
+				frappe.model.set_value(cdt,cdn,"wages",r.price);
+			})
+	},
+})
+	
