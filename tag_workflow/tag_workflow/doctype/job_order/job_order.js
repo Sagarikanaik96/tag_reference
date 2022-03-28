@@ -787,7 +787,7 @@ function assign_employees(frm){
 			title: __('Job Order filled'),
 			indicator: 'blue'
 		});
-	}else if(frm.doc.__islocal != 1 && cur_frm.doc.owner != frappe.session.user && frm.doc.worker_filled < frm.doc.no_of_workers){
+	}else if(frm.doc.__islocal != 1 && frm.doc.worker_filled < frm.doc.no_of_workers){
 		if(cur_frm.is_dirty()){
 			frappe.msgprint({
 				message: __('Please save the form before creating Quotation'),
