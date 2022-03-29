@@ -132,6 +132,7 @@ frappe.ui.form.on("Job Order", {
 		staffing_company_remove(frm);
 		staff_company_read_only(frm)
 		job_order_cancel_button(frm);
+		staff_company_asterisks(frm);
 		$(document).on('click', '[data-fieldname="job_start_time"]', function(){
 			$('.datepicker').show()
 			time_validation(frm)
@@ -1397,3 +1398,28 @@ function assign_employee_button(frm){
 	if(frm.doc.claim && frm.doc.resumes_required)
  		frm.trigger('claim')
  }
+
+function staff_company_asterisks(frm){
+    if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		if(frm.doc.company_type=='Non Exclusive'){
+			remove_asterisks(frm)
+		}
+		else{
+			frappe.db.get_value('User',{'name':frm.doc.owner},['organization_type'],function(r){
+				if((r.organization_type !='Staffing' || r  == null) ||  frm.doc.owner!=frappe.session.user){
+					remove_asterisks(frm);
+				}    
+			})
+		}
+    }
+}
+function remove_asterisks(frm){
+	var myStringArray = ["company", "category", "select_job", "from_date", "rate", "to_date", "job_start_time", "estimated_hours_per_day", "job_site", "no_of_workers","e_signature_full_name","agree_to_contract"];
+				var arrayLength = myStringArray.length;
+				for (var i = 0; i < arrayLength; i++) {
+					frm.set_df_property(myStringArray[i], "reqd", 0);
+				}
+				frm.set_df_property('agree_to_contract','label','Agree To Contract')
+				frm.set_df_property('agree_to_contract','description','Agree To Contract Is Required To Save The Order')
+
+}
