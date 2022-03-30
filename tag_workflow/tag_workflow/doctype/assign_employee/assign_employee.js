@@ -166,22 +166,44 @@ attachrefresh()
 
 /*-----------hiring notification--------------*/
 function make_hiring_notification(frm){
-	frappe.call({
-		"method":"tag_workflow.tag_data.receive_hiring_notification",
-		"freeze": true,
-		"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
-		"args":{
-			"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
-			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
-			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
-			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category
-		},
-		callback:function(r){
-			setTimeout(function () {
-				window.location.href='/app/job-order/'+frm.doc.job_order
-			}, 3000);
-		}
-	});
+	frappe.db.get_value("Job Order", {name: cur_frm.doc.job_order}, ["owner"], function(r_own) {
+		frappe.db.get_value('User',{'name':r_own.owner},['organization_type'],function(r){
+			if(r.organization_type !='Staffing' || r  == null){
+				frappe.call({
+					"method":"tag_workflow.tag_data.receive_hiring_notification",
+					"freeze": true,
+					"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
+					"args":{
+						"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
+						"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
+						"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
+						"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category
+					},
+					callback:function(rm){
+						setTimeout(function () {
+							window.location.href='/app/job-order/'+frm.doc.job_order
+						}, 3000);
+					}
+				});
+			}
+			else{
+				frappe.call({
+					"method":"tag_workflow.tag_data.staff_own_job_order",
+					"freeze": true,
+					"freeze_message": "<p><b>preparing notification</b></p>",
+					"args":{
+						"job_order" : cur_frm.doc.job_order,"staffing_org":cur_frm.doc.company,
+						 "emp_detail" : cur_frm.doc.employee_details.length, "doc_name" : cur_frm.doc.name					},
+					callback:function(r_call){
+						setTimeout(function () {
+							window.location.href='/app/job-order/'+frm.doc.job_order
+						}, 2000);
+					}
+				});
+
+			}
+		})
+	})
 }
 
 /*---------employee data--------------*/

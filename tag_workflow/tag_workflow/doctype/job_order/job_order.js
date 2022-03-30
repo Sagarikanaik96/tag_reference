@@ -240,7 +240,7 @@ frappe.ui.form.on("Job Order", {
 			});
 		}
 
-		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		if(frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.resumes_required==0){
 			frappe.call({
 				method: "tag_workflow.tag_data.claim_order_insert",
 				args: {
@@ -1083,6 +1083,7 @@ function staff_assigned_emp(frm){
 				});
 				frm.set_df_property("assigned_employees", "options", data);
 				frm.toggle_display('related_actions_section', 1);
+				frm.remove_custom_button('Assign Employee');
 			}
 		}
 	});

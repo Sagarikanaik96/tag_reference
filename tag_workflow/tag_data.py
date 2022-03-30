@@ -839,3 +839,22 @@ def send_email1(user, company_type, sid, name, doctype, recepients, subject=None
 		"reference_doctype": doctype,
 		"reference_name": name,
 	}).insert(ignore_permissions=True)
+
+@frappe.whitelist()
+def staff_own_job_order(job_order, emp_detail, doc_name,staffing_org):
+    try:
+        staff_job_order=frappe.get_doc('Job Order',job_order)
+        dat=f'update `tabAssign Employee` set tag_status="Approved" where name="{doc_name}"'
+        frappe.db.sql(dat)
+        frappe.db.commit()
+        frappe.db.set_value(jobOrder, job_order, "worker_filled", (int(emp_detail)+int(staff_job_order.worker_filled)))
+        frappe.db.set_value(jobOrder, job_order, "claim", (str(staffing_org)))
+        claimed = staff_job_order.staff_org_claimed if staff_job_order.staff_org_claimed else ""
+        if(len(claimed)==0):
+            frappe.db.set_value(jobOrder, job_order, "staff_org_claimed", (str(claimed)+str(staffing_org)))
+        else:
+            frappe.db.set_value(jobOrder, job_order, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
+        return 'success'
+    except Exception as e:
+        frappe.log_error(e, "Staff Job Order")
+        frappe.throw(e)
