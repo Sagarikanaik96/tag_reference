@@ -10,6 +10,7 @@ frappe.ui.form.on("Employee", {
 			cancel_employee(frm);
 			tag_company(frm);
 		  }
+		employee_delete_button(frm)
 		$('.form-control[data-fieldname="ssn"]').css('-webkit-text-security', 'disc');
 
 		$('*[data-fieldname="block_from"]').find('.grid-add-row')[0].addEventListener("click",function(){
@@ -319,6 +320,41 @@ function attachrefresh(){
 		});
 	},200)
 }
+
+function employee_delete_button(frm){
+	if (frm.doc.__islocal!=1 && (frappe.user.has_role('Staffing Admin')|| frappe.user_has_role('Staffing User')||frappe.user.has_role('Tag Admin'))){
+		frm.add_custom_button(__("Delete"),function(){
+			delete_employee(frm);
+		});
+	}
+}
+function delete_employee(frm){
+	return new Promise(function(resolve, reject) {
+		frappe.confirm("All the data linked to this employee will be deleted?",
+			function() {
+				let resp = "frappe.validated = false";
+				resolve(resp);
+				deleting_data(frm);
+			},
+			function() {
+				reject();
+			}
+		);
+	});
+}
+function deleting_data(frm){
+	frappe.call({
+		method:"tag_workflow.utils.employee.delete_data",
+		args:{emp:frm.doc.name},
+		callback:function(r){
+			if(r.message =='Done'){
+				frappe.msgprint('Employee Deleted Successfully');
+				setTimeout(function () {
+					window.location.href='/app/employee'
+				}, 2000);
+			}
+		}
+	});
 
 
 function filerestriction() {
