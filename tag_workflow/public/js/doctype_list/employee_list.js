@@ -87,6 +87,7 @@ frappe.listview_settings['Employee'] = {
 };
 
 frappe.confirm = function(message, confirm_action, reject_action) {
+	const custom_message = "All the data linked to this employee will be deleted?";
 	var d = new frappe.ui.Dialog({
 		title: __("Confirm"),
 		primary_action_label: __("Confirm"),
@@ -98,7 +99,7 @@ frappe.confirm = function(message, confirm_action, reject_action) {
 		secondary_action: () => d.hide(),
 	});
 
-	d.$body.append(`<p class="frappe-confirm-message">${message}</p>`);
+	d.$body.append(`<p class="frappe-confirm-message">${custom_message}</p>`);
 	d.show();
 
 	// flag, used to bind "okay" on enter

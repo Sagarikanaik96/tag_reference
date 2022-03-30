@@ -355,8 +355,7 @@ function deleting_data(frm){
 			}
 		}
 	});
-
-
+}
 function filerestriction() {
 	setTimeout(() => {
 				document.getElementsByClassName("modal-title")[0].innerHTML='Upload <h6>(Accepted File Type : pdf, txt or docx  file size 10mb) </h6>'
