@@ -307,7 +307,7 @@ def staff_org_details(company_details=None):
     is_ok = "failed"
     if None in company_info[0]:
         return is_ok
-    if(len(comp_data.job_site)==0 or len(comp_data.industry_type)==0 or len(comp_data.employees)==0):
+    if(len(comp_data.industry_type)==0 or len(comp_data.employees)==0):
         return is_ok
     return "success"
 

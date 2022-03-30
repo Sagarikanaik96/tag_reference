@@ -32,6 +32,9 @@ frappe.ui.form.on("Company", {
 		$(document).on('input', '[data-fieldname="zip"]', function(event){
 			this.value = this.value?.replace(/\D/g, "");
 		});
+		if(frm.doc.organization_type=='Staffing'){
+			frm.set_df_property('job_title', 'hidden', 1);
+		}
 	},
 
 	setup: function (frm){
