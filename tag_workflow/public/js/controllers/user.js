@@ -156,11 +156,17 @@ function field_toggle(frm){
 	for(let field in perm_dis_fields){
 		cur_frm.toggle_display(perm_dis_fields[field], 0);
 	}
+	if(frappe.session.user!='Administrator'){
+		var gender_dob=['gender','birth_date']
+		for(let field in gender_dob){
+			cur_frm.toggle_display(gender_dob[field], 0);
+		}
+	}
 }
 
 function field_reqd(frm){
 	cur_frm.fields_dict["short_bio"].collapse();
-	var data = ["company", "gender", "birth_date", "date_of_joining"];
+	var data = ["company", "date_of_joining"];
 	for(let value in data){
 		cur_frm.toggle_reqd(data[value], 1);
 	}

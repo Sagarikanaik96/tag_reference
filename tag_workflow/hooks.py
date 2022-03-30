@@ -94,6 +94,9 @@ doc_events = {
        },
        "Contact":{
                 "on_update":'tag_workflow.utils.lead.update_contact'
+       },
+       "Lead":{
+               "after_insert":'tag_workflow.utils.lead.lead_contact'
        }
 }
 

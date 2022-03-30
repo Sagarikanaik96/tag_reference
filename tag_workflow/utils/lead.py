@@ -28,3 +28,15 @@ def update_contact(doc,method):
     except Exception as e:
         frappe.log_error(e,'Contact Update')
         frappe.throw(e)
+def lead_contact(doc,method):
+    try:
+        contact=frappe.db.sql(''' select name from `tabContact` where email_id="{}" '''.format(doc.email_id),as_list=1)
+        frappe.db.set_value('Contact',contact[0][0], 'phone_number', doc.phone_no)
+        frappe.db.set_value('Contact',contact[0][0],'lead',doc.name)
+        frappe.db.set_value('Contact',contact[0][0],'owner_company',doc.company_name)
+        frappe.db.set_value('Contact',contact[0][0],'company',doc.owner_company)
+
+        frappe.db.commit()
+    except Exception as e:
+        frappe.log_error(e,'Contact Update')
+        frappe.throw(e)

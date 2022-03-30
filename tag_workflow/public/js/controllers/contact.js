@@ -1,8 +1,6 @@
 frappe.ui.form.on("Contact", {
 	refresh: function(frm){
-		if(frappe.route_history.length>1){
-			frappe.ui.toolbar.clear_cache();
-		}
+		lead_fields(frm);
 		$('.form-footer').hide()
 		$('[data-original-title="Menu"]').hide()
 		$('[data-label="Invite%20as%20User"]').hide()
@@ -24,6 +22,7 @@ frappe.ui.form.on("Contact", {
 				};
 			};
 		}
+		frm.set_df_property('company','hidden',1);
 		frm.set_df_property('mobile_no','hidden',1);
 	},
 	before_save:function(frm){
@@ -99,4 +98,9 @@ function cancel_cantact(frm){
 	frm.add_custom_button(__('Cancel'), function(){
 		frappe.set_route("Form", "Contact");
 	});
+}
+function lead_fields(frm){
+	if(frm.doc.__islocal!=1){
+		frm.set_df_property('lead','read_only',1);
+	}
 }

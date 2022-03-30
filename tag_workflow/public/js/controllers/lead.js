@@ -239,9 +239,7 @@ function onboard_orgs(
         staffing: staffing,
         email: email,
         person_name: person_name,
-        gender:frm.doc.gender,
         phone:frm.doc.phone_no,
-        dob:frm.doc.dob,
         organization_type: organization_type,
       },
       callback: function (r) {
