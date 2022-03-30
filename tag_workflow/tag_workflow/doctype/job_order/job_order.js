@@ -411,9 +411,7 @@ frappe.ui.form.on("Job Order", {
 					assign_employees(frm);
 				}, __("View"));
 			}else{
-				frm.add_custom_button(__('Claim Order'), function() {
-					claim_job_order_staffing(frm);
-				});
+				claim_order_button(frm);
 			}
 		}else if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
 			if (frm.doc.resumes_required){
@@ -1363,7 +1361,7 @@ function staffing_company_remove(frm){
 }  
 
 function claim_order_button(frm) {
-	if (frm.doc.__islocal != 1){
+	if (frm.doc.__islocal != 1 && !frm.doc.claim && frm.doc.resumes_required==0){
 		frm.add_custom_button(__('Claim Order'), function(){
 			claim_job_order_staffing(frm);
 		});
