@@ -290,7 +290,7 @@ let _contract = `<p><b>Staffing/Vendor Contract</b></p>
 function make_contract(frm) {
   if (
     cur_frm.is_dirty() != 1 &&
-    frm.doc.status == "Contract Signing" &&
+    frm.doc.status == "Contract Negotiation" &&
     (roles.includes("Tag Admin") ||
       roles.includes("Tag User") ||
       roles.includes("Staffing Admin") ||
@@ -377,19 +377,15 @@ function cancel_lead(frm){
 		frappe.set_route("Form", "Lead");
 	});
 }
-
 function view_contract(frm){
   if(frm.doc.__islocal!=1){
-    cur_frm.page.set_secondary_action(__('View Contract'), function(){
-      frappe.db.get_value('Contract',{'staffing_company':cur_frm.doc.company,'hiring_company':cur_frm.doc.company_name,'lead':frm.doc.name},['name'],function(r){
-        if(r.name){
-          window.location.href='/app/contract/'+r.name;
+    frappe.db.get_value('Contract',{'staffing_company':cur_frm.doc.company,'hiring_company':cur_frm.doc.company_name,'lead':frm.doc.name},['name'],function(r){
+      if(r.name){
+          cur_frm.page.set_secondary_action(__('View Contract'), function(){
+                window.location.href='/app/contract/'+r.name;
+          })
         }
-        else{
-          frappe.show_alert({message:__('No contract found! Please prepare a contract first.'), indicator:'red'});
-        }
-      });
-    });
+    })
   }
 }
 
