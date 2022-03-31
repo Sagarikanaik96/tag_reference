@@ -3,6 +3,7 @@ frappe.ui.form.on("Contract", {
 		$('.form-footer').hide()
 		toggle_field(frm);
 		update_contract(frm);
+		hide_submit_button(frm);
 		update_hiring(frm);
 		update_user(frm);
 		request_sign(frm);
@@ -256,3 +257,12 @@ frappe.ui.form.on("Industry Types", {
 		frm.refresh_field('industry_type')
 	},
 })
+function hide_submit_button(frm){
+	if(frm.doc.__islocal!=1 && !frm.doc.signe_hiring){
+
+		$('[data-label = "Submit"]').css('display', 'none');
+		$('[data-label = "Save"]').css('display', 'none');
+
+
+	}
+}
