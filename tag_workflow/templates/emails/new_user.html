@@ -57,16 +57,6 @@
 				</div>
 				<div class="inner-div bg-white py-5">
 
-					{% if onboard %}
-					<h2> {{company}} invited you to </h2>
-					<h2> create a "New Order" on <a> <u> tempguru.co </u> </a> </h2>
-					<p class="text-secondary py-4">TAG makes it easy to find temps from multiple agencies in one place</p>
-					<a href="{{ link }}" rel="nofollow" class="btn btn-primary btn-lg px-5 py-3 mt-5 mb-5"><span style="color: white;">Accept Invitation</span></a>
-					<h5 class="mt-5">Your Login Email:</h5>
-					<h5><a>{{email}}</a></h5>
-					<p class="footer"><a> <u> Unsubscribe </u> </a>from any communication about this invite</p>
-
-					{% else %}
 					<h2> Invitation </h2>
 					<p class="inner-text mb-0 py-3">{{_("Hi")}} {{ first_name }}{% if last_name %} {{ last_name}}{% endif %}!</p>
 					<p class="inner-text "> You have been invited to join your organization at TAG! To complete your user account set up at TAG, please click on the below link and set up your password.</p>
@@ -74,7 +64,6 @@
 					<p class="footer">
 						© 2022 TAG | All rights reserved
 					</p>
-					{% endif %}
 				</div>
 			</div>
 		</div>
