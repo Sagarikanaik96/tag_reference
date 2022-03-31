@@ -4,6 +4,7 @@ frappe.ui.form.on("Company", {
 		cur_frm.clear_custom_buttons();
 		init_values(frm);
 		hide_connections(frm);
+		removing_registration_verbiage(frm);
 		hide_details(frm);
 		update_company_fields(frm);
 		jazzhr_data(frm);
@@ -546,3 +547,11 @@ frappe.ui.form.on("Industry Types", {
 		frm.refresh_field('industry_type')
 	},
 })
+
+function removing_registration_verbiage(frm){
+    if(frm.doc.organization_type=='Staffing' && frm.doc.__islocal!=1)
+    {
+        frm.set_df_property('registration_details','label','')
+        frm.set_df_property('registration_details','description','')
+    }
+}
