@@ -11,7 +11,7 @@ frappe.ui.form.on("Employee", {
 			tag_company(frm);
 		  }
 		employee_delete_button(frm)
-		$('.form-control[data-fieldname="ssn"]').css('-webkit-text-security', 'disc');
+		$('.form-control[data-fieldname="ssn"]')[0].setAttribute("type", "password");
 
 		$('*[data-fieldname="block_from"]').find('.grid-add-row')[0].addEventListener("click",function(){
 			const li = []
@@ -36,6 +36,8 @@ frappe.ui.form.on("Employee", {
 				}
 			});
 		});
+
+		hide_decrpt_ssn(frm)
 
 		window.onclick = function(event) {
 			attachrefresh()
@@ -361,3 +363,21 @@ function filerestriction() {
 				document.getElementsByClassName("modal-title")[0].innerHTML='Upload <h6>(Accepted File Type : pdf, txt or docx  file size 10mb) </h6>'
   	}, 300)
 }
+
+function hide_decrpt_ssn(frm) {
+	if (frm.doc.__islocal != 1 ) {
+		frappe.call({
+				method: "tag_workflow.tag_data.hide_decrypt_ssn",
+				args: {
+					'frm': frm.doc.name,
+				},
+				async:0,
+				callback: function(r) {
+					if (frm.doc.__islocal != 0) {
+						frm.set_df_property("decrypt_ssn","hidden",r.message)
+					refresh_field('decrypted_ssn')
+			  		}
+				}
+		})
+	}
+} 

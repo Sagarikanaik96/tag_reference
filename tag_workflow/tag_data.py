@@ -842,6 +842,14 @@ def send_email1(user, company_type, sid, name, doctype, recepients, subject=None
 		"reference_doctype": doctype,
 		"reference_name": name,
 	}).insert(ignore_permissions=True)
+    
+@frappe.whitelist(allow_guest=False)
+def hide_decrypt_ssn(frm=None):
+    try:
+        emp = frappe.get_doc("Employee",frm)
+        return (not(bool(emp.ssn)))
+    except Exception:
+        frappe.log_error("No Employee in Database", "Warning")
 
 @frappe.whitelist()
 def staff_own_job_order(job_order, emp_detail, doc_name,staffing_org):
@@ -861,7 +869,6 @@ def staff_own_job_order(job_order, emp_detail, doc_name,staffing_org):
     except Exception as e:
         frappe.log_error(e, "Staff Job Order")
         frappe.throw(e)
-
 
 @frappe.whitelist(allow_guest=True)
 def hiring_category_list(hiring_company):
@@ -901,7 +908,4 @@ def adding_child_jobtitle(data):
         'description':"test"
     }).insert()
     return True
-
-
-
 
