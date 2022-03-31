@@ -35,6 +35,8 @@ frappe.ui.form.on("Company", {
 		if(frm.doc.organization_type=='Staffing'){
 			frm.set_df_property('job_title', 'hidden', 1);
 		}
+
+		industry_typejob(frm);
 	},
 
 	setup: function (frm){
@@ -186,6 +188,24 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		};
+
+		cur_frm.fields_dict['industry_type_job_title'].grid.get_field('industry_type').get_query = function(doc, cdt, cdn) {
+			return {
+				query: "tag_workflow.tag_data.hiring_category",
+				filters: {
+					hiring_company: frm.doc.name,
+				},
+			}
+		};
+
+		cur_frm.fields_dict['industry_type_job_title'].grid.get_field('job_titles').get_query = function(doc, cdt, cdn) {
+			return {
+				query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_jobtitle_list_page",
+				filters: {
+					job_order_company: frm.doc.name,
+				},
+			};
+		}
 	},
 });
 
@@ -468,6 +488,61 @@ frappe.ui.form.on("Job Titles", {
 				frappe.model.set_value(cdt,cdn,"description",r.description);
 				frappe.model.set_value(cdt,cdn,"wages",r.price);
 			})
+
+		frappe.call({
+				method: "tag_workflow.tag_data.adding_child_jobtitle",
+				args: {
+					data: child
+				},
+			});
+		frm.refresh_field('job_titles')
 	},
 })
+
+
+function industry_typejob(frm){
+	$('*[data-fieldname="industry_type_job_title"]').find('.grid-add-row')[0].addEventListener("click",function(){
+		var len = cur_frm.doc.industry_type_job_title.length
+		frappe.call({
+			"method": "tag_workflow.tag_data.hiring_category_list",
+			"args": {"hiring_company": frm.doc.name},
+			"async": 0,
+		"callback": function(r){
+			if (r.message.length==1){
+				frm.doc.industry_type_job_title[len-1]['industry_type']= r.message[0]["industry_type"]
+				frm.refresh_field("industry_type_job_title");
+			}
+			}
+		});
+		frappe.call({
+			"method": "tag_workflow.tag_data.jobtitle_list",
+			"args": {"company": frm.doc.name},
+			"async": 0,
+		"callback": function(r){
+			if (r.message.length==1){
+				frm.doc.industry_type_job_title[0]['job_titles']= r.message[0]["job_titles"]
+				frm.refresh_field("industry_type_job_title");
+				}
+			}
+		});
+	});
 	
+}
+
+
+
+frappe.ui.form.on("Industry Types", {
+	industry_type:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn];
+		console.log("call")
+		console.log(child)
+
+			frappe.call({
+				method: "tag_workflow.tag_data.adding_child",
+				args: {
+					data: child
+				},
+			});
+		frm.refresh_field('industry_type')
+	},
+})

@@ -60,11 +60,22 @@ def is_send_mail_required(organizaton,doc_name,msg):
 @frappe.whitelist()
 def get_jobtitle_list(doctype, txt, searchfield, page_len, start, filters):
     company=filters.get('job_order_company')
+    category=filters.get('job_category')
+    if company is None:
+        return None
+    else:
+        sql = ''' select job_titles from `tabIndustry Types Job Titles` where parent = '{0}' and  industry_type='{1}' '''.format(company,category)
+        return frappe.db.sql(sql)
+
+@frappe.whitelist()
+def get_jobtitle_list_page(doctype, txt, searchfield, page_len, start, filters):
+    company=filters.get('job_order_company')
     if company is None:
         return None
     else:
         sql = ''' select job_titles from `tabJob Titles` where parent = '{0}' '''.format(company)
         return frappe.db.sql(sql)
+
 
 @frappe.whitelist()
 def update_joborder_rate_desc(company = None,job = None):

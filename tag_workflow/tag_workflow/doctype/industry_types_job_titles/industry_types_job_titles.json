@@ -1,0 +1,43 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-03-30 03:15:17.798864",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "industry_type",
+  "job_titles"
+ ],
+ "fields": [
+  {
+   "fieldname": "industry_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Industry Type",
+   "options": "Industry Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "job_titles",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Job Titles",
+   "options": "Designation",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-03-30 03:40:46.094882",
+ "modified_by": "Administrator",
+ "module": "Tag Workflow",
+ "name": "Industry Types Job Titles",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

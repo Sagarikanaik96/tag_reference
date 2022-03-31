@@ -91,6 +91,7 @@ frappe.ui.form.on("Job Order", {
 				query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_jobtitle_list",
 				filters: {
 					job_order_company: doc.company,
+					job_category: doc.category,
 				},
 			};
 		});
@@ -321,6 +322,8 @@ frappe.ui.form.on("Job Order", {
 
 	category: function(frm) {
 		frm.set_value('shovel', "");
+		frm.set_value('select_job', "");
+
 	},
 
 	validate: function(frm) {

@@ -385,17 +385,20 @@ def job_site_employee(doctype, txt, searchfield, page_len, start, filters):
     sql = ''' select name,employee_name,user_id,contact_number from `tabEmployee` where company='{0}' '''.format(company)
     return frappe.db.sql(sql)
 
+sql_cmd = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''
 
-@frappe.whitelist(allow_guest=False)
+@frappe.whitelist(allow_guest=True)
 def hiring_category(doctype,txt,searchfield,page_len,start,filters):
     company=filters.get('hiring_company')
-    sql = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''.format(company)
+    sql=sql_cmd.format(company)
+    print(sql)
     return frappe.db.sql(sql)
 
 
 @frappe.whitelist(allow_guest=False)
 def org_industy_type(company=None):
-    sql = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''.format(company)
+    sql=sql_cmd.format(company)
+    print(sql)
     return frappe.db.sql(sql)
 
 
@@ -754,8 +757,8 @@ def staffing_exclussive_org_name(job_order):
     
 @frappe.whitelist()
 def checkingdesignationandorganization(designation_name,company=None):
-    sql = "select designation,organization from `tabDesignation` where designation = '{0}' and organization = '{1}' ".format(designation_name,company)
-    if frappe.db.sql(sql):
+    sql = "select name,designation,organization from `tabDesignation` where designation = '{0}' and organization = '{1}' ".format(designation_name,company)
+    if len(frappe.db.sql(sql,as_dict=True)) >= 1:
         return False
     return True 
 @frappe.whitelist()
@@ -858,3 +861,47 @@ def staff_own_job_order(job_order, emp_detail, doc_name,staffing_org):
     except Exception as e:
         frappe.log_error(e, "Staff Job Order")
         frappe.throw(e)
+
+
+@frappe.whitelist(allow_guest=True)
+def hiring_category_list(hiring_company):
+    sql = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''.format(hiring_company)
+    return frappe.db.sql(sql,as_dict=True)
+
+@frappe.whitelist(allow_guest=True)
+def jobtitle_list(company):
+    sql = ''' select job_titles from `tabJob Titles` where parent = '{0}' '''.format(company)
+    return frappe.db.sql(sql,as_dict=True)
+
+import json
+
+@frappe.whitelist(allow_guest=True)
+def adding_child(data):
+    data = json.loads(data)
+    frappe.get_doc({
+        'doctype': data['doctype'],
+        'idx': data['idx'],
+        'industry_type': data['industry_type'],
+        'parent':data['parent'],
+        'parentfield':data['parentfield'],
+        'parenttype':data['parenttype']
+    }).insert()
+    return True
+
+@frappe.whitelist(allow_guest=True)
+def adding_child_jobtitle(data):
+    data = json.loads(data)
+    frappe.get_doc({
+        'doctype': data['doctype'],
+        'idx': data['idx'],
+        'job_titles': data['job_titles'],
+        'parent':data['parent'],
+        'parentfield':data['parentfield'],
+        'parenttype':data['parenttype'],
+        'description':"test"
+    }).insert()
+    return True
+
+
+
+

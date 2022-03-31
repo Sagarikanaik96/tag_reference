@@ -66,6 +66,28 @@ frappe.ui.form.on("Contract", {
 			}
 		}
 	},
+
+	onload:function(frm) {
+		console.log("call")
+		cur_frm.fields_dict['industry_type_job_title_'].grid.get_field('industry_type').get_query = function(doc, cdt, cdn) {
+			console.log("call Titles")
+			return {
+				query: "tag_workflow.tag_data.hiring_category",
+					filters: {
+						hiring_company: frm.doc.name,
+				},
+			}
+		};
+
+		cur_frm.fields_dict['industry_type_job_title_'].grid.get_field('job_titles').get_query = function(doc, cdt, cdn) {
+			return {
+				query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_jobtitle_list_page",
+				filters: {
+					job_order_company: frm.doc.name,
+				},
+			};
+		}
+	},
 });
 
 /*-----------field-----------*/
@@ -198,3 +220,39 @@ function cancel_cantract(frm){
 		frappe.set_route("Form", "Contract");
 	});
 }
+
+frappe.ui.form.on("Job Titles", {
+	job_titles:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn];
+			frappe.db.get_value("Designation", {name:child.job_titles }, ["description","price"], function(r) {
+				frappe.model.set_value(cdt,cdn,"description",r.description);
+				frappe.model.set_value(cdt,cdn,"wages",r.price);
+			})
+
+		frappe.call({
+				method: "tag_workflow.tag_data.adding_child_jobtitle",
+				args: {
+					data: child
+				},
+			});
+		console.log(child)
+		frm.refresh_field('job_titles')
+	},
+})
+
+
+frappe.ui.form.on("Industry Types", {
+	industry_type:function(frm,cdt,cdn){
+		var child=locals[cdt][cdn];
+		console.log("call")
+		console.log(child)
+
+			frappe.call({
+				method: "tag_workflow.tag_data.adding_child",
+				args: {
+					data: child
+				},
+			});
+		frm.refresh_field('industry_type')
+	},
+})
