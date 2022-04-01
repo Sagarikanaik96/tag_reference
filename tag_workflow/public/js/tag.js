@@ -235,10 +235,6 @@ tag_workflow.Map = `
 
 				window.initPlaces = function() {
 					let default_location = { lat: 38.889248, lng: -77.050636 };
-					if(cur_frm.doc.lat && cur_frm.doc.lng){
-						default_location = { lat: Number(cur_frm.doc.lat), lng: Number(cur_frm.doc.lng) };
-					}
-
 					map = new google.maps.Map(document.getElementById("map"), {
 						zoom: 8,
 						center: default_location,
@@ -247,7 +243,6 @@ tag_workflow.Map = `
 
 					marker = new google.maps.Marker({map,});
 					geocoder = new google.maps.Geocoder();
-					geocode({ location: default_location });
 
 					if(jQuery( "#autocomplete-address" ).length ){
 						autocomplete = new google.maps.places.Autocomplete(
