@@ -12,7 +12,10 @@ frappe.ui.form.on("Employee", {
 		  }
 		employee_delete_button(frm)
 		$('.form-control[data-fieldname="ssn"]')[0].setAttribute("type", "password");
-
+		employee_delete_button(frm);
+		tag_workflow.SetMap(frm);
+		hide_field(frm)
+		$('.form-control[data-fieldname="ssn"]').css('-webkit-text-security', 'disc');
 		$('*[data-fieldname="block_from"]').find('.grid-add-row')[0].addEventListener("click",function(){
 			const li = []
 			frm.doc.block_from.forEach(element=>{
@@ -96,9 +99,6 @@ frappe.ui.form.on("Employee", {
 		$(document).on('click', '[data-fieldname="miscellaneous"]', function(){
 			filerestriction()
 		});
-
-
-		
 	},
 	decrypt_ssn: function(frm) {
 		frappe.call({
@@ -178,10 +178,25 @@ frappe.ui.form.on("Employee", {
 				}
 			})
 		}
-		
-	}
-	
-		
+	},
+	search_on_maps: function(frm){
+		if(cur_frm.doc.search_on_maps == 1){
+			tag_workflow.UpdateField(frm, "map");
+			hide_field(frm)
+		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
+			cur_frm.set_df_property('map','hidden',1)
+		}
+	},
+
+	enter_manually: function(frm){
+		if(cur_frm.doc.enter_manually == 1){
+			tag_workflow.UpdateField(frm, "manually");
+			show_fields(frm)
+		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
+			cur_frm.set_df_property('map','hidden',1)
+			hide_field(frm)
+		}
+	},
 });
 
 function hasExtensions(filename, exts){
@@ -363,7 +378,6 @@ function filerestriction() {
 				document.getElementsByClassName("modal-title")[0].innerHTML='Upload <h6>(Accepted File Type : pdf, txt or docx  file size 10mb) </h6>'
   	}, 300)
 }
-
 function hide_decrpt_ssn(frm) {
 	if (frm.doc.__islocal != 1 ) {
 		frappe.call({
@@ -381,3 +395,15 @@ function hide_decrpt_ssn(frm) {
 		})
 	}
 } 
+function hide_field(frm){
+	frm.set_df_property('street_address','hidden',1);
+	frm.set_df_property('city','hidden',1);
+	frm.set_df_property('state','hidden',1);
+	frm.set_df_property('zip','hidden',1);
+}
+function show_fields(frm){
+	frm.set_df_property('street_address','hidden',0);
+	frm.set_df_property('city','hidden',0);
+	frm.set_df_property('state','hidden',0);
+	frm.set_df_property('zip','hidden',0);
+}

@@ -10,6 +10,8 @@ frappe.ui.form.on("Contact", {
 		if(frm.doc.__islocal==1){
 			cancel_cantact(frm);
 		}
+		tag_workflow.SetMap(frm);
+		hide_fields(frm);
 	},
 	onload: function (frm) {
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
@@ -67,12 +69,27 @@ frappe.ui.form.on("Contact", {
 						frappe.msgprint({message: __('Is Primary already exist'), indicator: 'red'})
 						frappe.validated = false;
 					}
-					
 				}
 			});
 		}
-		
-		
+	},
+	search_on_maps: function(frm){
+		if(cur_frm.doc.search_on_maps == 1){
+			tag_workflow.UpdateField(frm, "map");
+			hide_fields(frm)
+		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
+			cur_frm.set_df_property('map','hidden',1)
+		}
+	},
+
+	enter_manually: function(frm){
+		if(cur_frm.doc.enter_manually == 1){
+			tag_workflow.UpdateField(frm, "manually");
+			show_fields(frm);
+		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
+			hide_fields(frm);
+			cur_frm.set_df_property('map','hidden',1)
+		}
 	},
 });
 
@@ -103,4 +120,17 @@ function lead_fields(frm){
 	if(frm.doc.__islocal!=1){
 		frm.set_df_property('lead','read_only',1);
 	}
+}
+
+function hide_fields(frm){
+	frm.set_df_property('contact_address','hidden',1);
+	frm.set_df_property('city','hidden',1);
+	frm.set_df_property('state','hidden',1);
+	frm.set_df_property('zip','hidden',1);
+}
+function show_fields(frm){
+	frm.set_df_property('contact_address','hidden',0);
+	frm.set_df_property('city','hidden',0);
+	frm.set_df_property('state','hidden',0);
+	frm.set_df_property('zip','hidden',0);
 }

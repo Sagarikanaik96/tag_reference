@@ -36,8 +36,9 @@ frappe.ui.form.on("Company", {
 		if(frm.doc.organization_type=='Staffing'){
 			frm.set_df_property('job_title', 'hidden', 1);
 		}
-
 		industry_typejob(frm);
+		tag_workflow.SetMap(frm);
+		hide_fields(frm);
 	},
 
 	setup: function (frm){
@@ -206,6 +207,24 @@ frappe.ui.form.on("Company", {
 					job_order_company: frm.doc.name,
 				},
 			};
+		}
+	},
+	search_on_maps: function(frm){
+		if(cur_frm.doc.search_on_maps == 1){
+			tag_workflow.UpdateField(frm, "map");
+			hide_fields(frm)
+		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
+			cur_frm.set_df_property('map','hidden',1)
+		}
+	},
+
+	enter_manually: function(frm){
+		if(cur_frm.doc.enter_manually == 1){
+			tag_workflow.UpdateField(frm, "manually");
+			show_fields(frm);
+		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
+			hide_fields(frm);
+			cur_frm.set_df_property('map','hidden',1)
 		}
 	},
 });
@@ -547,11 +566,24 @@ frappe.ui.form.on("Industry Types", {
 		frm.refresh_field('industry_type')
 	},
 })
-
 function removing_registration_verbiage(frm){
     if(frm.doc.organization_type=='Staffing' && frm.doc.__islocal!=1)
     {
         frm.set_df_property('registration_details','label','')
         frm.set_df_property('registration_details','description','')
     }
+}
+function hide_fields(frm){
+	frm.set_df_property('address','hidden',1);
+	frm.set_df_property('suite_or_apartment_no','hidden',1);
+	frm.set_df_property('city','hidden',1);
+	frm.set_df_property('state','hidden',1);
+	frm.set_df_property('zip','hidden',1);
+}
+function show_fields(frm){
+	frm.set_df_property('address','hidden',0);
+	frm.set_df_property('suite_or_apartment_no','hidden',0);
+	frm.set_df_property('city','hidden',0);
+	frm.set_df_property('state','hidden',0);
+	frm.set_df_property('zip','hidden',0);
 }
