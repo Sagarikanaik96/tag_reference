@@ -379,10 +379,9 @@ def get_org_site(doctype, txt, searchfield, page_len, start, filters):
     return frappe.db.sql(sql)
 
 @frappe.whitelist(allow_guest=False)
-def job_site_employee(doctype, txt, searchfield, page_len, start, filters):
-
+def job_site_contact(doctype, txt, searchfield, page_len, start, filters):
     company=filters.get('job_order_company')
-    sql = ''' select name,employee_name,user_id,contact_number from `tabEmployee` where company='{0}' '''.format(company)
+    sql = ''' select name, full_name, email, mobile_no from `tabUser` where company='{0}' '''.format(company)
     return frappe.db.sql(sql)
 
 sql_cmd = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''
@@ -909,3 +908,19 @@ def adding_child_jobtitle(data):
     }).insert()
     return True
 
+@frappe.whitelist()
+def filter_jobsite(doctype, txt, searchfield, page_len, start, filters):
+    try:
+        company = filters.get('company')
+        site_list = filters.get('site_list')
+        value = ''
+        for index ,i in enumerate(site_list):
+            if index >= 1:
+                value = value+"'"+","+"'"+i
+            else:
+                value =value+i
+        sql = '''select name from `tabJob Site` where company = '{0}' and name NOT IN ('{1}')'''.format(company,value)
+        return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.msgprint(e)
+        return tuple()

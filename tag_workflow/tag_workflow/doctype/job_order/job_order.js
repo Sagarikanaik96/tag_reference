@@ -406,6 +406,7 @@ frappe.ui.form.on("Job Order", {
 				},
 			});
 		}
+		sessionStorage.setItem('joborder_company', frm.doc.company);
 	},
 	onload_post_render:function(frm){
 		if ((cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing"){

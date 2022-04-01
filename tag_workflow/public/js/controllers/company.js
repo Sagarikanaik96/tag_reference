@@ -182,6 +182,20 @@ frappe.ui.form.on("Company", {
 			$('.menu-btn-group').hide();
 		}
 
+		frm.fields_dict['job_site'].grid.get_field('job_site').get_query = function(doc) {
+			let li = [];
+			document.querySelectorAll('a[data-doctype="Job Site"]').forEach(element=>{
+				li.push(element.getAttribute("data-name"));
+			})
+			return {
+				query: "tag_workflow.tag_data.filter_jobsite",
+				filters: {
+					company: doc.name,
+					site_list : li
+				}
+			}
+		}
+
 		cur_frm.fields_dict["employees"].grid.get_field("employee").get_query = function (doc, cdt, cdn) {
 			return {
 				query: "tag_workflow.tag_data.filter_company_employee",
