@@ -400,10 +400,12 @@ function hide_field(frm){
 	frm.set_df_property('city','hidden',1);
 	frm.set_df_property('state','hidden',1);
 	frm.set_df_property('zip','hidden',1);
+	frm.set_df_property('suite_or_apartment_no','hidden',1);
 }
 function show_fields(frm){
 	frm.set_df_property('street_address','hidden',0);
 	frm.set_df_property('city','hidden',0);
 	frm.set_df_property('state','hidden',0);
 	frm.set_df_property('zip','hidden',0);
+	frm.set_df_property('suite_or_apartment_no','hidden',0);
 }

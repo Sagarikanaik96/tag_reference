@@ -6,6 +6,7 @@ frappe.ui.form.on('Job Site', {
 		$('.form-footer').hide()
 		$('[data-original-title="Menu"]').hide()
 		maps(frm);
+		hide_field(frm)
 		if(frm.doc.__islocal==1){
 			cancel_jobsite(frm);
 			frm.set_df_property('job_site_contact','hidden', 1);
@@ -46,12 +47,19 @@ frappe.ui.form.on('Job Site', {
 	search_on_maps: function(frm){
 		if(cur_frm.doc.search_on_maps == 1){
 			update_field(frm, "map");
+			hide_field(frm)
+		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.manually_enter==0){
+			cur_frm.set_df_property('lat','hidden',1);
+			cur_frm.set_df_property('lng','hidden',1);
 		}
 	},
 
 	manually_enter: function(frm){
 		if(cur_frm.doc.manually_enter == 1){
 			update_field(frm, "manually");
+			show_field(frm)
+		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.manually_enter==0){
+			hide_field(frm);
 		}
 	},
 	validate: function (frm) {
@@ -275,6 +283,13 @@ function cancel_jobsite(frm){
 	});
 }
 
+function hide_field(frm){
+	frm.set_df_property('suite_or_apartment_no','hidden',1);
+}
+function show_field(frm){
+	frm.set_df_property('suite_or_apartment_no','hidden',0);
+}
+
 function get_jobsite_contact(frm){
 	frappe.db.get_value("User", {"company": frm.doc.company}, ['name'], function(r){
 		if(Object.keys(r).length==0){
@@ -304,4 +319,5 @@ function get_users(frm){
 			filters: {'job_order_company': doc.company}
 		}
 	});
+
 }

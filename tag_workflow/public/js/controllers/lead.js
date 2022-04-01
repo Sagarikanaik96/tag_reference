@@ -457,6 +457,7 @@ function hide_fields(frm){
   frm.set_df_property('state_2','hidden',1);
   frm.set_df_property('zip','hidden',1);
   frm.set_df_property('country_2','hidden',1);
+  frm.set_df_property('suite_or_apartment_no','hidden',1);
 }
 function show_fields(frm){
   frm.set_df_property('address_lines_1','hidden',0);
@@ -465,4 +466,5 @@ function show_fields(frm){
   frm.set_df_property('state_2','hidden',0);
   frm.set_df_property('zip','hidden',0);
   frm.set_df_property('country_2','hidden',0);
+  frm.set_df_property('suite_or_apartment_no','hidden',0);
 }
