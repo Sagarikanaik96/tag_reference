@@ -1,10 +1,10 @@
 frappe.ui.form.on("Contract", {
 	refresh: function(frm){
 		$('.form-footer').hide()
-		toggle_field(frm);
+		toggle_field();
 		update_contract(frm);
 		hide_submit_button(frm);
-		update_hiring(frm);
+		update_hiring();
 		update_user(frm);
 		if(cur_frm.doc.__islocal != 1){
 			$('.form-message.blue').hide()
@@ -39,10 +39,12 @@ frappe.ui.form.on("Contract", {
 	  	document.addEventListener("keydown", function(){
 	  		companyhide(500)
 	    })
+
+		frm.set_df_property('contract_terms', 'read_only', 1);
 	},
 
 	setup: function(frm){
-		frm.set_query("staffing_company", function(doc){
+		frm.set_query("staffing_company", function(){
 			return {
 				filters: [
 					["Company", "organization_type", "in", ["TAG", "Staffing"]]
@@ -87,8 +89,8 @@ frappe.ui.form.on("Contract", {
 		}
 	},
 
-	onload:function(frm) {
-		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc, cdt, cdn) {
+	onload:function() {
+		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
 			const li = [];
 			document.querySelectorAll('a[data-doctype="Industry Type"]').forEach(element=>{
 				li.push(element.getAttribute("data-name"));
@@ -105,13 +107,13 @@ frappe.ui.form.on("Contract", {
 });
 
 /*-----------field-----------*/
-function toggle_field(frm){
+function toggle_field(){
 	cur_frm.toggle_display("party_name", 0);
 	let roles = frappe.user_roles;
 	if((roles.includes("Hiring Admin") || roles.includes("Hiring User")) && (!roles.includes("Tag Admin") || !roles.includes("Tag User"))){
 		$('[data-label = "Submit"]').hide();
 		$('.form-message').hide();
-		let fields = ['signe_company', 'contract_terms', 'signee_staffing', 'signe_company', 'requires_fulfilment', 'fulfilment_deadline', 'start_date', 'end_date', 'staffing_company', 'hiring_company', 'end_party_user', 'signe_company', '_industry_types', 'job_titles', 'lead'];
+		let fields = ['signe_company', 'contract_terms', 'signee_staffing', 'signe_company', 'requires_fulfilment', 'fulfilment_deadline', 'start_date', 'end_date', 'staffing_company', 'hiring_company', 'end_party_user', 'signe_company', 'lead', 'addendums'];
 		for(let f in fields){
 			cur_frm.toggle_enable(fields[f], 0);
 		}
@@ -149,13 +151,17 @@ let _contract = `<p><b>Staffing/Vendor Contract</b></p>
 <p>(21) Representatives. The Hiring Company and the Staffing Company each certifies that its authorized representative has read all of the terms and conditions of this Contract and understands and agrees to the same.</p>`
 
 function update_contract(frm){
-	if(cur_frm.doc.__islocal == 1){
+	if(frm.doc.addendums && frappe.boot.tag.tag_user_info.company_type == 'Exclusive Hiring' || frappe.boot.tag.tag_user_info.company_type == 'Hiring'){
+		frm.set_value('contract_terms', _contract+`<br><b>Addendums</b><br>`+frm.doc.addendums);
+		frm.set_df_property('addendums', 'hidden', 1);
+	}
+	else{
 		cur_frm.set_value("contract_terms", _contract);
 	}
 }
 
 /*-------update hiring-------*/
-function update_hiring(frm){
+function update_hiring(){
 	frappe.call({
 		method: "tag_workflow.utils.whitelisted.get_company_list",
 		args: {"company_type": "Hiring"},
@@ -229,6 +235,7 @@ function companyhide(time) {
 
 		
 	}, time)
+}
 
 frappe.ui.form.on("Job Titles", {
 	job_titles:function(frm,cdt,cdn){
@@ -278,7 +285,7 @@ function company_onboard_sign(frm)
 				method: "tag_workflow.controllers.crm_controller.onboard_org",
 				freeze: true,
 				freeze_message:
-				  "<p><b>Please wait while we are preparing Organization for onboarding</b></p>",
+				  "<p><b>Onboarding Company, Please wait.</b></p>",
 				args: {
 				  "lead":frm.doc.lead,
 				},
@@ -292,7 +299,7 @@ function company_onboard_sign(frm)
 							"staff_user": frm.doc.contract_prepared_by ? frm.doc.contract_prepared_by : frappe.session.user,
 							"staff_company": frm.doc.staffing_company, "hiring_user": frm.doc.end_party_user, "name": frm.doc.name
 						},
-						callback:function(rm){
+						callback:function(){
 							frappe.msgprint('Signature Request Sent Successfully')
 							window.location.reload()
 						}

@@ -82,7 +82,7 @@ def make_company(lead, exclusive, staffing, org_type):
         if(frappe.db.exists("Contract", {"lead": lead})):
             contract = frappe.get_doc("Contract", {"lead": lead})
 
-        company = frappe.get_doc(dict(doctype="Company", organization_type=org_type, parent_staffing=staffing, company_name=exclusive, default_currency="USD", country="United States", create_chart_of_accounts_based_on="Standard Template", chart_of_accounts= "Standard with Numbers"))
+        company = frappe.get_doc(dict(doctype="Company", organization_type=org_type, parent_staffing=staffing, company_name=exclusive, default_currency="USD", country="United States", create_chart_of_accounts_based_on="Standard Template", chart_of_accounts= "Standard with Numbers", abbr=exclusive))
         if(contract):
 
             for c in contract.job_titles:

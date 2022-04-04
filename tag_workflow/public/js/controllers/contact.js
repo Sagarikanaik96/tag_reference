@@ -5,8 +5,8 @@ frappe.ui.form.on("Contact", {
 		$('[data-original-title="Menu"]').hide()
 		$('[data-label="Invite%20as%20User"]').hide()
 		$('[data-label="Links"]').hide()
-		init_fields(frm);
-		make_field_mandatory(frm);
+		init_fields();
+		make_field_mandatory();
 		if(frm.doc.__islocal==1){
 			cancel_cantact(frm);
 		}
@@ -29,7 +29,7 @@ frappe.ui.form.on("Contact", {
 	},
 	onload: function (frm) {
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-			cur_frm.fields_dict["company"].get_query = function (doc) {
+			cur_frm.fields_dict["company"].get_query = function () {
 				return {
 					query: "tag_workflow.tag_data.contact_company",
 					filters: {
@@ -109,7 +109,7 @@ frappe.ui.form.on("Contact", {
 
 
 /*---------hide field------------*/
-function init_fields(frm){
+function init_fields(){
 	var contact_field = ["middle_name","last_name","email_id","user","sync_with_google_contacts","status","salutation","designation","gender","image", "sb_00","sb_01","contact_details","more_info","company_name"];
 
 	for(var field in contact_field){
@@ -118,7 +118,7 @@ function init_fields(frm){
 }
 
 /*--------mandatory field------------*/
-function make_field_mandatory(frm){
+function make_field_mandatory(){
 	let reqd = ["company", "phone_number", "email_address"];
 	for(let r in reqd){
 		cur_frm.toggle_reqd(reqd[r], 1);
@@ -142,6 +142,7 @@ function companyhide(time) {
 
 		
 	}, time)
+}
 
 function lead_fields(frm){
 	if(frm.doc.__islocal!=1){
