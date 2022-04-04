@@ -42,14 +42,13 @@ frappe.ui.form.on("Company", {
 	},
 
 	setup: function (frm){
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(1) > form:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'drug_flat');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(1) > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'drug_hour');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(1) > form:nth-child(1) > div:nth-child(7) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'bg_flat');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(1) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'bg_hour');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'mvr_flat');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'mvr_hour');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(7) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'shovel_flat');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'shovel_hour');
+		Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
+			if(_field.title!=="total_monthly_sales"){
+			_field.id = "id_mvr_hour"	
+		}		
+		})
+		
+		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
 		init_values(frm);
 
 		let ORG = "Organization Type";
