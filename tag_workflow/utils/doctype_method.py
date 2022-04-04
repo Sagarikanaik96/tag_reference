@@ -110,13 +110,12 @@ def append_number_if_name_exists(doctype, value, fieldname="abbr", separator="-"
 def validate_abbr(self):
     if not self.abbr:
         self.abbr = ''.join(c[0] for c in self.company_name.split()).upper()
-
+    self.name = self.name.replace('"', "'")
     self.abbr = self.abbr.strip()
 
     if not self.abbr.strip():
         frappe.throw(_(Abbr))
-
-    sql = "select abbr from tabCompany where name != '{0}' and abbr = '{1}' ".format(self.name, self.abbr)
+    sql = """ select abbr from tabCompany where name != "{0}" and abbr = '{1}' """.format(self.name, self.abbr)
     if frappe.db.sql(sql):
         self.abbr = append_number_if_name_exists("Company", self.abbr, fieldname="abbr", separator="-", filters=None)
 
@@ -287,3 +286,13 @@ def checkingdesignation_name(designation_name):
     if frappe.db.sql(sql):
         return append_number_if_name_exists("Designation", designation_name, fieldname="designation_name", separator="-", filters=None)
     return designation_name 
+
+@frappe.whitelist()
+def checkingitemcode(item_code):
+    item_code = item_code.strip()
+    if not item_code.strip():
+        frappe.throw(_(Abbr))
+    sql = "select job_title from `tabItem` where job_title = '{0}' ".format(item_code)
+    if frappe.db.sql(sql):
+        return append_number_if_name_exists("Item", item_code, fieldname="item_code", separator="-", filters=None)
+    return item_code 

@@ -869,6 +869,28 @@ def staff_own_job_order(job_order, emp_detail, doc_name,staffing_org):
         frappe.log_error(e, "Staff Job Order")
         frappe.throw(e)
 
+
+
+@frappe.whitelist()
+def update_jobtitle(company, job_title, description,price,name,job_title_id):
+    try:
+        if job_title_id:
+            sql = """ UPDATE `tabJob Titles` SET job_titles = "{0}" ,description='{1}',  wages='{2}' where name="{3}" """.format(job_title,description,price,job_title_id)
+            frappe.db.sql(sql)
+            frappe.db.commit()
+            return 'success'
+
+        job_ti = frappe.get_doc(dict(doctype="Job Titles",parenttype="Company",  parentfield="job_titles",parent= company,job_titles=job_title,description=description,wages=price))
+        job_ti.insert(ignore_permissions=True)
+
+        sql = """ UPDATE `tabItem` SET job_title_id = "{0}"  where name="{1}" """.format(job_ti.name,name)
+        frappe.db.sql(sql)
+        frappe.db.commit()
+        return 'success'
+    except Exception as e:
+        frappe.log_error(e, "update JOb Titles")
+        frappe.throw(e)
+
 @frappe.whitelist(allow_guest=True)
 def hiring_category_list(hiring_company):
     sql = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''.format(hiring_company)
