@@ -1,8 +1,8 @@
 frappe.ui.form.on("Employee", {
 	refresh: function(frm){
 		$('.form-footer').hide()
-		trigger_hide(frm);
-		required_field(frm);
+		trigger_hide();
+		required_field();
 		download_document(frm)
 		cur_frm.dashboard.hide()
 		uploaded_file_format(frm);
@@ -42,7 +42,7 @@ frappe.ui.form.on("Employee", {
 
 		hide_decrpt_ssn(frm)
 
-		window.onclick = function(event) {
+		window.onclick = function() {
 			attachrefresh()
 		}
 		
@@ -176,7 +176,7 @@ frappe.ui.form.on("Employee", {
 	},
 	
 	setup:function(frm){
-		frm.set_query("company", function(doc) {
+		frm.set_query("company", function() {
 			return {
 				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]],['Company',"make_organization_inactive","=",0] ]
 			}
@@ -219,7 +219,7 @@ function hasExtensions(filename, exts){
 }
 
 /*----------hide field----------*/
-function trigger_hide(frm){
+function trigger_hide(){
 	let hide_fields = ["date_of_birth", "date_of_joining", "gender", "emergency_contact_details","salutation","erpnext_user","joining_details","job-profile","approvers_section","attendance_and_leave_details","salary_information","health_insurance_section","contact_details","sb53","personal_details","educational_qualification","previous_work_experience","history_in_company","exit", "naming_series", "middle_name","employment_details","job_profile"];
 	for(var val in hide_fields){
 		cur_frm.toggle_display(hide_fields[val], 0);
@@ -227,7 +227,7 @@ function trigger_hide(frm){
 }
 
 /*------required---------*/
-function required_field(frm){
+function required_field(){
 	let reqd_fields = ["email", "last_name"];
 	for(var fld in reqd_fields){
 		cur_frm.toggle_reqd(reqd_fields[fld], 1);
@@ -300,20 +300,20 @@ function tag_company(frm){
 function download_document(frm){
 	if(frm.doc.resume && frm.doc.resume.length>1){
 		$('[data-fieldname="resume"]').on('click',(e)=> {
-			doc_download(e,frm)
+			doc_download(e)
 		});
 	}
 	if(frm.doc.w4 && frm.doc.w4.length>1){
 		$('[data-fieldname="w4"]').on('click',(e)=> {
-			doc_download(e,frm)
+			doc_download(e)
 		});
 	}
 	$('[data-fieldname="attachments"]').on('click',(e)=> {
-		doc_download(e,frm)
+		doc_download(e)
 	});
 }
 
-function doc_download(e,frm){
+function doc_download(e){
 	let file=e.target.innerText
 	let link=''
   	if(file.includes('.') && file.length>1){
@@ -365,6 +365,7 @@ function companyhide(time) {
 
 		
 	}, time)
+}
 
 function employee_delete_button(frm){
 	if (frm.doc.__islocal!=1 && (frappe.user.has_role('Staffing Admin')|| frappe.user_has_role('Staffing User')||frappe.user.has_role('Tag Admin'))){
