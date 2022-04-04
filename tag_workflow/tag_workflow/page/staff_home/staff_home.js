@@ -31,7 +31,7 @@ frappe.StaffHome = Class.extend({
 		var me = this;
 		var center = { lat: 38.889248, lng: -77.050636 };
 		me.map = new google.maps.Map(document.getElementById('map'), {
-			zoom: 8,
+			zoom: 6,
 			center: center
 		});
 	},
@@ -61,7 +61,7 @@ frappe.StaffHome = Class.extend({
 			let marker = new google.maps.Marker({
 				position: new google.maps.LatLng(locations[c][1], locations[c][2]),
 				map: me.map,
-				title: locations[c][0]
+				title: locations[c][0].concat(" ",locations[c][3])
 			});
 			console.log(marker);
 		}
@@ -69,8 +69,8 @@ frappe.StaffHome = Class.extend({
 	update_order: function(wrapper, page, order, org_type){
 		let html = ``;
 		for(let o in order){
-			let from = new frappe.datetime.datetime(order[0].from_date).moment._d.toDateString();
-			let to = new frappe.datetime.datetime(order[0].to_date).moment._d.toDateString();
+			let from = moment(order[0].from_date)._d.toDateString();
+			let to = moment(order[0].to_date)._d.toDateString();
 			html += `
 				<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;">
 					<div class="d-flex flex-wrap p-3 ">
@@ -79,6 +79,7 @@ frappe.StaffHome = Class.extend({
 							<h6>$${order[o].per_hour}</h6>
 						</div>
 						<div class="d-flex w-100 ">
+							<span class="badge badge-pill exclusive">${order[o].name}</span>
 							<span class="badge badge-pill exclusive">${org_type}</span>
 						</div>
 						<div class="d-flex flex-wrap w-100 pt-3 ">
