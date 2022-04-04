@@ -55,6 +55,18 @@ attachrefresh()
 		});
 
 		$('[data-fieldname="company"]').css('display','block');
+
+		$(document).on('click', '[data-fieldname="company"]', function(){
+			companyhide(5000)
+		});
+
+		$('[data-fieldname="company"]').mouseover(function(){
+			companyhide(500)
+		})
+
+	  	document.addEventListener("keydown", function(){
+	  		companyhide(500)
+	    })
 	},
 	e_signature_full_name:function(frm){
 		if(frm.doc.e_signature_full_name){
@@ -460,3 +472,14 @@ function company_check(frm,table,msg){
 		}
 	}
 }
+
+function companyhide(time) {
+	setTimeout(() => {
+		var txt  = $('input[data-fieldname="company"]')[1].getAttribute('aria-owns')
+		var txt2 = 'ul[id="'+txt+'"]'
+		var  arry = document.querySelectorAll(txt2)[0].children
+		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
+		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
+	}, time)
+}
+

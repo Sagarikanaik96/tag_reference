@@ -21,8 +21,23 @@ frappe.ui.form.on("Lead", {
     if(frm.doc.__islocal==1){
 			cancel_lead(frm);
 		}
+
+
+    $(document).on('click', '[data-fieldname="owner_company"]', function(){
+      companyhide(1250)
+    });
+
+    $('[data-fieldname="owner_company"]').mouseover(function(){
+      companyhide(1000)
+    })
+
+      document.addEventListener("keydown", function(){
+        companyhide(1000)
+      })
+
     tag_workflow.SetMap(frm);
     hide_fields(frm);
+
   },
   sign:function(frm){
     if(frm.doc.sign){
@@ -439,6 +454,21 @@ function email_box(frm){
       });
       pop_up.show();
 }
+
+
+function companyhide(time) {
+  setTimeout(() => {
+    var txt  = $('[data-fieldname="owner_company"]')[1].getAttribute('aria-owns')
+    var txt2 = 'ul[id="'+txt+'"]'
+    var  arry = document.querySelectorAll(txt2)[0].children
+    document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
+    document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
+
+    
+  }, time)
+}
+
+
 function hide_fields(frm){
   frm.set_df_property('address_lines_1','hidden',1);
   frm.set_df_property('address_lines_2','hidden',1);
@@ -458,3 +488,4 @@ function show_fields(frm){
   frm.set_df_property('country_2','hidden',0);
   frm.set_df_property('suite_or_apartment_no','hidden',0);
 }
+

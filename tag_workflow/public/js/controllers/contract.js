@@ -27,6 +27,18 @@ frappe.ui.form.on("Contract", {
 
 
 		}
+
+		$(document).on('click', '[data-fieldname="staffing_company"]', function(){
+			companyhide(2000)
+		});
+
+		$('[data-fieldname="staffing_company"]').mouseover(function(){
+			companyhide(500)
+		})
+
+	  	document.addEventListener("keydown", function(){
+	  		companyhide(500)
+	    })
 	},
 
 	setup: function(frm){
@@ -212,6 +224,18 @@ function cancel_cantract(frm){
 	});
 }
 
+
+function companyhide(time) {
+	setTimeout(() => {
+		var txt  = $('[data-fieldname="staffing_company"]')[1].getAttribute('aria-owns')
+		var txt2 = 'ul[id="'+txt+'"]'
+		var  arry = document.querySelectorAll(txt2)[0].children
+		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
+		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
+
+		
+	}, time)
+
 frappe.ui.form.on("Job Titles", {
 	job_titles:function(frm,cdt,cdn){
 		var child=locals[cdt][cdn];
@@ -254,6 +278,7 @@ function hide_submit_button(frm){
 
 
 	}
+
 }
 
 frappe.ui.form.on("Job Titles", {

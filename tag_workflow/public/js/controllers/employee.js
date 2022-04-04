@@ -88,6 +88,20 @@ frappe.ui.form.on("Employee", {
   			}, 300)
 		});
 
+
+		$(document).on('click', '[data-fieldname="company"]', function(){
+			companyhide(1250)
+		});
+
+		$('[data-fieldname="company"]').mouseover(function(){
+			companyhide(300)
+		})
+
+	  	document.addEventListener("keydown", function(){
+	  		companyhide(300)
+	    })
+
+
 		$(document).on('click', '[data-fieldname="resume"]', function(){
 			filerestriction()
 		});
@@ -95,6 +109,7 @@ frappe.ui.form.on("Employee", {
 		$(document).on('click', '[data-fieldname="w4"]', function(){
 			filerestriction()
 		});
+
 
 		$(document).on('click', '[data-fieldname="miscellaneous"]', function(){
 			filerestriction()
@@ -337,6 +352,19 @@ function attachrefresh(){
 		});
 	},200)
 }
+
+
+
+function companyhide(time) {
+	setTimeout(() => {
+		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns')
+		var txt2 = 'ul[id="'+txt+'"]'
+		var  arry = document.querySelectorAll(txt2)[0].children
+		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
+		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
+
+		
+	}, time)
 
 function employee_delete_button(frm){
 	if (frm.doc.__islocal!=1 && (frappe.user.has_role('Staffing Admin')|| frappe.user_has_role('Staffing User')||frappe.user.has_role('Tag Admin'))){

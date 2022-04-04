@@ -74,6 +74,18 @@ frappe.ui.form.on('Claim Order', {
 		}
 		update_claim_by_staffing(frm)
 
+		$(document).on('click', '[data-fieldname="staffing_organization"]', function(){
+			companyhide(1250)
+		});
+
+		$('[data-fieldname="staffing_organization"]').mouseover(function(){
+			companyhide(300)
+		})
+
+	  	document.addEventListener("keydown", function(){
+	  		companyhide(300)
+	    })
+
 
 	},
 	setup:function(frm){
@@ -234,3 +246,15 @@ function update_claim_by_staffing(frm){
 }) 
 	} 
 }         
+
+function companyhide(time) {
+	setTimeout(() => {
+		var txt  = $('[data-fieldname="staffing_organization"]')[1].getAttribute('aria-owns')
+		var txt2 = 'ul[id="'+txt+'"]'
+		var  arry = document.querySelectorAll(txt2)[0].children
+		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
+		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
+
+		
+	}, time)
+}

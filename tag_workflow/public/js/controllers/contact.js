@@ -10,8 +10,22 @@ frappe.ui.form.on("Contact", {
 		if(frm.doc.__islocal==1){
 			cancel_cantact(frm);
 		}
+
+		$(document).on('click', '[data-fieldname="company"]', function(){
+			companyhide(2000)
+		});
+
+		$('[data-fieldname="company"]').mouseover(function(){
+			companyhide(300)
+		})
+
+	  	document.addEventListener("keydown", function(){
+	  		companyhide(300)
+	    })
+
 		tag_workflow.SetMap(frm);
 		hide_fields(frm);
+
 	},
 	onload: function (frm) {
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
@@ -116,6 +130,19 @@ function cancel_cantact(frm){
 		frappe.set_route("Form", "Contact");
 	});
 }
+
+
+function companyhide(time) {
+	setTimeout(() => {
+		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns')
+		var txt2 = 'ul[id="'+txt+'"]'
+		var  arry = document.querySelectorAll(txt2)[0].children
+		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
+		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
+
+		
+	}, time)
+
 function lead_fields(frm){
 	if(frm.doc.__islocal!=1){
 		frm.set_df_property('lead','read_only',1);
@@ -135,4 +162,5 @@ function show_fields(frm){
 	frm.set_df_property('state','hidden',0);
 	frm.set_df_property('zip','hidden',0);
 	frm.set_df_property('suite_or_apartment_no','hidden',0);
+
 }

@@ -150,6 +150,20 @@ frappe.ui.form.on("Job Order", {
 		}
 		cancel_job_order_deatils(frm);
 		deny_job_order(frm);
+
+		$(document).on('click', '[data-fieldname="company"]', function(){
+			companyhide(3000)
+		});
+
+		$('[data-fieldname="company"]').mouseover(function(){
+			companyhide(500)
+		})
+
+	  	document.addEventListener("keydown", function(){
+	  		companyhide(500)
+	    })
+
+
 	},
 
 	select_job: function(frm) {
@@ -1391,6 +1405,20 @@ function direct_order_staff_company(frm){
 		frm.set_df_property('staff_company','read_only',1)
 	}
  }
+
+ 
+function companyhide(time) {
+	setTimeout(() => {
+		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns')
+		var txt2 = 'ul[id="'+txt+'"]'
+		var  arry = document.querySelectorAll(txt2)[0].children
+		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
+		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
+
+		
+	}, time)
+}
+
 function staff_company_asterisks(frm){
     if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 		if(frm.doc.company_type=='Non Exclusive'){
@@ -1415,3 +1443,4 @@ function remove_asterisks(frm){
 				frm.set_df_property('agree_to_contract','description','Agree To Contract Is Required To Save The Order')
 
 }
+
