@@ -17,17 +17,7 @@ frappe.ui.form.on("Lead", {
     reqd_fields(frm);
     hide_details(frm);
     make_contract(frm);
-    let roles = frappe.user_roles;
-    if (
-      cur_frm.is_dirty() != 1 &&
-      frm.doc.status == "Close" &&
-      (roles.includes("Tag Admin") ||
-        roles.includes("Tag User") ||
-        roles.includes("Staffing Admin") ||
-        roles.includes("Staffing User"))
-    ) {
-      onboard_org(frm);
-    }
+
     if(frm.doc.__islocal==1){
 			cancel_lead(frm);
 		}

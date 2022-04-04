@@ -38,8 +38,18 @@ def get_org_types(staffing, organization_type=None):
 
 
 @frappe.whitelist()
-def onboard_org(lead, exclusive, staffing, email, person_name, phone, organization_type=None):
+def onboard_org(lead):
     try:
+        lead_value=frappe.get_doc('Lead',lead)
+        exclusive=lead_value.company_name
+        staffing=lead_value.owner_company
+        email=lead_value.email_id
+        person_name=lead_value.lead_name
+        phone=lead_value.phone_no
+        organization_type=lead_value.organization_type
+        lead_value.status='Contract Signing'
+        lead_value.save(ignore_permissions=True)
+
         is_company, is_user = 1, 1
         company_doc, user = "", ""
 
@@ -47,7 +57,7 @@ def onboard_org(lead, exclusive, staffing, email, person_name, phone, organizati
 
         if frappe.db.exists("User", email):
             frappe.msgprint(_("User already exists with given email(<b>{0}</b>). Email must be unique for onboarding.").format(email))
-            return is_company, is_user, company_doc, user
+            return 'user not created'
 
         if not frappe.db.exists("Company", exclusive):
             exclusive = make_company(lead, exclusive, staffing, org_type)
