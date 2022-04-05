@@ -979,7 +979,7 @@ function hiring_buttons(frm) {
 			},
 			callback: function(r) {
 				if (r.message == 'success1') {
-					frm.add_custom_button(__('Approved Employees'), function() {
+					frm.add_custom_button(__('Assigned Employees'), function() {
 						approved_emp(frm)
 					}, __("View"));
 					$('[data-fieldname = assigned_employees_hiring]').attr('id', 'approved_inactive')
