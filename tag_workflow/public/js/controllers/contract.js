@@ -1,6 +1,9 @@
 frappe.ui.form.on("Contract", {
 	refresh: function(frm){
-		$('.form-footer').hide()
+		$('.form-footer').hide();
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+		$('.custom-actions.hidden-xs.hidden-md').show();
+
 		toggle_field();
 		update_contract(frm);
 		hide_submit_button(frm);

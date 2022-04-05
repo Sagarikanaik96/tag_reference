@@ -1,4 +1,11 @@
 frappe.ui.form.on("Designation", {
+	refresh: function(frm){
+		if(frm.doc.__islocal){
+			console.log(frm.doc.__islocal);
+		}
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+		$('.custom-actions.hidden-xs.hidden-md').show();
+	},
 	validate: function (frm) {
 		if (frm.doc.__islocal) {
 

@@ -6,6 +6,8 @@ frappe.ui.form.on("Timesheet", {
 		$('[data-label="Create%20Sales%20Invoice"]').hide();
 		$('[data-label="Cancel"]').hide();
 		$('.custom-actions.hidden-xs.hidden-md').show();
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+
 		$(document).on('click', '[data-fieldname="from_time"]', function(){
 			$('.datepicker').show()
 		});

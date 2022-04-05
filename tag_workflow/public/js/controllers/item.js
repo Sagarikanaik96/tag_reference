@@ -3,7 +3,9 @@ frappe.ui.form.on("Item", {
 		cur_frm.clear_custom_buttons();
 		setup_data(frm);
 		hide_fields(frm);
-		$('[data-fieldname="company"]').css("display",'block')
+		$('[data-fieldname="company"]').css("display",'block');
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+		$('.custom-actions.hidden-xs.hidden-md').show();
 	},
 
 	before_save: function(frm){

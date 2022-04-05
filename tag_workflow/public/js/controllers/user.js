@@ -1,6 +1,9 @@
 frappe.ui.form.on("User", {
 	refresh: function(frm){
-		$('.form-footer').hide()
+		$('.form-footer').hide();
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+		$('.custom-actions.hidden-xs.hidden-md').show();
+
 		cur_frm.clear_custom_buttons();
 		multi_company_setup(frm);
 		set_options(frm);

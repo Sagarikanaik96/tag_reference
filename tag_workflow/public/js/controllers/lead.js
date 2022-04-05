@@ -1,5 +1,7 @@
 frappe.ui.form.on("Lead", {
   refresh: function (frm) {
+    $('[class="btn btn-primary btn-sm primary-action"]').show();
+    $('.custom-actions.hidden-xs.hidden-md').show();
     setTimeout(()=>{
       $('[data-label="Create"]').addClass("hide");
     }, 3000);

@@ -1,6 +1,9 @@
 frappe.ui.form.on("Employee", {
 	refresh: function(frm){
-		$('.form-footer').hide()
+		$('.form-footer').hide();
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+		$('.custom-actions.hidden-xs.hidden-md').show();
+
 		trigger_hide();
 		required_field();
 		download_document(frm)
@@ -10,7 +13,7 @@ frappe.ui.form.on("Employee", {
 			cancel_employee(frm);
 			tag_company(frm);
 		  }
-		employee_delete_button(frm)
+		employee_delete_button(frm);
 		$('.form-control[data-fieldname="ssn"]')[0].setAttribute("type", "password");
 		employee_delete_button(frm);
 		tag_workflow.SetMap(frm);
