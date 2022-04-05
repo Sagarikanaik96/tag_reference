@@ -425,17 +425,13 @@ frappe.ui.form.on("Job Order", {
 	onload_post_render:function(frm){
 		if ((cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
 			if (frm.doc.resumes_required){
-				frm.add_custom_button(__('Assign Employee'), function(){
-					assign_employees(frm);
-				});
+				assign_emp_button(frm);
 			}else{
 				claim_order_button(frm);
 			}
 		}else if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
 			if (frm.doc.resumes_required){
-				cur_frm.add_custom_button(__('Assign Employee'), function(){
-					assign_employees(frm);
-				});
+				assign_emp_button(frm);
 			}else{
 				claim_order_button(frm);
 			}
