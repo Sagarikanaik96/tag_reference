@@ -128,6 +128,4 @@ override_whitelisted_methods = {
 
 override_doctype_class = {
     "Designation":"tag_workflow.dashboard_data.designation.DesignationOverride",
-    "Company":"tag_workflow.dashboard_data.company.Company",
-
 } 
