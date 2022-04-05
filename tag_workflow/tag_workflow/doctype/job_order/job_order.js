@@ -424,20 +424,18 @@ frappe.ui.form.on("Job Order", {
 	},
 	onload_post_render:function(frm){
 		if ((cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
-			console.log('ok')
 			if (frm.doc.resumes_required){
 				frm.add_custom_button(__('Assign Employee'), function(){
 					assign_employees(frm);
-				}, __("View"));
+				});
 			}else{
 				claim_order_button(frm);
 			}
 		}else if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
-			console.log('oks')
 			if (frm.doc.resumes_required){
 				cur_frm.add_custom_button(__('Assign Employee'), function(){
 					assign_employees(frm);
-				}, __("View"));
+				});
 			}else{
 				claim_order_button(frm);
 			}
@@ -1443,4 +1441,15 @@ function remove_asterisks(frm){
 				frm.set_df_property('agree_to_contract','description','Agree To Contract Is Required To Save The Order')
 
 }
-
+function assign_emp_button(frm){
+		check_assigned_emp(frm);
+}
+function check_assigned_emp(frm){
+	frappe.db.get_value("Assign Employee", {'job_order': frm.doc.name, 'company': frappe.boot.tag.tag_user_info.company}, ["name"], function(rr) {
+		if (rr.name === undefined) {
+			frm.add_custom_button(__('Assign Employee'), function(){
+				assign_employees(frm);
+			});
+		}
+	});
+}
