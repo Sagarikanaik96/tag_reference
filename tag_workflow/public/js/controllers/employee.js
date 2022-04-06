@@ -3,6 +3,7 @@ frappe.ui.form.on("Employee", {
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
+		update_employees_data(frm);
 
 		trigger_hide();
 		required_field();
@@ -441,3 +442,31 @@ function show_fields(frm){
 	frm.set_df_property('zip','hidden',0);
 	frm.set_df_property('suite_or_apartment_no','hidden',0);
 }
+function update_employees_data(frm){
+	let roles = frappe.user_roles;
+	if (roles.includes("Staffing Admin") || roles.includes("Staffing User") && frm.doc.employee_number) {
+		frm.add_custom_button("Update Employee Record", function () {
+			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : update_existing_employees(frm);
+		}).addClass("btn-primary");
+	}
+ }
+ function update_existing_employees(frm){
+	if(frm.doc.employee_number){
+		frappe.call({
+			method: "tag_workflow.utils.whitelisted.update_single_employee",
+			args: { employee_id: frm.doc.employee_number, name: frm.doc.name,comp_name:frm.doc.company,updated_once:frm.doc.updated_once },
+			freeze: true,
+			freeze_message: "<p><b>Updating Employees Record</b></p>",
+			callback: function (r) {
+				if(r){
+					frappe.msgprint('Employee Updated Successfully')
+					window.location.reload()
+				}
+			},
+		});
+	}else{
+		cur_frm.scroll_to_field("jazzhr_api_key");
+		frappe.msgprint("<b>JazzHR API Key</b> is required");
+	}
+ }
+ 

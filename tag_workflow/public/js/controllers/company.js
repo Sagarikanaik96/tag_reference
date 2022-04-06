@@ -11,6 +11,7 @@ frappe.ui.form.on("Company", {
 		hide_details(frm);
 		update_company_fields(frm);
 		jazzhr_data(frm);
+		update_employees_data(frm)
 		make_invoice(frm);
 		uploaded_file_format(frm);
 		download_document(frm);
@@ -323,37 +324,37 @@ function validate_phone_and_zip(frm){
 
 /*--------jazzhr------------*/
 function jazzhr_data(frm){
-	let a=0
 	let roles = frappe.user_roles;
 	if (roles.includes("Staffing Admin") || roles.includes("Staffing User")) {
 		frm.add_custom_button("Get data from JazzHR", function () {
-			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm,a);
+			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm);
 		}).addClass("btn-primary");
 	}
-}
-
-function make_jazzhr_request(frm,a){
-	if(frm.doc.jazzhr_api_key){
-		frappe.call({
-			method: "tag_workflow.utils.whitelisted.make_jazzhr_request",
-			args: { api_key: frm.doc.jazzhr_api_key, company: frm.doc.name,count:a },
-			freeze: true,
-			freeze_message: "<p><b>Fetching records from JazzHR...</b></p>",
-			callback: function (r) {
-				if (r && r.message!='success') {
-					a=a+1
-					make_jazzhr_request(frm,a)
-				}
-				else{
-					frappe.msgprint('Employees added successfully to TAG')
-				}
-			},
-		});
-	}else{
-		cur_frm.scroll_to_field("jazzhr_api_key");
-		frappe.msgprint("<b>JazzHR API Key</b> is required");
+ }
+  
+ function make_jazzhr_request(frm) {
+	if (frm.doc.jazzhr_api_key) {
+		setTimeout(function(){
+			frappe.msgprint('Employees are fetched in the background . You can continue using the application')
+			setTimeout(function(){window.location.reload()},3000)   },8000)
+	   
+	  frappe.call({
+		method: "tag_workflow.utils.whitelisted.make_jazzhr_request",
+		args: { api_key: frm.doc.jazzhr_api_key, company: frm.doc.name },
+		freeze: true,
+		freeze_message: "<p><b>Fetching records from JazzHR...</b></p>",
+		callback: function (r) {
+		  if (r && r.message) {
+			frappe.msgprint('Employee To added in short time');
+		  }
+		},
+	  });
+	} else {
+	  cur_frm.scroll_to_field("jazzhr_api_key");
+	  frappe.msgprint("<b>JazzHR API Key</b> is required");
 	}
-}
+  }
+ 
 
 /*---------make invoice------------*/
 function hide_tag_charges(frm){
@@ -560,3 +561,34 @@ function show_fields(frm){
 	frm.set_df_property('state','hidden',0);
 	frm.set_df_property('zip','hidden',0);
 }
+ 
+function update_employees_data(frm){
+	let roles = frappe.user_roles;
+	if (roles.includes("Staffing Admin") || roles.includes("Staffing User")) {
+		frm.add_custom_button("Update Employee Records", function () {
+			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : update_existing_employees(frm);
+		}).addClass("btn-primary");
+	}
+ }
+ function update_existing_employees(frm){
+ if(frm.doc.jazzhr_api_key){
+	setTimeout(function(){
+		frappe.msgprint('Employees Updation are done in the background . You can continue using the application')
+		setTimeout(function(){window.location.reload()},3000)   },5000)
+	frappe.call({
+		method: "tag_workflow.utils.whitelisted.update_employees_data_jazz_hr",
+		args: { api_key: frm.doc.jazzhr_api_key, company: frm.doc.name },
+		freeze: true,
+		freeze_message: "<p><b>Updating Employees Record</b></p>",
+		callback: function (r) {
+			if(r){
+				frappe.msgprint('Updation Done Successfully')
+			}
+		},
+	});
+ }else{
+	cur_frm.scroll_to_field("jazzhr_api_key");
+	frappe.msgprint("<b>JazzHR API Key</b> is required");
+ }
+ }
+ 
