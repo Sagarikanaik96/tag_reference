@@ -168,7 +168,8 @@ input:visited {
 }
 
 .editable-form .user-bg,
-#page-Company .user-bg {
+#page-Company .user-bg,
+.submitted-form .user-bg {
   background: url("/assets/tag_workflow/images/background.jpg");
   background-repeat: no-repeat;
   background-size: cover;
@@ -832,9 +833,7 @@ span.frappe-timestamp.mini {
   padding-left: 18px;
 }
 
-[data-page-route="Company"]
-#id_mvr_hour:after
- {
+[data-page-route="Company"] #id_mvr_hour:after {
   position: absolute;
   left: 3px;
   top: 56%;
@@ -880,6 +879,9 @@ input.input-with-feedback.form-control,
   .dt-row-filter
   .dt-filter.dt-input {
   padding: 0 7px;
+}
+.custom-actions {
+  display: flex !important;
 }
 
 @media (max-width: 1300px) {
