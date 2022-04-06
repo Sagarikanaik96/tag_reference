@@ -105,17 +105,17 @@
    "fieldname": "job_site_contact",
    "fieldtype": "Link",
    "label": "Job Site Contact",
-   "options": "Employee"
+   "options": "User"
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
+   "hidden": 0,
    "label": "Company",
    "options": "Company"
   },
   {
-   "fetch_from": "job_site_contact.user_id",
+   "fetch_from": "job_site_contact.email",
    "fetch_if_empty": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
@@ -123,7 +123,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "job_site_contact.employee_name",
+   "fetch_from": "job_site_contact.full_name",
    "fetch_if_empty": 1,
    "fieldname": "contact_name",
    "fieldtype": "Data",
@@ -131,7 +131,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "job_site_contact.contact_number",
+   "fetch_from": "job_site_contact.mobile_no",
    "fetch_if_empty": 1,
    "fieldname": "phone_number",
    "fieldtype": "Data",

@@ -5,7 +5,7 @@ frappe.ui.form.on('Job Site', {
 	refresh: function(frm){
 		$('.form-footer').hide()
 		$('[data-original-title="Menu"]').hide()
-		maps(frm);
+		maps();
 		hide_field(frm)
 		if(frm.doc.__islocal==1){
 			cancel_jobsite(frm);
@@ -19,7 +19,7 @@ frappe.ui.form.on('Job Site', {
 				frm.set_value('company',frappe.route_history[len_history-2][2]);
 				frm.set_df_property('company', 'read_only', 1);
 			}
-			if(frappe.boot.tag.tag_user_info.company_type == 'Hiring' || frappe.boot.tag.tag_user_info.company_type == 'Exclusive Hiring'){
+			else if(frappe.boot.tag.tag_user_info.company_type == 'Hiring' || frappe.boot.tag.tag_user_info.company_type == 'Exclusive Hiring'){
 				frm.set_value('company', frappe.boot.tag.tag_user_info.company);
 				frm.set_df_property('company', 'read_only', 1);
 			}else{
@@ -30,7 +30,6 @@ frappe.ui.form.on('Job Site', {
 					}
 				});
 			}
-			get_jobsite_contact(frm);
 		}
 	},
 
@@ -109,9 +108,13 @@ frappe.ui.form.on('Job Site', {
 	company: function(frm){
 		if(frm.doc.company){
 			frm.set_df_property('job_site_contact','hidden', 0);
+			get_jobsite_contact(frm);
 		}
 		else{
 			frm.set_value('job_site_contact', '');
+			frm.set_value('contact_email', '');
+			frm.set_value('contact_name', '');
+			frm.set_value('phone_number', '');
 			frm.set_df_property('job_site_contact','hidden', 1);
 		}
 	}
@@ -272,7 +275,7 @@ let html = `
 	</html>
 `
 
-function maps(frm){
+function maps(){
 	 setTimeout(cur_frm.set_df_property("html", "options", html), 500);
 }
 
@@ -294,12 +297,11 @@ function get_jobsite_contact(frm){
 	frappe.db.get_value("User", {"company": frm.doc.company}, ['name'], function(r){
 		if(Object.keys(r).length==0){
 			frappe.db.get_value('Company', {'name': frm.doc.company}, ['contact_name', 'phone_no', 'email'], function(res){
+				frm.set_df_property('job_site_contact', 'hidden', 1);
 				if(Object.values(res).every(x => x === null)){
 					let message = 'Either create a user or fill in primary contact details of <b>'+frm.doc.company+'</b> to create a job site.'
 					frappe.msgprint(__(message));
-					frm.set_df_property('job_site_contact', 'hidden', 1);
 				}else{
-					frm.set_value('job_site_contact', res.contact_name);
 					frm.set_value('contact_name', res.contact_name);
 					frm.set_value('contact_email', res.email);
 					frm.set_value('phone_number', res.phone_no);
