@@ -20,8 +20,10 @@
 		font-weight: 600;
 	}
 	.user_list .custom_collapse .card {
-	border-radius: 0;
-	border-top: 1px solid #e2e6e9;
+    border-radius: 0;
+    border-top: 1px solid #e2e6e9;
+    border-left: 0;
+    border-right: 0;
 	}
 	.user_list .custom_collapse .card:nth-last-child(1) {
 	border-bottom: none;
@@ -43,8 +45,9 @@
 	}
 	.user_list .custom_collapse .card .card-header h2 button span {
 		position: absolute;
-		top: 6px;
+		top: 3px;
 		color: #8D9CBC;
+		font-size: 18px;
 	}
 	.user_list .custom_collapse .card-body {
 		padding: 0px 1.25rem 1.25rem 1.6rem;
@@ -63,6 +66,14 @@
 		padding: 3px 8px;
 		border-radius: 11px;
 	}
+	[data-route="dynamic_page"] .page-body {
+		display: none;
+	}
+	
+[data-route="dynamic_page"] .card-header button.btn-link:not(.collapsed) .rotate-icon {
+    transform: rotate(180deg);
+	top: 15px;
+}
 	</style>
 	
 	

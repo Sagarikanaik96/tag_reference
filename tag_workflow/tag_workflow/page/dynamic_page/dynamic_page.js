@@ -51,9 +51,9 @@ frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 					
 
 					let template = `
-				  <div class="container form-section m-auto card-section visible-section" style="width: 75%; animation: animatop 1.7s cubic-bezier(0.425, 1.14, 0.47, 1.125) forwards;"> 
+				  <div class="container form-section m-auto card-section visible-section" style="max-width: 70%; width: 100%; padding:0; animation: animatop 1.7s cubic-bezier(0.425, 1.14, 0.47, 1.125) forwards;"> 
 					<div id="listdata">
-					 <div class="user_list border rounded pt-4 pb-2 my-5">
+					 <div class="user_list border rounded pb-2 pt-4 mb-5">
 						<div class="w-100 px-3 d-flex flex-wrap">
 							<div class="col-md-6 col-sm-12 company_list">
 								<h5 class="col-md-4 px-0" id="comp_name"> ${my_val.name} </h5> 
@@ -72,7 +72,7 @@ frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 								<div class="card-header" id="headingOne">
 								<h2 class="mb-0">
 									<button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-									About&nbsp;<span class="pl-1"> &#x2304; </span>
+									About&nbsp;<span class="px-1 rotate-icon"> &#x2304; </span>
 									</button>
 								</h2>
 								</div>
@@ -85,7 +85,7 @@ frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 								<div class="card-header" id="headingTwo">
 								<h2 class="mb-0">
 									<button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-									Industries&nbsp; <span class="pl-1"> &#x2304; </span>
+									Industries&nbsp; <span class="px-1 rotate-icon"> &#x2304; </span>
 									</button>
 								</h2>
 								</div>
@@ -101,7 +101,7 @@ frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 								<div class="card-header" id="headingThree">
 								<h2 class="mb-0">
 									<button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-									Team Members&nbsp; <span class="pl-1"> &#x2304; </span>
+									Team Members&nbsp; <span class="px-1 rotate-icon"> &#x2304; </span>
 									</button>
 								</h2>
 								</div>
@@ -115,7 +115,7 @@ frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 								<div class="card-header" id="headingFour">
 								<h2 class="mb-0">
 									<button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseThree">
-									Ratings & Reviews&nbsp; <span class="pl-1"> &#x2304; </span>
+									Ratings & Reviews&nbsp; <span class="px-1 rotate-icon "> &#x2304; </span>
 									</button>
 								</h2>
 								</div>
