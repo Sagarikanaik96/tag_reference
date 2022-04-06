@@ -8,7 +8,7 @@ def get_order_info(company):
         location = []
         order_detail = []
         com = frappe.db.get_value("Company", {"name": company}, "organization_type")
-        job_order = frappe.db.get_list("Assign Employee", {"company": company, "tag_status": "Approved","transaction_date":frappe.utils.today()}, "job_order")
+        job_order = frappe.db.sql("select name as job_order from `tabJob Order` where  name in (select job_order from `tabAssign Employee` where company='{1}' and tag_status='Approved' )and from_date='{0}'".format(frappe.utils.today(),company),as_dict=1)
 
         for j in job_order:
             sql = "select name, lat, lng from `tabJob Site` where name = (select job_site from `tabJob Order` where name = '{}') and lat != '' and lng != ''".format(j['job_order'])
