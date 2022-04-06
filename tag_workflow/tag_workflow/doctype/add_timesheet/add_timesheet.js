@@ -27,8 +27,8 @@ frappe.ui.form.on('Add Timesheet', {
 			update_timesheet(frm);
 		}).addClass("btn-primary");
 
-		if(frappe.route_options && frappe.route_options.job_order){
-			cur_frm.set_value("job_order", frappe.route_options.job_order);
+		if(frappe.route_options && frappe.route_options.job_order_detail){
+			cur_frm.set_value("job_order", frappe.route_options.job_order_detail);
 		}
 	},
 

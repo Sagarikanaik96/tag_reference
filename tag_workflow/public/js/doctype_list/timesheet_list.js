@@ -4,9 +4,6 @@ frappe.listview_settings['Timesheet'] = {
 	right_column: "name",
 
 	refresh: function(listview){
-		if(frappe.route_history.length>1){
-			frappe.ui.toolbar.clear_cache();
-		}
 		$('#navbar-breadcrumbs > li > a').html('Timesheets');
 		$('.custom-actions.hidden-xs.hidden-md').hide();
 		$('[data-original-title="Menu"]').hide();
@@ -35,7 +32,7 @@ frappe.listview_settings['Timesheet'] = {
 				update_job_order(listview);
 			}).addClass("btn-primary");
 		}
-	}
+	},
 }
 
 /*-------------------------------*/
@@ -43,7 +40,7 @@ function update_job_order(listview){
 	let flt = listview.filters || [];
 	for(let f in flt){
 		if(flt[f][1] == "job_order_detail"){
-			frappe.route_options = {"job_order": flt[f][3]};
+			frappe.route_options = {"job_order_detail": flt[f][3]};
 			frappe.set_route("form", "add-timesheet");
 		}
 	}
