@@ -38,8 +38,15 @@ frappe.listview_settings['Claim Order'] = {
 		staffing_organization(val, d, f) {
 			if (val) {
 				return `<span class=" ellipsis" title="" id="${val}-${f.name}">
-						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">${val}</a>
-					</span>`
+						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" onclick=dynamic_route('${val}') >${val}</a>
+					</span>
+                    <script>
+                    function dynamic_route(name){
+                        name= name.replace("%"," ")
+                        frappe.route_options = {"company": name};
+                        frappe.set_route("app", "dynamic_page");
+                    }
+                    </script>`
 
             }
         },

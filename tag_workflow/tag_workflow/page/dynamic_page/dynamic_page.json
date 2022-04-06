@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2022-03-30 07:04:49.796720",
+ "modified": "2022-04-05 07:20:12.452246",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "dynamic_page",
@@ -16,6 +16,12 @@
   },
   {
    "role": "Hiring User"
+  },
+  {
+   "role": "Staffing Admin"
+  },
+  {
+   "role": "Staffing User"
   }
  ],
  "script": null,

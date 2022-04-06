@@ -22,6 +22,14 @@ frappe.ui.form.on("Sales Invoice", {
 		setTimeout(function(){
 			$('[data-label="Get%20Items%20From"]').hide();
 		}, 250);
+
+		$('[data-fieldname="company"]').click(function(){
+			$('[data-doctype="Company"]').removeAttr("href");
+			if (frm.doc.company){
+				frappe.route_options = {"company": frm.doc.company};
+				frappe.set_route("app", "dynamic_page");
+			}
+		});
 	},
 	on_submit: function(frm) {
 		if(frm.doc.docstatus ==1){

@@ -119,7 +119,8 @@ frappe.listview_settings['Job Order'] = {
 		company(val, d, f) {
 			if (val) {
 				return `<span class=" ellipsis" title="" id="Hiring-${f.name}" >
-						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" onmouseover="showCasePopover('${val}','${f.name}')" onmouseout = "hideCasePopover('${val}','${f.name}')"  onclick = "myfunction()" data-company = "company" >${val}</a>
+						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" onmouseover="showCasePopover('${val}','${f.name}')" onmouseout = "hideCasePopover('${val}','${f.name}')"  onclick = "myfunction('${val}')" data-company = "company" >${val}</a>
+						
 					</span>
 					<script>
 						function showCasePopover(cname,dname){
@@ -134,9 +135,14 @@ frappe.listview_settings['Job Order'] = {
 							}).popover('show');
 						}
 
-						function myfunction(){
+						function myfunction(name){
 							$('.popover-body').hide();
 							$('.arrow').hide();
+							
+							name= name.replace("%"," ")
+							frappe.route_options = {"company": name};
+							frappe.set_route("app", "dynamic_page");
+					
 						}
 
 						function details_in_popup(link, div_id, cname){

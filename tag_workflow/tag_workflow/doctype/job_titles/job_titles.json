@@ -6,10 +6,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "industry_type",
   "job_titles",
-  "description",
   "wages",
-  "industry_type"
+  "description"
  ],
  "fields": [
   {
@@ -24,10 +24,9 @@
    "fieldname": "wages",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Wages"
+   "label": "Bill Rate"
   },
   {
-   "fetch_from": "job_titles.description",
    "fetch_if_empty": 1,
    "fieldname": "description",
    "fieldtype": "Small Text",
@@ -45,7 +44,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-04-04 00:48:12.118624",
+ "modified": "2022-04-05 08:26:44.684422",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Titles",
