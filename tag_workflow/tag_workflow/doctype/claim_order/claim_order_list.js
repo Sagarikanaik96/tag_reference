@@ -1,7 +1,9 @@
 frappe.listview_settings['Claim Order'] = {
 
     refresh(listview) {
-        listview.page.clear_primary_action()
+	$('[class="btn btn-primary btn-sm primary-action"]').show();
+	$('.custom-actions.hidden-xs.hidden-md').show();
+        listview.page.clear_primary_action();
         $("button.btn.btn-default.btn-sm.filter-button").hide();
         $("button.btn.btn-sm.filter-button.btn-primary-light").hide();
         if((listview.data[0]["approved_no_of_workers"])!=0 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){

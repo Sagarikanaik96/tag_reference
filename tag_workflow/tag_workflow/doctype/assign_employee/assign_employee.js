@@ -4,18 +4,21 @@
  
 frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+		$('.custom-actions.hidden-xs.hidden-md').show();
+		window.onclick = function(event) {
+			attachrefresh();
+		}
 
-window.onclick = function(event) {
-	attachrefresh()
-}
-$('*[data-fieldname="employee_details"]').find('.grid-add-row')[0].addEventListener("click",function(){
-		attachrefresh()
-});
+		$('*[data-fieldname="employee_details"]').find('.grid-add-row')[0].addEventListener("click",function(){
+			attachrefresh();
+		});
 
-$("[data-fieldname=employee_details]").mouseover(function(){
-attachrefresh()
-})
-attachrefresh()
+		$("[data-fieldname=employee_details]").mouseover(function(){
+			attachrefresh();
+		});
+
+		attachrefresh();
 		$('.form-footer').hide()
 		if(frm.doc.__islocal==1){
 			if (!frm.doc.hiring_organization){

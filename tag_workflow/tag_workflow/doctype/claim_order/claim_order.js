@@ -47,7 +47,9 @@ frappe.ui.form.on('Claim Order', {
 
 	},
 	refresh:function(frm){
-		$('.form-footer').hide()
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+                $('.custom-actions.hidden-xs.hidden-md').show();
+		$('.form-footer').hide();
 		if(frm.doc.__islocal==1){
 			if (!frm.doc.hiring_organization){
                 frappe.msgprint(__("Your claim is not completed. Please try again from Job Order!"));
