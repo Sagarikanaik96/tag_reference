@@ -872,21 +872,22 @@ def staff_own_job_order(job_order, emp_detail, doc_name,staffing_org):
 
 
 @frappe.whitelist()
-def update_jobtitle(company, job_title, description,price,name,job_title_id):
+def update_jobtitle(company, job_title, description,price,name,industry,job_title_id=None):
     try:
-        if job_title_id:
-            sql = """ UPDATE `tabJob Titles` SET job_titles = "{0}" ,description='{1}',  wages='{2}' where name="{3}" """.format(job_title,description,price,job_title_id)
+        if company:
+            if job_title_id:
+                sql = """ UPDATE `tabJob Titles` SET job_titles = "{0}" ,description='{1}',  wages='{2}' ,industry_type='{3}' where name="{4}" """.format(job_title,description,price,industry,job_title_id)
+                frappe.db.sql(sql)
+                frappe.db.commit()
+                return 'success'
+
+            job_ti = frappe.get_doc(dict(doctype="Job Titles",parenttype="Company",  parentfield="job_titles",parent= company,job_titles=job_title,description=description,wages=price,industry_type=industry))
+            job_ti.insert(ignore_permissions=True)
+
+            sql = """ UPDATE `tabItem` SET job_title_id = "{0}"  where name="{1}" """.format(job_ti.name,name)
             frappe.db.sql(sql)
             frappe.db.commit()
             return 'success'
-
-        job_ti = frappe.get_doc(dict(doctype="Job Titles",parenttype="Company",  parentfield="job_titles",parent= company,job_titles=job_title,description=description,wages=price))
-        job_ti.insert(ignore_permissions=True)
-
-        sql = """ UPDATE `tabItem` SET job_title_id = "{0}"  where name="{1}" """.format(job_ti.name,name)
-        frappe.db.sql(sql)
-        frappe.db.commit()
-        return 'success'
     except Exception as e:
         frappe.log_error(e, "update JOb Titles")
         frappe.throw(e)
@@ -915,8 +916,9 @@ def adding_child_jobtitle(data,company,price,industry_type,description):
             'item_group': "Services",
             'job_title':data['job_titles'],
             'descriptions':description,
-            "item_code":checking_itemcode(data['job_titles'])
-        }).insert()
+            "item_code":checking_itemcode(data['job_titles']),
+            "stock_uom":"Nos"
+        }).insert(ignore_permissions=True)
     
     return True
 
@@ -925,7 +927,7 @@ def checking_itemcode(item_code):
     item_code = item_code.strip()
     if not item_code.strip():
         frappe.throw(_(Abbr))
-    sql = "select job_title from `tabItem` where job_title = '{0}' ".format(item_code)
+    sql = "select item_code from `tabItem` where item_code = '{0}' ".format(item_code)
     if frappe.db.sql(sql):
         return append_number_if_name_exists("Item", item_code, fieldname="item_code", separator="-", filters=None)
     return item_code 

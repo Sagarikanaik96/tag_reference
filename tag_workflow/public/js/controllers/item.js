@@ -10,12 +10,9 @@ frappe.ui.form.on("Item", {
 
 	before_save: function(frm){
 		frappe.call({"method": "tag_workflow.controllers.master_controller.check_item_group"});
-		
-
 		frappe.call({
 			"method": "tag_workflow.utils.doctype_method.checkingitemcode",
 			"args": {"item_code": frm.doc.job_title,
-
 					},
 			"async": 0,
 			"callback": function(r){
@@ -23,6 +20,7 @@ frappe.ui.form.on("Item", {
 				cur_frm.refresh_field("item_code");
 			}
 		});
+
 
 	},
 	after_save: function(frm){
@@ -33,14 +31,14 @@ frappe.ui.form.on("Item", {
 					description:frm.doc.descriptions,
 					price:frm.doc.rate,
 					name:frm.doc.name,
+					industry:frm.doc.industry,
 					job_title_id: frm.doc.job_title_id,
+
 				},
 			});
 			setTimeout(function(){
    				location.reload();
    			}, 350);
-
-		
 	},
 
 });

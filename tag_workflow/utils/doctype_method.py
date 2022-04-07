@@ -292,7 +292,8 @@ def checkingitemcode(item_code):
     item_code = item_code.strip()
     if not item_code.strip():
         frappe.throw(_(Abbr))
-    sql = "select job_title from `tabItem` where job_title = '{0}' ".format(item_code)
+    sql = "select item_code from `tabItem` where item_code = '{0}' ".format(item_code)
+    print(frappe.db.sql(sql))
     if frappe.db.sql(sql):
         return append_number_if_name_exists("Item", item_code, fieldname="item_code", separator="-", filters=None)
     return item_code 
