@@ -30,6 +30,13 @@ frappe.ui.form.on("Sales Invoice", {
 				frappe.set_route("app", "dynamic_page");
 			}
 		});
+		let child_table=['item_code','qty','rate','amount','activity_type','description','from_time','to_time','billing_hours','billing_amount','sales_invoice_id','job_order_id','total_amount','payment_term','description','due_date','invoice_portion','payment_amount'];
+		for(let i in child_table){
+			$( "[data-fieldname="+child_table[i]+"]" ).on('mouseover',function(e) {
+				let file=e.target.innerText;
+				$(this).attr('title', file);
+			});
+		}
 	},
 	on_submit: function(frm) {
 		if(frm.doc.docstatus ==1){

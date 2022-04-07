@@ -44,6 +44,13 @@ frappe.ui.form.on("Contract", {
 	    })
 
 		frm.set_df_property('contract_terms', 'read_only', 1);
+		let child_table=['industry_type','job_titles','wages'];
+		for(let i in child_table){
+			$( "[data-fieldname="+child_table[i]+"]" ).on('mouseover',function(e) {
+				let file=e.target.innerText;
+				$(this).attr('title', file);
+			});
+		}
 	},
 
 	setup: function(frm){

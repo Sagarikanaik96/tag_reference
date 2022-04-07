@@ -26,6 +26,13 @@ frappe.ui.form.on("Staffing Email", {
 				});
 			});
 		}
+		let child_table=['email_recipients', 'email'];
+		for(let i in child_table){
+			$( "[data-fieldname="+child_table[i]+"]" ).on('mouseover',function(e) {
+				let file=e.target.innerText;
+				$(this).attr('title', file);
+			});
+		}
 	},
 	setup: function (frm) {
 		frm.disable_save();

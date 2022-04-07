@@ -42,6 +42,13 @@ frappe.ui.form.on("Company", {
 		}
 		tag_workflow.SetMap(frm);
 		hide_fields(frm);
+		let child_table=['industry_type','job_titles','wages','industry_type','job_titles','job_site','employee','employee_name','resume'];
+		for(let i in child_table){
+			$( "[data-fieldname="+child_table[i]+"]" ).on('mouseover',function(e) {
+				let file=e.target.innerText;
+				$(this).attr('title', file);
+			});
+		}
 	},
 
 	setup: function (frm){

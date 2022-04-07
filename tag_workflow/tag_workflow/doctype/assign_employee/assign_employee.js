@@ -70,6 +70,7 @@ frappe.ui.form.on('Assign Employee', {
 	  	document.addEventListener("keydown", function(){
 	  		companyhide(500)
 	    })
+		child_table_label();
 	},
 	e_signature_full_name:function(frm){
 		if(frm.doc.e_signature_full_name){
@@ -486,3 +487,12 @@ function companyhide(time) {
 	}, time)
 }
 
+function child_table_label(){
+	let child_table=['employee','employee_name','resume','employee_status','employee_replaced_by'];
+		for(let i in child_table){
+			$( "[data-fieldname="+child_table[i]+"]" ).on('mouseover',function(e) {
+				let file=e.target.innerText;
+				$(this).attr('title', file);
+			});
+		}
+}

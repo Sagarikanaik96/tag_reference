@@ -498,3 +498,46 @@ frappe.search.AwesomeBar.prototype.setup = function(element) {
     frappe.search.utils.setup_recent();
     frappe.tags.utils.fetch_tags();
 };
+
+frappe.ui.form.ControlInput.prototype.set_label = function(label) {
+	if(this.value && this.df.fieldtype!='Checkbox'){
+		if(this.df.fieldtype=='Currency'){
+			this.$wrapper.attr("title", "$"+this.value.toFixed(2));
+		}
+		else if(this.df.fieldtype=='Date'){
+			let date = this.value.split('-');
+			let date_label = date[1]+"-"+date[2]+"-"+date[0];
+			this.$wrapper.attr("title", __(date_label));
+		}
+		else if(this.df.fieldtype=='Time'){
+			let time = this.value.split(':');
+			let time_label = time[0]+":"+time[1];
+			this.$wrapper.attr("title", __(time_label));
+		}
+		else if(this.df.fieldtype=='Datetime'){
+			let datetime = this.value.split(' ');
+			let new_date = datetime[0].split('-');
+			let new_time = datetime[1].split(':');
+			let datetime_label = new_date[1]+"-"+new_date[2]+"-"+new_date[0]+" "+new_time[0]+":"+new_time[1];
+			this.$wrapper.attr("title", __(datetime_label));
+		}
+		else if(this.df.fieldtype=='Float'){
+			this.$wrapper.attr("title", this.value.toFixed(2));
+		}
+		else if(this.df.fieldtype=='Text Editor'){
+			let regex_pattern = /<[^>]+>/g;
+			this.$wrapper.attr('title',this.value.replace(regex_pattern, ''));
+		}
+		else{
+			this.$wrapper.attr('title',this.value);
+		}
+	}
+
+	if(label) this.df.label = label;
+	if(this.only_input || this.df.label==this._label)
+		return;
+	var icon = "";
+	this.label_span.innerHTML = (icon ? '<i class="'+icon+'"></i> ' : "") +
+		__(this.df.label)  || "&nbsp;";
+	this._label = this.df.label;
+};

@@ -118,6 +118,13 @@ frappe.ui.form.on("Employee", {
 		$(document).on('click', '[data-fieldname="miscellaneous"]', function(){
 			filerestriction()
 		});
+		let child_table = ['job_category','blocked_from', 'no_show_company', 'job_order', 'date', 'unsatisfied_organization_name', 'dnr', 'id_requirements', 'direct_deposit_letter', 'drug_screen', 'attachments']
+		for(let i in child_table){
+			$( "[data-fieldname="+child_table[i]+"]" ).on('mouseover',function(e) {
+				let file=e.target.innerText;
+				$(this).attr('title', file);
+			});
+		}
 	},
 	decrypt_ssn: function(frm) {
 		frappe.call({
