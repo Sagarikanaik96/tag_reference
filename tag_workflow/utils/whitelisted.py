@@ -420,13 +420,19 @@ def emp_data(api_key,data,company):
         y=data.get_value(1)
         data.set_value(1,'')
         for i in y:
-            name=i['id']
-            sql_data=f'SELECT EXISTS(SELECT * from `tabEmployee` WHERE employee_number="{name}");'
-            sql=frappe.db.sql(sql_data,as_list=1)
-            if(sql[0][0]==0):
-                url = url_link+name+apikey+api_key
-                response = requests.get(url)
-                emp_response_data(response,company)
+            try:
+                name=i['id']
+                sql_data=f'SELECT EXISTS(SELECT * from `tabEmployee` WHERE employee_number="{name}");'
+                sql=frappe.db.sql(sql_data,as_list=1)
+                if(sql[0][0]==0):
+                    url = url_link+name+apikey+api_key
+                    response = requests.get(url)
+                    emp_response_data(response,company)
+            except Exception as e:
+                frappe.msgprint('Some Error Occured while storing data . Please try again')
+                frappe.error_log(e, "JazzHR")
+                frappe.throw(e)
+            
  
     except Exception as e:
         frappe.msgprint('Some Error Occured . Please try again')
@@ -522,19 +528,24 @@ def emp_data_update(api_key,company):
         emp_list=frappe.db.sql('select employee_number from `tabEmployee` where employee_number is NOT NULL and company="{0}" and updated_once!=1'.format(company),as_list=1)
         if(len(emp_list)>0):
             for i in emp_list:
-                name=i[0]
-                sql_data=f'SELECT EXISTS(SELECT * from `tabEmployee` WHERE employee_number="{name}");'
-                sql=frappe.db.sql(sql_data,as_list=1)
-                if(sql[0][0]==1):
-                    employee_doc=f'select name from `tabEmployee` where employee_number="{name}"'
-                    emp_doc=frappe.db.sql(employee_doc,as_list=1)
-                    emp_number=emp_doc[0][0]
-                    url = url_link+name+apikey+api_key
-                    response = requests.get(url)
-                    if(response.status_code == 200 and len(response.json())>0):
-                        data=response.json()
-                        doc_emp=frappe.get_doc('Employee',emp_number)
-                        updates_value(emp_number,data,doc_emp)
+                try:
+                    name=i[0]
+                    sql_data=f'SELECT EXISTS(SELECT * from `tabEmployee` WHERE employee_number="{name}");'
+                    sql=frappe.db.sql(sql_data,as_list=1)
+                    if(sql[0][0]==1):
+                        employee_doc=f'select name from `tabEmployee` where employee_number="{name}"'
+                        emp_doc=frappe.db.sql(employee_doc,as_list=1)
+                        emp_number=emp_doc[0][0]
+                        url = url_link+name+apikey+api_key
+                        response = requests.get(url)
+                        if(response.status_code == 200 and len(response.json())>0):
+                            data=response.json()
+                            doc_emp=frappe.get_doc('Employee',emp_number)
+                            updates_value(emp_number,data,doc_emp)
+                except Exception as e:
+                    frappe.msgprint('Some Error Occured while data updating ')
+                    frappe.error_log(e, "JazzHR")
+                    frappe.throw(e)
     except Exception as e:
         frappe.msgprint('Some Error Occur')
 
@@ -583,7 +594,7 @@ def employee_basic_details(data,doc_emp):
     try:
         employee_gender=data['eeo_gender'] if doc_emp.employee_gender is None or data['eeo_gender']=='Decline to answer' and data['eeo_gender'] else doc_emp.employee_gender
         military_veteran=1 if data['eeoc_veteran']=='I AM A PROTECTED VETERAN' else doc_emp.military_veteran
-        street_address=data['address'] if doc_emp.street_address is None or len(doc_emp.street_address)==0  else doc_emp.street_address
+        street_address=data['address'] if doc_emp.street_address is None or len(doc_emp.street_address)==0 and data['address']!='' and data['address']!='Unavailable'  else doc_emp.street_address
         contact_number=data['phone'] if doc_emp.contact_number is None or len(doc_emp.contact_number)==0 else doc_emp.contact_number
         email=data['email'] if doc_emp.email is None or len(doc_emp.email)==0 else doc_emp.email
         state=doc_emp.state
