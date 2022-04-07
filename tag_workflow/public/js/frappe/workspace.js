@@ -479,9 +479,10 @@ class DesktopPage {
 					}
 
 					function dynamic_route(name){
-						name= name.replace("%"," ")
-						frappe.route_options = {"company": name};
-						frappe.set_route("app", "dynamic_page");
+						name1= name.replace(/%/g, ' ');
+						localStorage.setItem("company", name1);
+						window.location.href = "/app/dynamic_page";						
+
 					}
 				</script>
 			`);

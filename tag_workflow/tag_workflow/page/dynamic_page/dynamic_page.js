@@ -1,3 +1,5 @@
+let company=localStorage.getItem("company")
+
 frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
@@ -7,31 +9,32 @@ frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 	wrapper.face_recognition = new frappe.FaceRecognition(wrapper, page);
 }
 
-	frappe.FaceRecognition = Class.extend({
-		init: function(wrapper, page) {
-			var me = this;
-			this.parent = wrapper;
-			this.page = this.parent.page;
-			setTimeout(function() {
-				me.setup(wrapper, page);
-			}, 0);
-		},
-		setup: function(wrapper, page){
-			var me = this;
-			this.body = $('<div></div>').appendTo(this.page.main);
-			$(frappe.render_template('dynamic_page', "")).appendTo(this.body);
-			me.show_profile(wrapper,page);
-		},
-		show_profile: function(_wrapper, _page){
-						
-			frappe.call({
-				method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link1",
-				args: { "name": frappe.route_options.company || ''},
-				callback: function (r) {
-										
-					var my_val= r.message[0]
-					var txt = ""
-					var text = my_val.employees
+frappe.FaceRecognition = Class.extend({
+	init: function(wrapper, page) {
+		var me = this;
+		this.parent = wrapper;
+		this.page = this.parent.page;
+		setTimeout(function() {
+			me.setup(wrapper, page);
+		}, 100);
+	},
+
+	setup: function(wrapper, page){
+		page.set_secondary_action('', () => me.get_details(wrapper, page), 'refresh');
+		var me = this;
+		this.body = $('<div></div>').appendTo(this.page.main);
+		$(frappe.render_template('dynamic_page', "")).appendTo(this.body);
+		me.show_profile(wrapper,page);
+	},
+
+	show_profile: function(_wrapper, _page){
+		frappe.call({
+			method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link1",
+			args: { "name": company || ''},
+			callback: function (r) {
+				var my_val= r.message[0];
+					var txt = "";
+					var text = my_val.employees;
 					for (let i in text) {
 						txt += text[i].employee_name + "<br>";
 					}
@@ -127,24 +130,16 @@ frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 
 							</div>
 						</div>
-					</div>
-			
-					
-		
-					`;
-				
-					const para = document.createElement("p");
-					para.innerHTML = template;
-					document.body.appendChild(para);	
-									
-					
+					</div>`;
+										
+					$("#dynamic_company_data1").html(template);
 				}
 				})
 		},
 	})
 
 	function new_order(){
-		var b=document.getElementById('comp_name').innerHTML
+		var b= document.getElementById('comp_name').innerHTML
 		var doc = frappe.model.get_new_doc("Job Order");
 		doc.company = frappe.boot.tag.tag_user_info.company
 		doc.staff_company = b
