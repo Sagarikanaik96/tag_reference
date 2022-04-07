@@ -17,7 +17,7 @@ frappe.ui.form.on("Lead", {
 
     }
     reqd_fields(frm);
-    hide_details(frm);
+    hide_details();
     make_contract(frm);
 
     if(frm.doc.__islocal==1){
@@ -98,7 +98,7 @@ frappe.ui.form.on("Lead", {
     if (frm.doc.organization_type == "Exclusive Hiring") {
       tag_staff_company(frm);
     } else{
-      frm.set_query("owner_company", function (doc) {
+      frm.set_query("owner_company", function () {
         return {
           filters: [["Company", "organization_type", "in", ["TAG"]]],
         };
@@ -191,7 +191,7 @@ function reqd_fields(frm) {
   let roles = frappe.user_roles;
   if (roles.includes("Tag Admin") || roles.includes("Tag User")) {
     cur_frm.toggle_reqd("organization_type", 1);
-    frm.set_query("organization_type", function (doc) {
+    frm.set_query("organization_type", function () {
       return {
         filters: [["Organization Type", "name", "!=", "Tag"]],
       };
@@ -217,7 +217,7 @@ function onboard_org(frm) {
       if (r && r.company) {
         frm
           .add_custom_button("Onboard Organization", function () {
-            check_dirty(frm)
+            check_dirty()
               ? onboard_orgs(
                   lead,
                   exclusive,
@@ -235,7 +235,7 @@ function onboard_org(frm) {
   );
 }
 
-function check_dirty(frm) {
+function check_dirty() {
   let is_ok = true;
   if (cur_frm.is_dirty() == 1) {
     frappe.msgprint("Please save the form before Onboard Organization");
@@ -346,6 +346,7 @@ function run_contract(frm) {
       contract.hiring_company=cur_frm.doc.company_name;
       contract.end_party_user=cur_frm.doc.email_id;
       contract.party_name=cur_frm.doc.company;
+      contract.contact_name = frm.doc.lead_name;
       frappe.set_route("form", contract.doctype, contract.name);
     }
   })
@@ -353,7 +354,7 @@ function run_contract(frm) {
 }
 
 /*---------hide details----------*/
-function hide_details(frm) {
+function hide_details() {
   let fields = [
     "source",
     "designation",
@@ -371,7 +372,7 @@ function setting_owner_company(frm) {
   } 
   else if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
     frm.set_value("organization_type", "Exclusive Hiring")
-    frm.set_query("owner_company", function (doc) {
+    frm.set_query("owner_company", function () {
       return {
         filters: [["Company", "organization_type", "in", ["Staffing"]],["Company", "make_organization_inactive", "=", 0]],
       };
@@ -391,7 +392,7 @@ function setting_owner_company(frm) {
 }
 
 function tag_staff_company(frm) {
-  frm.set_query("owner_company", function (doc) {
+  frm.set_query("owner_company", function () {
     return {
       filters: [["Company", "organization_type", "in", ["Staffing", "TAG"]]],
     };
@@ -447,7 +448,7 @@ function email_box(frm){
               "name": frm.doc.name, "recepients":comment["Email"], "subject":comment["Subject"], "content":comment["Content"], "cc":comment["CC"],
               "bcc":comment["BCC"],"doctype": frm.doc.doctype
             },
-            callback: function(r) {
+            callback: function() {
               frm.reload_doc()
             }
           });

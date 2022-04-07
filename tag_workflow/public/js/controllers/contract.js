@@ -68,6 +68,9 @@ frappe.ui.form.on("Contract", {
 	before_save: function(frm){
 		update_lead(frm);
 		frm.set_df_property('signe_hiring','read_only', 1);
+		if(frm.doc.addendums=='<div class="ql-editor read-mode"><p><br></p></div>'){
+			frm.set_value('addendums', '')
+		}
 	},
 	signe_company:function(frm){
 		$('[data-label = "Save"]').css('display', 'block');
@@ -107,6 +110,12 @@ frappe.ui.form.on("Contract", {
 			};
 		}
 	},
+	addendums: function(){
+		$('[data-label = "Save"]').css('display', 'block');
+	},
+	before_cancel: function(frm){
+		frappe.db.set_value(frm.doc.doctype, frm.doc.name, 'document_status', 'Cancelled');
+	}
 });
 
 /*-----------field-----------*/
@@ -154,9 +163,9 @@ let _contract = `<p><b>Staffing/Vendor Contract</b></p>
 <p>(21) Representatives. The Hiring Company and the Staffing Company each certifies that its authorized representative has read all of the terms and conditions of this Contract and understands and agrees to the same.</p>`
 
 function update_contract(frm){
-	if(frm.doc.addendums && frappe.boot.tag.tag_user_info.company_type == 'Exclusive Hiring' || frappe.boot.tag.tag_user_info.company_type == 'Hiring'){
-		frm.set_value('contract_terms', _contract+`<br><b>Addendums</b><br>`+frm.doc.addendums);
+	if(frm.doc.end_party_user == frappe.session.user){
 		frm.set_df_property('addendums', 'hidden', 1);
+		frm.doc.addendums?frm.set_value('contract_terms', _contract+`<br><b>Addendums</b><br>`+frm.doc.addendums):frm.set_value("contract_terms", _contract);
 	}
 	else{
 		cur_frm.set_value("contract_terms", _contract);
