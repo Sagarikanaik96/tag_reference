@@ -13,6 +13,12 @@ sudo chown -R erpuser:erpuser /app/
 cd /app/frappe-bench/
 bench setup requirements
 bench build --app tag_workflow
+
+# Run node rollup command
+cd /app/frappe-bench/apps/tag_workflow
+node /app/frappe-bench/apps/frappe/rollup/build.js --app tag_workflow
+cd /app/frappe-bench/
+
 bench migrate
 sudo supervisorctl restart all
 echo $(jq '.maintenance_mode |= 0' /app/frappe-bench/sites/common_site_config.json) > /app/frappe-bench/sites/common_site_config.json
