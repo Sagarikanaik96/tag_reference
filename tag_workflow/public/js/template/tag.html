@@ -193,15 +193,21 @@
               </div>
               {% endif %}
 
-              <a href="/app/home">
-                <div class="tab-button custom-btn">
-                  <img
-                    src="/assets/tag_workflow/images/ico-home.svg"
-                    class="pr-3 pl-5"
-                    alt="home"
-                  />Home
-                </div>
-              </a>
+	      {% if frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" || frappe.boot.tag.tag_user_info.company_type == "TAG" || frappe.session.user == "Administrator" %}
+		      <a href="/app/home">
+			      <div class="tab-button custom-btn">
+				      <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-5" alt="home"/>Home
+			      </div>
+		      </a>
+	      {% endif %}
+
+	      {% if frappe.boot.tag.tag_user_info.company_type == "Staffing" %}
+	      	<a href="/app/staff-home">
+			<div class="tab-button custom-btn">
+				<img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-5" alt="home"/>Home
+			</div>
+		</a>
+	      {% endif %}
 
               <div class="tab-button custom-btn">
                 <ul class="nav order">

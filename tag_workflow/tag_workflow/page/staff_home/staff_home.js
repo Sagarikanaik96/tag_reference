@@ -30,8 +30,8 @@ frappe.StaffHome = Class.extend({
 	init_map: function(wrapper, page){
 		var me = this;
 		var center = { lat: 38.889248, lng: -77.050636 };
-		me.map = new google.maps.Map(document.getElementById('map'), {
-			zoom: 6,
+		me.map = new google.maps.Map(document.getElementById('maps'), {
+			zoom: 3.8,
 			center: center
 		});
 	},
@@ -117,18 +117,130 @@ frappe.StaffHome = Class.extend({
 					</div>
 					<div class="d-flex flex-wrap w-100 py-3 border-top">
 						<div class="col-lg-6">
-							<a href="#" class="text-secondary pt-2">See on map</a>
+							<!--<a href="#" class="text-secondary pt-2">See on map</a> -->
 						</div>
 						<div class="col-lg-6"> 
 							<div class="d-flex flex-wrap">
-								<button type="button" class="btn btn-light btn-sm ml-3 border order-btn text-center">Order Details</button>
-								<button type="button" class="btn btn-primary btn-sm ml-3 rounded  text-center">Quick Info</button>
+								<button type="button" class="btn btn-light btn-sm ml-3 border order-btn text-center" onclick=redirect_order('${order[o].name}')>Order Details</button>
+								<button type="button" class="btn btn-primary btn-sm ml-3 rounded  text-center" onclick=show_info_order('${order[o].name}')>Quick Info</button>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>`
 		}
-		$("#order").html(html);
+
+		let total_order = `<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;"><div class="d-flex flex-wrap p-3" style="width: 100%;"><div class="d-flex justify-content-between w-100 "><h6>Total Number Of Today's Order: </h6><h6>${order.length}</h6></div></div></div>`;
+
+		$("#order").html(total_order+html);
 	}
 });
+
+
+function show_info_order(order){
+	frappe.call({
+		"method": "tag_workflow.tag_workflow.page.staff_home.staff_home.order_info",
+		"args": {"name": order},
+		"callback": function(r){
+			let data = r.message || [];
+			let html = ``;
+			for(let d in data){
+				let from = moment(data[d].from_date)._d.toDateString();
+				let to = moment(data[d].to_date)._d.toDateString();
+
+				html += `
+					<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;">
+						<div class="col-lg-3">
+							<p><b>Title</b></p>
+							<p>${data[d].select_job}</p>
+						</div>
+						<div class="col-lg-3">
+							<p><b>Start/End Date</b></p>
+							<p>${from} ${to}</p>
+						</div>
+						<div class="col-lg-3">
+							<p><b>Estimated Daily Hours</b></p>
+							<p>${data[d].estimated_hours_per_day}</p>
+						</div>
+						<div class="col-lg-3">
+							<p><b>Start Time</b><p>
+							<p>${data[d].job_start_time}</p>
+						</div>
+					</div>
+
+					<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;">
+						<div class="col-lg-3">
+							<p><b>Job Site</b></p>
+							<p>${data[d].job_site}</p>
+						</div>
+						<div class="col-lg-3">
+							<p><b>Job Site Contact</b></p>
+							<p>${data[d].job_site_contact}</p>
+						</div>
+						<div class="col-lg-3">
+							<p><b>No. Of Workers</b></p>
+							<p>${data[d].no_of_workers}</p>
+						</div>
+						<div class="col-lg-3">
+							<p><b>Notes</b></p>
+							<p>${data[d].extra_notes}</p>
+						</div>
+					</div>
+
+					<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;">
+						<p style="width: 100%; padding: 4px 15px;"><b>Add Ons</b></p>
+						<div class="col-lg-3">
+							<p><b>Drug Screen</b></p>
+							<p>${data[d].drug_screen}</p>
+						</div>
+						<div class="col-lg-3">
+							<p><b>Background Check</b></p>
+							<p>${data[d].background_check}</p>
+						</div>
+						<div class="col-lg-3">
+							<p><b>MVR</b></p>
+							<p>${data[d].driving_record}</p>
+						</div>
+						<div class="col-lg-3">
+							<p><b>Shovel</b></p>
+							<p>${data[d].shovel}</p>
+						</div>
+					</div>
+
+					<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;">
+						<div class="col-lg-3" style="padding: 10px 10px;">
+							<div class="form-group frappe-control input-max-width" data-fieldtype="Check" data-fieldname="resume" title="Resume Required">
+								<div class="checkbox">
+									<label>
+										<span class="input-area"><input type="checkbox" autocomplete="off" class="input-with-feedback" data-fieldtype="Check" data-fieldname="resume" placeholder="" disabled check=${data[d].resumes_required}></span>
+										<span class="label-area">Resumes Required</span>
+									</label>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-lg-3" style="padding: 10px 10px;">
+							<div class="form-group frappe-control input-max-width" data-fieldtype="Check" data-fieldname="mask" title="Require Staff To Wear Face Mask">
+								<div class="checkbox">
+									<label>
+										<span class="input-area"><input type="checkbox" autocomplete="off" class="input-with-feedback" data-fieldtype="Check" data-fieldname="mask" placeholder="" disabled check=${data[d].require_staff_to_wear_face_mask}></span>
+										<span class="label-area">Require Staff To Wear Face Mask</span>
+									</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				`;
+			}
+
+			let fields = [{"fieldname": "html", "fieldtype": "HTML", "options": html}];
+			let dialog = new frappe.ui.Dialog({title: "Quick Info",	fields: fields});
+			dialog.show();
+			dialog.$wrapper.find('.modal-dialog').css('max-width', '980px');
+		}
+	});
+}
+
+function redirect_order(name){
+	frappe.set_route("app", "job-order", name);
+}

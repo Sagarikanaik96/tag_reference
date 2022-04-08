@@ -44,47 +44,45 @@ frappe.ui.form.on("Employee", {
 			});
 		});
 
-		hide_decrpt_ssn(frm)
+		hide_decrpt_ssn(frm);
 
 		window.onclick = function() {
-			attachrefresh()
+			attachrefresh();
 		}
 		
 		$('*[data-fieldname="miscellaneous"]').find('.grid-add-row')[0].addEventListener("click",function(){
-				attachrefresh()
+			attachrefresh();
 		});
 
 		$("[data-fieldname=miscellaneous]").mouseover(function(){
-			attachrefresh()
-		})
+			attachrefresh();
+		});
 
 		$('*[data-fieldname="background_check_or_drug_screen"]').find('.grid-add-row')[0].addEventListener("click",function(){
-				attachrefresh()
+			attachrefresh();
 		});
 
 		$("[data-fieldname=background_check_or_drug_screen]").mouseover(function(){
-			attachrefresh()
-		})
+			attachrefresh();
+		});
 
 		$('*[data-fieldname="id_requirements"]').find('.grid-add-row')[0].addEventListener("click",function(){
-				attachrefresh()
+			attachrefresh();
 		});
 
 		$("[data-fieldname=id_requirements]").mouseover(function(){
-			attachrefresh()
-		})
+			attachrefresh();
+		});
 
 		$('*[data-fieldname="direct_deposit_letter"]').find('.grid-add-row')[0].addEventListener("click",function(){
-				attachrefresh()
+			attachrefresh();
 		});
 
 		$("[data-fieldname=direct_deposit_letter]").mouseover(function(){
-			attachrefresh()
-		})
-		attachrefresh()
+			attachrefresh();
+		});
 
-		
-
+		attachrefresh();
 
 		$(document).on('click', '[data-fieldtype="Attach"]', function(){
 			setTimeout(() => {
@@ -94,16 +92,16 @@ frappe.ui.form.on("Employee", {
 
 
 		$(document).on('click', '[data-fieldname="company"]', function(){
-			companyhide(1250)
+			companyhide(1250);
 		});
 
 		$('[data-fieldname="company"]').mouseover(function(){
-			companyhide(300)
-		})
+			companyhide(300);
+		});
 
 	  	document.addEventListener("keydown", function(){
-	  		companyhide(300)
-	    })
+			companyhide(300);
+		});
 
 
 		$(document).on('click', '[data-fieldname="resume"]', function(){
@@ -118,6 +116,7 @@ frappe.ui.form.on("Employee", {
 		$(document).on('click', '[data-fieldname="miscellaneous"]', function(){
 			filerestriction()
 		});
+
 		let child_table = ['job_category','blocked_from', 'no_show_company', 'job_order', 'date', 'unsatisfied_organization_name', 'dnr', 'id_requirements', 'direct_deposit_letter', 'drug_screen', 'attachments']
 		for(let i in child_table){
 			$( "[data-fieldname="+child_table[i]+"]" ).on('mouseover',function(e) {
@@ -133,67 +132,69 @@ frappe.ui.form.on("Employee", {
 				'frm': frm.doc.name,
 			},
 			callback: function(r) {
-				frm.set_value('decrypted_ssn', r.message)
-				refresh_field('decrypted_ssn')
+				frm.set_value('decrypted_ssn', r.message);
+				refresh_field('decrypted_ssn');
 			}
 		})
 	},
+
 	resume:function(frm){
 		if (frm.doc.resume && !hasExtensions(frm.doc.resume, [".pdf", ".txt", ".docx",'.png','jpg'])){
 			var array = frm.doc.resume.split("/")
 			var file_name = array[array.length -1]
 			frappe.call({
 				method:"tag_workflow.tag_data.delete_file_data",
-				args:{
-					file_name:file_name
-				}
-			})
-			frm.set_value('resume', '')
+				args:{file_name:file_name}
+			});
+
+			frm.set_value('resume', '');
 			refresh_field('resume');
 			frappe.msgprint("Upload Wrong File type in Resume");
 		}
 	},
-	validate:function(frm){
 
+	validate:function(frm){
 		if (frm.doc.zip &&frm.doc.zip.toString().length != 5){
-            frappe.msgprint(__("Minimum and Maximum Characters allowed for Zip are 5"));
-            frappe.validated = false;
-        }
+			frappe.msgprint(__("Minimum and Maximum Characters allowed for Zip are 5"));
+			frappe.validated = false;
+		}
 		
 		if (frm.doc.ssn && frm.doc.ssn.toString().length != 9) {
 			frappe.msgprint(__("Minimum and Maximum Characters allowed for SSN are 9")); 
-		frappe.validated = false;
-			
+			frappe.validated = false;
 		}
-		if (frm.doc.ssn && isNaN(frm.doc.ssn))
-		{
+
+		if (frm.doc.ssn && isNaN(frm.doc.ssn)){
 			frappe.msgprint(__("Only numbers are allowed in SSN."));
 			frappe.validated = false;
 		}
+
 		let email = frm.doc.email
-		if (email.length > 120 || !frappe.utils.validate_type(email, "email")){
-			frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
+		if(email.length > 120 || !frappe.utils.validate_type(email, "email")){
+			frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'});
 			frappe.validated = false
 		}
-		if ((frm.doc.employee_job_category) && (frm.doc.employee_job_category.length)>0){
-			frm.set_value("job_category",frm.doc.employee_job_category[0]["job_category"])
+		
+		if((frm.doc.employee_job_category) && (frm.doc.employee_job_category.length)>0){
+			frm.set_value("job_category",frm.doc.employee_job_category[0]["job_category"]);
 		}else{
-			frm.set_value("job_category",null)
+			frm.set_value("job_category",null);
 		} 
 	},
+
 	before_save:function (frm) {
-		
-		frm.doc.decrypt_ssn = 0
+		frm.doc.decrypt_ssn = 0;
 	},
 	
 	setup:function(frm){
 		frm.set_query("company", function() {
 			return {
-				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]],['Company',"make_organization_inactive","=",0] ]
+				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]],['Company',"make_organization_inactive","=",0]]
 			}
 		});
 
 	},
+
 	after_save:function(frm){
 		if(!frm.doc.user_id){
 			frappe.call({
@@ -202,31 +203,32 @@ frappe.ui.form.on("Employee", {
 					'doc_name':frm.doc.name,
 					'employee_company':frm.doc.company
 				}
-			})
+			});
 		}
 	},
+
 	search_on_maps: function(frm){
 		if(cur_frm.doc.search_on_maps == 1){
 			tag_workflow.UpdateField(frm, "map");
-			hide_field(frm)
+			hide_field(frm);
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
-			cur_frm.set_df_property('map','hidden',1)
+			cur_frm.set_df_property('map','hidden',1);
 		}
 	},
 
 	enter_manually: function(frm){
 		if(cur_frm.doc.enter_manually == 1){
 			tag_workflow.UpdateField(frm, "manually");
-			show_fields(frm)
+			show_fields(frm);
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
-			cur_frm.set_df_property('map','hidden',1)
-			hide_field(frm)
+			cur_frm.set_df_property('map','hidden',1);
+			hide_field(frm);
 		}
 	},
 });
 
 function hasExtensions(filename, exts){
-    return new RegExp("(" + exts.join("|").replace(/\./g, '\\.') + ')$').test(filename);
+	return new RegExp("(" + exts.join("|").replace(/\./g, '\\.') + ')$').test(filename);
 }
 
 /*----------hide field----------*/
@@ -248,49 +250,52 @@ function required_field(){
 
 function uploaded_file_format(frm){
 	frm.get_field('resume').df.options = {
-	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx']
+		restrictions: {
+			allowed_file_types: ['.pdf','.txt','.docx']
 		}
 	};
+
 	frm.get_field('w4').df.options = {
-	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx']
+		restrictions: {
+			allowed_file_types: ['.pdf','.txt','.docx']
 		}
 	};
+
 	frm.get_field('e_verify').df.options = {
-	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+		restrictions: {
+			allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
 		}
 	};
+
 	frm.get_field('i_9').df.options = {
-	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+		restrictions: {
+			allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
 		}
 	};	
 	
 	frm.get_field('hire_paperwork').df.options = {
-	    restrictions: {
-	    allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+		restrictions: {
+			allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
 		}
 	};
 
 	frappe.meta.get_docfield("Employee ID requirements","id_requirements", cur_frm.doc.name).options = {
-		    restrictions: {
-		    	allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
-			}
+		restrictions: {
+			allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+		}
 	};
 	
 	
 	frappe.meta.get_docfield("Employee Direct Deposit letter","direct_deposit_letter", cur_frm.doc.name).options = {
-		    restrictions: {
-		    	allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
-			}
+		restrictions: {
+			allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+		}
 	};
 
 	frappe.meta.get_docfield("Employee Drug Screen","drug_screen", cur_frm.doc.name).options = {
-		    restrictions: {
-		    	allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
-			}
+		restrictions: {
+			allowed_file_types: ['.pdf','.txt','.docx','.jpg','.png']
+		}
 	};
 }
 
@@ -304,87 +309,88 @@ function cancel_employee(frm){
 
 function tag_company(frm){
 	if(frappe.boot.tag.tag_user_info.company_type=='TAG'){
-		frm.set_value('company','')
+		frm.set_value('company','');
 	}
 }
 
 function download_document(frm){
 	if(frm.doc.resume && frm.doc.resume.length>1){
 		$('[data-fieldname="resume"]').on('click',(e)=> {
-			doc_download(e)
+			doc_download(e);
 		});
 	}
+
 	if(frm.doc.w4 && frm.doc.w4.length>1){
 		$('[data-fieldname="w4"]').on('click',(e)=> {
-			doc_download(e)
+			doc_download(e);
 		});
 	}
+
 	$('[data-fieldname="attachments"]').on('click',(e)=> {
-		doc_download(e)
+		doc_download(e);
 	});
 }
 
 function doc_download(e){
-	let file=e.target.innerText
-	let link=''
-  	if(file.includes('.') && file.length>1){
+	let file=e.target.innerText;
+	let link='';
+	if(file.includes('.') && file.length>1){
 		if(file.includes('/files/')){
-			link=window.location.origin+file
+			link=window.location.origin+file;
+		}else{
+			link=window.location.origin+'/files/'+file;
 		}
-		else{
-			link=window.location.origin+'/files/'+file
-		}			
-		let data=file.split('/')
+
+		let data=file.split('/');
 		const anchor = document.createElement('a');
 		anchor.href = link;
 		anchor.download = data[data.length-1];
 		document.body.appendChild(anchor);
 		anchor.click();
-		document.body.removeChild(anchor);  
-  }
+		document.body.removeChild(anchor);
+	}
 }
 
 function attachrefresh(){
 	setTimeout(()=>{
 		document.querySelectorAll('div[data-fieldname="attachments"]').forEach(function(oInput){
-				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)
+			oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1);
 		});
 
 		document.querySelectorAll('div[data-fieldname="id_requirements"]').forEach(function(oInput){
-				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)
+			oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1);
 		});
 
 		document.querySelectorAll('div[data-fieldname="direct_deposit_letter"]').forEach(function(oInput){
-				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)
+			oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1);
 		});
 
 		document.querySelectorAll('div[data-fieldname="drug_screen"]').forEach(function(oInput){
-				oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1)
+			oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1);
 		});
-	},200)
+	},200);
 }
 
 
 
-function companyhide(time) {
+function companyhide(time){
 	setTimeout(() => {
-		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns')
-		var txt2 = 'ul[id="'+txt+'"]'
-		var  arry = document.querySelectorAll(txt2)[0].children
-		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
-		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
-
-		
-	}, time)
+		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns');
+		var txt2 = 'ul[id="'+txt+'"]';
+		var  arry = document.querySelectorAll(txt2)[0].children;
+		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none';
+		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none';
+	}, time);
 }
 
 function employee_delete_button(frm){
-	if (frm.doc.__islocal!=1 && (frappe.user.has_role('Staffing Admin')|| frappe.user_has_role('Staffing User')||frappe.user.has_role('Tag Admin'))){
+	if (frm.doc.__islocal!=1 && (frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User') || frappe.user_roles.includes('Tag Admin'))){
 		frm.add_custom_button(__("Delete"),function(){
 			delete_employee(frm);
 		});
 	}
 }
+
 function delete_employee(frm){
 	return new Promise(function(resolve, reject) {
 		frappe.confirm("All the data linked to this employee will be deleted?",
@@ -399,6 +405,7 @@ function delete_employee(frm){
 		);
 	});
 }
+
 function deleting_data(frm){
 	frappe.call({
 		method:"tag_workflow.utils.employee.delete_data",
@@ -413,28 +420,29 @@ function deleting_data(frm){
 		}
 	});
 }
-function filerestriction() {
+
+function filerestriction(){
 	setTimeout(() => {
-				document.getElementsByClassName("modal-title")[0].innerHTML='Upload <h6>(Accepted File Type : pdf, txt or docx  file size 10mb) </h6>'
-  	}, 300)
+		document.getElementsByClassName("modal-title")[0].innerHTML='Upload <h6>(Accepted File Type : pdf, txt or docx  file size 10mb) </h6>';
+	}, 300);
 }
-function hide_decrpt_ssn(frm) {
-	if (frm.doc.__islocal != 1 ) {
+
+function hide_decrpt_ssn(frm){
+	if(frm.doc.__islocal != 1 ){
 		frappe.call({
-				method: "tag_workflow.tag_data.hide_decrypt_ssn",
-				args: {
-					'frm': frm.doc.name,
-				},
-				async:0,
-				callback: function(r) {
-					if (frm.doc.__islocal != 0) {
-						frm.set_df_property("decrypt_ssn","hidden",r.message)
-					refresh_field('decrypted_ssn')
-			  		}
+			method: "tag_workflow.tag_data.hide_decrypt_ssn",
+			args: {'frm': frm.doc.name,},
+			async:0,
+			callback: function(r) {
+				if (frm.doc.__islocal != 0) {
+					frm.set_df_property("decrypt_ssn","hidden",r.message);
+					refresh_field('decrypted_ssn');
 				}
-		})
+			}
+		});
 	}
-} 
+}
+
 function hide_field(frm){
 	frm.set_df_property('street_address','hidden',1);
 	frm.set_df_property('city','hidden',1);
@@ -442,6 +450,7 @@ function hide_field(frm){
 	frm.set_df_property('zip','hidden',1);
 	frm.set_df_property('suite_or_apartment_no','hidden',1);
 }
+
 function show_fields(frm){
 	frm.set_df_property('street_address','hidden',0);
 	frm.set_df_property('city','hidden',0);
@@ -449,6 +458,7 @@ function show_fields(frm){
 	frm.set_df_property('zip','hidden',0);
 	frm.set_df_property('suite_or_apartment_no','hidden',0);
 }
+
 function update_employees_data(frm){
 	let roles = frappe.user_roles;
 	if (roles.includes("Staffing Admin") || roles.includes("Staffing User") && frm.doc.employee_number) {
@@ -456,8 +466,9 @@ function update_employees_data(frm){
 			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : update_existing_employees(frm);
 		}).addClass("btn-primary");
 	}
- }
- function update_existing_employees(frm){
+}
+
+function update_existing_employees(frm){
 	if(frm.doc.employee_number){
 		frappe.call({
 			method: "tag_workflow.utils.whitelisted.update_single_employee",
@@ -475,5 +486,5 @@ function update_employees_data(frm){
 		cur_frm.scroll_to_field("jazzhr_api_key");
 		frappe.msgprint("<b>JazzHR API Key</b> is required");
 	}
- }
+}
  

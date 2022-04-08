@@ -9,9 +9,14 @@ USR = "User"
 # session update
 def on_session_creation():
     try:
-        company = frappe.db.get_value(USR, {"name": frappe.session.user}, "company") or ""
+        company, comp_type = frappe.db.get_value(USR, {"name": frappe.session.user}, ["company", "organization_type"]) or ["", ""]
         default_values = {"company": company}
         set_session_default_values(default_values)
+
+        if(comp_type == "Staffing"):
+            frappe.local.response["home_page"] = "/app/staff-home"
+        elif(comp_type in ["Exclusive Hiring", "Hiring"]):
+            frappe.local.response["home_page"] = "/app/home"
     except Exception as e:
         print(e)
 

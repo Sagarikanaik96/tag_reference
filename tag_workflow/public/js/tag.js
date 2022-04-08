@@ -3,14 +3,13 @@ frappe.provide("tag_workflow");
 
 
 $(document).bind('toolbar_setup', function() {
-        $(".dropdown-help").empty();
-        $('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
-			if(window.screen.width>768) {
-				$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
-			}
-			else {
-				$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo-Emblem.png">`);
-			}
+	$(".dropdown-help").empty();
+	$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
+	if(window.screen.width>768) {
+		$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
+	}else {
+		$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo-Emblem.png">`);
+	}
 
 	frappe.ui.toolbar.route_to_company = function() {
 		frappe.set_route('Form', 'Company', frappe.boot.tag.tag_user_info.company);
@@ -375,128 +374,134 @@ tag_workflow.Map = `
 			</script>
 		</body>
 	</html>
-`
+`;
+
+
 tag_workflow.SetMap = function (frm) {
-	 setTimeout(frm.set_df_property("map", "options", tag_workflow.Map), 500);
-	 frm.set_df_property('map','hidden',1)
-	 if(frm.is_new()){
-	 	$('.frappe-control[data-fieldname="html"]').html('')
-	 	$('.frappe-control[data-fieldname="map"]').html('')
-	 }
+	setTimeout(frm.set_df_property("map", "options", tag_workflow.Map), 500);
+	frm.set_df_property('map','hidden',1);
+	if(frm.is_new()){
+		$('.frappe-control[data-fieldname="html"]').html('');
+		$('.frappe-control[data-fieldname="map"]').html('');
+	}
 }
-frappe.search.AwesomeBar.prototype.setup = function(element) {
-    var me = this;
 
-    $('.search-bar').removeClass('hidden');
-    var $input = $(element);
-    var input = $input.get(0);
 
-    this.options = [];
-    this.global_results = [];
+frappe.search.AwesomeBar.prototype.setup = function(element){
+	var me = this;
+	$('.search-bar').removeClass('hidden');
+	var $input = $(element);
+	var input = $input.get(0);
+	this.options = [];
+	this.global_results = [];
 
-    var awesomplete = new Awesomplete(input, {
-        minChars: 0,
-        maxItems: 99,
-        autoFirst: true,
-        list: [],
-        filter: function() {
-            return true;
-        },
-        data: function(item) {
-            return {
-                label: (item.index || ""),
-                value: item.value
-            };
-        },
-        item: function(item) {
-            var d = this.get_item(item.value);
-            var name = __(d.label || d.value);
-            var html = '<span>' + name + '</span>';
-            if (d.description && d.value !== d.description) {
-                html += '<br><span class="text-muted ellipsis">' + __(d.description) + '</span>';
-            }
-            return $('<li></li>')
-                .data('item.autocomplete', d)
-                .html(`<a style="font-weight:normal">${html}</a>`)
-                .get(0);
-        },
-        sort: function(a, b) {
-            return (b.label - a.label);
-        }
-    });
+	var awesomplete = new Awesomplete(input, {
+		minChars: 0,
+		maxItems: 99,
+		autoFirst: true,
+		list: [],
+		filter: function() {
+			return true;
+		},
 
-    // Added to aid UI testing of global search
-    input.awesomplete = awesomplete;
+		data: function(item) {
+			return {
+				label: (item.index || ""),
+				value: item.value
+			};
+		},
 
-    this.awesomplete = awesomplete;
+		item: function(item) {
+			var d = this.get_item(item.value);
+			var name = __(d.label || d.value);
+			var html = '<span>' + name + '</span>';
+			if (d.description && d.value !== d.description) {
+				html += '<br><span class="text-muted ellipsis">' + __(d.description) + '</span>';
+			}
 
-    $input.on("input", frappe.utils.debounce(function(e) {
-        var value = e.target.value;
-        var txt = value.trim().replace(/\s\s+/g, ' ');
-        var last_space = txt.lastIndexOf(' ');
-        me.global_results = [];
+			return $('<li></li>').data('item.autocomplete', d).html(`<a style="font-weight:normal">${html}</a>`).get(0);
+		},
 
-        me.options = [];
+		sort: function(a, b) {
+			return (b.label - a.label);
+		}
+	});
 
-        if (txt && txt.length > 1) {
-            if (last_space !== -1) {
-                me.set_specifics(txt.slice(0, last_space), txt.slice(last_space + 1));
-            }
-            me.add_defaults(txt);
-            me.options = me.options.concat(me.build_options(txt));
-            me.options = me.options.concat(me.global_results);
-        } else {
-            me.options = me.options.concat(
-                me.deduplicate(frappe.search.utils.get_recent_pages(txt || "")));
-            me.options = me.options.concat(frappe.search.utils.get_frequent_links());
-        }
-        me.add_help();
+	// Added to aid UI testing of global search
+	input.awesomplete = awesomplete;
+	this.awesomplete = awesomplete;
 
-        awesomplete.list = me.deduplicate(me.options);
+	$input.on("input", frappe.utils.debounce(function(e) {
+		var value = e.target.value;
+		var txt = value.trim().replace(/\s\s+/g, ' ');
+		var last_space = txt.lastIndexOf(' ');
+		me.global_results = [];
+		me.options = [];
 
-    }, 100));
+		if (txt && txt.length > 1) {
+			if (last_space !== -1) {
+				me.set_specifics(txt.slice(0, last_space), txt.slice(last_space + 1));
+			}
+			me.add_defaults(txt);
+			me.options = me.options.concat(me.build_options(txt));
+			me.options = me.options.concat(me.global_results);
+		} else {
+			me.options = me.options.concat(me.deduplicate(frappe.search.utils.get_recent_pages(txt || "")));
+			me.options = me.options.concat(frappe.search.utils.get_frequent_links());
+		}
+		me.add_help();
+		awesomplete.list = me.deduplicate(me.options);
+	}, 100));
 
-    var open_recent = function() {
-        if (!this.autocomplete_open) {
-            $(this).trigger("input");
-        }
-    };
-    $input.on("focus", open_recent);
+	var open_recent = function() {
+		if (!this.autocomplete_open) {
+			$(this).trigger("input");
+		}
+	};
 
-    $input.on("awesomplete-open", function(e) {
-        me.autocomplete_open = e.target;
-    });
+	$input.on("focus", open_recent);
+	$input.on("awesomplete-open", function(e) {
+		me.autocomplete_open = e.target;
+	});
 
-    $input.on("awesomplete-close", function() {
-        me.autocomplete_open = false;
-    });
+	$input.on("awesomplete-close", function() {
+		me.autocomplete_open = false;
+	});
 
-    $input.on("awesomplete-select", function(e) {
-        var o = e.originalEvent;
-        var value = o.text.value;
-        var item = awesomplete.get_item(value);
-        setTimeout(cur_frm.refresh(), 500)
-        if (item.route_options) {
-            frappe.route_options = item.route_options;
-        }
+	$input.on("awesomplete-select", function(e) {
+		var o = e.originalEvent;
+		var value = o.text.value;
+		var item = awesomplete.get_item(value);
 
-        if (item.onclick) {
-            item.onclick(item.match);
-        } else {
-            frappe.set_route(item.route);
-        }
-        $input.val("");
-    });
+		setTimeout(
+			function(){
+				if(cur_frm){
+					cur_frm.refresh()
+				}
+			}, 
+		500);
 
-    $input.on("awesomplete-selectcomplete", function() {
-        $input.val("");
-    });
+		if (item.route_options) {
+			frappe.route_options = item.route_options;
+		}
 
-    $input.on("keydown", null, 'esc', function() {
-        $input.blur();
-    });
-    frappe.search.utils.setup_recent();
-    frappe.tags.utils.fetch_tags();
+		if (item.onclick) {
+			item.onclick(item.match);
+		} else {
+			frappe.set_route(item.route);
+		}
+		$input.val("");
+	});
+
+	$input.on("awesomplete-selectcomplete", function() {
+		$input.val("");
+	});
+
+	$input.on("keydown", null, 'esc', function() {
+		$input.blur();
+	});
+	frappe.search.utils.setup_recent();
+	frappe.tags.utils.fetch_tags();
 };
 
 frappe.ui.form.ControlInput.prototype.set_label = function(label) {
