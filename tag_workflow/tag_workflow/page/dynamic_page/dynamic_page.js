@@ -32,6 +32,12 @@ frappe.FaceRecognition = Class.extend({
 			method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link1",
 			args: { "name": company || ''},
 			callback: function (r) {
+				setTimeout(hide,10)
+				function hide(){
+					if(frappe.boot.tag.tag_user_info.company_type=== "Staffing"){
+						$('.btn-primary').hide()
+					}
+				}				
 				var my_val= r.message[0];
 					var txt = "";
 					var text = my_val.employees;
@@ -51,8 +57,25 @@ frappe.FaceRecognition = Class.extend({
 
 					
 					} 
-					
+					var arr=[]
+					if(my_val.suite_or_apartment_no){
+						arr.push(my_val.suite_or_apartment_no)
+					}
+					if(my_val.address){
+						arr.push(my_val.address)
+					}
+					if(my_val.city){
+						arr.push(my_val.city)
+					}
+					if(my_val.state){
+						arr.push(my_val.state)
+					}
+					if(my_val.zip){
+						arr.push(my_val.zip)
+					}
 
+					var varr= arr.join(", ");
+					
 					let template = `
 				  <div class="container form-section m-auto card-section visible-section" style="max-width: 97%;width: 100%;padding: 0;animation: animatop 1.7s cubic-bezier(0.425, 1.14, 0.47, 1.125) forwards;background: transparent;"> 
 					<div id="listdata">
@@ -61,7 +84,7 @@ frappe.FaceRecognition = Class.extend({
 							<div class="col-md-6 col-sm-12 company_list">
 								<h5 class="col-md-4 px-0" id="comp_name"> ${my_val.name} </h5> 
 								<div id="jobsite">
-									<div id="address"> ${my_val.address} ${my_val.city} ${my_val.state}</div>
+									<div id="address"> ${varr}</div>
 								</div>
 								<p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#">  <u> ${count} review </u> </a> </span> </p>
 							</div>
@@ -147,3 +170,4 @@ frappe.FaceRecognition = Class.extend({
 		doc.posting_date_time = frappe.datetime.now_date();  
 		frappe.set_route("Form", doc.doctype, doc.name);
 	}
+	
