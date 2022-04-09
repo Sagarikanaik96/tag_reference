@@ -1378,7 +1378,7 @@ function cancel_job_order_deatils(frm){
 
 function staffing_company_remove(frm){
 	if(frm.doc.__islocal==1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-		frm.set_value('company','')
+		frm.set_value('company', '');
 	}
 }  
 
@@ -1392,15 +1392,16 @@ function claim_order_button(frm) {
 
 
 function staff_company_read_only(frm){
-    if(frm.doc.__islocal!=1 && frm.doc.company_type=='Non Exclusive' && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+	if(frm.doc.__islocal!=1 && frm.doc.company_type=='Non Exclusive' && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 		$('[data-label="Save"]').hide()
-        var myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
-        var arrayLength = myStringArray.length;
-        for (var i = 0; i < arrayLength; i++) {
-            frm.set_df_property(myStringArray[i], "read_only", 1);
-        }
-    }
+		var myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
+		var arrayLength = myStringArray.length;
+		for(var i = 0; i < arrayLength; i++){
+			frm.set_df_property(myStringArray[i], "read_only", 1);
+		}
+	}
 }
+
 function direct_order_staff_company(frm){
 	if(frm.doc.staff_company){
 		frm.toggle_display('staff_company', 1)
@@ -1409,45 +1410,46 @@ function direct_order_staff_company(frm){
  }
 
  
-function companyhide(time) {
+function companyhide(time){
 	setTimeout(() => {
-		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns')
-		var txt2 = 'ul[id="'+txt+'"]'
-		var  arry = document.querySelectorAll(txt2)[0].children
-		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
-		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
-
-		
-	}, time)
+		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns');
+		var txt2 = 'ul[id="'+txt+'"]';
+		var arry = document.querySelectorAll(txt2)[0].children;
+		if(arry.length){
+			document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none';
+			document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none';
+		}
+	}, time);
 }
 
 function staff_company_asterisks(frm){
-    if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+	if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 		if(frm.doc.company_type=='Non Exclusive'){
-			remove_asterisks(frm)
-		}
-		else{
+			remove_asterisks(frm);
+		}else{
 			frappe.db.get_value('User',{'name':frm.doc.owner},['organization_type'],function(r){
 				if((r.organization_type !='Staffing' || r  == null) ||  frm.doc.owner!=frappe.session.user){
 					remove_asterisks(frm);
-				}    
-			})
+				}
+			});
 		}
-    }
+	}
 }
+
 function remove_asterisks(frm){
 	var myStringArray = ["company", "category", "select_job", "from_date", "rate", "to_date", "job_start_time", "estimated_hours_per_day", "job_site", "no_of_workers","e_signature_full_name","agree_to_contract"];
-				var arrayLength = myStringArray.length;
-				for (var i = 0; i < arrayLength; i++) {
-					frm.set_df_property(myStringArray[i], "reqd", 0);
-				}
-				frm.set_df_property('agree_to_contract','label','Agree To Contract')
-				frm.set_df_property('agree_to_contract','description','Agree To Contract Is Required To Save The Order')
+	var arrayLength = myStringArray.length;
+	for (var i = 0; i < arrayLength; i++) {
+		frm.set_df_property(myStringArray[i], "reqd", 0);
+	}
+	frm.set_df_property('agree_to_contract','label','Agree To Contract');
+	frm.set_df_property('agree_to_contract','description','Agree To Contract Is Required To Save The Order');
+}
 
-}
 function assign_emp_button(frm){
-		check_assigned_emp(frm);
+	check_assigned_emp(frm);
 }
+
 function check_assigned_emp(frm){
 	frappe.db.get_value("Assign Employee", {'job_order': frm.doc.name, 'company': frappe.boot.tag.tag_user_info.company}, ["name"], function(rr) {
 		if (rr.name === undefined) {

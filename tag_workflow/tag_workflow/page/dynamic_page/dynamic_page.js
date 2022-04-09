@@ -32,64 +32,69 @@ frappe.FaceRecognition = Class.extend({
 			method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link1",
 			args: { "name": company || ''},
 			callback: function (r) {
-				setTimeout(hide,10)
+				setTimeout(hide,10);
 				function hide(){
 					if(frappe.boot.tag.tag_user_info.company_type=== "Staffing"){
-						$('.btn-primary').hide()
+						$('.btn-primary').hide();
 					}
-				}				
+				}
+
 				var my_val= r.message[0];
-					var txt = "";
-					var text = my_val.employees;
-					for (let i in text) {
-						txt += text[i].employee_name + "<br>";
-					}
-					var industry = ""
-					for (var j in my_val.industry_type) {
-						industry += my_val.industry_type[j].industry_type + "<br>"
-					}
+				var txt = "";
+				var text = my_val.employees;
+				for(let i in text){
+					txt += text[i].employee_name + "<br>";
+				}
 
-					var count=0
-					var rate=""
-					for (let k in r.message[1]) {
-						count+=1
-						rate+= '★'.repeat(r.message[1][k][0]) + "<br>"  + r.message[1][k][1] + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
+				var industry = "";
+				for(var j in my_val.industry_type){
+					industry += my_val.industry_type[j].industry_type + "<br>";
+				}
 
-					
-					} 
-					var arr=[]
-					if(my_val.suite_or_apartment_no){
-						arr.push(my_val.suite_or_apartment_no)
-					}
-					if(my_val.address){
-						arr.push(my_val.address)
-					}
-					if(my_val.city){
-						arr.push(my_val.city)
-					}
-					if(my_val.state){
-						arr.push(my_val.state)
-					}
-					if(my_val.zip){
-						arr.push(my_val.zip)
-					}
+				var count = 0;
+				var rate = "";
+				for(let k in r.message[1]){
+					count += 1;
+					rate+= '★'.repeat(r.message[1][k][0]) + "<br>"  + r.message[1][k][1] + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
+				}
 
-					var varr= arr.join(", ");
-					
-					let template = `
-				  <div class="container form-section m-auto card-section visible-section" style="max-width: 97%;width: 100%;padding: 0;animation: animatop 1.7s cubic-bezier(0.425, 1.14, 0.47, 1.125) forwards;background: transparent;"> 
+				var arr = [];
+				if(my_val.suite_or_apartment_no){
+					arr.push(my_val.suite_or_apartment_no);
+				}
+
+				if(my_val.address){
+					arr.push(my_val.address);
+				}
+
+				if(my_val.city){
+					arr.push(my_val.city);
+				}
+
+				if(my_val.state){
+					arr.push(my_val.state);
+				}
+
+				if(my_val.zip){
+					arr.push(my_val.zip);
+				}
+
+				var varr= arr.join(", ");
+
+				let template = `
+					<div class="container form-section m-auto card-section visible-section" style="max-width: 97%;width: 100%;padding: 0;animation: animatop 1.7s cubic-bezier(0.425, 1.14, 0.47, 1.125) forwards;background: transparent;"> 
 					<div id="listdata">
 					 <div class="user_list border rounded pt-4">
 						<div class="w-100 px-3 d-flex flex-wrap">
 							<div class="col-md-6 col-sm-12 company_list">
-								<h5 class="col-md-4 px-0" id="comp_name"> ${my_val.name} </h5> 
+								<h5 class="col-md-4 px-0" id="comp_name">${my_val.name}</h5> 
 								<div id="jobsite">
 									<div id="address"> ${varr}</div>
 								</div>
 								<p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#">  <u> ${count} review </u> </a> </span> </p>
 							</div>
 							<div class="col-md-6 col-sm-12 order text-left text-md-right ">
-								<a href=javascript:new_order()<button type="button" class="btn btn-primary btn-sm mt-1">Place Order</button></a>
+								<a href=javascript:new_order()><button type="button" class="btn btn-primary btn-sm mt-1">Place Order</button></a>
 							</div>
 						</div>
 								   
@@ -155,19 +160,17 @@ frappe.FaceRecognition = Class.extend({
 							
 						</div>
 					</div>`;
-										
-					$("#dynamic_company_data1").html(template);
-				}
-				})
-		},
-	})
+				$("#dynamic_company_data1").html(template);
+			}
+		});
+	},
+});
 
-	function new_order(){
-		var b= document.getElementById('comp_name').innerHTML
-		var doc = frappe.model.get_new_doc("Job Order");
-		doc.company = frappe.boot.tag.tag_user_info.company
-		doc.staff_company = b
-		doc.posting_date_time = frappe.datetime.now_date();  
-		frappe.set_route("Form", doc.doctype, doc.name);
-	}
-	
+function new_order(){
+	var b = document.getElementById('comp_name').innerHTML;
+	var doc = frappe.model.get_new_doc("Job Order");
+	doc.company = frappe.boot.tag.tag_user_info.company;
+	doc.staff_company = b;
+	doc.posting_date_time = frappe.datetime.now_date();
+	frappe.set_route("Form", doc.doctype, doc.name);
+}	
