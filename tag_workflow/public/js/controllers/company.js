@@ -227,6 +227,25 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		}
+		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
+
+			let data=cur_frm.doc.industry_type
+
+			const li = []
+
+			for (let x in data) {
+				li.push(data[x]['industry_type'])
+
+			  }
+			return {
+				query: "tag_workflow.tag_data.get_jobtitle_list_page",
+				filters: {
+					data: li,
+					company:doc.name
+				},
+			};
+		}
+		
 		
 	},
 	search_on_maps: function(frm){
@@ -521,30 +540,6 @@ function exclusive_staff_company_fields(frm){
 	}
 }
 
-frappe.ui.form.on("Job Titles", {
-	job_titles:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn];
-			frappe.db.get_value("Designation", {name:child.job_titles }, ["description","price","industry_type"], function(r) {
-				frappe.model.set_value(cdt,cdn,"description",r.description);
-				frappe.model.set_value(cdt,cdn,"wages",r.price);
-				frappe.model.set_value(cdt,cdn,"industry_type",r.industry_type);
-			if(child.__islocal==1){
-				console.log("funcation call")
-				frappe.call({
-						method: "tag_workflow.tag_data.adding_child_jobtitle",
-						args: {
-							data: child,
-							company:frm.doc.name,
-							price:r.price,
-							industry_type:r.industry_type,
-							description:r.description
-						},
-				});
-			}
-			frm.refresh_field('job_titles')
-		})
-	},
-})
 
 
 function removing_registration_verbiage(frm){

@@ -1017,7 +1017,7 @@
    "name": "Timesheet-job_title",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "Designation",
+   "options": "Item",
    "organization": null,
    "owner": "Administrator",
    "parent": null,

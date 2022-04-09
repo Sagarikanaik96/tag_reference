@@ -2,13 +2,28 @@ frappe.ui.form.on("Item", {
 	refresh: function(frm){
 		cur_frm.clear_custom_buttons();
 		setup_data(frm);
+		hide_connections(frm);
+
 		hide_fields(frm);
 		$('[data-fieldname="company"]').css("display",'block');
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
+		if(frm.doc.__islocal==1){
+			let len_history = frappe.route_history.length;
+
+			if(frappe.route_history.length>1 && frappe.route_history[len_history-2][1]=='Company'){
+				frm.set_value('company',frappe.route_history[len_history-2][2]);
+				frm.set_df_property('company', 'read_only', 1);
+			}
+			else if(frappe.route_history.length>1 && frappe.route_history[len_history-2][1]=='Contract'){
+				frm.set_df_property('company', 'read_only', 1);
+			} 
+			
+		}
 	},
 
 	before_save: function(frm){
+		frm.set_value("item_code", frm.doc.job_titless);
 		frappe.call({"method": "tag_workflow.controllers.master_controller.check_item_group"});
 		frappe.call({
 			"method": "tag_workflow.utils.doctype_method.checkingitemcode",
@@ -22,23 +37,6 @@ frappe.ui.form.on("Item", {
 		});
 
 
-	},
-	after_save: function(frm){
-			frappe.call({
-				method: "tag_workflow.tag_data.update_jobtitle",
-				args: {company: frm.doc.company,
-					job_title:frm.doc.job_title,
-					description:frm.doc.descriptions,
-					price:frm.doc.rate,
-					name:frm.doc.name,
-					industry:frm.doc.industry,
-					job_title_id: frm.doc.job_title_id,
-
-				},
-			});
-			setTimeout(function(){
-   				location.reload();
-   			}, 350);
 	},
 
 });
@@ -60,4 +58,8 @@ function hide_fields(frm){
 	for(var field in fields){
 		cur_frm.toggle_display(fields[field], 0);
 	}
+}
+
+function hide_connections(frm){
+	frm.dashboard.hide();
 }

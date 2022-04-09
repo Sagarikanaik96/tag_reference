@@ -26,30 +26,6 @@
    "property_type": "Data",
    "row_name": null,
    "value": "Bill Rate"
-  },
-  {
-   "_assign": null,
-   "_comments": null,
-   "_liked_by": null,
-   "_user_tags": null,
-   "creation": "2022-02-15 02:33:30.098919",
-   "default_value": null,
-   "doc_type": "Job Titles",
-   "docstatus": 0,
-   "doctype_or_field": "DocField",
-   "field_name": "description",
-   "idx": 0,
-   "modified": "2022-02-15 02:33:30.098919",
-   "modified_by": "Administrator",
-   "name": "Job Titles-description-fetch_from",
-   "owner": "Administrator",
-   "parent": null,
-   "parentfield": null,
-   "parenttype": null,
-   "property": "fetch_from",
-   "property_type": "Small Text",
-   "row_name": null,
-   "value": ""
   }
  ],
  "sync_on_migrate": 1

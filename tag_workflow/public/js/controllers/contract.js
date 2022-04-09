@@ -112,7 +112,7 @@ frappe.ui.form.on("Contract", {
 				query: "tag_workflow.tag_data.get_jobtitle_list_page",
 				filters: {
 					data: li,
-					company:doc.name
+					company:doc.staffing_company
 				},
 			};
 		}
@@ -256,20 +256,6 @@ function companyhide(time) {
 	}, time)
 }
 
-frappe.ui.form.on("Job Titles", {
-	job_titles:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn];
-			frappe.db.get_value("Designation", {name:child.job_titles }, ["description","price","industry_type"], function(r) {
-				frappe.model.set_value(cdt,cdn,"description",r.description);
-				frappe.model.set_value(cdt,cdn,"wages",r.price);
-				frappe.model.set_value(cdt,cdn,"industry_type",r.industry_type);
-
-			})
-		frm.refresh_field('job_titles')
-	},
-})
-
-
 
 function hide_submit_button(frm){
 	if(frm.doc.__islocal!=1 && !frm.doc.signe_hiring){
@@ -306,7 +292,7 @@ function company_onboard_sign(frm)
 				freeze_message:
 				  "<p><b>Onboarding Company, Please wait.</b></p>",
 				args: {
-				  "lead":frm.doc.lead,
+					"lead":frm.doc.lead,'contract_number':frm.doc.name
 				},
 				callback: function (r) {
 				if(r.message!='user not created'){

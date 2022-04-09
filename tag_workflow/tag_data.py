@@ -904,53 +904,27 @@ def jobtitle_list(company):
 
 import json
 
-@frappe.whitelist(allow_guest=True)
-def adding_child_jobtitle(data,company,price,industry_type,description):
-    data = json.loads(data)
-    if data['job_titles']:
-        frappe.get_doc({
-            'doctype': "Item",
-            'industry': industry_type,
-            'rate':price,
-            'company':company,
-            'item_group': "Services",
-            'job_title':data['job_titles'],
-            'descriptions':description,
-            "item_code":checking_itemcode(data['job_titles']),
-            "stock_uom":"Nos"
-        }).insert(ignore_permissions=True)
-    
-    return True
-
-from tag_workflow.utils.doctype_method import append_number_if_name_exists
-def checking_itemcode(item_code):
-    item_code = item_code.strip()
-    if not item_code.strip():
-        frappe.throw(_(Abbr))
-    sql = "select item_code from `tabItem` where item_code = '{0}' ".format(item_code)
-    if frappe.db.sql(sql):
-        return append_number_if_name_exists("Item", item_code, fieldname="item_code", separator="-", filters=None)
-    return item_code 
-
-
 @frappe.whitelist()
 def get_jobtitle_list_page(doctype, txt, searchfield, page_len, start, filters):
     try:
         company = filters.get('company')
         data=filters.get('data')
-        value = ''
-        for index ,i in enumerate(data):
-            if index >= 1:
-                value = value+"'"+","+"'"+i
+        if(len(data)>0):
+            if len(data)==1:
+                sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}')) and industry IN ('{1}')  '''.format(company,data[0])
+                return frappe.db.sql(sql)
             else:
-                value =value+i
-        sql = ''' select name from `tabDesignation` where ((organization is null) or (organization = '{0}')) and industry_type IN ('{1}')  '''.format(company,value)
-        return frappe.db.sql(sql)
+
+                data=tuple(data)
+                sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}')) and industry IN {1}  '''.format(company,data)
+                return frappe.db.sql(sql)
+        else:
+            sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}')) and industry is null  '''.format(company)
+            return frappe.db.sql(sql)
+
     except Exception as e:
         frappe.msgprint(e)
         return tuple()
-
-
 
 @frappe.whitelist()
 def filter_jobsite(doctype, txt, searchfield, page_len, start, filters):
@@ -965,6 +939,24 @@ def filter_jobsite(doctype, txt, searchfield, page_len, start, filters):
                 value =value+i
         sql = '''select name from `tabJob Site` where company = '{0}' and name NOT IN ('{1}')'''.format(company,value)
         return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.msgprint(e)
+        return tuple()
+
+@frappe.whitelist()
+def get_industrytype_list_page(doctype, txt, searchfield, page_len, start, filters):
+    try:
+        data=filters.get('data')
+        print(data)
+        if len(data)==1:
+            sql = ''' select name from `tabIndustry Type` where name in ('{0}')  '''.format(data[0])
+            print(sql)
+            return frappe.db.sql(sql)
+        else:
+            data=tuple(data)
+
+            sql = ''' select name from `tabIndustry Type` where name in {0}  '''.format(data)
+            return frappe.db.sql(sql)
     except Exception as e:
         frappe.msgprint(e)
         return tuple()
