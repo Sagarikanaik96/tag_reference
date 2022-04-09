@@ -13,9 +13,40 @@ frappe.listview_settings['Timesheet'] = {
 		if(cur_list.doctype == "Timesheet"){
 			cur_list.page.btn_primary[0].style.display = "none";
 		}
+			
 	},
+	formatters: {
+		total_hours(val,d,f) {
+			console.log(val)
+			if(typeof(val)=="number"){
+					val=((val).toFixed(2));
+				
+			}
+			
+			if (val == '') {
+					return `<span class="filterable ellipsis" title="" id="${val}-${f.name}" >
+								<a class="filterable ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >0.00</a>
+							</span>`
+				}
+
+			else {
+				return `<span class="filterable ellipsis" title="" id="${val}-${f.name}" >
+						<a class="filterable ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a>
+					</span>`
+			}
+		}
+	
+		},
 
 	onload: function(listview) {
+		
+		[cur_list.columns[2],cur_list.columns[3]] = [cur_list.columns[3],cur_list.columns[2]];
+		[cur_list.columns[2],cur_list.columns[4]] = [cur_list.columns[4],cur_list.columns[2]];
+		[cur_list.columns[4],cur_list.columns[6]] = [cur_list.columns[6],cur_list.columns[4]];
+		[cur_list.columns[5],cur_list.columns[6]] = [cur_list.columns[6],cur_list.columns[5]];
+		
+		cur_list.render_header(cur_list);
+
 		$('h3[title = "Timesheet"]').html('Timesheets');
 		if(cur_list.doctype == "Timesheet"){
 			cur_list.page.btn_primary[0].style.display = "none";
@@ -32,8 +63,11 @@ frappe.listview_settings['Timesheet'] = {
 				update_job_order(listview);
 			}).addClass("btn-primary");
 		}
+		
 	},
+			
 }
+
 
 /*-------------------------------*/
 function update_job_order(listview){
@@ -45,3 +79,4 @@ function update_job_order(listview){
 		}
 	}
 }
+
