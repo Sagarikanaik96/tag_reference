@@ -80,10 +80,10 @@ frappe.StaffHome = Class.extend({
 						</div>
 						<div class="d-flex w-100 ">
 							<span class="badge badge-pill exclusive">${order[o].name}</span>
-							<span class="badge badge-pill exclusive">${org_type}</span>
+							<span class="badge badge-pill ml-2 exclusive">${org_type}</span>
 						</div>
 						<div class="d-flex flex-wrap w-100 pt-3 ">
-							<div class="col-lg-6">
+							<div class="col-lg-7">
 								<div class="row">
 									<div class="pt-2 pr-2 mr-1">
 									<img src="/assets/tag_workflow/images/ico-calendar.svg">
@@ -103,7 +103,7 @@ frappe.StaffHome = Class.extend({
 								</div>
 							</div>
 						</div>
-						<div class="col-lg-6">
+						<div class="col-lg-5">
 							<div class="row">
 								<div class="pt-2 pr-2 mr-1">
 									<img src="/assets/tag_workflow/images/ico-clock.svg">
@@ -116,10 +116,10 @@ frappe.StaffHome = Class.extend({
 						</div>
 					</div>
 					<div class="d-flex flex-wrap w-100 py-3 border-top">
-						<div class="col-lg-6">
+						<div class="col-lg-4">
 							<!--<a href="#" class="text-secondary pt-2">See on map</a> -->
 						</div>
-						<div class="col-lg-6"> 
+						<div class="col-lg-8"> 
 							<div class="d-flex flex-wrap">
 								<button type="button" class="btn btn-light btn-sm ml-3 border order-btn text-center" onclick=redirect_order('${order[o].name}')>Order Details</button>
 								<button type="button" class="btn btn-primary btn-sm ml-3 rounded  text-center" onclick=show_info_order('${order[o].name}')>Quick Info</button>
@@ -130,7 +130,7 @@ frappe.StaffHome = Class.extend({
 			</div>`
 		}
 
-		let total_order = `<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;"><div class="d-flex flex-wrap p-3" style="width: 100%;"><div class="d-flex justify-content-between w-100 "><h6>Total Number Of Today's Order: </h6><h6>${order.length}</h6></div></div></div>`;
+		let total_order = `<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;"><div class="d-flex flex-wrap p-3" style="width: 100%;"><div class="d-flex justify-content-between w-100 "><h6 class="mb-0">Total Number Of Today's Order: </h6><h6 class="mb-0">${order.length}</h6></div></div></div>`;
 
 		$("#order").html(total_order+html);
 	}
