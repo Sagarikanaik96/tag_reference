@@ -168,22 +168,12 @@ frappe.ui.Page = Class.extend({
 			this.item_filter = $(`
 				<div class="page-form row" id="item_filter">
 					<div class="filter-selector">
-						<button class="btn btn-default btn-sm filter-button" onclick="item_click('${frappe.boot.tag.tag_user_info.company}');">
+						<button class="btn btn-default btn-sm filter-button" id='filter_selected_data';">
 							<span class="button-label hidden-xs">My Job Titles<span></span></span>
 						</button>
-						<button class="btn btn-default btn-sm filter-button" onclick="item_click('');">
+						<button class="btn btn-default btn-sm filter-button" id='filter_all_data';">
 							<span class="button-label hidden-xs">All Job Titles<span></span></span>
 						</button>
-						<script>
-							function item_click(value){
-								$('.page-form').find('input').each(function(){
-									if($(this).attr('data-fieldname')=='company'){
-										$(this).val(value);
-										cur_list.refresh();
-									}
-								});
-							}
-						</script>
 					</div>
 				</div>`).prependTo(this.main);
 		}

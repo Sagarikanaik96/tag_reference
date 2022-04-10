@@ -960,3 +960,21 @@ def get_industrytype_list_page(doctype, txt, searchfield, page_len, start, filte
     except Exception as e:
         frappe.msgprint(e)
         return tuple()
+
+@frappe.whitelist()
+def my_used_job_title(company_name,company_type):
+    if company_type=='Hiring' or company_type=='Exclusive Hiring':
+        l=frappe.db.sql('select job_titles from `tabJob Titles` where parent="{0}"'.format(company_name),as_list=1)
+        z=[]
+        for i in l:
+            z.append(i[0])
+    elif company_type=='Staffing':
+        exc_company=frappe.db.sql('select name from `tabCompany` where parent_staffing="{0}" '.format(company_name),as_list=1)
+        z=[]
+        for i in exc_company:
+            l=frappe.db.sql('select job_titles from `tabJob Titles` where parent="{0}"'.format(i[0]),as_list=1)
+            for i in l:
+                z.append(i[0])
+    else:
+        return 'TAG'
+    return list(set(z))
