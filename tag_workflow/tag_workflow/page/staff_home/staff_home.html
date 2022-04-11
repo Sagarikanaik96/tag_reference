@@ -190,7 +190,7 @@
 									</div>
 								</div>
 								<div class="d-flex flex-wrap px-3 map-section">
-									<div class="col-md-6" id="order"></div>
+									<div class="col-md-6" id="order" style="max-height: 420px; overflow: auto;"></div>
 									<div class="col-md-6">
 										<div id="maps" style="height:450px;border-radius: var(--border-radius-md);"></div>
 									</div>
@@ -199,6 +199,108 @@
 						</div>
 						<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">...</div>
 						<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="widget-group ">
+				<div class="widget-group-head">
+					<div class="widget-group-title">Shortcuts</div>
+					<div class="widget-group-control"></div>
+				</div>
+				<div class="widget-group-body grid-col-3">
+					<div class="widget widget-shadow shortcut-widget-box" data-widget-name="a85252dcd0" onclick=redirect_doc("job-order")>
+						<div class="widget-head">
+							<div>
+								<div class="widget-title ellipsis">Job Orders</div>
+								<div class="widget-subtitle"></div>
+							</div>
+							<div class="widget-control"></div>
+						</div>
+						<div class="widget-body"></div>
+						<div class="widget-footer"></div>
+					</div>
+					<div class="widget widget-shadow shortcut-widget-box" data-widget-name="a98f4b28cd" onclick=redirect_doc("job-site")>
+						<div class="widget-head">
+							<div>
+								<div class="widget-title ellipsis">Job Sites</div>
+								<div class="widget-subtitle"></div>
+							</div>
+							<div class="widget-control"></div>
+						</div>
+						<div class="widget-body"></div>
+						<div class="widget-footer"></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="widget-group">
+				<div class="widget-group-head">
+					<div class="widget-group-title">My Activities</div>
+					<div class="widget-group-control"></div>
+				</div>
+				<div class="widget-group-body grid-col-3">
+					<div class="widget links-widget-box" data-widget-name="6ff65e433e">
+						<div class="widget-head">
+							<div>
+								<div class="widget-title ellipsis">
+									<svg class="icon icon-sm">
+										<use class="" href="#icon-file"></use>
+									</svg>
+									<span>Operations (Settings)</span>
+								</div>
+								<div class="widget-subtitle"></div>
+							</div>
+							<div class="widget-control"></div>
+						</div>
+						<div class="widget-body">
+							<a href="/app/user" class="link-item ellipsis" type="Link">
+								<span class="indicator-pill no-margin gray"></span>
+								<span class="link-content ellipsis">Company Users</span>
+							</a>
+							<a href="/app/company" class="link-item ellipsis" type="Link">
+								<span class="indicator-pill no-margin gray"></span>
+								<span class="link-content ellipsis">Affiliate Companies</span>
+							</a>
+							<a href="/app/contract" class="link-item ellipsis" type="Link">
+								<span class="indicator-pill no-margin gray"></span>
+								<span class="link-content ellipsis">Contract</span>
+							</a>
+						</div>
+						<div class="widget-footer"></div>
+					</div>
+					<div class="widget links-widget-box" data-widget-name="c8b579fdd9">
+						<div class="widget-head">
+							<div>
+								<div class="widget-title ellipsis">
+									<svg class="icon icon-sm">
+										<use class="" href="#icon-file"></use>
+									</svg>
+									<span>Job Order Resources</span>
+								</div>
+								<div class="widget-subtitle"></div>
+							</div>
+							<div class="widget-control"></div>
+						</div>
+						<div class="widget-body">
+							<a href="/app/job-site" class="link-item ellipsis" type="Link">
+								<span class="indicator-pill no-margin gray"></span>
+								<span class="link-content ellipsis">Job Sites</span>
+							</a>
+							<a href="/app/job-order" class="link-item ellipsis" type="Link">
+								<span class="indicator-pill no-margin gray"></span>
+								<span class="link-content ellipsis">Job Orders</span>
+							</a>
+							<a href="/app/timesheet" class="link-item ellipsis" type="Link">
+								<span class="indicator-pill no-margin gray"></span>
+								<span class="link-content ellipsis">Timesheets</span>
+							</a>
+							<a href="/app/sales-invoice" class="link-item ellipsis" type="Link">
+								<span class="indicator-pill no-margin gray"></span>
+								<span class="link-content ellipsis">Invoices</span>
+							</a>
+						</div>
+						<div class="widget-footer"></div>
 					</div>
 				</div>
 			</div>

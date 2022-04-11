@@ -1,10 +1,11 @@
 let company = frappe.boot.tag.tag_user_info.company;
 let company_type = frappe.boot.tag.tag_user_info.company_type;
+frappe.breadcrumbs.clear();
 
 frappe.pages['staff-home'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Home',
+		title: '',
 		single_column: true
 	});
 
@@ -17,8 +18,9 @@ frappe.StaffHome = Class.extend({
 		this.parent = wrapper;
 		this.page = this.parent.page;
 		setTimeout(function() {
+			frappe.breadcrumbs.clear();
 			me.setup(wrapper, page);
-		}, 1000);
+		}, 900);
 	},
 	setup: function(wrapper, page){
 		var me = this;
@@ -243,4 +245,8 @@ function show_info_order(order){
 
 function redirect_order(name){
 	frappe.set_route("app", "job-order", name);
+}
+
+function redirect_doc(name){
+	frappe.set_route("app", name);
 }

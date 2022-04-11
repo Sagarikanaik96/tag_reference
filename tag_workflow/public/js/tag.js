@@ -5,10 +5,16 @@ frappe.provide("tag_workflow");
 $(document).bind('toolbar_setup', function() {
 	$(".dropdown-help").empty();
 	$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
-	if(window.screen.width>768) {
+	if(window.screen.width>768){
 		$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
+		if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+			$('.navbar-home').html(`<a class="navbar-brand navbar-home" href="/app/staff-home"><img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png"></a>`);
+		}
 	}else {
 		$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo-Emblem.png">`);
+		if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+			$('.navbar-home').html(`<a class="navbar-brand navbar-home" href="/app/staff-home"><img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png"></a>`);
+		}
 	}
 
 	frappe.ui.toolbar.route_to_company = function() {
@@ -20,6 +26,10 @@ $(document).ready(function(){
 	if(frappe.boot && frappe.boot.home_page!=='setup-wizard'){
 		$(".main-section").append(frappe.render_template("tag"));
 	}
+
+	if(window.location.pathname == "/app/staff-home"){
+                setTimeout(frappe.breadcrumbs.clear(), 5000);
+        }
 });
 
 
