@@ -385,8 +385,6 @@ tag_workflow.SetMap = function (frm) {
 		$('.frappe-control[data-fieldname="map"]').html('');
 	}
 }
-
-
 frappe.search.AwesomeBar.prototype.setup = function(element){
 	var me = this;
 	$('.search-bar').removeClass('hidden');
@@ -503,7 +501,6 @@ frappe.search.AwesomeBar.prototype.setup = function(element){
 	frappe.search.utils.setup_recent();
 	frappe.tags.utils.fetch_tags();
 };
-
 frappe.ui.form.ControlInput.prototype.set_label = function(label) {
 	if(this.value && this.df.fieldtype!='Checkbox'){
 		if(this.df.fieldtype=='Currency'){

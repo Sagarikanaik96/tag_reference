@@ -252,6 +252,7 @@ frappe.ui.form.on("Company", {
 		if(cur_frm.doc.search_on_maps == 1){
 			tag_workflow.UpdateField(frm, "map");
 			hide_fields(frm)
+			show_addr()
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
 			cur_frm.set_df_property('map','hidden',1)
 		}
@@ -261,11 +262,16 @@ frappe.ui.form.on("Company", {
 		if(cur_frm.doc.enter_manually == 1){
 			tag_workflow.UpdateField(frm, "manually");
 			show_fields(frm);
+			show_addr()
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
 			hide_fields(frm);
 			cur_frm.set_df_property('map','hidden',1)
 		}
 	},
+	address:function(frm){
+		if(frm.doc.address)
+			frm.set_df_property('address','hidden',0)
+	}
 });
 
 /*---------hide details----------*/
@@ -551,19 +557,16 @@ function removing_registration_verbiage(frm){
 }
 function hide_fields(frm){
 	frm.set_df_property('address','hidden',1);
-	frm.set_df_property('suite_or_apartment_no','hidden',1);
 	frm.set_df_property('city','hidden',1);
 	frm.set_df_property('state','hidden',1);
 	frm.set_df_property('zip','hidden',1);
 }
 function show_fields(frm){
 	frm.set_df_property('address','hidden',0);
-	frm.set_df_property('suite_or_apartment_no','hidden',0);
 	frm.set_df_property('city','hidden',0);
 	frm.set_df_property('state','hidden',0);
 	frm.set_df_property('zip','hidden',0);
 }
- 
 function update_employees_data(frm){
 	let roles = frappe.user_roles;
 	if (roles.includes("Staffing Admin") || roles.includes("Staffing User")) {
@@ -593,4 +596,12 @@ function update_employees_data(frm){
 	frappe.msgprint("<b>JazzHR API Key</b> is required");
  }
  }
- 
+function show_addr(){
+$('#autocomplete-address').change(()=> {
+  if ($(this).val() === undefined) {
+    cur_frm.set_df_property('address','hidden',1)
+  }else {
+    cur_frm.set_df_property('address','hidden',0)
+  }
+})
+}

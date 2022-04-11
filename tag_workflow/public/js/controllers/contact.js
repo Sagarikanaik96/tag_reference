@@ -91,6 +91,7 @@ frappe.ui.form.on("Contact", {
 		if(cur_frm.doc.search_on_maps == 1){
 			tag_workflow.UpdateField(frm, "map");
 			hide_fields(frm)
+			show_addr()
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
 			cur_frm.set_df_property('map','hidden',1)
 		}
@@ -105,6 +106,10 @@ frappe.ui.form.on("Contact", {
 			cur_frm.set_df_property('map','hidden',1)
 		}
 	},
+	contact_address:function(frm){
+		if(frm.doc.contact_address)
+			frm.set_df_property('contact_address','hidden',0)
+	}
 });
 
 
@@ -155,13 +160,20 @@ function hide_fields(frm){
 	frm.set_df_property('city','hidden',1);
 	frm.set_df_property('state','hidden',1);
 	frm.set_df_property('zip','hidden',1);
-	frm.set_df_property('suite_or_apartment_no','hidden',1);
 }
 function show_fields(frm){
 	frm.set_df_property('contact_address','hidden',0);
 	frm.set_df_property('city','hidden',0);
 	frm.set_df_property('state','hidden',0);
 	frm.set_df_property('zip','hidden',0);
-	frm.set_df_property('suite_or_apartment_no','hidden',0);
 
+}
+function show_addr(){
+$('#autocomplete-address').change(()=> {
+  if ($(this).val() === undefined) {
+    cur_frm.set_df_property('contact_address','hidden',1)
+  }else {
+    cur_frm.set_df_property('contact_address','hidden',0)
+  }
+})
 }

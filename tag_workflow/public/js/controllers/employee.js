@@ -211,6 +211,7 @@ frappe.ui.form.on("Employee", {
 		if(cur_frm.doc.search_on_maps == 1){
 			tag_workflow.UpdateField(frm, "map");
 			hide_field(frm);
+			show_addr();
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
 			cur_frm.set_df_property('map','hidden',1);
 		}
@@ -225,6 +226,10 @@ frappe.ui.form.on("Employee", {
 			hide_field(frm);
 		}
 	},
+	street_address:function(frm){
+		if(frm.doc.street_address)
+			frm.set_df_property('street_address','hidden',0);
+	}
 });
 
 function hasExtensions(filename, exts){
@@ -448,7 +453,6 @@ function hide_field(frm){
 	frm.set_df_property('city','hidden',1);
 	frm.set_df_property('state','hidden',1);
 	frm.set_df_property('zip','hidden',1);
-	frm.set_df_property('suite_or_apartment_no','hidden',1);
 }
 
 function show_fields(frm){
@@ -456,7 +460,6 @@ function show_fields(frm){
 	frm.set_df_property('city','hidden',0);
 	frm.set_df_property('state','hidden',0);
 	frm.set_df_property('zip','hidden',0);
-	frm.set_df_property('suite_or_apartment_no','hidden',0);
 }
 
 function update_employees_data(frm){
@@ -487,4 +490,13 @@ function update_existing_employees(frm){
 		frappe.msgprint("<b>JazzHR API Key</b> is required");
 	}
 }
- 
+function show_addr(){
+$('#autocomplete-address').change(()=> {
+  if ($(this).val() === undefined) {
+    cur_frm.set_df_property('street_address','hidden',1)
+  }else {
+    cur_frm.set_df_property('street_address','hidden',0)
+  }
+})
+}
+
