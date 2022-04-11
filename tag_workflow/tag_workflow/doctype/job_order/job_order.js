@@ -1383,10 +1383,14 @@ function staffing_company_remove(frm){
 }  
 
 function claim_order_button(frm) {
-	if (frm.doc.__islocal != 1 && !frm.doc.claim && frm.doc.resumes_required==0){
-		frm.add_custom_button(__('Claim Order'), function(){
+	if (frm.doc.__islocal != 1 && frm.doc.no_of_workers != frm.doc.worker_filled){
+		let exist =false;
+		exist = check_claim_company(frm);
+		if(!exist){
+			frm.add_custom_button(__('Claim Order'), function(){
 			claim_job_order_staffing(frm);
 		});
+		}
 	}
 }
 
@@ -1458,4 +1462,8 @@ function check_assigned_emp(frm){
 			});
 		}
 	});
+}
+function check_claim_company(frm){
+	if(frm.doc.claim && frm.doc.claim.includes(frappe.boot.tag.tag_user_info.company) )
+		return true;
 }
