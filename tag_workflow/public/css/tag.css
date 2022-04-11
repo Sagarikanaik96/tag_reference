@@ -883,6 +883,14 @@ input.input-with-feedback.form-control,
 .custom-actions {
   display: flex !important;
 }
+.frappe-card .frappe-list header .ellipsis {
+  white-space: normal;
+  line-height: 1.2;
+  text-align: center;
+}
+.frappe-card .frappe-list .list-row-container .ellipsis {
+  text-align: center;
+}
 
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
