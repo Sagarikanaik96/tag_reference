@@ -38,7 +38,17 @@ frappe.listview_settings['Timesheet'] = {
 	
 		},
 
-	onload: function(listview) {
+		
+	onload: function(listview) {		
+
+		jQuery(document).on("click",".apply-filters",function(){
+			let jo = ""
+			$('.link-field').find('input:text')
+            .each(function () {
+				jo = $(this).val()
+            });
+			localStorage.setItem('job_order', jo)
+		}); 
 		
 		[cur_list.columns[2],cur_list.columns[3]] = [cur_list.columns[3],cur_list.columns[2]];
 		[cur_list.columns[2],cur_list.columns[4]] = [cur_list.columns[4],cur_list.columns[2]];
@@ -60,7 +70,7 @@ frappe.listview_settings['Timesheet'] = {
 		
 		if((frappe.boot.tag.tag_user_info.company_type == "Hiring" && frappe.boot.tag.tag_user_info.company)|| (frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" && frappe.boot.tag.tag_user_info.company)){
 			listview.page.set_secondary_action('<svg class="icon icon-xs" style=""><use class="" href="#icon-add"></use></svg>Add Timesheet', function(){
-				update_job_order(listview);
+				update_job_order();
 			}).addClass("btn-primary");
 		}
 		
@@ -70,13 +80,8 @@ frappe.listview_settings['Timesheet'] = {
 
 
 /*-------------------------------*/
-function update_job_order(listview){
-	let flt = listview.filters || [];
-	for(let f in flt){
-		if(flt[f][1] == "job_order_detail"){
-			frappe.route_options = {"job_order_detail": flt[f][3]};
-			frappe.set_route("form", "add-timesheet");
-		}
-	}
+function update_job_order(){	
+
+	window.location.href = "/app/add-timesheet";	
 }
 
