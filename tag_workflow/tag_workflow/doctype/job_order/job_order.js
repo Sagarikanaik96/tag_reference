@@ -20,6 +20,7 @@ frappe.ui.form.on("Job Order", {
 			frm.set_value('e_signature_full_name', frappe.session.user_fullname);
 			frm.set_df_property("e_signature_full_name", "read_only", 1);
 		}
+
 		make_invoice(frm);
 		hide_employee_rating(frm);
 		direct_order_staff_company(frm)
@@ -60,6 +61,7 @@ frappe.ui.form.on("Job Order", {
 		if (frappe.boot.tag.tag_user_info.company_type != "Staffing") {
 			fields_setup(frm);
 		}
+
 	},
 	
 	setup: function(frm) {
@@ -171,6 +173,10 @@ frappe.ui.form.on("Job Order", {
 			}
 		});
 
+	    if (cur_frm.doc.__islocal != 1) {
+
+	    	localStorage.setItem("order", frm.doc.name);
+	    }
 
 	},
 
