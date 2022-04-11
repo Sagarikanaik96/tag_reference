@@ -2,6 +2,7 @@ frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
 		$('.form-footer').hide();
 		$('[data-label="Resume%20Timer"]').hide();
+		$('[data-label="Start%20Timer"]').hide();
 		$('[data-label="Create%20Salary%20Slip"]').hide();
 		$('[data-label="Create%20Sales%20Invoice"]').hide();
 		$('[data-label="Cancel"]').hide();
