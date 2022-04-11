@@ -512,7 +512,7 @@ frappe.search.AwesomeBar.prototype.setup = function(element){
 	frappe.tags.utils.fetch_tags();
 };
 frappe.ui.form.ControlInput.prototype.set_label = function(label) {
-	if(this.value && this.df.fieldtype!='Checkbox'){
+	if(this.value && !['Checkbox', 'Password','Attach','Attach Image'].includes(this.df.fieldtype)){
 		if(this.df.fieldtype=='Currency'){
 			this.$wrapper.attr("title", "$"+this.value.toFixed(2));
 		}

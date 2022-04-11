@@ -49,6 +49,13 @@ frappe.ui.form.on("Company", {
 				$(this).attr('title', file);
 			});
 		}
+		let attach_fields = ['cert_of_insurance', 'w9', 'safety_manual', 'upload_docs']
+		for(let i in attach_fields){
+			$("[data-fieldname="+attach_fields[i]+"]").on('mouseover',function(e) {
+				let file=e.target.innerText.split['/'];
+				$(this).attr('title', file[file.length-1]);
+			});
+		}
 	},
 
 	setup: function (frm){

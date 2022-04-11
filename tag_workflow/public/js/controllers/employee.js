@@ -117,11 +117,19 @@ frappe.ui.form.on("Employee", {
 			filerestriction()
 		});
 
-		let child_table = ['job_category','blocked_from', 'no_show_company', 'job_order', 'date', 'unsatisfied_organization_name', 'dnr', 'id_requirements', 'direct_deposit_letter', 'drug_screen', 'attachments']
+		let child_table = ['job_category','blocked_from', 'no_show_company', 'job_order', 'date', 'unsatisfied_organization_name', 'dnr', 'id_requirements', 'direct_deposit_letter', 'drug_screen', 'attachments'];
 		for(let i in child_table){
 			$( "[data-fieldname="+child_table[i]+"]" ).on('mouseover',function(e) {
 				let file=e.target.innerText;
 				$(this).attr('title', file);
+			});
+		}
+		$('[data-fieldname= "ssn"]').attr('title', '');
+		let attach_fields = ['resume','e_verify','f_9','w4','hire_paperwork']
+		for(let i in attach_fields){
+			$("[data-fieldname="+attach_fields[i]+"]").on('mouseover',function(e) {
+				let file=e.target.innerText.split['/'];
+				$(this).attr('title', file[file.length-1]);
 			});
 		}
 	},
