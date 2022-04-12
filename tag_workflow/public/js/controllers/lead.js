@@ -37,8 +37,9 @@ frappe.ui.form.on("Lead", {
         companyhide(1000)
       })
 
-    tag_workflow.SetMap(frm);
+    set_map(frm);
     hide_fields(frm);
+    show_addr(frm);
 
   },
   sign:function(frm){
@@ -165,7 +166,7 @@ frappe.ui.form.on("Lead", {
     if(cur_frm.doc.search_on_maps == 1){
       tag_workflow.UpdateField(frm, "map");
       hide_fields(frm);
-      show_addr()
+      show_addr(frm)
     }else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
       cur_frm.set_df_property('map','hidden',1)
     }
@@ -175,15 +176,12 @@ frappe.ui.form.on("Lead", {
     if(cur_frm.doc.enter_manually == 1){
       tag_workflow.UpdateField(frm, "manually");
       show_fields(frm);
+      show_addr(frm)
     }else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
       cur_frm.set_df_property('map','hidden',1)
       hide_fields(frm)
     }
   },
-  address_lines_1:function(frm){
-    if(frm.doc.address_lines_1)
-      frm.set_df_property('address_lines_1','hidden',0)
-  }
 });
 
 /*-------reqd------*/
@@ -478,7 +476,6 @@ function companyhide(time) {
 
 
 function hide_fields(frm){
-  frm.set_df_property('address_lines_1','hidden',1);
   frm.set_df_property('address_lines_2','hidden',1);
   frm.set_df_property('county_2','hidden',1);
   frm.set_df_property('city_or_town','hidden',1);
@@ -487,19 +484,161 @@ function hide_fields(frm){
   frm.set_df_property('country_2','hidden',1);
 }
 function show_fields(frm){
-   frm.set_df_property('address_lines_1','hidden',0);
   frm.set_df_property('address_lines_2','hidden',0);
   frm.set_df_property('city_or_town','hidden',0);
   frm.set_df_property('state_2','hidden',0);
   frm.set_df_property('zip','hidden',0);
   frm.set_df_property('country_2','hidden',0);
 }
-function show_addr(){
-$('#autocomplete-address').change(()=> {
-  if ($(this).val() === undefined) {
-    cur_frm.set_df_property('address_lines_1','hidden',1)
-  }else {
-    cur_frm.set_df_property('address_lines_1','hidden',0)
+function show_addr(frm){
+  if(frm.doc.search_on_maps){
+    frm.get_docfield('address_lines_1').label ='Complete Address';
+  }else if(frm.doc.enter_manually){
+    frm.get_docfield('address_lines_1').label ='Address Line 1';
   }
-})
+  frm.refresh_field('address_lines_1');
+}
+const html=`<!doctype html>
+  <html>
+    <head>
+      <meta charset="utf-8">
+    </head>
+    <body>
+      <input class="form-control" placeholder="Search a location" id="autocomplete-address" style="height: 30px;margin-bottom: 15px;">
+      <div class="tab-content" title="map" style="text-align: center;padding: 4px;">
+        <div id="map" style="height:450px;border-radius: var(--border-radius-md);"></div>
+      </div>
+
+      <script src="https://maps.googleapis.com/maps/api/js?key=${frappe.boot.tag.tag_user_info.api_key}&amp;libraries=places&amp;callback=initPlaces" async="" defer=""></script>
+      <script>
+        let autocomplete;
+        let placeSearch;
+        let place;
+        let componentForm = {
+          street_number: "long_name",
+          route: "long_name",
+          locality: "long_name",
+          administrative_area_level_1: "long_name",
+          country: "long_name",
+          postal_code: "long_name"
+        };
+
+        window.initPlaces = function() {
+          let default_location = { lat: 38.889248, lng: -77.050636 };
+          map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 8,
+            center: default_location,
+            mapTypeControl: false,
+          });
+
+          marker = new google.maps.Marker({map,});
+          geocoder = new google.maps.Geocoder();
+
+          if(jQuery( "#autocomplete-address" ).length ){
+            autocomplete = new google.maps.places.Autocomplete(
+              document.getElementById( "autocomplete-address" ),
+              { types: [ "geocode" ] }
+            );
+            autocomplete.addListener( "place_changed", fillInAddress );
+          }
+        };
+
+        function fillInAddress() {
+          place = autocomplete.getPlace();
+          if(!place.formatted_address && place.name){
+            let val = parseFloat(place.name);
+            if(!isNaN(val) && val <= 90 && val >= -90){
+               let latlng = place.name.split(",");
+               default_location = { lat: parseFloat(latlng[0]), lng: parseFloat(latlng[1]) };
+               geocode({ location: default_location });
+            }
+          }else{
+            make_address(place, "auto");
+            geocode({ address: place.formatted_address });
+          }
+        }
+
+        function geolocate() {
+          if(navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition( function( position ) {
+              var geolocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+              };
+              var circle = new google.maps.Circle({
+                center: geolocation,
+                radius: position.coords.accuracy
+              });
+              autocomplete.setBounds( circle.getBounds() );
+            });
+          }
+        }
+
+        jQuery( "#autocomplete-address" ).on( "focus", function() {
+          geolocate();
+        });
+
+        function geocode(request) {
+          geocoder.geocode(request).then((result) => {
+            const { results } = result;
+            map.setCenter(results[0].geometry.location);
+            marker.setPosition(results[0].geometry.location);
+            marker.setMap(map);
+            return results;
+          }).catch((e) => {
+            alert("Geocode was not successful for the following reason: " + e);
+          });
+        }
+
+        function make_address(value, key){
+          let data = {name:"",street_number:"",route:"",locality:"",administrative_area_level_1:"",country:"",postal_code:"",lat:"",lng:"",plus_code:""};
+          if(key == "auto"){
+            data["lat"] = value.geometry.location.lat();
+            data["lng"] = value.geometry.location.lng();
+            data["name"] = value.formatted_address;
+            for(let i = 0; i < value.address_components.length; i++) {
+              let addressType = value.address_components[i].types[0];
+              if(componentForm[addressType]) {
+                let val = value.address_components[i][componentForm[addressType]];
+                let key = value.address_components[i].types[0];
+                data[key] = val;
+              }
+            }
+          }else{
+            let values = value.results[0] || [];
+            data["lat"] = (values ? values.geometry.location.lat() : "");
+            data["lng"] = (values ? values.geometry.location.lng() : "");
+            data["name"] = value.formatted_address;
+            for(let i = 0; i < values.address_components.length; i++) {
+              let addressType = values.address_components[i].types[0];
+              if(componentForm[addressType]) {
+                let val = values.address_components[i][componentForm[addressType]];
+                let key = values.address_components[i].types[0];
+                data[key] = val;
+                                                        }
+            }
+          }
+          update_address(data)
+        }
+        function update_address(data){
+          frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address_lines_1", document.getElementById("autocomplete-address").value);
+          frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address_lines_2", (data["street_number"]+" "+data["route"]));
+          frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state_2", data["administrative_area_level_1"]);
+          frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city_or_town", data["locality"]);
+          frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "country_2", data["country"]);
+          frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
+        }
+      </script>
+    </body>
+  </html>
+`;
+function set_map (frm) {
+  setTimeout(frm.set_df_property("map", "options", html), 500);
+  if(frm.is_new()){
+    frm.set_df_property('map','hidden',1);
+    $('.frappe-control[data-fieldname="html"]').html('');
+    $('.frappe-control[data-fieldname="map"]').html('');
+  }else if(frm.doc.search_on_maps == 0 && frm.doc.enter_manually ==0){
+    frm.set_df_property('map','hidden',1);
+  }
 }

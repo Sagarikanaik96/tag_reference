@@ -7,7 +7,8 @@ frappe.ui.form.on('Job Site', {
 		$('[data-original-title="Menu"]').hide()
 		maps();
 		hide_field(frm)
-		frm.set_df_property('address','hidden',1)
+		frm.get_docfield('address').label ='Complete Address';
+		frm.refresh_field('address')
 		if(frm.doc.__islocal==1){
 			cancel_jobsite(frm);
 			frm.set_df_property('job_site_contact','hidden', 1);
@@ -47,19 +48,20 @@ frappe.ui.form.on('Job Site', {
 	search_on_maps: function(frm){
 		if(cur_frm.doc.search_on_maps == 1){
 			update_field(frm, "map");
-			show_addr()
-			frm.set_df_property('address','hidden',1)
+			show_addr(frm)
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.manually_enter==0){
 			cur_frm.set_df_property('lat','hidden',1);
 			cur_frm.set_df_property('lng','hidden',1);
+			cur_frm.set_df_property('address','hidden',0)
 		}
 	},
 
 	manually_enter: function(frm){
 		if(cur_frm.doc.manually_enter == 1){
 			update_field(frm, "manually");
-			show_addr()
-			frm.set_df_property('address','hidden',0)
+			show_addr(frm)
+		}else{
+			cur_frm.set_df_property('address','hidden',0)
 		}
 	},
 	validate: function (frm) {
@@ -119,10 +121,6 @@ frappe.ui.form.on('Job Site', {
 			frm.set_df_property('job_site_contact','hidden', 1);
 		}
 	},
-	address:function(frm){
-		if(frm.doc.address)
-			frm.set_df_property('address','hidden',0)
-	}
 
 });
 
@@ -282,6 +280,8 @@ let html = `
 
 function maps(){
 	 setTimeout(cur_frm.set_df_property("html", "options", html), 500);
+	 if(cur_frm.is_new())
+	 	$('.frappe-control[data-fieldname="map"]').html('')
 }
 
 
@@ -320,12 +320,12 @@ function get_users(frm){
 	});
 
 }
-function show_addr(){
-$('#autocomplete-address').change(()=> {
-  if ($(this).val() === undefined) {
-    cur_frm.set_df_property('address','hidden',1)
-  }else{
-  	cur_frm.set_df_property('address','hidden',0)
+function show_addr(frm){
+	if(frm.doc.search_on_maps){
+		frm.set_df_property('address','hidden',0)
+    frm.get_docfield('address').label ='Complete Address';
+    frm.refresh_field('address');
+  }else if(frm.doc.manually_enter){
+  	frm.set_df_property('address','hidden',1)
   }
-})
 }
