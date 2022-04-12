@@ -74,7 +74,7 @@ frappe.StaffHome = Class.extend({
 			let from = moment(order[0].from_date)._d.toDateString();
 			let to = moment(order[0].to_date)._d.toDateString();
 			html += `
-				<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;">
+				<div class="row bg-white mx-2 my-4  rounded border job" data-job="${order[o].select_job}" style="margin-top: 0px !important;">
 					<div class="d-flex flex-wrap p-3 ">
 						<div class="d-flex justify-content-between w-100 ">
 							<h6>${order[o].select_job}</h6>
@@ -132,7 +132,7 @@ frappe.StaffHome = Class.extend({
 			</div>`
 		}
 
-		let total_order = `<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;"><div class="d-flex flex-wrap p-3" style="width: 100%;"><div class="d-flex justify-content-between w-100 "><h6 class="mb-0">Total Number Of Today's Order: </h6><h6 class="mb-0">${order.length}</h6></div></div></div>`;
+		let total_order = `<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;"><div class="d-flex flex-wrap p-3" style="width: 100%;"><div class="d-flex justify-content-between w-100 "><h6 class="mb-0">Total Number Of Today's Order: </h6><h6 class="mb-0" id="counter">${order.length}</h6></div></div></div>`;
 
 		$("#order").html(total_order+html);
 	}
@@ -249,4 +249,20 @@ function redirect_order(name){
 
 function redirect_doc(name){
 	frappe.set_route("app", name);
+}
+function filterOrder() {
+    var input, filter, o, j, a, i;
+    input = document.getElementById("my-input");
+    filter = input.value.toUpperCase();
+    o = document.getElementById("order");
+    j = o.getElementsByClassName("job");
+    for (i = 0; i < j.length; i++) {
+        a = j[i].getAttribute("data-job");
+        if (a.toUpperCase().indexOf(filter) > -1) {
+            j[i].style.display = "";
+        } else {
+            j[i].style.display = "none";
+        }
+    }
+   document.getElementById('counter').innerHTML= document.querySelectorAll('.job:not([style*="display: none"])').length;
 }
