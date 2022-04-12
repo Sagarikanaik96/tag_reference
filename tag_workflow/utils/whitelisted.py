@@ -411,9 +411,8 @@ def fetching_data(data,response,api_key,company):
             response = requests.get(url)
             i=i+1
             data.extend(response.json())
-        my_data=frappe.cache()
-        my_data.set_value(1,data)
-        enqueue(emp_data(api_key,my_data,company))
+        my_data=data
+        emp_data(api_key,my_data,company)
     except Exception as e:
         frappe.msgprint('Error Occured')
         frappe.error_log(e, "JazzHR")
@@ -421,8 +420,7 @@ def fetching_data(data,response,api_key,company):
  
 def emp_data(api_key,data,company):
     try:
-        y=data.get_value(1)
-        data.set_value(1,'')
+        y=data
         for i in y:
             try:
                 name=i['id']
