@@ -11,7 +11,7 @@ from frappe import enqueue
 
 class ProjectController(base_controller.BaseController):
     def validate_project(self):
-        if(self.doc.workflow_state == "Denied"):
+        if(self.doc.workflow_state == "Denied" and frappe.db.get_value("User", frappe.session.user, "organization_type") not in ["Hiring", "Exclusive Hiring"]):
             enqueue("tag_workflow.utils.timesheet.denied_notification", job_order=self.doc.job_order_detail, hiring_company=self.doc.company, staffing_company=self.doc.employee_company, timesheet_name=self.doc.name)
         elif(self.doc.workflow_state == "Approved"):
             enqueue("tag_workflow.utils.timesheet.approval_notification", job_order=self.doc.job_order_detail, staffing_company=self.doc.employee_company, date=None, hiring_company=self.doc.company, timesheet_name=self.doc.name, timesheet_approved_time=self.doc.modified, current_time=frappe.utils.now())

@@ -4,18 +4,21 @@
  
 frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+		$('.custom-actions.hidden-xs.hidden-md').show();
+		window.onclick = function(event) {
+			attachrefresh();
+		}
 
-window.onclick = function(event) {
-	attachrefresh()
-}
-$('*[data-fieldname="employee_details"]').find('.grid-add-row')[0].addEventListener("click",function(){
-		attachrefresh()
-});
+		$('*[data-fieldname="employee_details"]').find('.grid-add-row')[0].addEventListener("click",function(){
+			attachrefresh();
+		});
 
-$("[data-fieldname=employee_details]").mouseover(function(){
-attachrefresh()
-})
-attachrefresh()
+		$("[data-fieldname=employee_details]").mouseover(function(){
+			attachrefresh();
+		});
+
+		attachrefresh();
 		$('.form-footer').hide()
 		if(frm.doc.__islocal==1){
 			if (!frm.doc.hiring_organization){
@@ -55,6 +58,19 @@ attachrefresh()
 		});
 
 		$('[data-fieldname="company"]').css('display','block');
+
+		$(document).on('click', '[data-fieldname="company"]', function(){
+			companyhide(5000)
+		});
+
+		$('[data-fieldname="company"]').mouseover(function(){
+			companyhide(500)
+		})
+
+	  	document.addEventListener("keydown", function(){
+	  		companyhide(500)
+	    })
+		child_table_label();
 	},
 	e_signature_full_name:function(frm){
 		if(frm.doc.e_signature_full_name){
@@ -166,22 +182,44 @@ attachrefresh()
 
 /*-----------hiring notification--------------*/
 function make_hiring_notification(frm){
-	frappe.call({
-		"method":"tag_workflow.tag_data.receive_hiring_notification",
-		"freeze": true,
-		"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
-		"args":{
-			"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
-			"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
-			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
-			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category
-		},
-		callback:function(r){
-			setTimeout(function () {
-				window.location.href='/app/job-order/'+frm.doc.job_order
-			}, 3000);
-		}
-	});
+	frappe.db.get_value("Job Order", {name: cur_frm.doc.job_order}, ["owner"], function(r_own) {
+		frappe.db.get_value('User',{'name':r_own.owner},['organization_type'],function(r){
+			if(r.organization_type !='Staffing' || r  == null){
+				frappe.call({
+					"method":"tag_workflow.tag_data.receive_hiring_notification",
+					"freeze": true,
+					"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
+					"args":{
+						"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,
+						"hiring_org" : cur_frm.doc.hiring_organization, "job_order" : cur_frm.doc.job_order,
+						"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
+						"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category
+					},
+					callback:function(rm){
+						setTimeout(function () {
+							window.location.href='/app/job-order/'+frm.doc.job_order
+						}, 3000);
+					}
+				});
+			}
+			else{
+				frappe.call({
+					"method":"tag_workflow.tag_data.staff_own_job_order",
+					"freeze": true,
+					"freeze_message": "<p><b>preparing notification</b></p>",
+					"args":{
+						"job_order" : cur_frm.doc.job_order,"staffing_org":cur_frm.doc.company,
+						 "emp_detail" : cur_frm.doc.employee_details.length, "doc_name" : cur_frm.doc.name					},
+					callback:function(r_call){
+						setTimeout(function () {
+							window.location.href='/app/job-order/'+frm.doc.job_order
+						}, 2000);
+					}
+				});
+
+			}
+		})
+	})
 }
 
 /*---------employee data--------------*/
@@ -437,4 +475,24 @@ function company_check(frm,table,msg){
 			msg.push('Employee <b>'+table[d].employee+' </b>does not belong to '+frm.doc.company);
 		}
 	}
+}
+
+function companyhide(time) {
+	setTimeout(() => {
+		var txt  = $('input[data-fieldname="company"]')[1].getAttribute('aria-owns')
+		var txt2 = 'ul[id="'+txt+'"]'
+		var  arry = document.querySelectorAll(txt2)[0].children
+		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
+		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
+	}, time)
+}
+
+function child_table_label(){
+	let child_table=['employee','employee_name','resume','employee_status','employee_replaced_by'];
+		for(let i in child_table){
+			$( "[data-fieldname="+child_table[i]+"]" ).on('mouseover',function(e) {
+				let file=e.target.innerText;
+				$(this).attr('title', file);
+			});
+		}
 }

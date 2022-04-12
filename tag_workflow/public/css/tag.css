@@ -168,7 +168,8 @@ input:visited {
 }
 
 .editable-form .user-bg,
-#page-Company .user-bg {
+#page-Company .user-bg,
+.submitted-form .user-bg {
   background: url("/assets/tag_workflow/images/background.jpg");
   background-repeat: no-repeat;
   background-size: cover;
@@ -832,17 +833,10 @@ span.frappe-timestamp.mini {
   padding-left: 18px;
 }
 
-[data-page-route="Company"] #drug_flat:after,
-#drug_hour:after,
-#mvr_flat:after,
-#mvr_hour:after,
-#bg_flat:after,
-#bg_hour:after,
-#shovel_flat:after,
-#shovel_hour:after {
+[data-page-route="Company"] #id_mvr_hour:after {
   position: absolute;
-  left: 6px;
-  top: 22%;
+  left: 3px;
+  top: 56%;
   font-size: 13px;
   content: "$";
 }
@@ -885,6 +879,17 @@ input.input-with-feedback.form-control,
   .dt-row-filter
   .dt-filter.dt-input {
   padding: 0 7px;
+}
+.custom-actions {
+  display: flex !important;
+}
+.frappe-card .frappe-list header .ellipsis {
+  white-space: normal;
+  line-height: 1.2;
+  text-align: center;
+}
+.frappe-card .frappe-list .list-row-container .ellipsis {
+  text-align: center;
 }
 
 @media (max-width: 1300px) {

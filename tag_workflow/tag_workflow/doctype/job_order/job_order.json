@@ -138,7 +138,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Job Title",
-   "options": "Designation",
+   "options": "Item",
    "reqd": 1
   },
   {
@@ -396,7 +396,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "select_job.price",
+   "fetch_from": "select_job.rate",
    "fetch_if_empty": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
@@ -404,7 +404,7 @@
    "reqd": 1
   },
   {
-   "fetch_from": "select_job.description",
+   "fetch_from": "select_job.descriptions",
    "fetch_if_empty": 1,
    "fieldname": "description",
    "fieldtype": "Small Text",
@@ -602,7 +602,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-03-17 03:32:55.273023",
+ "modified": "2022-04-09 05:32:21.430782",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

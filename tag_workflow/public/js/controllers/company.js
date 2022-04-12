@@ -1,12 +1,17 @@
 frappe.ui.form.on("Company", {
 	refresh: function (frm){
 		$('.form-footer').hide();
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+		$('.custom-actions.hidden-xs.hidden-md').show();
+
 		cur_frm.clear_custom_buttons();
 		init_values(frm);
 		hide_connections(frm);
+		removing_registration_verbiage(frm);
 		hide_details(frm);
 		update_company_fields(frm);
 		jazzhr_data(frm);
+		update_employees_data(frm)
 		make_invoice(frm);
 		uploaded_file_format(frm);
 		download_document(frm);
@@ -32,17 +37,36 @@ frappe.ui.form.on("Company", {
 		$(document).on('input', '[data-fieldname="zip"]', function(event){
 			this.value = this.value?.replace(/\D/g, "");
 		});
+		if(frm.doc.organization_type=='Staffing'){
+			frm.set_df_property('job_title', 'hidden', 1);
+		}
+		set_map(frm);
+		hide_fields(frm);
+		show_addr(frm)
+		let child_table=['industry_type','job_titles','wages','industry_type','job_titles','job_site','employee','employee_name','resume'];
+		for(let i in child_table){
+			$( "[data-fieldname="+child_table[i]+"]" ).on('mouseover',function(e) {
+				let file=e.target.innerText;
+				$(this).attr('title', file);
+			});
+		}
+		let attach_fields = ['cert_of_insurance', 'w9', 'safety_manual', 'upload_docs']
+		for(let i in attach_fields){
+			$("[data-fieldname="+attach_fields[i]+"]").on('mouseover',function(e) {
+				let file=e.target.innerText.split['/'];
+				$(this).attr('title', file[file.length-1]);
+			});
+		}
 	},
 
 	setup: function (frm){
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(1) > form:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'drug_flat');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(1) > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'drug_hour');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(1) > form:nth-child(1) > div:nth-child(7) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'bg_flat');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(1) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'bg_hour');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'mvr_flat');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'mvr_hour');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(7) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'shovel_flat');
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'shovel_hour');
+		Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
+			if(_field.title!=="total_monthly_sales"){
+			_field.id = "id_mvr_hour"	
+		}		
+		})
+		
+		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
 		init_values(frm);
 
 		let ORG = "Organization Type";
@@ -67,6 +91,16 @@ frappe.ui.form.on("Company", {
 				};
 			}
 		});
+		$('[data-fieldname="parent_staffing"]').click(function(){ return false})
+
+		$('[data-fieldname="parent_staffing"]').click(function(){
+			var cust= $(this).text()
+			var txt= cust.split('.')[1]
+			var name1= txt.replace(/%/g, ' ');
+			var name= name1.trim()
+			localStorage.setItem("company", name)
+			window.location.href= "/app/dynamic_page"
+		})
 
 		frm.set_query("parent_staffing", function (doc) {
 			return {
@@ -175,6 +209,20 @@ frappe.ui.form.on("Company", {
 			$('.menu-btn-group').hide();
 		}
 
+		frm.fields_dict['job_site'].grid.get_field('job_site').get_query = function(doc) {
+			let li = [];
+			document.querySelectorAll('a[data-doctype="Job Site"]').forEach(element=>{
+				li.push(element.getAttribute("data-name"));
+			})
+			return {
+				query: "tag_workflow.tag_data.filter_jobsite",
+				filters: {
+					company: doc.name,
+					site_list : li
+				}
+			}
+		}
+
 		cur_frm.fields_dict["employees"].grid.get_field("employee").get_query = function (doc, cdt, cdn) {
 			return {
 				query: "tag_workflow.tag_data.filter_company_employee",
@@ -183,6 +231,60 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		};
+
+		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc, cdt, cdn) {
+			const li = [];
+			document.querySelectorAll('a[data-doctype="Industry Type"]').forEach(element=>{
+				li.push(element.getAttribute("data-name"));
+			});
+			return {
+				query: "tag_workflow.tag_data.get_jobtitle_list_page",
+				filters: {
+					data: li,
+					company:doc.name
+				},
+			};
+		}
+		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
+
+			let data=cur_frm.doc.industry_type
+
+			const li = []
+
+			for (let x in data) {
+				li.push(data[x]['industry_type'])
+
+			  }
+			return {
+				query: "tag_workflow.tag_data.get_jobtitle_list_page",
+				filters: {
+					data: li,
+					company:doc.name
+				},
+			};
+		}
+		
+		
+	},
+	search_on_maps: function(frm){
+		if(cur_frm.doc.search_on_maps == 1){
+			tag_workflow.UpdateField(frm, "map");
+			hide_fields(frm)
+			show_addr(frm)
+		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
+			cur_frm.set_df_property('map','hidden',1)
+		}
+	},
+
+	enter_manually: function(frm){
+		if(cur_frm.doc.enter_manually == 1){
+			tag_workflow.UpdateField(frm, "manually");
+			show_fields(frm);
+			show_addr(frm)
+		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
+			hide_fields(frm);
+			cur_frm.set_df_property('map','hidden',1)
+		}
 	},
 });
 
@@ -268,37 +370,37 @@ function validate_phone_and_zip(frm){
 
 /*--------jazzhr------------*/
 function jazzhr_data(frm){
-	let a=0
 	let roles = frappe.user_roles;
 	if (roles.includes("Staffing Admin") || roles.includes("Staffing User")) {
 		frm.add_custom_button("Get data from JazzHR", function () {
-			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm,a);
+			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm);
 		}).addClass("btn-primary");
 	}
-}
-
-function make_jazzhr_request(frm,a){
-	if(frm.doc.jazzhr_api_key){
-		frappe.call({
-			method: "tag_workflow.utils.whitelisted.make_jazzhr_request",
-			args: { api_key: frm.doc.jazzhr_api_key, company: frm.doc.name,count:a },
-			freeze: true,
-			freeze_message: "<p><b>Fetching records from JazzHR...</b></p>",
-			callback: function (r) {
-				if (r && r.message!='success') {
-					a=a+1
-					make_jazzhr_request(frm,a)
-				}
-				else{
-					frappe.msgprint('Employees added successfully to TAG')
-				}
-			},
-		});
-	}else{
-		cur_frm.scroll_to_field("jazzhr_api_key");
-		frappe.msgprint("<b>JazzHR API Key</b> is required");
+ }
+  
+ function make_jazzhr_request(frm) {
+	if (frm.doc.jazzhr_api_key) {
+		setTimeout(function(){
+			frappe.msgprint('Employees are fetched in the background . You can continue using the application')
+			setTimeout(function(){window.location.reload()},3000)   },8000)
+	   
+	  frappe.call({
+		method: "tag_workflow.utils.whitelisted.make_jazzhr_request",
+		args: { api_key: frm.doc.jazzhr_api_key, company: frm.doc.name },
+		freeze: true,
+		freeze_message: "<p><b>Fetching records from JazzHR...</b></p>",
+		callback: function (r) {
+		  if (r && r.message) {
+			frappe.msgprint('Employee To added in short time');
+		  }
+		},
+	  });
+	} else {
+	  cur_frm.scroll_to_field("jazzhr_api_key");
+	  frappe.msgprint("<b>JazzHR API Key</b> is required");
 	}
-}
+  }
+ 
 
 
 /*---------make invoice------------*/
@@ -459,13 +561,202 @@ function exclusive_staff_company_fields(frm){
 	}
 }
 
-frappe.ui.form.on("Job Titles", {
-	job_titles:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn];
-			frappe.db.get_value("Designation", {name:child.job_titles }, ["description","price"], function(r) {
-				frappe.model.set_value(cdt,cdn,"description",r.description);
-				frappe.model.set_value(cdt,cdn,"wages",r.price);
-			})
-	},
-})
-	
+
+
+function removing_registration_verbiage(frm){
+    if(frm.doc.organization_type=='Staffing' && frm.doc.__islocal!=1)
+    {
+        frm.set_df_property('registration_details','label','')
+        frm.set_df_property('registration_details','description','')
+    }
+}
+function hide_fields(frm){
+	frm.set_df_property('city','hidden',1);
+	frm.set_df_property('state','hidden',1);
+	frm.set_df_property('zip','hidden',1);
+}
+function show_fields(frm){
+	frm.set_df_property('city','hidden',0);
+	frm.set_df_property('state','hidden',0);
+	frm.set_df_property('zip','hidden',0);
+}
+function update_employees_data(frm){
+	let roles = frappe.user_roles;
+	if (roles.includes("Staffing Admin") || roles.includes("Staffing User")) {
+		frm.add_custom_button("Update Employee Records", function () {
+			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : update_existing_employees(frm);
+		}).addClass("btn-primary");
+	}
+ }
+ function update_existing_employees(frm){
+ if(frm.doc.jazzhr_api_key){
+	setTimeout(function(){
+		frappe.msgprint('Employees Updation are done in the background . You can continue using the application')
+		setTimeout(function(){window.location.reload()},3000)   },5000)
+	frappe.call({
+		method: "tag_workflow.utils.whitelisted.update_employees_data_jazz_hr",
+		args: { api_key: frm.doc.jazzhr_api_key, company: frm.doc.name },
+		freeze: true,
+		freeze_message: "<p><b>Updating Employees Record</b></p>",
+		callback: function (r) {
+			if(r){
+				frappe.msgprint('Updation Done Successfully')
+			}
+		},
+	});
+ }else{
+	cur_frm.scroll_to_field("jazzhr_api_key");
+	frappe.msgprint("<b>JazzHR API Key</b> is required");
+ }
+ }
+function show_addr(frm){
+  if(frm.doc.search_on_maps){
+    frm.get_docfield('address').label ='Complete Address';
+  }else if(frm.doc.enter_manually){
+    frm.get_docfield('address').label ='Address';
+  }
+  frm.refresh_field('address');
+}
+const html=`<!doctype html>
+  <html>
+    <head>
+      <meta charset="utf-8">
+    </head>
+    <body>
+      <input class="form-control" placeholder="Search a location" id="autocomplete-address" style="height: 30px;margin-bottom: 15px;">
+      <div class="tab-content" title="map" style="text-align: center;padding: 4px;">
+        <div id="map" style="height:450px;border-radius: var(--border-radius-md);"></div>
+      </div>
+
+      <script src="https://maps.googleapis.com/maps/api/js?key=${frappe.boot.tag.tag_user_info.api_key}&amp;libraries=places&amp;callback=initPlaces" async="" defer=""></script>
+      <script>
+        let autocomplete;
+        let placeSearch;
+        let place;
+        let componentForm = {
+          street_number: "long_name",
+          route: "long_name",
+          locality: "long_name",
+          administrative_area_level_1: "long_name",
+          country: "long_name",
+          postal_code: "long_name"
+        };
+
+        window.initPlaces = function() {
+          let default_location = { lat: 38.889248, lng: -77.050636 };
+          map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 8,
+            center: default_location,
+            mapTypeControl: false,
+          });
+
+          marker = new google.maps.Marker({map,});
+          geocoder = new google.maps.Geocoder();
+
+          if(jQuery( "#autocomplete-address" ).length ){
+            autocomplete = new google.maps.places.Autocomplete(
+              document.getElementById( "autocomplete-address" ),
+              { types: [ "geocode" ] }
+            );
+            autocomplete.addListener( "place_changed", fillInAddress );
+          }
+        };
+
+        function fillInAddress() {
+          place = autocomplete.getPlace();
+          if(!place.formatted_address && place.name){
+            let val = parseFloat(place.name);
+            if(!isNaN(val) && val <= 90 && val >= -90){
+               let latlng = place.name.split(",");
+               default_location = { lat: parseFloat(latlng[0]), lng: parseFloat(latlng[1]) };
+               geocode({ location: default_location });
+            }
+          }else{
+            make_address(place, "auto");
+            geocode({ address: place.formatted_address });
+          }
+        }
+
+        function geolocate() {
+          if(navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition( function( position ) {
+              var geolocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+              };
+              var circle = new google.maps.Circle({
+                center: geolocation,
+                radius: position.coords.accuracy
+              });
+              autocomplete.setBounds( circle.getBounds() );
+            });
+          }
+        }
+
+        jQuery( "#autocomplete-address" ).on( "focus", function() {
+          geolocate();
+        });
+
+        function geocode(request) {
+          geocoder.geocode(request).then((result) => {
+            const { results } = result;
+            map.setCenter(results[0].geometry.location);
+            marker.setPosition(results[0].geometry.location);
+            marker.setMap(map);
+            return results;
+          }).catch((e) => {
+            alert("Geocode was not successful for the following reason: " + e);
+          });
+        }
+
+        function make_address(value, key){
+          let data = {name:"",street_number:"",route:"",locality:"",administrative_area_level_1:"",country:"",postal_code:"",lat:"",lng:"",plus_code:""};
+          if(key == "auto"){
+            data["lat"] = value.geometry.location.lat();
+            data["lng"] = value.geometry.location.lng();
+            data["name"] = value.formatted_address;
+            for(let i = 0; i < value.address_components.length; i++) {
+              let addressType = value.address_components[i].types[0];
+              if(componentForm[addressType]) {
+                let val = value.address_components[i][componentForm[addressType]];
+                let key = value.address_components[i].types[0];
+                data[key] = val;
+              }
+            }
+          }else{
+            let values = value.results[0] || [];
+            data["lat"] = (values ? values.geometry.location.lat() : "");
+            data["lng"] = (values ? values.geometry.location.lng() : "");
+            data["name"] = value.formatted_address;
+            for(let i = 0; i < values.address_components.length; i++) {
+              let addressType = values.address_components[i].types[0];
+              if(componentForm[addressType]) {
+                let val = values.address_components[i][componentForm[addressType]];
+                let key = values.address_components[i].types[0];
+                data[key] = val;
+                                                        }
+            }
+          }
+          update_address(data)
+        }
+        function update_address(data){
+        	frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state", data["administrative_area_level_1"]);
+					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city", data["locality"]);
+					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "country_2", data["country"]);
+					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
+					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address", document.getElementById("autocomplete-address").value);
+        }
+      </script>
+    </body>
+  </html>
+`;
+function set_map (frm) {
+  setTimeout(frm.set_df_property("map", "options", html), 500);
+  if(frm.is_new()){
+    frm.set_df_property('map','hidden',1);
+    $('.frappe-control[data-fieldname="html"]').html('');
+    $('.frappe-control[data-fieldname="map"]').html('');
+  }else if(frm.doc.search_on_maps == 0 && frm.doc.enter_manually ==0){
+    frm.set_df_property('map','hidden',1);
+  }
+}

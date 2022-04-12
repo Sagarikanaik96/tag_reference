@@ -20,6 +20,7 @@ frappe.ui.form.on("Job Order", {
 			frm.set_value('e_signature_full_name', frappe.session.user_fullname);
 			frm.set_df_property("e_signature_full_name", "read_only", 1);
 		}
+
 		make_invoice(frm);
 		hide_employee_rating(frm);
 		direct_order_staff_company(frm)
@@ -60,6 +61,7 @@ frappe.ui.form.on("Job Order", {
 		if (frappe.boot.tag.tag_user_info.company_type != "Staffing") {
 			fields_setup(frm);
 		}
+
 	},
 	
 	setup: function(frm) {
@@ -91,6 +93,7 @@ frappe.ui.form.on("Job Order", {
 				query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_jobtitle_list",
 				filters: {
 					job_order_company: doc.company,
+					job_category: doc.category,
 				},
 			};
 		});
@@ -132,6 +135,7 @@ frappe.ui.form.on("Job Order", {
 		staffing_company_remove(frm);
 		staff_company_read_only(frm)
 		job_order_cancel_button(frm);
+		staff_company_asterisks(frm);
 		$(document).on('click', '[data-fieldname="job_start_time"]', function(){
 			$('.datepicker').show()
 			time_validation(frm)
@@ -146,29 +150,35 @@ frappe.ui.form.on("Job Order", {
 		if (frm.doc.__islocal != 1 && frappe.boot.tag.tag_user_info.company_type == "Hiring" && frm.doc.order_status == "Upcoming") {
 			hide_unnecessary_data(frm);
 		}
-
-		if ((cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
-			if (frm.doc.resumes_required){
-				frm.add_custom_button(__('Assign Employee'), function(){
-					assign_employees(frm);
-				});
-			}else{
-				frm.add_custom_button(__('Claim Order'), function() {
-					claim_job_order_staffing(frm);
-				});
-			}
-		}else if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
-			if (frm.doc.resumes_required){
-				cur_frm.add_custom_button(__('Assign Employee'), function(){
-					assign_employees(frm);
-				});
-			}else{
-				claim_order_button(frm);
-			}
-		}
-
 		cancel_job_order_deatils(frm);
 		deny_job_order(frm);
+
+		$(document).on('click', '[data-fieldname="company"]', function(){
+			companyhide(3000)
+		});
+
+		$('[data-fieldname="company"]').mouseover(function(){
+			companyhide(500)
+		})
+
+	  	document.addEventListener("keydown", function(){
+	  		companyhide(500)
+	    })
+
+		$('[data-fieldname="company"]').click(function(){ return false})
+	    $('[data-fieldname="company"]').click(function(){
+			
+			if (frm.doc.company){
+				localStorage.setItem("company", frm.doc.company);
+				window.location.href= "/app/dynamic_page";
+			}
+		});
+
+	    if (cur_frm.doc.__islocal != 1) {
+
+	    	localStorage.setItem("order", frm.doc.name);
+	    }
+
 	},
 
 	select_job: function(frm) {
@@ -240,7 +250,7 @@ frappe.ui.form.on("Job Order", {
 			});
 		}
 
-		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		if(frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.resumes_required==0){
 			frappe.call({
 				method: "tag_workflow.tag_data.claim_order_insert",
 				args: {
@@ -341,6 +351,8 @@ frappe.ui.form.on("Job Order", {
 
 	category: function(frm) {
 		frm.set_value('shovel', "");
+		frm.set_value('select_job', "");
+
 	},
 
 	validate: function(frm) {
@@ -423,13 +435,23 @@ frappe.ui.form.on("Job Order", {
 				},
 			});
 		}
+		sessionStorage.setItem('joborder_company', frm.doc.company);
 	},
-	claim:(frm)=>{
+	onload_post_render:function(frm){
 		if ((cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
-			frm.add_custom_button(__('Assign Employee'), function(){
-				assign_employees(frm);
-			});
+			if (frm.doc.resumes_required){
+				assign_emp_button(frm);
+			}else{
+				claim_order_button(frm);
+			}
+		}else if (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User"))){
+			if (frm.doc.resumes_required){
+				assign_emp_button(frm);
+			}else{
+				claim_order_button(frm);
+			}
 		}
+
 	}
 });
 
@@ -886,7 +908,6 @@ function view_buttons_hiring(frm){
 
 
 function view_buttons_staffing(frm) {
-	assign_employee_button(frm);
 	claim_assign_button(frm);
 	if ((frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)) {
 		let data3 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Messages </p></div>`;
@@ -969,7 +990,7 @@ function hiring_buttons(frm) {
 			},
 			callback: function(r) {
 				if (r.message == 'success1') {
-					frm.add_custom_button(__('Approved Employees'), function() {
+					frm.add_custom_button(__('Assigned Employees'), function() {
 						approved_emp(frm)
 					}, __("View"));
 					$('[data-fieldname = assigned_employees_hiring]').attr('id', 'approved_inactive')
@@ -1083,6 +1104,7 @@ function staff_assigned_emp(frm){
 				});
 				frm.set_df_property("assigned_employees", "options", data);
 				frm.toggle_display('related_actions_section', 1);
+				frm.remove_custom_button('Assign Employee');
 			}
 		}
 	});
@@ -1363,28 +1385,32 @@ function cancel_job_order_deatils(frm){
 
 function staffing_company_remove(frm){
 	if(frm.doc.__islocal==1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-		frm.set_value('company','')
+		frm.set_value('company', '');
 	}
 }  
 
 function claim_order_button(frm) {
-	if (frm.doc.__islocal != 1){
-		frm.add_custom_button(__('Claim Order'), function(){
+	if (frm.doc.__islocal != 1 && frm.doc.no_of_workers != frm.doc.worker_filled){
+		let exist =false;
+		exist = check_claim_company(frm);
+		if(!exist){
+			frm.add_custom_button(__('Claim Order'), function(){
 			claim_job_order_staffing(frm);
 		});
+		}
 	}
 }
 
 
 function staff_company_read_only(frm){
-    if(frm.doc.__islocal!=1 && frm.doc.company_type=='Non Exclusive' && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+	if(frm.doc.__islocal!=1 && frm.doc.company_type=='Non Exclusive' && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 		$('[data-label="Save"]').hide()
-        var myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
-        var arrayLength = myStringArray.length;
-        for (var i = 0; i < arrayLength; i++) {
-            frm.set_df_property(myStringArray[i], "read_only", 1);
-        }
-    }
+		var myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
+		var arrayLength = myStringArray.length;
+		for(var i = 0; i < arrayLength; i++){
+			frm.set_df_property(myStringArray[i], "read_only", 1);
+		}
+	}
 }
 
 function direct_order_staff_company(frm){
@@ -1394,7 +1420,58 @@ function direct_order_staff_company(frm){
 	}
  }
 
-function assign_employee_button(frm){
-	if(frm.doc.claim && frm.doc.resumes_required)
- 		frm.trigger('claim')
- }
+ 
+function companyhide(time){
+	setTimeout(() => {
+		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns');
+		var txt2 = 'ul[id="'+txt+'"]';
+		var arry = document.querySelectorAll(txt2)[0].children;
+		if(arry.length){
+			document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none';
+			document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none';
+		}
+	}, time);
+}
+
+function staff_company_asterisks(frm){
+	if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		if(frm.doc.company_type=='Non Exclusive'){
+			remove_asterisks(frm);
+		}else{
+			frappe.db.get_value('User',{'name':frm.doc.owner},['organization_type'],function(r){
+				if((r.organization_type !='Staffing' || r  == null) ||  frm.doc.owner!=frappe.session.user){
+					remove_asterisks(frm);
+				}
+			});
+		}
+	}
+}
+
+function remove_asterisks(frm){
+	var myStringArray = ["company", "category", "select_job", "from_date", "rate", "to_date", "job_start_time", "estimated_hours_per_day", "job_site", "no_of_workers","e_signature_full_name","agree_to_contract"];
+	var arrayLength = myStringArray.length;
+	for (var i = 0; i < arrayLength; i++) {
+		frm.set_df_property(myStringArray[i], "reqd", 0);
+	}
+	frm.set_df_property('agree_to_contract','label','Agree To Contract');
+	frm.set_df_property('agree_to_contract','description','Agree To Contract Is Required To Save The Order');
+}
+
+function assign_emp_button(frm){
+	check_assigned_emp(frm);
+}
+
+function check_assigned_emp(frm){
+	frappe.db.get_value("Assign Employee", {'job_order': frm.doc.name, 'company': frappe.boot.tag.tag_user_info.company}, ["name"], function(rr) {
+		if (rr.name === undefined) {
+			frm.add_custom_button(__('Assign Employee'), function(){
+				assign_employees(frm);
+			});
+		}
+	});
+}
+function check_claim_company(frm){
+	if(frm.doc.claim && frm.doc.claim.includes(frappe.boot.tag.tag_user_info.company) )
+		return true;
+}
+

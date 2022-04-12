@@ -467,7 +467,8 @@ class DesktopPage {
 									let html="";
 									for(let d in result){
 										if(result[d] != "undefined"){
-											html += "<div class='d-flex flex-wrap border-bottom' style='margin-top: 0.5rem;'><div class='col-md-12'><label class='text-secondary'>"+result[d]+"</label></div></div>"
+											let link = result[d].split(' ').join('%');
+											html += "<div class='d-flex flex-wrap border-bottom' style='margin-top: 0.5rem;'><div class='col-md-12'><label class='text-secondary'><a onclick=dynamic_route('"+link+"')>"+result[d]+"</a></label></div></div>"
 										}
 									}
 									$("#staffing_list").html(html);
@@ -475,6 +476,13 @@ class DesktopPage {
 								}
 							}
 						});
+					}
+
+					function dynamic_route(name){
+						name1= name.replace(/%/g, ' ');
+						localStorage.setItem("company", name1);
+						window.location.href = "/app/dynamic_page";						
+
 					}
 				</script>
 			`);

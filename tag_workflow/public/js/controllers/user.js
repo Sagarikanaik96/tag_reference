@@ -1,6 +1,9 @@
 frappe.ui.form.on("User", {
 	refresh: function(frm){
-		$('.form-footer').hide()
+		$('.form-footer').hide();
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+		$('.custom-actions.hidden-xs.hidden-md').show();
+
 		cur_frm.clear_custom_buttons();
 		multi_company_setup(frm);
 		set_options(frm);
@@ -12,6 +15,19 @@ frappe.ui.form.on("User", {
 		if(frm.doc.__islocal==1){
 			cancel_user(frm);
 		}
+
+
+		$(document).on('click', '[data-fieldname="company"]', function(){
+			companyhide(1250)
+		});
+
+		$('[data-fieldname="company"]').mouseover(function(){
+			companyhide(210)
+		})
+
+	  	document.addEventListener("keydown", function(){
+	  		companyhide(210)
+	    })
 
 	},
 	setup: function(frm){
@@ -156,11 +172,17 @@ function field_toggle(frm){
 	for(let field in perm_dis_fields){
 		cur_frm.toggle_display(perm_dis_fields[field], 0);
 	}
+	if(frappe.session.user!='Administrator'){
+		var gender_dob=['gender','birth_date']
+		for(let field in gender_dob){
+			cur_frm.toggle_display(gender_dob[field], 0);
+		}
+	}
 }
 
 function field_reqd(frm){
 	cur_frm.fields_dict["short_bio"].collapse();
-	var data = ["company", "gender", "birth_date", "date_of_joining"];
+	var data = ["company", "date_of_joining"];
 	for(let value in data){
 		cur_frm.toggle_reqd(data[value], 1);
 	}
@@ -281,7 +303,7 @@ function make_multicompany(frm){
 	let org_data = get_data(frm);
 	let table_fields = [
 		{
-			fieldname: "company", fieldtype: "Link", in_list_view: 1, label: "Organisation", options: "Company", reqd: 1,
+			fieldname: "company", fieldtype: "Link", in_list_view: 1, label: "Organization", options: "Company", reqd: 1,
 			get_query: function(){
 				return{
 					filters: [["Company", "name", "not in", cur_frm.doc.company], ["Company", "organization_type", "=", cur_frm.doc.organization_type]]
@@ -291,7 +313,7 @@ function make_multicompany(frm){
 	];
 
 	let dialog = new frappe.ui.Dialog({
-		title: 'Multi-Organisarion Setup',
+		title: 'Multi-Organization Setup',
 		fields: [
 			{label: "Current User", fieldname: "user", fieldtype: "Link", options: "User", default: cur_frm.doc.name, read_only: 1},
 			{fieldname:"company", fieldtype:"Table", label:"", cannot_add_rows:false, in_place_edit:true, reqd:1, data:org_data, fields:table_fields},
@@ -397,4 +419,17 @@ function exclusive_fields(frm){
 		$('[data-label="Save"]').show()
 	}
  }
- 
+
+function companyhide(time) {
+	setTimeout(() => {
+		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns')
+		var txt2 = 'ul[id="'+txt+'"]'
+		var  arry = document.querySelectorAll(txt2)[0].children
+		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
+		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
+
+		
+	}, time)
+}
+
+

@@ -1,7 +1,9 @@
 frappe.listview_settings['Claim Order'] = {
 
     refresh(listview) {
-        listview.page.clear_primary_action()
+	$('[class="btn btn-primary btn-sm primary-action"]').show();
+	$('.custom-actions.hidden-xs.hidden-md').show();
+        listview.page.clear_primary_action();
         $("button.btn.btn-default.btn-sm.filter-button").hide();
         $("button.btn.btn-sm.filter-button.btn-primary-light").hide();
         if((listview.data[0]["approved_no_of_workers"])!=0 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
@@ -37,9 +39,17 @@ frappe.listview_settings['Claim Order'] = {
     formatters: {
 		staffing_organization(val, d, f) {
 			if (val) {
+                let link = val.split(' ').join('%');
 				return `<span class=" ellipsis" title="" id="${val}-${f.name}">
-						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">${val}</a>
-					</span>`
+						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" onclick=dynamic_route('${link}') >${val}</a>
+					</span>
+                    <script>
+                    function dynamic_route(name){
+                        var name1= name.replace(/%/g, ' ');
+						localStorage.setItem("company", name1);
+						window.location.href = "/app/dynamic_page";	
+                    }
+                    </script>`
 
             }
         },

@@ -3,6 +3,8 @@
 
 frappe.ui.form.on('Job Titles', {
 	refresh: function(frm) {
-		$('.form-footer').hide()
+		$('.form-footer').hide();
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+		$('.custom-actions.hidden-xs.hidden-md').show();
 	}
 });

@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/erpuser/tag-workflow
+    destination: /home/erpuser/frappe-bench/apps/tag_workflow
 hooks:
   AfterInstall:
     - location: scripts/after_install.sh

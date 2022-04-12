@@ -5,9 +5,33 @@ frappe.ui.form.on('Job Site', {
 	refresh: function(frm){
 		$('.form-footer').hide()
 		$('[data-original-title="Menu"]').hide()
-		maps(frm);
+		maps();
+		hide_field(frm)
+		frm.get_docfield('address').label ='Complete Address';
+		frm.refresh_field('address')
 		if(frm.doc.__islocal==1){
 			cancel_jobsite(frm);
+			frm.set_df_property('job_site_contact','hidden', 1);
+			let len_history = frappe.route_history.length;
+			if(frappe.route_history.length>1 && frappe.route_history[len_history-2][1]=='Job Order'){
+				frm.set_value('company',sessionStorage.getItem('joborder_company'));
+				frm.set_df_property('company', 'read_only', 1);
+				sessionStorage.removeItem('joborder_company');
+			}else if(frappe.route_history.length>1 && frappe.route_history[len_history-2][1]=='Company'){
+				frm.set_value('company',frappe.route_history[len_history-2][2]);
+				frm.set_df_property('company', 'read_only', 1);
+			}
+			else if(frappe.boot.tag.tag_user_info.company_type == 'Hiring' || frappe.boot.tag.tag_user_info.company_type == 'Exclusive Hiring'){
+				frm.set_value('company', frappe.boot.tag.tag_user_info.company);
+				frm.set_df_property('company', 'read_only', 1);
+			}else{
+				frm.set_value('company', '');
+				frm.set_query('company', function(){
+					return{
+						filters: {parent_staffing:frappe.boot.tag.tag_user_info.company}
+					}
+				});
+			}
 		}
 	},
 
@@ -24,12 +48,20 @@ frappe.ui.form.on('Job Site', {
 	search_on_maps: function(frm){
 		if(cur_frm.doc.search_on_maps == 1){
 			update_field(frm, "map");
+			show_addr(frm)
+		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.manually_enter==0){
+			cur_frm.set_df_property('lat','hidden',1);
+			cur_frm.set_df_property('lng','hidden',1);
+			cur_frm.set_df_property('address','hidden',0)
 		}
 	},
 
 	manually_enter: function(frm){
 		if(cur_frm.doc.manually_enter == 1){
 			update_field(frm, "manually");
+			show_addr(frm)
+		}else{
+			cur_frm.set_df_property('address','hidden',0)
 		}
 	},
 	validate: function (frm) {
@@ -68,7 +100,27 @@ frappe.ui.form.on('Job Site', {
 				cur_frm.refresh_field("job_site");
 			}
 		});
-	}
+	},
+	job_site_contact: function(frm){
+		if(!frm.doc.job_site_contact){
+			frm.set_value('contact_email', '');
+			frm.set_value('contact_name', '');
+			frm.set_value('phone_number', '');
+		}
+	},
+	company: function(frm){
+		if(frm.doc.company){
+			frm.set_df_property('job_site_contact','hidden', 0);
+			get_jobsite_contact(frm);
+		}
+		else{
+			frm.set_value('job_site_contact', '');
+			frm.set_value('contact_email', '');
+			frm.set_value('contact_name', '');
+			frm.set_value('phone_number', '');
+			frm.set_df_property('job_site_contact','hidden', 1);
+		}
+	},
 
 });
 
@@ -214,7 +266,7 @@ let html = `
 
 				function update_address(data){
 					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "job_site", document.getElementById("autocomplete-address").value);
-					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address", (data["street_number"]+" "+data["route"]));
+					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address", document.getElementById("autocomplete-address").value);
 					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state", data["administrative_area_level_1"]);
 					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city", data["locality"]);
 					frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "lat", data["lat"]);
@@ -226,8 +278,10 @@ let html = `
 	</html>
 `
 
-function maps(frm){
+function maps(){
 	 setTimeout(cur_frm.set_df_property("html", "options", html), 500);
+	 if(cur_frm.is_new())
+	 	$('.frappe-control[data-fieldname="map"]').html('')
 }
 
 
@@ -235,4 +289,43 @@ function cancel_jobsite(frm){
 	frm.add_custom_button(__('Cancel'), function(){
 		frappe.set_route("Form", "Job Site");
 	});
+}
+function get_jobsite_contact(frm){
+	frappe.db.get_value("User", {"company": frm.doc.company}, ['name'], function(r){
+		if(Object.keys(r).length==0){
+			frappe.db.get_value('Company', {'name': frm.doc.company}, ['contact_name', 'phone_no', 'email'], function(res){
+				frm.set_df_property('job_site_contact', 'hidden', 1);
+				if(Object.values(res).every(x => x === null)){
+					let message = 'Either create a user or fill in primary contact details of <b>'+frm.doc.company+'</b> to create a job site.'
+					frappe.msgprint(__(message));
+				}else{
+					frm.set_value('contact_name', res.contact_name);
+					frm.set_value('contact_email', res.email);
+					frm.set_value('phone_number', res.phone_no);
+				}
+			});
+		}
+		else{
+			get_users(frm);
+		}
+	});
+}
+
+function get_users(frm){
+	frm.set_query('job_site_contact', function(doc) {
+		return {
+			query: "tag_workflow.tag_data.job_site_contact",
+			filters: {'job_order_company': doc.company}
+		}
+	});
+
+}
+function show_addr(frm){
+	if(frm.doc.search_on_maps){
+		frm.set_df_property('address','hidden',0)
+    frm.get_docfield('address').label ='Complete Address';
+    frm.refresh_field('address');
+  }else if(frm.doc.manually_enter){
+  	frm.set_df_property('address','hidden',1)
+  }
 }

@@ -8,6 +8,7 @@ from tag_workflow.tag_data import employee_company
 from tag_workflow.utils.notification import sendmail, make_system_notification, share_doc
 from frappe.desk.query_report import get_report_doc, generate_report_result
 from frappe.desk.desktop import Workspace
+from frappe import enqueue
 
 #-------global var------#
 item = "Timesheet Activity Cost"
@@ -16,6 +17,10 @@ payment = "Payment Schedule"
 taxes= "Sales Taxes and Charges"
 team = "Sales Team"
 JO = "Job Order"
+url_link="https://api.resumatorapi.com/v1/applicants/"
+apikey="?apikey="
+tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
+
 #-----------------------------------#
 def set_missing_values(source, target, customer=None, ignore_permissions=True):
     if customer:
@@ -127,30 +132,25 @@ def preparing_employee_data(data, company):
         return "Total <b>"+str(total)+"</b> records found, out of these newly created recored are <b>"+str(is_emp)+"</b> and <b>"+str(is_exists)+"</b> already exists."
     except Exception as e:
         frappe.throw(e)
-
+ 
 @frappe.whitelist()
-def make_jazzhr_request(api_key, company,count):
-    try:
-        if(count==str(0)):
-            url = "https://api.resumatorapi.com/v1/applicants?apikey="+api_key
-            response = requests.get(url)
-        else:
-            url="https://api.resumatorapi.com/v1/applicants/page/"+str(count)+"?apikey="+api_key
-            response = requests.get(url)
-        if(response.status_code == 200 and len(response.json())>0 and len(response.json())==100):
-            data = response.json()
-            result = preparing_employee_data(data, company)
-            return result
-        elif(response.status_code == 200 and len(response.json())>0 and len(response.json())!=100):
-            data = response.json()
-            result = preparing_employee_data(data, company)
-            return 'success'
-        else:
-            error = json.loads(response.text)['error']
-            frappe.throw(_("{0}").format(error))
-    except Exception as e:
-        frappe.log_error(e, "JazzHR")
-        frappe.throw(e)
+def make_jazzhr_request(api_key, company):
+   try:
+       url = "https://api.resumatorapi.com/v1/applicants?apikey="+api_key
+       response = requests.get(url)
+       if(response.status_code == 200 and len(response.json())>0 and len(response.json())==100):
+           data = response.json()
+           enqueue(fetching_data(data,response,api_key,company))
+           frappe.msgprint('Employees Added successfully')
+ 
+          
+       else:
+           error = json.loads(response.text)['error']
+           frappe.throw(_("{0}").format(error))
+   except Exception as e:
+       frappe.msgprint('Some Error Occur . Please Try Again')
+       frappe.error_log(e, "JazzHR")
+       frappe.throw(e)
 
 
 #--------get user data--------#
@@ -227,6 +227,9 @@ def request_signature(staff_user, staff_company, hiring_user, name):
 def update_lead(lead, staff_company, date, staff_user, name):
     try:
         frappe.db.set_value("Lead", lead, "status", 'Close')
+        frappe.db.set_value("Contract", name, 'document_status', 'Submitted');
+        frappe.db.set_value("Contract", name, "docstatus", 1)
+
         date = date.split('-')
         new_date = date[1]+'-'+date[2]+'-'+date[0]
         message = f"Congratulations! A Hiring contract has been signed on <b>{new_date}</b> for <b>{staff_company}</b>."
@@ -371,11 +374,15 @@ def get_desktop_page(page):
 def search_staffing_by_hiring(data=None):
     try:
         if(data):
+            
             user_name = frappe.session.user
             sql = ''' select company from `tabUser` where email='{}' '''.format(user_name)
             user_comp = frappe.db.sql(sql, as_list=1)
             sql = """select distinct p.name from `tabCompany` p inner join `tabIndustry Types` c where p.name = c.parent and organization_type = "Staffing" and (p.name like '%{0}%' or c.industry_type like '%{0}%') and c.industry_type in (select industry_type from `tabIndustry Types` where parent='{1}')  """.format(data,user_comp[0][0])
             data = frappe.db.sql(sql, as_dict=1)
+            exc_par = frappe.db.get_value("Company", {"name": user_comp[0][0]}, "parent_staffing")
+            if(exc_par):
+                data.append({"name": exc_par})
             return [d['name'] for d in data]
         return []
     except Exception as e:
@@ -395,3 +402,244 @@ def validated_primarykey(company):
 from datetime import datetime
 def converttime(s):
     return  datetime.strptime(str(s), '%H:%M:%S').strftime('%I:%M %p')
+
+ 
+def fetching_data(data,response,api_key,company):
+    try:
+        i=1
+        while(len(response.json())==100):
+            url="https://api.resumatorapi.com/v1/applicants/page/"+str(i)+apikey+api_key
+            response = requests.get(url)
+            i=i+1
+            data.extend(response.json())
+        my_data=frappe.cache()
+        my_data.set_value(1,data)
+        enqueue(emp_data(api_key,my_data,company))
+    except Exception as e:
+        frappe.msgprint('Error Occured')
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)
+ 
+def emp_data(api_key,data,company):
+    try:
+        y=data.get_value(1)
+        data.set_value(1,'')
+        for i in y:
+            try:
+                name=i['id']
+                sql_data=f'SELECT EXISTS(SELECT * from `tabEmployee` WHERE employee_number="{name}");'
+                sql=frappe.db.sql(sql_data,as_list=1)
+                if(sql[0][0]==0):
+                    url = url_link+name+apikey+api_key
+                    response = requests.get(url)
+                    emp_response_data(response,company)
+            except Exception as e:
+                frappe.msgprint('Some Error Occured while storing data . Please try again')
+                frappe.error_log(e, "JazzHR")
+                frappe.throw(e)
+            
+ 
+    except Exception as e:
+        frappe.msgprint('Some Error Occured . Please try again')
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)
+
+def emp_response_data(response,company):
+    try:
+        if(response.status_code == 200 and len(response.json())>0):
+            data=response.json()
+            employee_gender=data['eeo_gender'] if data['eeo_gender'] else ''
+            military=1 if data['eeoc_veteran']=='I AM A PROTECTED VETERAN' else 0
+            street_address=data['address'] if data['address']!='Unavailable' and data['address']!='' else ''
+            data1=frappe.db.sql('''select name from `tabEmployee` order by name desc limit 1''',as_list=1)
+            last_series_name=data1[0][0]
+            name=str(last_series_name).split('-')
+            series_number=name[0:-1]
+            series_last_no=name[-1]
+            new_series_number=str(int(series_last_no)+1).rjust(len(series_last_no), '0')
+            series_name_data = '-'.join(series_number)
+            new_series=series_name_data+'-'+str(new_series_number)
+            b_id=data['id'].strip('"')
+            first_name=data['first_name'].strip('"')
+            last_name=data['last_name'].strip('"')
+            phone_number=data['phone']
+            email_id=data['email']
+            state=''
+            city=''
+            zip_code=0
+            state,city,zip_code=emp_city_state(data)
+            my_db=f'''insert into `tabEmployee` (name,employee_number,employee_name,first_name,last_name,company,contact_number,employee_gender,military_veteran,street_address,city,state,zip,email) values("{new_series}","{b_id}","{first_name} {last_name}","{first_name}","{last_name}","{company}","{phone_number}","{employee_gender}","{military}","{street_address}","{city}","{state}","{zip_code}","{email_id}");'''
+            frappe.db.sql(my_db)
+            old_series=frappe.db.sql("""select current from `tabSeries` where name='HR-EMP-' """,as_list=1)
+            last_series_name=old_series[0][0]
+            current=last_series_name+1
+            my_db1=f'''update `tabSeries` set current={current} where name='HR-EMP-';'''
+            frappe.db.sql(my_db1)
+            frappe.db.commit()
+    except Exception as e:
+        frappe.msgprint('Some Error Occured')
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)
+def emp_city_state(data):
+    try:
+        if(data['location'])!='(No City Provided) (No State Provided) (No Postal Code Provided)':
+            address_data="https://maps.googleapis.com/maps/api/geocode/json?key="+tag_gmap_key+"&address="+data['location']
+            state,city,zip_code='','',0
+            response = requests.get(address_data)
+            if(response.status_code == 200 and len(response.json())>0 and len(response.json()['results'])>0):
+                address_dt=response.json()
+                state,city,zip_code=emp_zip_city(address_dt)
+            return state,city,zip_code
+        else:
+            state,city,zip_code='','',0
+            return state,city,zip_code
+    except Exception as e:
+        frappe.msgprint('Some Error Occured while fetching address')
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)
+           
+def emp_zip_city(address_dt):
+    try:
+        state,city,zip_code='','',0
+
+        state_data=address_dt['results'][0]['address_components']
+        for i in state_data:
+            if 'administrative_area_level_1' in i['types']:
+                state=i['long_name'] if i['long_name'] else ''
+            elif 'postal_code' in i['types']:
+                zip_code=i['long_name'] if i['long_name'].isdigit() else 0
+
+        city_zip=address_dt['results'][0]['formatted_address'].split(',')
+        city=city_zip[-3].strip() if len(city_zip)>2 and city_zip[-3].strip() else ''
+        return state,city,zip_code
+    except Exception as e:
+        frappe.msgprint('Some Error Occured while fetching address')
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)
+
+@frappe.whitelist()
+def update_employees_data_jazz_hr(api_key,company):
+    try:
+        enqueue(emp_data_update(api_key,company))
+        frappe.msgprint('Employee Data Updated Successfully')
+        return True
+
+    except Exception as e:
+        frappe.msgprint('Error Occured')
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)
+def emp_data_update(api_key,company):
+    try:
+        emp_list=frappe.db.sql('select employee_number from `tabEmployee` where employee_number is NOT NULL and company="{0}" and updated_once!=1'.format(company),as_list=1)
+        if(len(emp_list)>0):
+            for i in emp_list:
+                try:
+                    name=i[0]
+                    sql_data=f'SELECT EXISTS(SELECT * from `tabEmployee` WHERE employee_number="{name}");'
+                    sql=frappe.db.sql(sql_data,as_list=1)
+                    if(sql[0][0]==1):
+                        employee_doc=f'select name from `tabEmployee` where employee_number="{name}"'
+                        emp_doc=frappe.db.sql(employee_doc,as_list=1)
+                        emp_number=emp_doc[0][0]
+                        url = url_link+name+apikey+api_key
+                        response = requests.get(url)
+                        if(response.status_code == 200 and len(response.json())>0):
+                            data=response.json()
+                            doc_emp=frappe.get_doc('Employee',emp_number)
+                            updates_value(emp_number,data,doc_emp)
+                except Exception as e:
+                    frappe.msgprint('Some Error Occured while data updating ')
+                    frappe.error_log(e, "JazzHR")
+                    frappe.throw(e)
+    except Exception as e:
+        frappe.msgprint('Some Error Occur')
+
+        make_system_notification([frappe.session.user], "Updation Is not Successful", 'Company', company, 'Updation Error')
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)
+@frappe.whitelist()
+def update_single_employee(employee_id,name,comp_name,updated_once):
+    try:
+        if(updated_once!='1'):
+            api_key=frappe.get_doc('Company',comp_name)
+            url = url_link+employee_id+apikey+api_key.jazzhr_api_key
+            response = requests.get(url)
+            if(response.status_code == 200 and len(response.json())>0):
+                data=response.json()
+                doc_emp=frappe.get_doc('Employee',name)
+                updates_value(name,data,doc_emp)
+            return True
+        else:
+            frappe.msgprint('Employee Data Already Update')
+
+    except Exception as e:
+        frappe.msgprint('Some Error Occur')
+        make_system_notification([frappe.session.user], "Updation Is not Successful", 'Company', comp_name, 'Updation Error')
+
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)
+def updates_value(name,data,doc_emp):
+    try:
+        if('eeo_gender' in data.keys()):
+            state,city,zip_code=doc_emp.state,doc_emp.city,doc_emp.zip
+            employee_gender,military_veteran,street_address,contact_number,email,state,city,zip_code=employee_basic_details(data,doc_emp)
+            state,zip_code,city=emp_address_detail(data,doc_emp)
+            state=state if doc_emp.state is None else doc_emp.state
+            city=city if doc_emp.city is None or len(doc_emp.city)==0 else doc_emp.city
+            zip_code=zip_code if doc_emp.zip is None or doc_emp.zip==0 else doc_emp.zip
+            d=f'update `tabEmployee` set employee_gender="{employee_gender}",military_veteran="{military_veteran}",street_address="{street_address}",contact_number="{contact_number}",email="{email}",zip={zip_code},state="{state}",city="{city}",updated_once=1  where name="{name}"'
+            frappe.db.sql(d)
+            frappe.db.commit()
+    except Exception as e:
+        frappe.msgprint('Some Error Occured while fetching details')
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)
+ 
+def employee_basic_details(data,doc_emp):
+    try:
+        employee_gender=data['eeo_gender'] if doc_emp.employee_gender is None or data['eeo_gender']=='Decline to answer' and data['eeo_gender'] else doc_emp.employee_gender
+        military_veteran=1 if data['eeoc_veteran']=='I AM A PROTECTED VETERAN' else doc_emp.military_veteran
+        street_address=data['address'] if doc_emp.street_address is None or len(doc_emp.street_address)==0 and data['address']!='' and data['address']!='Unavailable'  else doc_emp.street_address
+        contact_number=data['phone'] if doc_emp.contact_number is None or len(doc_emp.contact_number)==0 else doc_emp.contact_number
+        email=data['email'] if doc_emp.email is None or len(doc_emp.email)==0 else doc_emp.email
+        state=doc_emp.state
+        city=doc_emp.city
+        zip_code=doc_emp.zip
+        return employee_gender,military_veteran,street_address,contact_number,email,state,city,zip_code
+    except Exception as e:
+        frappe.msgprint('Some Error Occured')
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)
+def emp_address_detail(data,doc_emp):
+    try:
+        state,zip_code,city='',0,''
+        if(data['location'])!='(No City Provided) (No State Provided) (No Postal Code Provided)':
+            address_data="https://maps.googleapis.com/maps/api/geocode/json?key="+tag_gmap_key+"&address="+data['location']
+            response = requests.get(address_data)
+            if(response.status_code == 200 and len(response.json())>0 and len(response.json()['results'])>0):
+                address_dt=response.json()
+                address_dt['results'][0]['formatted_address']
+                state_data=address_dt['results'][0]['address_components']
+                state,zip_code=state_zip(state_data,doc_emp)
+                city_zip=address_dt['results'][0]['formatted_address'].split(',')
+                city=city_zip[-3].strip() if len(city_zip)>2 and city_zip[-3].strip() else ''
+        else:
+            city,state,zip_code='','',0
+        return state,zip_code,city
+    except Exception as e:
+        frappe.msgprint('Some Error Occured while fetching address details')
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)
+def state_zip(state_data,doc_emp):
+    try:
+        state,zip_code=doc_emp.state,doc_emp.zip
+        for i in state_data:
+            if 'administrative_area_level_1' in i['types']:
+                state=i['long_name'] if i['long_name'] else ''
+            elif 'postal_code' in i['types']:
+                zip_code=i['long_name'] if i['long_name'].isdigit() else 0
+        return state,zip_code
+    except Exception as e:
+        frappe.msgprint('Some Error Occured while fetching state details')
+        frappe.error_log(e, "JazzHR")
+        frappe.throw(e)

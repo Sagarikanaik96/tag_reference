@@ -60,11 +60,22 @@ def is_send_mail_required(organizaton,doc_name,msg):
 @frappe.whitelist()
 def get_jobtitle_list(doctype, txt, searchfield, page_len, start, filters):
     company=filters.get('job_order_company')
+    category=filters.get('job_category')
+    if company is None:
+        return None
+    else:
+        sql = ''' select job_titles from `tabJob Titles` where parent = '{0}' and  industry_type='{1}' '''.format(company,category)
+        return frappe.db.sql(sql)
+
+@frappe.whitelist()
+def get_jobtitle_list_page(doctype, txt, searchfield, page_len, start, filters):
+    company=filters.get('job_order_company')
     if company is None:
         return None
     else:
         sql = ''' select job_titles from `tabJob Titles` where parent = '{0}' '''.format(company)
         return frappe.db.sql(sql)
+
 
 @frappe.whitelist()
 def update_joborder_rate_desc(company = None,job = None):
@@ -242,9 +253,9 @@ def get_company_details(comp_name):
     
 
 @frappe.whitelist(allow_guest=False)
-def get_joborder_value(user, sid, company_type, name):
+def get_joborder_value(user, company_type, name):
     try:
-        if(company_type and company_type in ["Staffing", "Hiring", "TAG", "Exclusive Hiring"] and frappe.session.user and user and user == frappe.session.user and sid == frappe.cache().get_value("sessions")[user] and name):
+        if(company_type and company_type in ["Staffing", "Hiring", "TAG", "Exclusive Hiring"] and frappe.session.user and user and user == frappe.session.user and name):
             sql = ''' select name,category,from_date,to_date,select_job,job_order_duration,job_site,no_of_workers,rate from `tabJob Order` where name = "{0}" '''.format(name)
             value = frappe.db.sql(sql,as_dict=True)
             if value:

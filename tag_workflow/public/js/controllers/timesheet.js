@@ -2,10 +2,13 @@ frappe.ui.form.on("Timesheet", {
 	refresh: function(frm){
 		$('.form-footer').hide();
 		$('[data-label="Resume%20Timer"]').hide();
+		$('[data-label="Start%20Timer"]').hide();
 		$('[data-label="Create%20Salary%20Slip"]').hide();
 		$('[data-label="Create%20Sales%20Invoice"]').hide();
 		$('[data-label="Cancel"]').hide();
 		$('.custom-actions.hidden-xs.hidden-md').show();
+		$('[class="btn btn-primary btn-sm primary-action"]').show();
+
 		$(document).on('click', '[data-fieldname="from_time"]', function(){
 			$('.datepicker').show()
 		});
@@ -36,6 +39,13 @@ frappe.ui.form.on("Timesheet", {
 		hide_timesheet_field(timesheet_fields);
 
 		check_update_timesheet(frm);
+		let child_table = ['activity_type','from_time', 'to_time', 'hrs', 'billing_amount']
+		for(let i in child_table){
+			$( "[data-fieldname="+child_table[i]+"]" ).on('mouseover',function(e) {
+				let file=e.target.innerText;
+				$(this).attr('title', file);
+			});
+		}
 	},
 	setup: function(frm){
 		job_order_details(frm);

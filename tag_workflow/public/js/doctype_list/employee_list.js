@@ -85,3 +85,34 @@ frappe.listview_settings['Employee'] = {
 		}
 	}
 };
+
+frappe.confirm = function(message, confirm_action, reject_action) {
+	const custom_message = "All the data linked to this employee will be deleted?";
+	var d = new frappe.ui.Dialog({
+		title: __("Confirm"),
+		primary_action_label: __("Confirm"),
+		primary_action: () => {
+			confirm_action && confirm_action();
+			d.hide();
+		},
+		secondary_action_label: __("Cancel"),
+		secondary_action: () => d.hide(),
+	});
+
+	d.$body.append(`<p class="frappe-confirm-message">${custom_message}</p>`);
+	d.show();
+
+	// flag, used to bind "okay" on enter
+	d.confirm_dialog = true;
+
+	// no if closed without primary action
+	if (reject_action) {
+		d.onhide = () => {
+			if (!d.primary_action_fulfilled) {
+				reject_action();
+			}
+		};
+	}
+
+	return d;
+};

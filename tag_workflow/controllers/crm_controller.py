@@ -38,8 +38,18 @@ def get_org_types(staffing, organization_type=None):
 
 
 @frappe.whitelist()
-def onboard_org(lead, exclusive, staffing, email, person_name, gender, phone, dob, organization_type=None):
+def onboard_org(lead,contract_number):
     try:
+        lead_value=frappe.get_doc('Lead',lead)
+        exclusive=lead_value.company_name
+        staffing=lead_value.owner_company
+        email=lead_value.email_id
+        person_name=lead_value.lead_name
+        phone=lead_value.phone_no
+        organization_type=lead_value.organization_type
+        lead_value.status='Contract Signing'
+        lead_value.save(ignore_permissions=True)
+
         is_company, is_user = 1, 1
         company_doc, user = "", ""
 
@@ -47,14 +57,14 @@ def onboard_org(lead, exclusive, staffing, email, person_name, gender, phone, do
 
         if frappe.db.exists("User", email):
             frappe.msgprint(_("User already exists with given email(<b>{0}</b>). Email must be unique for onboarding.").format(email))
-            return is_company, is_user, company_doc, user
+            return 'user not created'
 
         if not frappe.db.exists("Company", exclusive):
-            exclusive = make_company(lead, exclusive, staffing, org_type)
+            exclusive = make_company(exclusive, staffing, org_type,contract_number)
             is_company = 0
 
         if not frappe.db.exists("User", email):
-            user = make_user(exclusive, staffing, email, person_name, org_type, user_type, tag_user_type, gender, phone,dob)
+            user = make_user(exclusive, staffing, email, person_name, org_type, user_type, tag_user_type, phone)
             is_user = 0
 
         enqueue("tag_workflow.controllers.master_controller.make_update_comp_perm", docname=exclusive)
@@ -66,13 +76,11 @@ def onboard_org(lead, exclusive, staffing, email, person_name, gender, phone, do
 
 
 # add orgs
-def make_company(lead, exclusive, staffing, org_type):
+def make_company(exclusive, staffing, org_type,contract_number):
     try:
-        contract=''
-        if(frappe.db.exists("Contract", {"lead": lead})):
-            contract = frappe.get_doc("Contract", {"lead": lead})
+        contract=frappe.get_doc("Contract", {"name": contract_number})
 
-        company = frappe.get_doc(dict(doctype="Company", organization_type=org_type, parent_staffing=staffing, company_name=exclusive, default_currency="USD", country="United States", create_chart_of_accounts_based_on="Standard Template", chart_of_accounts= "Standard with Numbers"))
+        company = frappe.get_doc(dict(doctype="Company", organization_type=org_type, parent_staffing=staffing, company_name=exclusive, default_currency="USD", country="United States", create_chart_of_accounts_based_on="Standard Template", chart_of_accounts= "Standard with Numbers", abbr=exclusive))
         if(contract):
 
             for c in contract.job_titles:
@@ -81,14 +89,20 @@ def make_company(lead, exclusive, staffing, org_type):
             for c in contract._industry_types:
                 company.append("industry_type",{"industry_type":c.industry_type})
         company.save(ignore_permissions=True)
+        for c in contract.job_titles:
+            my_job_title=frappe.get_doc("Item", {"name": c.job_titles})
+            if(my_job_title.company):
+                my_job_title.company=exclusive
+                my_job_title.save(ignore_permissions=True)
+
         return company.name
     except Exception as e:
         frappe.throw(e)
 
 
-def make_user(exclusive, staffing, email, person_name, org_type, user_type, tag_user_type, gender, phone, dob):
+def make_user(exclusive, staffing, email, person_name, org_type, user_type, tag_user_type,phone):
     try:
-        user = frappe.get_doc(dict(doctype="User", organization_type=org_type, tag_user_type=tag_user_type, company=exclusive, email=email, first_name=person_name, module_profile=user_type, role_profile_name=tag_user_type, date_of_joining=frappe.utils.nowdate(),gender=gender, mobile_no=phone, birth_date=dob))
+        user = frappe.get_doc(dict(doctype="User", organization_type=org_type, tag_user_type=tag_user_type, company=exclusive, email=email, first_name=person_name, module_profile=user_type, role_profile_name=tag_user_type, date_of_joining=frappe.utils.nowdate(), mobile_no=phone))
         user.save(ignore_permissions=True)
         return user.name
     except Exception as e:

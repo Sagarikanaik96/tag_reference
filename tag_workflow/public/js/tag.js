@@ -3,14 +3,19 @@ frappe.provide("tag_workflow");
 
 
 $(document).bind('toolbar_setup', function() {
-        $(".dropdown-help").empty();
-        $('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
-			if(window.screen.width>768) {
-				$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
-			}
-			else {
-				$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo-Emblem.png">`);
-			}
+	$(".dropdown-help").empty();
+	$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
+	if(window.screen.width>768){
+		$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
+		if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+			$('.navbar-home').html(`<a class="navbar-brand navbar-home" href="/app/staff-home"><img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png"></a>`);
+		}
+	}else {
+		$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo-Emblem.png">`);
+		if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+			$('.navbar-home').html(`<a class="navbar-brand navbar-home" href="/app/staff-home"><img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png"></a>`);
+		}
+	}
 
 	frappe.ui.toolbar.route_to_company = function() {
 		frappe.set_route('Form', 'Company', frappe.boot.tag.tag_user_info.company);
@@ -21,6 +26,10 @@ $(document).ready(function(){
 	if(frappe.boot && frappe.boot.home_page!=='setup-wizard'){
 		$(".main-section").append(frappe.render_template("tag"));
 	}
+
+	if(window.location.pathname == "/app/staff-home"){
+                setTimeout(frappe.breadcrumbs.clear(), 5000);
+        }
 });
 
 
@@ -196,3 +205,171 @@ function unreject(me,d) {
 		return 0;
 	}
 }
+/*----------fields-----------*/
+tag_workflow.UpdateField = function update_field(frm, field){
+	if(field == "map"){
+		frm.set_value("enter_manually", 0);
+		frm.set_df_property('map','hidden',0);
+	}else{
+		frm.set_value("search_on_maps", 0);
+		frm.set_df_property('map','hidden',1)
+	}
+}
+frappe.search.AwesomeBar.prototype.setup = function(element){
+	var me = this;
+	$('.search-bar').removeClass('hidden');
+	var $input = $(element);
+	var input = $input.get(0);
+	this.options = [];
+	this.global_results = [];
+
+	var awesomplete = new Awesomplete(input, {
+		minChars: 0,
+		maxItems: 99,
+		autoFirst: true,
+		list: [],
+		filter: function() {
+			return true;
+		},
+
+		data: function(item) {
+			return {
+				label: (item.index || ""),
+				value: item.value
+			};
+		},
+
+		item: function(item) {
+			var d = this.get_item(item.value);
+			var name = __(d.label || d.value);
+			var html = '<span>' + name + '</span>';
+			if (d.description && d.value !== d.description) {
+				html += '<br><span class="text-muted ellipsis">' + __(d.description) + '</span>';
+			}
+
+			return $('<li></li>').data('item.autocomplete', d).html(`<a style="font-weight:normal">${html}</a>`).get(0);
+		},
+
+		sort: function(a, b) {
+			return (b.label - a.label);
+		}
+	});
+
+	// Added to aid UI testing of global search
+	input.awesomplete = awesomplete;
+	this.awesomplete = awesomplete;
+
+	$input.on("input", frappe.utils.debounce(function(e) {
+		var value = e.target.value;
+		var txt = value.trim().replace(/\s\s+/g, ' ');
+		var last_space = txt.lastIndexOf(' ');
+		me.global_results = [];
+		me.options = [];
+
+		if (txt && txt.length > 1) {
+			if (last_space !== -1) {
+				me.set_specifics(txt.slice(0, last_space), txt.slice(last_space + 1));
+			}
+			me.add_defaults(txt);
+			me.options = me.options.concat(me.build_options(txt));
+			me.options = me.options.concat(me.global_results);
+		} else {
+			me.options = me.options.concat(me.deduplicate(frappe.search.utils.get_recent_pages(txt || "")));
+			me.options = me.options.concat(frappe.search.utils.get_frequent_links());
+		}
+		me.add_help();
+		awesomplete.list = me.deduplicate(me.options);
+	}, 100));
+
+	var open_recent = function() {
+		if (!this.autocomplete_open) {
+			$(this).trigger("input");
+		}
+	};
+
+	$input.on("focus", open_recent);
+	$input.on("awesomplete-open", function(e) {
+		me.autocomplete_open = e.target;
+	});
+
+	$input.on("awesomplete-close", function() {
+		me.autocomplete_open = false;
+	});
+
+	$input.on("awesomplete-select", function(e) {
+		var o = e.originalEvent;
+		var value = o.text.value;
+		var item = awesomplete.get_item(value);
+
+		setTimeout(
+			function(){
+				if(cur_frm){
+					cur_frm.refresh()
+				}
+			}, 
+		500);
+
+		if (item.route_options) {
+			frappe.route_options = item.route_options;
+		}
+
+		if (item.onclick) {
+			item.onclick(item.match);
+		} else {
+			frappe.set_route(item.route);
+		}
+		$input.val("");
+	});
+
+	$input.on("awesomplete-selectcomplete", function() {
+		$input.val("");
+	});
+
+	$input.on("keydown", null, 'esc', function() {
+		$input.blur();
+	});
+	frappe.search.utils.setup_recent();
+	frappe.tags.utils.fetch_tags();
+};
+frappe.ui.form.ControlInput.prototype.set_label = function(label) {
+	if(this.value && !['Checkbox', 'Password','Attach','Attach Image'].includes(this.df.fieldtype)){
+		if(this.df.fieldtype=='Currency'){
+			this.$wrapper.attr("title", "$"+this.value.toFixed(2));
+		}
+		else if(this.df.fieldtype=='Date'){
+			let date = this.value.split('-');
+			let date_label = date[1]+"-"+date[2]+"-"+date[0];
+			this.$wrapper.attr("title", __(date_label));
+		}
+		else if(this.df.fieldtype=='Time'){
+			let time = this.value.split(':');
+			let time_label = time[0]+":"+time[1];
+			this.$wrapper.attr("title", __(time_label));
+		}
+		else if(this.df.fieldtype=='Datetime'){
+			let datetime = this.value.split(' ');
+			let new_date = datetime[0].split('-');
+			let new_time = datetime[1].split(':');
+			let datetime_label = new_date[1]+"-"+new_date[2]+"-"+new_date[0]+" "+new_time[0]+":"+new_time[1];
+			this.$wrapper.attr("title", __(datetime_label));
+		}
+		else if(this.df.fieldtype=='Float'){
+			this.$wrapper.attr("title", this.value.toFixed(2));
+		}
+		else if(this.df.fieldtype=='Text Editor'){
+			let regex_pattern = /<[^>]+>/g;
+			this.$wrapper.attr('title',this.value.replace(regex_pattern, ''));
+		}
+		else{
+			this.$wrapper.attr('title',this.value);
+		}
+	}
+
+	if(label) this.df.label = label;
+	if(this.only_input || this.df.label==this._label)
+		return;
+	var icon = "";
+	this.label_span.innerHTML = (icon ? '<i class="'+icon+'"></i> ' : "") +
+		__(this.df.label)  || "&nbsp;";
+	this._label = this.df.label;
+};

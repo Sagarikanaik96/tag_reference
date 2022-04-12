@@ -307,7 +307,7 @@ def staff_org_details(company_details=None):
     is_ok = "failed"
     if None in company_info[0]:
         return is_ok
-    if(len(comp_data.job_site)==0 or len(comp_data.industry_type)==0 or len(comp_data.employees)==0):
+    if(len(comp_data.industry_type)==0 or len(comp_data.employees)==0):
         return is_ok
     return "success"
 
@@ -379,23 +379,25 @@ def get_org_site(doctype, txt, searchfield, page_len, start, filters):
     return frappe.db.sql(sql)
 
 @frappe.whitelist(allow_guest=False)
-def job_site_employee(doctype, txt, searchfield, page_len, start, filters):
-
+def job_site_contact(doctype, txt, searchfield, page_len, start, filters):
     company=filters.get('job_order_company')
-    sql = ''' select name,employee_name,user_id,contact_number from `tabEmployee` where company='{0}' '''.format(company)
+    sql = ''' select name, full_name, email, mobile_no from `tabUser` where company='{0}' '''.format(company)
     return frappe.db.sql(sql)
 
+sql_cmd = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''
 
-@frappe.whitelist(allow_guest=False)
+@frappe.whitelist(allow_guest=True)
 def hiring_category(doctype,txt,searchfield,page_len,start,filters):
     company=filters.get('hiring_company')
-    sql = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''.format(company)
+    sql=sql_cmd.format(company)
+    print(sql)
     return frappe.db.sql(sql)
 
 
 @frappe.whitelist(allow_guest=False)
 def org_industy_type(company=None):
-    sql = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''.format(company)
+    sql=sql_cmd.format(company)
+    print(sql)
     return frappe.db.sql(sql)
 
 
@@ -508,9 +510,9 @@ def email_recipient(doctype, txt, searchfield, page_len, start, filters):
  
 def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l,staff_company):
     try:
-        msg=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with {staff_company}. Please respond.'
+        msg=f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond.'
         make_system_notification(l,msg,jobOrder,job_order,subject)   
-        message=f'{hiring_org} is requesting a fulfillment of a work order for {job_order_title} specifically with {staff_company}. Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
+        message=f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
         return send_email(subject,message,l)
     except Exception as e:
         frappe.log_error(e, "Single Job Order Notification Error")
@@ -754,8 +756,8 @@ def staffing_exclussive_org_name(job_order):
     
 @frappe.whitelist()
 def checkingdesignationandorganization(designation_name,company=None):
-    sql = "select designation,organization from `tabDesignation` where designation = '{0}' and organization = '{1}' ".format(designation_name,company)
-    if frappe.db.sql(sql):
+    sql = "select name,designation,organization from `tabDesignation` where designation = '{0}' and organization = '{1}' ".format(designation_name,company)
+    if len(frappe.db.sql(sql,as_dict=True)) >= 1:
         return False
     return True 
 @frappe.whitelist()
@@ -839,3 +841,140 @@ def send_email1(user, company_type, sid, name, doctype, recepients, subject=None
 		"reference_doctype": doctype,
 		"reference_name": name,
 	}).insert(ignore_permissions=True)
+    
+@frappe.whitelist(allow_guest=False)
+def hide_decrypt_ssn(frm=None):
+    try:
+        emp = frappe.get_doc("Employee",frm)
+        return (not(bool(emp.ssn)))
+    except Exception:
+        frappe.log_error("No Employee in Database", "Warning")
+
+@frappe.whitelist()
+def staff_own_job_order(job_order, emp_detail, doc_name,staffing_org):
+    try:
+        staff_job_order=frappe.get_doc('Job Order',job_order)
+        dat=f'update `tabAssign Employee` set tag_status="Approved" where name="{doc_name}"'
+        frappe.db.sql(dat)
+        frappe.db.commit()
+        frappe.db.set_value(jobOrder, job_order, "worker_filled", (int(emp_detail)+int(staff_job_order.worker_filled)))
+        frappe.db.set_value(jobOrder, job_order, "claim", (str(staffing_org)))
+        claimed = staff_job_order.staff_org_claimed if staff_job_order.staff_org_claimed else ""
+        if(len(claimed)==0):
+            frappe.db.set_value(jobOrder, job_order, "staff_org_claimed", (str(claimed)+str(staffing_org)))
+        else:
+            frappe.db.set_value(jobOrder, job_order, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
+        return 'success'
+    except Exception as e:
+        frappe.log_error(e, "Staff Job Order")
+        frappe.throw(e)
+
+
+
+@frappe.whitelist()
+def update_jobtitle(company, job_title, description,price,name,industry,job_title_id=None):
+    try:
+        if company:
+            if job_title_id:
+                sql = """ UPDATE `tabJob Titles` SET job_titles = "{0}" ,description='{1}',  wages='{2}' ,industry_type='{3}' where name="{4}" """.format(job_title,description,price,industry,job_title_id)
+                frappe.db.sql(sql)
+                frappe.db.commit()
+                return 'success'
+
+            job_ti = frappe.get_doc(dict(doctype="Job Titles",parenttype="Company",  parentfield="job_titles",parent= company,job_titles=job_title,description=description,wages=price,industry_type=industry))
+            job_ti.insert(ignore_permissions=True)
+
+            sql = """ UPDATE `tabItem` SET job_title_id = "{0}"  where name="{1}" """.format(job_ti.name,name)
+            frappe.db.sql(sql)
+            frappe.db.commit()
+            return 'success'
+    except Exception as e:
+        frappe.log_error(e, "update JOb Titles")
+        frappe.throw(e)
+
+@frappe.whitelist(allow_guest=True)
+def hiring_category_list(hiring_company):
+    sql = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''.format(hiring_company)
+    return frappe.db.sql(sql,as_dict=True)
+
+@frappe.whitelist(allow_guest=True)
+def jobtitle_list(company):
+    sql = ''' select job_titles from `tabJob Titles` where parent = '{0}' '''.format(company)
+    return frappe.db.sql(sql,as_dict=True)
+
+import json
+
+@frappe.whitelist()
+def get_jobtitle_list_page(doctype, txt, searchfield, page_len, start, filters):
+    try:
+        company = filters.get('company')
+        data=filters.get('data')
+        if(len(data)>0):
+            if len(data)==1:
+                sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}')) and industry IN ('{1}')  '''.format(company,data[0])
+                return frappe.db.sql(sql)
+            else:
+
+                data=tuple(data)
+                sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}')) and industry IN {1}  '''.format(company,data)
+                return frappe.db.sql(sql)
+        else:
+            sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}')) and industry is null  '''.format(company)
+            return frappe.db.sql(sql)
+
+    except Exception as e:
+        frappe.msgprint(e)
+        return tuple()
+
+@frappe.whitelist()
+def filter_jobsite(doctype, txt, searchfield, page_len, start, filters):
+    try:
+        company = filters.get('company')
+        site_list = filters.get('site_list')
+        value = ''
+        for index ,i in enumerate(site_list):
+            if index >= 1:
+                value = value+"'"+","+"'"+i
+            else:
+                value =value+i
+        sql = '''select name from `tabJob Site` where company = '{0}' and name NOT IN ('{1}')'''.format(company,value)
+        return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.msgprint(e)
+        return tuple()
+
+@frappe.whitelist()
+def get_industrytype_list_page(doctype, txt, searchfield, page_len, start, filters):
+    try:
+        data=filters.get('data')
+        print(data)
+        if len(data)==1:
+            sql = ''' select name from `tabIndustry Type` where name in ('{0}')  '''.format(data[0])
+            print(sql)
+            return frappe.db.sql(sql)
+        else:
+            data=tuple(data)
+
+            sql = ''' select name from `tabIndustry Type` where name in {0}  '''.format(data)
+            return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.msgprint(e)
+        return tuple()
+
+@frappe.whitelist()
+def my_used_job_title(company_name,company_type):
+    if company_type=='Hiring' or company_type=='Exclusive Hiring':
+        l=frappe.db.sql('select job_titles from `tabJob Titles` where parent="{0}"'.format(company_name),as_list=1)
+        z=[]
+        for i in l:
+            z.append(i[0])
+    elif company_type=='Staffing':
+        exc_company=frappe.db.sql('select name from `tabCompany` where parent_staffing="{0}" '.format(company_name),as_list=1)
+        z=[]
+        for i in exc_company:
+            l=frappe.db.sql('select job_titles from `tabJob Titles` where parent="{0}"'.format(i[0]),as_list=1)
+            for i in l:
+                z.append(i[0])
+    else:
+        return 'TAG'
+    return list(set(z))

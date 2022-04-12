@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 import re
 from frappe.utils import (cint, flt, has_gravatar, escape_html, format_datetime, now_datetime, get_formatted_email, today)
+from frappe.utils import flt, cstr, now, get_datetime_str, file_lock, date_diff
 from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
 from frappe.utils.global_search import update_global_search
 
@@ -109,13 +110,12 @@ def append_number_if_name_exists(doctype, value, fieldname="abbr", separator="-"
 def validate_abbr(self):
     if not self.abbr:
         self.abbr = ''.join(c[0] for c in self.company_name.split()).upper()
-
+    self.name = self.name.replace('"', "'")
     self.abbr = self.abbr.strip()
 
     if not self.abbr.strip():
         frappe.throw(_(Abbr))
-
-    sql = "select abbr from tabCompany where name != '{0}' and abbr = '{1}' ".format(self.name, self.abbr)
+    sql = """ select abbr from tabCompany where name != "{0}" and abbr = '{1}' """.format(self.name, self.abbr)
     if frappe.db.sql(sql):
         self.abbr = append_number_if_name_exists("Company", self.abbr, fieldname="abbr", separator="-", filters=None)
 
@@ -203,8 +203,7 @@ def validate_mandatory_fields(self):
             frappe.throw(_("Row {0}: Activity Type is mandatory.").format(data.idx))
 
 def run_post_save_methods(self):
-    doc_before_save = self.get_doc_before_save()
-    print(doc_before_save)
+    self.get_doc_before_save()
 
     if self._action=="save":
         self.run_method("on_update")
@@ -229,6 +228,43 @@ def run_post_save_methods(self):
     if (self.doctype, self.name) in frappe.flags.currently_saving:
         frappe.flags.currently_saving.remove((self.doctype, self.name))
     self.latest = None
+
+
+#---------------------------------------------------------#
+def check_islatest(self):
+    modified = frappe.db.sql("""select value from tabSingles where doctype=%s and field='modified' for update""", self.doctype)
+    modified = modified and modified[0][0]
+    if modified and modified != cstr(self._original_modified):
+        return True
+    return False
+
+def check_ismodify(self):
+    tmp = frappe.db.sql("""select modified, docstatus from `tab{0}` where name = %s for update""".format(self.doctype), self.name, as_dict=True)
+    if not tmp:
+        frappe.throw(_("Record does not exist"))
+    else:
+        tmp = tmp[0]
+
+    modified = cstr(tmp.modified)
+    if modified and modified != cstr(self._original_modified):
+        return True, tmp
+    return False, tmp
+
+def check_if_latest(self):
+    conflict = False
+    self._action = "save"
+
+    if not self.get('__islocal') and not self.meta.get('is_virtual'):
+        if self.meta.issingle:
+            conflict = check_islatest(self)
+        else:
+            conflict, tmp = check_ismodify(self)
+            self.check_docstatus_transition(tmp.docstatus)
+
+        if conflict and self.doctype not in ["Company", "Employee", "Job Order", "Assign Employee", "User", "Lead"]:
+                frappe.msgprint(_("Error: Document has been modified after you have opened it") + (" (%s, %s). " % (modified, self.modified)) + _("Please refresh to get the latest document."), raise_exception=frappe.TimestampMismatchError)
+    else:
+        self.check_docstatus_transition(0)
 #-----------------------------------------------------#
 
 @frappe.whitelist()
@@ -250,3 +286,14 @@ def checkingdesignation_name(designation_name):
     if frappe.db.sql(sql):
         return append_number_if_name_exists("Designation", designation_name, fieldname="designation_name", separator="-", filters=None)
     return designation_name 
+
+@frappe.whitelist()
+def checkingitemcode(item_code):
+    item_code = item_code.strip()
+    if not item_code.strip():
+        frappe.throw(_(Abbr))
+    sql = "select item_code from `tabItem` where item_code = '{0}' ".format(item_code)
+    print(frappe.db.sql(sql))
+    if frappe.db.sql(sql):
+        return append_number_if_name_exists("Item", item_code, fieldname="item_code", separator="-", filters=None)
+    return item_code 

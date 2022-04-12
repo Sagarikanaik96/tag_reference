@@ -69,7 +69,8 @@ doctype_list_js = {
         "Contact": "public/js/doctype_list/contact_list.js",
         "Lead": "public/js/doctype_list/lead_list.js",
         "Contract": "public/js/doctype_list/contract_list.js",
-        "Role Profile": "public/js/doctype_list/role_profile.js"
+        "Role Profile": "public/js/doctype_list/role_profile.js",
+        "Item": "public/js/doctype_list/item_list.js",
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]
@@ -94,6 +95,9 @@ doc_events = {
        },
        "Contact":{
                 "on_update":'tag_workflow.utils.lead.update_contact'
+       },
+       "Lead":{
+               "after_insert":'tag_workflow.utils.lead.lead_contact'
        }
 }
 
@@ -118,9 +122,10 @@ scheduler_events={
 
 override_whitelisted_methods = {
         "frappe.desk.query_report.run": "tag_workflow.utils.whitelisted.run",
-        "frappe.desk.desktop.get_desktop_page": "tag_workflow.utils.whitelisted.get_desktop_page"
+        "frappe.desk.desktop.get_desktop_page": "tag_workflow.utils.whitelisted.get_desktop_page",
+        "frappe.desk.reportview.delete_items": "tag_workflow.utils.employee.delete_items"
 }
 
 override_doctype_class = {
-    "Designation":"tag_workflow.dashboard_data.designation.DesignationOverride"
+    "Designation":"tag_workflow.dashboard_data.designation.DesignationOverride",
 } 

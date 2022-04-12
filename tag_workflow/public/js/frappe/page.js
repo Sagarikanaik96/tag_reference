@@ -163,6 +163,20 @@ frappe.ui.Page = Class.extend({
 					</div>
 				</div>`).prependTo(this.main);
 		}
+
+		if(window.location.pathname == '/app/item'){
+			this.item_filter = $(`
+				<div class="page-form row" id="item_filter">
+					<div class="filter-selector">
+						<button class="btn btn-default btn-sm filter-button" id='filter_selected_data';">
+							<span class="button-label hidden-xs">My Job Titles<span></span></span>
+						</button>
+						<button class="btn btn-default btn-sm filter-button" id='filter_all_data';">
+							<span class="button-label hidden-xs">All Job Titles<span></span></span>
+						</button>
+					</div>
+				</div>`).prependTo(this.main);
+		}
 		this.page_form = $('<div class="page-form row hide"></div>').prependTo(this.main);
 		this.inner_toolbar = this.custom_actions;
 		this.icon_group = this.page_actions.find(".page-icon-group");

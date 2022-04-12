@@ -4,19 +4,21 @@ import frappe
 from frappe import _
 class DesignationOverride(Designation):
 	def validate(self):
-		self.designation = self.designation_name.split("-")[0]
-		if not (self.checkingdesignationandorganization(self.designation,self.organization)):
-			frappe.throw(
-                 title='Error',
-                 msg=_('Designation name already exists for this organization')
-             )
-		data = self.checkingdesignation_name(self.designation_name)
-		self.designation_name = data
-		self.name = data
+		if self.get('__islocal'):
+			self.designation = self.designation_name.split("-")[0]
+			if not (self.checkingdesignationandorganization(self.designation,self.organization)):
+				frappe.throw(
+	                 title='Error',
+	                 msg=_('Designation name already exists for this organization')
+	             )
+			data = self.checkingdesignation_name(self.designation_name)
+			self.designation_name = data
+			self.name = data
+
 
 	def checkingdesignationandorganization(self,designation_name,company=None):
 		sql = "select designation,organization from `tabDesignation` where designation = '{0}' and organization = '{1}' ".format(designation_name,company)
-		if frappe.db.sql(sql):
+		if len(frappe.db.sql(sql,as_dict=1)) > 1:
 			return False
 		return True
 

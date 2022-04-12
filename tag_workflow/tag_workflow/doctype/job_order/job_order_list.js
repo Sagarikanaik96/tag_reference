@@ -119,7 +119,8 @@ frappe.listview_settings['Job Order'] = {
 		company(val, d, f) {
 			if (val) {
 				return `<span class=" ellipsis" title="" id="Hiring-${f.name}" >
-						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" onmouseover="showCasePopover('${val}','${f.name}')" onmouseout = "hideCasePopover('${val}','${f.name}')"  onclick = "myfunction()" data-company = "company" >${val}</a>
+						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" onmouseover="showCasePopover('${val}','${f.name}')" onmouseout = "hideCasePopover('${val}','${f.name}')"  onclick = "myfunction('${val}')" data-company = "company" >${val}</a>
+						
 					</span>
 					<script>
 						function showCasePopover(cname,dname){
@@ -134,9 +135,14 @@ frappe.listview_settings['Job Order'] = {
 							}).popover('show');
 						}
 
-						function myfunction(){
+						function myfunction(name){
 							$('.popover-body').hide();
 							$('.arrow').hide();
+							
+							var name1= name.replace(/%/g, ' ');
+							localStorage.setItem('company', name1)
+							window.location.href= "/app/dynamic_page"
+					
 						}
 
 						function details_in_popup(link, div_id, cname){
@@ -207,7 +213,7 @@ frappe.listview_settings['Job Order'] = {
 						function details_in_popup1(link, div_id, cname){
 							frappe.call({
 								method: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_joborder_value",
-								args: {"name": cname, "user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "sid": frappe.boot.tag.tag_user_info.sid},
+								args: {"name": cname, "user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type},
 								callback: function(res) {
 									if(res.message=='error_occur'){
 										console.log('some error occur')

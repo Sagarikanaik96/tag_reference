@@ -27,8 +27,9 @@ frappe.ui.form.on('Add Timesheet', {
 			update_timesheet(frm);
 		}).addClass("btn-primary");
 
-		if(frappe.route_options && frappe.route_options.job_order){
-			cur_frm.set_value("job_order", frappe.route_options.job_order);
+		let jo=localStorage.getItem("order")
+		if(localStorage){
+			cur_frm.set_value("job_order", jo);
 		}
 	},
 
@@ -277,10 +278,10 @@ function get_amount(frm, hours, breaks, child){
 		overtime_rate = cur_frm.doc.total_per_hour_rate*1.5;
 	}
 
-	frappe.model.set_value(child.doctype, child.name, "hours", total_hour.toFixed(2));
-	frappe.model.set_value(child.doctype, child.name, "working_hours", normal_hours.toFixed(2));
-	frappe.model.set_value(child.doctype, child.name, "overtime_hours", overtime_hours.toFixed(2));
-	frappe.model.set_value(child.doctype, child.name, "overtime_rate", overtime_rate.toFixed(2));
+	frappe.model.set_value(child.doctype, child.name, "hours", Math.round(total_hour * 100) / 100);
+	frappe.model.set_value(child.doctype, child.name, "working_hours", Math.round(normal_hours * 100) / 100);
+	frappe.model.set_value(child.doctype, child.name, "overtime_hours", Math.round(overtime_hours * 100) / 100);
+	frappe.model.set_value(child.doctype, child.name, "overtime_rate", Math.round(overtime_rate * 100) / 100);
 	frappe.model.set_value(child.doctype, child.name, "amount", normal_amount+overtime_amount);
 }
 

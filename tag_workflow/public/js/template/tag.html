@@ -69,6 +69,7 @@
         overflow-y: auto;
         overflow-x: hidden;
         transition: 0.5s ease-in-out;
+        z-index: 99;
       }
       .footer-admin .badge-danger {
         background: #f1effd !important;
@@ -112,7 +113,8 @@
         left: 10px;
       }
       .search-box input {
-        width: 470px;
+        max-width: 503px;
+        width: 100%;
         border: 2px solid#79D5EE;
         padding-left: 30px;
         border-radius: 8px;
@@ -192,15 +194,21 @@
               </div>
               {% endif %}
 
-              <a href="/app/home">
-                <div class="tab-button custom-btn">
-                  <img
-                    src="/assets/tag_workflow/images/ico-home.svg"
-                    class="pr-3 pl-5"
-                    alt="home"
-                  />Home
-                </div>
-              </a>
+	      {% if frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" || frappe.boot.tag.tag_user_info.company_type == "TAG" || frappe.session.user == "Administrator" %}
+		      <a href="/app/home">
+			      <div class="tab-button custom-btn">
+				      <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-5" alt="home"/>Home
+			      </div>
+		      </a>
+	      {% endif %}
+
+	      {% if frappe.boot.tag.tag_user_info.company_type == "Staffing" %}
+	      	<a href="/app/staff-home">
+			<div class="tab-button custom-btn">
+				<img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-5" alt="home"/>Home
+			</div>
+		</a>
+	      {% endif %}
 
               <div class="tab-button custom-btn">
                 <ul class="nav order">
