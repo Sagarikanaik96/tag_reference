@@ -402,6 +402,7 @@ function jazzhr_data(frm){
   }
  
 
+
 /*---------make invoice------------*/
 function hide_tag_charges(frm){
 	let roles = frappe.user_roles;

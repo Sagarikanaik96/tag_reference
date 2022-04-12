@@ -1474,3 +1474,4 @@ function check_claim_company(frm){
 	if(frm.doc.claim && frm.doc.claim.includes(frappe.boot.tag.tag_user_info.company) )
 		return true;
 }
+
