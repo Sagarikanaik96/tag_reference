@@ -202,6 +202,7 @@ login.login_handlers = (function () {
 				if (data.exc_type != "ValidationError"){
 					frappe.msgprint("Invalid login credentials");
 				}
+				login.set_status('{{ _("Invalid Login. Try again.") }}', 'blue');
 			}
 
 			var message = default_message;
