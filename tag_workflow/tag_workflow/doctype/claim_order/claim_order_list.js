@@ -39,14 +39,15 @@ frappe.listview_settings['Claim Order'] = {
     formatters: {
 		staffing_organization(val, d, f) {
 			if (val) {
+                let link = val.split(' ').join('%');
 				return `<span class=" ellipsis" title="" id="${val}-${f.name}">
-						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" onclick=dynamic_route('${val}') >${val}</a>
+						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" onclick=dynamic_route('${link}') >${val}</a>
 					</span>
                     <script>
                     function dynamic_route(name){
-                        name= name.replace("%"," ")
-                        frappe.route_options = {"company": name};
-                        frappe.set_route("app", "dynamic_page");
+                        var name1= name.replace(/%/g, ' ');
+						localStorage.setItem("company", name1);
+						window.location.href = "/app/dynamic_page";	
                     }
                     </script>`
 

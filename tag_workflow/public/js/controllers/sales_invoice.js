@@ -3,6 +3,14 @@ frappe.ui.form.on("Sales Invoice", {
 		if(frappe.session.user != 'Administrator'){
 			$('[data-label="Get%20Items%20From"]').hide();
 		}
+		$('[data-fieldname="customer"]').click(function(){ return false})
+
+		$("[data-fieldname=customer]").click(function(event){
+			var cust=event.target.innerHTML
+			const newText = cust.trim();
+			localStorage.setItem("company",newText)
+			window.location.href= "/app/dynamic_page"
+		});
 	},
 	refresh: function(frm){
 		$('.form-footer').hide()
@@ -23,11 +31,12 @@ frappe.ui.form.on("Sales Invoice", {
 			$('[data-label="Get%20Items%20From"]').hide();
 		}, 250);
 
+		$('[data-fieldname="company"]').click(function(){ return false})
 		$('[data-fieldname="company"]').click(function(){
-			$('[data-doctype="Company"]').removeAttr("href");
+			
 			if (frm.doc.company){
-				frappe.route_options = {"company": frm.doc.company};
-				frappe.set_route("app", "dynamic_page");
+				localStorage.setItem("company", frm.doc.company);
+				window.location.href="/app/dynamic_page";
 			}
 		});
 		let child_table=['item_code','qty','rate','amount','activity_type','description','from_time','to_time','billing_hours','billing_amount','sales_invoice_id','job_order_id','total_amount','payment_term','description','due_date','invoice_portion','payment_amount'];

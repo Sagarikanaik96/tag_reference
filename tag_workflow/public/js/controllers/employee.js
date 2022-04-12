@@ -84,6 +84,39 @@ frappe.ui.form.on("Employee", {
 
 		attachrefresh();
 
+		$(document).on('click', '[data-fieldname="company"]', function(){
+			setTimeout(()=>{
+				$('[data-fieldname="company"]').find('.link-btn').addClass("hide");
+		
+			},300);
+		});
+
+		$('[data-fieldname="company"]').mouseover(function(){
+			setTimeout(()=>{
+				$('[data-fieldname="company"]').find('.link-btn').addClass("hide");
+		
+			},500);
+		});
+
+	  	document.addEventListener("keydown", function(){
+			setTimeout(()=>{
+				$('[data-fieldname="company"]').find('.link-btn').addClass("hide");
+		
+			},400);
+		});
+
+		$('[data-fieldname="company"]').click(function(){
+			setTimeout(()=>{
+				var cust= $(this).text()
+				var txt= cust.split('.')[1]
+				var name1= txt.replace(/%/g, ' ');
+				var name= name1.trim()
+				localStorage.setItem("company", name)
+				window.location.href= "/app/dynamic_page"
+			},1000);
+		});
+
+
 		$(document).on('click', '[data-fieldtype="Attach"]', function(){
 			setTimeout(() => {
 				document.getElementsByClassName("modal-title")[0].innerHTML='Upload <h6>(Accepted File Type : pdf, txt or docx ,png ,jpg only, file size 10mb) </h6>'

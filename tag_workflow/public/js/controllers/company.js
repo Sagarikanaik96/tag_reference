@@ -91,6 +91,16 @@ frappe.ui.form.on("Company", {
 				};
 			}
 		});
+		$('[data-fieldname="parent_staffing"]').click(function(){ return false})
+
+		$('[data-fieldname="parent_staffing"]').click(function(){
+			var cust= $(this).text()
+			var txt= cust.split('.')[1]
+			var name1= txt.replace(/%/g, ' ');
+			var name= name1.trim()
+			localStorage.setItem("company", name)
+			window.location.href= "/app/dynamic_page"
+		})
 
 		frm.set_query("parent_staffing", function (doc) {
 			return {

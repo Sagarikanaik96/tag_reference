@@ -1,4 +1,5 @@
 let company=localStorage.getItem("company")
+console.log(company,"company")
 
 frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
@@ -31,19 +32,20 @@ frappe.FaceRecognition = Class.extend({
 		frappe.call({
 			method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link1",
 			args: { "name": company || ''},
-			callback: function (r) {
+			callback: function (r) {				
 				setTimeout(hide,10);
 				function hide(){
-					if(frappe.boot.tag.tag_user_info.company_type=== "Staffing"){
-						$('.btn-primary').hide();
+					if(frappe.boot.tag.tag_user_info.company_type=== "Staffing" || frappe.boot.tag.tag_user_info.company===company){
+						$('.btn-primary').hide()
 					}
 				}
 
 				var my_val= r.message[0];
+				console.log(my_val);
 				var txt = "";
-				var text = my_val.employees;
+				var text = r.message[2];
 				for(let i in text){
-					txt += text[i].employee_name + "<br>";
+					txt += text[i].full_name + "<br>";
 				}
 
 				var industry = "";
@@ -161,8 +163,10 @@ frappe.FaceRecognition = Class.extend({
 						</div>
 					</div>`;
 				$("#dynamic_company_data1").html(template);
-			}
+			
+		}
 		});
+		
 	},
 });
 

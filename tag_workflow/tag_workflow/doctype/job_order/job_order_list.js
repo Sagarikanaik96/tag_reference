@@ -139,9 +139,9 @@ frappe.listview_settings['Job Order'] = {
 							$('.popover-body').hide();
 							$('.arrow').hide();
 							
-							name= name.replace("%"," ")
-							frappe.route_options = {"company": name};
-							frappe.set_route("app", "dynamic_page");
+							var name1= name.replace(/%/g, ' ');
+							localStorage.setItem('company', name1)
+							window.location.href= "/app/dynamic_page"
 					
 						}
 

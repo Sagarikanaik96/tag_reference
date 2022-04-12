@@ -89,8 +89,8 @@ frappe.ui.form.on('Claim Order', {
 	    $('[data-fieldname="staffing_organization"]').click(function(){
 			$('[data-doctype="Company"]').removeAttr("href");
 			if (frm.doc.staffing_organization){
-				frappe.route_options = {"company":frm.doc.staffing_organization };
-				frappe.set_route("app", "dynamic_page");
+				localStorage.setItem("company", frm.doc.staffing_organization);
+				window.location.href="/app/dynamic_page";
 			}
 		});
 

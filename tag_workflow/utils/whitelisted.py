@@ -373,11 +373,15 @@ def get_desktop_page(page):
 def search_staffing_by_hiring(data=None):
     try:
         if(data):
+            
             user_name = frappe.session.user
             sql = ''' select company from `tabUser` where email='{}' '''.format(user_name)
             user_comp = frappe.db.sql(sql, as_list=1)
             sql = """select distinct p.name from `tabCompany` p inner join `tabIndustry Types` c where p.name = c.parent and organization_type = "Staffing" and (p.name like '%{0}%' or c.industry_type like '%{0}%') and c.industry_type in (select industry_type from `tabIndustry Types` where parent='{1}')  """.format(data,user_comp[0][0])
             data = frappe.db.sql(sql, as_dict=1)
+            exc_par = frappe.db.get_value("Company", {"name": user_comp[0][0]}, "parent_staffing")
+            if(exc_par):
+                data.append({"name": exc_par})
             return [d['name'] for d in data]
         return []
     except Exception as e:

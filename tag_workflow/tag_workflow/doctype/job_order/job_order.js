@@ -165,11 +165,12 @@ frappe.ui.form.on("Job Order", {
 	  		companyhide(500)
 	    })
 
+		$('[data-fieldname="company"]').click(function(){ return false})
 	    $('[data-fieldname="company"]').click(function(){
-			$('[data-doctype="Company"]').removeAttr("href");
+			
 			if (frm.doc.company){
-				frappe.route_options = {"company": frm.doc.company};
-				frappe.set_route("app", "dynamic_page");
+				localStorage.setItem("company", frm.doc.company);
+				window.location.href= "/app/dynamic_page";
 			}
 		});
 
