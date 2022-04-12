@@ -93,6 +93,7 @@ frappe.ui.form.on("Contract", {
 	signe_hiring:function(frm){
 		$('[data-label = "Save"]').css('display', 'block');
 		if(frm.doc.signe_hiring){
+			frm.set_value("sign_date_hiring", frappe.datetime.now_date());
 			var regex = /[^0-9A-Za-z ]/g;
 			if (regex.test(frm.doc.signe_hiring) === true){
 				frappe.msgprint(__("Signature: Only alphabets and numbers are allowed."));
@@ -119,9 +120,6 @@ frappe.ui.form.on("Contract", {
 	},
 	addendums: function(){
 		$('[data-label = "Save"]').css('display', 'block');
-	},
-	before_cancel: function(frm){
-		frappe.db.set_value(frm.doc.doctype, frm.doc.name, 'document_status', 'Cancelled');
 	}
 });
 

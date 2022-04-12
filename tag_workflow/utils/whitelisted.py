@@ -226,7 +226,6 @@ def request_signature(staff_user, staff_company, hiring_user, name):
 def update_lead(lead, staff_company, date, staff_user, name):
     try:
         frappe.db.set_value("Lead", lead, "status", 'Close')
-        frappe.db.set_value("Contract", name, 'document_status', 'Submitted');
         frappe.db.set_value("Contract", name, "docstatus", 1)
 
         date = date.split('-')
