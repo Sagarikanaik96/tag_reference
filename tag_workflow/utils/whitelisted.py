@@ -640,3 +640,18 @@ def state_zip(state_data,doc_emp):
         frappe.msgprint('Some Error Occured while fetching state details')
         frappe.error_log(e, "JazzHR")
         frappe.throw(e)
+
+@frappe.whitelist()
+def get_staffing_company_invoices():
+    try:
+        data = get_staffing_company_list()
+        comps = data.split('\n')
+        companies = frappe.db.get_list('Sales Invoice',filters={'company':['in',comps],'status':['!=','Cancelled']},fields=['distinct(company)'])
+        if len(companies)>0:
+            final_data=[c['company'] for c in companies]
+            return "\n".join(final_data)
+        else:
+            return []
+    except Exception as e:
+        frappe.log_error(e,'Company error')
+        return  []

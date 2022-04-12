@@ -1,7 +1,6 @@
 frappe.listview_settings['Sales Invoice'] = {
 	add_fields:['company'],
 	onload:function(listview){
-		document.querySelector(".frappe-control[data-fieldname='company']").remove()
 		if (frappe.boot.tag.tag_user_info.company_type == 'Hiring') {
 			frappe.route_options = {
 				"company": "",
@@ -17,7 +16,7 @@ frappe.listview_settings['Sales Invoice'] = {
 				onchange: function() {
 					cur_list.refresh();
 				},
-				options: get_staffing_company_list(),
+				options: get_staffing_company_invoices(),
 				placeholder: "Company"
 			};
 			listview.page.add_field(df, '.standard-filter-section')
@@ -213,4 +212,16 @@ function get_staffing_company_list(){
 		}
 	});
 	return company
+}
+
+function get_staffing_company_invoices(){
+	frappe.flags.company = null;
+	frappe.call({
+		"method": "tag_workflow.utils.whitelisted.get_staffing_company_invoices",
+		"async": 0,
+		"callback": function(r){
+			frappe.flags.company = r.message;
+		}
+	});
+	return frappe.flags.company
 }
