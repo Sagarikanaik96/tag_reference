@@ -529,7 +529,7 @@ function staff_company_direct_or_general(frm){
 }
 
 function set_read_fields(frm){
-	var myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description"];
+	var myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description","category"];
 	var arrayLength = myStringArray.length;
 	for(var i = 0; i < arrayLength; i++){
 		frm.set_df_property(myStringArray[i], "read_only", 1);

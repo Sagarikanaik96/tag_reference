@@ -134,6 +134,7 @@
    "label": "Require staff to wear face mask"
   },
   {
+   "depends_on": "eval:doc.category",
    "fieldname": "select_job",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -602,7 +603,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-09 05:32:21.430782",
+ "modified": "2022-04-12 02:52:37.154660",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
