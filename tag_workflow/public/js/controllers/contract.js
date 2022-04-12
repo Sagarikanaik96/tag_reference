@@ -78,6 +78,23 @@ frappe.ui.form.on("Contract", {
 		if(frm.doc.addendums=='<div class="ql-editor read-mode"><p><br></p></div>'){
 			frm.set_value('addendums', '')
 		}
+		if(frm.doc._industry_types && frm.doc.job_titles){
+			let industries=[]
+			let titles_industry=[]
+			for(let i in frm.doc._industry_types){
+				industries.push(frm.doc._industry_types[i].industry_type)
+			}
+			for(let i in frm.doc.job_titles){
+				titles_industry.push(frm.doc.job_titles[i].industry_type)
+			}
+			for(let i in titles_industry){
+				if(industries.indexOf(titles_industry[i]) == -1)  {
+					frappe.msgprint('"'+frm.doc.job_titles[i].job_titles+'" Job Titles Industry Type "'+titles_industry[i]+'" is not present in '+cur_frm.doc.name)
+					frappe.validated=false
+					break
+				}
+			}		
+		}
 	},
 	signe_company:function(frm){
 		$('[data-label = "Save"]').css('display', 'block');

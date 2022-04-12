@@ -292,6 +292,28 @@ frappe.ui.form.on("Company", {
 			cur_frm.set_df_property('map','hidden',1)
 		}
 	},
+	before_save: function(frm){
+		if(frm.doc.industry_type && frm.doc.job_titles){
+			let industries=[]
+			let titles_industry=[]
+			for(let i in frm.doc.industry_type){
+				industries.push(frm.doc.industry_type[i].industry_type)
+			}
+			for(let i in frm.doc.job_titles){
+				titles_industry.push(frm.doc.job_titles[i].industry_type)
+			}
+			for(let i in titles_industry){
+				if(industries.indexOf(titles_industry[i]) == -1)  {
+					frappe.msgprint('"'+frm.doc.job_titles[i].job_titles+'" Job Titles Industry Type "'+titles_industry[i]+'" is not present in '+cur_frm.doc.name)
+					frappe.validated=false
+					break
+				}
+
+			}
+			
+
+		}
+	}
 });
 
 /*---------hide details----------*/
