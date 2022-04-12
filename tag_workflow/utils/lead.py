@@ -20,23 +20,24 @@ def contact_person(doctype,txt,searchfield,page_len,start,filters):
         frappe.log_error(e,'Next Contact person')
         frappe.throw(e)
 
-def update_contact(doc):
+def update_contact(doc,method):
     try:
-        if doc.mobile_no:
+        if method and doc.mobile_no:
             frappe.db.set_value(doc.doctype,doc.name, 'phone_number', doc.mobile_no)
             frappe.db.commit()
     except Exception as e:
         frappe.log_error(e,'Contact Update')
         frappe.throw(e)
-def lead_contact(doc):
+def lead_contact(doc,method):
     try:
-        contact=frappe.db.sql(''' select name from `tabContact` where email_id="{}" '''.format(doc.email_id),as_list=1)
-        frappe.db.set_value('Contact',contact[0][0], 'phone_number', doc.phone_no)
-        frappe.db.set_value('Contact',contact[0][0],'lead',doc.name)
-        frappe.db.set_value('Contact',contact[0][0],'owner_company',doc.company_name)
-        frappe.db.set_value('Contact',contact[0][0],'company',doc.owner_company)
+        if method:
+            contact=frappe.db.sql(''' select name from `tabContact` where email_id="{}" '''.format(doc.email_id),as_list=1)
+            frappe.db.set_value('Contact',contact[0][0], 'phone_number', doc.phone_no)
+            frappe.db.set_value('Contact',contact[0][0],'lead',doc.name)
+            frappe.db.set_value('Contact',contact[0][0],'owner_company',doc.company_name)
+            frappe.db.set_value('Contact',contact[0][0],'company',doc.owner_company)
 
-        frappe.db.commit()
+            frappe.db.commit()
     except Exception as e:
         frappe.log_error(e,'Contact Update')
         frappe.throw(e)

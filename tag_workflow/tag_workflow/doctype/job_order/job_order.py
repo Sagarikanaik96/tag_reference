@@ -170,26 +170,7 @@ def make_sales_invoice(source_name, company, emp_sql,target_doc=None, ignore_per
         timesheet_item = {"item_name": job_title, "description": "Service", "uom": "Nos", "qty": 1, "stock_uom": "Nos", "conversion_factor": 1, "stock_qty": 1, "rate": total_amount, "amount": total_amount, "income_account": income_account, "cost_center": cost_center, "default_expense_account": default_expense_account}
         doclist.append("items", timesheet_item)
         doclist.company = company
-    def update_time_timelogs(sheet,doclist,time):
-        for logs in sheet.time_logs:
-            status = '-'
-            if sheet.no_show:
-                status = 'No Show'
-            elif sheet.non_satisfactory:
-                status = 'Non Satisfactory'
-            elif sheet.dnr:
-                status = 'DNR'
-
-
-            if time.no_show == 1:
-                # add zero all value in time sheet in invoice
-                activity = {"activity_type": logs.activity_type, "billing_amount": 0, "billing_hours": 0, "time_sheet": logs.parent, "from_time": 0, "to_time": 0, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":0,"overtime_hours":0,"per_hour_rate1":0}
-            else:
-                activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours,"per_hour_rate1":logs.billing_rate}
-            doclist.append("timesheets", activity)
-        return doclist
-
-
+    
         
 
     def make_invoice(source_name, target_doc):
@@ -209,25 +190,44 @@ def make_sales_invoice(source_name, company, emp_sql,target_doc=None, ignore_per
 
     return doclist
 
+def update_time_timelogs(sheet,doclist,time):
+    for logs in sheet.time_logs:
+        status = '-'
+        if sheet.no_show:
+            status = 'No Show'
+        elif sheet.non_satisfactory:
+            status = 'Non Satisfactory'
+        elif sheet.dnr:
+            status = 'DNR'
+
+
+        if time.no_show == 1:
+            # add zero all value in time sheet in invoice
+            activity = {"activity_type": logs.activity_type, "billing_amount": 0, "billing_hours": 0, "time_sheet": logs.parent, "from_time": 0, "to_time": 0, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":0,"overtime_hours":0,"per_hour_rate1":0}
+        else:
+            activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours,"per_hour_rate1":logs.billing_rate}
+        doclist.append("timesheets", activity)
+    return doclist
+
+
 #--------invoice-------#
 @frappe.whitelist()
 def make_invoice(source_name, target_doc=None):
     try:
         company = frappe.db.get_value("User", frappe.session.user, "company")
         emp_sql = """ select name from `tabEmployee` where company = '{0}' """.format(company)
-        emp_list = frappe.db.sql(emp_sql)
         # check if timesheet already in sales invoice and timesheet submitted
         len_sql = """ select name from `tabTimesheet` where job_order_detail = '{0}' and docstatus = 1 and employee in ({1}) and is_check_in_sales_invoice = 0 """.format(source_name, emp_sql)
      
         if(len(frappe.db.sql(len_sql, as_dict=1)) <= 0):
             frappe.msgprint(_("Either Invoice For Timesheet OR No Timesheet found for this Job Order(<b>{0}</b>)").format(source_name))
         else:
-            return prepare_invoice(company, source_name, emp_list,emp_sql)
+            return prepare_invoice(company, source_name,emp_sql)
     except Exception as e:
         frappe.msgprint(frappe.get_traceback())
         frappe.log_error(e, 'make_invoice')
 
-def prepare_invoice(company, source_name, emp_list,emp_sql):
+def prepare_invoice(company, source_name,emp_sql):
     try:
         return make_sales_invoice(source_name, company,emp_sql, target_doc=None)
     except Exception as e:
