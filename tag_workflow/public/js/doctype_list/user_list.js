@@ -1,6 +1,12 @@
 frappe.listview_settings['User'] = {
 	onload: function(){
+		$('[data-fieldname="email"]').hide()
+		$('[data-fieldname="username"]').hide()
 		$('h3[title="User"]').html('Company Users');
+		cur_list.columns[4].df.label = 'Role'
+		cur_list.render_header(cur_list.columns[4])
+		$('[data-original-title="Role Profile"]').attr('data-original-title',"Role")
+		$('[data-fieldname="role_profile_name"]').attr('placeholder',"Role")
 		if(frappe.session.user!='Administrator'){
 			$('.custom-actions.hidden-xs.hidden-md').hide();
 			$('[data-original-title="Refresh"]').hide();
