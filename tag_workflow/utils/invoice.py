@@ -34,7 +34,7 @@ def make_sales_invoice(source_name, company, target_doc=None, ignore_permissions
     def customer_doc(source_name):
         return frappe.get_doc("Customer", {"name": source_name})
 
-    def update_item(company, source, doclist, target):
+    def update_item(company, source, doclist):
         total_amount = 0
         
         income_account, cost_center, default_expense_account, tag_charges = frappe.db.get_value("Company", company, ["default_income_account", "cost_center", "default_expense_account", "tag_charges"])
@@ -59,7 +59,7 @@ def make_sales_invoice(source_name, company, target_doc=None, ignore_permissions
     customer = customer_doc(source_name)
     doclist = make_invoice(source_name, target_doc)
     doclist.company = company
-    update_item(company, source_name, doclist, target_doc)
+    update_item(company, source_name, doclist)
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
     return doclist
 
@@ -124,7 +124,7 @@ def create_month_sales_invoice(source_name, company,month,year,first_day,last_da
     def customer_doc(source_name):
         return frappe.get_doc("Customer", {"name": source_name})
 
-    def update_item(company, source, doclist, target,first_day,last_day):
+    def update_item(company, source, doclist,first_day,last_day):
         try:
             total_amount = 0
             grand_total = 0
@@ -160,7 +160,7 @@ def create_month_sales_invoice(source_name, company,month,year,first_day,last_da
             print(e)
             frappe.log_error(e,'create month sales invoice update item')
 
-    def update_salesinvoice_list(company, doclist, target,first_day,last_day):
+    def update_salesinvoice_list(company, doclist,first_day,last_day):
         try:
             sql = f""" select name,company,job_order,total_billing_hours,total_billing_amount from `tabSales Invoice` where docstatus = 1 and company = '{company}' and posting_date between '{first_day}' and '{last_day}' and is_check_in_sales_invoice = 0 """
             salesinvoice_data = frappe.db.sql(sql, as_dict=True)
@@ -193,8 +193,8 @@ def create_month_sales_invoice(source_name, company,month,year,first_day,last_da
     doclist.first_day = first_day
     doclist.last_day = last_day
 
-    update_item(company, source_name, doclist, target_doc,first_day,last_day)
-    update_salesinvoice_list(source_name, doclist, target_doc,first_day,last_day)
+    update_item(company, source_name, doclist,first_day,last_day)
+    update_salesinvoice_list(source_name, doclist,first_day,last_day)
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
     doclist.save()
     doclist.submit()

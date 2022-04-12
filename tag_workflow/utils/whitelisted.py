@@ -65,7 +65,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=True):
         customer = frappe.db.get_value(order, source_name, "customer")
         return frappe.get_doc("Customer", customer)
 
-    def update_timesheet(source, doclist, target):
+    def update_timesheet(doclist):
         total_amount = 0
         total_hours = 0
         job_order = frappe.db.get_value(order, source_name, "job_order")
@@ -96,7 +96,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=True):
 
     customer = customer_doc(source_name)
     doclist = make_invoice(source_name, target_doc)
-    update_timesheet(source_name, doclist, target_doc)
+    update_timesheet(doclist)
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
     return doclist
 

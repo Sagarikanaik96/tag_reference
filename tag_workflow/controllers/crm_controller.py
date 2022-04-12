@@ -64,7 +64,7 @@ def onboard_org(lead,contract_number):
             is_company = 0
 
         if not frappe.db.exists("User", email):
-            user = make_user(exclusive, staffing, email, person_name, org_type, user_type, tag_user_type, phone)
+            user = make_user(exclusive, email, person_name, org_type, user_type, tag_user_type, phone)
             is_user = 0
 
         enqueue("tag_workflow.controllers.master_controller.make_update_comp_perm", docname=exclusive)
@@ -100,7 +100,7 @@ def make_company(exclusive, staffing, org_type,contract_number):
         frappe.throw(e)
 
 
-def make_user(exclusive, staffing, email, person_name, org_type, user_type, tag_user_type,phone):
+def make_user(exclusive, email, person_name, org_type, user_type, tag_user_type,phone):
     try:
         user = frappe.get_doc(dict(doctype="User", organization_type=org_type, tag_user_type=tag_user_type, company=exclusive, email=email, first_name=person_name, module_profile=user_type, role_profile_name=tag_user_type, date_of_joining=frappe.utils.nowdate(), mobile_no=phone))
         user.save(ignore_permissions=True)

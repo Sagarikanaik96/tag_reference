@@ -20,7 +20,7 @@ def contact_person(doctype,txt,searchfield,page_len,start,filters):
         frappe.log_error(e,'Next Contact person')
         frappe.throw(e)
 
-def update_contact(doc,method):
+def update_contact(doc):
     try:
         if doc.mobile_no:
             frappe.db.set_value(doc.doctype,doc.name, 'phone_number', doc.mobile_no)
@@ -28,7 +28,7 @@ def update_contact(doc,method):
     except Exception as e:
         frappe.log_error(e,'Contact Update')
         frappe.throw(e)
-def lead_contact(doc,method):
+def lead_contact(doc):
     try:
         contact=frappe.db.sql(''' select name from `tabContact` where email_id="{}" '''.format(doc.email_id),as_list=1)
         frappe.db.set_value('Contact',contact[0][0], 'phone_number', doc.phone_no)
