@@ -25,18 +25,6 @@ frappe.ui.form.on("Item", {
 	before_save: function(frm){
 		frm.set_value("item_code", frm.doc.job_titless);
 		frappe.call({"method": "tag_workflow.controllers.master_controller.check_item_group"});
-		frappe.call({
-			"method": "tag_workflow.utils.doctype_method.checkingitemcode",
-			"args": {"item_code": frm.doc.job_title,
-					},
-			"async": 0,
-			"callback": function(r){
-				frm.set_value("item_code", r.message);
-				cur_frm.refresh_field("item_code");
-			}
-		});
-
-
 	},
 
 });

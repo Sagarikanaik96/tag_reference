@@ -51,6 +51,9 @@ frappe.ui.form.on("Contract", {
 				$(this).attr('title', file);
 			});
 		}
+		if ((frm.doc.__islocal==1)  && (cur_frm.doc.lead)){
+			frm.save();
+		}
 	},
 
 	setup: function(frm){
@@ -274,9 +277,7 @@ function companyhide(time) {
 
 function hide_submit_button(frm){
 	if(frm.doc.__islocal!=1 && !frm.doc.signe_hiring){
-
 		$('[data-label = "Submit"]').css('display', 'none');
-
 
 	}
 
@@ -285,13 +286,11 @@ function hide_submit_button(frm){
 frappe.ui.form.on("Job Titles", {
 	job_titles:function(){
 		$('[data-label = "Save"]').css('display', 'block');
-
 	},
 })
 frappe.ui.form.on("Industry Types", {
 	industry_type:function(){
 		$('[data-label = "Save"]').css('display', 'block');
-
 	},
 })
 function company_onboard_sign(frm)
