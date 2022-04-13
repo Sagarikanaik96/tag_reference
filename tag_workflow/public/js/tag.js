@@ -332,7 +332,7 @@ frappe.search.AwesomeBar.prototype.setup = function(element){
 	frappe.tags.utils.fetch_tags();
 };
 frappe.ui.form.ControlInput.prototype.set_label = function(label) {
-	if(this.value && !['Checkbox', 'Password','Attach','Attach Image'].includes(this.df.fieldtype)){
+	if(this.value && !['Checkbox', 'Password','Attach Image','Text Editor'].includes(this.df.fieldtype)){
 		if(this.df.fieldtype=='Currency'){
 			this.$wrapper.attr("title", "$"+this.value.toFixed(2));
 		}
@@ -356,9 +356,9 @@ frappe.ui.form.ControlInput.prototype.set_label = function(label) {
 		else if(this.df.fieldtype=='Float'){
 			this.$wrapper.attr("title", this.value.toFixed(2));
 		}
-		else if(this.df.fieldtype=='Text Editor'){
-			let regex_pattern = /<[^>]+>/g;
-			this.$wrapper.attr('title',this.value.replace(regex_pattern, ''));
+		else if(this.df.fieldtype == 'Attach'){
+			let attach_label = this.value.split('/');
+			this.$wrapper.attr('title',attach_label[attach_label.length-1]);
 		}
 		else{
 			this.$wrapper.attr('title',this.value);

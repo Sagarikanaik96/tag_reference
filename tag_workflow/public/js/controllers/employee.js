@@ -158,13 +158,6 @@ frappe.ui.form.on("Employee", {
 			});
 		}
 		$('[data-fieldname= "ssn"]').attr('title', '');
-		let attach_fields = ['resume','e_verify','f_9','w4','hire_paperwork']
-		for(let i in attach_fields){
-			$("[data-fieldname="+attach_fields[i]+"]").on('mouseover',function(e) {
-				let file=e.target.innerText.split['/'];
-				$(this).attr('title', file[file.length-1]);
-			});
-		}
 	},
 	decrypt_ssn: function(frm) {
 		frappe.call({
