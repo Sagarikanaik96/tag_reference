@@ -5,11 +5,11 @@ frappe.ui.form.on("Company", {
 		$('.custom-actions.hidden-xs.hidden-md').show();
 
 		cur_frm.clear_custom_buttons();
-		init_values(frm);
+		init_values();
 		hide_connections(frm);
 		removing_registration_verbiage(frm);
-		hide_details(frm);
-		update_company_fields(frm);
+		hide_details();
+		update_company_fields();
 		jazzhr_data(frm);
 		update_employees_data(frm)
 		make_invoice(frm);
@@ -30,11 +30,11 @@ frappe.ui.form.on("Company", {
 			cancel_company(frm);
 		}
 
-		$(document).on('input', '[data-fieldname="phone_no"]', function(event){
+		$(document).on('input', '[data-fieldname="phone_no"]', function(){
 			this.value = this.value?.replace(/\D/g, "");
 		});
 
-		$(document).on('input', '[data-fieldname="zip"]', function(event){
+		$(document).on('input', '[data-fieldname="zip"]', function(){
 			this.value = this.value?.replace(/\D/g, "");
 		});
 		if(frm.doc.organization_type=='Staffing'){
@@ -58,6 +58,12 @@ frappe.ui.form.on("Company", {
 			});
 		}
 	},
+	update_employee_records: function (frm){
+		update_existing_employees(frm)
+	}, 
+	get_data_from_jazzhr: function (frm){
+		make_jazzhr_request(frm)
+	},
 
 	setup: function (frm){
 		Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
@@ -67,10 +73,10 @@ frappe.ui.form.on("Company", {
 		})
 		
 		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
-		init_values(frm);
+		init_values();
 
 		let ORG = "Organization Type";
-		frm.set_query("organization_type", function (doc){
+		frm.set_query("organization_type", function (){
 			if(frappe.session.user=="Administrator"){
 				return {
 					filters: [[ORG, "name", "in", ["TAG","Hiring","Staffing","Exclusive Hiring"]]],
@@ -102,7 +108,7 @@ frappe.ui.form.on("Company", {
 			window.location.href= "/app/dynamic_page"
 		})
 
-		frm.set_query("parent_staffing", function (doc) {
+		frm.set_query("parent_staffing", function () {
 			return {
 				filters: [
 					["Company", "organization_type", "=", "Staffing"],
@@ -120,7 +126,7 @@ frappe.ui.form.on("Company", {
 		}
 	},
 
-	set_primary_contact_as_account_receivable_contact: function (frm) {
+	set_primary_contact_as_account_receivable_contact: function () {
 		if (cur_frm.doc.set_primary_contact_as_account_receivable_contact == 1) {
 			if(cur_frm.doc.contact_name && cur_frm.doc.phone_no && cur_frm.doc.email){
 				cur_frm.set_value("accounts_receivable_name", cur_frm.doc.contact_name);
@@ -137,7 +143,7 @@ frappe.ui.form.on("Company", {
 		}
 	},
 
-	set_primary_contact_as_account_payable_contact: function (frm){
+	set_primary_contact_as_account_payable_contact: function (){
 		if (cur_frm.doc.set_primary_contact_as_account_payable_contact == 1) {
 			if (cur_frm.doc.contact_name && cur_frm.doc.phone_no && cur_frm.doc.email){
 				cur_frm.set_value("accounts_payable_contact_name", cur_frm.doc.contact_name);
@@ -186,7 +192,7 @@ frappe.ui.form.on("Company", {
 		}
 	},
 
-	make_organization_inactive(frm){
+	make_organization_inactive(){
 		frappe.call({
 			method: "tag_workflow.tag_data.disable_user",
 			args: {
@@ -223,7 +229,7 @@ frappe.ui.form.on("Company", {
 			}
 		}
 
-		cur_frm.fields_dict["employees"].grid.get_field("employee").get_query = function (doc, cdt, cdn) {
+		cur_frm.fields_dict["employees"].grid.get_field("employee").get_query = function (doc) {
 			return {
 				query: "tag_workflow.tag_data.filter_company_employee",
 				filters: {
@@ -232,7 +238,7 @@ frappe.ui.form.on("Company", {
 			};
 		};
 
-		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc, cdt, cdn) {
+		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
 			const li = [];
 			document.querySelectorAll('a[data-doctype="Industry Type"]').forEach(element=>{
 				li.push(element.getAttribute("data-name"));
@@ -286,10 +292,32 @@ frappe.ui.form.on("Company", {
 			cur_frm.set_df_property('map','hidden',1)
 		}
 	},
+	before_save: function(frm){
+		if(frm.doc.industry_type && frm.doc.job_titles){
+			let industries=[]
+			let titles_industry=[]
+			for(let i in frm.doc.industry_type){
+				industries.push(frm.doc.industry_type[i].industry_type)
+			}
+			for(let i in frm.doc.job_titles){
+				titles_industry.push(frm.doc.job_titles[i].industry_type)
+			}
+			for(let i in titles_industry){
+				if(industries.indexOf(titles_industry[i]) == -1)  {
+					frappe.msgprint('"'+frm.doc.job_titles[i].job_titles+'" Job Titles Industry Type "'+titles_industry[i]+'" is not present in '+cur_frm.doc.name)
+					frappe.validated=false
+					break
+				}
+
+			}
+			
+
+		}
+	}
 });
 
 /*---------hide details----------*/
-function hide_details(frm){
+function hide_details(){
 	let fields = ["charts_section", "sales_settings", "default_settings", "section_break_22", "auto_accounting_for_stock_settings", "fixed_asset_defaults", "non_profit_section", "hra_section", "budget_detail", "company_logo", "date_of_incorporation", "address_html", "date_of_commencement", "fax", "website", "company_description", "registration_info", "domain", "parent_company", "is_group", "industry", "abbr", "change_abbr",];
 	for (let data in fields) {
 		cur_frm.toggle_display(fields[data], 0);
@@ -297,7 +325,7 @@ function hide_details(frm){
 }
 
 /*----------init values-----------*/
-function init_values(frm){
+function init_values(){
 	if(cur_frm.doc.__islocal == 1){
 		$(".page-title .title-area .title-text").css("cursor", "auto");
 		var company_data = {
@@ -319,7 +347,7 @@ function init_values(frm){
 }
 
 /*----update field properity-----*/
-function update_company_fields(frm){
+function update_company_fields(){
 	let roles = frappe.user_roles;
 	let is_local = cur_frm.doc.__islocal;
 	let company_fields = ["organization_type", "country", "industry", "default_currency", "parent_staffing",];
@@ -369,14 +397,6 @@ function validate_phone_and_zip(frm){
 }
 
 /*--------jazzhr------------*/
-function jazzhr_data(frm){
-	let roles = frappe.user_roles;
-	if (roles.includes("Staffing Admin") || roles.includes("Staffing User")) {
-		frm.add_custom_button("Get data from JazzHR", function () {
-			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm);
-		}).addClass("btn-primary");
-	}
- }
   
  function make_jazzhr_request(frm) {
 	if (frm.doc.jazzhr_api_key) {
@@ -493,34 +513,34 @@ function validate_email_phone(email,phone_no){
 function download_document(frm){
 	if(frm.doc.upload_docs && frm.doc.upload_docs.length>1){
 		$('[data-fieldname="upload_docs"]').on('click',(e)=> {
-			doc_download(e,frm);
+			doc_download(e);
 		});
 	}
 
 	if(frm.doc.cert_of_insurance && frm.doc.cert_of_insurance.length>1){
 		$('[data-fieldname="cert_of_insurance"]').on('click',(e)=> {
-			doc_download(e,frm);
+			doc_download(e);
 		});
 	}
 
 	if(frm.doc.w9 && frm.doc.w9.length>1){
 		$('[data-fieldname="w9"]').on('click',(e)=> {
-			doc_download(e,frm);
+			doc_download(e);
 		});
 	}
 
 	if(frm.doc.safety_manual && frm.doc.safety_manual.length>1){
 		$('[data-fieldname="safety_manual"]').on('click',(e)=> {
-			doc_download(e,frm);
+			doc_download(e);
 		});
 	}
 
 	$('[data-fieldname="resume"]').on('click',(e)=> {
-		doc_download(e,frm);
+		doc_download(e);
 	});
 }
 
-function doc_download(e,frm){
+function doc_download(e){
 	let file=e.target.innerText;
 	if(file.includes('.') && file.length>1){
 		let link='';
@@ -580,14 +600,7 @@ function show_fields(frm){
 	frm.set_df_property('state','hidden',0);
 	frm.set_df_property('zip','hidden',0);
 }
-function update_employees_data(frm){
-	let roles = frappe.user_roles;
-	if (roles.includes("Staffing Admin") || roles.includes("Staffing User")) {
-		frm.add_custom_button("Update Employee Records", function () {
-			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : update_existing_employees(frm);
-		}).addClass("btn-primary");
-	}
- }
+
  function update_existing_employees(frm){
  if(frm.doc.jazzhr_api_key){
 	setTimeout(function(){

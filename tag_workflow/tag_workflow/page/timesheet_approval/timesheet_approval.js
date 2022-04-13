@@ -73,7 +73,7 @@ frappe.TimesheetApproval = Class.extend({
 		})
         },
 
-	order_info: function(wrapper, page){
+	order_info: function(_wrapper, _page){
 		var me = this;
 		let values = me.page.fields_dict;
 		let job_order = values.job_order.value || '';
@@ -127,14 +127,14 @@ frappe.TimesheetApproval = Class.extend({
 		});
 	},
 
-	no_data: function(wrapper, page){
+	no_data: function(_wrapper, _page){
 		let html = `<tr><td style="text-align: center; width: 10%;"></td><td style="text-align: center; width: 20%;"></td><td style="text-align: center; width: 25%;">No Data Found</td><td style="text-align: center; width: 20%;"></td><td style="text-align: center; width: 25%;"></td></tr>`;
 		$("#child").empty();
 		$("#data_approval").empty();
 		$("#data_approval").append(html);
 	},
 
-	make_main_table: function(wrapper, page, data, company){
+	make_main_table: function(_wrapper, _page, data, _company){
 		var me = this;
 		me.main_data = ``;
 		for(var i in data){
@@ -178,7 +178,7 @@ frappe.TimesheetApproval = Class.extend({
 		}
 	},
 
-	approve_timesheet(wrapper, page, count, value, action){
+	approve_timesheet(_wrapper, page, count, value, action){
 		var me = this;
 		if(count.length && value.length){
 			frappe.call({
@@ -199,7 +199,7 @@ frappe.TimesheetApproval = Class.extend({
 		}
 	},
 
-	deny_timesheet(wrapper, page, count, value, action){
+	deny_timesheet(_wrapper, _page, count, value, _action){
 		if(!count.length && !value.length){
 			frappe.msgprint("Please select timesheet(s).");
 			return;
@@ -257,7 +257,7 @@ frappe.TimesheetApproval = Class.extend({
 		dialog.$wrapper.find('.modal-dialog').css('max-width', '880px');
 		dialog.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
 	},
-	make_timesheet(wrapper, page){
+	make_timesheet(_wrapper, _page){
 		frappe.route_options = {"job_order":$('[data-fieldname="job_order"]')[0].fieldobj.value };
 		frappe.set_route("form", "add-timesheet");
 	},		
@@ -338,6 +338,6 @@ function select_all(){
 }
 
 /*-----------------------show timesheet------------------*/
-function show_timesheet(order, date, name){
+function show_timesheet(_order, _date, name){
 	frappe.set_route("form", "Timesheet", name);
 }

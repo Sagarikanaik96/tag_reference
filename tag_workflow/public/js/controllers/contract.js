@@ -51,6 +51,9 @@ frappe.ui.form.on("Contract", {
 				$(this).attr('title', file);
 			});
 		}
+		if ((frm.doc.__islocal==1)  && (cur_frm.doc.lead)){
+			frm.save();
+		}
 	},
 
 	setup: function(frm){
@@ -78,6 +81,23 @@ frappe.ui.form.on("Contract", {
 		if(frm.doc.addendums=='<div class="ql-editor read-mode"><p><br></p></div>'){
 			frm.set_value('addendums', '')
 		}
+		if(frm.doc._industry_types && frm.doc.job_titles){
+			let industries=[]
+			let titles_industry=[]
+			for(let i in frm.doc._industry_types){
+				industries.push(frm.doc._industry_types[i].industry_type)
+			}
+			for(let i in frm.doc.job_titles){
+				titles_industry.push(frm.doc.job_titles[i].industry_type)
+			}
+			for(let i in titles_industry){
+				if(industries.indexOf(titles_industry[i]) == -1)  {
+					frappe.msgprint('"'+frm.doc.job_titles[i].job_titles+'" Job Titles Industry Type "'+titles_industry[i]+'" is not present in '+cur_frm.doc.name)
+					frappe.validated=false
+					break
+				}
+			}		
+		}
 	},
 	signe_company:function(frm){
 		$('[data-label = "Save"]').css('display', 'block');
@@ -93,6 +113,7 @@ frappe.ui.form.on("Contract", {
 	signe_hiring:function(frm){
 		$('[data-label = "Save"]').css('display', 'block');
 		if(frm.doc.signe_hiring){
+			frm.set_value("sign_date_hiring", frappe.datetime.now_date());
 			var regex = /[^0-9A-Za-z ]/g;
 			if (regex.test(frm.doc.signe_hiring) === true){
 				frappe.msgprint(__("Signature: Only alphabets and numbers are allowed."));
@@ -119,9 +140,6 @@ frappe.ui.form.on("Contract", {
 	},
 	addendums: function(){
 		$('[data-label = "Save"]').css('display', 'block');
-	},
-	before_cancel: function(frm){
-		frappe.db.set_value(frm.doc.doctype, frm.doc.name, 'document_status', 'Cancelled');
 	}
 });
 
@@ -259,9 +277,7 @@ function companyhide(time) {
 
 function hide_submit_button(frm){
 	if(frm.doc.__islocal!=1 && !frm.doc.signe_hiring){
-
 		$('[data-label = "Submit"]').css('display', 'none');
-
 
 	}
 
@@ -270,13 +286,11 @@ function hide_submit_button(frm){
 frappe.ui.form.on("Job Titles", {
 	job_titles:function(){
 		$('[data-label = "Save"]').css('display', 'block');
-
 	},
 })
 frappe.ui.form.on("Industry Types", {
 	industry_type:function(){
 		$('[data-label = "Save"]').css('display', 'block');
-
 	},
 })
 function company_onboard_sign(frm)

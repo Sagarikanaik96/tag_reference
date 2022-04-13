@@ -40,12 +40,12 @@ def execute(filters=None):
 		frappe.msgprint("To Date can't be before From Date")
 	else:
 		current_company=frappe.db.sql(''' select company from `tabUser` where email='{}' '''.format(frappe.session.user),as_list=1)
-		dataa= fields_data(current_company,filters,from_date,to_date,company_search,condition)
+		dataa= fields_data(current_company,filters,company_search,condition)
 		
 			
 	return columns, dataa
 
-def fields_data(current_company,filters,from_date,to_date,company_search,condition):
+def fields_data(current_company,filters,company_search,condition):
 	data=[]
 	if(len(current_company)==0 or current_company[0][0]=='TAG'):
 		if(filters.get('companies')):

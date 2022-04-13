@@ -199,7 +199,7 @@ export default {
 		}
 	},
 	watch: {
-		files(newvalue, oldvalue) {
+		files(newvalue) {
 			if (!this.allow_multiple && newvalue.length > 1) {
 				this.files = [newvalue[newvalue.length - 1]];
 			}
@@ -226,7 +226,7 @@ export default {
 		browse_files() {
 			this.$refs.file_input.click();
 		},
-		on_file_input(e) {
+		on_file_input() {
 			this.add_files(this.$refs.file_input.files);
 		},
 		remove_file(file) {
@@ -347,7 +347,7 @@ export default {
 
 			return new Promise((resolve, reject) => {
 				let xhr = new XMLHttpRequest();
-				xhr.upload.addEventListener('loadstart', (e) => {
+				xhr.upload.addEventListener('loadstart', () => {
 					file.uploading = true;
 				})
 				xhr.upload.addEventListener('progress', (e) => {
@@ -356,11 +356,11 @@ export default {
 						file.total = e.total;
 					}
 				})
-				xhr.upload.addEventListener('load', (e) => {
+				xhr.upload.addEventListener('load', () => {
 					file.uploading = false;
 					resolve();
 				})
-				xhr.addEventListener('error', (e) => {
+				xhr.addEventListener('error', () => {
 					file.failed = true;
 					reject();
 				})

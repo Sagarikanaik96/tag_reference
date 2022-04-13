@@ -10,7 +10,7 @@ frappe.listview_settings["Company"] = {
     indicator[1] = { Active: "green", Inactive: "red" }[status];
     return indicator;
   },
-  onload: function (listview) {
+  onload: function () {
     $('h3[title="Company"]').html('Affiliate Companies');
     if(frappe.session.user != 'Administrator'){
       $('.custom-actions.hidden-xs.hidden-md').hide();
@@ -23,7 +23,7 @@ frappe.listview_settings["Company"] = {
       };
     }
   },
-  refresh: function(listview){
+  refresh: function(){
     $('#navbar-breadcrumbs > li > a').html('Affiliate Companies');
   }
 };

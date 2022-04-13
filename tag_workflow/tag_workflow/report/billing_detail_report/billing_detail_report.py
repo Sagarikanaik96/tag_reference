@@ -44,14 +44,14 @@ def execute(filters=None):
 		user_name=frappe.session.user
 		sql = ''' select organization_type from `tabUser` where email='{}' '''.format(user_name)
 		user_type=frappe.db.sql(sql, as_list=1)
-		current_company=frappe.db.sql(''' select company from `tabUser` where email='{}' '''.format(frappe.session.user),as_list=1)
+		
 
-		dataa=fields_data(filters,current_company,company_search,user_type,user_name,condition)
+		dataa=fields_data(filters,company_search,user_type,user_name,condition)
 		
 			
 	return columns, dataa
 
-def fields_data(filters,current_company,company_search,user_type,user_name,condition):
+def fields_data(filters,company_search,user_type,user_name,condition):
 	print(condition)
 	data=[]
 	if frappe.session.user=="Administrator" or user_type[0][0]=='TAG':

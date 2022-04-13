@@ -66,7 +66,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=True):
         customer = frappe.db.get_value(order, source_name, "customer")
         return frappe.get_doc("Customer", customer)
 
-    def update_timesheet(source, doclist, target):
+    def update_timesheet(doclist):
         total_amount = 0
         total_hours = 0
         job_order = frappe.db.get_value(order, source_name, "job_order")
@@ -97,7 +97,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=True):
 
     customer = customer_doc(source_name)
     doclist = make_invoice(source_name, target_doc)
-    update_timesheet(source_name, doclist, target_doc)
+    update_timesheet(doclist)
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
     return doclist
 
@@ -227,7 +227,6 @@ def request_signature(staff_user, staff_company, hiring_user, name):
 def update_lead(lead, staff_company, date, staff_user, name):
     try:
         frappe.db.set_value("Lead", lead, "status", 'Close')
-        frappe.db.set_value("Contract", name, 'document_status', 'Submitted');
         frappe.db.set_value("Contract", name, "docstatus", 1)
 
         date = date.split('-')
@@ -412,9 +411,8 @@ def fetching_data(data,response,api_key,company):
             response = requests.get(url)
             i=i+1
             data.extend(response.json())
-        my_data=frappe.cache()
-        my_data.set_value(1,data)
-        enqueue(emp_data(api_key,my_data,company))
+        my_data=data
+        emp_data(api_key,my_data,company)
     except Exception as e:
         frappe.msgprint('Error Occured')
         frappe.error_log(e, "JazzHR")
@@ -422,8 +420,7 @@ def fetching_data(data,response,api_key,company):
  
 def emp_data(api_key,data,company):
     try:
-        y=data.get_value(1)
-        data.set_value(1,'')
+        y=data
         for i in y:
             try:
                 name=i['id']
@@ -643,3 +640,18 @@ def state_zip(state_data,doc_emp):
         frappe.msgprint('Some Error Occured while fetching state details')
         frappe.error_log(e, "JazzHR")
         frappe.throw(e)
+
+@frappe.whitelist()
+def get_staffing_company_invoices():
+    try:
+        data = get_staffing_company_list()
+        comps = data.split('\n')
+        companies = frappe.db.get_list('Sales Invoice',filters={'company':['in',comps],'status':['!=','Cancelled']},fields=['distinct(company)'])
+        if len(companies)>0:
+            final_data=[c['company'] for c in companies]
+            return "\n".join(final_data)
+        else:
+            return []
+    except Exception as e:
+        frappe.log_error(e,'Company error')
+        return  []

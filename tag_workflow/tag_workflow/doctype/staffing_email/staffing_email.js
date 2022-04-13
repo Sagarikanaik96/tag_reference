@@ -39,7 +39,7 @@ frappe.ui.form.on("Staffing Email", {
 		if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
 			frm.fields_dict.email_recipients.grid.get_field(
 				"email_recipients"
-			).get_query = function (doc, cdt, cdn) {
+			).get_query = function () {
 				return {
 					query: "tag_workflow.tag_data.email_recipient",
 					filters: { company: frappe.defaults.get_user_default("Company") },
@@ -47,7 +47,7 @@ frappe.ui.form.on("Staffing Email", {
 			};
 		}
 	},
-	onload: function(frm){
+	onload: function(){
 		if(frappe.session.user != 'Administrator'){
             $('.menu-btn-group').hide()
         }

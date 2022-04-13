@@ -7,9 +7,9 @@ frappe.ui.form.on("User", {
 		cur_frm.clear_custom_buttons();
 		multi_company_setup(frm);
 		set_options(frm);
-		field_toggle(frm);
-		field_reqd(frm);
-		field_check(frm);
+		field_toggle();
+		field_reqd();
+		field_check();
 		exclusive_fields(frm);
 		cur_frm.dashboard.hide()
 		if(frm.doc.__islocal==1){
@@ -36,7 +36,7 @@ frappe.ui.form.on("User", {
 			frm.set_value('company','')
 		}
 
-		frm.set_query("organization_type", function(doc){
+		frm.set_query("organization_type", function(){
 			if(roles.includes('Tag Admin')){
 				return {
 					filters: [
@@ -73,7 +73,7 @@ frappe.ui.form.on("User", {
 	},
 	organization_type: function(frm){
 		set_options(frm);
-		init_values(frm);
+		init_values();
 		if(!frm.doc.organization_type){
 			frm.set_query("company", function (doc) {
 				return {
@@ -89,12 +89,12 @@ frappe.ui.form.on("User", {
 		
 			if(frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring'){
 				let company=cur_frm.doc.organization_type
-				setup_company_value(frm,company);
+				setup_company_value(company);
 			}
 			else{
 				let company='Exclusive Hiring'
 				frm.set_value('company',frappe.boot.tag.tag_user_info.company)
-				setup_company_value(frm,company)
+				setup_company_value(company)
 			}
 
 		}
@@ -114,14 +114,14 @@ frappe.ui.form.on("User", {
 			org_info(frm);	
 		}	
 	},
-	first_name:function(frm){
+	first_name:function(){
 		if(cur_frm.doc.first_name){
 			var first_name = cur_frm.doc.first_name;
 			first_name = name_update(first_name);
 			cur_frm.set_value("first_name",first_name);
 		}
 	},		
-	last_name:function(frm){
+	last_name:function(){
 		if(cur_frm.doc.last_name){
 			var last_name = cur_frm.doc.last_name;
 			last_name = name_update(last_name);
@@ -144,10 +144,10 @@ frappe.ui.form.on("User", {
 		check_bd(frm);
 	},
 	enabled: function(frm){
-		field_toggle(frm);
+		field_toggle();
 		multi_company_setup(frm);
 	},
-	onload:function(frm){
+	onload:function(){
 		if(frappe.session.user!='Administrator'){
 			$('.menu-btn-group').hide();
 		}
@@ -167,7 +167,7 @@ function name_update(string){
 }
 
 /*--------perpare field display-----------*/
-function field_toggle(frm){
+function field_toggle(){
 	var perm_dis_fields = ["sb1", "document_follow_notifications_section", "email_settings", "sb_allow_modules", "sb2", "sb3", "third_party_authentication", "api_access", "full_name", "language", "time_zone", "middle_name", "username", "interest", "bio", "banner_image", "mute_sounds", "desk_theme", "phone"];
 	for(let field in perm_dis_fields){
 		cur_frm.toggle_display(perm_dis_fields[field], 0);
@@ -180,7 +180,7 @@ function field_toggle(frm){
 	}
 }
 
-function field_reqd(frm){
+function field_reqd(){
 	cur_frm.fields_dict["short_bio"].collapse();
 	var data = ["company", "date_of_joining"];
 	for(let value in data){
@@ -188,7 +188,7 @@ function field_reqd(frm){
 	}
 }
 
-function field_check(frm){
+function field_check(){
 	let values = ["email", "company", "organization_type"];
 	let pass = "new_password";
 	if(!cur_frm.doc.__islocal){
@@ -206,7 +206,7 @@ function field_check(frm){
 	(frappe.session.user === cur_frm.doc.name) ? cur_frm.toggle_enable("enabled", 0) : console.log("TAG");
 }
 
-function init_values(frm){
+function init_values(){
 	if(cur_frm.doc.__islocal == 1){
 		let clear_values = ["username", "email", "first_name", "last_name", "company", "gender", "birth_date", "tag_user_type", "location", "mobile_no"];
 		for(var val in clear_values){
@@ -278,8 +278,8 @@ function update_employee(frm){
 }
 
 
-function setup_company_value(frm,company){
-	cur_frm.fields_dict['company'].get_query = function(doc) {
+function setup_company_value(company){
+	cur_frm.fields_dict['company'].get_query = function() {
 		return {
 			filters: {
 				"organization_type": company
@@ -331,7 +331,7 @@ function make_multicompany(frm){
 					args: {"user": frm.doc.name, "company": company.join(",")},
 					freeze: true,
 					freeze_message: "<p><b>preparing user for multi-Organisarion...</b></p>",
-					callback: function(r){
+					callback: function(){
 						frappe.msgprint("User <b>"+frm.doc.name+"</b> has been assigned as <b>"+frm.doc.tag_user_type+"</b> for Organisation <b>"+company.join(",")+"</b>");
 						cur_frm.reload_doc();
 					}

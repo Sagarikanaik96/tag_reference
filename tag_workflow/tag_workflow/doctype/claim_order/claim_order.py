@@ -20,7 +20,7 @@ claimOrder = "Claim Order"
 def staffing_claim_joborder(job_order,hiring_org, staffing_org, doc_name,single_share,no_required,no_assigned):
 	try:
 		if(int(single_share)==1):
-			check_partial_claim(job_order,staffing_org,single_share,no_required,no_assigned,hiring_org,doc_name)
+			check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_org,doc_name)
 			return
 
 		bid_receive=frappe.get_doc(jobOrder,job_order)
@@ -151,7 +151,7 @@ def save_modified_claims(my_data,doc_name):
 		frappe.db.rollback()
 
 
-def check_partial_claim(job_order,staffing_org,single_share,no_required,no_assigned,hiring_org,doc_name):
+def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_org,doc_name):
 	try:
 		job_order_data=frappe.get_doc(jobOrder,job_order)
 		job_order_data.is_single_share = '0'

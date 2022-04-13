@@ -138,7 +138,7 @@ def update_exclusive_perm(user_list, company):
 
 
 # remove message on user creation
-def make_employee_permission(user, emp, company):
+def make_employee_permission(user, company):
     try:
         if not frappe.db.exists(PERMISSION,{"user": user,"allow": COM,"apply_to_all_doctypes":1, "for_value": company}):
             perm_doc = frappe.get_doc(dict(doctype=PERMISSION,user=user, allow=COM, for_value=company, apply_to_all_doctypes=1))
@@ -195,7 +195,7 @@ def check_employee(name, first_name, company, last_name=None, gender=None, date_
 
 
         if(organization_type != "TAG"):
-            make_employee_permission(name, emp.name, company)
+            make_employee_permission(name, company)
             enqueue("tag_workflow.controllers.master_controller.user_exclusive_perm", user=name, company=company, organization_type=None)
             enqueue("tag_workflow.utils.trigger_session.share_company_with_user", users=users)
         elif(organization_type == "TAG"):

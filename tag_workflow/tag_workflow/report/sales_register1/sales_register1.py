@@ -3,7 +3,7 @@
 
 import frappe
 
-def execute(filters=None):
+def execute():
 	columns, data = [], []
 
 	columns=[

@@ -48,7 +48,7 @@ frappe.query_reports["Tag Invoice"] = {
 
 		},
 	],
-	onload:function(frm){
+	onload:function(){
 		if (!frappe.user_roles.includes('Tag Admin')){
 			// setTimeout(hide_field,100)
 			hide_field()

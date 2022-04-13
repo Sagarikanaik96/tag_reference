@@ -3,7 +3,5 @@
 /* eslint-disable */
 
 frappe.query_reports["Sales Register1"] = {
-	"filters": [
-
-	]
+	
 };

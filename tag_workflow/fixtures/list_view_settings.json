@@ -54,5 +54,19 @@
   "parentfield": null,
   "parenttype": null,
   "total_fields": "6"
+ },
+ {
+  "disable_auto_refresh": 0,
+  "disable_count": 0,
+  "disable_sidebar_stats": 0,
+  "docstatus": 0,
+  "doctype": "List View Settings",
+  "fields": null,
+  "modified": "2022-04-12 03:43:03.639809",
+  "name": "Item",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "total_fields": "8"
  }
 ]

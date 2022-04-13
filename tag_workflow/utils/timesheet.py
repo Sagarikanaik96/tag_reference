@@ -72,7 +72,7 @@ def get_child_time(posting_date, from_time, to_time, child_from=None, child_to=N
         print(e)
         return from_time, to_time
 
-def check_old_timesheet(child_from, child_to, employee, job_order):
+def check_old_timesheet(child_from, child_to, employee):
     try:
         sql = """select c.name, c.parent from `tabTimesheet Detail` c where (('{1}' >= c.from_time and '{1}' <= c.to_time) or ('{2}' >= c.from_time and '{2}' <= c.to_time) or ('{1}' <= c.from_time and '{2}' >= c.to_time)) and parent in (select name from `tabTimesheet` where employee = '{0}') """.format(employee, child_from, child_to)
         data = frappe.db.sql(sql, as_dict=1)
@@ -115,7 +115,7 @@ def update_timesheet_data(data, company, company_type, user):
             to_time = datetime.datetime.strptime((data['posting_date']+" "+data['exit_time']), TM_FT)
             for item in data['items']:
                 child_from, child_to = get_child_time(data['posting_date'], from_time, to_time, item['enter_time'], item['exit_time'])
-                is_ok = check_old_timesheet(child_from, child_to, item['employee'], data['job_order'])
+                is_ok = check_old_timesheet(child_from, child_to, item['employee'])
                 if(is_ok == 0):
                     timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=company, job_order_detail=data['job_order'], employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate,status_of_work_order = job.order_status,date_of_timesheet=data['posting_date']))
                     timesheet.append("time_logs", {
@@ -158,9 +158,9 @@ def notify_email(job_order, employee, value, subject, company, employee_name, da
         sql = """ select user_id from `tabEmployee` where company = (select company from `tabEmployee` where name = '{0}') and user_id IS NOT NULL  """.format(employee)
         user_list = frappe.db.sql(sql, as_dict=1)
         if subject=='DNR':
-            message=dnr_notification(job_order,value,employee_name,subject,date,company,employee_company,employee)       
+            message=dnr_notification(job_order,value,employee_name,subject,date,company,employee)       
         else:
-            message=show_satisfactory_notification(job_order,value,employee_name,subject,date,company,employee_company,employee)
+            message=show_satisfactory_notification(job_order,value,employee_name,subject,date,company,employee)
             
         users = []
         for user in user_list:
@@ -274,7 +274,7 @@ def unsatisfied_organization(emp_doc,company,job_order):
     assign_doc.save(ignore_permissions=True)
     emp_doc.save(ignore_permissions=True)
 
-def dnr_notification(job_order,value,employee_name,subject,date,company,employee_company,employee):
+def dnr_notification(job_order,value,employee_name,subject,date,company,employee):
     sql = ''' select from_date,job_start_time,to_date from `tabJob Order` where name='{}' '''.format(job_order)
     data=frappe.db.sql(sql, as_dict=1)
     start_date=data[0].from_date
@@ -305,7 +305,7 @@ def dnr_notification(job_order,value,employee_name,subject,date,company,employee
             message = f'<b>{employee_name}</b> has been unmarked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
         return message
         
-def show_satisfactory_notification(job_order,value,employee_name,subject,date,company,employee_company,employee):
+def show_satisfactory_notification(job_order,value,employee_name,subject,date,company,employee):
     if(int(value)):
         message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
     else:

@@ -14,7 +14,7 @@ frappe.listview_settings["Contact"] = {
             }
         }
     },
-    refresh:function(listview){
+    refresh:function(){
         if(frappe.boot.tag.tag_user_info.user_type == 'Staffing User'){
             $('[class="btn btn-primary btn-sm primary-action"]').hide()
         }

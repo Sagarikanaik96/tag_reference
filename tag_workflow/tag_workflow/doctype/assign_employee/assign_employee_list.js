@@ -1,5 +1,5 @@
 frappe.listview_settings['Assign Employee'] = {
-    onload: function(listview){
+    onload: function(){
         if(frappe.boot.tag.tag_user_info.company_type!='Staffing'){
             $('.page-actions').hide();
         }

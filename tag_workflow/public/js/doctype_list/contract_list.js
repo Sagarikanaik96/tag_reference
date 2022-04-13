@@ -1,10 +1,31 @@
 frappe.listview_settings["Contract"] = {
-    onload:function(){
+    onload:function(listview){
         if(frappe.session.user != 'Administrator'){
             $('.custom-actions.hidden-xs.hidden-md').hide()
             $('[data-original-title="Refresh"]').hide()
             $('.menu-btn-group').hide()
         }
+        const df = {
+            condition: "=",
+            default: null,
+            fieldname: "docstatus",
+            fieldtype: "Select",
+            input_class: "input-xs",
+            label: "Status",
+            is_filter: 1,
+            onchange: function() {
+                cur_list.refresh();
+            },
+            options: [0,1,2],
+            placeholder: "Status"
+        };
+        listview.page.add_field(df, '.standard-filter-section');
+        let doc_filter = document.querySelector('select[data-fieldname = "docstatus"]')
+        doc_filter.options.add(new Option(), 0);
+        doc_filter.options[1].innerHTML = 'Draft';
+        doc_filter.options[2].innerHTML = 'Submitted';
+        doc_filter.options[3].innerHTML = 'Cancelled';
+        doc_filter.options.add(new Option('Signed', 3), 4);
     },
     refresh:function(){
         $('[data-original-title = "Name"]>input').attr('placeholder', 'Contract ID');

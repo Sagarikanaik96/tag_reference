@@ -1,5 +1,5 @@
 frappe.listview_settings['Job Site'] = {
-	onload:function(listview){
+	onload:function(){
 		$('h3[title = "Job Site"]').html('Job Sites');
 		if(frappe.session.user!='Administrator'){
 			$('.custom-actions.hidden-xs.hidden-md').hide();

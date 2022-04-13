@@ -3,7 +3,7 @@ frappe.listview_settings['Timesheet'] = {
 	add_fields: ["status", "total_hours", "start_date", "end_date", "from_date", "to_date"],
 	right_column: "name",
 
-	refresh: function(listview){
+	refresh: function(){
 		$('#navbar-breadcrumbs > li > a').html('Timesheets');
 		$('.custom-actions.hidden-xs.hidden-md').hide();
 		$('[data-original-title="Menu"]').hide();

@@ -4,12 +4,15 @@ from frappe import _
 
 
 def get_data(data):
-    return {
-            'fieldname': 'lead',
-            'transactions': [
-                {
-                    'label': _('Reference'),
-                    'items': ['Contract']
-                },
-            ]
-    }
+	if data:
+	    return {
+	            'fieldname': 'lead',
+	            'transactions': [
+	                {
+	                    'label': _('Reference'),
+	                    'items': ['Contract']
+	                },
+	            ]
+	    }
+	
+

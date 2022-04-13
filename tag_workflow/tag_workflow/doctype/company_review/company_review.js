@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Company Review', {
-	refresh: function(frm) {
+	refresh: function() {
 		$('.form-footer').hide()
 	}
 });

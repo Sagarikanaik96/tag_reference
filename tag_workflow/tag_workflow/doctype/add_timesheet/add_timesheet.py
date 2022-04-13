@@ -33,7 +33,7 @@ def get_child_time(posting_date, from_time, to_time, child_from=None, child_to=N
     except Exception:
         return from_time, to_time, '', ''
 
-def check_old_timesheet(child_from, child_to, employee, job_order):
+def check_old_timesheet(child_from, child_to, employee):
     try:
         sql = """select c.name, c.parent from `tabTimesheet Detail` c where (('{1}' >= c.from_time and '{1}' <= c.to_time) or ('{2}' >= c.from_time and '{2}' <= c.to_time) or ('{1}' <= c.from_time and '{2}' >= c.to_time)) and parent in (select name from `tabTimesheet` where employee = '{0}') """.format(employee, child_from, child_to)
         data = frappe.db.sql(sql, as_dict=1)
@@ -82,7 +82,7 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
             from_time, to_time = get_datetime(date, from_time, to_time)
             for item in items:
                 child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, item['from_time'], item['to_time'], item['break_from'], item['break_to'])
-                is_ok = check_old_timesheet(child_from, child_to, item['employee'], job_order)
+                is_ok = check_old_timesheet(child_from, child_to, item['employee'])
                 if(is_ok == 0):
                     timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=job.company, job_order_detail=job_order, employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate, status_of_work_order=job.order_status, date_of_timesheet=date))
 

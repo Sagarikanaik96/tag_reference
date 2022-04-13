@@ -138,7 +138,7 @@ function refresh(listview){
                                             'my_data':dict.dict,
                                             'doc_name':listview.data[0].job_order
                                         },
-                                        callback:function(rmdata){    
+                                        callback:function(){
                                             setTimeout(function () {
                                                 window.location.href='/app/job-order/'+listview.data[0].job_order
                                             }, 3000);
@@ -269,7 +269,7 @@ function modify_claims(listview){
                                             'my_data':dict.dict,
                                             'doc_name':listview.data[0].job_order
                                         },
-                                        callback:function(rmdata1){   
+                                        callback:function(){
                                             setTimeout(function () {
                                                 window.location.href='/app/job-order/'+listview.data[0].job_order
                                             }, 2000); 
