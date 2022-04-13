@@ -1,7 +1,6 @@
 frappe.ui.form.on("Item", {
 	refresh: function(frm){
 		cur_frm.clear_custom_buttons();
-		setup_data();
 		hide_connections(frm);
 
 		hide_fields();
@@ -70,16 +69,8 @@ frappe.ui.form.on("Item", {
 
 });
 
-/*--------setup values-----------*/
-function setup_data(){
-	if(cur_frm.doc.__islocal == 1){
-		var item_data = {"item_group": "Services", "is_stock_item": 0, "include_item_in_manufacturing": 0, "stock_uom": "Nos"};
-		var keys = Object.keys(item_data);
-		for(var val in keys){
-			cur_frm.set_value(keys[val], item_data[keys[val]]);
-		}
-	}
-}
+
+
 
 /*-------hide fields------------*/
 function hide_fields(){

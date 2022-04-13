@@ -51,9 +51,6 @@ frappe.ui.form.on("Contract", {
 				$(this).attr('title', file);
 			});
 		}
-		if ((frm.doc.__islocal==1)  && (cur_frm.doc.lead)){
-			frm.save();
-		}
 	},
 
 	setup: function(frm){
@@ -279,12 +276,13 @@ function hide_submit_button(frm){
 	if(frm.doc.__islocal!=1 && !frm.doc.signe_hiring){
 		$('[data-label = "Submit"]').css('display', 'none');
 
-	}
+	}	
 
 }
 
 frappe.ui.form.on("Job Titles", {
 	job_titles:function(){
+
 		$('[data-label = "Save"]').css('display', 'block');
 	},
 })
