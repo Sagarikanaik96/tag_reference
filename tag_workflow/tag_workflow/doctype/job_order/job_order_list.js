@@ -1,5 +1,5 @@
 frappe.listview_settings['Job Order'] = {
-	onload:function(listview){
+	onload:function(){
 		$('h3[title = "Job Order"]').html('Job Orders');
 		$('.list-header-subject > div:nth-child(7) > span:nth-child(1)').html('Industry');
 		$('[data-fieldname="name"]').attr('placeholder','Order ID');

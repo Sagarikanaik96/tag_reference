@@ -229,10 +229,10 @@ frappe.ui.Page = Class.extend({
 		let scroll_container = $('html')
 			.css("overflow-y", "hidden");
 
-		this.sidebar.find(".close-sidebar").on('click', (e) => close_sidebar(e));
-		this.sidebar.on("click", "button:not(.dropdown-toggle)", (e) => close_sidebar(e));
+		this.sidebar.find(".close-sidebar").on('click', () => close_sidebar());
+		this.sidebar.on("click", "button:not(.dropdown-toggle)", () => close_sidebar());
 
-		let close_sidebar = (e) => {
+		let close_sidebar = () => {
 			scroll_container.css("overflow-y", "");
 			this.sidebar.find("div.close-sidebar").fadeOut(() => {
 				overlay_sidebar.removeClass('opened')
@@ -746,7 +746,7 @@ frappe.ui.Page = Class.extend({
 			.toggle(true);
 	},
 
-	add_help_button: function(txt) {
+	add_help_button: function() {
 		//
 	},
 

@@ -26,7 +26,7 @@ frappe.query_reports["Work Orders"] = {
 			reqd:0
 		}
 	],
-	onload:function(frm){
+	onload:function(){
 			setTimeout(hide_createcard,900)
 	}
 };

@@ -32,7 +32,7 @@ frappe.ui.form.on("Timesheet", {
 			});
 
 			if((frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User')) && frappe.session.user!='Administrator'){
-				approval_timesheet(frm);
+				approval_timesheet();
 			}
 		}
 		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
@@ -67,7 +67,7 @@ frappe.ui.form.on("Timesheet", {
 				}
 			}
 		});
-		frm.fields_dict['time_logs'].grid.get_field('activity_type').get_query = function(doc, cdt, cdn) {
+		frm.fields_dict['time_logs'].grid.get_field('activity_type').get_query = function(doc) {
 			return {
 				query: "tag_workflow.utils.timesheet.job_name",
 				filters: {
@@ -142,7 +142,7 @@ frappe.ui.form.on("Timesheet", {
 
 	job_order_detail: function(frm){
 		job_order_details(frm);
-		update_job_detail(frm);
+		update_job_detail();
 	},
 
 	no_show: function(frm){
@@ -219,7 +219,7 @@ function check_update_timesheet(frm){
 									'job_order':cur_frm.doc.job_order_detail
 								},
 								"async": 0,
-								callback:function(rm){
+								callback:function(){
 									frappe.msgprint('Review Submitted Successfully');
 								}
 							});
@@ -240,7 +240,7 @@ function hide_timesheet_field(fields){
 	}
 }
 
-function update_job_detail(frm){
+function update_job_detail(){
 	if (cur_frm.doc.job_order_detail){
 		frappe.call({
 			method:"tag_workflow.tag_data.update_timesheet",
@@ -340,7 +340,7 @@ function employee_timesheet_rating(frm){
 	});
 }
 
-function approval_timesheet(frm){
+function approval_timesheet(){
 	frappe.db.get_value("Hiring Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
 		if(!r.rating){
 			var pop_up = new frappe.ui.Dialog({
@@ -360,7 +360,7 @@ function approval_timesheet(frm){
 							'ratings':comp_rating,
 							'job_order':cur_frm.doc.job_order_detail
 						},
-						callback:function(rm){
+						callback:function(){
 								frappe.msgprint('Review Submitted Successfully')	
 						}
 					})
@@ -548,7 +548,7 @@ function update_time(frm, cdt, cdn){
 }
 
 
-var calculate_end_time = function(frm, cdt, cdn) {
+var calculate_end_time = function(_frm, cdt, cdn) {
         let child = locals[cdt][cdn];
 	console.log(child.name);
 };

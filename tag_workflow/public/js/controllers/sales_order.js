@@ -6,7 +6,7 @@ tag_workflow.controllers.SalesOrderController = Class.extend({
 		$.extend(this, args);
 	},
 
-	refresh: function(doc){
+	refresh: function(){
 		var me = this;
 		if(me.frm.doc.docstatus == 1){
 			me.frm.add_custom_button(__("Make Sales Invoice"), function() {

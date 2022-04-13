@@ -143,7 +143,7 @@ function get_employee_data(frm){
 }
 
 /*-------------------------------------*/
-cur_frm.fields_dict['items'].grid.get_field('employee').get_query = function(doc, cdt, cdn){
+cur_frm.fields_dict['items'].grid.get_field('employee').get_query = function(doc){
 	return {
 		query: "tag_workflow.utils.timesheet.get_timesheet_employee",
 		filters: {
@@ -155,7 +155,7 @@ cur_frm.fields_dict['items'].grid.get_field('employee').get_query = function(doc
 
 /*----------------------------------*/
 frappe.ui.form.on("Timesheet Item", {
-	items_add: function(frm, cdt, cdn){
+	items_add: function(_frm, cdt, cdn){
 		let child = frappe.get_doc(cdt, cdn);
 		frappe.model.set_value(child.doctype, child.name, "company", "");
 	},

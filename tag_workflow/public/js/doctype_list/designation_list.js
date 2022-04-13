@@ -1,6 +1,6 @@
 frappe.listview_settings['Designation'] = { 
     filters : [["organization","=",'']],
-    onload:function(listview){
+    onload:function(){
         frappe.route_options = {
             "organization": ''
         }; 

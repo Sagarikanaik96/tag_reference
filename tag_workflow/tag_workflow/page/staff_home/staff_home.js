@@ -29,7 +29,7 @@ frappe.StaffHome = Class.extend({
 		me.make_data(wrapper, page);
 		me.init_map(wrapper, page);
 	},
-	init_map: function(wrapper, page){
+	init_map: function(_wrapper, _page){
 		var me = this;
 		var center = { lat: 38.889248, lng: -77.050636 };
 		me.map = new google.maps.Map(document.getElementById('maps'), {
@@ -56,7 +56,7 @@ frappe.StaffHome = Class.extend({
 			}
 		});
 	},
-	update_map: function(wrapper, page, location){
+	update_map: function(_wrapper, _page, location){
 		var me = this;
 		let locations = location;
 		for(let c in locations) {
@@ -68,7 +68,7 @@ frappe.StaffHome = Class.extend({
 			console.log(marker);
 		}
 	},
-	update_order: function(wrapper, page, order, org_type){
+	update_order: function(_wrapper, _page, order, org_type){
 		let html = ``;
 		for(let o in order){
 			let from = moment(order[0].from_date)._d.toDateString();

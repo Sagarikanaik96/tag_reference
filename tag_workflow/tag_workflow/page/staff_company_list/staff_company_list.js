@@ -21,7 +21,7 @@ frappe.FaceRecognition = Class.extend({
 			$(frappe.render_template('staff_company_list', "")).appendTo(this.body);
 			me.show_profile(wrapper,page);
 		},
-		show_profile: function(wrapper, page){
+		show_profile: function(_wrapper, _page){
 			frappe.call({
 				method:"tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.comp",
 				args:{
