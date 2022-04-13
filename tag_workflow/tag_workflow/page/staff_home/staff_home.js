@@ -1,4 +1,4 @@
-let company = frappe.boot.tag.tag_user_info.company;
+let company1 = frappe.boot.tag.tag_user_info.company;
 let company_type = frappe.boot.tag.tag_user_info.company_type;
 frappe.breadcrumbs.clear();
 
@@ -46,7 +46,7 @@ frappe.StaffHome = Class.extend({
 		var me = this;
 		frappe.call({
 			method: "tag_workflow.tag_workflow.page.staff_home.staff_home.get_order_info",
-			args: {"company": company},
+			args: {"company1": company1},
 			callback: function(r){
 				var location = r.message.location;
 				var order = r.message.order;

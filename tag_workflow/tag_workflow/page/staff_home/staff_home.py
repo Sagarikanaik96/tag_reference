@@ -3,16 +3,16 @@ from frappe import _
 
 
 @frappe.whitelist()
-def get_order_info(company):
+def get_order_info(company1):
     try:
         location, order_detail, final_list = [], [], []
-        com = frappe.db.get_value("Company", {"name": company}, "organization_type")
-        claim = frappe.db.sql("""select job_order from `tabClaim Order` where staffing_organization = "{}" and approved_no_of_workers != 0 order by creation desc""".format(company), as_dict=1)
+        com = frappe.db.get_value("Company", {"name": company1}, "organization_type")
+        claim = frappe.db.sql("""select job_order from `tabClaim Order` where staffing_organization = "{}" and approved_no_of_workers != 0 order by creation desc""".format(company1), as_dict=1)
 
         for c in claim:
             order_detail.append(c.job_order)
 
-        assign = frappe.db.sql(""" select job_order from `tabAssign Employee` where company = "{}" and tag_status = "Approved" """.format(company), as_dict=1)
+        assign = frappe.db.sql(""" select job_order from `tabAssign Employee` where company = "{}" and tag_status = "Approved" """.format(company1), as_dict=1)
         for a in assign:
             order_detail.append(a.job_order)
 
