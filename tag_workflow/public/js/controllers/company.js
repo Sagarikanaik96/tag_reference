@@ -10,8 +10,6 @@ frappe.ui.form.on("Company", {
 		removing_registration_verbiage(frm);
 		hide_details();
 		update_company_fields();
-		jazzhr_data(frm);
-		update_employees_data(frm)
 		make_invoice(frm);
 		uploaded_file_format(frm);
 		download_document(frm);
