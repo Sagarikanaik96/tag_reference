@@ -58,6 +58,12 @@ frappe.ui.form.on("Company", {
 			});
 		}
 	},
+	update_employee_records: function (frm){
+		update_existing_employees(frm)
+	}, 
+	get_data_from_jazzhr: function (frm){
+		make_jazzhr_request(frm)
+	},
 
 	setup: function (frm){
 		Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
@@ -369,14 +375,6 @@ function validate_phone_and_zip(frm){
 }
 
 /*--------jazzhr------------*/
-function jazzhr_data(frm){
-	let roles = frappe.user_roles;
-	if (roles.includes("Staffing Admin") || roles.includes("Staffing User")) {
-		frm.add_custom_button("Get data from JazzHR", function () {
-			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : make_jazzhr_request(frm);
-		}).addClass("btn-primary");
-	}
- }
   
  function make_jazzhr_request(frm) {
 	if (frm.doc.jazzhr_api_key) {
@@ -579,14 +577,7 @@ function show_fields(frm){
 	frm.set_df_property('state','hidden',0);
 	frm.set_df_property('zip','hidden',0);
 }
-function update_employees_data(frm){
-	let roles = frappe.user_roles;
-	if (roles.includes("Staffing Admin") || roles.includes("Staffing User")) {
-		frm.add_custom_button("Update Employee Records", function () {
-			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : update_existing_employees(frm);
-		}).addClass("btn-primary");
-	}
- }
+
  function update_existing_employees(frm){
  if(frm.doc.jazzhr_api_key){
 	setTimeout(function(){

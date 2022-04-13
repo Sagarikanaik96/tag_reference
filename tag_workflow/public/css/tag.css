@@ -65,6 +65,33 @@ li.dropdown.dropdown.dropdown-help.dropdown-mobile {
   background-color: #0a97bfeb !important;
   color: #fff !important;
 }
+[data-route="Form/Company/new-company-1"] button.btn-default:hover {
+  background-color: #0a97bfeb !important;
+  color: #fff !important;
+}
+[data-fieldname="get_data_from_jazzhr"] button {
+  background-color: #21b9e4 !important;
+  color: #fff !important;
+  display: flex;
+  margin-top: 21px;
+  margin-right: 20px;
+}
+[data-fieldname="update_employee_records"] button {
+  background-color: #21b9e4 !important;
+  color: #fff !important;
+  margin-right: 30px;
+  display: flex;
+  float: left;
+  margin-top: 21px;
+}
+[data-fieldname="get_data_from_jazzhr"] {
+  display: flex;
+  float: left;
+}
+[data-fieldname="update_employee_records"] {
+  display: flex;
+  float: left;
+}
 
 input:hover {
   border: 1px solid#21B9E4 !important;
@@ -977,6 +1004,9 @@ input.input-with-feedback.form-control,
   }
   .hiring-home .search_icon {
     display: none;
+  }
+  [data-fieldname="get_data_from_jazzhr"] button {
+    margin-top: 0px;
   }
 }
 
