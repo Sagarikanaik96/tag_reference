@@ -3,6 +3,7 @@ frappe.ui.form.on("Employee", {
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
+		get_ssn_value(frm);
 		update_employees_data(frm);
 		trigger_hide();
 		required_field();
@@ -209,7 +210,7 @@ frappe.ui.form.on("Employee", {
 	},
 
 	ssn: function(frm){
-		if (frm.doc.ssn && isNaN(frm.doc.ssn)){
+		if(frm.doc.ssn && isNaN(frm.doc.ssn)){
 			frappe.msgprint(__("Only numbers are allowed in SSN."));
 			frm.set_value("ssn", "");
 		}
@@ -417,11 +418,15 @@ function attachrefresh(){
 
 function companyhide(time){
 	setTimeout(() => {
-		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns');
-		var txt2 = 'ul[id="'+txt+'"]';
-		var  arry = document.querySelectorAll(txt2)[0].children;
-		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none';
-		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none';
+		var txt  = $('[data-fieldname="company"]')[0].getAttribute('aria-owns');
+		if(txt != null){
+			var txt2 = 'ul[id="'+txt+'"]';
+			var  arry = document.querySelectorAll(txt2)[0].children;
+			if(arry.length && cur_frm.doc.doctype == "Employee"){
+				document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none';
+				document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none';
+			}
+		}
 	}, time);
 }
 
@@ -666,6 +671,7 @@ const html=`<!doctype html>
 		</body>
 	</html>
 `;
+
 function set_map (frm) {
 	setTimeout(frm.set_df_property("map", "options", html), 500);
 	if(frm.is_new()){
@@ -674,5 +680,15 @@ function set_map (frm) {
 		$('.frappe-control[data-fieldname="map"]').html('');
 	}else if(frm.doc.search_on_maps == 0 && frm.doc.enter_manually ==0){
 		frm.set_df_property('map','hidden',1);
+	}
+}
+
+/*------------------------------------*/
+function get_ssn_value(frm){
+	if(frm.doc.ssn){
+		frappe.call({method: "tag_workflow.tag_data.api_sec", args: {'frm': frm.doc.name}, callback: function(r) {localStorage.setItem("tag", String(r.message));}});	
+		$('[data-fieldname="ssn"]')[1].onfocus = function(){if(localStorage.getItem("tag")){cur_frm.set_value("ssn", localStorage.getItem("tag")); localStorage.setItem("tag", "");}}
+	}else{
+		localStorage.setItem("tag", "");
 	}
 }
