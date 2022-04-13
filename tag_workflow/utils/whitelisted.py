@@ -380,7 +380,9 @@ def search_staffing_by_hiring(data=None):
             data = frappe.db.sql(sql, as_dict=1)
             exc_par = frappe.db.get_value("Company", {"name": user_comp[0][0]}, "parent_staffing")
             if(exc_par):
-                data.append({"name": exc_par})
+                data1=[]
+                data1.append({"name": exc_par})
+                return [d['name'] for d in data1]
             return [d['name'] for d in data]
         return []
     except Exception as e:
