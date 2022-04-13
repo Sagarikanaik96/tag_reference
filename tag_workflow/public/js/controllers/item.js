@@ -10,7 +10,6 @@ frappe.ui.form.on("Item", {
 		$('.custom-actions.hidden-xs.hidden-md').show();
 		if(frm.doc.__islocal==1){
 			let len_history = frappe.route_history.length;
-
 			if(frappe.route_history.length>1 && frappe.route_history[len_history-2][1]=='Company'){
 				frm.set_value('company',frappe.route_history[len_history-2][2]);
 				frm.set_df_property('company', 'read_only', 1);
@@ -18,14 +17,56 @@ frappe.ui.form.on("Item", {
 			else if(frappe.route_history.length>1 && frappe.route_history[len_history-2][1]=='Contract'){
 				frm.set_df_property('company', 'read_only', 1);
 			} 
-			
 		}
+		$('[data-fieldname="job_titless"]').css("display", "block");
 	},
 
 	before_save: function(frm){
 		frm.set_value("item_code", frm.doc.job_titless);
 		frappe.call({"method": "tag_workflow.controllers.master_controller.check_item_group"});
+		
 	},
+
+	validate: function (frm) {
+		if (frm.doc.__islocal) {
+			if (frm.doc.job_titless.indexOf('-') > 0){
+				frm.set_value("job_titless_name",frm.doc.job_titless.split('-')[0]);
+			}else{
+				frm.set_value("job_titless_name",frm.doc.job_titless);
+			}
+			cur_frm.refresh_field("job_titless_name");
+
+			frappe.call({
+				"method": "tag_workflow.tag_data.checkingjobtitleandcompany",
+				"args": {"job_titless": frm.doc.job_titless_name,
+						"company": frm.doc.company
+						},
+				"async": 0,
+				"callback": function(r){
+					if (!(r.message)){
+						frappe.msgprint({
+					        message: __("job title name already exists for this organization"),
+					        title: __("Error"),
+					        indicator: "orange",
+					      });
+						frappe.validated = false
+					}
+				}
+			})
+			frappe.call({
+				"method": "tag_workflow.utils.doctype_method.checkingjobtitle_name",
+				"args": {"job_titless": frm.doc.job_titless,
+
+						},
+				"async": 0,
+				"callback": function(r){
+					frm.set_value("job_titless", r.message);
+					cur_frm.refresh_field("job_titless");
+				}
+			});
+		}
+		frm.set_value("item_code", frm.doc.job_titless);
+	}
 
 });
 

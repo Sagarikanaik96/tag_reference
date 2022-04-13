@@ -288,12 +288,11 @@ def checkingdesignation_name(designation_name):
     return designation_name 
 
 @frappe.whitelist()
-def checkingitemcode(item_code):
-    item_code = item_code.strip()
-    if not item_code.strip():
+def checkingjobtitle_name(job_titless):
+    job_titless = job_titless.strip()
+    if not job_titless.strip():
         frappe.throw(_(Abbr))
-    sql = "select item_code from `tabItem` where item_code = '{0}' ".format(item_code)
-    print(frappe.db.sql(sql))
+    sql = "select job_titless from `tabItem` where job_titless = '{0}' ".format(job_titless)
     if frappe.db.sql(sql):
-        return append_number_if_name_exists("Item", item_code, fieldname="item_code", separator="-", filters=None)
-    return item_code 
+        return append_number_if_name_exists("Item", job_titless, fieldname="job_titless", separator="-", filters=None)
+    return job_titless 

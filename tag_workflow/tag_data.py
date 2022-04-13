@@ -759,7 +759,18 @@ def checkingdesignationandorganization(designation_name,company=None):
     sql = "select name,designation,organization from `tabDesignation` where designation = '{0}' and organization = '{1}' ".format(designation_name,company)
     if len(frappe.db.sql(sql,as_dict=True)) >= 1:
         return False
-    return True 
+    return True
+
+@frappe.whitelist()
+def checkingjobtitleandcompany(job_titless,company=None):
+    sql = "select name,job_titless_name,company from `tabItem` where job_titless_name = '{0}' and company = '{1}' ".format(job_titless,company)
+    print(sql)
+    print(len(frappe.db.sql(sql,as_dict=True)))
+    if len(frappe.db.sql(sql,as_dict=True)) >= 1:
+        return False
+    return True
+
+
 @frappe.whitelist()
 def company_exist(hiring_company):
     comp=f'select name from `tabCompany` where name="{hiring_company}"'
