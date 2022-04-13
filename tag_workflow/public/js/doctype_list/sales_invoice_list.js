@@ -67,6 +67,9 @@ frappe.listview_settings['Sales Invoice'] = {
 			return __('Open {0}', [`"Sales Invoice" ${doc.name}`]);
 		},
 		action: function(doc) {
+			$('.custom-actions.hidden-xs.hidden-md').show();
+			$('[class="btn btn-primary btn-sm primary-action"]').show();
+			$('[class="btn btn-default btn-sm ellipsis"]').show();
 			frappe.set_route('print', "Sales Invoice", doc.name);
 		}
 	}

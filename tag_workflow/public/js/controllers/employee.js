@@ -205,11 +205,6 @@ frappe.ui.form.on("Employee", {
 			frappe.validated = false;
 		}
 
-		if (frm.doc.ssn && isNaN(frm.doc.ssn)){
-			frappe.msgprint(__("Only numbers are allowed in SSN."));
-			frappe.validated = false;
-		}
-
 		let email = frm.doc.email
 		if(email.length > 120 || !frappe.utils.validate_type(email, "email")){
 			frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'});
@@ -221,6 +216,13 @@ frappe.ui.form.on("Employee", {
 		}else{
 			frm.set_value("job_category",null);
 		} 
+	},
+
+	ssn: function(frm){
+		if (frm.doc.ssn && isNaN(frm.doc.ssn)){
+			frappe.msgprint(__("Only numbers are allowed in SSN."));
+			frm.set_value("ssn", "");
+		}
 	},
 
 	before_save:function (frm) {

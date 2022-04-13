@@ -52,7 +52,6 @@ def setup_data():
         setup_company_permission()
         check_if_user_exists()
         share_company_with_user()
-        employee_ssn_update()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -209,19 +208,4 @@ def check_if_user_exists():
                 user_exclusive_perm(user.name, user.company, user.organization_type)
     except Exception as e:
         frappe.log_error(e, "user update")
-        print(e)
-
-def employee_ssn_update():
-    try:
-        print("*------ssn update--------------------------*\n")
-        emp_list = frappe.get_list("Employee", ["name"])
-        for e in emp_list:
-            emp = frappe.get_doc("Employee", e.name)
-            if(emp.ssn):
-                ssn = emp.ssn
-                emp.ssn = ""
-                emp.ssn = ssn
-                emp.save(ignore_permissions=True)
-    except Exception as e:
-        frappe.log_error(e, "ssn update")
         print(e)
