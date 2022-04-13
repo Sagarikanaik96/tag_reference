@@ -9,9 +9,9 @@ frappe.listview_settings["Item"] = {
   },
   refresh:function(){
     $('div[data-fieldname="item_group"]').hide();
-    $('div[data-fieldname="job_titless"]').hide();
 
     $('div[data-fieldname="variant_of"]').hide();
+    $('div[data-fieldname="name"]').hide()
    
   },
 };
