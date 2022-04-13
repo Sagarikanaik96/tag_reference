@@ -29,29 +29,12 @@ frappe.ui.form.on("Item", {
 	validate: function (frm) {
 		if (frm.doc.__islocal) {
 			if (frm.doc.job_titless.indexOf('-') > 0){
-				frm.set_value("job_titless_name",frm.doc.job_titless.split('-')[0]);
+				frm.set_value("job_titless",frm.doc.job_titless.split('-')[0]);
 			}else{
-				frm.set_value("job_titless_name",frm.doc.job_titless);
+				frm.set_value("job_titless",frm.doc.job_titless);
 			}
-			cur_frm.refresh_field("job_titless_name");
+			cur_frm.refresh_field("job_titless");
 
-			frappe.call({
-				"method": "tag_workflow.tag_data.checkingjobtitleandcompany",
-				"args": {"job_titless": frm.doc.job_titless_name,
-						"company": frm.doc.company
-						},
-				"async": 0,
-				"callback": function(r){
-					if (!(r.message)){
-						frappe.msgprint({
-					        message: __("job title name already exists for this organization"),
-					        title: __("Error"),
-					        indicator: "orange",
-					      });
-						frappe.validated = false
-					}
-				}
-			})
 			frappe.call({
 				"method": "tag_workflow.utils.doctype_method.checkingjobtitle_name",
 				"args": {"job_titless": frm.doc.job_titless,
