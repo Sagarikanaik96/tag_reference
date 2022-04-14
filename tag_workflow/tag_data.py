@@ -142,7 +142,7 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
 
 
 @frappe.whitelist(allow_guest=False)
-def receive_hiring_notification(user, company_type, hiring_org, job_order, staffing_org, emp_detail, doc_name, no_of_worker_req, is_single_share, job_title):
+def receive_hiring_notification(user, company_type, hiring_org, job_order, staffing_org, emp_detail, doc_name, no_of_worker_req, is_single_share, job_title,employee_filled):
     try:
         if(company_type == "Staffing" and user == frappe.session.user):
             update_values=frappe.db.sql(''' select data from `tabVersion` where docname='{}' '''.format(doc_name),as_list=1)
@@ -162,6 +162,8 @@ def receive_hiring_notification(user, company_type, hiring_org, job_order, staff
                 chat_room_created(hiring_org,staffing_org,job_order)
 
             bid_receive.save(ignore_permissions=True)
+            hiring_type=frappe.get_doc('Company',hiring_org)
+            hiring_auto_approve(hiring_type,job_order,employee_filled,staffing_org,doc_name)
             job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
             job_detail = frappe.db.sql(job_sql, as_dict=1)
             lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)
@@ -989,3 +991,16 @@ def my_used_job_title(company_name,company_type):
     else:
         return 'TAG'
     return list(set(z))
+def hiring_auto_approve(hiring_type,job_order,employee_filled,staffing_org,doc_name):
+    if(hiring_type.organization_type=='Exclusive Hiring'):
+        job = frappe.get_doc(jobOrder, job_order)
+        claimed = job.staff_org_claimed if job.staff_org_claimed else ""
+        frappe.db.set_value(jobOrder, job_order, "worker_filled", (int(employee_filled)))
+        if(len(claimed)==0):
+            frappe.db.set_value(jobOrder, job_order, "staff_org_claimed", (str(claimed)+str(staffing_org)))
+        else:
+            frappe.db.set_value(jobOrder, job_order, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
+
+        assign_emp_status_data=f'update `tabAssign Employee` set tag_status="Approved" where name="{doc_name}"'                       
+        frappe.db.sql(assign_emp_status_data)
+        frappe.db.commit()
