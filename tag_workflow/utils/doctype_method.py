@@ -115,7 +115,7 @@ def validate_abbr(self):
 
     if not self.abbr.strip():
         frappe.throw(_(Abbr))
-    sql = """ select abbr from tabCompany where name != "{0}" and abbr = '{1}' """.format(self.name, self.abbr)
+    sql = """ select abbr from tabCompany where name != "{0}" and abbr = "{1}" """.format(self.name, self.abbr)
     if frappe.db.sql(sql):
         self.abbr = append_number_if_name_exists("Company", self.abbr, fieldname="abbr", separator="-", filters=None)
 
