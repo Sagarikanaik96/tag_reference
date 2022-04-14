@@ -1,6 +1,7 @@
 let company1 = frappe.boot.tag.tag_user_info.company;
 let company_type = frappe.boot.tag.tag_user_info.company_type;
 frappe.breadcrumbs.clear();
+frappe.flags.wrapper = null;
 
 frappe.pages['staff-home'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
@@ -8,8 +9,10 @@ frappe.pages['staff-home'].on_page_load = function(wrapper) {
 		title: '',
 		single_column: true
 	});
-
 	wrapper.staff_home = new frappe.StaffHome(wrapper, page);
+	frappe.flags.wrapper = wrapper.staff_home
+	localStorage.removeItem('category');
+	localStorage.removeItem('order_by');
 }
 
 frappe.StaffHome = Class.extend({
@@ -65,12 +68,25 @@ frappe.StaffHome = Class.extend({
 				map: me.map,
 				title: locations[c][0].concat(" ",locations[c][3])
 			});
-			console.log(marker);
+			console.log(marker)
 		}
 	},
-	update_order: function(_wrapper, _page, order, org_type){
-		let html = ``;
+	update_order: function(wrapper, page, order, org_type){
+		var me = this
+		let html = ``; 
+		let exist =[]
+		me.update_dropdown_item(wrapper,page)
 		for(let o in order){
+			//Category
+			if (!exist.includes(order[o].category)){
+				let a = document.createElement('a');
+				a.setAttribute('href',"#");
+				a.classList.add('dropdown-item')
+				a.addEventListener('click',filter_category)
+				a.innerHTML = order[o].category
+				document.getElementById('category').appendChild(a);
+				exist.push(order[o].category)
+			}
 			let from = moment(order[0].from_date)._d.toDateString();
 			let to = moment(order[0].to_date)._d.toDateString();
 			html += `
@@ -131,10 +147,44 @@ frappe.StaffHome = Class.extend({
 				</div>
 			</div>`
 		}
-
 		let total_order = `<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;"><div class="d-flex flex-wrap p-3" style="width: 100%;"><div class="d-flex justify-content-between w-100 "><h6 class="mb-0">Total Number Of Today's Order: </h6><h6 class="mb-0" id="counter">${order.length}</h6></div></div></div>`;
-
 		$("#order").html(total_order+html);
+		me.update_event();
+	},
+	update_dropdown_item:function(_wrapper,_page){
+		// Default Value
+		document.getElementById('category').innerHTML = '';
+		let a = document.createElement('a');
+		a.setAttribute('href',"#");
+		a.setAttribute('class','dropdown-item')
+		a.addEventListener('click',filter_category)
+		a.innerHTML = 'All'
+		document.getElementById('category').appendChild(a);
+		//Order BY
+		document.getElementById('order-by').innerHTML = '';
+		const ord = ['All','Non Exclusive','Exclusive']
+		for(let i of ord){
+			let b = document.createElement('a');
+			b.setAttribute('href',"#");
+			b.setAttribute('class','dropdown-item');
+			b.addEventListener('click',order_by);
+			b.innerHTML = i;
+			document.getElementById('order-by').appendChild(b)
+		}
+	},
+	render_map:function(r,wrapper,page){
+		var location = r.message.location;
+		var order = r.message.order;
+		var org_type = r.message.org_type;
+		frappe.flags.wrapper.update_map(wrapper, page, location);
+		frappe.flags.wrapper.update_order(wrapper, page, order, org_type);
+
+	},
+	update_event:function(){
+		let od = document.getElementsByClassName('order-by')
+		for(let j of od){
+			j.addEventListener('click',order_by)
+		}
 	}
 });
 
@@ -265,4 +315,84 @@ function filterOrder() {
         }
     }
    document.getElementById('counter').innerHTML= document.querySelectorAll('.job:not([style*="display: none"])').length;
+}
+
+function ajaxCallOrderBy(category,wrapper,page){
+	frappe.call({
+		method: "tag_workflow.tag_workflow.page.staff_home.staff_home.filter_category",
+		args:{"company": company1,"category":category},
+		callback: function(r){
+			var location = r.message.location;
+			var order = r.message.order;
+			var org_type = r.message.org_type;
+			frappe.flags.wrapper.update_map(wrapper, page, location);
+			frappe.flags.wrapper.update_order(wrapper, page, order, org_type);
+			localStorage.removeItem('order_by')
+		}
+	});
+}
+function ajaxCallCategory(ob,wrapper,page){
+	frappe.call({
+		method: "tag_workflow.tag_workflow.page.staff_home.staff_home.filter_category",
+		args:{"company": company1,"order_by":ob},
+		callback: function(r){
+			var location = r.message.location;
+			var order = r.message.order;
+			var org_type = r.message.org_type;
+			frappe.flags.wrapper.update_map(wrapper, page, location);
+			frappe.flags.wrapper.update_order(wrapper, page, order, org_type);
+			localStorage.removeItem('category')
+		}
+	});
+}
+function order_by(){
+		if(this.tagName.toLowerCase()=='a' && this.text!="All" ){
+			localStorage.setItem('order_by',this.text)
+			let args = null
+			if(localStorage.getItem('category'))
+				args = {"company": company1,"category":localStorage.getItem('category'),"order_by":this.text}
+			else
+				args = {"company": company1,"order_by":this.text}
+			frappe.call({
+				method: "tag_workflow.tag_workflow.page.staff_home.staff_home.filter_category",
+				args:args,
+				callback: function(r){
+					frappe.flags.wrapper.render_map(r,cur_page.page,cur_page.page.page);
+				}
+			});
+		}else if(this.tagName.toLowerCase()=='a' && this.text=="All"){
+			if(localStorage.getItem('category'))
+				ajaxCallOrderBy(localStorage.getItem('category'),cur_page.page,cur_page.page.page)
+			else{
+				frappe.flags.wrapper.update_job_order(cur_page.page,cur_page.page.page);
+				localStorage.removeItem('order_by')
+			}
+		}
+}
+
+function filter_category(){
+		if(this.tagName.toLowerCase()=='a' && this.text!="All" ){
+			console.log(this.text)
+			localStorage.setItem('category',this.text)
+			let args = null
+			if(localStorage.getItem('order_by'))
+				args = {"company": company1,"category":this.text,"order_by":localStorage.getItem('order_by')}
+			else
+				args = {"company": company1,"category":this.text}
+			frappe.call({
+				method: "tag_workflow.tag_workflow.page.staff_home.staff_home.filter_category",
+				args: args,
+				callback: function(r){
+					frappe.flags.wrapper.render_map(r,cur_page.page,cur_page.page.page);
+				}
+			});
+		}else if(this.tagName.toLowerCase()=='a' && this.text=="All"){
+			console.log(this.text)
+			if(localStorage.getItem('order_by'))
+				ajaxCallCategory(localStorage.getItem('order_by'),cur_page.page,cur_page.page.page)
+			else{
+				frappe.flags.wrapper.update_job_order(cur_page.page,cur_page.page.page);
+				localStorage.removeItem('category')
+			}
+		}
 }

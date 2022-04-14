@@ -67,3 +67,46 @@ def order_info(name):
         return result
     except Exception as e:
         frappe.msgprint(e)
+
+@frappe.whitelist()
+def filter_category(company,category=None,order_by=None):
+    try:
+        location, order_detail, final_list = [], [], []
+        com = frappe.db.get_value("Company", {"name": company}, "organization_type")
+        claim = frappe.db.sql("""select job_order from `tabClaim Order` where staffing_organization = "{}" and approved_no_of_workers != 0 order by creation desc""".format(company), as_dict=1)
+
+        for c in claim:
+            order_detail.append(c.job_order)
+
+        assign = frappe.db.sql(""" select job_order from `tabAssign Employee` where company = "{}" and tag_status = "Approved" """.format(company), as_dict=1)
+        for a in assign:
+            order_detail.append(a.job_order)
+        sql = None
+        filters = dict()
+        if category:
+            filters['category'] = category
+        if order_by:
+            filters['company_type'] = order_by
+        filters['from_date'] = ['>=',frappe.utils.nowdate()]
+        filters['to_date'] = ['<=',frappe.utils.nowdate()]
+        
+        job_order = frappe.db.get_all('Job Order',filters=filters,fields=['name'],order_by='creation desc')
+        for j in job_order:
+            if j.name in order_detail:
+                sql = "select name,  category,select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour from `tabJob Order` where name = '{0}'".format(j.name)
+                data = frappe.db.sql(sql, as_dict=1)
+                for d in data:
+                    final_list.append(d)
+
+                sql = "select name, lat, lng from `tabJob Site` where name = (select job_site from `tabJob Order` where name = '{}') and lat != '' and lng != ''".format(j.name)
+                data = frappe.db.sql(sql, as_dict=1)
+                for d in data:
+                    location.append([d['name'], float(d['lat']), float(d['lng']), j.name])
+
+        value = {"location": location, "order": final_list, "org_type": com}
+        print(filters)
+        return value
+    except Exception as e:
+        print(e)
+        frappe.msgprint(frappe.get_traceback())
+        return {"location": [], "order": []}
