@@ -372,7 +372,6 @@ function order_by(){
 
 function filter_category(){
 		if(this.tagName.toLowerCase()=='a' && this.text!="All" ){
-			console.log(this.text)
 			localStorage.setItem('category',this.text)
 			let args = null
 			if(localStorage.getItem('order_by'))
@@ -387,7 +386,6 @@ function filter_category(){
 				}
 			});
 		}else if(this.tagName.toLowerCase()=='a' && this.text=="All"){
-			console.log(this.text)
 			if(localStorage.getItem('order_by'))
 				ajaxCallCategory(localStorage.getItem('order_by'),cur_page.page,cur_page.page.page)
 			else{

@@ -20,7 +20,7 @@ def get_order_info(company1):
         job_order = frappe.db.sql(sql, as_dict=1)
         for j in job_order:
             if j.name in order_detail:
-                sql = "select name, select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour from `tabJob Order` where name = '{}'".format(j.name)
+                sql = "select name, category, select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour from `tabJob Order` where name = '{}'".format(j.name)
                 data = frappe.db.sql(sql, as_dict=1)
                 for d in data:
                     final_list.append(d)
@@ -104,7 +104,6 @@ def filter_category(company,category=None,order_by=None):
                     location.append([d['name'], float(d['lat']), float(d['lng']), j.name])
 
         value = {"location": location, "order": final_list, "org_type": com}
-        print(filters)
         return value
     except Exception as e:
         print(e)
