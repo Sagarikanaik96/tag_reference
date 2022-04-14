@@ -1,4 +1,13 @@
 frappe.ui.form.on("Item", {
+
+	setup: function (){
+		Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
+			_field.id = "id_mvr_hour";		
+		})
+		
+		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
+		
+	},
 	refresh: function(frm){
 		cur_frm.clear_custom_buttons();
 		hide_connections(frm);

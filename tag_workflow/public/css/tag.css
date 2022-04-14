@@ -883,6 +883,14 @@ input.input-with-feedback.form-control,
   border: 1px solid#21b7e170;
   background-color: white;
 }
+[data-page-route="Item"] #id_mvr_hour:after {
+  position: absolute;
+  left: 3px;
+  top: 56%;
+  font-size: 13px;
+  content: "$";
+}
+
 [data-route="query-report/TAG Earnings"]
   select.input-with-feedback.form-control.ellipsis,
 [data-route="query-report/Orders"]
