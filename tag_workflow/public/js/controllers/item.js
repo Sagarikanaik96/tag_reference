@@ -22,6 +22,8 @@ frappe.ui.form.on("Item", {
 
 	before_save: function(frm){
 		frm.set_value("item_code", frm.doc.job_titless);
+		cur_frm.set_value('item_group','All Item Groups')
+		cur_frm.set_value('stock_uom','Nos')
 		frappe.call({"method": "tag_workflow.controllers.master_controller.check_item_group"});
 		
 	},
