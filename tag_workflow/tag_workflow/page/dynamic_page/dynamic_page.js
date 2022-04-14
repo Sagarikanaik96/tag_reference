@@ -1,5 +1,4 @@
 let company=localStorage.getItem("company")
-console.log(company,"company")
 
 frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
@@ -41,7 +40,6 @@ frappe.FaceRecognition = Class.extend({
 				}
 
 				var my_val= r.message[0];
-				console.log(my_val);
 				var txt = "";
 				var text = r.message[2];
 				for(let i in text){

@@ -107,13 +107,10 @@ frappe.ui.form.on("Employee", {
 
 		$('[data-fieldname="company"]').click(function(){
 			setTimeout(()=>{
-				var cust= $(this).text()
-				var txt= cust.split('.')[1]
-				var name1= txt.replace(/%/g, ' ');
-				var name= name1.trim()
-				localStorage.setItem("company", name)
+				var cust= cur_frm.fields_dict.company.value
+				localStorage.setItem("company", cust)
 				window.location.href= "/app/dynamic_page"
-			},1000);
+			},600);
 		});
 
 

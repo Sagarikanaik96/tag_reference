@@ -5,10 +5,10 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 		$('[data-fieldname="customer"]').click(function(){ return false})
 
-		$("[data-fieldname=customer]").click(function(event){
-			var cust=event.target.innerHTML
-			const newText = cust.trim();
-			localStorage.setItem("company",newText)
+		$("[data-fieldname=customer]").click(function(){
+			
+			var custt= cur_frm.fields_dict.customer.value
+			localStorage.setItem("company",custt)
 			window.location.href= "/app/dynamic_page"
 		});
 	},
