@@ -4,6 +4,7 @@ from frappe import _, msgprint, throw
 from frappe.utils import cint, cstr, flt, now_datetime, getdate, nowdate
 from frappe.model.mapper import get_mapped_doc
 from erpnext.selling.doctype.quotation.quotation import _make_customer
+from tag_workflow.tag_data import employee_company
 from tag_workflow.utils.notification import sendmail, make_system_notification, share_doc
 from frappe.desk.query_report import get_report_doc, generate_report_result
 from frappe.desk.desktop import Workspace
