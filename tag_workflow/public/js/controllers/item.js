@@ -2,7 +2,8 @@ frappe.ui.form.on("Item", {
 	refresh: function(frm){
 		cur_frm.clear_custom_buttons();
 		hide_connections(frm);
-
+		document.querySelector('.frappe-control[data-fieldname="rate"]').parentNode.parentElement.setAttribute('class','col-sm-6')
+		document.querySelector('.frappe-control[data-fieldname="industry"]').parentNode.parentElement.setAttribute('class','col-sm-6')
 		hide_fields();
 		$('[data-fieldname="company"]').css("display",'block');
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
