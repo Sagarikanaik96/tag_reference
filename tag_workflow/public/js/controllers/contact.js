@@ -39,10 +39,16 @@ frappe.ui.form.on("Contact", {
 				};
 			};
 		}
+		if(frm.doc.__islocal==1){
+			frm.set_df_property('lead','reqd',1);
+		}
 		frm.set_df_property('company','hidden',1);
 		frm.set_df_property('mobile_no','hidden',1);
 	},
 	before_save:function(frm){
+		if(!frm.doc.company){
+			cur_frm.set_value('company',frappe.boot.tag.tag_user_info.company)
+		}
 		let name = frm.doc.first_name
 		let company = frm.doc.company_name
 		let email = frm.doc.email_address
