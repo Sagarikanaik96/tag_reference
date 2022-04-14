@@ -73,6 +73,10 @@ frappe.ui.form.on("Contract", {
 	},
 
 	before_save: function(frm){
+		if(!frm.doc.staff_company || !frm.doc.party_name){
+			cur_frm.set_value('staffing_company',frappe.boot.tag.tag_user_info.company)
+			cur_frm.set_value('party_name',frappe.boot.tag.tag_user_info.company)
+		}
 		update_lead(frm);
 		frm.set_df_property('signe_hiring','read_only', 1);
 		if(frm.doc.addendums=='<div class="ql-editor read-mode"><p><br></p></div>'){
