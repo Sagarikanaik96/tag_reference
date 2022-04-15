@@ -1,11 +1,25 @@
 frappe.listview_settings["Item"] = {
   hide_name_column: true,
-  onload:function() {
+  onload:function(listview) {
     $('[data-fieldname="name"]').attr('placeholder','Job Title');
 
     frappe.route_options = {
       "company": "",
       };
+      const df = {
+        condition: "=",
+        default: null,
+        fieldname: "rate",
+        fieldtype: "Autocomplete",
+        input_class: "input-xs",
+        label: "Rate",
+        is_filter: 1,
+        onchange: function() {
+          cur_list.refresh();
+        },
+        placeholder: "Rate"
+      };
+      listview.page.add_field(df, '.standard-filter-section')
   },
   refresh:function(){
     $('div[data-fieldname="item_group"]').hide();
