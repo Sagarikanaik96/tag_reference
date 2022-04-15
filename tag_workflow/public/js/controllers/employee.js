@@ -107,11 +107,13 @@ frappe.ui.form.on("Employee", {
 		});
 
 		$('[data-fieldname="company"]').click(function(){
-			setTimeout(()=>{
-				var cust= cur_frm.fields_dict.company.value
-				localStorage.setItem("company", cust)
-				window.location.href= "/app/dynamic_page"
-			},600);
+			if(cur_frm.doc.__islocal !==1){
+				setTimeout(()=>{
+					var cust= cur_frm.fields_dict.company.value
+					localStorage.setItem("company", cust)
+					window.location.href= "/app/dynamic_page"
+				},600);
+			}
 		});
 
 

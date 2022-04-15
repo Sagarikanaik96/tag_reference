@@ -1,5 +1,6 @@
 frappe.listview_settings["Contract"] = {
     onload:function(listview){
+        $('.btn-primary').hide()
         if(frappe.session.user != 'Administrator'){
             $('.custom-actions.hidden-xs.hidden-md').hide()
             $('[data-original-title="Refresh"]').hide()
@@ -29,6 +30,7 @@ frappe.listview_settings["Contract"] = {
         $('[data-original-title = "Status"][data-fieldname = "document_status"]').hide();
     },
     refresh:function(){
+        $('.btn-primary').hide()
         $('[data-original-title = "Name"]>input').attr('placeholder', 'Contract ID');
         $('[data-original-title = "Hiring Company"]>input').attr('placeholder', 'Company Name');
         $('span.level-item:nth-child(3)').html('Contract ID');
