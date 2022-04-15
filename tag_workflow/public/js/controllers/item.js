@@ -9,6 +9,7 @@ frappe.ui.form.on("Item", {
 		
 	},
 	refresh: function(frm){
+		$('.form-footer').hide();
 		cur_frm.clear_custom_buttons();
 		hide_connections(frm);
 		document.querySelector('.frappe-control[data-fieldname="rate"]').parentNode.parentElement.setAttribute('class','col-sm-6')
