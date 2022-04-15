@@ -51,6 +51,10 @@ frappe.ui.form.on("Contract", {
 				$(this).attr('title', file);
 			});
 		}
+		if(frm.doc.__islocal==1 ||(cur_frm.doc.docstatus==0 && frappe.boot.tag.tag_user_info.company!=frm.doc.hiring_company)){
+			console.log('kjnkj')
+			frm.set_df_property('signe_hiring','hidden',1)
+		}
 	},
 
 	setup: function(frm){
@@ -78,7 +82,6 @@ frappe.ui.form.on("Contract", {
 			cur_frm.set_value('party_name',frappe.boot.tag.tag_user_info.company)
 		}
 		update_lead(frm);
-		frm.set_df_property('signe_hiring','read_only', 1);
 		if(frm.doc.addendums=='<div class="ql-editor read-mode"><p><br></p></div>'){
 			frm.set_value('addendums', '')
 		}
@@ -157,7 +160,6 @@ function toggle_field(){
 		}
 	}else{
 		cur_frm.toggle_enable("signee_hiring", 0)
-		cur_frm.toggle_enable("signe_hiring", 0);
 	}
 }
 
@@ -248,7 +250,7 @@ function update_lead(frm){
 			method: "tag_workflow.utils.whitelisted.update_lead",
 			freeze:true,
 			freeze_message:'Preparing Notification Of Staffing',
-			args: {"lead": frm.doc.lead, "staff_company": frm.doc.staffing_company, "date": frappe.datetime.now_date(), "staff_user": frm.doc.contract_prepared_by, "name": frm.doc.name},
+			args: {"lead": frm.doc.lead, "staff_company": frm.doc.staffing_company, "date": frappe.datetime.now_date(), "staff_user": frm.doc.contract_prepared_by, "name": frm.doc.name,"hiring_signee":frm.doc.signe_hiring,"hiring_sign_date":frappe.datetime.now_date()},
 			callback:function(){
 				window.location.reload()
 			}

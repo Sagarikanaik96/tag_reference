@@ -224,9 +224,11 @@ def request_signature(staff_user, staff_company, hiring_user, name):
 
 #-------update lead--------#
 @frappe.whitelist(allow_guest=True)
-def update_lead(lead, staff_company, date, staff_user, name):
+def update_lead(lead, staff_company, date, staff_user, name,hiring_signee,hiring_sign_date):
     try:
         frappe.db.set_value("Lead", lead, "status", 'Close')
+        frappe.db.set_value("Contract", name, "signe_hiring", hiring_signee)
+        frappe.db.set_value("Contract", name, "sign_date_hiring", hiring_sign_date)
         frappe.db.set_value("Contract", name, "docstatus", 1)
 
         date = date.split('-')
