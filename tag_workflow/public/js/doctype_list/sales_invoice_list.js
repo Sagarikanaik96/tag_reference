@@ -2,9 +2,7 @@ frappe.listview_settings['Sales Invoice'] = {
 	add_fields:['company'],
 	onload:function(listview){
 		if (frappe.boot.tag.tag_user_info.company_type == 'Hiring') {
-			frappe.route_options = {
-				"company": "",
-			}
+						
 			const df = {
 				condition: "=",
 				default: null,
@@ -228,3 +226,5 @@ function get_staffing_company_invoices(){
 	});
 	return frappe.flags.company
 }
+
+
