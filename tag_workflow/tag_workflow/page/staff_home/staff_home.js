@@ -149,7 +149,6 @@ frappe.StaffHome = Class.extend({
 		}
 		let total_order = `<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;"><div class="d-flex flex-wrap p-3" style="width: 100%;"><div class="d-flex justify-content-between w-100 "><h6 class="mb-0">Total Number Of Today's Order: </h6><h6 class="mb-0" id="counter">${order.length}</h6></div></div></div>`;
 		$("#order").html(total_order+html);
-		me.update_event();
 	},
 	update_dropdown_item:function(_wrapper,_page){
 		// Default Value
@@ -173,19 +172,15 @@ frappe.StaffHome = Class.extend({
 		}
 	},
 	render_map:function(r,wrapper,page){
+		var me = this;
 		var location = r.message.location;
 		var order = r.message.order;
 		var org_type = r.message.org_type;
+		me.init_map();
 		frappe.flags.wrapper.update_map(wrapper, page, location);
 		frappe.flags.wrapper.update_order(wrapper, page, order, org_type);
 
 	},
-	update_event:function(){
-		let od = document.getElementsByClassName('order-by')
-		for(let j of od){
-			j.addEventListener('click',order_by)
-		}
-	}
 });
 
 

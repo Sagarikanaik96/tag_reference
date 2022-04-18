@@ -81,16 +81,9 @@ def filter_category(company,category=None,order_by=None):
         assign = frappe.db.sql(""" select job_order from `tabAssign Employee` where company = "{}" and tag_status = "Approved" """.format(company), as_dict=1)
         for a in assign:
             order_detail.append(a.job_order)
-        sql = None
-        filters = dict()
-        if category:
-            filters['category'] = category
-        if order_by:
-            filters['company_type'] = order_by
-        filters['from_date'] = ['>=',frappe.utils.nowdate()]
-        filters['to_date'] = ['<=',frappe.utils.nowdate()]
-        
-        job_order = frappe.db.get_all('Job Order',filters=filters,fields=['name'],order_by='creation desc')
+
+        sql = filter_data(category,order_by)
+        job_order = frappe.db.sql(sql, as_dict=1)
         for j in job_order:
             if j.name in order_detail:
                 sql = "select name,  category,select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour from `tabJob Order` where name = '{0}'".format(j.name)
@@ -109,3 +102,13 @@ def filter_category(company,category=None,order_by=None):
         print(e)
         frappe.msgprint(frappe.get_traceback())
         return {"location": [], "order": []}
+
+def filter_data(category,order_by):
+    sql = None
+    if category and order_by:
+        sql = f'select name from `tabJob Order`  where "{frappe.utils.nowdate()}"  between from_date and to_date and category="{category}" and company_type="{order_by}" order by creation desc'
+    elif category:
+        sql = f'select name from `tabJob Order`  where "{frappe.utils.nowdate()}"  between from_date and to_date and category="{category}" order by creation desc'
+    elif order_by:
+        sql = f'select name from `tabJob Order`  where "{frappe.utils.nowdate()}"  between from_date and to_date and company_type="{order_by}" order by creation desc'
+    return sql
