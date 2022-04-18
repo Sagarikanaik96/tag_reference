@@ -30,7 +30,9 @@ frappe.ui.form.on("Item", {
 		}
 		$('[data-fieldname="job_titless"]').css("display", "block");
 	},
-
+	onload_post_render:function(){
+		document.querySelector('.frappe-control[data-fieldname="industry"]').parentNode.parentElement.nextElementSibling.style.display = 'none'
+	},
 	before_save: function(frm){
 		frm.set_value("item_code", frm.doc.job_titless);
 		cur_frm.set_value('item_group','All Item Groups')
