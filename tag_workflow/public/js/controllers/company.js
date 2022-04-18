@@ -584,9 +584,9 @@ function removing_registration_verbiage(frm){
     }
 }
 function hide_fields(frm){
-	frm.set_df_property('city','hidden',1);
-	frm.set_df_property('state','hidden',1);
-	frm.set_df_property('zip','hidden',1);
+	frm.set_df_property('city','hidden',frm.doc.city?0:1);
+	frm.set_df_property('state','hidden',frm.doc.state?0:1);
+	frm.set_df_property('zip','hidden',frm.doc.zip?0:1);
 }
 function show_fields(frm){
 	frm.set_df_property('city','hidden',0);
@@ -764,5 +764,7 @@ function set_map (frm) {
     $('.frappe-control[data-fieldname="map"]').html('');
   }else if(frm.doc.search_on_maps == 0 && frm.doc.enter_manually ==0){
     frm.set_df_property('map','hidden',1);
+  }else if(frm.doc.enter_manually == 1){
+  	frm.set_df_property('map','hidden',1);
   }
 }
