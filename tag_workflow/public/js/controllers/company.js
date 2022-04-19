@@ -210,9 +210,12 @@ frappe.ui.form.on("Company", {
 
 		frm.fields_dict['job_site'].grid.get_field('job_site').get_query = function(doc) {
 			let li = [];
-			document.querySelectorAll('a[data-doctype="Job Site"]').forEach(element=>{
-				li.push(element.getAttribute("data-name"));
-			})
+			let table_data = frm.fields_dict.job_site.grid.data;
+			for (let i in table_data){
+				if(table_data[i]['job_site']){
+					li.push(table_data[i]['job_site']);
+				}
+			}
 			return {
 				query: "tag_workflow.tag_data.filter_jobsite",
 				filters: {
