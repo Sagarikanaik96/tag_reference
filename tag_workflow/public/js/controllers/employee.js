@@ -1,5 +1,8 @@
 frappe.ui.form.on("Employee", {
 	refresh: function(frm){
+		$(document).on('input', '[data-fieldname="contact_number"]', function(){
+			this.value = this.value?.replace(/\D/g, "");
+		});
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
@@ -158,7 +161,10 @@ frappe.ui.form.on("Employee", {
 			});
 		}
 		$('[data-fieldname= "ssn"]').attr('title', '');
+
 	},
+
+
 	decrypt_ssn: function(frm) {
 		frappe.call({
 			method: "tag_workflow.tag_data.api_sec",
@@ -188,6 +194,11 @@ frappe.ui.form.on("Employee", {
 	},
 
 	validate:function(frm){
+		if (frm.doc.contact_number && frm.doc.contact_number.toString().length != 10) {
+			frappe.msgprint(__("Minimum and Maximum Characters allowed for Contact Number are 10")); 
+			frappe.validated = false;
+		}
+
 		if (frm.doc.zip &&frm.doc.zip.toString().length != 5){
 			frappe.msgprint(__("Minimum and Maximum Characters allowed for Zip are 5"));
 			frappe.validated = false;
