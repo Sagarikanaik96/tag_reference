@@ -476,12 +476,12 @@ function companyhide(time) {
 
 
 function hide_fields(frm){
-  frm.set_df_property('address_lines_2','hidden',frm.doc.address_lines_2?0:1);
-  frm.set_df_property('county_2','hidden',frm.doc.county_2 ?0:1);
-  frm.set_df_property('city_or_town','hidden',frm.doc.city_or_town ?0:1);
-  frm.set_df_property('state_2','hidden',frm.doc.state2?0:1);
-  frm.set_df_property('zip','hidden',frm.doc.zip?0:1);
-  frm.set_df_property('country_2','hidden',frm.doc.country_2?0:1);
+  frm.set_df_property('address_lines_2','hidden',frm.doc.address_lines_2 && frm.doc.enter_manually ==1?0:1);
+  frm.set_df_property('county_2','hidden',frm.doc.county_2 && frm.doc.enter_manually ==1?0:1);
+  frm.set_df_property('city_or_town','hidden',frm.doc.city_or_town && frm.doc.enter_manually ==1?0:1);
+  frm.set_df_property('state_2','hidden',frm.doc.state2 && frm.doc.enter_manually ==1?0:1);
+  frm.set_df_property('zip','hidden',frm.doc.zip && frm.doc.enter_manually ==1?0:1);
+  frm.set_df_property('country_2','hidden',frm.doc.country_2 && frm.doc.enter_manually ==1?0:1);
 }
 function show_fields(frm){
   frm.set_df_property('address_lines_2','hidden',0);

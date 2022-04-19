@@ -493,9 +493,9 @@ function hide_decrpt_ssn(frm){
 }
 
 function hide_field(frm){
-	frm.set_df_property('city','hidden',frm.doc.city ? 0:1);
-	frm.set_df_property('state','hidden', frm.doc.state ? 0:1);
-	frm.set_df_property('zip','hidden',frm.doc.zip ? 0:1);
+	frm.set_df_property('city','hidden',frm.doc.city && frm.doc.enter_manually ==1 ? 0:1);
+	frm.set_df_property('state','hidden', frm.doc.state && frm.doc.enter_manually ==1 ? 0:1);
+	frm.set_df_property('zip','hidden',frm.doc.zip && frm.doc.enter_manually ==1 ? 0:1);
 }
 
 function show_fields(frm){
