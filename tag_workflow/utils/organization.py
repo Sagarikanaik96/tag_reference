@@ -51,6 +51,7 @@ def setup_data():
         set_workspace()
         setup_company_permission()
         check_if_user_exists()
+        update_job_title_list()
         share_company_with_user()
         frappe.db.commit()
     except Exception as e:
@@ -208,4 +209,18 @@ def check_if_user_exists():
                 user_exclusive_perm(user.name, user.company, user.organization_type)
     except Exception as e:
         frappe.log_error(e, "user update")
+        print(e)
+
+def update_job_title_list():
+    try:
+        print("*------Job Title list--------------------------*\n")
+        job_designation_list=frappe.db.sql('select name,industry_type,price,description,designation_name from `tabDesignation` where organization is null and industry_type is not null;',as_dict=1)      
+        if(len(job_designation_list)>0):
+            for i in range(len(job_designation_list)):  
+                if not frappe.db.exists("Item", {"name":job_designation_list[i].name}):
+                    role_doc = frappe.get_doc(dict(doctype = "Item", industry = job_designation_list[i].industry_type,job_titless=job_designation_list[i].name,rate=job_designation_list[i].price,item_code=job_designation_list[i].name,item_group="All Item Groups",stock_uom="Nos",descriptions=job_designation_list[i].description, company=""))
+                    role_doc.save()
+
+    except Exception as e:
+        frappe.log_error(e, "job title update")
         print(e)
