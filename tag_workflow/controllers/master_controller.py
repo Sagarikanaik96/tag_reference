@@ -226,12 +226,23 @@ def addjob_order(current_user,company):
 
             sql = """ select name from `tabSales Invoice` where company = '{0}' """.format(company)
             invoice_list = frappe.db.sql(sql, as_dict=1)
-            for job in job_list:
-                add(JOB, job.share_name, user=current_user, share= 1,read=1,write=1,flags={"ignore_share_permission": 1})
-            for time in timesheet_list:
-                add("Timesheet", time.share_name, user=current_user, share= 1,read=1,write=1,submit=1,flags={"ignore_share_permission": 1})
-            for invoice in invoice_list:
-                add("Sales Invoice", invoice.name, user=current_user, share= 1,read=1,write=1,flags={"ignore_share_permission": 1})
+            share_file_list(job_list,timesheet_list,invoice_list,current_user)
     except Exception as e:
         frappe.error_log(e, "old Job Order ")
         frappe.throw(e) 
+def share_file_list(job_list,timesheet_list,invoice_list,current_user):
+    for job in job_list:
+        x=f'select * from `tabJob Order` where name ="{job.share_name}"'
+        d=frappe.db.sql(x,as_list=1)
+        if(len(d)>0):
+            add(JOB, job.share_name, user=current_user, share= 1,read=1,write=1,flags={"ignore_share_permission": 1})
+    for time in timesheet_list:
+        x=f'select * from `tabTimesheet` where name ="{time.share_name}"'
+        d=frappe.db.sql(x,as_list=1)
+        if(len(d)>0):
+            add("Timesheet", time.share_name, user=current_user, share= 1,read=1,write=1,submit=1,flags={"ignore_share_permission": 1})
+    for invoice in invoice_list:
+        x=f'select * from `tabSales Invoice` where name ="{invoice.name}"'
+        d=frappe.db.sql(x,as_list=1)
+        if(len(d)>0):
+            add("Sales Invoice", invoice.name, user=current_user, share= 1,read=1,write=1,flags={"ignore_share_permission": 1})
