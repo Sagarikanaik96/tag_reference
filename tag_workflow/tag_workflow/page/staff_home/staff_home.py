@@ -5,7 +5,7 @@ from frappe import _
 @frappe.whitelist()
 def get_order_info(company1):
     try:
-        location, order_detail, final_list = [], [], []
+        cat,location, order_detail, final_list = [], [], [],[]
         com = frappe.db.get_value("Company", {"name": company1}, "organization_type")
         claim = frappe.db.sql("""select job_order from `tabClaim Order` where staffing_organization = "{}" and approved_no_of_workers != 0 order by creation desc""".format(company1), as_dict=1)
 
@@ -23,6 +23,7 @@ def get_order_info(company1):
                 sql = "select name, category, select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour from `tabJob Order` where name = '{}'".format(j.name)
                 data = frappe.db.sql(sql, as_dict=1)
                 for d in data:
+                    cat.append(d.category)
                     final_list.append(d)
 
                 sql = "select name, lat, lng from `tabJob Site` where name = (select job_site from `tabJob Order` where name = '{}') and lat != '' and lng != ''".format(j.name)
@@ -30,7 +31,7 @@ def get_order_info(company1):
                 for d in data:
                     location.append([d['name'], float(d['lat']), float(d['lng']), j.name])
 
-        value = {"location": location, "order": final_list, "org_type": com}
+        value = {"location": location, "order": final_list, "org_type": com,"category":set(cat)}
         return value
     except Exception as e:
         print(e)

@@ -54,6 +54,16 @@ frappe.StaffHome = Class.extend({
 				var location = r.message.location;
 				var order = r.message.order;
 				var org_type = r.message.org_type;
+				var category = r.message.category;
+				me.update_dropdown_item(wrapper,page)
+				for (let c in category){
+					let a = document.createElement('a');
+					a.setAttribute('href',"#");
+					a.classList.add('dropdown-item')
+					a.addEventListener('click',filter_category)
+					a.innerHTML = category[c]
+					document.getElementById('category').appendChild(a);
+				}
 				me.update_map(wrapper, page, location);
 				me.update_order(wrapper, page, order, org_type);
 			}
@@ -71,22 +81,9 @@ frappe.StaffHome = Class.extend({
 			console.log(marker)
 		}
 	},
-	update_order: function(wrapper, page, order, org_type){
-		var me = this
+	update_order: function(_wrapper, _page, order, org_type){
 		let html = ``; 
-		let exist =[]
-		me.update_dropdown_item(wrapper,page)
 		for(let o in order){
-			//Category
-			if (!exist.includes(order[o].category)){
-				let a = document.createElement('a');
-				a.setAttribute('href',"#");
-				a.classList.add('dropdown-item')
-				a.addEventListener('click',filter_category)
-				a.innerHTML = order[o].category
-				document.getElementById('category').appendChild(a);
-				exist.push(order[o].category)
-			}
 			let from = moment(order[0].from_date)._d.toDateString();
 			let to = moment(order[0].to_date)._d.toDateString();
 			html += `
@@ -344,6 +341,7 @@ function order_by(){
 		if(this.tagName.toLowerCase()=='a' && this.text!="All" ){
 			localStorage.setItem('order_by',this.text)
 			let args = null
+			document.querySelector('.btn-link[data-ord="btn-ord"]').innerHTML=this.text
 			if(localStorage.getItem('category'))
 				args = {"company": company1,"category":localStorage.getItem('category'),"order_by":this.text}
 			else
@@ -356,6 +354,7 @@ function order_by(){
 				}
 			});
 		}else if(this.tagName.toLowerCase()=='a' && this.text=="All"){
+			document.querySelector('.btn-link[data-ord="btn-ord"]').innerHTML= this.text
 			if(localStorage.getItem('category'))
 				ajaxCallOrderBy(localStorage.getItem('category'),cur_page.page,cur_page.page.page)
 			else{
@@ -369,6 +368,7 @@ function filter_category(){
 		if(this.tagName.toLowerCase()=='a' && this.text!="All" ){
 			localStorage.setItem('category',this.text)
 			let args = null
+			document.querySelector('.btn-link[data-cat="btn-cat"]').innerHTML=this.text
 			if(localStorage.getItem('order_by'))
 				args = {"company": company1,"category":this.text,"order_by":localStorage.getItem('order_by')}
 			else
@@ -381,6 +381,7 @@ function filter_category(){
 				}
 			});
 		}else if(this.tagName.toLowerCase()=='a' && this.text=="All"){
+			document.querySelector('.btn-link[data-cat="btn-cat"]').innerHTML=this.text
 			if(localStorage.getItem('order_by'))
 				ajaxCallCategory(localStorage.getItem('order_by'),cur_page.page,cur_page.page.page)
 			else{
