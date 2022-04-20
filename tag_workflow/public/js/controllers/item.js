@@ -1,14 +1,11 @@
 frappe.ui.form.on("Item", {
 
-	setup: function (frm){
+	setup: function (){
 		Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
 			_field.id = "id_mvr_hour";		
 		})
 		
 		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
-		if(frappe.boot.tag.tag_user_info.company_type != 'TAG' && frappe.session.user != 'Administrator'){
-			frm.set_df_property('company', 'reqd', 1);
-		}
 		
 	},
 	refresh: function(frm){
@@ -31,7 +28,10 @@ frappe.ui.form.on("Item", {
 				frm.set_df_property('company', 'read_only', 1);
 			} 
 		}
-		$('[data-fieldname="job_titless"]').css("display", "block");
+		frm.set_df_property('job_titless', 'hidden', 0);
+		if(frappe.boot.tag.tag_user_info.company_type != 'TAG' && frappe.session.user != 'Administrator'){
+			frm.set_df_property('company', 'reqd', 1);
+		}
 	},
 	onload_post_render:function(){
 		//document.querySelector('.frappe-control[data-fieldname="industry"]').parentNode.parentElement.nextElementSibling.style.display = 'none'
@@ -45,7 +45,7 @@ frappe.ui.form.on("Item", {
 	},
 
 	validate: function (frm) {
-		if (frm.doc.__islocal) {
+		if (frm.doc.__islocal && frm.doc.job_titless) {
 			if (frm.doc.job_titless.indexOf('-') > 0){
 				frm.set_value("job_titless",frm.doc.job_titless.split('-')[0]);
 			}else{
@@ -66,8 +66,15 @@ frappe.ui.form.on("Item", {
 			});
 		}
 		frm.set_value("item_code", frm.doc.job_titless);
+		validate_form(frm);
+	},
+	company: function(frm){
+		if(!frm.doc.company){
+			frm.set_value('company', '');
+			$('[data-fieldname = "company"]').attr('title', '');
+			$('[data-fieldname = "company"]>input').attr('title', '');
+		}
 	}
-
 });
 
 
@@ -83,4 +90,33 @@ function hide_fields(){
 
 function hide_connections(frm){
 	frm.dashboard.hide();
+}
+
+function validate_form(frm){
+	let error_fields = [], mandatory_fields = [];
+	if(frappe.boot.tag.tag_user_info.company_type != 'TAG' && frappe.session.user != 'Administrator'){
+		mandatory_fields = ['industry', 'job_titless', 'rate', 'company', 'descriptions'];
+	}
+	else{
+		mandatory_fields = ['industry', 'job_titless', 'rate', 'descriptions'];
+	}
+	let message = __('<b>Please Fill Mandatory Fields to create a {0}:</b>', [__(frm.doc.doctype)]);
+	mandatory_fields.forEach(field => {
+		if (!frm.doc[field]) {
+			if(field == 'job_titless'){
+				error_fields.push('Job Title');
+			}else{
+				error_fields.push(frappe.unscrub(field));
+			}
+		}
+	});
+	if (error_fields && error_fields.length) {
+		message = message + '<br><br><ul><li>' + error_fields.join('</li><li>') + "</ul>";
+		frappe.msgprint({
+			message: message,
+			indicator: 'orange',
+			title: __('Missing Fields')
+		});
+		frappe.validated = false;
+	}
 }
