@@ -967,6 +967,7 @@ input.input-with-feedback.form-control,
   }
   .page-title .title-area .title-text {
     padding-left: 20px;
+    padding-top: 20px;
     font-weight: 500;
     font-size: 18px;
     color: #4e4e4e;
@@ -1015,6 +1016,17 @@ input.input-with-feedback.form-control,
   }
   [data-fieldname="get_data_from_jazzhr"] button {
     margin-top: 0px;
+  }
+  [data-page-route="List/Sales Invoice/List"] .frappe-list .result {
+    overflow: auto;
+    min-height: auto;
+  }
+  [data-page-route="List/Sales Invoice/List"] .frappe-list .result header,
+  [data-page-route="List/Sales Invoice/List"]
+    .frappe-list
+    .result
+    .list-row-container {
+    width: 650px;
   }
 }
 
