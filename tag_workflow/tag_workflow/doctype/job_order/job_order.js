@@ -169,8 +169,10 @@ frappe.ui.form.on("Job Order", {
 	    $('[data-fieldname="company"]').click(function(){
 			
 			if (frm.doc.company){
-				localStorage.setItem("company", frm.doc.company);
-				window.location.href= "/app/dynamic_page";
+				if(frm.doc.__islocal!==1){
+					localStorage.setItem("company", frm.doc.company);
+					window.location.href= "/app/dynamic_page";
+				}
 			}
 		});
 

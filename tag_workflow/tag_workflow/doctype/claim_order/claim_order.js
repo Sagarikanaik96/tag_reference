@@ -47,6 +47,7 @@ frappe.ui.form.on('Claim Order', {
 
 	},
 	refresh:function(frm){
+		setTimeout(submit_hide,1000);
 		$('.form-footer').hide();
 		if(frm.doc.__islocal==1){
 			if (!frm.doc.hiring_organization){
@@ -97,6 +98,7 @@ frappe.ui.form.on('Claim Order', {
 
 	},
 	setup:function(frm){
+		
 		$('[data-label="Save"]').hide()
 		frm.set_query("staffing_organization", function () {
 			return {
@@ -265,4 +267,11 @@ function companyhide(time) {
 
 		
 	}, time)
+}
+
+
+function submit_hide(){
+	if (cur_frm.doc.single_share==1 && cur_frm.doc.__islocal!=1){
+		$('.btn-primary').hide();
+	}
 }
