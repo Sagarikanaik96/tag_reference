@@ -1,11 +1,14 @@
 frappe.ui.form.on("Item", {
 
-	setup: function (){
+	setup: function (frm){
 		Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
 			_field.id = "id_mvr_hour";		
 		})
 		
 		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
+		if(frappe.boot.tag.tag_user_info.company_type != 'TAG' && frappe.session.user != 'Administrator'){
+			frm.set_df_property('company', 'reqd', 1);
+		}
 		
 	},
 	refresh: function(frm){
