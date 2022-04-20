@@ -40,6 +40,7 @@ def get_user_info():
         org = frappe.get_site_config()._fs_org or ''
         data = {"user_type": user_doc.tag_user_type, "company": user_doc.company, "company_type": user_doc.organization_type, "api_key": api_key, "sid":frappe.session.sid, 'org':org}
         frappe.cache().set_value("sessions", {user: frappe.session.sid})
+        frappe.local.cookie_manager.set_cookie('ctype',data['company_type'])
         return data
     except Exception as e:
         print(e)
