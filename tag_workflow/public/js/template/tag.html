@@ -286,9 +286,9 @@
                       aria-labelledby="btn-1"
                     >
                       <li class="py-2 mt-2">
-                        <a href="/app/contact">Contacts</a>
+                        <a href="#" onclick=contact_page()>Contacts</a>
                       </li>
-                      <li class="py-2"><a href="/app/lead">Leads</a></li>
+                      <li class="py-2" data="lead"><a href="#" onclick=lead_page()>Leads</a></li>
                       <li class="py-2"><a href="/app/staffing-email">Emails</a></li>
                       <li class="py-2"><a href="/app/contract">Contract</a></li>
 
@@ -297,7 +297,7 @@
                 </ul>
               </div>
 
-              <a href="/app/employee">
+              <a href="#" onclick=employee_page()>
                 <div class="tab-button custom-btn">
                   <img
                     src="/assets/tag_workflow/images/ico-employee.svg"
@@ -410,6 +410,15 @@
 
   function job_order_page() {
     location.href = "/app/job-order";
+  }
+  function lead_page() {
+    location.href = "/app/lead";
+  }
+  function employee_page() {
+    location.href = "/app/employee";
+  }
+  function contact_page() {
+    location.href = "/app/contact";
   }
 </script>
 
