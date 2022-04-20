@@ -297,7 +297,7 @@ function approved_employee(frm){
 			});
 		}
 
-		cur_frm.set_value('approve_employee_notification',0)
+		// cur_frm.set_value('approve_employee_notification',0)  
 		cur_frm.refresh_field('approve_employee_notification')
 	}
 }

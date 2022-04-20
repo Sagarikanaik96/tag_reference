@@ -114,7 +114,8 @@ def assign_employee_data(hiringorg, name):
 @frappe.whitelist(allow_guest=False)
 def update_job_order(user, company_type, sid, job_name, employee_filled, staffing_org, hiringorg, name):
     try:
-        if(company_type == "Hiring" and user == frappe.session.user and sid == frappe.cache().get_value("sessions")[user]):
+        if(company_type == "Hiring" and user == frappe.session.user):
+            frappe.db.set_value("Assign Employee", name, "approve_employee_notification", 0)
             job = frappe.get_doc(jobOrder, job_name)
             claimed = job.staff_org_claimed if job.staff_org_claimed else ""
             frappe.db.set_value(jobOrder, job_name, "worker_filled", (int(employee_filled)+int(job.worker_filled)))
