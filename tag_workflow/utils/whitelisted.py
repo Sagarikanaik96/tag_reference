@@ -447,11 +447,11 @@ def emp_response_data(response, company):
             emp.first_name = data['first_name'].strip('"')
             emp.last_name = data['last_name'].strip('"')
             emp.company = company
-            emp.contact_number = phone_number
-            emp.employee_gender = data['eeo_gender'] if data['eeo_gender'] else ''
+            emp.contact_number = data['phone'] or ""
+            emp.employee_gender = data['eeo_gender'] if data['eeo_gender'] in ["Male", "Female"] else ''
             emp.military_veteran = 1 if data['eeoc_veteran'] == 'I AM A PROTECTED VETERAN' else 0
             emp.street_address = data['address'] if data['address'] != 'Unavailable' and data['address'] != '' else ''
-            emp.email = data['email']
+            emp.email = data['email'] or ""
             state, city, zip_code = emp_city_state(data)
             emp.city = city
             emp.state = state
@@ -464,14 +464,18 @@ def emp_response_data(response, company):
 
 def emp_city_state(data):
     try:
-        if(data['location'])!='(No City Provided) (No State Provided) (No Postal Code Provided)':
+        if((data['location']) != '(No City Provided) (No State Provided) (No Postal Code Provided)' and data['location']):
             address_data="https://maps.googleapis.com/maps/api/geocode/json?key="+tag_gmap_key+"&address="+data['location']
             state, city, zip_code = '', '', 0
-            response = requests.get(address_data)
+            try:
+                response = requests.get(address_data)
+            except Exception as e:
+                print(e)
+                return state, city, zip_code
             if(response.status_code == 200 and len(response.json())>0 and len(response.json()['results'])>0):
-                address_dt=response.json()
+                address_dt = response.json()
                 state, city, zip_code = emp_zip_city(address_dt)
-            return state,city,zip_code
+            return state, city, zip_code
         else:
             return '', '', 0
     except Exception as e:
