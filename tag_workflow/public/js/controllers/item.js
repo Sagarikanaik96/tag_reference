@@ -15,8 +15,8 @@ frappe.ui.form.on("Item", {
 		$('.form-footer').hide();
 		cur_frm.clear_custom_buttons();
 		hide_connections(frm);
-		document.querySelector('.frappe-control[data-fieldname="rate"]').parentNode.parentElement.setAttribute('class','col-sm-6')
-		document.querySelector('.frappe-control[data-fieldname="industry"]').parentNode.parentElement.setAttribute('class','col-sm-6')
+		document.querySelector('.has-error[data-fieldname="job_titless"]').parentNode.parentElement.setAttribute('class','col-sm-6')
+		document.querySelector('[id="id_mvr_hour"]').parentNode.parentElement.setAttribute('class','col-sm-6')
 		hide_fields();
 		$('[data-fieldname="company"]').css("display",'block');
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
@@ -34,7 +34,7 @@ frappe.ui.form.on("Item", {
 		$('[data-fieldname="job_titless"]').css("display", "block");
 	},
 	onload_post_render:function(){
-		document.querySelector('.frappe-control[data-fieldname="industry"]').parentNode.parentElement.nextElementSibling.style.display = 'none'
+		//document.querySelector('.frappe-control[data-fieldname="industry"]').parentNode.parentElement.nextElementSibling.style.display = 'none'
 	},
 	before_save: function(frm){
 		frm.set_value("item_code", frm.doc.job_titless);
