@@ -12,8 +12,6 @@ frappe.ui.form.on("Item", {
 		$('.form-footer').hide();
 		cur_frm.clear_custom_buttons();
 		hide_connections(frm);
-		document.querySelector('.has-error[data-fieldname="job_titless"]').parentNode.parentElement.setAttribute('class','col-sm-6')
-		document.querySelector('[id="id_mvr_hour"]').parentNode.parentElement.setAttribute('class','col-sm-6')
 		hide_fields();
 		$('[data-fieldname="company"]').css("display",'block');
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
@@ -32,9 +30,12 @@ frappe.ui.form.on("Item", {
 		if(frappe.boot.tag.tag_user_info.company_type != 'TAG' && frappe.session.user != 'Administrator'){
 			frm.set_df_property('company', 'reqd', 1);
 		}
-	},
-	onload_post_render:function(){
-		//document.querySelector('.frappe-control[data-fieldname="industry"]').parentNode.parentElement.nextElementSibling.style.display = 'none'
+		readonly_fields(frm);
+		if(frm.doc.__islocal == 1){
+			if (frappe.boot.tag.tag_user_info.company_type == 'TAG' || frappe.session.user == 'Administrator'){
+				frm.set_value('company', '')
+			}
+		}
 	},
 	before_save: function(frm){
 		frm.set_value("item_code", frm.doc.job_titless);
@@ -118,5 +119,14 @@ function validate_form(frm){
 			title: __('Missing Fields')
 		});
 		frappe.validated = false;
+	}
+}
+
+function readonly_fields(frm){
+	if(frm.doc.__islocal!=1 && !(frappe.boot.tag.tag_user_info.company_type=='TAG' || frappe.session.user == 'Administrator')){
+		let fields = ['industry', 'rate', 'company','job_titless', 'descriptions'];
+		for (let i in fields){
+			frm.set_df_property(fields[i], 'read_only', 1);
+		}
 	}
 }

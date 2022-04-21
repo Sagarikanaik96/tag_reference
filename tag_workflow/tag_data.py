@@ -481,9 +481,13 @@ def hiring_org_name(current_user):
            
 @frappe.whitelist(allow_guest=False)
 def designation_activity_data(doc,method):
-    docs=frappe.new_doc('Activity Type')
-    docs.activity_type=doc.name
-    docs.insert()
+    if not frappe.db.exists("Item", {"name":doc.name}):
+        role_doc = frappe.get_doc(dict(doctype = "Item", industry = doc.industry_type,job_titless=doc.name,rate=doc.price,item_code=doc.name,item_group="All Item Groups",stock_uom="Nos",descriptions=doc.description, company=""))
+        role_doc.save()
+    if not frappe.db.exists("Activity Type", {"name":doc.name}):
+        docs=frappe.new_doc('Activity Type')
+        docs.activity_type=doc.name
+        docs.insert()
 
 @frappe.whitelist(allow_guest=False)
 def filter_company_employee(doctype, txt, searchfield, page_len, start, filters):
@@ -925,15 +929,15 @@ def get_jobtitle_list_page(doctype, txt, searchfield, page_len, start, filters):
         data=filters.get('data')
         if(len(data)>0):
             if len(data)==1:
-                sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}')) and industry IN ('{1}')  '''.format(company,data[0])
+                sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}') or LENGTH(company)=0) and industry IN ('{1}')  '''.format(company,data[0])
                 return frappe.db.sql(sql)
             else:
 
                 data=tuple(data)
-                sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}')) and industry IN {1}  '''.format(company,data)
+                sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}') or LENGTH(company)=0) and industry IN {1}  '''.format(company,data)
                 return frappe.db.sql(sql)
         else:
-            sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}')) and industry is null  '''.format(company)
+            sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}') or LENGTH(company)=0) and industry is null  '''.format(company)
             return frappe.db.sql(sql)
 
     except Exception as e:

@@ -35,6 +35,11 @@ frappe.flags.tag_list=''
 setTimeout(function(){
   const btn=document.getElementById('filter_selected_data')
   btn.addEventListener('click',function(){
+    btn.style.backgroundColor = '#21B9E4';
+    btn.style.color="#fff";
+    const btn3=document.getElementById('filter_all_data')
+    btn3.style.backgroundColor='White';
+    btn3.style.color="black";
     frappe.call({
         method:"tag_workflow.tag_data.my_used_job_title",
         args:{
@@ -62,6 +67,11 @@ setTimeout(function(){
   })
   const btn1=document.getElementById('filter_all_data')
     btn1.addEventListener('click',function(){
+      btn1.style.backgroundColor = '#21B9E4';
+      btn1.style.color="#fff";
+      const btn2=document.getElementById('filter_selected_data')
+      btn2.style.backgroundColor='White';
+      btn2.style.color="black";
       frappe.flags.company='True'
       frappe.flags.my_list=[]
       frappe.flags.tag_list='False'
