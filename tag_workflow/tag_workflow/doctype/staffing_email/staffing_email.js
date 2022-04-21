@@ -37,12 +37,16 @@ frappe.ui.form.on("Staffing Email", {
 	setup: function (frm) {
 		frm.disable_save();
 		if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
-			frm.fields_dict.email_recipients.grid.get_field(
-				"email_recipients"
-			).get_query = function () {
+			frm.fields_dict.email_recipients.grid.get_field("email_recipients").get_query = function () {
+				let recipientsdata = frm.doc.email_recipients, recipients_list = [];
+				for(let i in recipientsdata){
+					if(recipientsdata[i]['email_recipients']){
+						recipients_list.push(recipientsdata[i]['email_recipients'])
+					}
+				}
 				return {
 					query: "tag_workflow.tag_data.email_recipient",
-					filters: { company: frappe.defaults.get_user_default("Company") },
+					filters: { company: frappe.defaults.get_user_default("Company"), recipients_list: recipients_list },
 				};
 			};
 		}

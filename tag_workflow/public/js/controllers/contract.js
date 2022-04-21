@@ -52,7 +52,6 @@ frappe.ui.form.on("Contract", {
 			});
 		}
 		if(frm.doc.__islocal==1 ||(cur_frm.doc.docstatus==0 && frappe.boot.tag.tag_user_info.company!=frm.doc.hiring_company)){
-			console.log('kjnkj')
 			frm.set_df_property('signe_hiring','hidden',1)
 		}
 	},
@@ -127,17 +126,26 @@ frappe.ui.form.on("Contract", {
 		}
 	},
 
-	onload:function() {
-		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
-			const li = [];
-			document.querySelectorAll('a[data-doctype="Industry Type"]').forEach(element=>{
-				li.push(element.getAttribute("data-name"));
-			});
+	onload:function(frm) {
+		frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
+			let industrytype = frm.doc._industry_types, industrytype_list = [];
+			for (let x in industrytype) {
+				if(industrytype[x]['industry_type']){
+					industrytype_list.push(industrytype[x]['industry_type']);
+				}
+			}
+			let jobtitle = frm.doc.job_titles, title_list = [];
+			for (let y in jobtitle){
+				if(jobtitle[y]['job_titles']){
+					title_list.push(jobtitle[y]['job_titles']);
+				}
+			}
 			return {
 				query: "tag_workflow.tag_data.get_jobtitle_list_page",
 				filters: {
-					data: li,
-					company:doc.staffing_company
+					data: industrytype_list,
+					company: doc.staffing_company,
+					title_list: title_list
 				},
 			};
 		}

@@ -109,6 +109,38 @@ frappe.ui.form.on("Company", {
 				],
 			};
 		});
+		frm.fields_dict["employees"].grid.get_field("employee").get_query = function (doc) {
+			let employees_data = frm.doc.employees, employees_list = [];
+			for (let x in employees_data){
+				if(employees_data[x]['employee']){
+					employees_list.push(employees_data[x]['employee']);
+				}
+			}
+			return {
+				query: "tag_workflow.tag_data.filter_company_employee",
+				filters: {
+					company: doc.name,
+					employees_list: employees_list
+				},
+			};
+		};
+
+		frm.fields_dict['job_site'].grid.get_field('job_site').get_query = function(doc) {
+			let li = [];
+			let table_data = frm.doc.job_site;
+			for (let i in table_data){
+				if(table_data[i]['job_site']){
+					li.push(table_data[i]['job_site']);
+				}
+			}
+			return {
+				query: "tag_workflow.tag_data.filter_jobsite",
+				filters: {
+					company: doc.name,
+					site_list : li
+				}
+			}
+		}
 	},
 
 	organization_type:function(frm){
@@ -208,32 +240,6 @@ frappe.ui.form.on("Company", {
 			$('.menu-btn-group').hide();
 		}
 
-		frm.fields_dict['job_site'].grid.get_field('job_site').get_query = function(doc) {
-			let li = [];
-			let table_data = frm.fields_dict.job_site.grid.data;
-			for (let i in table_data){
-				if(table_data[i]['job_site']){
-					li.push(table_data[i]['job_site']);
-				}
-			}
-			return {
-				query: "tag_workflow.tag_data.filter_jobsite",
-				filters: {
-					company: doc.name,
-					site_list : li
-				}
-			}
-		}
-
-		cur_frm.fields_dict["employees"].grid.get_field("employee").get_query = function (doc) {
-			return {
-				query: "tag_workflow.tag_data.filter_company_employee",
-				filters: {
-					company: doc.name,
-				},
-			};
-		};
-
 		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
 			const li = [];
 			document.querySelectorAll('a[data-doctype="Industry Type"]').forEach(element=>{
@@ -247,21 +253,25 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		}
-		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
-
-			let data=cur_frm.doc.industry_type
-
-			const li = []
-
-			for (let x in data) {
-				li.push(data[x]['industry_type'])
-
-			  }
+		frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
+			let industrytype = frm.doc.industry_type, industrytype_list = [];
+			for (let x in industrytype) {
+				if(industrytype[x]['industry_type']){
+					industrytype_list.push(industrytype[x]['industry_type']);
+				}
+			}
+			let jobtitle = frm.doc.job_titles, title_list = [];
+			for (let y in jobtitle){
+				if(jobtitle[y]['job_titles']){
+					title_list.push(jobtitle[y]['job_titles']);
+				}
+			}
 			return {
 				query: "tag_workflow.tag_data.get_jobtitle_list_page",
 				filters: {
-					data: li,
-					company:doc.name
+					data: industrytype_list,
+					company:doc.name,
+					title_list: title_list
 				},
 			};
 		}

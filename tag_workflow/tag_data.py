@@ -493,7 +493,15 @@ def designation_activity_data(doc,method):
 def filter_company_employee(doctype, txt, searchfield, page_len, start, filters):
     try:
         company=filters.get('company')
-        sql = """ select name, employee_name,company from `tabEmployee` where company='{0}' """.format(company)
+        employees_list = filters.get('employees_list')
+        value = ''
+        for index ,i in enumerate(employees_list):
+            if index >= 1:
+                value = value+"'"+","+"'"+i
+            else:
+                value =value+i
+        sql = """ select name, employee_name,company from `tabEmployee` where company='{0}' and (name NOT IN ('{1}') and name like '%%{2}%%')""".format(company, value, '%s' % txt)
+        print('***********', sql)
         return frappe.db.sql(sql)
     except Exception as e:
         frappe.db.rollback()
@@ -509,7 +517,14 @@ def contact_company(doctype, txt, searchfield, page_len, start, filters):
 @frappe.whitelist(allow_guest=False)
 def email_recipient(doctype, txt, searchfield, page_len, start, filters):
     company=filters.get('company')
-    sql = """ select name from `tabContact` where company='{}' """.format(company)
+    recipients_list = filters.get('recipients_list')
+    value = ''
+    for index ,i in enumerate(recipients_list):
+        if index >= 1:
+            value = value+"'"+","+"'"+i
+        else:
+            value =value+i
+    sql = """ select name from `tabContact` where company='{0}' and (name NOT IN ('{1}') and name like '%%{2}%%')""".format(company, value, '%s' % txt)
     return frappe.db.sql(sql) 
 
 
@@ -927,17 +942,23 @@ def get_jobtitle_list_page(doctype, txt, searchfield, page_len, start, filters):
     try:
         company = filters.get('company')
         data=filters.get('data')
+        title_list = filters.get('title_list')
+        value = ''
+        for index ,i in enumerate(title_list):
+            if index >= 1:
+                value = value+"'"+","+"'"+i
+            else:
+                value =value+i
         if(len(data)>0):
             if len(data)==1:
-                sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}') or LENGTH(company)=0) and industry IN ('{1}')  '''.format(company,data[0])
+                sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}') or LENGTH(company)=0) and industry IN ('{1}') and (name NOT IN ('{2}') and name like '%%{3}%%')'''.format(company,data[0], value,'%s' % txt)
                 return frappe.db.sql(sql)
             else:
-
                 data=tuple(data)
-                sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}') or LENGTH(company)=0) and industry IN {1}  '''.format(company,data)
+                sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}') or LENGTH(company)=0) and industry IN {1} and (name NOT IN ('{2}') and name like '%%{3}%%')'''.format(company,data, value,'%s' % txt)
                 return frappe.db.sql(sql)
         else:
-            sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}') or LENGTH(company)=0) and industry is null  '''.format(company)
+            sql = ''' select name from `tabItem` where ((company is null) or (company = '{0}') or LENGTH(company)=0) and industry is null and (name NOT IN ('{1}') and name like '%%{2}%%')'''.format(company, value,'%s' % txt)
             return frappe.db.sql(sql)
 
     except Exception as e:
@@ -955,7 +976,7 @@ def filter_jobsite(doctype, txt, searchfield, page_len, start, filters):
                 value = value+"'"+","+"'"+i
             else:
                 value =value+i
-        sql = '''select name from `tabJob Site` where company = '{0}' and name NOT IN ('{1}')'''.format(company,value)
+        sql = '''select name from `tabJob Site` where company = '{0}' and (name NOT IN ('{1}') and name like '%%{2}%%')'''.format(company,value,'%s' % txt)
         return frappe.db.sql(sql)
     except Exception as e:
         frappe.msgprint(e)
