@@ -393,29 +393,22 @@ function validate_phone_and_zip(frm){
 }
 
 /*--------jazzhr------------*/
-  
- function make_jazzhr_request(frm) {
-	if (frm.doc.jazzhr_api_key) {
-		setTimeout(function(){
-			frappe.msgprint('Employees are fetched in the background . You can continue using the application')
-			setTimeout(function(){window.location.reload()},3000)   },8000)
-	   
-	  frappe.call({
-		method: "tag_workflow.utils.whitelisted.make_jazzhr_request",
-		args: { api_key: frm.doc.jazzhr_api_key, company: frm.doc.name },
-		freeze: true,
-		freeze_message: "<p><b>Fetching records from JazzHR...</b></p>",
-		callback: function (r) {
-		  if (r && r.message) {
-			frappe.msgprint('Employee To added in short time');
-		  }
-		},
-	  });
-	} else {
-	  cur_frm.scroll_to_field("jazzhr_api_key");
-	  frappe.msgprint("<b>JazzHR API Key</b> is required");
+function make_jazzhr_request(frm){
+	if(frm.doc.jazzhr_api_key){
+		frappe.call({
+			method: "tag_workflow.utils.jazz_integration.jazzhr_fetch_applicants",
+			args: {api_key: frm.doc.jazzhr_api_key, company: frm.doc.name, action: 1},
+			freeze: true,
+			freeze_message: "<p><b>Fetching records from JazzHR...</b></p>",
+			callback: function(r){
+				frappe.msgprint('Employees are fetched in the background. You can continue using the application');
+			}
+		});
+	}else{
+		cur_frm.scroll_to_field("jazzhr_api_key");
+		frappe.msgprint("<b>JazzHR API Key</b> is required");
 	}
-  }
+}
  
 
 
@@ -597,27 +590,25 @@ function show_fields(frm){
 	frm.set_df_property('zip','hidden',0);
 }
 
- function update_existing_employees(frm){
- if(frm.doc.jazzhr_api_key){
-	setTimeout(function(){
-		frappe.msgprint('Employees Updation are done in the background . You can continue using the application')
-		setTimeout(function(){window.location.reload()},3000)   },5000)
-	frappe.call({
-		method: "tag_workflow.utils.whitelisted.update_employees_data_jazz_hr",
-		args: { api_key: frm.doc.jazzhr_api_key, company: frm.doc.name },
-		freeze: true,
-		freeze_message: "<p><b>Updating Employees Record</b></p>",
-		callback: function (r) {
-			if(r){
-				frappe.msgprint('Updation Done Successfully')
-			}
-		},
-	});
- }else{
-	cur_frm.scroll_to_field("jazzhr_api_key");
-	frappe.msgprint("<b>JazzHR API Key</b> is required");
- }
- }
+function update_existing_employees(frm){
+	if(frm.doc.jazzhr_api_key){
+		frappe.call({
+			method: "tag_workflow.utils.jazz_integration.jazzhr_update_applicants",
+			args: { api_key: frm.doc.jazzhr_api_key, company: frm.doc.name, action: 2 },
+			freeze: true,
+			freeze_message: "<p><b>Updating Employees Record</b></p>",
+			callback: function (r) {
+				if(r){
+					frappe.msgprint('Employees Updation are done in the background . You can continue using the application')
+				}
+			},
+		});
+	}else{
+		cur_frm.scroll_to_field("jazzhr_api_key");
+		frappe.msgprint("<b>JazzHR API Key</b> is required");
+	}
+}
+
 function show_addr(frm){
   if(frm.doc.search_on_maps){
     frm.get_docfield('address').label ='Complete Address';

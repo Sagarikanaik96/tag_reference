@@ -18,7 +18,7 @@ frappe.ui.form.on("Employee", {
 			tag_company(frm);
 		  }
 		employee_delete_button(frm);
-		$('.form-control[data-fieldname="ssn"]')[0].setAttribute("type", "password");
+		$('.form-control[data-fieldname="ssn"]')[0].setAttribute("autocomplete", "nope");
 		employee_delete_button(frm);
 		set_map(frm);
 		hide_field(frm);
@@ -518,7 +518,7 @@ function show_fields(frm){
 function update_employees_data(frm){
 	let roles = frappe.user_roles;
 	if (roles.includes("Staffing Admin") || roles.includes("Staffing User") && frm.doc.employee_number) {
-		frm.add_custom_button("Update Employee Record", function () {
+		frm.add_custom_button("Sync with JAZZHR", function () {
 			cur_frm.is_dirty() == 1 ? frappe.msgprint("Please save the form first") : update_existing_employees(frm);
 		}).addClass("btn-primary");
 	}
@@ -527,14 +527,13 @@ function update_employees_data(frm){
 function update_existing_employees(frm){
 	if(frm.doc.employee_number){
 		frappe.call({
-			method: "tag_workflow.utils.whitelisted.update_single_employee",
-			args: { employee_id: frm.doc.employee_number, name: frm.doc.name,comp_name:frm.doc.company,updated_once:frm.doc.updated_once },
+			method: "tag_workflow.utils.jazz_integration.update_single_employee",
+			args: {"employee_number": frm.doc.employee_number, "company": frm.doc.company},
 			freeze: true,
 			freeze_message: "<p><b>Updating Employees Record</b></p>",
 			callback: function (r) {
 				if(r){
-					frappe.msgprint('Employee Updated Successfully')
-					window.location.reload()
+					frappe.msgprint('Employees Updation are done in the background . You can continue using the application');
 				}
 			},
 		});
