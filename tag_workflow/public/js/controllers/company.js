@@ -169,7 +169,7 @@ frappe.ui.form.on("Company", {
 		let pay_email = frm.doc.accounts_payable_email;
 		validate_email_phone(email,phone_no);
 		let regex = /[\d]/g;
-		if (account_phone_no && (account_phone_no.length < 4 || account_phone_no.length > 15 || isNaN(account_phone_no)) && regex.test(account_phone_no) === true){
+		if (account_phone_no && (account_phone_no.length < 4 || account_phone_no.length > 15) && regex.test(account_phone_no) === true){
 			frappe.msgprint({message: __('Accounts Receivable Phone Number should be between 4 to 15 characters and contain only digits.'), indicator: 'red'});
 			frappe.validated = false;
 		}
@@ -377,7 +377,7 @@ function validate_phone_and_zip(frm){
 	let phone = frm.doc.phone_no || '';
 	let zip = frm.doc.zip;
 	let is_valid = 1;
-	if(phone && (phone.length < 4 || phone.length > 15) &&!isNaN(phone)){
+	if(phone && (phone.length < 4 || phone.length > 15)){
 		is_valid = 0;
 		frappe.msgprint({message: __("Company Phone Number should be between 4 to 15 characters."), title: __("Phone Number"), indicator: "red",});
 	}
@@ -494,7 +494,7 @@ function validate_email_phone(email,phone_no){
 	}
 
 	let regex = /[\d]/g;
-	if(phone_no && (phone_no.length < 4 || phone_no.length > 15 || isNaN(phone_no)) && regex.test(phone_no)){
+	if(phone_no && (phone_no.length < 4 || phone_no.length > 15) && regex.test(phone_no)){
 		frappe.msgprint({message: __('Accounts Payable Phone Number should be between 4 to 15 characters and contain only digits.'), indicator: 'red'});
 		frappe.validated = false;
 	}
