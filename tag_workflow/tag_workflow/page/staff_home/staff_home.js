@@ -98,9 +98,9 @@ frappe.StaffHome = Class.extend({
 							<span class="badge badge-pill ml-2 exclusive">${org_type}</span>
 						</div>
 						<div class="d-flex flex-wrap w-100 pt-3 ">
-							<div class="col-lg-7">
+							<div class="col-xl-7 col-lg-12">
 								<div class="row">
-									<div class="pt-2 pr-2 mr-1">
+									<div class="pt-2 pr-2 mr-0">
 									<img src="/assets/tag_workflow/images/ico-calendar.svg">
 								</div>
 								<div>
@@ -109,7 +109,7 @@ frappe.StaffHome = Class.extend({
 								</div>
 							</div>
 							<div class="row">
-								<div class="pt-2 pr-2 mr-1">
+								<div class="pt-2 pr-2 mr-0">
 									<img src="/assets/tag_workflow/images/ico-worker.svg">
 								</div>
 								<div>
@@ -118,9 +118,9 @@ frappe.StaffHome = Class.extend({
 								</div>
 							</div>
 						</div>
-						<div class="col-lg-5">
+						<div class="col-xl-5 col-lg-12">
 							<div class="row">
-								<div class="pt-2 pr-2 mr-1">
+								<div class="pt-2 pr-2 mr-0">
 									<img src="/assets/tag_workflow/images/ico-clock.svg">
 								</div>
 								<div>
