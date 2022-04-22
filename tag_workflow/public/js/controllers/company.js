@@ -310,7 +310,7 @@ frappe.ui.form.on("Company", {
 			}
 			for(let i in titles_industry){
 				if(industries.indexOf(titles_industry[i]) == -1)  {
-					frappe.msgprint(frm.doc.job_titles[i].job_titles+ "is not mapped to an Industry. Please update accordingly.")
+					frappe.msgprint(frm.doc.job_titles[i].job_titles+" is not mapped to an Industry. Please update accordingly.")
 					frappe.validated=false
 					break
 				}
