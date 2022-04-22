@@ -300,7 +300,7 @@ frappe.ui.form.on("Company", {
 			}
 			for(let i in titles_industry){
 				if(industries.indexOf(titles_industry[i]) == -1)  {
-					frappe.msgprint('"'+frm.doc.job_titles[i].job_titles+'" Job Titles Industry Type "'+titles_industry[i]+'" is not present in '+cur_frm.doc.name)
+					frappe.msgprint(frm.doc.job_titles[i].job_titles+ "is not mapped to an Industry. Please update accordingly.")
 					frappe.validated=false
 					break
 				}
