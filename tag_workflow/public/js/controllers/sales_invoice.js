@@ -77,6 +77,10 @@ frappe.ui.form.on("Sales Invoice", {
 	before_save: function(frm){
 		cur_frm.set_value("taxes_and_charges", "");
 		cur_frm.clear_table("taxes");
+		let item = frm.doc.items || [];
+		for(let i in item){
+			frappe.model.set_value(item[i].doctype, item[i].name, "item_code", "")
+		}
 		update_payment(frm);
 	},
 	is_pos: function(frm){

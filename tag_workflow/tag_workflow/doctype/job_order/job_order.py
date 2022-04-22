@@ -167,7 +167,7 @@ def make_sales_invoice(source_name, company, emp_sql,target_doc=None, ignore_per
         doclist.for_company_state = for_company_state
         doclist.for_company_zip = for_company_zip
 
-        timesheet_item = {"item_name": job_title, "description": "Service", "uom": "Nos", "qty": 1, "stock_uom": "Nos", "conversion_factor": 1, "stock_qty": 1, "rate": total_amount, "amount": total_amount, "income_account": income_account, "cost_center": cost_center, "default_expense_account": default_expense_account}
+        timesheet_item = {"item_code":"", "item_name": job_title, "description": "Service", "uom": "Nos", "qty": 1, "stock_uom": "Nos", "conversion_factor": 1, "stock_qty": 1, "rate": total_amount, "amount": total_amount, "income_account": income_account, "cost_center": cost_center, "default_expense_account": default_expense_account}
         doclist.append("items", timesheet_item)
         doclist.company = company
     
