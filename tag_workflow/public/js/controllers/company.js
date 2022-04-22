@@ -168,9 +168,9 @@ frappe.ui.form.on("Company", {
 		let receive_email = frm.doc.accounts_receivable_rep_email;
 		let pay_email = frm.doc.accounts_payable_email;
 		validate_email_phone(email,phone_no);
-		
-		if (account_phone_no && (account_phone_no.length != 10 || isNaN(account_phone_no))){
-			frappe.msgprint({message: __('Not Valid Accounts Receivable phone number'), indicator: 'red'});
+		let regex = /[\d]/g;
+		if (account_phone_no && (account_phone_no.length < 4 || account_phone_no.length > 15 || isNaN(account_phone_no)) && regex.test(account_phone_no) === true){
+			frappe.msgprint({message: __('Accounts Receivable Phone Number should be between 4 to 15 characters and contain only digits.'), indicator: 'red'});
 			frappe.validated = false;
 		}
 		
@@ -377,9 +377,9 @@ function validate_phone_and_zip(frm){
 	let phone = frm.doc.phone_no || '';
 	let zip = frm.doc.zip;
 	let is_valid = 1;
-	if(phone && phone.length != 10 && !isNaN(phone)){
+	if(phone && (phone.length < 4 || phone.length > 15) &&!isNaN(phone)){
 		is_valid = 0;
-		frappe.msgprint({message: __("Company Phone No. is not valid"), title: __("Phone Number"), indicator: "red",});
+		frappe.msgprint({message: __("Company Phone Number should be between 4 to 15 characters."), title: __("Phone Number"), indicator: "red",});
 	}
 
 	if(zip && zip.length != 5 && !isNaN(zip)){
@@ -493,8 +493,9 @@ function validate_email_phone(email,phone_no){
 		frappe.validated = false;
 	}
 
-	if(phone_no && (phone_no.length != 10 || isNaN(phone_no))){
-		frappe.msgprint({message: __('Not Valid Accounts Payable phone number'), indicator: 'red'});
+	let regex = /[\d]/g;
+	if(phone_no && (phone_no.length < 4 || phone_no.length > 15 || isNaN(phone_no)) && regex.test(phone_no)){
+		frappe.msgprint({message: __('Accounts Payable Phone Number should be between 4 to 15 characters and contain only digits.'), indicator: 'red'});
 		frappe.validated = false;
 	}
 }

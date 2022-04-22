@@ -154,8 +154,9 @@ frappe.ui.form.on("User", {
 	},
 	validate:function(frm){
 		let phone = frm.doc.mobile_no
-		if (phone && (phone.length != 10 || isNaN(phone))){
-			frappe.msgprint({message: __('Not Valid phone number'), indicator: 'red'})
+		let regex = /[\d]/g;
+		if (phone && (phone.length < 4 || phone.length > 15 || isNaN(phone)) && regex.test(phone) === true){
+			frappe.msgprint({message: __('Mobile Number should be between 4 to 15 characters and contain only digits.'), indicator: 'red'})
 			frappe.validated = false
 		}
 	}

@@ -194,18 +194,18 @@ frappe.ui.form.on("Employee", {
 	},
 
 	validate:function(frm){
-		if (frm.doc.contact_number && frm.doc.contact_number.toString().length != 10) {
-			frappe.msgprint(__("Minimum and Maximum Characters allowed for Contact Number are 10")); 
+		if (frm.doc.contact_number && (frm.doc.contact_number.toString().length < 4 || frm.doc.contact_number.toString().length > 15)) {
+			frappe.msgprint(__("Contact Number should be between 4 to 15 characters."));
 			frappe.validated = false;
 		}
 
 		if (frm.doc.zip &&frm.doc.zip.toString().length != 5){
-			frappe.msgprint(__("Minimum and Maximum Characters allowed for Zip are 5"));
+			frappe.msgprint(__("Minimum and Maximum Characters allowed for Zip are 5."));
 			frappe.validated = false;
 		}
 		
 		if (frm.doc.ssn && frm.doc.ssn.toString().length != 9) {
-			frappe.msgprint(__("Minimum and Maximum Characters allowed for SSN are 9")); 
+			frappe.msgprint(__("Minimum and Maximum Characters allowed for SSN are 9."));
 			frappe.validated = false;
 		}
 
