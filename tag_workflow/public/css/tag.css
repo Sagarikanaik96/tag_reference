@@ -72,16 +72,12 @@ li.dropdown.dropdown.dropdown-help.dropdown-mobile {
 [data-fieldname="get_data_from_jazzhr"] button {
   background-color: #21b9e4 !important;
   color: #fff !important;
-  display: flex;
   margin-top: 21px;
-  margin-right: 20px;
+  margin-right: 15px;
 }
 [data-fieldname="update_employee_records"] button {
   background-color: #21b9e4 !important;
   color: #fff !important;
-  margin-right: 30px;
-  display: flex;
-  float: left;
   margin-top: 21px;
 }
 [data-fieldname="get_data_from_jazzhr"] {
@@ -939,6 +935,9 @@ input.input-with-feedback.form-control,
 }
 
 @media (max-width: 768px) {
+  [data-fieldname="update_employee_records"] button {
+    margin-top: 0;
+  }
   #page-User .layout-main-section-wrapper .layout-main-section,
   #page-Company .layout-main-section-wrapper .layout-main-section,
   #page-Lead .layout-main-section-wrapper .layout-main-section,
