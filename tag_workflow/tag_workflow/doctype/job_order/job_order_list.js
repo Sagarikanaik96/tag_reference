@@ -191,11 +191,11 @@ frappe.listview_settings['Job Order'] = {
 						</span>
 					</span>
 					<span class=" ellipsis" title="" id="${f.name}">
-						<a class="ellipsis" href="/app/job-order/${val}" data-doctype="Job Order" onmouseover="showCasePopover1('${val}','${f.name}')" onmouseout = "hideCasePopover1('${val}','${f.name}')" onclick = "myfunction()" data-jobname = "name" >${val}</a>
+						<a class="ellipsis" href="/app/job-order/${val}" data-doctype="Job Order" onmouseover="showCasePopover1('${val}','${f.name}')" onmouseout = "hideCasePopover1('${val}','${f.name}')"  data-jobname = "name" >${val}</a>
 					</span>
 					<script>
 						function showCasePopover1(cname,dname){
-							$('.popover-body').hide();
+							
 							$("#"+dname).popover({
 								title: name,
 								content: function(){
@@ -205,11 +205,6 @@ frappe.listview_settings['Job Order'] = {
 								html: true,
 							}).popover('show');
 						}
-
-						function myfunction(){
-							$('.popover-body').hide();
-						}
-
 						function details_in_popup1(link, div_id, cname){
 							frappe.call({
 								method: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_joborder_value",
