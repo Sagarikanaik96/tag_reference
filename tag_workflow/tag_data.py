@@ -1030,3 +1030,44 @@ def hiring_auto_approve(hiring_type,job_order,employee_filled,staffing_org,doc_n
         assign_emp_status_data=f'update `tabAssign Employee` set tag_status="Approved" where name="{doc_name}"'                       
         frappe.db.sql(assign_emp_status_data)
         frappe.db.commit()
+
+
+@frappe.whitelist()
+def job_site_add(doc,method):
+    new_site=frappe.get_doc('Company',doc.company)
+    new_site.append('job_site', {
+        'job_site': doc.name
+    })
+    new_site.save(ignore_permissions=True)
+
+@frappe.whitelist()
+def job_title_add(doc,method):
+    new_title=frappe.get_doc('Company',doc.company)
+    new_title.append('job_titles', {
+        'industry_type': doc.industry,
+        'job_titles':doc.name,
+        'wages':doc.rate,
+        'description':doc.descriptions
+
+    })
+    
+    for i in new_title.industry_type:
+        if(i.industry_type == doc.industry):
+            new_title.save(ignore_permissions=True)
+            break
+    else:
+        new_title.append('industry_type',{
+            'industry_type':doc.industry
+        })
+        new_title.save(ignore_permissions=True)
+@frappe.whitelist()
+def job_industry_type_add(company,user_industry):  
+    new_industry=frappe.get_doc('Company',company)
+    for i in new_industry.industry_type:
+        if(i.industry_type == user_industry):
+            break
+    else:
+        new_industry.append('industry_type',{
+            'industry_type':user_industry
+        })
+        new_industry.save(ignore_permissions=True)

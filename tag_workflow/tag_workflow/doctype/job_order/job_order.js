@@ -180,6 +180,8 @@ frappe.ui.form.on("Job Order", {
 
 	    	localStorage.setItem("order", frm.doc.name);
 	    }
+		set_exc_industry_company(frm)
+
 
 	},
 
@@ -355,6 +357,15 @@ frappe.ui.form.on("Job Order", {
 	category: function(frm) {
 		frm.set_value('shovel', "");
 		frm.set_value('select_job', "");
+		if(frm.doc.category && frm.doc.company){
+			frappe.call({
+				'method':'tag_workflow.tag_data.job_industry_type_add',
+				'args':{
+					'company':frm.doc.company,
+					'user_industry':frm.doc.category
+				}
+			})
+		}
 
 	},
 
@@ -440,6 +451,7 @@ frappe.ui.form.on("Job Order", {
 			});
 		}
 		sessionStorage.setItem('joborder_company', frm.doc.company);
+		sessionStorage.setItem('exc_joborder_company', frm.doc.company);	
 	},
 	onload_post_render:function(frm){
 		if (((cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing") || (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User")))){
@@ -1472,3 +1484,19 @@ function check_claim_company(frm){
 		return true;
 }
 
+function set_exc_industry_company(frm){
+	if(sessionStorage.exc_joborder_company){
+		cur_frm.set_value('company',sessionStorage.exc_joborder_company)
+		if(frm.doc.category && frm.doc.company){
+			sessionStorage.setItem('exc_joborder_company', '');	
+
+			frappe.call({
+				'method':'tag_workflow.tag_data.job_industry_type_add',
+				'args':{
+					'company':frm.doc.company,
+					'user_industry':frm.doc.category
+				}
+			})
+		}
+	}
+}
