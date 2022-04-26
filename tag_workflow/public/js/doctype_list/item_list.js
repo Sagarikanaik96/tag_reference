@@ -98,10 +98,11 @@ frappe.views.BaseList.prototype.prepare_data = function(r) {
     this.data = data;
   }
   if(frappe.flags.tag_list=='True'){
-    this.data = this.data.filter((d) => d.company==null)
+    this.data = this.data.filter((d) => !d.company)
+
   }
   if((frappe.flags.my_list).length>0){
-  this.data = this.data.filter((d) => frappe.flags.my_list[0].includes(d.name) || d.company!=null)
+  this.data = this.data.filter((d) => frappe.flags.my_list[0].includes(d.name))
   }
   
   this.data = this.data.uniqBy((d) => d.name);

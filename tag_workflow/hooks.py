@@ -98,7 +98,13 @@ doc_events = {
        },
        "Lead":{
                "after_insert":'tag_workflow.utils.lead.lead_contact'
-       }
+       },
+       "Job Site":{
+               "after_insert":'tag_workflow.tag_data.job_site_add'
+       },
+       "Item":{
+               "after_insert":'tag_workflow.tag_data.job_title_add'
+       },
 }
 
 # logo
