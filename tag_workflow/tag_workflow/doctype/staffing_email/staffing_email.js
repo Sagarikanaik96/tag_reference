@@ -33,6 +33,10 @@ frappe.ui.form.on("Staffing Email", {
 				$(this).attr('title', file);
 			});
 		}
+		$('.editable-title > div:nth-child(1) > div:nth-child(1) > h3:nth-child(1)').hide();
+		$('.disabled').hide();
+		$('#navbar-breadcrumbs > li:nth-child(2) > a:nth-child(1)').text('Emails');
+		$('h3.ellipsis').text('New Email');
 	},
 	setup: function (frm) {
 		frm.disable_save();
@@ -55,5 +59,20 @@ frappe.ui.form.on("Staffing Email", {
 		if(frappe.session.user != 'Administrator'){
             $('.menu-btn-group').hide()
         }
+	},
+	before_save: function(frm){
+		update_fields(frm);
 	}
 });
+
+function update_fields(frm){
+	let email_rec = frm.fields_dict.email_recipients.grid.data;
+	let recipient_name = [];
+	if(email_rec.length>0){
+		for(let i in email_rec){
+			recipient_name.push(email_rec[i].email_recipients);
+		}
+	}
+	frm.set_value('recipients', recipient_name.join(', '));
+	frm.set_value('date_sent', frappe.datetime.now_date());
+}

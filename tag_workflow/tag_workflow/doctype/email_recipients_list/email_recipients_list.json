@@ -14,7 +14,7 @@
    "fieldname": "email_recipients",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Email Recipients",
+   "label": "Contact Name",
    "options": "Contact"
   },
   {
@@ -22,14 +22,14 @@
    "fieldname": "email",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Email",
+   "label": "Email Address",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-11-23 22:16:36.989640",
+ "modified": "2022-04-25 10:24:12.949560",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Email Recipients List",
