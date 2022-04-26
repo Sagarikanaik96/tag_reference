@@ -27,7 +27,6 @@ frappe.listview_settings["Contract"] = {
         doc_filter.options[1].innerHTML = 'Draft';
         doc_filter.options[2].innerHTML = 'Submitted';
         doc_filter.options[3].innerHTML = 'Cancelled';
-        doc_filter.options.add(new Option('Signed', 3), 4);
         $('[data-original-title = "Status"][data-fieldname = "document_status"]').hide();
     },
     refresh:function(){
