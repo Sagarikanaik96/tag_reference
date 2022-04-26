@@ -1042,24 +1042,27 @@ def job_site_add(doc,method):
 
 @frappe.whitelist()
 def job_title_add(doc,method):
-    new_title=frappe.get_doc('Company',doc.company)
-    new_title.append('job_titles', {
-        'industry_type': doc.industry,
-        'job_titles':doc.name,
-        'wages':doc.rate,
-        'description':doc.descriptions
+    try:
+        if doc.company:
+            new_title=frappe.get_doc('Company',doc.company)
+            new_title.append('job_titles', {
+                'industry_type': doc.industry,
+                'job_titles':doc.name,
+                'wages':doc.rate,
+                'description':doc.descriptions
+            })
+            for i in new_title.industry_type:
+                if(i.industry_type == doc.industry):
+                    new_title.save(ignore_permissions=True)
+                    break
+            else:
+                new_title.append('industry_type',{
+                    'industry_type':doc.industry
+                })
+                new_title.save(ignore_permissions=True)
+    except Exception as e:
+       frappe.error_log(e,'Job Title Add Error')
 
-    })
-    
-    for i in new_title.industry_type:
-        if(i.industry_type == doc.industry):
-            new_title.save(ignore_permissions=True)
-            break
-    else:
-        new_title.append('industry_type',{
-            'industry_type':doc.industry
-        })
-        new_title.save(ignore_permissions=True)
 @frappe.whitelist()
 def job_industry_type_add(company,user_industry):  
     new_industry=frappe.get_doc('Company',company)
