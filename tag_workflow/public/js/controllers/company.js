@@ -28,10 +28,6 @@ frappe.ui.form.on("Company", {
 			cancel_company(frm);
 		}
 
-		$(document).on('input', '[data-fieldname="phone_no"]', function(){
-			this.value = this.value?.replace(/\D/g, "");
-		});
-
 		$(document).on('input', '[data-fieldname="zip"]', function(){
 			this.value = this.value?.replace(/\D/g, "");
 		});
@@ -48,6 +44,9 @@ frappe.ui.form.on("Company", {
 				$(this).attr('title', file);
 			});
 		}
+		$('[data-fieldname = "phone_no"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
+		$('[data-fieldname = "accounts_payable_phone_number"]>div>div>div>input').attr("placeholder", 'Example: +XX XXX-XXX-XXXX');
+		$('[data-fieldname = "accounts_receivable_phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 	},
 	update_employee_records: function (frm){
 		update_existing_employees(frm)
@@ -200,9 +199,9 @@ frappe.ui.form.on("Company", {
 		let receive_email = frm.doc.accounts_receivable_rep_email;
 		let pay_email = frm.doc.accounts_payable_email;
 		validate_email_phone(email,phone_no);
-		let regex = /[\d]/g;
-		if (account_phone_no && (account_phone_no.length < 4 || account_phone_no.length > 15) && regex.test(account_phone_no) === true){
-			frappe.msgprint({message: __('Accounts Receivable Phone Number should be between 4 to 15 characters and contain only digits.'), indicator: 'red'});
+		let isValid = intlTelInputUtils.isValidNumber(account_phone_no);
+		if (account_phone_no && !isValid){
+			frappe.msgprint({message: __("Invalid Accounts Receivable Phone Number!"), indicator: "red"});
 			frappe.validated = false;
 		}
 		
@@ -386,15 +385,16 @@ function update_company_fields(){
 function validate_phone_and_zip(frm){
 	let phone = frm.doc.phone_no || '';
 	let zip = frm.doc.zip;
+	let isValid = intlTelInputUtils.isValidNumber(phone);
 	let is_valid = 1;
-	if(phone && (phone.length < 4 || phone.length > 15)){
+	if(phone && !isValid){
 		is_valid = 0;
-		frappe.msgprint({message: __("Company Phone Number should be between 4 to 15 characters."), title: __("Phone Number"), indicator: "red",});
+		frappe.msgprint({message: __("Invalid Company Phone Number!"), indicator: "red"});
 	}
 
 	if(zip && zip.length != 5 && !isNaN(zip)){
 		is_valid = 0;
-		frappe.msgprint({message: __("Enter valid zip"), title: __("ZIP"), indicator: "red",});
+		frappe.msgprint({message: __("Enter a valid zip."), indicator: "red",});
 	}
 
 	if(is_valid == 0){
@@ -410,7 +410,7 @@ function make_jazzhr_request(frm){
 			args: {api_key: frm.doc.jazzhr_api_key, company: frm.doc.name, action: 1},
 			freeze: true,
 			freeze_message: "<p><b>Fetching records from JazzHR...</b></p>",
-			callback: function(r){
+			callback: function(){
 				frappe.msgprint('Employees are fetched in the background. You can continue using the application');
 			}
 		});
@@ -502,10 +502,9 @@ function validate_email_phone(email,phone_no){
 		frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'});
 		frappe.validated = false;
 	}
-
-	let regex = /[\d]/g;
-	if(phone_no && (phone_no.length < 4 || phone_no.length > 15) && regex.test(phone_no)){
-		frappe.msgprint({message: __('Accounts Payable Phone Number should be between 4 to 15 characters and contain only digits.'), indicator: 'red'});
+	let isValid = intlTelInputUtils.isValidNumber(phone_no);
+	if(phone_no && !isValid){
+		frappe.msgprint({message: __("Invalid Accounts Payable Phone Number!"), indicator: "red"});
 		frappe.validated = false;
 	}
 }

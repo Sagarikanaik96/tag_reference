@@ -40,7 +40,7 @@ frappe.ui.form.on("Lead", {
     set_map(frm);
     hide_fields(frm);
     show_addr(frm);
-
+    $('[data-fieldname = "phone_no"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
   },
   sign:function(frm){
     if(frm.doc.sign){
@@ -71,10 +71,10 @@ frappe.ui.form.on("Lead", {
     let phone = frm.doc.phone_no;
     let email = frm.doc.email_id;
     let zip = frm.doc.zip;
-    let regex = /[\d]/g;
-    if (phone && (phone.length < 4 || phone.length > 15 || isNaN(phone)) && regex.test(phone) === true) {
+    let isValid = intlTelInputUtils.isValidNumber(phone);
+    if (phone && !isValid) {
       frappe.msgprint({
-        message: __("Phone Number should be between 4 to 15 characters and contain only digits."),
+        message: __("Invalid Phone Number!"),
         indicator: "red",
       });
       frappe.validated = false;

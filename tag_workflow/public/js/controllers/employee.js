@@ -1,8 +1,5 @@
 frappe.ui.form.on("Employee", {
 	refresh: function(frm){
-		$(document).on('input', '[data-fieldname="contact_number"]', function(){
-			this.value = this.value?.replace(/\D/g, "");
-		});
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
@@ -161,7 +158,7 @@ frappe.ui.form.on("Employee", {
 			});
 		}
 		$('[data-fieldname= "ssn"]').attr('title', '');
-
+		$('[data-fieldname = "contact_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 	},
 
 
@@ -194,8 +191,10 @@ frappe.ui.form.on("Employee", {
 	},
 
 	validate:function(frm){
-		if (frm.doc.contact_number && (frm.doc.contact_number.toString().length < 4 || frm.doc.contact_number.toString().length > 15)) {
-			frappe.msgprint(__("Contact Number should be between 4 to 15 characters."));
+		let contact_number = frm.doc.contact_number;
+		let isValid = intlTelInputUtils.isValidNumber(contact_number);
+		if (contact_number && !isValid) {
+			frappe.msgprint(__("Invalid Contact Number!"));
 			frappe.validated = false;
 		}
 

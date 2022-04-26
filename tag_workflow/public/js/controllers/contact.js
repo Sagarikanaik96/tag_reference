@@ -26,7 +26,7 @@ frappe.ui.form.on("Contact", {
 		set_map(frm);
 		hide_fields(frm);
 		show_addr(frm)
-
+		$('[data-fieldname = "phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 	},
 	onload: function (frm) {
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
@@ -71,9 +71,9 @@ frappe.ui.form.on("Contact", {
 			frappe.msgprint({message: __('Not Valid Zip'), indicator: 'red'})
 			is_valid = 0
 		}
-		let regex = /[\d]/g;
-		if (phone && (phone.length < 4 || phone.length > 15 || isNaN(phone)) && regex.test(phone) === true){
-			frappe.msgprint({message: __('Phone Number should be between 4 to 15 characters and contain only digits.'), indicator: 'red'})
+		let isValid = intlTelInputUtils.isValidNumber(phone);
+		if (phone && !isValid){
+			frappe.msgprint({message: __('Invalid Phone Number!'), indicator: 'red'})
 			is_valid = 0
 		}
 		if (is_valid == 0){

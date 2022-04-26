@@ -180,9 +180,8 @@ frappe.ui.form.on("Job Order", {
 
 	    	localStorage.setItem("order", frm.doc.name);
 	    }
+		$('[data-fieldname = "phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 		set_exc_industry_company(frm)
-
-
 	},
 
 	select_job: function(frm) {
@@ -408,10 +407,10 @@ frappe.ui.form.on("Job Order", {
 		}
 
 		let phone = frm.doc.phone_number;
-		let regex = /[\d]/g;
-		if (phone && (phone.length < 4 || phone.length > 15 || isNaN(phone)) && regex.test(phone) === true) {
+		let isValid = intlTelInputUtils.isValidNumber(phone);
+		if (phone && !isValid) {
 			frappe.msgprint({
-				message: __("Phone Number should be between 4 to 15 characters and contain only digits."),
+				message: __("Invalid Phone Number!"),
 				indicator: "red",
 			});
 			frappe.validated = false;
