@@ -113,7 +113,6 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
                 where `distance` < {7} order by `distance` asc
                 """.format(emp_company, job_category, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance])
         emp = frappe.db.sql(sql)
-        #result = check_distance(emp, distance, job_location)
         return emp
     except Exception as e:
         frappe.msgprint(e)
