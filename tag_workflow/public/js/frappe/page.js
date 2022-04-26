@@ -165,7 +165,8 @@ frappe.ui.Page = Class.extend({
 		}
 
 		if(window.location.pathname == '/app/item'){
-			this.item_filter = $(`
+			if(frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type=='Exclusive Hiring' || frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+				this.item_filter = $(`
 				<div class="page-form row" id="item_filter">
 					<div class="filter-selector">
 						<button class="btn btn-default btn-sm filter-button" id='filter_selected_data';">
@@ -175,7 +176,8 @@ frappe.ui.Page = Class.extend({
 							<span class="button-label hidden-xs">All Job Titles<span></span></span>
 						</button>
 					</div>
-				</div>`).prependTo(this.main);
+				</div>`).prependTo(this.main);	
+			}
 		}
 		this.page_form = $('<div class="page-form row hide"></div>').prependTo(this.main);
 		this.inner_toolbar = this.custom_actions;
