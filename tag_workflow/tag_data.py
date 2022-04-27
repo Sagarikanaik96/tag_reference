@@ -1074,3 +1074,37 @@ def job_industry_type_add(company,user_industry):
             'industry_type':user_industry
         })
         new_industry.save(ignore_permissions=True)
+@frappe.whitelist()
+def new_activity(activity):
+    if not frappe.db.exists("Activity Type", {"name":activity}):
+        docs=frappe.new_doc('Activity Type')
+        docs.activity_type=activity
+        docs.insert()
+
+@frappe.whitelist()
+def new_job_title_company(job_name,company,industry,rate,description):
+    try:
+        if company:
+            new_title=frappe.get_doc('Company',company)
+            for i in new_title.job_titles:
+                if(i.job_titles == job_name):
+                    break
+            else:
+                new_title.append('job_titles', {
+                    'industry_type': industry,
+                    'job_titles':job_name,
+                    'wages':rate,
+                    'description':description
+                })
+            for i in new_title.industry_type:
+                if(i.industry_type == industry):
+                    new_title.save(ignore_permissions=True)
+                    break
+            else:
+                new_title.append('industry_type',{
+                    'industry_type':industry
+                })
+                new_title.save(ignore_permissions=True)
+    except Exception as e:
+       frappe.error_log(e,'Job Title Add Error')
+

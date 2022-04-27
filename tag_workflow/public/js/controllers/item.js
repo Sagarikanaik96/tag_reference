@@ -13,6 +13,7 @@ frappe.ui.form.on("Item", {
 		cur_frm.clear_custom_buttons();
 		hide_connections(frm);
 		hide_fields();
+		read_only_company_field(frm);
 		$('[data-fieldname="company"]').css("display",'block');
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
@@ -75,6 +76,47 @@ frappe.ui.form.on("Item", {
 			$('[data-fieldname = "company"]').attr('title', '');
 			$('[data-fieldname = "company"]>input').attr('title', '');
 		}
+	},
+	after_save:function(frm){
+		if(frm.doc.name!=frm.doc.job_titless){
+			frappe.call({
+				method:"frappe.rename_doc",
+				args: {
+					doctype: frm.doctype,
+					old: frm.docname,
+					new:cur_frm.doc.job_titless	,
+					merge: 0,
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						$(document).trigger('rename', [frm.doctype, frm.docname,
+							r.message || cur_frm.doc.job_titless]);
+						if(locals[frm.doctype] && locals[frm.doctype][frm.docname])
+							delete locals[frm.doctype][frm.docname];
+					}
+				}
+			});
+			frappe.call({
+				method:'tag_workflow.tag_data.new_activity',
+				args:{
+					'activity':frm.doc.job_titless
+				}
+			})
+		}
+		if(frm.doc.company){
+			frappe.call({
+				method:'tag_workflow.tag_data.new_job_title_company',
+				args:{
+					'job_name':frm.doc.name,
+					'company':frm.doc.company,
+					'industry':frm.doc.industry,
+					'rate':frm.doc.rate,
+					'description':frm.doc.descriptions
+				}
+			})	
+
+		}
+		
 	}
 });
 
@@ -127,6 +169,15 @@ function readonly_fields(frm){
 		let fields = ['industry', 'rate', 'company','job_titless', 'descriptions'];
 		for (let i in fields){
 			frm.set_df_property(fields[i], 'read_only', 1);
+		}
+	}
+}
+
+function read_only_company_field(frm){
+	if(frm.doc.__islocal!=1 && (frappe.boot.tag.tag_user_info.company_type=='TAG' || frappe.session.user == 'Administrator')){
+		if(frm.doc.company){
+			frm.set_df_property('industry', 'read_only', 1);
+			frm.set_df_property('company', 'read_only', 1);
 		}
 	}
 }
