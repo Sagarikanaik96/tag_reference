@@ -399,10 +399,16 @@ input::-webkit-credentials-auto-fill-button {
 
 /* Hiring table */
 [data-route="Workspaces/My Activities"] .sub-menu,
-[data-route=""] .sub-menu {
+[data-route="staff-home"] .sub-menu {
   top: 61px !important;
   z-index: 9 !important;
-  transition: 0.5s ease-in-out;
+  transition: 0.5s ease !important;
+}
+[data-route="staff-home"] #page-staff-home .page-head {
+  display: none;
+}
+[data-route="staff-home"] .home-tab .tab-content {
+  margin-top: 20px;
 }
 #page-Workspaces .page-title .title-area .title-text {
   margin-left: 120px;
