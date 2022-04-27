@@ -20,7 +20,8 @@ frappe.listview_settings["Contract"] = {
             options: [0,1,2],
             placeholder: "Status"
         };
-        listview.page.add_field(df, '.standard-filter-section');
+        let standard_filters_wrapper = listview.page.page_form.find('.standard-filter-section');
+        listview.page.add_field(df, standard_filters_wrapper);
         let doc_filter = document.querySelector('select[data-fieldname = "docstatus"]')
         doc_filter.options.add(new Option(), 0);
         doc_filter.options[1].innerHTML = 'Draft';
