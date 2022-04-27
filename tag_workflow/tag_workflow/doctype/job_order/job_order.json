@@ -13,6 +13,7 @@
   "html_3",
   "related_actions_section",
   "related_details",
+  "assign_employee",
   "messages",
   "timesheets",
   "invoices",
@@ -599,11 +600,16 @@
    "fieldname": "html_3",
    "fieldtype": "HTML",
    "options": "<h3>Your claim has been approved</h3>"
+  },
+  {
+   "fieldname": "assign_employee",
+   "fieldtype": "HTML",
+   "label": "Assign Employee"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-12 02:52:37.154660",
+ "modified": "2022-04-27 04:19:46.603900",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
