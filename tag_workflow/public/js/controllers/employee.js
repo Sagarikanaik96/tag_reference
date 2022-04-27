@@ -3,7 +3,6 @@ frappe.ui.form.on("Employee", {
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
-		get_ssn_value(frm);
 		update_employees_data(frm);
 		trigger_hide();
 		required_field();
@@ -15,12 +14,11 @@ frappe.ui.form.on("Employee", {
 			tag_company(frm);
 		  }
 		employee_delete_button(frm);
-		$('.form-control[data-fieldname="ssn"]')[0].setAttribute("autocomplete", "nope");
 		employee_delete_button(frm);
 		set_map(frm);
 		hide_field(frm);
 		show_addr(frm);
-		$('.form-control[data-fieldname="ssn"]').css('-webkit-text-security', 'disc');
+		$('.form-control[data-fieldname="sssn"]').css('-webkit-text-security', 'disc');
 		$('*[data-fieldname="block_from"]').find('.grid-add-row')[0].addEventListener("click",function(){
 			const li = []
 			frm.doc.block_from.forEach(element=>{
@@ -203,7 +201,9 @@ frappe.ui.form.on("Employee", {
 			frappe.validated = false;
 		}
 		
-		if (frm.doc.ssn && frm.doc.ssn.toString().length != 9) {
+		if (frm.doc.sssn && frm.doc.sssn.toString().length != 9) {
+			frm.set_value("ssn", "");
+			frm.set_value("sssn", "");
 			frappe.msgprint(__("Minimum and Maximum Characters allowed for SSN are 9."));
 			frappe.validated = false;
 		}
@@ -230,8 +230,36 @@ frappe.ui.form.on("Employee", {
 
 	before_save:function (frm) {
 		frm.doc.decrypt_ssn = 0;
+		if(frm.doc.sssn){
+			if(frm.doc.sssn=='•••••••••'){
+				frm.set_value('sssn','•••••••••')
+			}
+			else if(isNaN(parseInt(frm.doc.sssn))){
+				frappe.msgprint(__("Only numbers are allowed in SSN."));
+				frm.set_value("ssn", "");
+				frm.set_value("sssn", "");
+				frm.doc.decrypt_ssn = 0;
+
+				frappe.validated = false
+			}
+			else{
+				frm.set_value('ssn',cur_frm.doc.sssn)
+				frm.set_value('sssn','•••••••••')
+			}
+		}
+		else if (frm.doc.sssn && frm.doc.sssn.toString().length != 9) {
+			frm.set_value("ssn", "");
+			frm.set_value("sssn", "");
+			frappe.msgprint(__("Minimum and Maximum Characters allowed for SSN are 9."));
+			frappe.validated = false;
+		}
+		else{
+			frm.set_value("ssn", "");
+			frm.set_value("sssn", "");
+
+		}
+
 	},
-	
 	setup:function(frm){
 		frm.set_query("company", function() {
 			return {
