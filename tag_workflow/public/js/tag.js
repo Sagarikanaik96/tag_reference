@@ -297,8 +297,8 @@ frappe.search.AwesomeBar.prototype.setup = function(element){
 
 		setTimeout(
 			function(){
-				if(cur_frm){
-					cur_frm.refresh()
+				if(cur_frm || cur_page){
+					location.reload()
 				}
 			}, 
 		500);

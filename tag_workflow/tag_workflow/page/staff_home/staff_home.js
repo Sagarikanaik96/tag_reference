@@ -290,7 +290,7 @@ function redirect_order(name){
 }
 
 function redirect_doc(name){
-	frappe.set_route("app", name);
+	location.href = '/app/'+name
 }
 function filterOrder() {
     var input, filter, o, j, a, i;
