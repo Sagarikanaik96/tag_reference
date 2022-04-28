@@ -92,12 +92,14 @@
   {
    "fieldname": "lat",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Lat",
    "read_only": 1
   },
   {
    "fieldname": "lng",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Lng",
    "read_only": 1
   },
@@ -147,7 +149,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-13 03:05:44.424697",
+ "modified": "2022-04-28 06:03:39.972523",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Site",
