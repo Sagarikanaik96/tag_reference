@@ -1,5 +1,12 @@
+:root {
+  --primary-color: #21b9e4;
+  --white: #ffffff;
+  --primary-hover-color: #0a97bfeb;
+  --label-color: #454f63;
+}
+
 label {
-  color: #454f63 !important;
+  color: var(--label-color) !important;
   font-size: 14px !important;
 }
 .widget.onboarding-widget-box {
@@ -7,14 +14,14 @@ label {
 }
 input[type="checkbox"]:checked {
   background-image: url("data:image/svg+xml, <svg viewBox='0 0 8 7' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M1 4.00001L2.66667 5.80001L7 1.20001' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>"),
-    linear-gradient(180deg, #4ac3f8 -124.51%, #21b9e4 100%);
-  background-color: #21b9e4 !important;
+    linear-gradient(180deg, #4ac3f8 -124.51%, var(--primary-color) 100%);
+  background-color: var(--primary-color) !important;
 }
 input[type="checkbox"]:focus {
   box-shadow: 0 0 0 2px rgb(33 185 228 / 25%) !important;
 }
 input[type="radio"]:checked::before {
-  background-color: #21b9e4 !important;
+  background-color: var(--primary-color) !important;
 }
 .form-control:focus {
   box-shadow: 0 0 0 2px rgb(33 185 228 / 25%);
@@ -57,27 +64,27 @@ li.dropdown.dropdown.dropdown-help.dropdown-mobile {
 }
 
 .btn.btn-primary {
-  background-color: #21b9e4 !important;
-  color: #fff;
+  background-color: var(--primary-color) !important;
+  color: var(--white);
   transition: 0.3s ease-in-out;
 }
 .btn.btn-primary:hover {
-  background-color: #0a97bfeb !important;
-  color: #fff !important;
+  background-color: var(--primary-hover-color) !important;
+  color: var(--white) !important;
 }
 [data-route="Form/Company/new-company-1"] button.btn-default:hover {
-  background-color: #0a97bfeb !important;
-  color: #fff !important;
+  background-color: var(--primary-hover-color) !important;
+  color: var(--white) !important;
 }
 [data-fieldname="get_data_from_jazzhr"] button {
-  background-color: #21b9e4 !important;
-  color: #fff !important;
+  background-color: var(--primary-color) !important;
+  color: var(--white) !important;
   margin-top: 21px;
   margin-right: 15px;
 }
 [data-fieldname="update_employee_records"] button {
-  background-color: #21b9e4 !important;
-  color: #fff !important;
+  background-color: var(--primary-color) !important;
+  color: var(--white) !important;
   margin-top: 21px;
 }
 [data-fieldname="get_data_from_jazzhr"] {
@@ -90,14 +97,14 @@ li.dropdown.dropdown.dropdown-help.dropdown-mobile {
 }
 
 input:hover {
-  border: 1px solid#21B9E4 !important;
+  border: 1px solid var(--primary-color) !important;
 }
 
 input:active {
-  border: 1px solid#21B9E4 !important;
+  border: 1px solid var(--primary-color) !important;
 }
 input:visited {
-  border: 1px solid#21B9E4 !important;
+  border: 1px solid var(--primary-color) !important;
 }
 /* user management */
 #navbar-breadcrumbs {
@@ -116,7 +123,7 @@ input:visited {
 .standard-sidebar-item.selected,
 .desk-sidebar .standard-sidebar-item:hover {
   background-color: #e8f8fc !important;
-  border-left: 2px solid #21b9e4 !important;
+  border-left: 2px solid var(--primary-color) !important;
   border-radius: 0px;
   color: #000000;
   transition: 0.2s ease-in-out;
@@ -124,7 +131,7 @@ input:visited {
 
 [data-page-route="Workspaces"] .layout-main .layout-side-section {
   padding-right: 0px;
-  background: #fff;
+  background: var(--white);
   padding-left: 0;
   min-height: 1px;
   border-radius: var(--border-radius-md);
@@ -144,23 +151,23 @@ input:visited {
 .list-sidebar .sidebar-action a,
 .btn-primary-light,
 .notification-list-body .panel-notifications .full-log-btn {
-  color: #21b9e4 !important;
+  color: var(--primary-color) !important;
 }
 
 .filter-icon.active use {
-  stroke: #21b9e4;
+  stroke: var(--primary-color);
 }
 
 .layout-main-section .frappe-list .list-row {
   padding: 25px 15px 25px 0px;
-  background: #fff;
+  background: var(--white);
   border-radius: 8px;
   margin: 7px 0;
 }
 .form-section .section-head {
   font-size: 18px;
   font-weight: 500;
-  color: #21b9e4 !important;
+  color: var(--primary-color) !important;
 }
 .editable-form .layout-main-section-wrapper .layout-main-section,
 .submitted-form .layout-main-section-wrapper .layout-main-section,
@@ -205,7 +212,7 @@ input:visited {
 /* notification */
 .notifications-list .notification-item-tabs .notifications-category.active {
   font-size: 14px;
-  border-bottom: 2px solid #21b9e4;
+  border-bottom: 2px solid var(--primary-color);
 }
 .notifications-list .notification-item-tabs .notifications-category {
   font-size: 14px;
@@ -319,10 +326,10 @@ input::-webkit-credentials-auto-fill-button {
   font-size: 14px;
 }
 #page-staff_company_list #listdata table tr td button {
-  background: #21b9e4;
+  background: var(--primary-color);
   border-radius: 5px;
   border: none;
-  color: #fff;
+  color: var(--white);
   font-size: 13px;
   padding: 3px 12px;
   margin-top: 15px;
@@ -377,13 +384,13 @@ input::-webkit-credentials-auto-fill-button {
   color: #454f63;
 }
 #page-staff_company_list table tbody tr {
-  background: #fff;
+  background: var(--white);
 }
 #page-staff_company_list table tbody tr td:nth-child(2) {
   font-weight: 500;
 }
 #page-staff_company_list #myInput {
-  border: 1px solid#21B9E4;
+  border: 1px solid var(--primary-color);
   border-radius: 5px;
   padding: 1px 5px;
   max-width: 324px;
@@ -420,7 +427,7 @@ input::-webkit-credentials-auto-fill-button {
   font-size: 13px !important;
 }
 .chat-space .chat-space-container .recipient-message .message-bubble {
-  background: #fff !important;
+  background: var(--white) !important;
   border: 1px solid#ECECF1 !important;
   font-size: 13px !important;
 }
@@ -432,11 +439,11 @@ input::-webkit-credentials-auto-fill-button {
 }
 .chat-space .chat-space-actions .type-message {
   border-radius: 5px !important;
-  background: #fff !important;
+  background: var(--white) !important;
   border: 1px solid#ECECF1 !important;
 }
 .chat-space .chat-space-actions .message-send-button {
-  background: #21b9e4 !important;
+  background: var(--primary-color) !important;
   border-radius: 5px !important;
 }
 .chat-header .chat-profile-info {
@@ -462,7 +469,7 @@ input::-webkit-credentials-auto-fill-button {
 .modal-dialog .file-upload-area div button:nth-child(1) {
   display: block;
   margin: auto;
-  color: #21b9e4;
+  color: var(--primary-color);
   font-size: 14px;
 }
 
@@ -476,7 +483,7 @@ input::-webkit-credentials-auto-fill-button {
   max-width: 900px !important;
 }
 .contract_div h3 {
-  color: #21b9e4;
+  color: var(--primary-color);
   font-weight: 600;
 }
 .contract_div {
@@ -488,7 +495,7 @@ input::-webkit-credentials-auto-fill-button {
   padding-right: 10px;
 }
 [data-route="List/Job Order/List"] .popover-body b {
-  color: #21b9e4;
+  color: var(--primary-color);
   font-weight: 600;
   line-height: 22px;
 }
@@ -551,7 +558,7 @@ input::-webkit-credentials-auto-fill-button {
   width: 100%;
   transition: 0.8s ease-in-out;
   position: absolute;
-  background: #fff;
+  background: var(--white);
   z-index: 999;
 }
 .awesomplete > ul {
@@ -578,7 +585,7 @@ input::-webkit-credentials-auto-fill-button {
   width: 100%;
   border-collapse: separate;
   border-spacing: 7px;
-  background: #fff;
+  background: var(--white);
   border: 1px solid#ECECF1;
   border-radius: 8px;
   padding: 10px;
@@ -640,13 +647,13 @@ input::-webkit-credentials-auto-fill-button {
 
 /* job order Hiring button */
 [data-page-route="List/Job Order/List"] .btn.btn-secondary {
-  background-color: #21b9e4 !important;
-  color: #fff;
+  background-color: var(--primary-color) !important;
+  color: var(--white);
   transition: 0.3s ease-in-out;
 }
 [data-page-route="List/Job Order/List"] .btn.btn-secondary:hover {
-  background-color: #0a97bfeb !important;
-  color: #fff !important;
+  background-color: var(--primary-hover-color) !important;
+  color: var(--white) !important;
 }
 /* New timeline UI */
 .new-timeline {
@@ -659,13 +666,13 @@ input::-webkit-credentials-auto-fill-button {
   background: #7b68ef !important;
 }
 .new-timeline .timeline-badge svg {
-  fill: #fff !important;
+  fill: var(--white) !important;
 }
 .new-timeline .timeline-badge svg.icon-sm {
-  --icon-stroke: #fff;
+  --icon-stroke: var(--white);
 }
 .new-timeline .nav-pills .nav-link.active {
-  background-color: #21b9e4 !important;
+  background-color: var(--primary-color) !important;
 }
 .new-timeline .activity-toggle h4 {
   font-weight: 600;
@@ -773,7 +780,7 @@ input::-webkit-credentials-auto-fill-button {
 }
 [data-route="Form/Add Timesheet/Add Timesheet"] .form-section .form-column h4 {
   font-weight: 500;
-  color: #21b9e4 !important;
+  color: var(--primary-color) !important;
   font-size: 16px;
   margin-bottom: 10px !important;
 }
