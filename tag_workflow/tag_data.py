@@ -1034,11 +1034,15 @@ def hiring_auto_approve(hiring_type,job_order,employee_filled,staffing_org,doc_n
 
 @frappe.whitelist()
 def job_site_add(doc,method):
-    new_site=frappe.get_doc('Company',doc.company)
-    new_site.append('job_site', {
-        'job_site': doc.name
-    })
-    new_site.save(ignore_permissions=True)
+    try:
+        if doc.company:
+            new_site=frappe.get_doc('Company',doc.company)
+            new_site.append('job_site', {
+                'job_site': doc.name
+            })
+            new_site.save(ignore_permissions=True)
+    except Exception as e:
+       frappe.error_log(e,'Job Site Add Error')
 
 @frappe.whitelist()
 def job_title_add(doc,method):
