@@ -131,8 +131,9 @@ scheduler_events={
 override_whitelisted_methods = {
         "frappe.desk.query_report.run": "tag_workflow.utils.whitelisted.run",
         "frappe.desk.desktop.get_desktop_page": "tag_workflow.utils.whitelisted.get_desktop_page",
-        "frappe.desk.reportview.delete_items": "tag_workflow.utils.employee.delete_items"
-}
+        "frappe.desk.reportview.delete_items": "tag_workflow.utils.employee.delete_items",
+        "frappe.desk.form.load.getdoc": "tag_workflow.utils.whitelisted.getdoc1"
+}       
 
 override_doctype_class = {
     "Designation":"tag_workflow.dashboard_data.designation.DesignationOverride",
