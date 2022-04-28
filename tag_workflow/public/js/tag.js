@@ -12,7 +12,7 @@ $(document).bind('toolbar_setup', function() {
 	}
 
 	frappe.ui.toolbar.route_to_company = function() {
-		frappe.set_route('Form', 'Company', frappe.boot.tag.tag_user_info.company);
+		location.href = '/app/company/'+frappe.boot.tag.tag_user_info.company;
 	};
 });
 
