@@ -1,13 +1,4 @@
 frappe.ui.form.on("Item", {
-
-	setup: function (){
-		Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
-			_field.id = "id_mvr_hour";		
-		})
-		
-		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
-		
-	},
 	refresh: function(frm){
 		$('.form-footer').hide();
 		cur_frm.clear_custom_buttons();
@@ -37,8 +28,23 @@ frappe.ui.form.on("Item", {
 				frm.set_value('company', '')
 			}
 		}
+		if(frm.doc.__islocal != 1){
+			Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
+				_field.id = "id_rate";
+			}) 
+		}
+		
+		if(cur_frm.doc.__islocal==1){
+			Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
+				_field.id = "id_mvr_hour";		
+			})
+			
+			$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
+		}
+		
 	},
 	before_save: function(frm){
+		
 		frm.set_value("item_code", frm.doc.job_titless);
 		cur_frm.set_value('item_group','All Item Groups')
 		cur_frm.set_value('stock_uom','Nos')
