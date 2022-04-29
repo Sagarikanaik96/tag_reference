@@ -1,3 +1,4 @@
+frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("Lead", {
   refresh: function (frm) {
     $('[class="btn btn-primary btn-sm primary-action"]').show();
@@ -71,12 +72,8 @@ frappe.ui.form.on("Lead", {
     let phone = frm.doc.phone_no;
     let email = frm.doc.email_id;
     let zip = frm.doc.zip;
-    let isValid = intlTelInputUtils.isValidNumber(phone);
-    if (phone && !isValid) {
-      frappe.msgprint({
-        message: __("Invalid Phone Number!"),
-        indicator: "red",
-      });
+    if(phone && !validate_phone(phone)){
+      frappe.msgprint({message: __("Invalid Phone Number!"),indicator: "red"});
       frappe.validated = false;
     }
     if (
@@ -86,8 +83,8 @@ frappe.ui.form.on("Lead", {
       frappe.msgprint({ message: __("Not A Valid Email"), indicator: "red" });
       frappe.validated = false;
     }
-    if (zip && (zip.length != 5 || isNaN(zip))) {
-      frappe.msgprint({ message: __("Not Valid Zip"), indicator: "red" });
+    if (zip && !validate_zip(zip)) {
+      frappe.msgprint({ message: __("Invalid Zip!"), indicator: "red" });
       frappe.validated = false;
     }
   },
@@ -183,6 +180,15 @@ frappe.ui.form.on("Lead", {
       hide_fields(frm)
     }
   },
+  phone_no: function(frm){
+    let phone = frm.doc.phone_no;
+		if(phone){
+			let phone_new = validate_phone(phone);
+			if(phone_new){
+				frm.set_value('phone_no', phone_new);
+			}
+		}
+  }
 });
 
 /*-------reqd------*/

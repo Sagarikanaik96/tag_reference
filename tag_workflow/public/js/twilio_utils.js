@@ -16403,3 +16403,29 @@
     NOT_A_NUMBER: 4,
   });
 })();
+
+function validate_phone(phone){
+	let isValid = intlTelInputUtils.isValidNumber(phone);
+	if(!isValid){
+		if(!intlTelInputUtils.isValidNumber('+'+phone)){
+			if(!intlTelInputUtils.isValidNumber('+1'+phone)){
+				return 0;
+			}
+      else{
+        return '+1'+phone;
+      }
+		}
+    else{
+      return '+'+phone;
+    }
+	}
+	return phone;
+}
+
+function validate_zip(zip){
+  let regex = /^\w+(\s+\w+)*$/g;
+  if(zip.length < 3 || zip.length > 15 || !regex.test(zip)){
+    return 0;
+  }
+  return 1;
+}

@@ -1,5 +1,6 @@
 // Copyright (c) 2021, SourceFuse and contributors
 // For license information, please see license.txt
+frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("Job Order", {
 	assign_employees: function(frm) {
 		if(frm.doc.to_date < frappe.datetime.now_datetime()) {
@@ -407,12 +408,8 @@ frappe.ui.form.on("Job Order", {
 		}
 
 		let phone = frm.doc.phone_number;
-		let isValid = intlTelInputUtils.isValidNumber(phone);
-		if (phone && !isValid) {
-			frappe.msgprint({
-				message: __("Invalid Phone Number!"),
-				indicator: "red",
-			});
+		if (phone && !validate_phone(phone)) {
+			frappe.msgprint({message: __("Invalid Phone Number!"),indicator: "red"});
 			frappe.validated = false;
 		}
 	},
@@ -458,6 +455,15 @@ frappe.ui.form.on("Job Order", {
 				assign_emp_button(frm);
 			}else{
 				claim_order_button(frm);
+			}
+		}
+	},
+	phone_number: function(frm){
+		let phone = frm.doc.phone_number;
+		if(phone){
+			let phone_new = validate_phone(phone);
+			if(phone_new){
+				frm.set_value('phone_number', phone_new);
 			}
 		}
 	}

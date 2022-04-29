@@ -1,3 +1,4 @@
+frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("Employee", {
 	refresh: function(frm){
 		$('.form-footer').hide();
@@ -190,14 +191,13 @@ frappe.ui.form.on("Employee", {
 
 	validate:function(frm){
 		let contact_number = frm.doc.contact_number;
-		let isValid = intlTelInputUtils.isValidNumber(contact_number);
-		if (contact_number && !isValid) {
-			frappe.msgprint(__("Invalid Contact Number!"));
+		let zip = frm.doc.zip;
+		if(contact_number && !validate_phone(contact_number)){
+			frappe.msgprint({message: __("Invalid Contact Number!"),indicator: "red"});
 			frappe.validated = false;
 		}
-
-		if (frm.doc.zip &&frm.doc.zip.toString().length != 5){
-			frappe.msgprint(__("Minimum and Maximum Characters allowed for Zip are 5."));
+		if (zip && !validate_zip(zip)){
+			frappe.msgprint(__("Invalid Zip!"));
 			frappe.validated = false;
 		}
 		
@@ -306,6 +306,15 @@ frappe.ui.form.on("Employee", {
 			setTimeout(()=>{
 				$('.frappe-control[data-fieldname="map"]').removeClass('hide-control')
 			},1000)
+		}
+	},
+	phone_number: function(frm){
+		let phone = frm.doc.phone_number;
+		if(phone){
+			let phone_new = validate_phone(phone);
+			if(phone_new){
+				frm.set_value('phone_number', phone_new);
+			}
 		}
 	}
 });

@@ -1,3 +1,4 @@
+frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("Job Site", {
 	refresh: function(frm){
 		if(frm.doc.__islocal){
@@ -7,8 +8,9 @@ frappe.ui.form.on("Job Site", {
 		$('.custom-actions.hidden-xs.hidden-md').show();
 	},
 	validate:function(frm){
-		if (frm.doc.zip && frm.doc.zip.toString().length != 5){
-			frappe.msgprint(__("Minimum and Maximum Characters allowed for Zip are 5"));
+		let zip=frm.doc.zip;
+		if (zip && !validate_zip(zip)){
+			frappe.msgprint({message: __('Invalid Zip!'), indicator: 'red'})
 			frappe.validated = false;
 		}
 	}

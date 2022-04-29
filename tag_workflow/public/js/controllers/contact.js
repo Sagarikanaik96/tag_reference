@@ -1,3 +1,4 @@
+frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("Contact", {
 	refresh: function(frm){
 		lead_fields(frm);
@@ -59,20 +60,19 @@ frappe.ui.form.on("Contact", {
 			frappe.msgprint({message: __('Name length exceeds'), indicator: 'red'})
 			is_valid = 0
 		}
-		if (company && company.lenght > 120){
-			frappe.msgprint({message: __('Company lenght exceeds'), indicator: 'red'})
+		if (company && company.length > 120){
+			frappe.msgprint({message: __('Company length exceeds'), indicator: 'red'})
 			is_valid = 0
 		}
 		if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
 			frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
 			is_valid = 0
 		}
-		if (zip && (zip.length !=5 || isNaN(zip))){
-			frappe.msgprint({message: __('Not Valid Zip'), indicator: 'red'})
+		if (zip && !validate_zip(zip)){
+			frappe.msgprint({message: __('Invalid Zip!'), indicator: 'red'})
 			is_valid = 0
 		}
-		let isValid = intlTelInputUtils.isValidNumber(phone);
-		if (phone && !isValid){
+		if (phone && !validate_phone(phone)){
 			frappe.msgprint({message: __('Invalid Phone Number!'), indicator: 'red'})
 			is_valid = 0
 		}
@@ -114,6 +114,15 @@ frappe.ui.form.on("Contact", {
 			hide_fields(frm);
 		}
 	},
+	phone_number: function(frm){
+		let phone = frm.doc.phone_number;
+		if(phone){
+			let phone_new = validate_phone(phone);
+			if(phone_new){
+				frm.set_value('phone_number', phone_new);
+			}
+		}
+	}
 });
 
 

@@ -1,3 +1,4 @@
+frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("User", {
 	refresh: function(frm){
 		$('.form-footer').hide();
@@ -155,10 +156,18 @@ frappe.ui.form.on("User", {
 	},
 	validate:function(frm){
 		let phone = frm.doc.mobile_no;
-		let isValid = intlTelInputUtils.isValidNumber(phone);
-		if (phone && !isValid){
-			frappe.msgprint({message: __('Invalid Mobile Number!'), indicator: 'red'})
-			frappe.validated = false
+		if (phone && !validate_phone){
+			frappe.msgprint({message: __("Invalid Mobile Number!"),indicator: "red"});
+			frappe.validated = false;
+		}
+	},
+	mobile_no: function(frm){
+		let phone = frm.doc.mobile_no;
+		if(phone){
+			let phone_new = validate_phone(phone);
+			if(phone_new){
+				frm.set_value('mobile_no', phone_new);
+			}
 		}
 	}
 });

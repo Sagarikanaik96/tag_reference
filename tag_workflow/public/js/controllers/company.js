@@ -1,3 +1,4 @@
+frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("Company", {
 	refresh: function (frm){
 		if(cur_frm.doc.__islocal==1 || cur_frm.doc.organization_type==='Hiring' || cur_frm.doc.organization_type=== 'Exclusive Hiring' || frappe.boot.tag.tag_user_info.company_type==="Exclusive Hiring"){
@@ -6,7 +7,6 @@ frappe.ui.form.on("Company", {
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
-
 		cur_frm.clear_custom_buttons();
 		init_values();
 		hide_connections(frm);
@@ -20,20 +20,15 @@ frappe.ui.form.on("Company", {
 		if(frappe.user.has_role("Tag Admin")){
 			frm.set_df_property("employees", "read_only", 1);
 		}
-
 		if(!frappe.user.has_role("Tag Admin")){
 			frm.set_df_property("make_organization_inactive", "hidden", 1);
 			frm.set_df_property("make_organization_inactive", "read_only", 1);
 		}
-
 		if(frm.doc.__islocal == 1){
 			$('div[data-fieldname="average_rating"]').css("display", "none");
 			cancel_company(frm);
 		}
 
-		$(document).on('input', '[data-fieldname="zip"]', function(){
-			this.value = this.value?.replace(/\D/g, "");
-		});
 		if(frm.doc.organization_type=='Staffing'){
 			frm.set_df_property('job_title', 'hidden', 1);
 		}
@@ -61,8 +56,8 @@ frappe.ui.form.on("Company", {
 	setup: function (frm){
 		Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
 			if(_field.title!=="total_monthly_sales"){
-			_field.id = "id_mvr_hour"	
-		}		
+				_field.id = "id_mvr_hour"
+			}
 		})
 		
 		$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
@@ -75,7 +70,6 @@ frappe.ui.form.on("Company", {
 					filters: [[ORG, "name", "in", ["TAG","Hiring","Staffing","Exclusive Hiring"]]],
 				};
 			}
-
 			if(frappe.user_roles.includes("Tag Admin")){
 				return {
 					filters: [[ORG, "name", "!=", "TAG"]],
@@ -91,7 +85,6 @@ frappe.ui.form.on("Company", {
 			}
 		});
 		$('[data-fieldname="parent_staffing"]').click(function(){ return false})
-
 		$('[data-fieldname="parent_staffing"]').click(function(){
 			if(cur_frm.doc.__islocal !==1){
 				var cust= $(this).text()
@@ -102,7 +95,6 @@ frappe.ui.form.on("Company", {
 				window.location.href= "/app/dynamic_page"
 			}
 		})
-
 		frm.set_query("parent_staffing", function () {
 			return {
 				filters: [
@@ -144,7 +136,6 @@ frappe.ui.form.on("Company", {
 			}
 		}
 	},
-
 	organization_type:function(frm){
 		if(frm.doc.organization_type && frm.doc.organization_type=='Exclusive Hiring'){
 			org_info(frm);
@@ -186,24 +177,18 @@ frappe.ui.form.on("Company", {
 			cur_frm.set_value("accounts_payable_phone_number", "");
 		}
 	},
-
 	after_save: function(frm){
 		frappe.call({
 			method: "tag_workflow.controllers.master_controller.make_update_comp_perm",
 			args: {docname: frm.doc.name},
 		});
 	},
-
 	validate: function (frm){
-		validate_phone_and_zip(frm);
-		let phone_no = frm.doc.accounts_payable_phone_number || "";
+		validate_phone_email_zip(frm);
 		let account_phone_no=frm.doc.accounts_receivable_phone_number || "";
-		let email = frm.doc.email;
 		let receive_email = frm.doc.accounts_receivable_rep_email;
 		let pay_email = frm.doc.accounts_payable_email;
-		validate_email_phone(email,phone_no);
-		let isValid = intlTelInputUtils.isValidNumber(account_phone_no);
-		if (account_phone_no && !isValid){
+		if (account_phone_no && !validate_phone(account_phone_no)){
 			frappe.msgprint({message: __("Invalid Accounts Receivable Phone Number!"), indicator: "red"});
 			frappe.validated = false;
 		}
@@ -212,13 +197,11 @@ frappe.ui.form.on("Company", {
 			frappe.msgprint({message: __('Not A Valid Accounts Receivable Email'), indicator: 'red'});
 			frappe.validated = false;
 		}
-
 		if (pay_email && (pay_email.length > 120 || !frappe.utils.validate_type(pay_email, "email"))){
 			frappe.msgprint({message: __('Not A Valid Accounts Payable Email'), indicator: 'red'});
 			frappe.validated = false;
 		}
 	},
-
 	make_organization_inactive(){
 		frappe.call({
 			method: "tag_workflow.tag_data.disable_user",
@@ -228,7 +211,6 @@ frappe.ui.form.on("Company", {
 			},
 		});
 	},
-
 	click_here: function (frm) {
 		if (frm.doc.organization_type == "Hiring") {
 			frappe.set_route("Form", "Hiring Company Review");
@@ -236,12 +218,10 @@ frappe.ui.form.on("Company", {
 			frappe.set_route("Form", "Company Review");
 		}
 	},
-
 	onload: function (frm) {
 		if(frappe.session.user != 'Administrator'){
 			$('.menu-btn-group').hide();
 		}
-
 		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
 			const li = [];
 			document.querySelectorAll('a[data-doctype="Industry Type"]').forEach(element=>{
@@ -316,11 +296,18 @@ frappe.ui.form.on("Company", {
 					frappe.validated=false
 					break
 				}
-
 			}
 			
-
 		}
+	},
+	phone_no: function(frm){
+		set_field(frm, frm.doc.phone_no, "phone_no");
+	},
+	accounts_receivable_phone_number: function(frm){
+		set_field(frm, frm.doc.accounts_receivable_phone_number, "accounts_receivable_phone_number");
+	},
+	accounts_payable_phone_number: function(frm){
+		set_field(frm, frm.doc.accounts_payable_phone_number, "accounts_payable_phone_number");
 	}
 });
 
@@ -384,22 +371,29 @@ function update_company_fields(){
 	}
 }
 
-/*--------phone and zip validation----------*/
-function validate_phone_and_zip(frm){
+/*--------phone, email and zip validation----------*/
+function validate_phone_email_zip(frm){
 	let phone = frm.doc.phone_no || '';
 	let zip = frm.doc.zip;
-	let isValid = intlTelInputUtils.isValidNumber(phone);
+	let phone_no = frm.doc.accounts_payable_phone_number || "";
+	let email = frm.doc.email;
 	let is_valid = 1;
-	if(phone && !isValid){
+	if(phone && !validate_phone(phone)){
 		is_valid = 0;
 		frappe.msgprint({message: __("Invalid Company Phone Number!"), indicator: "red"});
 	}
-
-	if(zip && zip.length != 5 && !isNaN(zip)){
+	if(zip && !validate_zip(zip)){
 		is_valid = 0;
 		frappe.msgprint({message: __("Enter a valid zip."), indicator: "red",});
 	}
-
+	if(email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
+		is_valid = 0;
+		frappe.msgprint({message: __('Invalid Email!'), indicator: 'red'});
+	}
+	if(phone_no && !validate_phone(phone_no)){
+		is_valid = 0;
+		frappe.msgprint({message: __("Invalid Accounts Payable Phone Number!"), indicator: "red"});
+	}
 	if(is_valid == 0){
 		frappe.validated = false;
 	}
@@ -498,18 +492,6 @@ function org_info(frm){
 			}
 		}
 	});
-}
-
-function validate_email_phone(email,phone_no){
-	if(email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
-		frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'});
-		frappe.validated = false;
-	}
-	let isValid = intlTelInputUtils.isValidNumber(phone_no);
-	if(phone_no && !isValid){
-		frappe.msgprint({message: __("Invalid Accounts Payable Phone Number!"), indicator: "red"});
-		frappe.validated = false;
-	}
 }
 
 function download_document(frm){
@@ -655,4 +637,13 @@ function set_map (frm) {
   }else if((frm.doc.search_on_maps == 0 && frm.doc.enter_manually ==0)||frm.doc.enter_manually ==1){
     frm.set_df_property('map','hidden',1);
   }
+}
+
+function set_field(frm, phone, fieldname){
+	if(phone){
+		let phone_new = validate_phone(phone);
+		if(phone_new){
+			frm.set_value(fieldname, phone_new);
+		}
+	}
 }
