@@ -86,18 +86,9 @@ input::-webkit-credentials-auto-fill-button {
   background-color: #21b9e4 !important;
 }
 .btn-login-area {
-  background: #21b9e4 !important;
-  color: #fff !important;
-  padding: 4px 20px !important;
-  border-radius: 6px;
-  font-size: 14px;
-}
-[data-route="query-report/Orders"] .btn-login-area {
-  background: #21b9e4 !important;
-  color: #fff !important;
-  padding: 4px 20px !important;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 0 !important;
+  color: #21b9e4 !important;
+  font-size: 16px !important;
 }
 
 @media (max-width: 768px) {
