@@ -13,15 +13,14 @@ JAZZHR_RATE_LIMIT_SECONDS = 40
 JAZZHR_MAX_ITR = 1500
 
 @frappe.whitelist()
-def jazzhr_fetch_applicants(api_key, company, action):
+def jazzhr_fetch_applicants(api_key, company):
     try:
-        action = int(action)
-        frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_fetch_applicants_data", queue='default', timeout=1200, api_key=api_key, company=company, action=action)
+        frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_fetch_applicants_data", queue='default', job_name=company, timeout=1200, api_key=api_key, company=company)
     except Exception as e:
         frappe.log_error(e, "JazzHR - jazzhr_fetch_applicants fail long")
 
 #------------JAZZHR applicants----------------------#
-def jazzhr_fetch_applicants_data(api_key, company, action):
+def jazzhr_fetch_applicants_data(api_key, company):
     try:
         redis = frappe.cache()
         page_no, count, fetch_applicants = 1, 0, 1
@@ -45,13 +44,13 @@ def jazzhr_fetch_applicants_data(api_key, company, action):
                 fetch_applicants = 0
 
         #-------------jazzhr applicant data long queue function-------------#
-        jazzhr_applicant_data(api_key, company, action)
+        jazzhr_applicant_data(api_key, company)
     except Exception as e:
         frappe.log_error(e, "JazzHR - jazzhr_fetch_applicants data fail")
 
 
 #---------------long queue------------------#
-def jazzhr_applicant_data(api_key, company, action):
+def jazzhr_applicant_data(api_key, company):
     try:
         key = "jazz_"+str(company)
         redis = frappe.cache()
@@ -60,28 +59,32 @@ def jazzhr_applicant_data(api_key, company, action):
         start = 0
         end = JAZZHR_MAX_ITR
         for i in range(0, rng):
-            frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_fetch_applicant_other_info", queue='long', job_name="JazzHR Long Job - "+str(i), api_key=api_key, company=company, action=action, start=start, end=end)
+            print(i)
+            frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_fetch_applicant_other_info", queue='long', job_name=company, is_async=True, api_key=api_key, company=company, start=start, end=end)
             start += JAZZHR_MAX_ITR
             end += JAZZHR_MAX_ITR
+
+        #--------sql update---------------#
+        frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_make_sql", queue='long', job_name="JazzHR SQL", is_async=True, api_key=api_key, company=company)
     except Exception as e:
         frappe.log_error(e, "JazzHR - start_log_queue")
 
 #--------------applicant info----------------#
-def jazzhr_fetch_applicant_other_info(api_key, company, action, start, end):
+def jazzhr_fetch_applicant_other_info(api_key, company, start, end):
     try:
         redis = frappe.cache()
         key = "jazz_"+str(company)
         count, exce = 1, 1
         for i in range(start, end):
-            applicant_id = redis.hget(key, i)
             try:
+                applicant_id = redis.hget(key, i)
                 # enqueue with increasing time to take care of rate limiting
                 if(count % JAZZHR_RATE_LIMIT_CALLS == 0):
                     time.sleep(60)
-                frappe.enqueue(JAZZHR_APPLICANT_DETAIL, timeout=900, api_key=api_key, applicant_id=applicant_id, company=company, action=action)
+                if(applicant_id):
+                    frappe.enqueue(JAZZHR_APPLICANT_DETAIL, job_name=company, is_async=True, timeout=900, api_key=api_key, applicant_id=applicant_id, company=company, action=2)
                 count += 1
                 exce = 1
-                redis.hdel(key, i)
             except Exception as e:
                 frappe.log_error(e, "JazzHR - jazzhr_fetch_applicant_other_info per user")
                 count -= 1
@@ -96,19 +99,11 @@ def jazzhr_fetch_applicant_other_info(api_key, company, action, start, end):
 @frappe.whitelist()
 def jazzhr_fetch_applicant_details(api_key, applicant_id, company, action):
     try:
-        redis = frappe.cache()
         applicant_details_url = JAZZHR_API_URL + applicant_id + JAZZHR_API_KEY_PARAM + api_key
         response = requests.get(applicant_details_url)
         update_redis(applicant_id, company, response)
-
-        # save to DB?
-        if(action == 1):
-            save_emp_to_db(applicant_id, company)
-        elif(action == 2):
+        if action == 1:
             update_emp_to_db(applicant_id, company)
-
-        #delete from redis
-        redis.delete(applicant_id)
     except Exception as e:
         frappe.log_error(e, "JazzHR applicant detail")
 
@@ -182,35 +177,72 @@ def emp_location_data(address_dt):
         return '', '', 0, '', ''
 
 
-#-----------------------------#
-def save_emp_to_db(applicant_id, company):
+#------------sql/-----------------#
+def jazzhr_make_sql(api_key, company):
     try:
-        applicant_key = f"{company}-{applicant_id}"
+        print(api_key)
+        _key = "jazz_"+str(company)
         redis = frappe.cache()
-        if not frappe.db.exists("Employee", {"employee_number": applicant_id, "company": company}):
-            emp = frappe.new_doc("Employee")
-            emp.employee_number = redis.hget(applicant_key, 'employee_number')
-            emp.first_name = redis.hget(applicant_key, 'first_name')
-            emp.last_name = redis.hget(applicant_key, 'last_name')
-            emp.company = redis.hget(applicant_key, 'company')
-            emp.contact_number = redis.hget(applicant_key, 'contact_number')
-            emp.employee_gender = redis.hget(applicant_key, 'employee_gender')
-            emp.military_veteran = redis.hget(applicant_key, 'military_veteran')
-            emp.street_address = redis.hget(applicant_key, 'street_address')
-            emp.email = redis.hget(applicant_key, 'email')
-            emp.city = redis.hget(applicant_key, 'city')
-            emp.state = redis.hget(applicant_key, 'state')
-            emp.zip = redis.hget(applicant_key, 'zip')
-            emp.lat = redis.hget(applicant_key, 'lat')
-            emp.lng = redis.hget(applicant_key, 'lng')
-            emp.save(ignore_permissions=True)
+        emp_last_number, count = 0, 0
+
+        emp_count = frappe.db.sql(""" select * from `tabSeries` where name = "HR-EMP-" """, as_dict=1)
+        if(emp_count):
+            emp_last_number = emp_count[0]['current'] + 1
+
+        sql = 'insert into `tabEmployee` (name, employee_number, employee_name, first_name, last_name, company, contact_number, employee_gender, military_veteran, street_address, email, city, state, zip, lat, lng, naming_series, lft, rgt, creation) values '
+
+        records = redis.hgetall(_key)
+        for r in records:
+            key = redis.hget("jazz_"+ company, r.decode("utf-8"))
+            applicant_id = company+"-"+key
+            data = get_frm_redis_cache(applicant_id)
+
+            if any(data):
+                emp_name = ["HR-EMP-"+str(emp_last_number)]
+                sql += str(tuple(emp_name + data + ["HR-EMP-", emp_last_number, emp_last_number+1, frappe.utils.now()])) + ","
+                emp_last_number += 1
+                count += 1
+
+            redis.hdel(_key, r.decode("utf-8"))
+        if count > 0:
+            frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-EMP-" """, emp_last_number)
+            frappe.db.sql(sql[0:-1])
+            frappe.db.commit()
     except Exception as e:
-        #frappe.msgprint('Some Error Occured')
-        frappe.log_error(e, "JazzHR emp save")
+        frappe.db.rollback()
+        frappe.log_error(e, "JazzHR sql query")
+
+
+def get_frm_redis_cache(applicant_id):
+    try:
+        redis = frappe.cache()
+
+        if(frappe.cache().hgetall(applicant_id)):
+            employee_number = redis.hget(applicant_id, 'employee_number')
+            first_name = redis.hget(applicant_id, 'first_name')
+            last_name = redis.hget(applicant_id, 'last_name')
+            company = redis.hget(applicant_id, 'company')
+            employee_name = first_name + " " + last_name
+            contact_number = redis.hget(applicant_id, 'contact_number')
+            employee_gender = redis.hget(applicant_id, 'employee_gender')
+            military_veteran = redis.hget(applicant_id, 'military_veteran')
+            street_address = redis.hget(applicant_id, 'street_address')
+            email = redis.hget(applicant_id, 'email')
+            city = redis.hget(applicant_id, 'city')
+            state = redis.hget(applicant_id, 'state')
+            zip_code = redis.hget(applicant_id, 'zip')
+            lat = redis.hget(applicant_id, 'lat')
+            lng = redis.hget(applicant_id, 'lng')
+            return [employee_number, employee_name, first_name, last_name, company, contact_number, employee_gender, military_veteran, street_address, email, city, state, zip_code, lat, lng]
+        else:
+            return []
+    except Exception as e:
+        frappe.log_error(e, "JazzHR data from redis")
+        return []
 
 #--------------------------update emp records------------------#
 @frappe.whitelist()
-def jazzhr_update_applicants(api_key, company, action):
+def jazzhr_update_applicants(api_key, company):
     try:
         emp_list = frappe.db.sql(""" select name, employee_number from `tabEmployee` where company = %s and employee_number IS NOT NULL and (first_name IN(NULL, "undefined", "None", "") or last_name IN(NULL, "unavailable", "None", "") or employee_gender IN(NULL, "undefined", "None", "") or contact_number IN(NULL, "undefined", "None", "") or employee_gender IN(NULL, "undefined", "None", "") or street_address IN(NULL, "undefined", "None", "") or email IN(NULL, "undefined", "None", "") or city IN(NULL, "undefined", "None", "") or state IN(NULL, "undefined", "None", "") or zip = 0 or lat IN(NULL, "undefined", "None", "") or lng IN(NULL, "undefined", "None", "")) """,company, as_dict=1)
         #print(len(emp_list), emp_list)
@@ -220,14 +252,14 @@ def jazzhr_update_applicants(api_key, company, action):
             try:
                 if(count % JAZZHR_RATE_LIMIT_CALLS == 0):
                     time.sleep(JAZZHR_RATE_LIMIT_SECONDS)
-                frappe.enqueue(JAZZHR_APPLICANT_DETAIL, api_key=api_key,applicant_id=e['employee_number'],company=company,action=int(action))
+                frappe.enqueue(JAZZHR_APPLICANT_DETAIL, job_name=company, is_async=True, api_key=api_key, applicant_id=e['employee_number'], company=company, action=1)
                 count += 1
                 exce = 1
             except Exception as e:
                 frappe.log_error(e, "JazzHR emp applicant recall")
                 exce += 1
                 count -= 1
-                if(exce <= 5):
+                if(exce <= 3):
                     continue
     except Exception as e:
         frappe.log_error(e, "JazzHR emp fetching")
@@ -240,7 +272,7 @@ def update_emp_to_db(applicant_id, company):
         emp = frappe.get_doc("Employee", {"employee_number": applicant_id, "company": company})
         for f in ["first_name", "last_name", "contact_number", "employee_gender", "street_address", "email", "city", "state", "zip", "lat", "lng"]:
             if(getattr(emp, f) in [None, "undefined", "None", ""]):
-                frappe.db.set_value("Employee", emp.name, f, redis.hget(applicant_key, f))
+                frappe.db.sql(""" update `tabEmployee` set %s = %s where name = %s """,(f, redis.hget(applicant_key, f), emp.name))
         frappe.db.commit()
         redis.delete(applicant_id)
     except Exception as e:
@@ -253,8 +285,29 @@ def update_single_employee(employee_number, company):
     try:
         api_key = frappe.db.get_value("Company", company, "jazzhr_api_key") or ""
         if(api_key):
-            frappe.enqueue(JAZZHR_APPLICANT_DETAIL, api_key=api_key, applicant_id=employee_number, company=company, action=2)
+            frappe.enqueue(JAZZHR_APPLICANT_DETAIL, job_name=company, is_async=True, api_key=api_key, applicant_id=employee_number, company=company, action=1)
         else:
             frappe.msgprint(_("JazzHR api key not found in company<b>({0})</b>.").format(company))
     except Exception as e:
         frappe.log_error(e, "JazzHR emp update single employee")
+
+
+
+
+
+#-----------------------------------------#
+@frappe.whitelist()
+def button_disabled(company):
+    try:
+        from rq import Queue, Worker
+        from frappe.utils.background_jobs import get_redis_conn
+        conn = get_redis_conn()
+        workers = Worker.all(conn)
+        for worker in workers:
+            job = worker.get_current_job()
+            if job and job.kwargs.get('job_name') == company:
+                    return 1
+        return 0
+    except Exception as e:
+        return 0
+        frappe.msgprint(e)

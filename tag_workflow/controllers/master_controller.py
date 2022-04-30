@@ -87,10 +87,10 @@ def make_update_comp_perm(docname):
         doc = frappe.get_doc(COM, docname)
         if doc.organization_type == "Exclusive Hiring":
             user_list = get_user_list(doc.parent_staffing)
-            enqueue("tag_workflow.controllers.master_controller.update_exclusive_perm", user_list=user_list, company=doc.name)
+            enqueue("tag_workflow.controllers.master_controller.update_exclusive_perm", now=True, user_list=user_list, company=doc.name)
         elif doc.organization_type != "Staffing":
             user_list = get_user_list()
-            enqueue("tag_workflow.controllers.master_controller.update_job_order_permission", user_list=user_list, company=doc.name)
+            enqueue("tag_workflow.controllers.master_controller.update_job_order_permission", now=True, user_list=user_list, company=doc.name)
         update_user_info(doc.name, doc.make_organization_inactive)
     except Exception as e:
         frappe.log_error(e, "Quotation and Job Order Permission")
@@ -196,8 +196,8 @@ def check_employee(name, first_name, company, last_name=None, gender=None, date_
 
         if(organization_type != "TAG"):
             make_employee_permission(name, company)
-            enqueue("tag_workflow.controllers.master_controller.user_exclusive_perm", user=name, company=company, organization_type=None)
-            enqueue("tag_workflow.utils.trigger_session.share_company_with_user", users=users)
+            enqueue("tag_workflow.controllers.master_controller.user_exclusive_perm", now=True, user=name, company=company, organization_type=None)
+            enqueue("tag_workflow.utils.trigger_session.share_company_with_user", now=True, users=users)
         elif(organization_type == "TAG"):
             remove_tag_permission(name, emp.name, company)
     except Exception as e:

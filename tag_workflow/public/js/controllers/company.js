@@ -27,6 +27,8 @@ frappe.ui.form.on("Company", {
 		if(frm.doc.__islocal == 1){
 			$('div[data-fieldname="average_rating"]').css("display", "none");
 			cancel_company(frm);
+		}else{
+			make_button_disable(frm);
 		}
 
 		if(frm.doc.organization_type=='Staffing'){
@@ -408,7 +410,9 @@ function make_jazzhr_request(frm){
 			freeze: true,
 			freeze_message: "<p><b>Fetching records from JazzHR...</b></p>",
 			callback: function(){
-				frappe.msgprint('Employees are fetched in the background. You can continue using the application');
+				frappe.msgprint('Employees are being added in the background. You may continue using the application');
+				$('[data-fieldname="get_data_from_jazzhr"]')[1].disabled = 1;
+				$('[data-fieldname="update_employee_records"]')[1].disabled = 1;
 			}
 		});
 	}else{
@@ -587,16 +591,13 @@ function show_fields(frm){
 
 function update_existing_employees(frm){
 	if(frm.doc.jazzhr_api_key){
+		$('[data-fieldname="get_data_from_jazzhr"]')[1].disabled = 1;
+		$('[data-fieldname="update_employee_records"]')[1].disabled = 1;
+		frappe.msgprint('Employees are being updated in the background. You may continue using the application');
+
 		frappe.call({
 			method: "tag_workflow.utils.jazz_integration.jazzhr_update_applicants",
-			args: { api_key: frm.doc.jazzhr_api_key, company: frm.doc.name, action: 2 },
-			freeze: true,
-			freeze_message: "<p><b>Updating Employees Record</b></p>",
-			callback: function (r) {
-				if(r){
-					frappe.msgprint('Employees Updation are done in the background . You can continue using the application')
-				}
-			},
+			args: {api_key: frm.doc.jazzhr_api_key, company: frm.doc.name},
 		});
 	}else{
 		cur_frm.scroll_to_field("jazzhr_api_key");
@@ -646,4 +647,18 @@ function set_field(frm, phone, fieldname){
 			frm.set_value(fieldname, phone_new);
 		}
 	}
+}
+
+/*-----------------------------------*/
+function make_button_disable(frm){
+        frappe.call({
+                method: "tag_workflow.utils.jazz_integration.button_disabled",
+                args: {"company": frm.doc.name},
+                callback: function(r){
+                        if(r.message){
+                                $('[data-fieldname="get_data_from_jazzhr"]')[1].disabled = 1;
+                                $('[data-fieldname="update_employee_records"]')[1].disabled = 1;
+                        }
+                }
+        });
 }
