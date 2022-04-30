@@ -12,9 +12,6 @@ body {
 .web-footer {
   display: none;
 }
-.btn.btn-primary {
-  background-color: var(--primary-color) !important;
-}
 label {
   color: #2a2e43;
 }
@@ -78,19 +75,29 @@ input::-webkit-credentials-auto-fill-button {
 .navbar-nav .nav-item {
   border-radius: 8px;
 }
-.navbar-light .navbar-nav .nav-link {
-  padding: 0 !important;
-  color: var(--primary-color) !important;
-  font-size: 16px;
-}
-
 .login-content .form-signin .btn-login {
   width: 190px !important;
   font-size: 14px;
 }
-
 #page-temporary-assistance-guru .chat-app #chat-bubble {
   margin-bottom: 35px !important;
+}
+.btn.btn-primary {
+  background-color: #21b9e4 !important;
+}
+.btn-login-area {
+  background: #21b9e4 !important;
+  color: #fff !important;
+  padding: 4px 20px !important;
+  border-radius: 6px;
+  font-size: 14px;
+}
+[data-route="query-report/Orders"] .btn-login-area {
+  background: #21b9e4 !important;
+  color: #fff !important;
+  padding: 4px 20px !important;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
 @media (max-width: 768px) {
