@@ -64,41 +64,43 @@ frappe.ui.form.on('Job Site', {
 		}
 	},
 	validate: function (frm) {
-
-		if (frm.doc.job_site.indexOf('-') > 0){
-			frm.set_value("job_site_name",frm.doc.job_site.split('-')[0]);
-		}else{
-			frm.set_value("job_site_name",frm.doc.job_site);
-		}
-		cur_frm.refresh_field("job_site_name");
-		frappe.call({
-			"method": "tag_workflow.tag_workflow.doctype.job_site.job_site.checkingjobsiteandjob_site_contact",
-			"args": {"job_site_name": frm.doc.job_site_name,
-					"job_site_contact":frm.doc.job_site_contact,
-					},
-			"async": 0,
-			"callback": function(r){
-				if (!(r.message)){
-					frappe.msgprint({
-				        message: __("Job site already exists for this contact"),
-				        title: __("Error"),
-				        indicator: "orange",
-				      });
-					frappe.validated = false
+		if(frm.doc.__islocal==1){	
+			if (frm.doc.job_site.indexOf('-') > 0){
+				frm.set_value("job_site_name",frm.doc.job_site.split('-')[0]);
+			}else{
+				frm.set_value("job_site_name",frm.doc.job_site);
+			}
+			cur_frm.refresh_field("job_site_name");
+			frappe.call({
+				"method": "tag_workflow.tag_workflow.doctype.job_site.job_site.checkingjobsiteandjob_site_contact",
+				"args": {"job_site_name": frm.doc.job_site_name,
+						"job_site_contact":frm.doc.job_site_contact,
+						},
+				"async": 0,
+				"callback": function(r){
+					if (!(r.message)){
+						frappe.msgprint({
+							message: __("Job site already exists for this contact"),
+							title: __("Error"),
+							indicator: "orange",
+						  });
+						frappe.validated = false
+					}
 				}
-			}
-		})
-		frappe.call({
-			"method": "tag_workflow.utils.doctype_method.checkingjobsite",
-			"args": {"job_site": frm.doc.job_site,
-
-					},
-			"async": 0,
-			"callback": function(r){
-				frm.set_value("job_site", r.message);
-				cur_frm.refresh_field("job_site");
-			}
-		});
+			})
+			frappe.call({
+				"method": "tag_workflow.utils.doctype_method.checkingjobsite",
+				"args": {"job_site": frm.doc.job_site,
+	
+						},
+				"async": 0,
+				"callback": function(r){
+					frm.set_value("job_site", r.message);
+					cur_frm.refresh_field("job_site");
+				}
+			});
+		}
+		
 	},
 	job_site_contact: function(frm){
 		if(!frm.doc.job_site_contact){

@@ -92,7 +92,10 @@ def append_number_if_name_exists(doctype, value, fieldname="abbr", separator="-"
     if not filters:
         filters = dict()
     filters.update({fieldname: value})
-    exists = frappe.db.exists(doctype, filters)
+    if doctype=='Job Site':
+        exists=frappe.db.sql('select name from `tabJob Site` where name like "%{0}%"'.format(value))
+    else:
+        exists = frappe.db.exists(doctype, filters)
     regex = "^{value}{separator}\\d+$".format(value=re.escape(value), separator=separator)
     
     if(exists):
@@ -273,7 +276,7 @@ def checkingjobsite(job_site):
     job_site = job_site.strip()
     if not job_site.strip():
         frappe.throw(_(Abbr))
-    sql = "select job_site from `tabJob Site` where job_site = '{0}' ".format(job_site)
+    sql = "select job_site from `tabJob Site` where job_site like '%{0}%' order by name desc ".format(job_site)
     if frappe.db.sql(sql):
         return append_number_if_name_exists("Job Site", job_site, fieldname="job_site", separator="-", filters=None)
     return job_site
