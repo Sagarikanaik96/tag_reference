@@ -13,5 +13,9 @@ frappe.ui.form.on("Job Site", {
 			frappe.msgprint({message: __('Invalid Zip!'), indicator: 'red'})
 			frappe.validated = false;
 		}
+	},
+	zip: function(frm){
+		let zip = frm.doc.zip;
+		frm.set_value('zip', zip?zip.toUpperCase():zip);
 	}
 });

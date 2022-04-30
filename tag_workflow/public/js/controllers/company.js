@@ -310,6 +310,10 @@ frappe.ui.form.on("Company", {
 	},
 	accounts_payable_phone_number: function(frm){
 		set_field(frm, frm.doc.accounts_payable_phone_number, "accounts_payable_phone_number");
+	},
+	zip: function(frm){
+		let zip = frm.doc.zip;
+		frm.set_value('zip', zip?zip.toUpperCase():zip);
 	}
 });
 

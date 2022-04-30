@@ -308,14 +308,18 @@ frappe.ui.form.on("Employee", {
 			},1000)
 		}
 	},
-	phone_number: function(frm){
-		let phone = frm.doc.phone_number;
-		if(phone){
-			let phone_new = validate_phone(phone);
-			if(phone_new){
-				frm.set_value('phone_number', phone_new);
+	contact_number: function(frm){
+		let contact = frm.doc.contact_number;
+		if(contact){
+			let contact_new = validate_phone(contact);
+			if(contact_new){
+				frm.set_value('contact_number', contact_new);
 			}
 		}
+	},
+	zip: function(frm){
+		let zip = frm.doc.zip;
+		frm.set_value('zip', zip?zip.toUpperCase():zip);
 	}
 });
 

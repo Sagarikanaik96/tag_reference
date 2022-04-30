@@ -122,6 +122,10 @@ frappe.ui.form.on("Contact", {
 				frm.set_value('phone_number', phone_new);
 			}
 		}
+	},
+	zip: function(frm){
+		let zip = frm.doc.zip;
+		frm.set_value('zip', zip?zip.toUpperCase():zip);
 	}
 });
 

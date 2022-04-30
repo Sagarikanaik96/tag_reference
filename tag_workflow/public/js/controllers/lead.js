@@ -188,7 +188,11 @@ frappe.ui.form.on("Lead", {
 				frm.set_value('phone_no', phone_new);
 			}
 		}
-  }
+  },
+  zip: function(frm){
+		let zip = frm.doc.zip;
+		frm.set_value('zip', zip?zip.toUpperCase():zip);
+	}
 });
 
 /*-------reqd------*/
