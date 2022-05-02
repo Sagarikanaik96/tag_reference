@@ -559,12 +559,14 @@ function timer_value(frm) {
 			frm.set_df_property(myStringArray[i], "read_only", 1);
 		}
 		frm.set_df_property("time_remaining_for_make_edits", "options", " ");
-	}else{
+	}else if(frm.doc.order_status == "Upcoming"){
 		set_read_fields(frm);
 		time_value(frm);
 		setTimeout(function() {
 			time_value(frm);
 			cur_frm.refresh();
+			cur_frm.trigger("onload_post_render");
+			view_button();
 		}, 60000);
 	}
 }
@@ -850,11 +852,11 @@ function view_button(frm){
 				'method': 'tag_workflow.tag_data.claim_order_company',
 				'args': {
 					'user_name': frappe.session.user,
-					'claimed': frm.doc.claim
+					'claimed': cur_frm.doc.claim
 				},
 				callback: function(r){
 					if(r.message != 'unsuccess'){
-						view_buttons_staffing(frm);
+						view_buttons_staffing(cur_frm);
 					}
 				}
 			});
@@ -1404,14 +1406,18 @@ function staffing_company_remove(frm){
 }  
 
 function claim_order_button(frm) {
-	if (frm.doc.__islocal != 1 && frm.doc.no_of_workers != frm.doc.worker_filled){
-		let exist =false;
-		exist = check_claim_company(frm);
-		if(!exist){
-			frm.add_custom_button(__('Claim Order'), function(){
-			claim_job_order_staffing(frm);
+	if(frm.doc.__islocal != 1 && frm.doc.no_of_workers != frm.doc.worker_filled){
+		frappe.call({
+			"method": "tag_workflow.tag_data.claim_order_company",
+			"args": {"user_name": frappe.session.user, "claimed": cur_frm.doc.staff_org_claimed || ""},
+			"callback": function(r){
+				if(r.message == "unsuccess"){
+					cur_frm.add_custom_button(__('Claim Order'), function(){
+						claim_job_order_staffing(frm);
+					});
+				}
+			}
 		});
-		}
 	}
 }
 
