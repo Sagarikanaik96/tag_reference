@@ -378,7 +378,7 @@ def filter_blocked_employee(doctype, txt, searchfield, page_len, start, filters)
 @frappe.whitelist(allow_guest=False)
 def get_org_site(doctype, txt, searchfield, page_len, start, filters):
     company=filters.get('job_order_company')
-    sql = ''' select job_site from `tabCompany Site` where parent='{0}' '''.format(company)
+    sql = ''' select job_site from `tabCompany Site` where parent="{0}" and job_site like "%%{1}%%" '''.format(company,'%s' % txt)
     return frappe.db.sql(sql)
 
 @frappe.whitelist(allow_guest=False)
