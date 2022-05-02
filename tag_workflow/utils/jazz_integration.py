@@ -191,19 +191,18 @@ def jazzhr_make_sql(api_key, company):
 
         sql = 'insert into `tabEmployee` (name, employee_number, employee_name, first_name, last_name, company, contact_number, employee_gender, military_veteran, street_address, email, city, state, zip, lat, lng, naming_series, lft, rgt, creation) values '
 
-        records = redis.hgetall(_key)
+        records = [redis.hget(_key, e.decode("utf-8")) for e in redis.hgetall(_key)]
         for r in records:
-            key = redis.hget("jazz_"+ company, r.decode("utf-8"))
+            key = redis.hget("jazz_"+ company, r)
             applicant_id = company+"-"+key
             data = get_frm_redis_cache(applicant_id)
-
             if any(data):
                 emp_name = ["HR-EMP-"+str(emp_last_number)]
                 sql += str(tuple(emp_name + data + ["HR-EMP-", emp_last_number, emp_last_number+1, frappe.utils.now()])) + ","
                 emp_last_number += 1
                 count += 1
 
-            redis.hdel(_key, r.decode("utf-8"))
+            redis.hdel(_key, r)
         if count > 0:
             frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-EMP-" """, emp_last_number)
             frappe.db.sql(sql[0:-1])
@@ -272,7 +271,8 @@ def update_emp_to_db(applicant_id, company):
         emp = frappe.get_doc("Employee", {"employee_number": applicant_id, "company": company})
         for f in ["first_name", "last_name", "contact_number", "employee_gender", "street_address", "email", "city", "state", "zip", "lat", "lng"]:
             if(getattr(emp, f) in [None, "undefined", "None", ""]):
-                frappe.db.sql(""" update `tabEmployee` set %s = %s where name = %s """,(f, redis.hget(applicant_key, f), emp.name))
+                sql = "update `tabEmployee` set "+ f + " = '"+ redis.hget(applicant_key, f) +"' where name = '"+ emp.name + "'"
+                frappe.db.sql(sql)
         frappe.db.commit()
         redis.delete(applicant_id)
     except Exception as e:
@@ -303,9 +303,16 @@ def button_disabled(company):
         from frappe.utils.background_jobs import get_redis_conn
         conn = get_redis_conn()
         workers = Worker.all(conn)
+        queues = Queue.all(conn)
+
         for worker in workers:
             job = worker.get_current_job()
             if job and job.kwargs.get('job_name') == company:
+                    return 1
+
+        for queue in queues:
+            for job in queue.jobs:
+                if job and job.kwargs.get('job_name') == company:
                     return 1
         return 0
     except Exception as e:
