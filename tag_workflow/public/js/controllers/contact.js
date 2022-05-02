@@ -53,32 +53,23 @@ frappe.ui.form.on("Contact", {
 		let name = frm.doc.first_name
 		let company = frm.doc.company_name
 		let email = frm.doc.email_address
-		let zip = frm.doc.zip
-		let phone = frm.doc.phone_number
 		let is_valid = 1;
 		if (name && name.length  > 120){
 			frappe.msgprint({message: __('Name length exceeds'), indicator: 'red'})
-			is_valid = 0
+			is_valid = 0;
 		}
 		if (company && company.length > 120){
 			frappe.msgprint({message: __('Company length exceeds'), indicator: 'red'})
-			is_valid = 0
+			is_valid = 0;
 		}
 		if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
 			frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'})
-			is_valid = 0
-		}
-		if (zip && !validate_zip(zip)){
-			frappe.msgprint({message: __('Invalid Zip!'), indicator: 'red'})
-			is_valid = 0
-		}
-		if (phone && !validate_phone(phone)){
-			frappe.msgprint({message: __('Invalid Phone Number!'), indicator: 'red'})
-			is_valid = 0
+			is_valid = 0;
 		}
 		if (is_valid == 0){
-			frappe.validated = false
+			frappe.validated = false;
 		}
+		validate_phone_zip(frm);
 	},
 	validate: function(frm) {
 		if (cur_frm.doc.is_primary == 1){
@@ -117,10 +108,7 @@ frappe.ui.form.on("Contact", {
 	phone_number: function(frm){
 		let phone = frm.doc.phone_number;
 		if(phone){
-			let phone_new = validate_phone(phone);
-			if(phone_new){
-				frm.set_value('phone_number', phone_new);
-			}
+			frm.set_value('phone_number', validate_phone(phone)?validate_phone(phone):phone);
 		}
 	},
 	zip: function(frm){
@@ -212,4 +200,25 @@ function set_map (frm) {
   if((frm.doc.search_on_maps == 0 && frm.doc.enter_manually ==0)||frm.doc.enter_manually ==1 || frm.is_new()){
     frm.set_df_property('map','hidden',1);
   }
+}
+
+function validate_phone_zip(frm){
+	let zip = frm.doc.zip;
+	let phone = frm.doc.phone_number;
+	if (zip){
+		frm.set_value('zip', zip.toUpperCase());
+		if(!validate_zip(zip)){
+			frappe.msgprint({message: __('Invalid Zip!'), indicator: 'red'})
+			frappe.validated = false;
+		}
+	}
+	if (phone){
+		if(!validate_phone(phone)){
+			frappe.msgprint({message: __('Invalid Phone Number!'), indicator: 'red'})
+			frappe.validated = false;
+		}
+		else{
+			frm.set_value('phone_number', validate_phone(phone));
+		}
+	}
 }

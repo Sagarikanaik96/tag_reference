@@ -186,21 +186,30 @@ frappe.ui.form.on("Company", {
 		});
 	},
 	validate: function (frm){
-		validate_phone_email_zip(frm);
+		validate_phone_zip(frm);
 		let account_phone_no=frm.doc.accounts_receivable_phone_number || "";
 		let receive_email = frm.doc.accounts_receivable_rep_email;
 		let pay_email = frm.doc.accounts_payable_email;
-		if (account_phone_no && !validate_phone(account_phone_no)){
-			frappe.msgprint({message: __("Invalid Accounts Receivable Phone Number!"), indicator: "red"});
-			frappe.validated = false;
+		let email = frm.doc.email;
+		if (account_phone_no){
+			if(!validate_phone(account_phone_no)){
+				frappe.msgprint({message: __("Invalid Accounts Receivable Phone Number!"), indicator: "red"});
+				frappe.validated = false;
+			}
+			else{
+				set_field(frm, account_phone_no, "accounts_receivable_phone_number");
+			}
 		}
-		
 		if (receive_email && (receive_email.length > 120 || !frappe.utils.validate_type(receive_email, "email"))){
 			frappe.msgprint({message: __('Not A Valid Accounts Receivable Email'), indicator: 'red'});
 			frappe.validated = false;
 		}
 		if (pay_email && (pay_email.length > 120 || !frappe.utils.validate_type(pay_email, "email"))){
 			frappe.msgprint({message: __('Not A Valid Accounts Payable Email'), indicator: 'red'});
+			frappe.validated = false;
+		}
+		if(email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
+			frappe.msgprint({message: __('Invalid Email!'), indicator: 'red'});
 			frappe.validated = false;
 		}
 	},
@@ -377,28 +386,36 @@ function update_company_fields(){
 	}
 }
 
-/*--------phone, email and zip validation----------*/
-function validate_phone_email_zip(frm){
+/*--------phone and zip validation----------*/
+function validate_phone_zip(frm){
 	let phone = frm.doc.phone_no || '';
 	let zip = frm.doc.zip;
 	let phone_no = frm.doc.accounts_payable_phone_number || "";
-	let email = frm.doc.email;
 	let is_valid = 1;
-	if(phone && !validate_phone(phone)){
-		is_valid = 0;
-		frappe.msgprint({message: __("Invalid Company Phone Number!"), indicator: "red"});
+	if(phone){
+		if(!validate_phone(phone)){
+			is_valid = 0;
+			frappe.msgprint({message: __("Invalid Company Phone Number!"), indicator: "red"});
+		}
+		else{
+			set_field(frm, phone, "phone_no");
+		}
 	}
-	if(zip && !validate_zip(zip)){
-		is_valid = 0;
-		frappe.msgprint({message: __("Enter a valid zip."), indicator: "red",});
+	if(zip){
+		frm.set_value('zip', zip.toUpperCase());
+		if(!validate_zip(zip)){
+			is_valid = 0;
+			frappe.msgprint({message: __("Invalid Zip!"),indicator: "red"});
+		}
 	}
-	if(email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
-		is_valid = 0;
-		frappe.msgprint({message: __('Invalid Email!'), indicator: 'red'});
-	}
-	if(phone_no && !validate_phone(phone_no)){
-		is_valid = 0;
-		frappe.msgprint({message: __("Invalid Accounts Payable Phone Number!"), indicator: "red"});
+	if(phone_no){
+		if(!validate_phone(phone_no)){
+			is_valid = 0;
+			frappe.msgprint({message: __("Invalid Accounts Payable Phone Number!"), indicator: "red"});
+		}
+		else{
+			set_field(frm, phone_no, "accounts_payable_phone_number");
+		}
 	}
 	if(is_valid == 0){
 		frappe.validated = false;
@@ -646,10 +663,7 @@ function set_map (frm) {
 
 function set_field(frm, phone, fieldname){
 	if(phone){
-		let phone_new = validate_phone(phone);
-		if(phone_new){
-			frm.set_value(fieldname, phone_new);
-		}
+		frm.set_value(fieldname, validate_phone(phone)?validate_phone(phone):phone);
 	}
 }
 

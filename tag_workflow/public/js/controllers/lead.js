@@ -72,20 +72,25 @@ frappe.ui.form.on("Lead", {
     let phone = frm.doc.phone_no;
     let email = frm.doc.email_id;
     let zip = frm.doc.zip;
-    if(phone && !validate_phone(phone)){
-      frappe.msgprint({message: __("Invalid Phone Number!"),indicator: "red"});
-      frappe.validated = false;
+    if(phone){
+      if(!validate_phone(phone)){
+        frappe.msgprint({message: __("Invalid Phone Number!"),indicator: "red"});
+        frappe.validated = false;
+      }
+      else{
+        frm.set_value('phone_no', validate_phone(phone));
+      }
     }
-    if (
-      email &&
-      (email.length > 120 || !frappe.utils.validate_type(email, "email"))
-    ) {
+    if (email &&(email.length > 120 || !frappe.utils.validate_type(email, "email"))) {
       frappe.msgprint({ message: __("Not A Valid Email"), indicator: "red" });
       frappe.validated = false;
     }
-    if (zip && !validate_zip(zip)) {
-      frappe.msgprint({ message: __("Invalid Zip!"), indicator: "red" });
-      frappe.validated = false;
+    if (zip){
+      frm.set_value('zip', zip.toUpperCase());
+      if(!validate_zip(zip)){
+        frappe.msgprint({ message: __("Invalid Zip!"), indicator: "red" });
+        frappe.validated = false;
+      }
     }
   },
   setup: function (frm) {
@@ -183,10 +188,7 @@ frappe.ui.form.on("Lead", {
   phone_no: function(frm){
     let phone = frm.doc.phone_no;
 		if(phone){
-			let phone_new = validate_phone(phone);
-			if(phone_new){
-				frm.set_value('phone_no', phone_new);
-			}
+			frm.set_value('phone_no', validate_phone(phone)?validate_phone(phone):phone);
 		}
   },
   zip: function(frm){

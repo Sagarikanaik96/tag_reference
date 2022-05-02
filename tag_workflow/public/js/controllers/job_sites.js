@@ -9,9 +9,12 @@ frappe.ui.form.on("Job Site", {
 	},
 	validate:function(frm){
 		let zip=frm.doc.zip;
-		if (zip && !validate_zip(zip)){
-			frappe.msgprint({message: __('Invalid Zip!'), indicator: 'red'})
-			frappe.validated = false;
+		if (zip){
+			frm.set_value('zip',zip.toUpperCase());
+			if(!validate_zip(zip)){
+				frappe.msgprint({message: __('Invalid Zip!'), indicator: 'red'})
+				frappe.validated = false;
+			}
 		}
 	},
 	zip: function(frm){

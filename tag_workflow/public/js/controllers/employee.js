@@ -190,17 +190,7 @@ frappe.ui.form.on("Employee", {
 	},
 
 	validate:function(frm){
-		let contact_number = frm.doc.contact_number;
-		let zip = frm.doc.zip;
-		if(contact_number && !validate_phone(contact_number)){
-			frappe.msgprint({message: __("Invalid Contact Number!"),indicator: "red"});
-			frappe.validated = false;
-		}
-		if (zip && !validate_zip(zip)){
-			frappe.msgprint(__("Invalid Zip!"));
-			frappe.validated = false;
-		}
-		
+		validate_phone_zip(frm);
 		if (frm.doc.sssn && frm.doc.sssn.toString().length != 9) {
 			frm.set_value("ssn", "");
 			frm.set_value("sssn", "");
@@ -311,10 +301,7 @@ frappe.ui.form.on("Employee", {
 	contact_number: function(frm){
 		let contact = frm.doc.contact_number;
 		if(contact){
-			let contact_new = validate_phone(contact);
-			if(contact_new){
-				frm.set_value('contact_number', contact_new);
-			}
+			frm.set_value('contact_number', validate_phone(contact)?validate_phone(contact):contact);
 		}
 	},
 	zip: function(frm){
@@ -622,5 +609,26 @@ function get_ssn_value(frm){
 		$('[data-fieldname="ssn"]')[1].onfocus = function(){if(localStorage.getItem("tag")){cur_frm.set_value("ssn", localStorage.getItem("tag")); localStorage.setItem("tag", "");}}
 	}else{
 		localStorage.setItem("tag", "");
+	}
+}
+
+function validate_phone_zip(frm){
+	let contact_number = frm.doc.contact_number;
+	let zip = frm.doc.zip;
+	if(contact_number){
+		if(!validate_phone(contact_number)){
+			frappe.msgprint({message: __("Invalid Contact Number!"),indicator: "red"});
+			frappe.validated = false;
+		}
+		else{
+			frm.set_value('contact_number', validate_phone(contact_number));
+		}
+	}
+	if (zip){
+		frm.set_value('zip', zip.toUpperCase());
+		if(!validate_zip(zip)){
+			frappe.msgprint({message: __("Invalid Zip!"),indicator: "red"});
+			frappe.validated = false;
+		}
 	}
 }

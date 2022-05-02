@@ -408,9 +408,14 @@ frappe.ui.form.on("Job Order", {
 		}
 
 		let phone = frm.doc.phone_number;
-		if (phone && !validate_phone(phone)) {
-			frappe.msgprint({message: __("Invalid Phone Number!"),indicator: "red"});
-			frappe.validated = false;
+		if (phone) {
+			if(!validate_phone(phone)){
+				frappe.msgprint({message: __("Invalid Phone Number!"),indicator: "red"});
+				frappe.validated = false;
+			}
+			else{
+				frm.set_value('phone_number', validate_phone(phone));
+			}
 		}
 	},
 
@@ -461,10 +466,7 @@ frappe.ui.form.on("Job Order", {
 	phone_number: function(frm){
 		let phone = frm.doc.phone_number;
 		if(phone){
-			let phone_new = validate_phone(phone);
-			if(phone_new){
-				frm.set_value('phone_number', phone_new);
-			}
+			frm.set_value('phone_number', validate_phone(phone)?validate_phone(phone):phone);
 		}
 	}
 });

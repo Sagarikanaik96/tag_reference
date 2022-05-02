@@ -156,18 +156,20 @@ frappe.ui.form.on("User", {
 	},
 	validate:function(frm){
 		let phone = frm.doc.mobile_no;
-		if (phone && !validate_phone){
-			frappe.msgprint({message: __("Invalid Mobile Number!"),indicator: "red"});
-			frappe.validated = false;
+		if (phone){
+			if(!validate_phone(phone)){
+				frappe.msgprint({message: __("Invalid Mobile Number!"),indicator: "red"});
+				frappe.validated = false;
+			}
+			else{
+				frm.set_value('mobile_no', validate_phone(phone));
+			}
 		}
 	},
 	mobile_no: function(frm){
 		let phone = frm.doc.mobile_no;
 		if(phone){
-			let phone_new = validate_phone(phone);
-			if(phone_new){
-				frm.set_value('mobile_no', phone_new);
-			}
+			frm.set_value('mobile_no', validate_phone(phone)?validate_phone(phone):phone);
 		}
 	}
 });
