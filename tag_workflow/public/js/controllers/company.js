@@ -1,9 +1,6 @@
 frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("Company", {
 	refresh: function (frm){
-		if(cur_frm.doc.__islocal==1 || cur_frm.doc.organization_type==='Hiring' || cur_frm.doc.organization_type=== 'Exclusive Hiring' || frappe.boot.tag.tag_user_info.company_type==="Exclusive Hiring"){
-			$('.card-section')[23].className='row form-section card-section hide-control'
-		}
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
