@@ -894,10 +894,13 @@ input.input-with-feedback.form-control,
 }
 [data-page-route="Item"] #id_mvr_hour:after {
   position: absolute;
-  left: 3px;
+  left: 10px;
   top: 56%;
   font-size: 13px;
   content: "$";
+}
+[data-page-route="Item"] input#id_mvr_hour {
+  padding-left: 20px;
 }
 
 [data-route="query-report/TAG Earnings"]
