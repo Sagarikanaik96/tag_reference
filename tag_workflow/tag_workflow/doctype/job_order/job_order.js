@@ -180,7 +180,9 @@ frappe.ui.form.on("Job Order", {
 	    if (cur_frm.doc.__islocal != 1) {
 
 	    	localStorage.setItem("order", frm.doc.name);
-	    }
+	    } else {
+			frm.set_df_property("time_remaining_for_make_edits", "hidden", 1);
+		}
 		$('[data-fieldname = "phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 		set_exc_industry_company(frm)
 	},
@@ -570,6 +572,8 @@ function timer_value(frm) {
 			cur_frm.trigger("onload_post_render");
 			view_button();
 		}, 60000);
+	} else {
+		frm.set_df_property("time_remaining_for_make_edits", "hidden", 1);
 	}
 }
 
