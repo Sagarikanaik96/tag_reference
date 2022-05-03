@@ -2,6 +2,7 @@ frappe.listview_settings['Employee'] = {
 	hide_name_column: true,
 	filters: [["status","=", "Active"], ["company", "=", frappe.boot.tag.tag_user_info.company],["user_id","is","not set"]],
 	refresh: function(listview){
+		$('[data-fieldname="name"]').hide()
 		$('#navbar-breadcrumbs > li > a').html('Employees');
 		let view = listview;
 		let children = view.$list_head_subject[0].children;
