@@ -189,7 +189,7 @@ function check_update_timesheet(frm){
 		var diff=current_date.getTime()-approved_date.getTime();
 		diff = parseInt(diff/1000);
 
-		if (diff<30){
+		if (diff<25 && (frappe.boot.tag.tag_user_info.company_type=="Hiring" || frappe.boot.tag.tag_user_info.company_type=="Exclusive Hiring")){
 			frappe.call({method: "tag_workflow.utils.timesheet.send_timesheet_for_approval",args: {"employee": frm.doc.employee, "docname": frm.doc.name,'company':frm.doc.company,'job_order':frm.doc.job_order_detail }});
 		}
 
