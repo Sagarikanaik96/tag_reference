@@ -192,9 +192,9 @@ def jazzhr_make_sql(api_key, company):
         sql = 'insert into `tabEmployee` (name, employee_number, employee_name, first_name, last_name, company, contact_number, employee_gender, military_veteran, street_address, email, city, state, zip, lat, lng, naming_series, lft, rgt, creation) values '
 
         records = [redis.hget(_key, e.decode("utf-8")) for e in redis.hgetall(_key)]
+        records = list(dict.fromkeys(records))
         for r in records:
-            key = redis.hget("jazz_"+ company, r)
-            applicant_id = company+"-"+key
+            applicant_id = company+"-"+r
             data = get_frm_redis_cache(applicant_id)
             if any(data):
                 emp_name = ["HR-EMP-"+str(emp_last_number)]

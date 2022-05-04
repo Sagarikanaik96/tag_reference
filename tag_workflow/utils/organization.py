@@ -9,6 +9,10 @@ import json, os
 from pathlib import Path
 from tag_workflow.utils.trigger_session import share_company_with_user
 from tag_workflow.controllers.master_controller import make_update_comp_perm, user_exclusive_perm
+import requests
+
+tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
+GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
 
 #-------setup variables for TAG -------------#
 tag_workflow= "Tag Workflow"
@@ -53,6 +57,7 @@ def setup_data():
         check_if_user_exists()
         update_job_title_list()
         share_company_with_user()
+        update_lat_lng()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -166,7 +171,7 @@ def refactor_permission_data(file_path):
             element.pop('modified', '')
 
         with open(file_path, 'w') as data_file:
-            data = json.dump(data, data_file)
+            json.dump(data, data_file)
     except Exception as e:
         print(e)
         frappe.log_error(e, "refactor_permission_data")
@@ -211,9 +216,10 @@ def check_if_user_exists():
         frappe.log_error(e, "user update")
         print(e)
 
+# job title update
 def update_job_title_list():
     try:
-        print("*------Job Title list--------------------------*\n")
+        print("*------job title list--------------------------*\n")
         job_designation_list=frappe.db.sql('select name,industry_type,price,description,designation_name from `tabDesignation` where organization is null and industry_type is not null;',as_dict=1)      
         if(len(job_designation_list)>0):
             for i in range(len(job_designation_list)):  
@@ -224,3 +230,37 @@ def update_job_title_list():
     except Exception as e:
         frappe.log_error(e, "job title update")
         print(e)
+
+# lat lng update
+def update_lat_lng():
+    try:
+        count = 0
+        print("*------lat lng updtae--------------------------*\n")
+        my_data = frappe.db.sql(""" select name, state, city, zip from `tabEmployee` where lat is null and lng is null and employee_number is null and city is not null and state is not null """,as_dict=1)
+        for d in my_data:
+            address = d.city + ", " + d.state + ", " + (d.zip if d.zip != 0 and d.zip is not None else "")
+            google_location_data_url = GOOGLE_API_URL + address
+            if(count % 80 == 0):
+                time.sleep(30)
+            google_response = requests.get(google_location_data_url)
+            location_data = google_response.json()
+            if(google_response.status_code == 200 and len(location_data)>0 and len(location_data['results'])>0):
+                lat, lng = emp_location_data(location_data)
+                frappe.db.set_value('Employee', d.name, 'lat', lat)
+                frappe.db.set_value('Employee', d.name, 'lng', lng)
+            count += 1
+    except Exception as e:
+        frappe.log_error(e, "longitude latitude error")
+        print(e)
+
+def emp_location_data(address_dt):
+    try:
+        lat, lng = '', ''
+        if(len(address_dt['results']) > 0):
+            location = address_dt['results'][0]['geometry']['location']
+            lat = location['lat']
+            lng = location['lng']
+        return lat, lng
+    except Exception as e:
+        frappe.log_error(e, "Longitude latitude address")
+        return '', ''
