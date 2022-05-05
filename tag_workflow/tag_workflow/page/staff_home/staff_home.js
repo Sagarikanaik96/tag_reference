@@ -86,6 +86,11 @@ frappe.StaffHome = Class.extend({
 		for(let o in order){
 			let from = moment(order[0].from_date)._d.toDateString();
 			let to = moment(order[0].to_date)._d.toDateString();
+			let st1=[]
+			let st= order[o].job_start_time.split(':')
+			let sh= ('0'+st[0]).slice(-2)
+			st1.push(sh, st[1])
+			let st2= st1.join(":")
 			html += `
 				<div class="row bg-white mx-2 my-4  rounded border job" data-job="${order[o].select_job}" style="margin-top: 0px !important;">
 					<div class="d-flex flex-wrap p-3 ">
@@ -125,7 +130,7 @@ frappe.StaffHome = Class.extend({
 								</div>
 								<div>
 									<small class="text-secondary"> Est. Daily Hours / Start Time </small>
-									<p> ${order[o].estimated_hours_per_day} Hrs </p>
+									<p> ${order[o].estimated_hours_per_day} Hrs / ${st2} </p>
 								</div>
 							</div>
 						</div>
