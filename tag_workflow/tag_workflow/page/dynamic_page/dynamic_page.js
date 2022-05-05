@@ -86,7 +86,7 @@ frappe.FaceRecognition = Class.extend({
 								<div id="jobsite">
 									<div id="address"> ${varr}</div>
 								</div>
-								<p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#">  <u> ${count} review </u> </a> </span> </p>
+								<p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#">  <u> ${count} Reviews </u> </a> </span> </p>
 							</div>
 							<div class="col-md-6 col-sm-12 order text-left text-md-right ">
                                 <div>
