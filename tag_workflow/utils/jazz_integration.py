@@ -101,13 +101,11 @@ def jazzhr_fetch_applicant_details(api_key, applicant_id, company, action):
     try:
         applicant_details_url = JAZZHR_API_URL + applicant_id + JAZZHR_API_KEY_PARAM + api_key
         response = requests.get(applicant_details_url)
-        update_redis(applicant_id, company, response)
-        if action == 1:
-            update_emp_to_db(applicant_id, company)
+        update_redis(applicant_id, company, response, action)
     except Exception as e:
         frappe.log_error(e, "JazzHR applicant detail")
 
-def update_redis(applicant_id, company, response):
+def update_redis(applicant_id, company, response, action):
     try:
         applicant_details = response.json()
         applicant_key = f"{company}-{applicant_id}"
@@ -131,6 +129,8 @@ def update_redis(applicant_id, company, response):
 
             # fetch location data from google
             fetch_google_location_data(applicant_details, applicant_key, redis)
+            if action == 1:
+                update_emp_to_db(applicant_id, company)
     except Exception as e:
         frappe.log_error(e, "JazzHR redis update")
 
@@ -250,7 +250,7 @@ def jazzhr_update_applicants(api_key, company):
         for e in emp_list:
             try:
                 if(count % JAZZHR_RATE_LIMIT_CALLS == 0):
-                    time.sleep(JAZZHR_RATE_LIMIT_SECONDS)
+                    time.sleep(120)
                 frappe.enqueue(JAZZHR_APPLICANT_DETAIL, job_name=company, is_async=True, api_key=api_key, applicant_id=e['employee_number'], company=company, action=1)
                 count += 1
                 exce = 1
@@ -270,9 +270,8 @@ def update_emp_to_db(applicant_id, company):
         redis = frappe.cache()
         emp = frappe.get_doc("Employee", {"employee_number": applicant_id, "company": company})
         for f in ["first_name", "last_name", "contact_number", "employee_gender", "street_address", "email", "city", "state", "zip", "lat", "lng"]:
-            if(getattr(emp, f) in [None, "undefined", "None", ""]):
-                sql = "update `tabEmployee` set "+ f + " = '"+ redis.hget(applicant_key, f) +"' where name = '"+ emp.name + "'"
-                frappe.db.sql(sql)
+            if(getattr(emp, f) in [None, "undefined", "None", "", 0]):
+                frappe.db.set_value("Employee", emp.name, f, redis.hget(applicant_key, f))
         frappe.db.commit()
         redis.delete(applicant_id)
     except Exception as e:
