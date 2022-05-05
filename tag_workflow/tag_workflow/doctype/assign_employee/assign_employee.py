@@ -87,14 +87,15 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
                 select name, employee_name,CONCAT(Round(
                 3959 * Acos( Least(1.0,Cos( Radians({4}) )*Cos( Radians(lat) )*Cos( Radians(lng) - Radians ({5}) )+Sin( Radians({4}) )*Sin( Radians(lat)))),1), " miles") as `distance`
                 from `tabEmployee`
-                where company = '{0}' and status = 'Active' and zip!=0
-                and lat!="" and lng!="" 
+                where company = '{0}' and status = 'Active'
+                and (lat!="" or lat is Null) and (lng!="" or lng is Null)
+                and user_id is Null
                 and name NOT IN (select parent from `tabBlocked Employees` where blocked_from = '{1}')
                 and name NOT IN (select parent from `tabDNR`  where dnr = '{1}') 
                 and (name NOT IN (select parent from `tabUnsatisfied Organization` where unsatisfied_organization_name = '{1}')) 
-                and name NOT IN ('{2}') and employee_name like  '%%{3}%%') t
-                where `distance` < {6}
-                order by `distance`*1""".format(emp_company, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance])
+                and name NOT IN ('{2}') and (name like '%%{3}%%' or employee_name like  '%%{3}%%')) t
+                where (`distance` < {6} or `distance` is NULL) order by `distance`*-1
+                """.format(emp_company, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance])
         else:
             sql = """
                 select * from(
@@ -103,13 +104,13 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
                 from `tabEmployee`where company = '{0}'and status = 'Active' and zip!=0
                 and lat!="" and lng!=""
                 and employee_name like '%%{4}%%' 
+                and user_id is Null
                 and name in (select parent from `tabJob Category` where job_category = '{1}'
-                and parent NOT IN ('{3}')) or name in (select name from `tabEmployee` where job_category is null 
-                and company = '{0}' and user_id is null and zip!=0 and name NOT IN ('{3}')) 
+                and parent NOT IN ('{3}')) 
                 and name NOT IN (select parent from `tabBlocked Employees` where blocked_from = '{2}') 
                 and name NOT IN (select parent from `tabDNR`  where dnr = '{2}') 
                 and (name NOT IN (select parent from `tabUnsatisfied Organization` where unsatisfied_organization_name = '{2}'))and name NOT IN ('{3}')
-                and employee_name like '%%{4}%%') t
+                and (name like '%%{4}%%' or employee_name like  '%%{4}%%')) t
                 where `distance` < {7} order by `distance`*1
                 """.format(emp_company, job_category, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance])
         emp = frappe.db.sql(sql)
