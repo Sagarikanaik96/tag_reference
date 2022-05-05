@@ -88,15 +88,17 @@ frappe.ui.form.on('Assign Employee', {
 		hide_resume(frm);
 
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc) {
-			const li = [];
-			document.querySelectorAll('a[data-doctype="Employee"]').forEach(element=>{
-				li.push(element.getAttribute("data-name"));
-			});
+			let employees = frm.doc.employee_details, employees_list = [];
+			for (let x in employees) {
+				if(employees[x]['employee']){
+					employees_list.push(employees[x]['employee']);
+				}
+			}
 			return {
 				query: "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.get_employee",
 				filters: {
 					company: doc.hiring_organization, emp_company: doc.company,all_employees:doc.show_all_employees,
-					job_category: doc.job_category,	distance_radius: doc.distance_radius, job_location: doc.job_location, employee_lis : li
+					job_category: doc.job_category,	distance_radius: doc.distance_radius, job_location: doc.job_location, employee_lis : employees_list
 				}
 			}
 		}

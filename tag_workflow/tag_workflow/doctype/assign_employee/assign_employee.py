@@ -84,8 +84,8 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
         if all_employees:
             sql = """
                 select * from(
-                select name, employee_name,Round(
-                3959 * Acos( Least(1.0,Cos( Radians({4}) )*Cos( Radians(lat) )*Cos( Radians(lng) - Radians ({5}) )+Sin( Radians({4}) )*Sin( Radians(lat)))),1) as `distance`
+                select name, employee_name,CONCAT(Round(
+                3959 * Acos( Least(1.0,Cos( Radians({4}) )*Cos( Radians(lat) )*Cos( Radians(lng) - Radians ({5}) )+Sin( Radians({4}) )*Sin( Radians(lat)))),1), " miles") as `distance`
                 from `tabEmployee`
                 where company = '{0}' and status = 'Active' and zip!=0
                 and lat!="" and lng!="" 
@@ -94,12 +94,12 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
                 and (name NOT IN (select parent from `tabUnsatisfied Organization` where unsatisfied_organization_name = '{1}')) 
                 and name NOT IN ('{2}') and employee_name like  '%%{3}%%') t
                 where `distance` < {6}
-                order by `distance` asc """.format(emp_company, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance])
+                order by `distance`*1""".format(emp_company, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance])
         else:
             sql = """
                 select * from(
-                select name, employee_name,Round(
-                3959 * Acos( Least(1.0,Cos( Radians({5}) )*Cos( Radians(lat) )*Cos( Radians(lng) - Radians ({6}) )+Sin( Radians({5}) )*Sin( Radians(lat)))),1) as `distance`
+                select name, employee_name,CONCAT(Round(
+                3959 * Acos( Least(1.0,Cos( Radians({5}) )*Cos( Radians(lat) )*Cos( Radians(lng) - Radians ({6}) )+Sin( Radians({5}) )*Sin( Radians(lat)))),1), " miles") as `distance`
                 from `tabEmployee`where company = '{0}'and status = 'Active' and zip!=0
                 and lat!="" and lng!=""
                 and employee_name like '%%{4}%%' 
@@ -110,7 +110,7 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
                 and name NOT IN (select parent from `tabDNR`  where dnr = '{2}') 
                 and (name NOT IN (select parent from `tabUnsatisfied Organization` where unsatisfied_organization_name = '{2}'))and name NOT IN ('{3}')
                 and employee_name like '%%{4}%%') t
-                where `distance` < {7} order by `distance` asc
+                where `distance` < {7} order by `distance`*1
                 """.format(emp_company, job_category, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance])
         emp = frappe.db.sql(sql)
         return emp
