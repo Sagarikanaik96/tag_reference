@@ -94,7 +94,7 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
                 and name NOT IN (select parent from `tabDNR`  where dnr = '{1}') 
                 and (name NOT IN (select parent from `tabUnsatisfied Organization` where unsatisfied_organization_name = '{1}')) 
                 and name NOT IN ('{2}') and (name like '%%{3}%%' or employee_name like  '%%{3}%%')) t
-                where (`distance` < {6} or `distance` is NULL) order by `distance`*-1
+                where (`distance` < {6} or `distance` is NULL) order by `distance` is NULL,`distance`*1
                 """.format(emp_company, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance])
         else:
             sql = """
