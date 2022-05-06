@@ -34,6 +34,7 @@ frappe.ui.form.on("Sales Invoice", {
 		if(frm.doc.__islocal==1){
 			cancel_salesinvoice(frm);
 		}
+		$('[data-label="Save"]').show();
 
 		setTimeout(function(){
 			$('[data-label="View"]').hide();
@@ -59,6 +60,7 @@ frappe.ui.form.on("Sales Invoice", {
 				$(this).attr('title', file);
 			});
 		}
+		$('[data-label="Save"]').show();
 	},
 	on_submit: function(frm) {
 		if(frm.doc.docstatus ==1){
