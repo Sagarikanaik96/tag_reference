@@ -244,10 +244,27 @@ def get_frm_redis_cache(applicant_id):
 def jazzhr_update_applicants(api_key, company):
     try:
         emp_list = frappe.db.sql(""" select name, employee_number from `tabEmployee` where company = %s and employee_number IS NOT NULL and (first_name IN(NULL, "undefined", "None", "") or last_name IN(NULL, "unavailable", "None", "") or employee_gender IN(NULL, "undefined", "None", "") or contact_number IN(NULL, "undefined", "None", "") or employee_gender IN(NULL, "undefined", "None", "") or street_address IN(NULL, "undefined", "None", "") or email IN(NULL, "undefined", "None", "") or city IN(NULL, "undefined", "None", "") or state IN(NULL, "undefined", "None", "") or zip = 0 or lat IN(NULL, "undefined", "None", "") or lng IN(NULL, "undefined", "None", "")) """,company, as_dict=1)
-        #print(len(emp_list), emp_list)
-        count = 1
-        exce = 1
-        for e in emp_list:
+        frappe.enqueue("tag_workflow.utils.jazz_integration.jazz_emp_update", queue='default', job_name=company, timeout=1200, api_key=api_key, company=company, emp_list=emp_list)
+    except Exception as e:
+        frappe.log_error(e, "JazzHR emp fetching")
+
+def jazz_emp_update(api_key, company, emp_list):
+    try:
+        rng = int(len(emp_list)/JAZZHR_MAX_ITR) + 1
+        start = 0
+        end = JAZZHR_MAX_ITR
+        for i in range(0, rng):
+            print(i)
+            frappe.enqueue("tag_workflow.utils.jazz_integration.jazz_make_emp_update_queue", queue='long', job_name=company, is_async=True, api_key=api_key, company=company, start=start, end=end, emp_list=emp_list)
+            start += JAZZHR_MAX_ITR
+            end += JAZZHR_MAX_ITR
+    except Exception as e:
+        frappe.log_error(e, "jazz_emp_update")
+
+def jazz_make_emp_update_queue(api_key, company, start, end, emp_list):
+    try:
+        count, exce = 1, 1
+        for e in emp_list[start:end]:
             try:
                 if(count % JAZZHR_RATE_LIMIT_CALLS == 0):
                     time.sleep(120)
@@ -255,14 +272,13 @@ def jazzhr_update_applicants(api_key, company):
                 count += 1
                 exce = 1
             except Exception as e:
-                frappe.log_error(e, "JazzHR emp applicant recall")
+                frappe.log_error(e, "JazzHR jazz_make_emp_update_queue")
                 exce += 1
                 count -= 1
                 if(exce <= 3):
                     continue
     except Exception as e:
-        frappe.log_error(e, "JazzHR emp fetching")
-
+        frappe.log_error(e, "jazz_make_emp_update_queue")
 
 def update_emp_to_db(applicant_id, company):
     try:
