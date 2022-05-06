@@ -142,7 +142,7 @@ frappe.ui.form.on("Job Order", {
 			time_validation(frm)
 
 		});
-
+		order_buttons(frm)
 		setTimeout(function() {
 			view_button(frm);
 			make_invoice(frm);
@@ -456,15 +456,6 @@ frappe.ui.form.on("Job Order", {
 		sessionStorage.setItem('joborder_company', frm.doc.company);
 		sessionStorage.setItem('exc_joborder_company', frm.doc.company);	
 	},
-	onload_post_render:function(frm){
-		if (((cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing") || (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User")))){
-			if (frm.doc.resumes_required){
-				assign_emp_button(frm);
-			}else{
-				claim_order_button(frm);
-			}
-		}
-	},
 	phone_number: function(frm){
 		let phone = frm.doc.phone_number;
 		if(phone){
@@ -569,7 +560,6 @@ function timer_value(frm) {
 		setTimeout(function() {
 			time_value(frm);
 			cur_frm.refresh();
-			cur_frm.trigger("onload_post_render");
 			view_button();
 		}, 60000);
 	} else {
@@ -1530,6 +1520,15 @@ function set_exc_industry_company(frm){
 					'user_industry':frm.doc.category
 				}
 			})
+		}
+	}
+}
+function order_buttons(frm){
+	if (((cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing") || (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User")))){
+		if (frm.doc.resumes_required){
+			assign_emp_button(frm);
+		}else{
+			claim_order_button(frm);
 		}
 	}
 }
