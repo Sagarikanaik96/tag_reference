@@ -17,7 +17,7 @@ frappe.ui.form.on('Add Timesheet', {
 		$(".form-message.blue").css("background", "lightyellow");
 		$(".form-message.blue").css("color", "black");
 		$(".form-message.blue").css("margin-top", "10px");
-		$(".editable-form .layout-main-section-wrapper .layout-main-section, .submitted-form .layout-main-section-wrapper .layout-main-section, #page-Company .layout-main-section-wrapper .layout-main-section, #page-Timesheet .layout-main-section-wrapper .layout-main-section, #page-Lead .layout-main-section-wrapper .layout-main-section").css("max-width", "100%");
+		$(".editable-form .layout-main-section-wrapper .layout-main-section, .submitted-form .layout-main-section-wrapper .layout-main-section, #page-Company .layout-main-section-wrapper .layout-main-section, #page-Timesheet .layout-main-section-wrapper .layout-main-section, #page-Lead .layout-main-section-wrapper .layout-main-section");
 
 		frm.set_value("from_time", "");
 		frm.set_value("to_time", "");
@@ -92,7 +92,7 @@ frappe.ui.form.on('Add Timesheet', {
 function update_title(frm){
 	frappe.db.get_value("Job Order", {"name": frm.doc.job_order}, ["select_job", "job_site", "job_order_duration", "per_hour","from_date","to_date","per_hour","flat_rate", "estimated_hours_per_day"], function(r){
 		if(r){
-			let data = `<div style="display: flex;flex-direction: inherit;">
+			let data = `<div>
 					<p><b>Job Title: </b> ${r['select_job']}</p>&nbsp;&nbsp;
 					<p><b>Job Site: </b> ${r['job_site']}</p>&nbsp;&nbsp;
 					<p><b>Job Duration: </b> ${r['job_order_duration']}</p>&nbsp;&nbsp;

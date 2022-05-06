@@ -189,6 +189,11 @@ input:visited {
   max-width: 100%;
   width: 100%;
 }
+[data-page-route="Add Timesheet"]
+  .layout-main-section-wrapper
+  .layout-main-section {
+  max-width: 100%;
+}
 /* user management */
 #page-User .layout-main .layout-side-section {
   border-right: none;
@@ -743,6 +748,8 @@ input::-webkit-credentials-auto-fill-button {
   div {
   justify-content: space-around;
   flex-wrap: wrap;
+  display: flex;
+  flex-direction: inherit;
 }
 [data-route="Form/Add Timesheet/Add Timesheet"]
   .layout-main-section-wrapper
@@ -951,6 +958,13 @@ input.input-with-feedback.form-control,
 }
 
 @media (max-width: 768px) {
+  [data-route="Form/Add Timesheet/Add Timesheet"]
+    .layout-main-section-wrapper
+    .layout-main-section
+    .form-message
+    div {
+    display: table;
+  }
   [data-fieldname="update_employee_records"] button {
     margin-top: 0;
   }
