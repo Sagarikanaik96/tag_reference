@@ -41,7 +41,7 @@
    "name": "Employee-employee_gender",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "\nMale\nFemale\nDecline to Answer",
+   "options": "\nMale\nFemale\nDecline to answer",
    "organization": null,
    "owner": "Administrator",
    "parent": null,

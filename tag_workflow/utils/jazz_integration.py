@@ -117,7 +117,7 @@ def update_redis(applicant_id, company, response, action):
             redis.hset(applicant_key, 'last_name', applicant_details['last_name'].strip('"'))
             redis.hset(applicant_key, 'company', company)
             redis.hset(applicant_key, 'contact_number', applicant_details['phone'] or "")
-            redis.hset(applicant_key, 'employee_gender', applicant_details['eeo_gender'] if applicant_details['eeo_gender'] in ["Male", "Female", "Decline to Answer"] else '')
+            redis.hset(applicant_key, 'employee_gender', applicant_details['eeo_gender'] if applicant_details['eeo_gender'] in ["Male", "Female", "Decline to answer"] else '')
             redis.hset(applicant_key, 'military_veteran', 1 if applicant_details['eeoc_veteran'] == 'I AM A PROTECTED VETERAN' else 0)
             redis.hset(applicant_key, 'street_address', applicant_details['address'] if applicant_details['address'] != 'Unavailable' and applicant_details['address'] != '' else '')
             redis.hset(applicant_key, 'email', applicant_details['email'] or "")

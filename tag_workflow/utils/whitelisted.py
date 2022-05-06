@@ -584,7 +584,7 @@ def updates_value(name,data,doc_emp):
  
 def employee_basic_details(data,doc_emp):
     try:
-        employee_gender=data['eeo_gender'] if doc_emp.employee_gender is None or data['eeo_gender']=='Decline to answer' and data['eeo_gender'] else doc_emp.employee_gender
+        employee_gender=data['eeo_gender'] if doc_emp.employee_gender is None and data['eeo_gender'] else doc_emp.employee_gender
         military_veteran=1 if data['eeoc_veteran']=='I AM A PROTECTED VETERAN' else doc_emp.military_veteran
         street_address=data['address'] if doc_emp.street_address is None or len(doc_emp.street_address)==0 and data['address']!='' and data['address']!='Unavailable'  else doc_emp.street_address
         contact_number=data['phone'] if doc_emp.contact_number is None or len(doc_emp.contact_number)==0 else doc_emp.contact_number
