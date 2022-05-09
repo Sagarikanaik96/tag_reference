@@ -445,10 +445,8 @@ frappe.ui.form.on("Job Order", {
 				callback: function(r) {
 					if (r.message != "success") {
 						msgprint("You can't create a Job Order until <b>"+frm.doc.company+"'s</b> details are completed.");
+						frm.set_value("company", '');
 						frappe.validated = false;
-						setTimeout(() => {
-							frappe.set_route("List","Job Order");
-						}, 3000);
 					}
 				},
 			});
