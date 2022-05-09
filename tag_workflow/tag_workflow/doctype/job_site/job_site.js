@@ -35,14 +35,7 @@ frappe.ui.form.on('Job Site', {
 	},
 
 	setup: function(frm){
-		frm.set_query('job_site_contact', function(doc) {
-				return {
-						query: "tag_workflow.tag_data.job_site_employee",
-						filters: {
-								'job_order_company': doc.company
-						}
-				}
-		});
+		get_users(frm)
 	},
 	search_on_maps: function(frm){
 		if(cur_frm.doc.search_on_maps == 1){
