@@ -449,7 +449,7 @@ def emp_response_data(response, company):
             emp.last_name = data['last_name'].strip('"')
             emp.company = company
             emp.contact_number = data['phone'] or ""
-            emp.employee_gender = data['eeo_gender'] if data['eeo_gender'] in ["Male", "Female"] else ''
+            emp.employee_gender = data['eeo_gender'] if data['eeo_gender'] in ["Male", "Female", "Decline to answer"] else ''
             emp.military_veteran = 1 if data['eeoc_veteran'] == 'I AM A PROTECTED VETERAN' else 0
             emp.street_address = data['address'] if data['address'] != 'Unavailable' and data['address'] != '' else ''
             emp.email = data['email'] or ""

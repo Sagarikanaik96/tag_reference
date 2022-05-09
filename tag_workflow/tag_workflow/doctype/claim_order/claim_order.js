@@ -85,17 +85,9 @@ frappe.ui.form.on('Claim Order', {
 
 	  	document.addEventListener("keydown", function(){
 	  		companyhide(300)
-	    })
+	    });
 
-	    $('[data-fieldname="staffing_organization"]').click(function(){
-			$('[data-doctype="Company"]').removeAttr("href");
-			if (frm.doc.staffing_organization){
-				localStorage.setItem("company", frm.doc.staffing_organization);
-				window.location.href="/app/dynamic_page";
-			}
-		});
-
-
+		setTimeout(hr,1000);
 	},
 	setup:function(frm){
 		
@@ -273,5 +265,14 @@ function companyhide(time) {
 function submit_hide(){
 	if (cur_frm.doc.single_share==1 && cur_frm.doc.__islocal!=1){
 		$('.btn-primary').hide();
+	}
+}
+
+function hr(){
+	if(cur_frm.doc.__islocal!=1){
+		Array.from($('[data-doctype="Company"]')).forEach(_field =>{
+			localStorage.setItem("company", cur_frm.doc.staffing_organization);
+			_field.href= '/app/dynamic_page';
+		});
 	}
 }
