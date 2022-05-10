@@ -137,6 +137,7 @@ frappe.ui.form.on("Job Order", {
 		staff_company_read_only(frm)
 		job_order_cancel_button(frm);
 		staff_company_asterisks(frm);
+		repeat_order(frm);
 		$(document).on('click', '[data-fieldname="job_start_time"]', function(){
 			$('.datepicker').show()
 			time_validation(frm)
@@ -636,7 +637,12 @@ function check_to_date(frm){
 function check_value(field, name, value){
 	if(value && value < 0){
 		frappe.msgprint({message: __("<b>" + field + "</b> Cannot be Less Than Zero"),	title: __("Error"),indicator: "orange",});
-		cur_frm.set_value(name, "");
+		cur_frm.set_value(name, (cur_frm.doc.repeat_old_worker && name == "no_of_workers" ? cur_frm.doc.repeat_old_worker : 0));
+	}else if(cur_frm.doc.no_of_workers >= 0 && cur_frm.doc.is_repeat && cur_frm.doc.repeat_from && cur_frm.doc.repeat_old_worker > 0){
+		if(cur_frm.doc.no_of_workers < cur_frm.doc.repeat_old_worker || cur_frm.doc.no_of_workers > cur_frm.doc.repeat_old_worker){
+			frappe.msgprint("For Repeat Order, <b>No. of workers</b> must be same as the old order.");
+			cur_frm.set_value("no_of_workers", cur_frm.doc.repeat_old_worker);
+		}
 	}
 }
 
@@ -1410,7 +1416,7 @@ function cancel_job_order_deatils(frm){
 }
 
 function staffing_company_remove(frm){
-	if(frm.doc.__islocal==1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+	if(frm.doc.__islocal==1 && frappe.boot.tag.tag_user_info.company_type=='Staffing' && !frm.doc.repeat_from_company){
 		frm.set_value('company', '');
 	}
 }  
@@ -1529,4 +1535,139 @@ function order_buttons(frm){
 			claim_order_button(frm);
 		}
 	}
+}
+
+/*---------------------------------------------*/
+function repeat_order(frm){
+	let condition = (frm.doc.__islocal != 1 && cur_frm.doc.order_status == "Completed" && frappe.boot.tag.tag_user_info.company_type=='Hiring');
+	if(condition){
+		frm.add_custom_button(__("Repeat Order"),function(){
+			repeat_hiring_dia(frm);
+		});
+	}else{
+		repeat_order_remaining_orgs(frm);
+	}
+}
+
+/*--------------hiring dialog----------------------*/
+function repeat_hiring_dia(frm){
+	var dialog = new frappe.ui.Dialog({
+		title: __('Repeat Order'),
+		fields: [
+			{
+				fieldname: "direct", fieldtype: "Check", label: "Direct Order",
+				onchange: function(){
+					let direct = cur_dialog.get_value("direct");
+					if(direct === 1){
+						cur_dialog.set_value("normal", 0);
+						cur_dialog.fields_dict.direct_2.df.hidden = 0;
+						cur_dialog.fields_dict.company.df.hidden = 0;
+						cur_dialog.fields_dict.company.df.reqd = 1;
+					}else{
+						cur_dialog.fields_dict.direct_2.df.hidden = 1;
+						cur_dialog.fields_dict.company.df.hidden = 1;
+						cur_dialog.fields_dict.company.df.reqd = 0;
+					}
+					cur_dialog.fields_dict.company.refresh();
+					cur_dialog.fields_dict.direct_2.refresh()
+				}
+			},
+			{fieldname:"company", fieldtype:"Select", label:"Select Company", hidden:1, options:frappe.boot.tag.tag_user_info.comps.join("\n"), default: cur_frm.doc.staff_company},
+			{fieldname: "direct_1", fieldtype: "Column Break"},
+			{
+				fieldname: "normal", fieldtype: "Check", label: "Normal Order",
+				onchange: function(){
+					let normal = cur_dialog.get_value("normal");
+					if(normal == 1){
+						cur_dialog.set_value("direct", 0);
+						cur_dialog.set_value("company", "");
+					}
+				}
+			},
+			{fieldname: "direct_2", fieldtype: "Section Break", hidden: 1},
+			{fieldname: "company", fieldtype: "Select", label: "Select Company", options: frappe.boot.tag.tag_user_info.comps.join("\n")},
+		]
+	});
+
+	dialog.set_primary_action(__('Proceed'), function() {
+		let values = dialog.get_values();
+		let dia_cond = (values.direct || values.normal);
+		if(dia_cond){
+			trigger_new_order(frm, values.direct, values.normal, values.company);
+			dialog.hide();
+		}else{
+			frappe.msgprint({message: __("Please mark your selection"), title: __("Repeat Order"), indicator: "red",});
+		}
+	});
+	dialog.set_secondary_action(function(){
+		dialog.hide();
+	});
+	dialog.set_secondary_action_label("Cancel");
+	dialog.show();
+}
+
+/*-------------------------------------------------------------*/
+function repeat_order_remaining_orgs(frm){
+	if(frm.doc.__islocal != 1 && cur_frm.doc.order_status == "Completed" && (frappe.boot.tag.tag_user_info.company_type=='Exclusive Hiring' || (frappe.boot.tag.tag_user_info.company_type=='Staffing' && frappe.boot.tag.tag_user_info.exces.includes(cur_frm.doc.company)))){
+		trigger_exc_stf_odr(frm);
+	}
+}
+
+function trigger_exc_stf_odr(frm){
+	frm.add_custom_button(__("Repeat Order"),function(){
+		frappe.confirm('Are you sure you want to proceed?',
+			() => {
+				trigger_new_order(frm, 1, 0, "");
+			}, () => {
+				// action to perform if No is selected
+			}
+		);
+	});
+}
+
+function trigger_new_order(frm, direct, normal, company){
+	let doc = frm.doc;
+	var no_copy_list = ["name", "amended_from", "amendment_date", "cancel_reason"];
+	var newdoc = frappe.model.get_new_doc(doc.doctype, doc, "");
+	console.log(normal);
+	for(var key in doc){
+		// dont copy name and blank fields
+		var df = frappe.meta.get_docfield(doc.doctype, key);
+		let from_amend = 0;
+		if(df && key.slice(0, 2) != "__" && !in_list(no_copy_list, key) && !(df && (!from_amend && cint(df.no_copy) == 1))){
+			var value = doc[key] || [];
+			if (frappe.model.table_fields.includes(df.fieldtype)) {
+				for (var i = 0, j = value.length; i < j; i++) {
+					var d = value[i];
+					frappe.model.copy_doc(d, from_amend, newdoc, df.fieldname);
+				}
+			}else{
+				newdoc[key] = doc[key];
+			}
+		}
+	}
+
+	var user = frappe.session.user;
+	newdoc.__islocal = 1;
+	newdoc.company = cur_frm.doc.company;
+	newdoc.is_direct = direct;
+	newdoc.docstatus = 0;
+	newdoc.owner = user;
+	newdoc.creation = "";
+	newdoc.modified_by = user;
+	newdoc.modified = "";
+	newdoc.is_repeat = 1;
+	newdoc.repeat_from = cur_frm.doc.name;
+	newdoc.repeat_from_company = cur_frm.doc.company;
+	newdoc.repeat_staff_company = cur_frm.doc.staff_company ? cur_frm.doc.staff_company : "";
+	newdoc.from_date = "";
+	newdoc.to_date = "";
+	newdoc.staff_org_claimed = "";
+	newdoc.order_status = "Upcoming";
+	newdoc.staff_company = company;
+	newdoc.repeat_old_worker = cur_frm.doc.no_of_workers;
+	newdoc.worker_filled = 0;
+	newdoc.bid = 0;
+	newdoc.claim = "";
+	frappe.set_route("form", newdoc.doctype, newdoc.name);
 }

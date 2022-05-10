@@ -34,6 +34,7 @@ def update_boot(boot):
 
 def get_user_info():
     try:
+        comps, exces, stfs = [], [], []
         user = frappe.session.user
         user_doc = frappe.get_doc(USR, user)
         api_key = frappe.get_site_config().tag_gmap_key or ''
@@ -41,6 +42,27 @@ def get_user_info():
         data = {"user_type": user_doc.tag_user_type, "company": user_doc.company, "company_type": user_doc.organization_type, "api_key": api_key, "sid":frappe.session.sid, 'org':org}
         frappe.cache().set_value("sessions", {user: frappe.session.sid})
         frappe.local.cookie_manager.set_cookie('ctype',data['company_type'])
+
+        sql = ""
+        if(user_doc.organization_type == "Hiring"):
+            sql = """select name from `tabCompany` where organization_type = "Staffing" """
+        elif(user_doc.organization_type == "Staffing"):
+            sql = """select name from `tabCompany` where organization_type = "Staffing" and name in (select company from `tabEmployee` where user_id = '{0}')""".format(user_doc.name)
+            excs = frappe.db.sql(""" select name from `tabCompany` where organization_type = "Exclusive Hiring" and parent_staffing in (select company from `tabEmployee` where user_id = %s) """,user_doc.name, as_dict=1)
+            for e in excs:
+                exces.append(e.name)
+
+            stfs_list = frappe.db.get_list("Employee", {"user_id": user_doc.name}, "company")
+            for s in stfs_list:
+                stfs.append(s.company)
+        elif(user_doc.organization_type == "Exclusive Hiring"):
+            sql = """ select parent_staffing as name from `tabCompany` where name = '{0}' """.format(user_doc.company)
+
+        if(sql):
+            com_list = frappe.db.sql(sql, as_dict=1)
+            for c in com_list:
+                comps.append(c.name)
+        data.update({"comps": comps, "exces": exces, "stfs": stfs})
         return data
     except Exception as e:
         print(e)

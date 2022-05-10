@@ -13,7 +13,6 @@
   "html_3",
   "related_actions_section",
   "related_details",
-  "assign_employee",
   "messages",
   "timesheets",
   "invoices",
@@ -89,7 +88,15 @@
   "section_break_61",
   "employee_rating",
   "dispute_section",
-  "dispute_comment"
+  "dispute_comment",
+  "section_break_83",
+  "is_repeat",
+  "repeat_from",
+  "repeat_from_company",
+  "column_break_87",
+  "repeat_staff_company",
+  "repeat_old_worker",
+  "is_direct"
  ],
  "fields": [
   {
@@ -602,14 +609,56 @@
    "options": "<h3>Your claim has been approved</h3>"
   },
   {
-   "fieldname": "assign_employee",
-   "fieldtype": "HTML",
-   "label": "Assign Employee"
+   "fieldname": "section_break_83",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_repeat",
+   "fieldtype": "Check",
+   "label": "Is Repeat"
+  },
+  {
+   "fieldname": "repeat_from",
+   "fieldtype": "Data",
+   "label": "Repeat From",
+   "read_only": 1
+  },
+  {
+   "fieldname": "repeat_from_company",
+   "fieldtype": "Data",
+   "label": "Repeat From Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_87",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "repeat_staff_company",
+   "fieldtype": "Data",
+   "label": "Repeat Staff Company",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "repeat_old_worker",
+   "fieldtype": "Int",
+   "label": "Repeat Old Worker",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_direct",
+   "fieldtype": "Check",
+   "label": "Is Direct",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-27 04:19:46.603900",
+ "modified": "2022-05-10 07:02:40.014786",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

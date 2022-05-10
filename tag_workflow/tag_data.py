@@ -631,6 +631,7 @@ def assigned_employees(job_order):
         assigned_data=frappe.db.sql(sql)
         if(len(assigned_data)>0):
             return "success1"
+        return "failed"
     except Exception as e:
         frappe.log_error(e, "Assign Employee List")
 
