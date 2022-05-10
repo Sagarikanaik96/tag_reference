@@ -30,12 +30,18 @@ frappe.FaceRecognition = Class.extend({
 	show_profile: function(_wrapper, _page){
 		frappe.call({
 			method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link1",
-			args: { "name": company || ''},
+			args: { "name": company || '',
+					"userid": frappe.user_info().email
+					},
 			callback: function (r) {				
 				setTimeout(hide,10);
 				function hide(){
-					if(frappe.boot.tag.tag_user_info.company_type=== "Staffing" || frappe.boot.tag.tag_user_info.company===company){
-						$('.btn-primary').hide()
+					if(frappe.boot.tag.tag_user_info.company_type=== "Staffing"){
+						$("#place_order").hide();
+					}
+					if(frappe.boot.tag.tag_user_info.company_type===r.message[0].organization_type){
+						$("#place_order").hide();
+						$("#work_order").hide();
 					}
 				}
 
@@ -94,7 +100,8 @@ frappe.FaceRecognition = Class.extend({
 								<p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#">  <u> ${count} review </u> </a> </span> </p>
 							</div>
 							<div class="col-md-6 col-sm-12 order text-left text-md-right ">
-								<a href=javascript:new_order()><button type="button" class="btn btn-primary btn-sm mt-1">Place Order</button></a>
+								<a href=javascript:new_order()><button type="button" id="place_order" class="btn btn-primary btn-sm btn-lg mt-1">Place Order</button></a>
+								<a href=javascript:work_order_history()><button type="button" id="work_order" class="btn btn-primary btn-info btn-sm mt-1">Work Order History</button></a>
 							</div>
 						</div>
 								   
@@ -176,3 +183,173 @@ function new_order(){
 	doc.posting_date_time = frappe.datetime.now_date();
 	frappe.set_route("Form", doc.doctype, doc.name);
 }	
+
+function work_order_history(){
+	frappe.call({
+		method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link2",
+		args: { "name": company || '',
+				"comp": frappe.boot.tag.tag_user_info.company,
+				"comp_type" :frappe.boot.tag.tag_user_info.company_type,
+				"user_id": frappe.user_info().email
+				
+		},
+		callback: function (r) {	
+			let body;
+			let title1;
+			if(r.message[1]==="exceed"){ 
+				let opt=``;
+				title1= "Select Your Company"
+				for(let companies in r.message[0]){
+					let link = r.message[0][companies].company.split(' ').join('%@');
+					opt+=`<a href=javascript:work_order_history_for_multi_companies("${link}")><button type="button" class="btn btn-primary btn-sm mt-1" style="margin-right:10px">${r.message[0][companies].company}</button></a>`				}
+				body= opt;
+				let fields = [{"fieldname": "", "fieldtype": "HTML", "options": body}];
+				let dialog = new frappe.ui.Dialog({title: title1,	fields: fields});
+				dialog.show();
+				dialog.$wrapper.find('.modal-dialog').css('max-width', '680px');
+
+				
+			}
+			else{
+					my_pop_up(r.message)
+			}
+						
+		}
+	});
+}
+
+
+function work_order_history_for_multi_companies(name2){
+	var name3= name2.replace(/%@/g, ' ');
+	frappe.call({
+		method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link3",
+		args: { "name": company || '',
+				"comp": name3,
+				"comp_type" :frappe.boot.tag.tag_user_info.company_type
+		},
+		callback: function (r) {	
+			var job_order=""
+			var created= ""
+			var job_category=""
+			var rate1=""
+			var total=""
+			for(let l in r.message[0]){
+				var jobb= r.message[0][l].name
+				for(let s in r.message[2]){
+					var invoice= r.message[2][s][1];
+					if(invoice==jobb){
+						total+=invoice+ "<br>"+ "<br>"
+					}
+					
+				}
+
+
+				job_order+= r.message[0][l].name+ "<br>"+ "<br>";
+			}
+
+			for(let m in r.message[0]){
+				var from_date= r.message[0][m].from_date+ "<br>"+ "<br>";
+				
+				created+=(from_date)
+			}
+
+			for(let n in r.message[1]){
+				var job_cat= r.message[1][n].job_category+ "<br>"+ "<br>";
+				
+				job_category+=(job_cat)
+			}
+
+			for(let p in r.message[0]){
+				var rate= r.message[0][p].rate+ "<br>"+ "<br>";
+				
+				rate1+=(rate)
+			}
+
+		let body;
+		let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead><tr><th>Job Order</th><th>Start Date</th><th>Job Title</th><th>Rate</th><th>Invoiced Amout</th><th></th></tr></thead><tbody>`;
+		let html = ``;
+		for(let d in r.message[0]){
+			if(r.message[2][d].total_billing_amount==null){
+				r.message[2][d].total_billing_amount=(0).toFixed(2)
+			}
+			else{
+				r.message[2][d].total_billing_amount=r.message[2][d].total_billing_amount.toFixed(2)
+			}
+			html += `<tr><td>${r.message[0][d].name}</td><td>${r.message[0][d].from_date}</td><td>${r.message[1][d].job_category}</td><td>$ ${r.message[0][d].rate}</td><td>$ ${r.message[2][d].total_billing_amount}</td><td><button class="btn btn-primary btn-sm primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${r.message[0][d].name}')">Order<span class="alt-underline">Det</span>ails</button></td></tr>`;
+		}
+		if(html){
+			body = head + html + "</tbody></table>";
+		}else{
+			body = head + `<tr><td></td><td></td><td>No Data Found</td><td></td><td></td><td></td></tbody></table>`;
+		}
+			let fields = [{"fieldname": "", "fieldtype": "HTML", "options": body}];
+			let dialog = new frappe.ui.Dialog({title: "Work Order History",	fields: fields});
+			dialog.show();
+			dialog.$wrapper.find('.modal-dialog').css('max-width', '980px');
+
+		}
+	});
+}
+function my_pop_up(message){
+	var job_order=""
+	var created= ""
+	var job_category=""
+	var rate1=""
+	var total=""
+	let title1= "Work Order History"
+	for(let l in message[0]){
+		var jobb= message[0][l].name
+		for(let s in message[2]){
+			var invoice= message[2][s][1];
+			if(invoice==jobb){
+				total+=invoice+ "<br>"+ "<br>"
+			}
+			
+		}
+
+
+		job_order+= message[0][l].name+ "<br>"+ "<br>";
+	}
+
+	for(let m in message[0]){
+		var from_date= message[0][m].from_date+ "<br>"+ "<br>";
+		
+		created+=(from_date)
+	}
+
+	for(let n in message[1]){
+		var job_cat= message[1][n].job_category+ "<br>"+ "<br>";
+		
+		job_category+=(job_cat)
+	}
+
+	for(let p in message[0]){
+		var rate= message[0][p].rate+ "<br>"+ "<br>";
+		
+		rate1+=(rate)
+	}
+
+	let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead><tr><th>Job Order</th><th>Start Date</th><th>Job Title</th><th>Rate</th><th>Invoiced Amout</th><th></th></tr></thead><tbody>`;
+	let html = ``;
+	for(let d in message[0]){
+		if(message[2][d].total_billing_amount==null){
+			message[2][d].total_billing_amount=(0).toFixed(2)
+		}
+		else{
+			message[2][d].total_billing_amount=message[2][d].total_billing_amount.toFixed(2)
+		}
+		html += `<tr><td>${message[0][d].name}</td><td>${message[0][d].from_date}</td><td>${message[1][d].job_category}</td><td>$ ${message[0][d].rate}</td><td>$ ${message[2][d].total_billing_amount}</td><td><button class="btn btn-primary btn-sm primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${message[0][d].name}')">Order<span class="alt-underline">Det</span>ails</button></td></tr>`;
+	}
+	let body;
+	if(html){
+		body = head + html + "</tbody></table>";
+	}else{
+		body = head + `<tr><td></td><td></td><td>No Data Found</td><td></td><td></td><td></td></tbody></table>`;
+	}
+
+	let fields = [{"fieldname": "", "fieldtype": "HTML", "options": body}];
+	let dialog = new frappe.ui.Dialog({title: title1,	fields: fields});
+	dialog.show();
+	dialog.$wrapper.find('.modal-dialog').css('max-width', '980px');
+
+}
