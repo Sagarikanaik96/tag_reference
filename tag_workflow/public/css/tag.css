@@ -945,6 +945,12 @@ input.input-with-feedback.form-control,
 .frappe-card .frappe-list .list-row-container .ellipsis {
   text-align: center;
 }
+.chat-cross-button {
+  display: block !important;
+}
+.chat-list-icons {
+  margin-right: 30px;
+}
 
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
