@@ -57,6 +57,7 @@ def setup_data():
         setup_company_permission()
         check_if_user_exists()
         update_job_title_list()
+        update_old_lead_status()
         share_company_with_user()
         update_lat_lng()
         frappe.db.commit()
@@ -278,3 +279,14 @@ def emp_location_data(address_dt):
     except Exception as e:
         frappe.log_error(e, "Longitude latitude address")
         return '', ''
+def update_old_lead_status():
+    try:
+        print('*------Updating Old Lead Status------*')
+        old_leads=frappe.db.sql('select name, company_name,status from `tabLead` where company_name in (select name from `tabCompany` where organization_type="Exclusive Hiring") and status="Open";',as_dict=1)
+        if(len(old_leads)>0):
+            for i in range(len(old_leads)):
+                if frappe.db.exists('Lead',{"name":old_leads[i].name}):
+                    frappe.db.set_value("Lead",old_leads[i].name,"status", "Close")
+    except Exception as e:
+        frappe.log_error(e,'Lead Update Error')
+        print(e)
