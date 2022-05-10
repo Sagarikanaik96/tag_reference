@@ -11,6 +11,14 @@ frappe.ui.form.on("Sales Invoice", {
 			localStorage.setItem("company",custt)
 			window.location.href= "/app/dynamic_page"
 		});
+		setTimeout(function(){
+			$('[data-label="Get%20Items%20From"]').hide();
+			$('[data-label="View"]').hide();
+			$('[data-label="Create"]').hide();
+			$('[data-label="Fetch%20Timesheet"]').hide();
+
+
+		},250)
 	},
 	refresh: function(frm){
 		$('.form-footer').hide()
@@ -28,8 +36,13 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 
 		setTimeout(function(){
+			$('[data-label="View"]').hide();
 			$('[data-label="Get%20Items%20From"]').hide();
-		}, 250);
+			$('[data-label="Create"]').hide();
+			$('[data-label="Fetch%20Timesheet"]').hide();
+
+
+		},250)
 
 		$('[data-fieldname="company"]').click(function(){ return false})
 		$('[data-fieldname="company"]').click(function(){
