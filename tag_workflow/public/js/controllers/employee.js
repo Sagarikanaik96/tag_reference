@@ -7,6 +7,7 @@ frappe.ui.form.on("Employee", {
 		update_employees_data(frm);
 		trigger_hide();
 		required_field();
+		employee_work_history(frm)
 		download_document(frm)
 		cur_frm.dashboard.hide()
 		uploaded_file_format(frm);
@@ -632,3 +633,49 @@ function validate_phone_zip(frm){
 		}
 	}
 }
+
+
+function employee_work_history(frm){
+	if(frm.doc.__islocal!=1 && (frappe.boot.tag.tag_user_info.company_type=='Staffing' || frappe.boot.tag.tag_user_info.company_type=='TAG')){
+		frm.add_custom_button(__('Employment History'), function(){
+			employee_history(frm);
+		}).addClass("btn-primary");
+	}
+}
+function employee_history(frm){
+	frappe.call({
+		'method':'tag_workflow.tag_data.employee_work_history',
+		'args':{
+			'employee_no':frm.doc.name,
+		},
+		'callback':function(r){
+			if(r.message=='No Record'){
+				frappe.msgprint('Employee '+frm.doc.employee_name+' doesnot have any Work History')
+			}
+			else{
+				var data = r.message;
+			let profile_html = `<table class="col-md-12 basic-table table-headers table table-hover"><th>Job Order</th><th>Start Date</th><th>Job Title</th><th>Hiring Company</th><th>Total Hours</th>`;
+			for(let p in data){
+				profile_html += `<tr>
+					<td style="margin-right:20px;" ><a href="${window.location.origin}/app/job-order/${data[p].job_order_detail}">${data[p].job_order_detail}</a></td>
+					<td>${data[p].from_date}</td>
+					<td>${data[p].job_name}</td>
+					<td>${data[p].company}</td>
+					<td>${data[p].total_hours}</td>
+					</tr>`;
+			}
+			profile_html+=`</table>`
+			let new_pop_up = new frappe.ui.Dialog({
+				title: frm.doc.employee_name+" Work History",
+				'fields': [
+					{fieldname: "staff_companies",fieldtype: "HTML",options:profile_html},
+				],
+			})
+			new_pop_up.$wrapper.find('.modal-dialog').css('max-width', '880px');
+			new_pop_up.show();
+
+			}
+
+		}
+	})
+} 

@@ -1133,6 +1133,14 @@ def new_job_title_company(job_name,company,industry,rate,description):
        frappe.error_log(e,'Job Title Add Error')
 
 @frappe.whitelist()
+def employee_work_history(employee_no):
+    sql=f'select job_order_detail,from_date,job_name,company,sum(total_hours) as total_hours from `tabTimesheet` where employee="{employee_no}" group by job_order_detail order by from_date desc'
+    my_data=frappe.db.sql(sql,as_dict=True)
+    if(len(my_data)==0):
+        return 'No Record'
+    else:
+        return my_data 
+
 def my_used_job_orders(company_name,company_type):
     if company_type=='Hiring' or company_type== exclusive_hiring:
         l=frappe.db.sql('select job_order from `tabClaim Order` where staffing_organization="{0}"'.format(company_name),as_list=1)
@@ -1147,3 +1155,4 @@ def my_used_job_orders(company_name,company_type):
     else:
         return 'TAG'
     return list(set(z))
+
