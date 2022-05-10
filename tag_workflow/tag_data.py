@@ -179,10 +179,10 @@ def receive_hiring_notification(user, company_type, hiring_org, job_order, staff
                 add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)
             sub="Employee Assigned"
             msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}'
-            make_system_notification(l,msg,'Assign Employee',doc_name,sub)
+            frappe.enqueue(make_system_notification,now=True,users=l,message=msg,doctype='Assign Employee',docname=doc_name,subject=sub)
             msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim .'
             link =  f'  href="/app/assign-employee/{doc_name}" '
-            return joborder_email_template(sub, msg, l, link)
+            return frappe.enqueue(joborder_email_template,now=True,sub=sub, msg=msg, l=l, link=link)
         else:
             return NOASS
     except Exception as e:
@@ -252,9 +252,9 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
                 l = [l[0] for l in user_list]
                 for user in l:
                     add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
-                single_job_order_notification(job_order_title,hiring_org,job_order,subject,l,staff_company)
+                frappe.enqueue(single_job_order_notification,now=True,job_order_title=job_order_title,hiring_org=hiring_org,job_order=job_order,subject=subject,l=l,staff_company=staff_company)
             else:
-                staff_email_notification_cont(hiring_org, job_order, job_order_title,doc,subject)
+                frappe.enqueue(staff_email_notification_cont,now=True,hiring_org=hiring_org, job_order=job_order, job_order_title=job_order_title,doc=doc,subject=subject)
     except Exception as e:
         print(e, frappe.get_traceback())
 
