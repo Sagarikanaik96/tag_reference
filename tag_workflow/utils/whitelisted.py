@@ -682,3 +682,10 @@ def run_onload(doc):
     doc.set("__onload", frappe._dict())
     doc.run_method("onload")
 
+@frappe.whitelist(allow_guest=True)
+def get_company_job_order(company_type):
+    try:
+        sql = """ select name from `tabCompany` where organization_type='{0}' """.format(company_type)
+        return frappe.db.sql(sql)
+    except Exception as e:
+        print(e) 

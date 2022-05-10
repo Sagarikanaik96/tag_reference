@@ -208,7 +208,7 @@ def check_if_user_exists():
         for user in user_list:
             if(frappe.db.exists(EMP, {"user_id": user.name})):
                 company, date_of_joining = frappe.db.get_value(EMP, {"user_id": user.name}, ["company", "date_of_joining"])
-                sql = """ UPDATE `tabUser` SET company = '{0}', date_of_joining = '{1}' where name = '{2}' """.format(company, date_of_joining, user.name)
+                sql = """ UPDATE `tabUser` SET company = "{0}", date_of_joining = "{1}" where name = "{2}" """.format(company, date_of_joining, user.name)
                 frappe.db.sql(sql)
 
             if(user.company):

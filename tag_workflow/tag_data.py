@@ -11,6 +11,7 @@ import datetime
 jobOrder = "Job Order"
 assignEmployees = "Assign Employee"
 NOASS = "No Access"
+exclusive_hiring = "Exclusive Hiring"
 
 @frappe.whitelist(allow_guest=False)
 def company_details(company_name=None):
@@ -1018,7 +1019,7 @@ def my_used_job_title(company_name,company_type):
         return 'TAG'
     return list(set(z))
 def hiring_auto_approve(hiring_type,job_order,employee_filled,staffing_org,doc_name):
-    if(hiring_type.organization_type=='Exclusive Hiring'):
+    if(hiring_type.organization_type== exclusive_hiring):
         job = frappe.get_doc(jobOrder, job_order)
         claimed = job.staff_org_claimed if job.staff_org_claimed else ""
         frappe.db.set_value(jobOrder, job_order, "worker_filled", (int(employee_filled)))
@@ -1131,3 +1132,18 @@ def new_job_title_company(job_name,company,industry,rate,description):
     except Exception as e:
        frappe.error_log(e,'Job Title Add Error')
 
+@frappe.whitelist()
+def my_used_job_orders(company_name,company_type):
+    if company_type=='Hiring' or company_type== exclusive_hiring:
+        l=frappe.db.sql('select job_order from `tabClaim Order` where staffing_organization="{0}"'.format(company_name),as_list=1)
+        z=[]
+        for i in l:
+            z.append(i[0])
+    elif company_type=='Staffing':
+        z=[]
+        l=frappe.db.sql('select name from `tabJob Order` where company="{0}"'.format(company_name),as_list=1)
+        for i in l:
+            z.append(i[0])
+    else:
+        return 'TAG'
+    return list(set(z))

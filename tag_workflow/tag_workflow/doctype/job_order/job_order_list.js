@@ -244,3 +244,46 @@ frappe.listview_settings['Job Order'] = {
 	},
 }
 
+frappe.flags.my_list=[]
+frappe.flags.company=''
+frappe.flags.tag_list=''
+setTimeout(function(){
+  const btn=document.getElementById('select_filter')
+  btn.addEventListener('click',function(event){
+    frappe.call({
+        method:"tag_workflow.tag_data.my_used_job_orders",
+        args:{
+          company_name:event.target.value,
+          company_type:frappe.boot.tag.tag_user_info.company_type,
+        },
+        callback:function(r){
+	      	if (r.message){
+		        frappe.flags.my_list = r.message
+		        frappe.flags.company= event.target.value
+		        frappe.flags.tag_list='False'
+		        cur_list.refresh()
+		    }
+        }
+
+      })
+  })
+},2000)
+
+
+frappe.views.BaseList.prototype.prepare_data = function(r) {
+  this.page_length = 500;
+  let data = r.message || {};
+  data = !Array.isArray(data) ?
+      frappe.utils.dict(data.keys, data.values) :
+      data;
+
+  if (this.start === 0) {
+      this.data = data;
+  } else {
+      this.data = this.data.concat(data);
+  }	
+  if((frappe.flags.my_list).length>0 ){
+  	this.data = this.data.filter((d) => frappe.flags.my_list.includes(d.name))
+  }
+  this.data = this.data.uniqBy((d) => d.name); 
+} 
