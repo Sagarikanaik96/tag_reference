@@ -54,13 +54,13 @@ frappe.listview_settings['Claim Order'] = {
             }
         },
         job_order(val, d, f) {
-			if (val) {
-				return `<span class=" ellipsis2" title="" id="${val}-${f.name}">
-						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">${val}</a>
-					</span>`
-
+            if (val) {
+                return `<span class=" ellipsis2" title="" id="${val}-${f.name}">
+                        <a class="ellipsis" href="/app/job-order/${val}" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">${val}</a>
+                    </span>`
+  
             }
-        },
+        }, 
         approved_no_of_workers(val, d, f) {
             if(typeof(val)=='number')
             {
