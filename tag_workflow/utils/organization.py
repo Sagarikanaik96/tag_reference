@@ -49,6 +49,7 @@ def setup_data():
 
         update_organization_data()
         update_roles()
+        update_tag_user_type()
         update_role_profile()
         update_module_profile()
         update_permissions()
@@ -229,6 +230,19 @@ def update_job_title_list():
 
     except Exception as e:
         frappe.log_error(e, "job title update")
+        print(e)
+
+#--------User Type Update for TAG----------#
+def update_tag_user_type():
+    try:
+        print("*------updating user type-------------------*\n")
+        tag_admin = tag_admin = frappe.get_list('User',fields= ['name'],filters= {'tag_user_type': 'Tag Admin'}, as_list=1)
+        if(len(tag_admin)>0):
+            for name in tag_admin:
+                sql = '''UPDATE `tabUser` set tag_user_type = "{0}" where name = "{1}";'''.format("TAG Admin", name[0])
+                frappe.db.sql(sql)
+    except Exception as e:
+        frappe.log_error(e, "Update Tag User Type")
         print(e)
 
 # lat lng update

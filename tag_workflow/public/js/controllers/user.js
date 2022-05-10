@@ -107,7 +107,7 @@ frappe.ui.form.on("User", {
 			frm.set_value("tag_user_type", "Staffing Admin")
 		}
 		else if(frm.doc.organization_type == "TAG"){
-			frm.set_value("tag_user_type", "Tag Admin")
+			frm.set_value("tag_user_type", "TAG Admin")
 		}
 		if(frappe.boot.tag.tag_user_info.company_type=="Hiring"){
 			org_info(frm);
@@ -234,7 +234,7 @@ function set_options(frm){
 	let organization_type = frm.doc.organization_type;
 
 	if(organization_type == "TAG"){
-		options = "\nTag Admin";
+		options = "\nTAG Admin";
 	}else if(organization_type == "Hiring" || organization_type == "Exclusive Hiring"){
 		options = "\nHiring Admin\nHiring User";
 	}else if(organization_type == "Staffing"){
@@ -263,10 +263,10 @@ function setup_profile(frm){
 	}else if(type == "Staffing User"){
 		frappe.model.set_value(doctype, docname, role_profile, "Staffing User");
 		frappe.model.set_value(doctype, docname, module_profile, "Staffing");
-	}else if(type == "Tag Admin"){
+	}else if(type == "TAG Admin"){
 		frappe.model.set_value(doctype, docname, role_profile, "Tag Admin");
 		frappe.model.set_value(doctype, docname, module_profile, "Tag Admin");
-	}else if(type == "Tag User"){
+	}else if(type == "TAG User"){
 		frappe.model.set_value(doctype, docname, role_profile, "Tag User");
 		frappe.model.set_value(doctype, docname, module_profile, "Tag Admin");
 	}

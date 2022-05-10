@@ -551,7 +551,7 @@ def chat_room_created(hiring_org,staffing_org,job_order):
     try:
         hiring_comp_users=frappe.db.sql(''' select user_id from `tabEmployee` where company='{0}' and user_id IS NOT NULL'''.format(hiring_org),as_list=1)
         staffing_users=frappe.db.sql(''' select user_id from `tabEmployee` where company='{0}' and user_id IS NOT NULL '''.format(staffing_org),as_list=1)
-        tag_users=frappe.db.sql(''' select email from `tabUser` where tag_user_type='Tag Admin' ''',as_list=1)
+        tag_users=frappe.db.sql(''' select email from `tabUser` where tag_user_type='TAG Admin' ''',as_list=1)
 
         user_list=hiring_comp_users+staffing_users+tag_users
         total_user_list=[]

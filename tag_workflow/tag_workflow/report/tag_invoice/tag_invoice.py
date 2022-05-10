@@ -26,7 +26,7 @@ def execute(filters=None):
     condition = ""
     status = " in ('Ongoing','Upcoming','Completed')"
 
-    if current_user_type[0]['tag_user_type'] == 'Tag Admin':
+    if current_user_type[0]['tag_user_type'] == 'TAG Admin':
         if filters.get("company"):
             staff_comp = filters.get("company")
             condition += f" and company = '{staff_comp}'"
