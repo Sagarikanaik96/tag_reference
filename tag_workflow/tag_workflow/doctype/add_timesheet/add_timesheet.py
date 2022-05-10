@@ -67,7 +67,7 @@ def get_datetime(date, from_time, to_time):
 #---------------------------------------------------#
 
 @frappe.whitelist()
-def update_timesheet(user, company_type, items, job_order, date, from_time, to_time, break_from_time=None, break_to_time=None):
+def update_timesheet(user, company_type, items, job_order, date, from_time, to_time, break_from_time=None, break_to_time=None,save=None):
     try:
         added = 0
         timesheets = []
@@ -95,9 +95,7 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
                     timesheet.insert(ignore_permissions=True)
                     timesheet = add_status(timesheet, item['status'], item['employee'], job.company, job_order)
                     timesheet.save(ignore_permissions=True)
-                    timesheet_status_data=f'update `tabTimesheet` set workflow_state="Approval Request" where name="{timesheet.name}"'
-                    frappe.db.sql(timesheet_status_data)
-                    frappe.db.commit()
+                    staffing_own_timesheet(save,timesheet,company_type)
                     timesheets.append({"employee": item['employee'], "docname": timesheet.name, "company": job.company, "job_title": job.select_job})
                     added = 1
                 else:
@@ -187,4 +185,13 @@ def dnr_notification(time,staffing_user):
         message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>No Show</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>.'
         subject = 'No Show'
         make_system_notification(staffing_user, message, 'Timesheet', time['docname'], subject)
-       
+
+def staffing_own_timesheet(save,timesheet,company_type):
+    if(save!="1"):
+        timesheet_status_data=f'update `tabTimesheet` set workflow_state="Approval Request" where name="{timesheet.name}"'
+        frappe.db.sql(timesheet_status_data)
+        frappe.db.commit()
+        if(company_type=='Staffing'):
+            timesheet_status_data=f'update `tabTimesheet` set workflow_state="Approved" where name="{timesheet.name}"'                       
+            frappe.db.sql(timesheet_status_data)
+            frappe.db.commit()

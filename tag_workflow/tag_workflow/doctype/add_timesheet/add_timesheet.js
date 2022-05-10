@@ -23,8 +23,16 @@ frappe.ui.form.on('Add Timesheet', {
 		frm.set_value("to_time", "");
 		frm.set_value("break_from_time", "");
 		frm.set_value("break_to_time", "");
+		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+			frm.add_custom_button(__('Save Timesheet'), function() {
+				let save=1
+				update_timesheet(frm,save);
+			}).addClass("btn-primary");
+		}
+		
 		frm.add_custom_button(__('Submit Timesheet'), function() {
-			update_timesheet(frm);
+			let save=0
+			update_timesheet(frm,save);
 		}).addClass("btn-primary");
 
 		let jo=localStorage.getItem("order")
@@ -309,7 +317,7 @@ function update_time(frm){
 }
 
 /*--------------------------------------------------*/
-function update_timesheet(frm){
+function update_timesheet(frm,save){
 	if(frm.doc.job_order && frm.doc.date && frm.doc.from_time && frm.doc.to_time && frm.doc.items){
 		let items = frm.doc.items || [];
 		let job_order = frm.doc.job_order;
@@ -321,7 +329,7 @@ function update_timesheet(frm){
 
 		frappe.call({
 			method: "tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_timesheet",
-			args: {"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "items": items, "job_order": job_order, "date": date, "from_time": from_time, "to_time": to_time, "break_from_time": break_from_time, "break_to_time": break_to_time},
+			args: {"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "items": items, "job_order": job_order, "date": date, "from_time": from_time, "to_time": to_time, "break_from_time": break_from_time, "break_to_time": break_to_time,"save":save},
 			async: 1,
 			freeze: true,
 			freeze_message: "Please wait while we are adding timesheet(s)...",

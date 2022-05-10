@@ -564,3 +564,9 @@ def removing_no_show(company,emp_doc,job_order):
         assign_doc.remove(removed_row)
         assign_doc.save(ignore_permissions=True)
     
+@frappe.whitelist()
+def submit_staff_timesheet(timesheet_name):
+    timesheet_status_data=f'update `tabTimesheet` set workflow_state="Approved" where name="{timesheet_name}"'                       
+    frappe.db.sql(timesheet_status_data)
+    frappe.db.commit()
+    return "success"

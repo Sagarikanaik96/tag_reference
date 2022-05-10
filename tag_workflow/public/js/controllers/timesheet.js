@@ -8,7 +8,7 @@ frappe.ui.form.on("Timesheet", {
 		$('[data-label="Cancel"]').hide();
 		$('.custom-actions.hidden-xs.hidden-md').show();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
-
+		add_button_submit(frm);
 		$(document).on('click', '[data-fieldname="from_time"]', function(){
 			$('.datepicker').show()
 		});
@@ -547,3 +547,26 @@ var calculate_end_time = function(_frm, cdt, cdn) {
         let child = locals[cdt][cdn];
 	console.log(child.name);
 };
+
+function add_button_submit(frm){
+	if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.workflow_state=='Open'){
+		frm.add_custom_button(__('Submit Timesheet'), function() {
+			submit_timesheet(frm);
+		}).addClass("btn-primary");
+	}
+}
+function submit_timesheet(frm){
+	frappe.call({
+		method: "tag_workflow.utils.timesheet.submit_staff_timesheet",
+		args: {"timesheet_name": frm.doc.name},
+		async: 1,
+		freeze: true,
+		freeze_message: "Please wait while we are updating timesheet status...",
+		callback: function(r){
+			if(r){
+				frappe.msgprint('Status Updated Successfully')
+				window.location.reload()
+			}
+		}
+	});
+}
