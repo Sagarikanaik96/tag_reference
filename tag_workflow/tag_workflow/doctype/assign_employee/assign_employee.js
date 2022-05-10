@@ -71,6 +71,8 @@ frappe.ui.form.on('Assign Employee', {
 	  		companyhide(500)
 	    })
 		child_table_label();
+
+		add_employee_row(frm);
 	},
 	e_signature_full_name:function(frm){
 		if(frm.doc.e_signature_full_name){
@@ -123,6 +125,17 @@ frappe.ui.form.on('Assign Employee', {
 		else{
 			make_notification_approved(frm);
 		}
+		frm.set_value("previous_worker",frm.doc.employee_details.length);
+
+
+		frappe.call({
+			"method":"tag_workflow.tag_data.previous_worker_count",
+			"args":{
+				"name": cur_frm.doc.name,
+				"previous_worker":frm.doc.employee_details.length
+			},
+		});
+
 	},
 	validate:function(frm){
 		var sign = cur_frm.doc.e_signature_full_name;
@@ -205,13 +218,18 @@ function make_hiring_notification(frm){
 				});
 			}
 			else{
+				var count_len = cur_frm.doc.employee_details.length
+				if (cur_frm.doc.previous_worker){
+					count_len = cur_frm.doc.employee_details.length-cur_frm.doc.previous_worker
+				}
+
 				frappe.call({
 					"method":"tag_workflow.tag_data.staff_own_job_order",
 					"freeze": true,
 					"freeze_message": "<p><b>preparing notification</b></p>",
 					"args":{
 						"job_order" : cur_frm.doc.job_order,"staffing_org":cur_frm.doc.company,
-						 "emp_detail" : cur_frm.doc.employee_details.length, "doc_name" : cur_frm.doc.name					},
+						 "emp_detail" : count_len, "doc_name" : cur_frm.doc.name					},
 					callback:function(){
 						setTimeout(function () {
 							window.location.href='/app/job-order/'+frm.doc.job_order
@@ -246,14 +264,11 @@ function check_employee_data(frm){
 /*--------------child table------------------*/
 function render_table(frm){
 	if(frm.doc.tag_status == "Approved"){
-		cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = true;
-		cur_frm.fields_dict['employee_details'].refresh();
 		frappe.call({
 			"method": "tag_workflow.utils.timesheet.check_employee_editable",
 			"args": {"job_order": frm.doc.job_order, "name": frm.doc.name, "creation": frm.doc.creation},
 			"callback": function(r){
 				if(r && r.message == 0){
-					cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = true;
 					cur_frm.fields_dict['employee_details'].refresh();
 				}else{
 					cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = false;
@@ -285,6 +300,11 @@ function approved_employee(frm){
 		var current_date = new Date(frappe.datetime.now_datetime());
 		var approved_date = new Date(frm.doc.modified);
 		var diff = current_date.getTime()-approved_date.getTime();
+		console.log(cur_frm.doc.employee_details.length)
+		var table_len = cur_frm.doc.employee_details.length
+		if (cur_frm.doc.previous_worker){
+			table_len = cur_frm.doc.employee_details.length-cur_frm.doc.previous_worker
+		}
 		diff = parseInt(diff/1000);
 		if(diff<60){
 			frappe.call({
@@ -293,7 +313,7 @@ function approved_employee(frm){
 				"freeze_message": "<p><b>preparing notification for Staffing orgs...</b></p>",
 				args:{
 					"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "sid": frappe.boot.tag.tag_user_info.sid,
-					"job_name" : cur_frm.doc.job_order, "employee_filled" : cur_frm.doc.employee_details.length,
+					"job_name" : cur_frm.doc.job_order, "employee_filled" : table_len,
 					"staffing_org" : cur_frm.doc.company, "hiringorg" : cur_frm.doc.hiring_organization, "name": frm.doc.name
 				}
 			});
@@ -309,7 +329,26 @@ function hide_resume(frm){
 		var table=frappe.meta.get_docfield("Assign Employee Details", "resume",frm.doc.name);
 		table.hidden=1;
 		frm.refresh_fields();
+		if(frm.doc.job_order){
+			frappe.call({
+				method:"tag_workflow.tag_data.check_status_job_order",
+				args:{
+					"job_name" : cur_frm.doc.job_order
+				},
+				"async": 0,
+				"callback": function(r){
+					if (r.message=="Completed"){
+						frm.set_df_property("employee_details","read_only",1)
+						frm.set_df_property("distance_radius","read_only",1)
+						frm.set_df_property("show_all_employees","read_only",1)
+					}
+				}
+			});
 	}
+	}
+
+
+
 }
 
 
@@ -374,7 +413,7 @@ function worker_notification(frm){
 
 function table_emp(frm,table,msg){
 	if(frm.doc.tag_status=='Approved'){
-		(table.length > Number(frm.doc.no_of_employee_required)+1) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more than No. Of Employees Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
+		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more than No. Of Employees Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 	}
 	else if(frm.doc.claims_approved){
         (table.length > Number(frm.doc.claims_approved)) ? msg.push('Please Assign '+frm.doc.claims_approved+' Employees') : console.log("TAG");
@@ -386,9 +425,10 @@ function table_emp(frm,table,msg){
 
 function make_notification_approved(frm){
 	var count = cur_frm.doc.employee_details.length
-	if (cur_frm.doc.replaced_employees.length > 0){
-		count = 0
+	if (cur_frm.doc.previous_worker){
+		count = cur_frm.doc.employee_details.length-cur_frm.doc.previous_worker
 	}
+
 	frappe.call({
 		"method":"tag_workflow.tag_data.receive_hire_notification",
 		"freeze": true,
@@ -497,4 +537,30 @@ function child_table_label(){
 				$(this).attr('title', file);
 			});
 		}
+}
+
+
+
+
+function add_employee_row(frm){
+	if (frm.doc.claims_approved){
+		if (frm.doc.claims_approved > frm.doc.employee_details.length){
+			cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = false;
+			cur_frm.fields_dict['employee_details'].refresh();
+		}else{
+			cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = true;
+			cur_frm.fields_dict['employee_details'].refresh();
+		}
+
+	}
+	else{
+		if (frm.doc.claims_approved > frm.doc.employee_details.length){
+			console.log(frm.doc.no_of_employee_required >= frm.doc.employee_details.length)
+			cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = false;
+			cur_frm.fields_dict['employee_details'].refresh();
+		}else{
+			cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = true;
+			cur_frm.fields_dict['employee_details'].refresh();
+		}
+	}
 }

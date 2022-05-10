@@ -1032,6 +1032,25 @@ def hiring_auto_approve(hiring_type,job_order,employee_filled,staffing_org,doc_n
         frappe.db.commit()
 
 
+
+@frappe.whitelist(allow_guest=False)
+def check_status_job_order(job_name):
+    try:
+        job_ins = frappe.get_doc(jobOrder, job_name)
+        return job_ins.order_status
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.log_error(e, "final_notification")
+
+@frappe.whitelist(allow_guest=False)
+def previous_worker_count(name,previous_worker):
+    try:
+        frappe.db.set_value(assignEmployees, name, "previous_worker", int(previous_worker))
+        return "Something Went Access"
+    except Exception as e:
+        print(e, frappe.get_traceback())
+        frappe.db.rollback()
+
 @frappe.whitelist()
 def job_site_add(doc,method):
     try:

@@ -32,7 +32,8 @@
   "amended_from",
   "is_single_share",
   "approve_employee_notification",
-  "view_contract"
+  "view_contract",
+  "previous_worker"
  ],
  "fields": [
   {
@@ -213,12 +214,18 @@
    "fieldname": "show_all_employees",
    "fieldtype": "Check",
    "label": "Show All Employees"
+  },
+  {
+   "fieldname": "previous_worker",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Previous Worker"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-09 04:01:51.303907",
+ "modified": "2022-04-18 03:15:20.417608",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",
