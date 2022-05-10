@@ -13,11 +13,15 @@ frappe.listview_settings["Contact"] = {
                 });
             }
         }
+        $('[title = "Contact"]').html('Contacts');
+        $('[data-original-title = "Name"]').hide();
+        $('[data-original-title = "Owner Company"]').hide();
     },
     refresh:function(){
         if(frappe.boot.tag.tag_user_info.user_type == 'Staffing User'){
             $('[class="btn btn-primary btn-sm primary-action"]').hide()
         }
+        $('#navbar-breadcrumbs > li:nth-child(2) > a:nth-child(1)').html('Contacts');
     },
     hide_name_column: true,
 } 
