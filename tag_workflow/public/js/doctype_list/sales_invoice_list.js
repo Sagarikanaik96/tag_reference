@@ -46,6 +46,20 @@ frappe.listview_settings['Sales Invoice'] = {
 			}).addClass("btn-primary");
 		}
 	},
+
+	formatters: {
+		grand_total(val,d,f){
+			let finalAmount = 0.00;
+			if(typeof(val)=="number" && val>0){
+				finalAmount=((val).toFixed(2));
+			}
+			else{
+				finalAmount=finalAmount.toFixed(2);
+			}
+			return `<span class="filterable ellipsis" title="" id="${val}-${f.name}" ><a class="filterable ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >$ ${finalAmount}</a></span>`;
+		}
+	},
+	
 	refresh:function(){
 		$('[data-fieldname="name"]').hide()
 		$('[data-fieldname="company"]').hide()
