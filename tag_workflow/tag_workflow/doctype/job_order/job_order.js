@@ -1017,16 +1017,7 @@ function hiring_buttons(frm) {
 						}
                     });
                     frm.set_df_property("assigned_employees_hiring", "options", data);
-                    frm.toggle_display('related_actions_section', 1);
-				}else{
-					$('[data-fieldname = assigned_employees_hiring]').attr('id', 'approved_inactive')
-					let data = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assign Employees  </p> </div>`;
-                    $('[data-fieldname = assigned_employees_hiring]').click(function() {
-						staff_assign_redirect(frm)
-                    });
-                    frm.set_df_property("assigned_employees_hiring", "options", data);
-                    frm.toggle_display('related_actions_section', 1);
-
+                    frm.toggle_display('related_actions_section', 1);				
 				}
 			}
 		});
