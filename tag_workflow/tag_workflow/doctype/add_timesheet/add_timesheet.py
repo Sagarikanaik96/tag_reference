@@ -192,6 +192,6 @@ def staffing_own_timesheet(save,timesheet,company_type):
         frappe.db.sql(timesheet_status_data)
         frappe.db.commit()
         if(company_type=='Staffing'):
-            timesheet_status_data=f'update `tabTimesheet` set workflow_state="Approved" where name="{timesheet.name}"'                       
+            timesheet_status_data=f'update `tabTimesheet` set docstatus="1",workflow_state="Approved",status="Submitted" where name="{timesheet.name}"'                       
             frappe.db.sql(timesheet_status_data)
             frappe.db.commit()
