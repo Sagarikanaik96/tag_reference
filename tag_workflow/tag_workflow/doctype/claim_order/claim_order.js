@@ -20,6 +20,21 @@ frappe.ui.form.on('Claim Order', {
 		frm.set_value('approved_no_of_workers',0)
 	},
 	validate: function(frm) {
+		var l = {"Job Order": frm.doc.job_order, "Staffing Organization": frm.doc.staffing_organization, "E Signature": frm.doc.e_signature, "Agree To Contract": cur_frm.doc.agree_to_contract};
+
+		var message = "<b>Please Fill Mandatory Fields:</b>";
+		for (let k in l) {
+			console.log(cur_frm.doc.agree_to_contract, "contract")
+			if (l[k] === undefined || !l[k] || l[k]==0) {
+				message = message + "<br>" + k;
+			}
+		}
+
+		if (message != "<b>Please Fill Mandatory Fields:</b>") {
+			frappe.msgprint({message: __(message), title: __("Missing Fields"), indicator: "orange",});
+			frappe.validated = false;
+		}
+
 		let no_of_worker = frm.doc.no_of_workers_joborder
 		let claim_no = frm.doc.staff_claims_no
 		if(claim_no > no_of_worker){
@@ -88,6 +103,9 @@ frappe.ui.form.on('Claim Order', {
 	    });
 
 		setTimeout(hr,1000);
+		
+		frm.set_df_property('agree_to_contract','label','Agree To Contract <span style="color: red;">&#42;</span>');
+
 	},
 	setup:function(frm){
 		
