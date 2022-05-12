@@ -94,5 +94,37 @@
   "parenttype": null,
   "source_text": "Organization Type",
   "translated_text": "Company Type"
+ },
+ {
+  "context": null,
+  "contributed": 0,
+  "contribution_docname": null,
+  "contribution_status": "",
+  "docstatus": 0,
+  "doctype": "Translation",
+  "language": "en-US",
+  "modified": "2022-05-12 04:40:48.430000",
+  "name": "539ec8f0f6",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "source_text": "Cancelled",
+  "translated_text": "Canceled"
+ },
+ {
+  "context": null,
+  "contributed": 0,
+  "contribution_docname": null,
+  "contribution_status": "",
+  "docstatus": 0,
+  "doctype": "Translation",
+  "language": "en",
+  "modified": "2022-05-12 04:40:48.430000",
+  "name": "cc6841cdc6",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "source_text": "Cancelled",
+  "translated_text": "Canceled"
  }
 ]
