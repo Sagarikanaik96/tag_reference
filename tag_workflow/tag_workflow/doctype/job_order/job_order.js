@@ -1170,13 +1170,13 @@ function staff_claim_button(frm){
 					frappe.db.get_value("Assign Employee", {'job_order': frm.doc.name, 'company': frappe.boot.tag.tag_user_info.company}, ["name"], function(rr) {
 						if (rr.name === undefined) {
 							let datadda1 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg"> Assign Employees </p></div>`;
-							$('[data-fieldname = assign_employee]').click(function() {
+							$('[data-fieldname = "assigned_employees"]').click(function() {
 								assign_employe(frm);
 							});
-							frm.set_df_property("assign_employee", "options", datadda1);
+							frm.set_df_property("assigned_employees", "options", datadda1);
 							frm.toggle_display('related_actions_section', 1);
 
-							frm.add_custom_button(__('Assign Employee'), function f1() {
+							frm.add_custom_button(__('Assign Employees'), function f1() {
 								assign_employe(frm);
 							}, __("View"));
 						}
