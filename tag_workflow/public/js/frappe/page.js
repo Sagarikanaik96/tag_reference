@@ -138,9 +138,6 @@ frappe.ui.Page = Class.extend({
 			this.hiring_filter = $(`
 				<div class="page-form row" id="hiring_filter">
 					<div class="filter-selector">
-						<select type="text" id="select_filter" autocomplete="off" class="input-with-feedback form-control input-xs ellipsis"
-						placeholder="Company" style="margin: 0% 0% 1% 0%;box-sizing: initial;"></select>
-
 						<button class="btn btn-default btn-sm filter-button" onclick="hiring_click('Ongoing');">
 							<span class="button-label hidden-xs">Ongoing Order<span></span></span>
 						</button>
@@ -162,65 +159,6 @@ frappe.ui.Page = Class.extend({
 									}
 								});
 							}
-							let text = "<option value='' selected>Choose Company</option>";
-							frappe.call({
-								"method": "tag_workflow.utils.whitelisted.get_company_job_order",
-								args: {
-									"company_type":"Staffing"
-								},
-								"async": 0,
-								"callback": function(r){
-									if(r.message){
-										var li= r.message
-										for (let i = 0; i < li.length; i++) {
-										  	text += '<option value="'+r.message[i][0]+'">'+r.message[i][0]+"</option>"
-										}
-									}
-								}
-							});
-							document.getElementById("select_filter").innerHTML = text;
-						</script>
-					</div>
-				</div>`).prependTo(this.main);
-		}
-
-		if((frappe.boot.tag.tag_user_info.company_type == "Staffing") && window.location.pathname == '/app/job-order'){
-			this.hiring_filter = $(`
-				<div class="page-form row" id="hiring_filter">
-					<div class="filter-selector">
-						<select type="text" id="select_filter" autocomplete="off" class="input-with-feedback form-control input-xs ellipsis"
-						placeholder="Company Type" style="
-												    font-size: var(--text-md);
-												    position: relative;
-												    width: 120px;
-												    height: fit-content;box-sizing: initial;"></select>
-						<script>
-							let text = "<option value='' selected>Choose Company</option>";
-							frappe.call({
-								"method": "tag_workflow.utils.whitelisted.get_company_job_order",
-								args: {
-									"company_type":"Hiring"
-								},
-								"async": 0,
-								"callback": function(r){
-									if(r.message){
-										var li= r.message
-										for (let i = 0; i < li.length; i++) {
-										  	text += '<option value="'+r.message[i][0]+'">'+r.message[i][0]+"</option>"
-										}
-									}
-								}
-							});
-							document.getElementById("select_filter").innerHTML = text;
-							const select = document.getElementById('select_filter');
-							select.addEventListener('change', function handleChange(event) {
-								$('.page-form').find('input').each(function () {
-									if($(this).attr('data-fieldname')=='company'){
-										$(this).val(event.target.value);
-										cur_list.refresh();
-									}
-								});
-							});
 						</script>
 					</div>
 				</div>`).prependTo(this.main);

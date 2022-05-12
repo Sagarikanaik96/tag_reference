@@ -683,9 +683,26 @@ def run_onload(doc):
     doc.run_method("onload")
 
 @frappe.whitelist(allow_guest=True)
-def get_company_job_order(company_type):
+def get_company_job_order(user_type):
     try:
-        sql = """ select name from `tabCompany` where organization_type='{0}' """.format(company_type)
-        return frappe.db.sql(sql)
+        current_user=frappe.session.user
+        data = []
+        if user_type=='Staffing':
+            sql=f'''select name from `tabCompany` where organization_type="Hiring" or parent_staffing in (select company from `tabEmployee` where email="{current_user}") '''
+            frappe.db.sql(sql)
+            companies = frappe.db.sql(sql, as_dict=1)
+            data = [c['name'] for c in companies]
+            return "\n".join(data)
+        elif user_type=="Hiring" or user_type=="Exclusive Hiring":
+            sql=f''' select name,company,email from `tabEmployee` where email="{current_user}" '''
+            companies = frappe.db.sql(sql, as_dict=1)
+            data = [c['company'] for c in companies]
+            return "\n".join(data)
+        else:
+            sql = """ select name from `tabCompany` where organization_type in ('Hiring','Exclusive Hiring') """
+            frappe.db.sql(sql)
+            companies = frappe.db.sql(sql, as_dict=1)
+            data = [c['name'] for c in companies]
+            return "\n".join(data)
     except Exception as e:
         print(e) 

@@ -1141,19 +1141,3 @@ def employee_work_history(employee_no):
         return 'No Record'
     else:
         return my_data 
-
-def my_used_job_orders(company_name,company_type):
-    if company_type=='Hiring' or company_type== exclusive_hiring:
-        l=frappe.db.sql('select job_order from `tabClaim Order` where staffing_organization="{0}"'.format(company_name),as_list=1)
-        z=[]
-        for i in l:
-            z.append(i[0])
-    elif company_type=='Staffing':
-        z=[]
-        l=frappe.db.sql('select name from `tabJob Order` where company="{0}"'.format(company_name),as_list=1)
-        for i in l:
-            z.append(i[0])
-    else:
-        return 'TAG'
-    return list(set(z))
-
