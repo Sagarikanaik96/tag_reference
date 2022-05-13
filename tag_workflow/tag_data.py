@@ -860,13 +860,15 @@ def employee_company(doc,method):
 def update_company_employee(doc_name,employee_company):
    emp_doc=frappe.get_doc('Employee',doc_name)
    comp_doc=frappe.get_doc('Company',employee_company)
-   for i in comp_doc.employees:
-       if(doc_name in i.employee):
-           if(emp_doc.employee_name!=i.employee_name):
-               i.employee_name=emp_doc.employee_name
-           if(emp_doc.resume!=i.resume):
-               i.resume=emp_doc.resume
-           comp_doc.save(ignore_permissions=True)
+   employee_list = frappe.db.get_list('Employee Assign Name', filters={
+                                              'parent': employee_company, 'employee':doc_name}, fields={'name'})
+   for employee in employee_list:
+       child_employee_doc=frappe.get_doc('Employee Assign Name',employee)
+       if(emp_doc.employee_name!=child_employee_doc.employee_name):
+               child_employee_doc.db_set('employee_name',emp_doc.employee_name)
+       if(emp_doc.resume!=child_employee_doc.resume):
+               child_employee_doc.db_set('resume',emp_doc.resume)
+   frappe.db.commit()
 
 @frappe.whitelist()
 def user_company(doctype,txt,searchfield,page_len,start,filters):
