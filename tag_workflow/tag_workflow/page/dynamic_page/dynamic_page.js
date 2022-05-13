@@ -193,7 +193,7 @@ function work_order_history(){
 				"user_id": frappe.user_info().email
 				
 		},
-		callback: function (r) {	
+		callback: function (r) {
 			let body;
 			let title1;
 			if(r.message[1]==="exceed"){ 
@@ -227,70 +227,13 @@ function work_order_history_for_multi_companies(name2){
 				"comp": name3,
 				"comp_type" :frappe.boot.tag.tag_user_info.company_type
 		},
-		callback: function (r) {	
-			var job_order=""
-			var created= ""
-			var job_category=""
-			var rate1=""
-			var total=""
-			for(let l in r.message[0]){
-				var jobb= r.message[0][l].name
-				for(let s in r.message[2]){
-					var invoice= r.message[2][s][1];
-					if(invoice==jobb){
-						total+=invoice+ "<br>"+ "<br>"
-					}
-					
-				}
-
-
-				job_order+= r.message[0][l].name+ "<br>"+ "<br>";
-			}
-
-			for(let m in r.message[0]){
-				var from_date= r.message[0][m].from_date+ "<br>"+ "<br>";
-				
-				created+=(from_date)
-			}
-
-			for(let n in r.message[1]){
-				var job_cat= r.message[1][n].job_category+ "<br>"+ "<br>";
-				
-				job_category+=(job_cat)
-			}
-
-			for(let p in r.message[0]){
-				var rate= r.message[0][p].rate+ "<br>"+ "<br>";
-				
-				rate1+=(rate)
-			}
-
-		let body;
-		let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead><tr><th>Job Order</th><th>Start Date</th><th>Job Title</th><th>Rate</th><th>Invoiced Amout</th><th></th></tr></thead><tbody>`;
-		let html = ``;
-		for(let d in r.message[0]){
-			if(r.message[2][d].total_billing_amount==null){
-				r.message[2][d].total_billing_amount=(0).toFixed(2)
-			}
-			else{
-				r.message[2][d].total_billing_amount=r.message[2][d].total_billing_amount.toFixed(2)
-			}
-			html += `<tr><td>${r.message[0][d].name}</td><td>${r.message[0][d].from_date}</td><td>${r.message[1][d].job_category}</td><td>$ ${r.message[0][d].rate}</td><td>$ ${r.message[2][d].total_billing_amount}</td><td><button class="btn btn-primary btn-sm primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${r.message[0][d].name}')">Order<span class="alt-underline">Det</span>ails</button></td></tr>`;
-		}
-		if(html){
-			body = head + html + "</tbody></table>";
-		}else{
-			body = head + `<tr><td></td><td></td><td>No Data Found</td><td></td><td></td><td></td></tbody></table>`;
-		}
-			let fields = [{"fieldname": "", "fieldtype": "HTML", "options": body}];
-			let dialog = new frappe.ui.Dialog({title: "Work Order History",	fields: fields});
-			dialog.show();
-			dialog.$wrapper.find('.modal-dialog').css('max-width', '980px');
-
+		callback: function (r) {
+			my_pop_up(r.message)		
 		}
 	});
 }
 function my_pop_up(message){
+	console.log(message)
 	var job_order=""
 	var created= ""
 	var job_category=""
@@ -331,15 +274,7 @@ function my_pop_up(message){
 
 	let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead><tr><th>Job Order</th><th>Start Date</th><th>Job Title</th><th>Rate</th><th>Invoiced Amout</th><th></th></tr></thead><tbody>`;
 	let html = ``;
-	for(let d in message[0]){
-		if(message[2][d].total_billing_amount==null){
-			message[2][d].total_billing_amount=(0).toFixed(2)
-		}
-		else{
-			message[2][d].total_billing_amount=message[2][d].total_billing_amount.toFixed(2)
-		}
-		html += `<tr><td>${message[0][d].name}</td><td>${message[0][d].from_date}</td><td>${message[1][d].job_category}</td><td>$ ${message[0][d].rate}</td><td>$ ${message[2][d].total_billing_amount}</td><td><button class="btn btn-primary btn-sm primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${message[0][d].name}')">Order<span class="alt-underline">Det</span>ails</button></td></tr>`;
-	}
+	html=html_data(html,message)
 	let body;
 	if(html){
 		body = head + html + "</tbody></table>";
@@ -352,4 +287,17 @@ function my_pop_up(message){
 	dialog.show();
 	dialog.$wrapper.find('.modal-dialog').css('max-width', '980px');
 
+}
+function html_data(html,message){
+	for(let d in message[0]){
+		if(message[2][d].total_billing_amount==null){
+			message[2][d].total_billing_amount=(0).toFixed(2)
+		}
+		else{
+			message[2][d].total_billing_amount=message[2][d].total_billing_amount.toFixed(2)
+		}		
+		html += `<tr><td>${message[0][d].name}</td><td>${message[0][d].from_date}</td><td>${message[1][d].job_category}</td><td>$ ${message[0][d].rate}</td><td>$ ${message[2][d].total_billing_amount}${message[0][d].order_status != "Completed" ? "*" : ""}</td><td><button class="btn btn-primary btn-sm primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${message[0][d].name}')">Order <span class="alt-underline">Det</span>ails</button></td></tr>`;
+		
+	}
+	return html
 }
