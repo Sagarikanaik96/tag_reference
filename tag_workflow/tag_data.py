@@ -1135,9 +1135,13 @@ def new_job_title_company(job_name,company,industry,rate,description):
 
 @frappe.whitelist()
 def employee_work_history(employee_no):
-    sql=f'select job_order_detail,from_date,job_name,company,sum(total_hours) as total_hours from `tabTimesheet` where employee="{employee_no}" group by job_order_detail order by from_date desc'
+    sql=f'select name,job_order_detail,from_date,job_name,company,sum(total_hours) as total_hours,workflow_state from `tabTimesheet` where employee="{employee_no}" group by job_order_detail order by job_order_detail desc'
     my_data=frappe.db.sql(sql,as_dict=True)
     if(len(my_data)==0):
         return 'No Record'
     else:
+        for i in range(len(my_data)):
+            status=frappe.db.sql('select workflow_state from `tabTimesheet` where job_order_detail="{0}" and employee="{1}" '.format(my_data[i]['job_order_detail'],employee_no),as_list=1)
+            if ['Approval Request'] in status or ['Denied'] in status:
+                my_data[i]['workflow_state']='Approval Request'
         return my_data 

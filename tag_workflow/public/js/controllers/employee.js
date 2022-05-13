@@ -650,7 +650,7 @@ function employee_history(frm){
 		},
 		'callback':function(r){
 			if(r.message=='No Record'){
-				frappe.msgprint('Employee '+frm.doc.employee_name+' doesnot have any Work History')
+				frappe.msgprint('Employee '+frm.doc.employee_name+' does not have any Work History')
 			}
 			else{
 				var data = r.message;
@@ -661,7 +661,7 @@ function employee_history(frm){
 					<td>${data[p].from_date}</td>
 					<td>${data[p].job_name}</td>
 					<td>${data[p].company}</td>
-					<td>${data[p].total_hours}</td>
+					<td>${data[p].total_hours.toFixed(2)} ${data[p].workflow_state=="Approval Request" ? "*" : ""} </td>
 					</tr>`;
 			}
 			profile_html+=`</table>`
