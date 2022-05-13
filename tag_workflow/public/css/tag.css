@@ -263,7 +263,7 @@ input::-webkit-credentials-auto-fill-button {
 .col.layout-main-section-wrapper,
 .col-md-12.layout-main-section-wrapper {
   left: 8rem;
-  max-width: 90%;
+  max-width: 90% !important;
   width: 100%;
 }
 
@@ -504,6 +504,7 @@ input::-webkit-credentials-auto-fill-button {
   font-weight: 600;
   line-height: 22px;
 }
+
 /* Responsive css start */
 
 #page-Company textarea.form-control {
@@ -582,6 +583,9 @@ input::-webkit-credentials-auto-fill-button {
   color: #8d9cbc !important;
   font-size: 12px !important;
   padding-right: 5px;
+}
+[data-route*="Form/Job Order"] .popover {
+  display: none;
 }
 [data-route="List/Claim Order/List"] .modal-body .frappe-control {
   font-size: 12px;
