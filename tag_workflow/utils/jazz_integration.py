@@ -1,6 +1,8 @@
 import frappe
 from frappe import _, msgprint, throw
 import json, requests, time
+from rq import Queue, Worker
+from frappe.utils.background_jobs import get_redis_conn
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 
@@ -333,3 +335,27 @@ def button_disabled(company):
     except Exception as e:
         return 0
         frappe.msgprint(e)
+
+@frappe.whitelist()
+def terminate_job(company):
+    try:
+        conn = get_redis_conn()
+        workers = Worker.all(conn)
+        queues = Queue.all(conn)
+
+        for worker in workers:
+            job = worker.get_current_job()
+            if job and job.kwargs.get('job_name') == company:
+                job.cancel()
+                job.delete()
+
+        for queue in queues:
+            for job in queue.jobs:
+                if job and job.kwargs.get('job_name') == company:
+                    job.cancel()
+                    job.delete()
+
+        return 1
+    except Exception as e:
+        frappe.log_error(e, "JazzHR terminate_job")
+        return 0

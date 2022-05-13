@@ -431,6 +431,7 @@ function make_jazzhr_request(frm){
 				frappe.msgprint('Employees are being added in the background. You may continue using the application');
 				$('[data-fieldname="get_data_from_jazzhr"]')[1].disabled = 1;
 				$('[data-fieldname="update_employee_records"]')[1].disabled = 1;
+				add_terminate_button(frm);
 			}
 		});
 	}else{
@@ -617,6 +618,7 @@ function update_existing_employees(frm){
 			method: "tag_workflow.utils.jazz_integration.jazzhr_update_applicants",
 			args: {api_key: frm.doc.jazzhr_api_key, company: frm.doc.name},
 		});
+		add_terminate_button(frm);
 	}else{
 		cur_frm.scroll_to_field("jazzhr_api_key");
 		frappe.msgprint("<b>JazzHR API Key</b> is required");
@@ -673,7 +675,26 @@ function make_button_disable(frm){
                         if(r.message){
                                 $('[data-fieldname="get_data_from_jazzhr"]')[1].disabled = 1;
                                 $('[data-fieldname="update_employee_records"]')[1].disabled = 1;
+				add_terminate_button(frm);
                         }
                 }
+        });
+}
+
+function add_terminate_button(frm){
+        frm.add_custom_button(__("Stop JazzHR Job"), function (){
+                frappe.call({
+                        method: "tag_workflow.utils.jazz_integration.terminate_job",
+                        args: {"company": frm.doc.name},
+                        callback: function(r){
+                                if(r.message){
+                                        frappe.msgprint('JazzHR has been terminated.');
+                                        $('[data-fieldname="get_data_from_jazzhr"]')[1].disabled = 0;
+                                        $('[data-fieldname="update_employee_records"]')[1].disabled = 0;
+					cur_frm.remove_custom_button("Stop JazzHR Job")
+                                        make_button_disable(frm);
+                                }
+                        }
+                });
         });
 }
