@@ -691,10 +691,11 @@ function add_terminate_button(frm){
                                         frappe.msgprint('The Background Job (JazzHR) for this company is stopped');
                                         $('[data-fieldname="get_data_from_jazzhr"]')[1].disabled = 0;
                                         $('[data-fieldname="update_employee_records"]')[1].disabled = 0;
-					cur_frm.remove_custom_button("Stop JazzHR Job")
+										cur_frm.remove_custom_button("Stop JazzHR Job")
                                         make_button_disable(frm);
                                 }
                         }
                 });
-        });
+        }).addClass("btn-primary");
+
 }
