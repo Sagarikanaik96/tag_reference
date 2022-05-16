@@ -243,6 +243,36 @@ frappe.ui.form.on("Job Order", {
 	},
 
 	after_save: function(frm) {
+		if(frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.resumes_required==0){
+			frappe.call({
+				method: "tag_workflow.tag_data.claim_order_insert",
+				freeze:true,
+				freeze_message:'Please wait while order is claiming',
+				args: {
+					hiring_org: cur_frm.doc.company,
+					job_order: cur_frm.doc.name,
+					no_of_workers_joborder: cur_frm.doc.no_of_workers,
+					e_signature_full_name:cur_frm.doc.e_signature_full_name,
+					staff_company: frappe.boot.tag.tag_user_info.company,
+				},callback:function(r){
+					if(r.message==1){
+						console.log("claimed")
+						frappe.msgprint('Job Order has been claimed')
+						setTimeout(function(){
+							location.reload()
+						},5000)
+					}
+					else{
+						frappe.msgprint('Automatic claim is not successful');
+						console.log("not claimed")
+						setTimeout(function(){
+							location.reload()
+						},5000)
+					}
+				}
+			});
+		}
+
 		if(frm.doc.staff_org_claimed){
 			notification_joborder_change(frm);
 		}else{
@@ -257,21 +287,6 @@ frappe.ui.form.on("Job Order", {
 			});
 		}
 
-		if(frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.resumes_required==0){
-			frappe.call({
-				method: "tag_workflow.tag_data.claim_order_insert",
-				args: {
-					hiring_org: cur_frm.doc.company,
-					job_order: cur_frm.doc.name,
-					no_of_workers_joborder: cur_frm.doc.no_of_workers,
-					e_signature_full_name:cur_frm.doc.e_signature_full_name,
-					staff_company: frappe.boot.tag.tag_user_info.company,
-				},
-			});
-			setTimeout(function(){
-				location.reload();
-			}, 150);
-		}
 	},
 
 	view_contract: function() {
@@ -1170,13 +1185,13 @@ function staff_claim_button(frm){
 					frappe.db.get_value("Assign Employee", {'job_order': frm.doc.name, 'company': frappe.boot.tag.tag_user_info.company}, ["name"], function(rr) {
 						if (rr.name === undefined) {
 							let datadda1 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg"> Assign Employees </p></div>`;
-							$('[data-fieldname = "assigned_employees"]').click(function() {
+							$('[data-fieldname = assign_employee]').click(function() {
 								assign_employe(frm);
 							});
-							frm.set_df_property("assigned_employees", "options", datadda1);
+							frm.set_df_property("assign_employee", "options", datadda1);
 							frm.toggle_display('related_actions_section', 1);
 
-							frm.add_custom_button(__('Assign Employees'), function f1() {
+							frm.add_custom_button(__('Assign Employee'), function f1() {
 								assign_employe(frm);
 							}, __("View"));
 						}
