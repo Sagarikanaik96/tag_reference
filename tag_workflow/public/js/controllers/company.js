@@ -688,7 +688,7 @@ function add_terminate_button(frm){
                         args: {"company": frm.doc.name},
                         callback: function(r){
                                 if(r.message){
-                                        frappe.msgprint('JazzHR has been terminated.');
+                                        frappe.msgprint('The Background Job (JazzHR) for this company is stopped');
                                         $('[data-fieldname="get_data_from_jazzhr"]')[1].disabled = 0;
                                         $('[data-fieldname="update_employee_records"]')[1].disabled = 0;
 					cur_frm.remove_custom_button("Stop JazzHR Job")
