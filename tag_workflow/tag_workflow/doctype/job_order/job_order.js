@@ -170,7 +170,7 @@ frappe.ui.form.on("Job Order", {
 		$('[data-fieldname="company"]').click(function(){ return false})
 	    $('[data-fieldname="company"]').click(function(){
 			
-			if (frm.doc.company){
+			if (frm.doc.company && cur_frm.doctype== 'Job Order'){
 				if(frm.doc.__islocal!==1){
 					localStorage.setItem("company", frm.doc.company);
 					window.location.href= "/app/dynamic_page";
