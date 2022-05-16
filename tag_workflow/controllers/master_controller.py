@@ -198,6 +198,7 @@ def check_employee(name, first_name, company, last_name=None, gender=None, date_
             make_employee_permission(name, company)
             enqueue("tag_workflow.controllers.master_controller.user_exclusive_perm", now=True, user=name, company=company, organization_type=None)
             enqueue("tag_workflow.utils.trigger_session.share_company_with_user", now=True, users=users)
+            enqueue("tag_workflow.controllers.master_controller.share_old_docs", queue='default', user=name, company=company, company_type=organization_type)
         elif(organization_type == "TAG"):
             remove_tag_permission(name, emp.name, company)
     except Exception as e:
@@ -246,3 +247,26 @@ def share_file_list(job_list,timesheet_list,invoice_list,current_user):
         d=frappe.db.sql(x,as_list=1)
         if(len(d)>0):
             add("Sales Invoice", invoice.name, user=current_user, share= 1,read=1,write=1,flags={"ignore_share_permission": 1})
+
+
+def share_old_docs(user, company, company_type):
+    try:
+        data = []
+        if(company_type == "Staffing"):
+            user_list = frappe.db.get_list("User", {"company": company}, "name")
+            users = [u.name for u in user_list]
+            non_exc_data = frappe.db.sql(""" select DISTINCT share_name as docname, share_doctype as doctype from `tabDocShare` where user in {0} and share_doctype in ("Job Order", "Timesheet") """.format(tuple(users)), as_dict=1)
+            exc_data = frappe.db.sql(""" select name from `tabJob Order` where company in(select name from `tabCompany` where parent_staffing = %s) """,company, as_dict=1)
+            exc_data = [{"doctype": "Job Order", "docname": e.name} for e in exc_data]
+            data = non_exc_data + exc_data
+
+
+        for d in data:
+            try:
+                if not frappe.db.exists("DocShare", {"user": user, "share_name": d['docname'], "read": 1}) and frappe.db.exists(d['doctype'], d['docname']):
+                    add(d['doctype'], d['docname'], user=user, share= 1, read=1, write=0, flags={"ignore_share_permission": 1})
+            except Exception as e:
+                frappe.error_log(e, "share error")
+                continue
+    except Exception as e:
+        frappe.error_log(e, "share_old_docs")
