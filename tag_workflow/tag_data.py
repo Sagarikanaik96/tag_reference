@@ -827,6 +827,7 @@ def claim_order_insert(hiring_org=None,job_order=None,no_of_workers_joborder=Non
         sql = """ UPDATE `tabJob Order` SET bid = 1,claim="{0}",staff_org_claimed="{0}" where name="{1}" """.format(staff_company,job_order)
         frappe.db.sql(sql)
         frappe.db.commit()
+        return 1
     except Exception as e:
         print(e, frappe.get_traceback())        
 
