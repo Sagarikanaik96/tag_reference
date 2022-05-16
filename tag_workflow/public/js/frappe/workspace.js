@@ -507,10 +507,10 @@ class DesktopPage {
 	get_order_data() {
 		let data = this.data.get_order_data;
 		let body;
-		let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead><tr><th>Job Title</th><th>Date & Time</th><th>Job Site</th><th>Company</th><th>Total Price</th><th>Head Count</th><th></th></tr></thead><tbody>`;
+		let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead><tr><th>Job Title</th><th>Date & Time</th><th>Job Site</th><th>Company</th><th>Total Price</th><th style="text-align:center">Total Assigned/Required</th><th></th></tr></thead><tbody>`;
 		let html = ``;
 		for(let d in data){
-			html += `<tr><td>${data[d].select_job}</td><td>${data[d].date}</td><td>${data[d].job_site}</td><td>${data[d].company}</td><td>$ ${data[d].per_hour.toFixed(2)}</td><td>${data[d].worker_filled}</td><td><button class="btn btn-primary btn-sm primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${data[d].name}')">Order<span class="alt-underline"> Det</span>ails</button></td></tr>`;
+			html += `<tr><td>${data[d].select_job}</td><td>${data[d].date}</td><td>${data[d].job_site}</td><td>${data[d].company}</td><td>$ ${data[d].per_hour.toFixed(2)}</td><td style="text-align:center">${data[d].worker_filled}/${data[d].no_of_workers}</td><td><button class="btn btn-primary btn-sm primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${data[d].name}')">Order<span class="alt-underline"> Det</span>ails</button></td></tr>`;
 		}
 		if(html){
 			body = head + html + "</tbody></table>";
