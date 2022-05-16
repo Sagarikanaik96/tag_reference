@@ -955,7 +955,11 @@ input.input-with-feedback.form-control,
 .chat-list-icons {
   margin-right: 30px;
 }
+select.input-with-feedback.form-control.ellipsis {
+  padding: 0 0.75rem;
+}
 
+/*------ Media query start ----*/
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
   .col-md-12.layout-main-section-wrapper {
