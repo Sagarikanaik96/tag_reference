@@ -1,3 +1,4 @@
+from unicodedata import name
 import frappe
 from frappe.desk.form.load import get_docinfo, run_onload
 import requests, json
@@ -704,5 +705,50 @@ def get_company_job_order(user_type):
             companies = frappe.db.sql(sql, as_dict=1)
             data = [c['name'] for c in companies]
             return "\n".join(data)
+    except Exception as e:
+        print(e) 
+
+
+@frappe.whitelist(allow_guest=True)
+def get_organization_type(user_type):
+    try:
+        current_user=frappe.session.user
+        data = []
+        if user_type=='Staffing':
+            sql=f"""select company from `tabEmployee` where user_id='{current_user}'"""
+            data1=frappe.db.sql(sql, as_dict=True)
+            for c in data1:
+                data.append(c["company"])
+            
+            sql1= f"select name from `tabCompany` where parent_staffing in (select company from `tabEmployee` where email='{current_user}')"
+            data2=frappe.db.sql(sql1, as_dict=True)
+            for c in data2:
+                data.append(c["name"])
+            
+            return "\n".join(data)
+        elif user_type=="Hiring" or user_type=="Exclusive Hiring":
+            sql=f''' select name,company,email from `tabEmployee` where email="{current_user}" '''
+            companies = frappe.db.sql(sql, as_dict=1)
+            data = [c['company'] for c in companies]
+
+            return "\n".join(data)
+        else:
+            sql = """ select name from `tabCompany`"""
+            frappe.db.sql(sql)
+            companies = frappe.db.sql(sql, as_dict=1)
+            data = [c['name'] for c in companies]
+
+            return "\n".join(data)
+    except Exception as e:
+        print(e) 
+
+@frappe.whitelist(allow_guest=True)
+def get_role_profile():
+    try:
+        role= frappe.db.get_list('Role Profile',fields=['name'])
+        data= [c['name'] for c in role]
+        data.sort()
+        
+        return "\n".join(data)
     except Exception as e:
         print(e) 

@@ -1,7 +1,14 @@
 frappe.listview_settings['User'] = {
-	onload: function(){
+	onload: function(listview){
 		$('[data-fieldname="email"]').hide()
 		$('[data-fieldname="username"]').hide()
+		$('[data-fieldname="organization_type"]').hide()
+		$('[data-fieldname="role_profile_name"]').hide()
+		$('[data-fieldname="company"]').hide()
+		$('[data-fieldname="user_type"]').hide()
+
+
+		
 		$('h3[title="User"]').html('Company Users');
 		cur_list.columns[4].df.label = 'Role'
 		cur_list.render_header(cur_list.columns[4])
@@ -12,6 +19,53 @@ frappe.listview_settings['User'] = {
 			$('[data-original-title="Refresh"]').hide();
 			$('.menu-btn-group').hide();
 		}
+
+		const df = {
+            condition: "=",
+            default: null,
+            fieldname: "organization_type",
+            fieldtype: "Select",
+            input_class: "input-xs",
+            is_filter: 1,
+            onchange: function() {
+                cur_list.refresh();
+            },
+			options: ["","Exclusive Hiring", "Hiring", "Staffing", "TAG"],
+            placeholder: "Company Type"
+        };
+        listview.page.add_field(df, '.standard-filter-section');
+		
+
+		const df1 = {
+            condition: "=",
+            default: null,
+            fieldname: "role_profile_name",
+            fieldtype: "Select",
+            input_class: "input-xs",
+            is_filter: 1,
+            onchange: function() {
+                cur_list.refresh();
+            },
+			options: get_role_profile1(),
+            placeholder: "Role"
+        };
+        listview.page.add_field(df1, '.standard-filter-section');
+
+		const df2 = {
+            condition: "=",
+            default: null,
+            fieldname: "company",
+            fieldtype: "Select",
+            input_class: "input-xs",
+            is_filter: 1,
+            onchange: function() {
+                cur_list.refresh();
+            },
+			options: get_organization_type(),
+            placeholder: "Company"
+        };
+        listview.page.add_field(df2, '.standard-filter-section');
+
     },
 	hide_name_column: true,
 	refresh: function(listview){
@@ -60,3 +114,38 @@ frappe.ui.form.ControlPassword = frappe.ui.form.ControlData.extend({
 		});
 	}
 });
+
+function get_organization_type(){
+	let text='\n'
+
+	frappe.call({
+		"method": "tag_workflow.utils.whitelisted.get_organization_type",
+		args: {
+			"user_type":frappe.boot.tag.tag_user_info.company_type
+		},
+		"async": 0,
+		"callback": function(r){
+			if(r.message){
+				text += r.message
+			}
+		}
+	});
+	return text
+
+}
+
+function get_role_profile1(){
+	let text='\n'
+
+	frappe.call({
+		"method": "tag_workflow.utils.whitelisted.get_role_profile",
+		"async": 0,
+		"callback": function(r1){
+			if(r1.message){
+				text += r1.message
+			}
+		}
+	});
+	return text
+
+}
