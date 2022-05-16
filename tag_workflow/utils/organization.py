@@ -9,7 +9,7 @@ import json, os
 from pathlib import Path
 from tag_workflow.utils.trigger_session import share_company_with_user
 from tag_workflow.controllers.master_controller import make_update_comp_perm, user_exclusive_perm
-import requests
+import requests, time
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
@@ -59,7 +59,6 @@ def setup_data():
         update_job_title_list()
         update_old_lead_status()
         share_company_with_user()
-        update_lat_lng()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -245,18 +244,23 @@ def update_tag_user_type():
     except Exception as e:
         frappe.log_error(e, "Update Tag User Type")
         print(e)
+@frappe.whitelist()
+def update_lat_lng(company):
+    try:
+        frappe.enqueue("tag_workflow.utils.organization.update_old_emp_lat_lng", queue='long', job_name=company, is_async=True, company=company)
+    except Exception as e:
+        frappe.msgprint(e)
 
-# lat lng update
-def update_lat_lng():
+def update_old_emp_lat_lng(company):
     try:
         count = 0
         print("*------lat lng updtae--------------------------*\n")
-        my_data = frappe.db.sql(""" select name, state, city, zip from `tabEmployee` where lat is null and lng is null and employee_number is null and city is not null and state is not null """,as_dict=1)
+        my_data = frappe.db.sql(""" select name, state, city, zip from `tabEmployee` where lat in (null, '') and employee_number is null and city is not null and state is not null and company = %s """, company, as_dict=1)
         for d in my_data:
             address = d.city + ", " + d.state + ", " + (d.zip if d.zip != 0 and d.zip is not None else "")
             google_location_data_url = GOOGLE_API_URL + address
             if(count % 80 == 0):
-                time.sleep(30)
+                time.sleep(5)
             google_response = requests.get(google_location_data_url)
             location_data = google_response.json()
             if(google_response.status_code == 200 and len(location_data)>0 and len(location_data['results'])>0):
