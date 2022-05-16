@@ -22,7 +22,7 @@ JO = "Job Order"
 url_link="https://api.resumatorapi.com/v1/applicants/"
 apikey="?apikey="
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
-
+exclusive_hiring="Exclusive Hiring"
 #-----------------------------------#
 def set_missing_values(source, target, customer=None, ignore_permissions=True):
     if customer:
@@ -344,7 +344,7 @@ def get_company_order(company_type, company, result):
                 result.append({"name": j, "date": (str(date.strftime("%d %b, %Y "))+ ' '+str(converttime(time))), "job_site": job_site, "company": company, "per_hour": per_hour, "select_job": select_job})
         return result
 
-    elif(company_type in ["Hiring", "Exclusive Hiring"]):
+    elif(company_type in ["Hiring", exclusive_hiring]):
         order1 = f" select name,from_date,job_start_time,job_site, company, per_hour, order_status,select_job,worker_filled from `tabJob Order` where company = '{company}' and '{frappe.utils.nowdate()}'  between from_date and to_date  order by creation desc limit 5"
         order = frappe.db.sql(order1,as_dict=1)
         for o in order:
@@ -694,7 +694,7 @@ def get_company_job_order(user_type):
             companies = frappe.db.sql(sql, as_dict=1)
             data = [c['name'] for c in companies]
             return "\n".join(data)
-        elif user_type=="Hiring" or user_type=="Exclusive Hiring":
+        elif user_type=="Hiring" or user_type==exclusive_hiring:
             sql=f''' select name,company,email from `tabEmployee` where email="{current_user}" '''
             companies = frappe.db.sql(sql, as_dict=1)
             data = [c['company'] for c in companies]
@@ -726,7 +726,7 @@ def get_organization_type(user_type):
                 data.append(c["name"])
             
             return "\n".join(data)
-        elif user_type=="Hiring" or user_type=="Exclusive Hiring":
+        elif user_type=="Hiring" or user_type==exclusive_hiring:
             sql=f''' select name,company,email from `tabEmployee` where email="{current_user}" '''
             companies = frappe.db.sql(sql, as_dict=1)
             data = [c['company'] for c in companies]
@@ -751,4 +751,4 @@ def get_role_profile():
         
         return "\n".join(data)
     except Exception as e:
-        print(e) 
+        print(e)  
