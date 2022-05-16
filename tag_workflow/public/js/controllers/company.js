@@ -10,6 +10,7 @@ frappe.ui.form.on("Company", {
 		removing_registration_verbiage(frm);
 		hide_details();
 		update_company_fields();
+		update_lat_lng(frm);
 		make_invoice(frm);
 		uploaded_file_format(frm);
 		download_document(frm);
@@ -698,4 +699,24 @@ function add_terminate_button(frm){
                 });
         }).addClass("btn-primary");
 
+}
+
+function update_lat_lng(frm){
+	if(frappe.session.user == "Administrator"){
+		frm.add_custom_button(__("Update lat lng"), function () {
+			if(frm.doc.__islocal){
+				frappe.msgprint('Please same the form first.');
+			}else{
+				frappe.call({
+					method: "tag_workflow.utils.organization.update_lat_lng",
+					args: {"company": frm.doc.name},
+					freeze: true,
+					freeze_message: "<p><b>Fetching records from JazzHR...</b></p>",
+					callback: function(){
+						frappe.msgprint('Employees are being updated in the background. You may continue using the application');
+					}
+				});
+			}
+		}).addClass("btn-primary");
+	}
 }
