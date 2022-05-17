@@ -290,9 +290,6 @@ function approved_employee(frm){
 		var diff = current_date.getTime()-approved_date.getTime();
 		console.log(cur_frm.doc.employee_details.length)
 		var table_len = cur_frm.doc.employee_details.length
-		if (cur_frm.doc.previous_worker){
-			table_len = cur_frm.doc.employee_details.length-cur_frm.doc.previous_worker
-		}
 		diff = parseInt(diff/1000);
 		if(diff<60){
 			frappe.call({
