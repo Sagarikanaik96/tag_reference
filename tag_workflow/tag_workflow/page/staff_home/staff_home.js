@@ -6,7 +6,7 @@ frappe.flags.wrapper = null;
 frappe.pages['staff-home'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: '',
+		title: 'Home',
 		single_column: true
 	});
 	wrapper.staff_home = new frappe.StaffHome(wrapper, page);
