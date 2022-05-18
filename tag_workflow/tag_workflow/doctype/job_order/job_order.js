@@ -1314,7 +1314,7 @@ function assigned_emp(){
 
 				profile_html += `<tr><td>${data[p].employee}</td><td>${marked_as}</td>`;
 
-				if(marked_as != " Replaced"){
+				if(marked_as != " Replaced" && cur_frm.doc.order_status != "Completed"){
 					profile_html += `
 						<td class="replace" data-fieldname="replace">
 							<button class="btn btn-primary btn-sm mt-2" onclick=redirect_job('${data[p].assign_name}','${data[p].child_name}')>Replace</button>

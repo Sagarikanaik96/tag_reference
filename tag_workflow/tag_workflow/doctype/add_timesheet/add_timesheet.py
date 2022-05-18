@@ -48,7 +48,11 @@ def check_if_employee_assign(items, job_order):
         for item in items:
             sql = """ select employee from `tabAssign Employee Details` where employee = '{0}' and parent in (select name from `tabAssign Employee` where tag_status = "Approved" and job_order = '{1}') """.format(item['employee'], job_order)
             result = frappe.db.sql(sql, as_dict=1)
-            if(len(result) == 0):
+
+            rep_sql = """ select old_employee from `tabAssign Employee Details` where old_employee = '{0}' and parent in (select name from `tabAssign Employee` where tag_status = "Approved" and job_order = '{1}') """.format(item['employee'], job_order)
+            rep_result = frappe.db.sql(rep_sql, as_dict=1)
+
+            if(len(result) == 0 and len(rep_result) == 0):
                 frappe.msgprint(_("Employee with ID <b>{0}</b> not assigned to this Job Order(<b>{1}</b>). Please fill the details correctly and re-submit timesheets").format(item['employee'], job_order))
                 is_employee = 0
         return is_employee
@@ -169,6 +173,7 @@ def job_order_name(doctype,txt,searchfield,page_len,start,filters):
     except Exception as e:
         frappe.log_error(e, "Job Order For Timesheet")
         frappe.throw(e)
+
 @frappe.whitelist()
 def dnr_notification(time,staffing_user):
     dnr_timesheet=frappe.get_doc('Timesheet',time['docname'])

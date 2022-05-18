@@ -76,7 +76,6 @@ frappe.ui.form.on('Assign Employee', {
 		child_table_label();
 
 		add_employee_row(frm);
-		open_child_row(frm);
 	},
 	e_signature_full_name:function(frm){
 		if(frm.doc.e_signature_full_name){
@@ -478,11 +477,9 @@ frappe.ui.form.on("Assign Employee Details", {
 				}
 			})
 		}
-
 		if(child.__islocal != 1){
 			check_old_value(child);
 		}
-
 	}	
 });
 
@@ -589,12 +586,5 @@ function check_old_value(child){
 				}
 			}
 		});
-	}
-}
-
-function open_child_row(frm){
-	if(frappe.route_options && frappe.route_options.child){
-		frm.fields_dict["employee_details"].grid.grid_rows_by_docname[frappe.route_options.child].toggle_view();
-		frappe.route_options = {};
 	}
 }
