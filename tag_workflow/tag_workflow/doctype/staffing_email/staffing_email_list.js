@@ -5,6 +5,9 @@ frappe.listview_settings["Staffing Email"] = {
             $('.menu-btn-group').hide()
         }
         $('[data-original-title = "Name"]').hide();
+        $('.list-subject').css("flex", "1");
+        $('.list-row .level-right ').css("flex", "0.3"); 
+        $('.list-row-head .level-right').css("flex", "0.3");
     },
     refresh: function(){
         if(frappe.session.user != 'Administrator'){
@@ -13,6 +16,9 @@ frappe.listview_settings["Staffing Email"] = {
         $('[title = "Staffing Email"]').html('Emails');
         $('#navbar-breadcrumbs > li:nth-child(2) > a:nth-child(1)').html('Emails');
         $('[data-label = "Add Staffing Email"]').text('Draft Email');
+        $('.list-subject').css("flex", "1");
+        $('.list-row .level-right ').css("flex", "0.3");
+        $('.list-row-head .level-right').css("flex", "0.3");
     },
     hide_name_column: true
 } 
