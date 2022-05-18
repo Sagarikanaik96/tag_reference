@@ -76,6 +76,7 @@ frappe.ui.form.on('Assign Employee', {
 		child_table_label();
 
 		add_employee_row(frm);
+		open_child_row(frm);
 	},
 	e_signature_full_name:function(frm){
 		if(frm.doc.e_signature_full_name){
@@ -275,12 +276,12 @@ frappe.ui.form.on("Assign Employee Details", {
 			frappe.throw("You can't delete employee details once it's Approved.");
 		}
 	},
-	form_render: function(frm, cdt, cdn){
+	/*form_render: function(frm, cdt, cdn){
 		let child = frappe.get_doc(cdt, cdn);
 		if(frm.doc.tag_status == "Approved" && child.__islocal != 1){
 			cur_frm.fields_dict["employee_details"].grid.grid_rows_by_docname[child.name].toggle_editable("employee", 0);
 		}
-	}
+	}*/
 });
 
 function approved_employee(frm){
@@ -469,7 +470,7 @@ function document_download(){
 
 frappe.ui.form.on("Assign Employee Details", {
 	employee:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn]
+		var child = locals[cdt][cdn];
 		if(frm.doc.show_all_employees==0){
 			frappe.db.get_value("Employee", {name: child.employee}, ["job_category"], function(r) {
 				if(r.job_category && r.job_category!='null'){
@@ -477,6 +478,11 @@ frappe.ui.form.on("Assign Employee Details", {
 				}
 			})
 		}
+
+		if(child.__islocal != 1){
+			check_old_value(child);
+		}
+
 	}	
 });
 
@@ -567,5 +573,28 @@ function staffing_company(frm){
 				}	
 			});
 		}
+	}
+}
+
+/*-------------------------------------*/
+function check_old_value(child){
+	if(child.employee){
+		frappe.call({
+			"method": "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.check_old_value",
+			"args": {"name": child.name},
+			"callback": function(r){
+				let emp = r.message;
+				if(emp != child.employee){
+					frappe.model.set_value(child.doctype, child.name, "old_employee", emp);
+				}
+			}
+		});
+	}
+}
+
+function open_child_row(frm){
+	if(frappe.route_options && frappe.route_options.child){
+		frm.fields_dict["employee_details"].grid.grid_rows_by_docname[frappe.route_options.child].toggle_view();
+		frappe.route_options = {};
 	}
 }

@@ -130,3 +130,10 @@ def approved_workers(job_order,user_email):
     sql=f"select staffing_organization,approved_no_of_workers from `tabClaim Order` where job_order='{job_order}' and staffing_organization in (select company from `tabEmployee` where user_id='{user_email}') "
     data=frappe.db.sql(sql,as_dict=True)
     return data
+
+@frappe.whitelist()
+def check_old_value(name):
+    try:
+        return frappe.db.get_value("Assign Employee Details", name, "employee")
+    except Exception as e:
+        frappe.msgprint(e)

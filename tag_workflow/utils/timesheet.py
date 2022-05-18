@@ -46,17 +46,24 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
 @frappe.whitelist()
 def get_timesheet_data(job_order, user, company_type):
     try:
-        if(company_type=='Staffing'):
-            company_type='Exclusive Hiring'
+        result, rep_result = [], []
+        if(company_type == 'Staffing'):
+            company_type = 'Exclusive Hiring'
+
         if(company_type in ["Hiring", "Exclusive Hiring"]):
             sql = """ select employee, employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
             data = frappe.db.sql(sql, as_dict=1)
             result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company")} for d in data]
-            return result
+
+            res_sql = """ select old_employee as employee, old_employee_name as employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") and old_employee != '' """.format(job_order)
+            rep_data = frappe.db.sql(res_sql, as_dict=1)
+            rep_result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company")} for d in rep_data]
+
+            return result+rep_result
         return []
     except Exception as e:
-        return []
         frappe.msgprint(e)
+        return []
 
 
 #------------------------------------#

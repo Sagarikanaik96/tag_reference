@@ -381,3 +381,13 @@ def get_industry_type_list(doctype, txt, searchfield, page_len, start, filters):
     else:
         sql = ''' select industry_type from `tabIndustry Types` where parent = '{0}' '''.format(company)
         return frappe.db.sql(sql)
+
+
+
+@frappe.whitelist()
+def get_redirect_doc(company, name):
+    try:
+        docname = frappe.db.get_value("Assign Employee", {"job_order": name, "company": ['in', tuple(json.loads(company))]}, "name")
+        return docname
+    except Exception as e:
+        frappe.msgprint(e)

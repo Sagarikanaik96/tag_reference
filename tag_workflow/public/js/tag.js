@@ -367,3 +367,10 @@ frappe.ui.form.ControlInput.prototype.set_label = function(label) {
 		__(this.df.label)  || "&nbsp;";
 	this._label = this.df.label;
 };
+
+/*----------------------------------------*/
+function redirect_job(name, child_name){
+	console.log(name, child_name);
+	frappe.route_options = {"child": child_name};
+	frappe.set_route("app", "assign-employee", name);
+}

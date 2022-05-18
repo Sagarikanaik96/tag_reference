@@ -648,20 +648,14 @@ def assigned_employee_data(job_order):
             sql3=f"""select max(IF(no_show=1, "No Show", " ")) as no_show,max(IF(non_satisfactory=1,"Non Satisfactory"," ")) as non_satisfactory,max(IF(dnr=1,"DNR"," ")) as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
             employees_data=frappe.db.sql(sql3,as_dict=True)
             if(len(employees_data)==0):
-                emp_dic["staff_company"]=emp_data[i].staff_company
-                emp_dic["employee"]=emp_data[i].employee_name
-                emp_dic["no_show"]=""
-                emp_dic["non_satisfactory"]=""
-                emp_dic["dnr"]=""
+                emp_dic = {"staff_company": emp_data[i].staff_company, "employee": emp_data[i].employee_name, "no_show": "", "non_satisfactory": "", "dnr": "", "replaced": ""}
                 emp_list.append(emp_dic)
             else:
-                emp_dic["staff_company"]=emp_data[i].staff_company
-                emp_dic["employee"]=emp_data[i].employee_name
-                emp_dic["no_show"]=employees_data[0].no_show
-                emp_dic["non_satisfactory"]=employees_data[0].non_satisfactory
-                emp_dic["dnr"]=employees_data[0].dnr
+                emp_dic = {"staff_company": emp_data[i].staff_company, "employee": emp_data[i].employee_name, "no_show": employees_data[0].no_show, "non_satisfactory": employees_data[0].non_satisfactory, "dnr": employees_data[0].dnr, "replaced": ""}
                 emp_list.append(emp_dic)
-        return emp_list
+
+        replaced = replaced_employees(job_order, None)
+        return emp_list+replaced
     except Exception as e:
         frappe.log_error(e, "Assigned Employee")
 
@@ -679,32 +673,44 @@ def staff_assigned_employees(job_order):
 @frappe.whitelist(allow_guest=False)
 def staffing_assigned_employee(job_order):
     try:
-        assigned_emp=f""" select `tabAssign Employee`.company,`tabAssign Employee`.name as name,`tabAssign Employee Details`.employee_name as employee_name,`tabAssign Employee Details`.employee as employee from `tabAssign Employee`,`tabAssign Employee Details` where `tabAssign Employee`.name=`tabAssign Employee Details`.parent and job_order="{job_order}" and tag_status="Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email='{frappe.session.user}' )  """
-        emp_data=frappe.db.sql(assigned_emp,as_dict=1)
-        emp_list=[]
+        assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabAssign Employee Details`.employee_name as employee_name, `tabAssign Employee Details`.employee as employee, `tabAssign Employee Details`.name as child_name from `tabAssign Employee`, `tabAssign Employee Details` where `tabAssign Employee`.name = `tabAssign Employee Details`.parent and job_order = "{job_order}" and tag_status = "Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email = '{frappe.session.user}')"""
+        emp_data = frappe.db.sql(assigned_emp, as_dict=1)
+        emp_list = []
         for i in range(len(emp_data)):
             emp_dic={}
-            sql3=f"""select max(IF(no_show=1, "No Show", " ")) as no_show,max(IF(non_satisfactory=1,"Non Satisfactory"," ")) as non_satisfactory,max(IF(dnr=1,"DNR"," ")) as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}' """
-            employees_data=frappe.db.sql(sql3,as_dict=True)
+            sql3 = f"""select max(IF(no_show=1, "No Show", " ")) as no_show,max(IF(non_satisfactory=1,"Non Satisfactory"," ")) as non_satisfactory,max(IF(dnr=1,"DNR"," ")) as dnr from `tabTimesheet` where job_order_detail='{job_order}' and employee='{emp_data[i].employee}'"""
+            employees_data = frappe.db.sql(sql3, as_dict=True)
+
             if(len(employees_data)==0):
-                emp_dic['assign_name']=emp_data[i].name
-                emp_dic["staff_company"]=emp_data[i].staff_company
-                emp_dic["employee"]=emp_data[i].employee_name
-                emp_dic["no_show"]=""
-                emp_dic["non_satisfactory"]=""
-                emp_dic["dnr"]=""
+                emp_dic = {"assign_name": emp_data[i].name, "staff_company": emp_data[i].staff_company, "employee": emp_data[i].employee_name, "no_show": "", "non_satisfactory": "", "dnr": "", "replaced": "", "child_name": emp_data[i].child_name}
                 emp_list.append(emp_dic)
             else:
-                emp_dic['assign_name']=emp_data[i].name
-                emp_dic["staff_company"]=emp_data[i].staff_company
-                emp_dic["employee"]=emp_data[i].employee_name
-                emp_dic["no_show"]=employees_data[0].no_show
-                emp_dic["non_satisfactory"]=employees_data[0].non_satisfactory
-                emp_dic["dnr"]=employees_data[0].dnr
+                emp_dic = {"assign_name": emp_data[i].name, "staff_company": emp_data[i].staff_company, "employee": emp_data[i].employee_name, "no_show": employees_data[0].no_show, "non_satisfactory": employees_data[0].non_satisfactory, "dnr": employees_data[0].dnr, "replaced": "", "child_name": emp_data[i].child_name}
                 emp_list.append(emp_dic)
-        return emp_list
+
+        replaced = replaced_employees(job_order, frappe.session.user)
+        return emp_list+replaced
     except Exception as e:
         frappe.log_error(e, "Approved Employee")
+
+#------------------------------------#
+def replaced_employees(job_order, user=None):
+    try:
+        data = []
+        if user:
+            assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabAssign Employee Details`.old_employee_name as employee_name, `tabAssign Employee Details`.old_employee as employee, `tabAssign Employee Details`.name as child_name from `tabAssign Employee`, `tabAssign Employee Details` where `tabAssign Employee`.name = `tabAssign Employee Details`.parent and job_order = "{job_order}" and tag_status = "Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email = '{frappe.session.user}')  """
+        else:
+            assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabAssign Employee Details`.old_employee_name as employee_name, `tabAssign Employee Details`.old_employee as employee, `tabAssign Employee Details`.name as child_name from `tabAssign Employee`, `tabAssign Employee Details` where `tabAssign Employee`.name = `tabAssign Employee Details`.parent and job_order = "{job_order}" and tag_status = "Approved"  """
+
+        emp_data = frappe.db.sql(assigned_emp,as_dict=1)
+        for e in emp_data:
+            if(e.employee_name):
+                data.append({"assign_name": e.name, "staff_company": e.company, "employee": e.employee_name, "replaced": "Replaced", "child_name": e.child_name})
+
+        return data
+    except Exception as e:
+        return []
+#-----------------------------------#
 
 def unshare_job_order(job):
     if job.bid>0 and job.staff_org_claimed:

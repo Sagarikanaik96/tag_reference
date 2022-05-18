@@ -1246,17 +1246,21 @@ function approved_emp(){
 		},
 		callback: function(rm) {
 			var data = rm.message;
-			let profile_html = `<table><th>Employee Name</th><th>Marked As</th><th>Staffing Company</th>`;
+			let profile_html = `<table style="width: 100%;"><th>Employee Name</th><th>Marked As</th><th>Staffing Company</th>`;
 			for (let p in data) {
-				var marked_as = ''
+				var marked_as = '';
 				if (data[p].no_show){
-					marked_as  += ' '+ data[p].no_show
+					marked_as  += ' '+ data[p].no_show;
 				}
 				if (data[p].non_satisfactory){
-					marked_as += ' ' + data[p].non_satisfactory
+					marked_as += ' ' + data[p].non_satisfactory;
 				}
 				if (data[p].dnr){
-					marked_as += ' '+ data[p].dnr
+					marked_as += ' '+ data[p].dnr;
+				}
+
+				if(data[p].replaced){
+					marked_as += ' Replaced';
 				}
 				profile_html += `<tr>
 					<td>${data[p].employee}</td>
@@ -1288,26 +1292,33 @@ function approved_emp(){
 function assigned_emp(){
 	frappe.call({
 		method: "tag_workflow.tag_data.staffing_assigned_employee",
-		args: {'job_order': cur_frm.doc.name,},
+		args: {'job_order': cur_frm.doc.name},
 		callback: function(rm) {
-			var data = rm.message;
-			let profile_html = `<table><th>Employee Name</th><th>Marked As</th><th>Actions</th>`;
+			var data = rm.message || [];
+			let profile_html = `<table style="width: 100%;"><th>Employee Name</th><th>Marked As</th><th>Actions</th>`;
 			for (let p in data) {
-				var marked_as = ''
+				var marked_as = '';
 				if (data[p].no_show){
-					marked_as  += ' '+ data[p].no_show
+					marked_as  += ' '+ data[p].no_show;
 				}
 				if (data[p].non_satisfactory){
-					marked_as += ' '+ data[p].non_satisfactory
+					marked_as += ' '+ data[p].non_satisfactory;
 				}
 				if (data[p].dnr){
-					marked_as += ' '+ data[p].dnr
+					marked_as += ' '+ data[p].dnr;
+				}
+
+				if(data[p].replaced){
+					marked_as += " Replaced";
 				}
 
 				profile_html += `<tr><td>${data[p].employee}</td><td>${marked_as}</td>`;
 
-				if (data[parseInt(p)].no_show == "No Show" || data[parseInt(p)].non_satisfactory == "Non Satisfactory" || data[parseInt(p)].dnr == "DNR") {
-					profile_html += `<td class="replace" data-fieldname="replace" ><a href="/app/assign-employee/${data[p].assign_name}"><button class="btn btn-primary btn-sm mt-2">Replace </button></a></td>`;
+				if(marked_as != " Replaced"){
+					profile_html += `
+						<td class="replace" data-fieldname="replace">
+							<button class="btn btn-primary btn-sm mt-2" onclick=redirect_job('${data[p].assign_name}','${data[p].child_name}')>Replace</button>
+						</td>`;
 				}
 
 				profile_html += `</tr>`;
@@ -1316,7 +1327,7 @@ function assigned_emp(){
 			profile_html += `</table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`;
 			var dialog1 = new frappe.ui.Dialog({
 				title: __('Assigned Employees'),
-				fields: [{fieldname: "staff_companies",	fieldtype: "HTML", options: profile_html}, ]
+				fields: [{fieldname: "staff_companies",	fieldtype: "HTML", options: profile_html}]
 			});
 
 			dialog1.no_cancel();

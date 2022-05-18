@@ -253,9 +253,7 @@ def share_old_docs(user, company, company_type):
     try:
         data = []
         if(company_type == "Staffing"):
-            user_list = frappe.db.get_list("User", {"company": company}, "name")
-            users = [u.name for u in user_list]
-            non_exc_data = frappe.db.sql(""" select DISTINCT share_name as docname, share_doctype as doctype from `tabDocShare` where user in {0} and share_doctype in ("Job Order", "Timesheet") """.format(tuple(users)), as_dict=1)
+            non_exc_data = frappe.db.sql(""" select DISTINCT share_name as docname, share_doctype as doctype from `tabDocShare` where user in (select name from `tabUser` where company = %s) and share_doctype in ("Job Order", "Timesheet") """,company, as_dict=1)
             exc_data = frappe.db.sql(""" select name from `tabJob Order` where company in(select name from `tabCompany` where parent_staffing = %s) """,company, as_dict=1)
             exc_data = [{"doctype": "Job Order", "docname": e.name} for e in exc_data]
             data = non_exc_data + exc_data
