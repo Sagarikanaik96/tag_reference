@@ -1281,6 +1281,9 @@ function approved_emp(){
 				fields: [{fieldname: "staff_companies", fieldtype: "HTML", options: profile_html},]
 			});
 			dialog.no_cancel();
+			dialog.$wrapper.on('hidden.bs.modal', function () {
+				$('[data-fieldname = assigned_employees_hiring]').attr('id', 'approved_inactive');
+		 	});
 			dialog.set_primary_action(__('Close'), function() {
 				dialog.hide();
 				$('[data-fieldname = assigned_employees_hiring]').attr('id', 'approved_inactive');
@@ -1337,6 +1340,9 @@ function assigned_emp(){
 			});
 
 			dialog1.no_cancel();
+			dialog1.$wrapper.on('hidden.bs.modal', function () {
+				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_inactive');
+			});
 			dialog1.set_primary_action(__('Close'), function() {
 				dialog1.hide();
 				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_inactive');
