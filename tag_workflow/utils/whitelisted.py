@@ -647,38 +647,6 @@ def get_staffing_company_invoices():
         frappe.log_error(e,'Company error')
         return  []
 
-@frappe.whitelist()
-def getdoc1(doctype, name, user=None):
-    if not (doctype and name):
-        frappe.throw('doctype and name required!')
-
-    if not name:
-        name = doctype
-
-    if not frappe.db.exists(doctype, name):
-        return []
-
-    try:
-        doc = frappe.get_doc(doctype, name)
-        run_onload(doc)
-        if not doc.has_permission("read") and doc.doctype != "Sales Invoice":
-            frappe.flags.error_message = _('Insufficient Permission for {0}').format(frappe.bold(doctype + ' ' + name))
-            raise frappe.PermissionError(("read", doctype, name))
-        elif not doc.has_permission("read") and not doc.timesheets:
-            frappe.flags.error_message = _('Insufficient Permission  for {0}').format(frappe.bold(doctype + ' ' + name))
-            raise frappe.PermissionError(("read", doctype, name))
-
-        doc.apply_fieldlevel_read_permissions()
-        # add file list
-        doc.add_viewed()
-        get_docinfo(doc)
-    except Exception:
-        frappe.errprint(frappe.utils.get_traceback())
-        raise
-
-    doc.add_seen()
-    frappe.response.docs.append(doc)
-
 def run_onload(doc):
     doc.set("__onload", frappe._dict())
     doc.run_method("onload")
