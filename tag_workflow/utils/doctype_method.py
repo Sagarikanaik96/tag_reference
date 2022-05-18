@@ -265,7 +265,7 @@ def check_if_latest(self):
             conflict, tmp = check_ismodify(self)
             self.check_docstatus_transition(tmp.docstatus)
 
-        if conflict and self.doctype not in ["Company", "Employee", "Job Order", "Assign Employee", "User", "Lead"]:
+        if conflict and self.doctype not in ["Company", "Employee", "Job Order", "Assign Employee", "User", "Lead", "Timesheet"]:
                 frappe.msgprint(_("Error: Document has been modified after you have opened it") + (" (%s, %s). " % (modified, self.modified)) + _("Please refresh to get the latest document."), raise_exception=frappe.TimestampMismatchError)
     else:
         self.check_docstatus_transition(0)
