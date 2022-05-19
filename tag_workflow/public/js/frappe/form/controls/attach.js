@@ -105,7 +105,6 @@ frappe.ui.form.ControlAttach = frappe.ui.form.ControlData.extend({
 		if(this.frm) {
 			this.parse_validate_and_set_in_model(attachment.file_url);
 			this.frm.attachments.update_attachment(attachment);
-			this.frm.doc.docstatus == 1 ? this.frm.save('Update') : this.frm.save();
 		}
 		this.set_value(attachment.file_url);
 	},
