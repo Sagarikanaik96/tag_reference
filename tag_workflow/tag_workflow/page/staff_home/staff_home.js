@@ -92,7 +92,8 @@ frappe.StaffHome = Class.extend({
 			st1.push(sh, st[1])
 			let st2= st1.join(":")
 			html += `
-				<div class="row bg-white mx-2 my-4  rounded border job" data-job="${order[o].select_job}" style="margin-top: 0px !important;">
+				<div style="max-height: 385px; overflow: auto;">
+				<div class="row bg-white mx-2 my-3 rounded border job" data-job="${order[o].select_job}" style="margin-top: 0px !important;">
 					<div class="d-flex flex-wrap p-3 ">
 						<div class="d-flex justify-content-between w-100 ">
 							<h6>${order[o].select_job}</h6>
@@ -135,7 +136,7 @@ frappe.StaffHome = Class.extend({
 							</div>
 						</div>
 					</div>
-					<div class="d-flex flex-wrap w-100 py-3 border-top">
+					<div class="d-flex flex-wrap w-100 pt-3 border-top">
 						<div class="col-lg-4">
 							<!--<a href="#" class="text-secondary pt-2">See on map</a> -->
 						</div>
@@ -146,6 +147,7 @@ frappe.StaffHome = Class.extend({
 							</div>
 						</div>
 					</div>
+				</div>
 				</div>
 			</div>`
 		}

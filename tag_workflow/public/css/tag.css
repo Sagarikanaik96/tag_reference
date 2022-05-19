@@ -571,12 +571,21 @@ input::-webkit-credentials-auto-fill-button {
   font-weight: 500;
   font-size: 13px;
 }
+.hiring_dashboard_table table thead {
+  position: sticky;
+  top: -1px;
+  background: #fff;
+}
 .hiring_dashboard_table table tbody tr td {
   font-size: 13px;
+  padding: 8px 14px;
 }
 .hiring_dashboard_table {
   max-height: 300px;
   overflow: auto;
+}
+.hiring_dashboard_table table {
+  margin-top: 0;
 }
 .hiring-home .inner-search {
   max-width: 470px;
