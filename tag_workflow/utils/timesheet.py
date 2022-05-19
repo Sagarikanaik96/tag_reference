@@ -53,11 +53,11 @@ def get_timesheet_data(job_order, user, company_type):
         if(company_type in ["Hiring", "Exclusive Hiring"]):
             sql = """ select employee, employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
             data = frappe.db.sql(sql, as_dict=1)
-            result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company")} for d in data]
+            result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company"), "status": ""} for d in data]
 
             res_sql = """ select old_employee as employee, old_employee_name as employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") and old_employee != '' """.format(job_order)
             rep_data = frappe.db.sql(res_sql, as_dict=1)
-            rep_result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company")} for d in rep_data]
+            rep_result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company"), "status": "Replaced"} for d in rep_data]
 
             return result+rep_result
         return []

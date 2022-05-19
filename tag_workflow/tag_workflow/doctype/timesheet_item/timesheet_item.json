@@ -10,10 +10,10 @@
   "employee_name",
   "company",
   "from_time",
-  "column_break_5",
   "to_time",
   "break_from",
   "break_to",
+  "column_break_5",
   "hours",
   "amount",
   "status",
@@ -76,7 +76,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "\nDNR\nNo Show\nNon Satisfactory"
+   "options": "\nDNR\nNo Show\nNon Satisfactory\nReplaced"
   },
   {
    "columns": 1,
@@ -131,7 +131,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-28 01:44:16.319149",
+ "modified": "2022-05-19 00:34:54.149448",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Timesheet Item",

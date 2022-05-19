@@ -140,7 +140,8 @@ function get_employee_data(frm){
 					$.extend(child, {
 						"employee": data[d]['employee'],
 						"employee_name": data[d]['employee_name'],
-						"company": data[d]['company']
+						"company": data[d]['company'],
+						"status": data[d]['status']
 					});
 				}
 				cur_frm.refresh_field("items");
