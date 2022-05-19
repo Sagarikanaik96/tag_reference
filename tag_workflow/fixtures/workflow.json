@@ -73,7 +73,7 @@
   "doctype": "Workflow",
   "document_type": "Timesheet",
   "is_active": 1,
-  "modified": "2022-01-11 20:02:24.619304",
+  "modified": "2022-05-19 03:08:49.102817",
   "name": "Timesheet",
   "override_status": 0,
   "parent": null,
@@ -82,7 +82,7 @@
   "send_email_alert": 0,
   "states": [
    {
-    "allow_edit": "Projects User",
+    "allow_edit": "Accounts User",
     "doc_status": "0",
     "is_optional_state": 0,
     "message": null,
