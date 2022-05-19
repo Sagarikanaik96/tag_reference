@@ -24,6 +24,7 @@ frappe.ui.form.on('Assign Employee', {
 		attachrefresh();
 		$('.form-footer').hide()
 		if(frm.doc.__islocal==1){
+			$(".grid-add-row").attr('class', 'btn btn-xs btn-secondary grid1-row');
 			if (!frm.doc.hiring_organization){
 				frappe.msgprint(__("Your Can't Assign Employee without job order detail"));
 				frappe.validated = false
@@ -76,6 +77,7 @@ frappe.ui.form.on('Assign Employee', {
 		child_table_label();
 
 		add_employee_row(frm);
+
 	},
 	e_signature_full_name:function(frm){
 		if(frm.doc.e_signature_full_name){
