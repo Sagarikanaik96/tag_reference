@@ -50,9 +50,9 @@ def get_child_data(order, timesheet, date=None):
         company = frappe.db.get_value("Timesheet", {"name": timesheet}, "employee_company")
 
         if(date != "null"):
-            sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.date_of_timesheet = '{1}' and t.employee_company = '{2}' order by t.creation asc""".format(order, date, company)
+            sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.date_of_timesheet = '{1}' and t.employee_company = '{2}' order by t.creation asc""".format(order, date, company)
         else:
-            sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.employee_company = '{1}' order by t.creation asc""".format(order, company)
+            sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.employee_company = '{1}' order by t.creation asc""".format(order, company)
 
         data = frappe.db.sql(sql, as_dict=1)
         for d in data:
@@ -68,6 +68,8 @@ def get_child_data(order, timesheet, date=None):
                 state = 'Non Satisfactory'
             elif(d.no_show == 1):
                 state = 'No Show'
+            elif(d.replaced == 1):
+                state = 'Replaced'
 
             result.append({"employee": d['employee'], "employee_name": d['employee_name'], "from_time": from_time, "to_time": to_time, "break_start": break_start, "break_end": break_end, "name": d['name'], "hours": d['hours'], "workflow_state": d['workflow_state'], "state": state})
 

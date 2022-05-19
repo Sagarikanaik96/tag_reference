@@ -17,11 +17,14 @@ class AddTimesheet(Document):
 
 
 #------------------------------------#
-def get_child_time(posting_date, from_time, to_time, child_from=None, child_to=None, break_from=None, break_to=None):
+def get_child_time(posting_date, fromtime=None, totime=None, child_from=None, child_to=None, break_from=None, break_to=None):
     try:
         if(child_from and child_to):
             from_time = datetime.datetime.strptime((posting_date+" "+str(child_from)), TM_FT)
             to_time = datetime.datetime.strptime((posting_date+" "+str(child_to)), TM_FT)
+        else:
+            from_time = ''
+            to_time = ''
 
         if(break_from and break_to):
             break_from = datetime.datetime.strptime((posting_date+" "+str(break_from)), TM_FT)
@@ -31,12 +34,14 @@ def get_child_time(posting_date, from_time, to_time, child_from=None, child_to=N
             break_to = ''
         return from_time, to_time, break_from, break_to
     except Exception:
-        return from_time, to_time, '', ''
+        return fromtime, totime, '', ''
 
 def check_old_timesheet(child_from, child_to, employee):
     try:
-        sql = """select c.name, c.parent from `tabTimesheet Detail` c where (('{1}' >= c.from_time and '{1}' <= c.to_time) or ('{2}' >= c.from_time and '{2}' <= c.to_time) or ('{1}' <= c.from_time and '{2}' >= c.to_time)) and parent in (select name from `tabTimesheet` where employee = '{0}') """.format(employee, child_from, child_to)
-        data = frappe.db.sql(sql, as_dict=1)
+        data = []
+        if(child_from and child_to):
+            sql = """select c.name, c.parent from `tabTimesheet Detail` c where (('{1}' >= c.from_time and '{1}' <= c.to_time) or ('{2}' >= c.from_time and '{2}' <= c.to_time) or ('{1}' <= c.from_time and '{2}' >= c.to_time)) and parent in (select name from `tabTimesheet` where employee = '{0}') """.format(employee, child_from, child_to)
+            data = frappe.db.sql(sql, as_dict=1)
         return 1 if(len(data) > 0) else 0
     except Exception as e:
         print(e)
@@ -49,7 +54,7 @@ def check_if_employee_assign(items, job_order):
             sql = """ select employee from `tabAssign Employee Details` where employee = '{0}' and parent in (select name from `tabAssign Employee` where tag_status = "Approved" and job_order = '{1}') """.format(item['employee'], job_order)
             result = frappe.db.sql(sql, as_dict=1)
 
-            rep_sql = """ select old_employee from `tabAssign Employee Details` where old_employee = '{0}' and parent in (select name from `tabAssign Employee` where tag_status = "Approved" and job_order = '{1}') """.format(item['employee'], job_order)
+            rep_sql = """ select employee from `tabReplaced Employee` where employee = '{0}' and parent in (select name from `tabAssign Employee` where tag_status = "Approved" and job_order = '{1}') """.format(item['employee'], job_order)
             rep_result = frappe.db.sql(rep_sql, as_dict=1)
 
             if(len(result) == 0 and len(rep_result) == 0):
@@ -107,7 +112,7 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
         else:
             frappe.msgprint(_("Date must be in between Job Order start date and end date for timesheets"))
 
-        enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.send_timesheet_for_approval", timesheets=timesheets,now=True)
+        enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.send_timesheet_for_approval", timesheets=timesheets)
         return True if added == 1 else False
     except Exception as e:
         frappe.msgprint(e)
@@ -131,6 +136,8 @@ def add_status(timesheet, status, employee, company, job_order):
         elif(status == "Non Satisfactory"):
             timesheet.non_satisfactory = 1
             unsatisfied_organization(emp, company, job_order)
+        elif(status == "Replaced"):
+            timesheet.replaced = 1
         return timesheet
     except Exception:
         return timesheet

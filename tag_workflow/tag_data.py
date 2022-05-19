@@ -696,16 +696,18 @@ def staffing_assigned_employee(job_order):
 #------------------------------------#
 def replaced_employees(job_order, user=None):
     try:
-        data = []
+        data, emp = [], []
         if user:
-            assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabAssign Employee Details`.old_employee_name as employee_name, `tabAssign Employee Details`.old_employee as employee, `tabAssign Employee Details`.name as child_name from `tabAssign Employee`, `tabAssign Employee Details` where `tabAssign Employee`.name = `tabAssign Employee Details`.parent and job_order = "{job_order}" and tag_status = "Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email = '{frappe.session.user}')  """
+            assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabReplaced Employee`.employee_name as employee_name, `tabReplaced Employee`.employee, `tabReplaced Employee`.name as child_name from `tabAssign Employee`, `tabReplaced Employee` where `tabAssign Employee`.name = `tabReplaced Employee`.parent and job_order = "{job_order}" and tag_status = "Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email = '{frappe.session.user}')  """
         else:
-            assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabAssign Employee Details`.old_employee_name as employee_name, `tabAssign Employee Details`.old_employee as employee, `tabAssign Employee Details`.name as child_name from `tabAssign Employee`, `tabAssign Employee Details` where `tabAssign Employee`.name = `tabAssign Employee Details`.parent and job_order = "{job_order}" and tag_status = "Approved"  """
+            assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabReplaced Employee`.employee_name as employee_name, `tabReplaced Employee`.employee, `tabReplaced Employee`.name as child_name from `tabAssign Employee`, `tabReplaced Employee` where `tabAssign Employee`.name = `tabReplaced Employee`.parent and job_order = "{job_order}" and tag_status = "Approved"  """
+
 
         emp_data = frappe.db.sql(assigned_emp,as_dict=1)
         for e in emp_data:
-            if(e.employee_name):
+            if(e.employee_name and e.employee not in emp):
                 data.append({"assign_name": e.name, "staff_company": e.company, "employee": e.employee_name, "replaced": "Replaced", "child_name": e.child_name})
+                emp.append(e.employee)
 
         return data
     except Exception as e:

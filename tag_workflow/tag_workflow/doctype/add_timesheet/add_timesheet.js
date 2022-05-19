@@ -215,7 +215,7 @@ function add_pre_data(child, frm){
 
 /*-----------------------------------------*/
 function update_child_time(child, frm){
-	let hours = child.hours;
+	let hours = 0;
 	let breaks = 0;
 	let time_start = new Date();
 	let time_end = new Date();
@@ -232,6 +232,8 @@ function update_child_time(child, frm){
 		if(hours <= 0){
 			hours = 0;
 		}
+	}else{
+		make_from_to_zero(child);
 	}
 
 	if(child.break_from && child.break_to && child.from_time && child.to_time){
@@ -256,6 +258,14 @@ function update_child_time(child, frm){
 	}else{
 		frappe.model.set_value(child.doctype, child.name, "hours", 0);
 		frappe.model.set_value(child.doctype, child.name, "amount", 0);
+	}
+}
+
+function make_from_to_zero(child){
+	if(!child.from_time){
+		frappe.model.set_value(child.doctype, child.name, "from_time", "");
+	}else if(!child.to_time){
+		frappe.model.set_value(child.doctype, child.name, "to_time", "");
 	}
 }
 

@@ -25,6 +25,7 @@
   "show_all_employees",
   "employee_details",
   "replaced_employees",
+  "items",
   "html_37",
   "e_signature_full_name",
   "digital_sign",
@@ -220,12 +221,18 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "Previous Worker"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Replaced Employee"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-16 03:30:15.929306",
+ "modified": "2022-05-19 06:15:15.103614",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",

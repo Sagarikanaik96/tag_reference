@@ -10,9 +10,7 @@
   "employee_name",
   "resume",
   "job_category",
-  "company",
-  "old_employee",
-  "old_employee_name"
+  "company"
  ],
  "fields": [
   {
@@ -46,27 +44,12 @@
    "fieldname": "company",
    "fieldtype": "Read Only",
    "label": "Company"
-  },
-  {
-   "fieldname": "old_employee",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Old Employee",
-   "options": "Employee",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "old_employee.employee_name",
-   "fieldname": "old_employee_name",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Old Employee Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-05-18 02:16:35.117749",
+ "modified": "2022-05-19 06:10:57.808110",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee Details",

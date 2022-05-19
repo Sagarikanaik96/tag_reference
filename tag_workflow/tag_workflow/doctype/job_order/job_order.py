@@ -248,6 +248,8 @@ def update_time_timelogs(sheet,doclist,time):
             status = 'Non Satisfactory'
         elif sheet.dnr:
             status = 'DNR'
+        elif sheet.replaced:
+            status = 'Replaced'
 
 
         if time.no_show == 1:

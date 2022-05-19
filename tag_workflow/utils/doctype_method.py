@@ -200,7 +200,7 @@ def update_cost(self):
 
 def validate_mandatory_fields(self):
     for data in self.time_logs:
-        if not data.from_time and not data.to_time:
+        if not data.from_time and not data.to_time and self.replaced == 0:
             frappe.throw(_("Row {0}: From Time and To Time is mandatory.").format(data.idx))
 
         if not data.activity_type and self.employee:

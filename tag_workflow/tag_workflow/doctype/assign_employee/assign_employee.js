@@ -584,9 +584,21 @@ function check_old_value(child){
 			"callback": function(r){
 				let emp = r.message;
 				if(emp != child.employee){
-					frappe.model.set_value(child.doctype, child.name, "old_employee", emp);
+					update_replaced_emp(emp);
 				}
 			}
 		});
+	}
+}
+
+function update_replaced_emp(emp){
+	let items = cur_frm.doc.items || [];
+	for(let i in items){
+		console.log(emp, items[i].employee)
+		if(items[i].employee != emp){
+			let child = frappe.model.get_new_doc("Replaced Employee", cur_frm.doc, "items");
+			$.extend(child, {"employee": emp});
+			cur_frm.refresh_field("items");
+		}
 	}
 }
