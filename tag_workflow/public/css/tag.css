@@ -192,7 +192,7 @@ input:visited {
 [data-page-route="Add Timesheet"]
   .layout-main-section-wrapper
   .layout-main-section {
-  max-width: 100%;
+  max-width: 100% !important;
 }
 /* user management */
 #page-User .layout-main .layout-side-section {

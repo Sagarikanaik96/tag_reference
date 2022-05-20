@@ -39,20 +39,13 @@ frappe.ui.form.on('Add Timesheet', {
 		if(localStorage){
 			cur_frm.set_value("job_order", jo);
 		}
+		show_desc(frm);
 	},
 
 	job_order: function(frm){
-		if(frm.doc.job_order){
-			frm.trigger("date");
-			update_title(frm);
-			get_employee_data(frm);
-		}else{
-			frm.dashboard.set_headline(__());
-			frm.dashboard.set_headline(__(`<div style="display: flex;flex-direction: inherit;"><p>Job Order description will be available here...</p></div>`));
-			cur_frm.clear_table("items");
-			cur_frm.refresh_field("items");
-		}
+		show_desc(frm);
 	},
+	
 	setup:function(frm){
 		frm.set_query("job_order", function(){
 			return {
@@ -355,5 +348,18 @@ function update_timesheet(frm,save){
 		});
 	}else{
 		frappe.msgprint({message: __("(*) fields are required"), title: __('Mandatory'), indicator: 'red'});
+	}
+}
+
+function show_desc(frm){
+	if(frm.doc.job_order){
+		frm.trigger("date");
+		update_title(frm);
+		get_employee_data(frm);
+	}else{
+		frm.dashboard.set_headline(__());
+		frm.dashboard.set_headline(__(`<div style="display: flex;flex-direction: inherit;"><p>Job Order description will be available here...</p></div>`));
+		cur_frm.clear_table("items");
+		cur_frm.refresh_field("items");
 	}
 }
