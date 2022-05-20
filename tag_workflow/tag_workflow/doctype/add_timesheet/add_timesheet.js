@@ -39,7 +39,9 @@ frappe.ui.form.on('Add Timesheet', {
 		if(localStorage){
 			cur_frm.set_value("job_order", jo);
 		}
-		show_desc(frm);
+		setTimeout(status_field,1000)
+		update_title(frm);
+
 	},
 
 	job_order: function(frm){
@@ -362,4 +364,16 @@ function show_desc(frm){
 		cur_frm.clear_table("items");
 		cur_frm.refresh_field("items");
 	}
+}
+function status_field(){
+	console.log('Status Field')
+    $( '[data-fieldname="status"]' ).on( "click",(e)=> {
+        let file=e.target.innerText
+        if(file!="Replaced"){
+            $("select.input-with-feedback.form-control.ellipsis.input-sm option[value=Replaced]").hide();
+        }
+        else{
+            $("select.input-with-feedback.form-control.ellipsis.input-sm option[value=Replaced]").show();	
+        }
+      });
 }
