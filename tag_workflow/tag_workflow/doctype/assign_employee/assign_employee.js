@@ -472,6 +472,21 @@ function document_download(){
 frappe.ui.form.on("Assign Employee Details", {
 	employee:function(frm,cdt,cdn){
 		var child = locals[cdt][cdn];
+		frappe.call({
+            method:"tag_workflow.tag_data.joborder_resume",
+            args: {
+                name: child.employee,
+            },
+            callback:function(r){
+                if (r.message[0]["resume"]){
+                    frappe.model.set_value(cdt, cdn, "resume" , r.message[0]["resume"])
+                }
+                else{
+                    frappe.model.set_value(cdt, cdn, "resume" , "")
+                }
+                    cur_frm.refresh_field("employee_details");
+            }
+        });
 		if(frm.doc.show_all_employees==0){
 			frappe.db.get_value("Employee", {name: child.employee}, ["job_category"], function(r) {
 				if(r.job_category && r.job_category!='null'){
