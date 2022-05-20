@@ -593,12 +593,16 @@ function check_old_value(child){
 
 function update_replaced_emp(emp){
 	let items = cur_frm.doc.items || [];
+	let is_emp = 1;
 	for(let i in items){
-		console.log(emp, items[i].employee)
-		if(items[i].employee != emp){
-			let child = frappe.model.get_new_doc("Replaced Employee", cur_frm.doc, "items");
-			$.extend(child, {"employee": emp});
-			cur_frm.refresh_field("items");
+		if(items[i].employee == emp){
+			is_emp = 0;
 		}
+	}
+
+	if(is_emp){
+		let child = frappe.model.get_new_doc("Replaced Employee", cur_frm.doc, "items");
+		$.extend(child, {"employee": emp});
+		cur_frm.refresh_field("items");
 	}
 }

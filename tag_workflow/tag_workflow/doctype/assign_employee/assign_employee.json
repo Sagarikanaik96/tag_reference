@@ -225,14 +225,16 @@
   {
    "fieldname": "items",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Items",
-   "options": "Replaced Employee"
+   "options": "Replaced Employee",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-19 06:15:15.103614",
+ "modified": "2022-05-20 00:47:26.672845",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",
