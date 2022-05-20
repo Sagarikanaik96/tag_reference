@@ -187,7 +187,7 @@ def update_cost(self):
             rate = get_activity_cost(self.employee, data.activity_type)
             hours = data.billing_hours or 0
             costing_hours = data.billing_hours or data.hours or 0
-            if rate and self.no_show == 0:
+            if rate and self.no_show == 0 and hours > 0:
                 bill_rate, cost_rate = get_bill_cost(rate, data)
                 data.billing_rate = bill_rate
                 data.costing_rate = cost_rate
@@ -200,7 +200,7 @@ def update_cost(self):
 
 def validate_mandatory_fields(self):
     for data in self.time_logs:
-        if not data.from_time and not data.to_time and self.replaced == 0:
+        if not data.from_time and not data.to_time and self.replaced == 0 and self.no_show == 0:
             frappe.throw(_("Row {0}: From Time and To Time is mandatory.").format(data.idx))
 
         if not data.activity_type and self.employee:

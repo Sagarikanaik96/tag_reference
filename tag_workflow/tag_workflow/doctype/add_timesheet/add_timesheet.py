@@ -138,6 +138,10 @@ def add_status(timesheet, status, employee, company, job_order):
             unsatisfied_organization(emp, company, job_order)
         elif(status == "Replaced"):
             timesheet.replaced = 1
+            if item.hours <= 0:
+                item.billing_rate = 0
+                item.flat_rate = 0
+                item.billing_amount = 0
         return timesheet
     except Exception:
         return timesheet

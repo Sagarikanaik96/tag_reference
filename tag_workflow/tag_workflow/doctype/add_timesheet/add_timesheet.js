@@ -129,6 +129,7 @@ function get_employee_data(frm){
 		freeze_message: "Please wait while we are fetching data...",
 		callback: function(r){
 			if(r){
+				cur_frm.clear_table("items");
 				let data = r.message || [];
 				for(let d in data){
 					let child = frappe.model.get_new_doc("Timesheet Item", cur_frm.doc, "items");
@@ -285,7 +286,9 @@ function get_amount(frm, hours, breaks, child){
 		normal_hours = total_hour;
 	}
 
-	normal_amount = (normal_hours*cur_frm.doc.total_per_hour_rate)+cur_frm.doc.additional_flat_rate;
+	if(hours > 0){
+		normal_amount = (normal_hours*cur_frm.doc.total_per_hour_rate)+cur_frm.doc.additional_flat_rate;
+	}
 
 	if(overtime_hours > 0){
 		overtime_amount = (overtime_hours*cur_frm.doc.total_per_hour_rate*1.5)+cur_frm.doc.additional_flat_rate;
@@ -365,6 +368,7 @@ function show_desc(frm){
 		cur_frm.refresh_field("items");
 	}
 }
+
 function status_field(){
 	console.log('Status Field')
     $( '[data-fieldname="status"]' ).on( "click",(e)=> {
