@@ -321,7 +321,7 @@ frappe.ui.form.on("Job Order", {
 		let value = frm.doc.estimated_hours_per_day;
 		if(value && (value < 0 || value > 24)){
 			frappe.msgprint({message: __("<b>Estimated Hours Per Day</b> Cannot be Less Than Zero or Greater Than 24."),title: __("Error"),indicator: "orange",});
-			frm.set_value(estimated_hours_per_day, "");
+			frm.set_value("estimated_hours_per_day", "");
 		}
 	},
 
