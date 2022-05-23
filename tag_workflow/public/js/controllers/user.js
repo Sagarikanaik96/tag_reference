@@ -30,6 +30,11 @@ frappe.ui.form.on("User", {
 	  		companyhide(210)
 	    })
 		$('[data-fieldname = "mobile_no"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
+		$(document).on('keypress', function(event){
+			if (event.key === 'Enter') {
+				event.preventDefault();
+			}
+		});
 
 	},
 	setup: function(frm){
