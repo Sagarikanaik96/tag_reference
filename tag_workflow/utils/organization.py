@@ -255,7 +255,7 @@ def update_old_emp_lat_lng(company):
     try:
         count = 0
         print("*------lat lng updtae--------------------------*\n")
-        my_data = frappe.db.sql(""" select name, state, city, zip from `tabEmployee` where lat in (null, '') and employee_number is null and city is not null and state is not null and company = %s """, company, as_dict=1)
+        my_data = frappe.db.sql(""" select name, state, city, zip from `tabEmployee` where (lat is null or lat ='' or lng is null or lng='') and employee_number is null and city is not null and state is not null and company = %s """, company, as_dict=1)
         for d in my_data:
             address = d.city + ", " + d.state + ", " + (d.zip if d.zip != 0 and d.zip is not None else "")
             google_location_data_url = GOOGLE_API_URL + address
