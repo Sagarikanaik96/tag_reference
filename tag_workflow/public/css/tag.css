@@ -189,6 +189,25 @@ input:visited {
   max-width: 100%;
   width: 100%;
 }
+[data-route*="Form/Assign Employee"] .grid-body .attached-file {
+  width: fit-content;
+  padding: 2px;
+  margin: 1px;
+}
+[data-route*="Form/Assign Employee"] .grid-body .attached-file .ellipsis {
+  width: fit-content;
+  padding-right: 10px;
+}
+[data-route*="Form/Assign Employee"]
+  .grid-body
+  .field-area
+  [data-fieldtype="Attach"] {
+  overflow: auto;
+  margin: 2px;
+}
+[data-route*="Form/Assign Employee"] .grid-body .editable-row .form-control {
+  height: auto;
+}
 [data-page-route="Add Timesheet"]
   .layout-main-section-wrapper
   .layout-main-section {
