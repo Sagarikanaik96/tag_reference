@@ -32,9 +32,7 @@ frappe.listview_settings['User'] = {
             },
 			options: ["","Exclusive Hiring", "Hiring", "Staffing", "TAG"],
             placeholder: "Company Type"
-        };
-        listview.page.add_field(df, '.standard-filter-section');
-		
+        };		
 
 		const df1 = {
             condition: "=",
@@ -49,8 +47,7 @@ frappe.listview_settings['User'] = {
 			options: get_role_profile1(),
             placeholder: "Role"
         };
-        listview.page.add_field(df1, '.standard-filter-section');
-
+		
 		const df2 = {
             condition: "=",
             default: null,
@@ -64,7 +61,11 @@ frappe.listview_settings['User'] = {
 			options: get_organization_type(),
             placeholder: "Company"
         };
-        listview.page.add_field(df2, '.standard-filter-section');
+
+		let standard_filters_wrapper = listview.page.page_form.find('.standard-filter-section');
+        listview.page.add_field(df, standard_filters_wrapper);
+		listview.page.add_field(df1, standard_filters_wrapper);
+        listview.page.add_field(df2, standard_filters_wrapper);
 
     },
 	hide_name_column: true,
