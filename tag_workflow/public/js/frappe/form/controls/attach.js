@@ -14,7 +14,6 @@ frappe.ui.form.ControlAttach = frappe.ui.form.ControlData.extend({
 					<a class="attached-file-link" target="_blank"></a>
 				</div>
 				<div>
-					<a class="btn btn-xs btn-default" data-action="reload_attachment">${__('Reload File')}</a>
 					<a class="btn btn-xs btn-default" data-action="clear_attachment">${__('Clear')}</a>
 				</div>
 			</div>`)
