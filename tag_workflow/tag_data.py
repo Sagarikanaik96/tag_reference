@@ -24,6 +24,9 @@ def company_details(company_name=None):
         is_ok = "failed"
         if None in company_info[0]:
             return is_ok
+        for i in company_info[0]:
+            if(len(i)==0):
+                return is_ok
         if(len(comp_data.industry_type)==0):
             return is_ok
         return "success"

@@ -451,6 +451,9 @@ frappe.ui.form.on("Job Order", {
     },
 
 	company: function(frm){
+		if(frm.doc.__islocal==1 && frm.doc.company && frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type=='Exclusive Hiring'){
+			check_company_detail(frm)
+		}
 		if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.company){
 			fields_setup();
 			frappe.call({
@@ -481,8 +484,8 @@ frappe.ui.form.on("Job Order", {
 /*-------check company details---------*/
 function check_company_detail(frm) {
 	let roles = frappe.user_roles;
-	if (roles.includes("Hiring User") || roles.includes("Hiring Admin")) {
-		var company_name = frappe.boot.tag.tag_user_info.company;
+	if (roles.includes("Hiring User") || roles.includes("Hiring Admin") && frm.doc.company) {
+		var company_name = frm.doc.company;
 		frappe.call({
 			method: "tag_workflow.tag_data.company_details",
 			args: {
@@ -492,9 +495,11 @@ function check_company_detail(frm) {
 				if (r.message != "success") {
 					if(frappe.boot.tag.tag_user_info.company_type == 'Exclusive Hiring'){
 						frappe.msgprint(__("You can't create a Job Order until <b>"+frm.doc.company+"'s</b> details are completed."));
+						frm.set_value('company','')
 					}
 					else{
 						frappe.msgprint(__("You can't create a Job Order until your Company Details are completed."));
+						frm.set_value('company','')
 					}
 					frappe.validated = false;
 				}
@@ -1419,7 +1424,6 @@ function cancel_job_order_deatils(frm){
 	}
 
 	if(cur_frm.doc.__islocal == 1){
-		check_company_detail(frm);
 		cancel_joborder(frm);
 	}else{
 		timer_value(frm);
