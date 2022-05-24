@@ -292,15 +292,11 @@ frappe.ui.form.on("Company", {
 	before_save: function(frm){
 		if(frm.doc.industry_type && frm.doc.job_titles){
 			let industries=[]
-			let titles_industry=[]
 			for(let i in frm.doc.industry_type){
 				industries.push(frm.doc.industry_type[i].industry_type)
 			}
 			for(let i in frm.doc.job_titles){
-				titles_industry.push(frm.doc.job_titles[i].industry_type)
-			}
-			for(let i in titles_industry){
-				if(industries.indexOf(titles_industry[i]) == -1)  {
+				if(industries.indexOf(frm.doc.job_titles[i].industry_type) == -1) {
 					frappe.msgprint(frm.doc.job_titles[i].job_titles+" is not mapped to an Industry. Please update accordingly.")
 					frappe.validated=false
 					break

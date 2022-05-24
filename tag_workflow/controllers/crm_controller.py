@@ -25,12 +25,12 @@ class CRMController(base_controller.BaseController):
 #-----------org type details--------#
 def get_org_types(staffing, organization_type=None):
     try:
-        org_type, user_type, tag_user_type, staffing = EXC, "Hiring", "Hiring Admin", staffing
-
         if(organization_type == "Staffing"):
             org_type, user_type, tag_user_type, staffing = "Staffing", "Staffing", "Staffing Admin", ""
         elif(organization_type == "Hiring"):
             org_type, user_type, tag_user_type, staffing = "Hiring", "Hiring", "Hiring Admin", ""
+        else:
+            org_type, user_type, tag_user_type, staffing = EXC, "Hiring", "Hiring Admin", staffing
         return org_type, user_type, tag_user_type, staffing
     except Exception as e:
         print(e)
@@ -47,18 +47,16 @@ def onboard_org(lead,contract_number):
         person_name=lead_value.lead_name
         phone=lead_value.phone_no
         organization_type=lead_value.organization_type
-        lead_value.status='Contract Signing'
-        lead_value.save(ignore_permissions=True)
-
-        is_company, is_user = 1, 1
-        company_doc, user = "", ""
-
-        org_type, user_type, tag_user_type, staffing = get_org_types(staffing, organization_type)
-
+        lead_value.db_set('status', 'Contract Signing')
+        frappe.db.commit()
         if frappe.db.exists("User", email):
             frappe.msgprint(_("User already exists with given email(<b>{0}</b>). Email must be unique for onboarding.").format(email))
             return 'user not created'
+        is_company, is_user = 1, 1
+        company_doc, user = "", ""
+        org_type, user_type, tag_user_type, staffing = get_org_types(staffing, organization_type)
 
+        
         if not frappe.db.exists("Company", exclusive):
             exclusive = make_company(exclusive, staffing, org_type,contract_number)
             is_company = 0
@@ -66,7 +64,6 @@ def onboard_org(lead,contract_number):
         if not frappe.db.exists("User", email):
             user = make_user(exclusive, email, person_name, org_type, user_type, tag_user_type, phone)
             is_user = 0
-
         enqueue("tag_workflow.controllers.master_controller.make_update_comp_perm", docname=exclusive)
         return is_company, is_user, company_doc, user
     except Exception as e:
@@ -94,7 +91,6 @@ def make_company(exclusive, staffing, org_type,contract_number):
             if(my_job_title.company):
                 my_job_title.company=exclusive
                 my_job_title.save(ignore_permissions=True)
-
         return company.name
     except Exception as e:
         frappe.throw(e)
