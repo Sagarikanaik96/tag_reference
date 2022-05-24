@@ -210,41 +210,44 @@ def check_employee_editable(job_order, name, creation):
 @frappe.whitelist()
 def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_order=None):
     try:
-        ratings = json.loads(ratings)
-        doc = frappe.new_doc('Company Review')
-        doc.staffing_company=staffing_company
-        doc.hiring_company=hiring_company
-        doc.job_order=job_order
-        doc.rating=ratings['Rating']
-        if 'Comment' in ratings.keys():
-            doc.comments=ratings['Comment']
-        doc.save(ignore_permissions=True)
-
-        sql = '''select user_id from `tabEmployee` where company = '{}' and user_id IS NOT NULL '''.format(staffing_company)
-        staff_member = frappe.db.sql(sql, as_list=1)
-        for staff in staff_member:
-            add("Company Review", doc.name, staff[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
-
-        sql = ''' select average_rating from `tabCompany` where name = '{}' '''.format(staffing_company)
-        company_rate = frappe.db.sql(sql, as_list=1)
-        if (len(company_rate)==0 or company_rate[0][0]==None):
-            doc=frappe.get_doc('Company',staffing_company)
-            doc.average_rating=ratings['Rating']
-            doc.save()
-        else:
-            sql = ''' select rating from `tabCompany Review` where staffing_company='{}' '''.format(staffing_company)
-            average_rate = frappe.db.sql(sql, as_list=1)
-            if average_rate[0][0]!=None:
-                rating=[float(i[0]) for i in average_rate]
-                doc=frappe.get_doc('Company',staffing_company)
-                avg_rating=round(sum(rating)/len(rating))
-                doc.average_rating=str(avg_rating)
-                doc.save()
-        return "success"
+        enqueue("tag_workflow.utils.timesheet.staffing_company_rating",hiring_company=hiring_company,staffing_company=staffing_company,ratings=ratings,job_order=job_order)
+        return 1
+       
     except Exception as e:
         frappe.log_error(e, "Hiring Company Rating")
         frappe.throw(e)
+def staffing_company_rating(hiring_company,staffing_company,ratings,job_order):
+    ratings = json.loads(ratings)
+    doc = frappe.new_doc('Company Review')
+    doc.staffing_company=staffing_company
+    doc.hiring_company=hiring_company
+    doc.job_order=job_order
+    doc.rating=ratings['Rating']
+    if 'Comment' in ratings.keys():
+        doc.comments=ratings['Comment']
+    doc.save(ignore_permissions=True)
 
+    sql = '''select user_id from `tabEmployee` where company = '{}' and user_id IS NOT NULL '''.format(staffing_company)
+    staff_member = frappe.db.sql(sql, as_list=1)
+    for staff in staff_member:
+        add("Company Review", doc.name, staff[0], read=1, write = 0, share = 0, everyone = 0,notify = 1, flags={"ignore_share_permission": 1})
+
+    sql = ''' select average_rating from `tabCompany` where name = '{}' '''.format(staffing_company)
+    company_rate = frappe.db.sql(sql, as_list=1)
+    if (len(company_rate)==0 or company_rate[0][0]==None):
+        doc=frappe.get_doc('Company',staffing_company)
+        doc.average_rating=ratings['Rating']
+        doc.save()
+    else:
+        sql = ''' select rating from `tabCompany Review` where staffing_company='{}' '''.format(staffing_company)
+        average_rate = frappe.db.sql(sql, as_list=1)
+        if average_rate[0][0]!=None:
+            rating=[float(i[0]) for i in average_rate]
+            doc=frappe.get_doc('Company',staffing_company)
+            avg_rating=round(sum(rating)/len(rating))
+            doc.average_rating=str(avg_rating)
+            doc.save()
+    return "success"
 @frappe.whitelist()
 def approval_notification(job_order=None,staffing_company=None,date=None,hiring_company=None,timesheet_name=None,timesheet_approved_time=None,current_time=None):
     try:

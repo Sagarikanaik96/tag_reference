@@ -204,6 +204,7 @@ function check_update_timesheet(frm){
 						],
 						primary_action: function(){
 							pop_up.hide();
+							console.log('Submitting Review')
 							var comp_rating=pop_up.get_values();
 							frappe.call({
 								method:"tag_workflow.utils.timesheet.company_rating",
@@ -214,7 +215,8 @@ function check_update_timesheet(frm){
 									'job_order':cur_frm.doc.job_order_detail
 								},
 								"async": 0,
-								callback:function(){
+								callback:function(rm){
+									console.log(rm)
 									frappe.msgprint('Review Submitted Successfully');
 								}
 							});
