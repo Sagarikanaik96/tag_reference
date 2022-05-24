@@ -45,6 +45,28 @@ frappe.listview_settings['Sales Invoice'] = {
 				create_monthly_invoice()
 			}).addClass("btn-primary");
 		}
+
+		const filter = {
+            condition: "=",
+            default: null,
+            fieldname: "docstatus",
+            fieldtype: "Select",
+            input_class: "input-xs",
+            label: "Status",
+            is_filter: 1,
+            onchange: function() {
+                listview.refresh();
+            },
+            options: [0,1],
+            placeholder: "Status"
+        };
+		let standard_filters_wrapper = listview.page.page_form.find('.standard-filter-section');
+		listview.page.add_field(filter, standard_filters_wrapper);
+		let doc_filter = document.querySelector('select[data-fieldname = "docstatus"]')
+		doc_filter.options.add(new Option(), 0);
+		doc_filter.options[1].innerHTML = 'Draft';
+		doc_filter.options[2].innerHTML = 'Submitted';
+		$('[data-original-title = "Status"][data-fieldname = "status"]').hide();
 	},
 
 	formatters: {
