@@ -603,9 +603,6 @@ input::-webkit-credentials-auto-fill-button {
   font-size: 12px !important;
   padding-right: 5px;
 }
-[data-route*="Form/Job Order"] .popover {
-  display: none;
-}
 [data-route="List/Claim Order/List"] .modal-body .frappe-control {
   font-size: 12px;
 }

@@ -46,7 +46,11 @@ frappe.listview_settings['Job Order'] = {
 			options: get_company_job_order(),
             placeholder: "Company"
         };
-        listview.page.add_field(df, '.standard-filter-section');	
+        listview.page.add_field(df, '.standard-filter-section');
+		document.body.addEventListener('click', function(){
+				$('[role = "tooltip"]').popover('dispose');
+			}
+		, true);
 	},
 	refresh:function(listview){
 		$('.custom-actions.hidden-xs.hidden-md').hide();
@@ -77,7 +81,7 @@ frappe.listview_settings['Job Order'] = {
 			}
              
          }, 50 );
-		$('[role = "tooltip"]').hide();
+		$('[role = "tooltip"]').popover('dispose');
 	},	
 
 	formatters: {
@@ -209,7 +213,6 @@ frappe.listview_settings['Job Order'] = {
 					</span>
 					<script>
 						function showCasePopover1(cname,dname){
-							
 							$("#"+dname).popover({
 								title: name,
 								content: function(){
