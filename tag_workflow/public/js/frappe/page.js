@@ -148,7 +148,7 @@ frappe.ui.Page = Class.extend({
 							<span class="button-label hidden-xs">Completed Order<span></span></span>
 						</button>
 						<button class="btn btn-default btn-sm filter-button" onclick="hiring_click('All');">
-							<span class="button-label hidden-xs">All Order<span></span></span>
+							<span class="button-label hidden-xs">All Orders<span></span></span>
 						</button>
 						<script>
 							function hiring_click(value){
