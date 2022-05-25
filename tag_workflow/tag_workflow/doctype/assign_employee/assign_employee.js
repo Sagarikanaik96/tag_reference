@@ -4,24 +4,17 @@
  
 frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
-		setTimeout(function(){
-			staffing_company(frm)
-		},1000);
-		$('[class="btn btn-primary btn-sm primary-action"]').show();
+        setTimeout(function(){
+            staffing_company(frm)
+        },1000);
+
+        $('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
 		window.onclick = function() {
 			attachrefresh();
 		}
 
-		$('*[data-fieldname="employee_details"]').find('.grid-add-row')[0].addEventListener("click",function(){
-			attachrefresh();
-		});
-
-		$("[data-fieldname=employee_details]").mouseover(function(){
-			attachrefresh();
-		});
-
-		attachrefresh();
+        old_unknown_function(frm);
 		$('.form-footer').hide()
 		if(frm.doc.__islocal==1){
 			$(".grid-add-row").attr('class', 'btn btn-xs btn-secondary grid1-row');
@@ -40,26 +33,6 @@ frappe.ui.form.on('Assign Employee', {
 		hide_resume(frm);
 		back_job_order_form(frm);
 		document_download()
-		$(document).on('click', '[data-fieldname="employee"]', function(){
-			if ($('[data-fieldname="employee"]').last().val() != '' ){
-				frappe.call({
-					method:"tag_workflow.tag_data.joborder_resume",
-					args: {
-						name: $('[data-fieldname="employee"]').last().val(),
-					},
-					callback:function(r){
-						if ($('[data-fieldname="resume"]').last().text() == "Attach"){
-							frm.doc.employee_details.forEach(element=>{
-								if (element.employee === $('[data-fieldname="employee"]').last().val()){
-									element.resume = r.message[0]["resume"]
-								}
-							})
-							cur_frm.refresh_field("employee_details");
-						}
-					}
-				});
-			}
-		});
 
 		$('[data-fieldname="company"]').css('display','block');
 
@@ -95,7 +68,8 @@ frappe.ui.form.on('Assign Employee', {
 		hide_resume(frm);
 
 		cur_frm.fields_dict['employee_details'].grid.get_field('employee').get_query = function(doc) {
-			let employees = frm.doc.employee_details, employees_list = [];
+			let employees = frm.doc.employee_details || [];
+            let employees_list = [];
 			for (let x in employees) {
 				if(employees[x]['employee']){
 					employees_list.push(employees[x]['employee']);
@@ -468,32 +442,34 @@ function document_download(){
 frappe.ui.form.on("Assign Employee Details", {
 	employee:function(frm,cdt,cdn){
 		var child = locals[cdt][cdn];
-		frappe.call({
-            method:"tag_workflow.tag_data.joborder_resume",
-            args: {
-                name: child.employee,
-            },
-            callback:function(r){
-                if (r.message[0]["resume"]){
-                    frappe.model.set_value(cdt, cdn, "resume" , r.message[0]["resume"])
-                }
-                else{
-                    frappe.model.set_value(cdt, cdn, "resume" , "")
-                }
+
+        if(child.employee){
+            frappe.call({
+                method:"tag_workflow.tag_data.joborder_resume",
+                args: {name: child.employee},
+                callback:function(r){
+                    if(r.message[0]["resume"]){
+                        frappe.model.set_value(cdt, cdn, "resume" , r.message[0]["resume"]);
+                    }else{
+                        frappe.model.set_value(cdt, cdn, "resume" , "");
+                    }
                     cur_frm.refresh_field("employee_details");
+                }
+            });
+
+            if(frm.doc.show_all_employees==0){
+                frappe.db.get_value("Employee", {name: child.employee}, ["job_category"], function(r) {
+                    if(r.job_category && r.job_category!='null'){
+                        frappe.model.set_value(cdt,cdn,"job_category",frm.doc.job_category);
+                    }
+                });
             }
-        });
-		if(frm.doc.show_all_employees==0){
-			frappe.db.get_value("Employee", {name: child.employee}, ["job_category"], function(r) {
-				if(r.job_category && r.job_category!='null'){
-					frappe.model.set_value(cdt,cdn,"job_category",frm.doc.job_category)
-				}
-			})
-		}
-		if(child.__islocal != 1){
-			check_old_value(child);
-		}
-	}	
+
+            if(child.__islocal != 1){
+                check_old_value(child);
+            }
+        }
+    }
 });
 
 
@@ -616,4 +592,40 @@ function update_replaced_emp(emp){
 		$.extend(child, {"employee": emp});
 		cur_frm.refresh_field("items");
 	}
+}
+
+function old_unknown_function(frm){
+    if(cur_frm.doc.employee_details.length > 0){
+        $('*[data-fieldname="employee_details"]').find('.grid-add-row')[0].addEventListener("click",function(){
+            attachrefresh();
+        });
+
+        $("[data-fieldname=employee_details]").mouseover(function(){
+            attachrefresh();
+        });
+
+        attachrefresh();
+        employee_resume_fun(frm);
+    }
+}
+
+function employee_resume_fun(frm){
+    $(document).on('click', '[data-fieldname="employee"]', function(){
+        if($('[data-fieldname="employee"]').last().val() != '' ){
+            frappe.call({
+                method:"tag_workflow.tag_data.joborder_resume",
+                args: {name: $('[data-fieldname="employee"]').last().val()},
+                callback:function(r){
+                    if ($('[data-fieldname="resume"]').last().text() == "Attach"){
+                        frm.doc.employee_details.forEach(element=>{
+                            if (element.employee === $('[data-fieldname="employee"]').last().val()){
+                                element.resume = r.message[0]["resume"];
+                            }
+                        });
+                        cur_frm.refresh_field("employee_details");
+                    }
+                }
+            });
+        }
+    });
 }
