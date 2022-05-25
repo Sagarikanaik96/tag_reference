@@ -118,10 +118,6 @@ frappe.ui.form.on('Assign Employee', {
 		cur_frm.clear_table("employee_details")
 		cur_frm.refresh_fields();
 	},
-	show_all_employees:function(){
-		cur_frm.clear_table("employee_details")
-		cur_frm.refresh_fields();
-	},
 	
 	after_save:function(frm){
 		if(frm.doc.tag_status=='Open' && cur_frm.doc.resume_required==1){
