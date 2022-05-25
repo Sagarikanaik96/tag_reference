@@ -39,7 +39,7 @@ frappe.ui.form.on('Add Timesheet', {
 		if(localStorage){
 			cur_frm.set_value("job_order", jo);
 		}
-		setTimeout(status_field,1000)
+		setTimeout(status_field,1000);
 		update_title(frm);
 
 	},
@@ -142,6 +142,7 @@ function get_employee_data(frm){
 				}
 				cur_frm.refresh_field("items");
 				update_time(frm);
+                setTimeout(status_field, 700);
 			}
 		}
 	});
@@ -193,6 +194,7 @@ frappe.ui.form.on("Timesheet Item", {
 	employee: function(frm, cdt, cdn){
 		let child = frappe.get_doc(cdt, cdn);
 		add_pre_data(child, frm);
+        check_replaced_emp(child, frm);
 	}
 });
 
@@ -370,14 +372,34 @@ function show_desc(frm){
 }
 
 function status_field(){
-	console.log('Status Field')
-    $( '[data-fieldname="status"]' ).on( "click",(e)=> {
-        let file=e.target.innerText
-        if(file!="Replaced"){
-            $("select.input-with-feedback.form-control.ellipsis.input-sm option[value=Replaced]").hide();
+    let items = cur_frm.doc.items || [];
+    for(let i in items){
+        if(items[i].status != "Replaced"){
+            cur_frm.fields_dict['items'].grid.get_grid_row(items[i].name).columns.status.df.options = "\nDNR\nNo Show\nNon Satisfactory";
+            cur_frm.fields_dict['items'].grid.get_grid_row(items[i].name).refresh();
         }
-        else{
-            $("select.input-with-feedback.form-control.ellipsis.input-sm option[value=Replaced]").show();	
-        }
-      });
+    }
+}
+
+function check_replaced_emp(child, frm){
+    if(child.employee){
+        frappe.call({
+            "method": "tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.checkreplaced_emp",
+            "args": {"employee": child.employee, "job_order": frm.doc.job_order},
+            "callback": function(r){
+                if(r){
+                    let result = r.message;
+                    if(result == 0){
+                        cur_frm.fields_dict['items'].grid.get_grid_row(child.name).columns.status.df.options = "\nDNR\nNo Show\nNon Satisfactory";
+                        cur_frm.fields_dict['items'].grid.get_grid_row(child.name).refresh();
+                        frappe.model.set_value(child.doctype, child.name, "status", "");
+                    }else{
+                        cur_frm.fields_dict['items'].grid.get_grid_row(child.name).columns.status.df.options = "\nDNR\nNo Show\nNon Satisfactory\nReplaced";
+                        cur_frm.fields_dict['items'].grid.get_grid_row(child.name).refresh();
+                        frappe.model.set_value(child.doctype, child.name, "status", "Replaced");
+                    }
+                }
+            }
+        });
+    }
 }

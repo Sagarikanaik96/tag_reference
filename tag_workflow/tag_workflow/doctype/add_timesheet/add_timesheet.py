@@ -211,3 +211,14 @@ def staffing_own_timesheet(save,timesheet,company_type):
             timesheet_status_data=f'update `tabTimesheet` set docstatus="1",workflow_state="Approved",status="Submitted" where name="{timesheet.name}"'                       
             frappe.db.sql(timesheet_status_data)
             frappe.db.commit()
+
+
+@frappe.whitelist()
+def checkreplaced_emp(employee, job_order):
+    try:
+        sql = """ select c.employee from `tabReplaced Employee` c where c.employee = '{0}' and c.parent in(select name from `tabAssign Employee` where job_order = '{1}' and tag_status = "Approved") """.format(employee, job_order)
+        result = frappe.db.sql(sql, as_dict=1)
+        return 1 if len(result) > 0 else 0
+    except Exception as e:
+        print(e)
+        return 0

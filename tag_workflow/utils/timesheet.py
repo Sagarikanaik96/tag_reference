@@ -156,7 +156,11 @@ def update_timesheet_data(data, company, company_type, user):
 def get_timesheet_employee(doctype, txt, searchfield, start, page_len, filters):
     job_order = filters.get('job_order')
     sql = """ select employee, employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
-    return frappe.db.sql(sql)
+
+    res_sql = """ select DISTINCT employee, employee_name from `tabReplaced Employee` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
+
+    emps = frappe.db.sql(sql) + frappe.db.sql(res_sql)
+    return emps
 
 
 @frappe.whitelist()
