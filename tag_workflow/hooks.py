@@ -56,7 +56,8 @@ doctype_js = {
         "Contact": ["public/js/controllers/contact.js",map],
         "Lead": ["public/js/controllers/lead.js",map],
         "Contract": "public/js/controllers/contract.js",
-        "Job Site": "public/js/controllers/job_sites.js"
+        "Job Site": "public/js/controllers/job_sites.js",
+        "Data Import":"public/js/controllers/data_import.js"
 }
 
 # doctype list
@@ -104,6 +105,9 @@ doc_events = {
        "Item":{
                "after_insert":'tag_workflow.tag_data.job_title_add'
        },
+       "Employee":{
+               "after_insert":'tag_workflow.tag_data.update_employee_lat_lng'
+       }
 }
 
 # logo

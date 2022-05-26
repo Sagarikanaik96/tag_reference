@@ -77,12 +77,20 @@ frappe.listview_settings['Employee'] = {
 		}
 	},
 	
-	onload: function(){
+	onload: function(listview){
 		$('h3[title="Employee"]').html('Employees');
 		if(frappe.session.user!='Administrator'){
 			$('.custom-actions.hidden-xs.hidden-md').hide();
 			$('[data-original-title="Refresh"]').hide();
 			$('.menu-btn-group').hide();
+		}
+		if(frappe.boot.tag.tag_user_info.company_type== 'Staffing' || frappe.boot.tag.tag_user_info.company_type=="TAG"){
+			listview.page.set_secondary_action('Import', function(){
+				frappe.route_options = {
+					'reference_doctype': 'Employee'
+				}
+				frappe.set_route('Form', 'Data Import', 'new-data-import');
+			});
 		}
 	}
 };

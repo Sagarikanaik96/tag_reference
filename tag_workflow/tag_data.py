@@ -7,6 +7,10 @@ from frappe.utils import get_datetime,now
 from frappe.utils import date_diff
 import json
 import datetime
+import requests, time
+
+tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
+GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
 
 jobOrder = "Job Order"
 assignEmployees = "Assign Employee"
@@ -1160,3 +1164,39 @@ def employee_work_history(employee_no):
             if ['Approval Request'] in status or ['Denied'] in status:
                 my_data[i]['workflow_state']='Approval Request'
         return my_data 
+
+@frappe.whitelist()
+def update_employee_lat_lng(doc,method):
+    try:
+        if doc.state and doc.city and doc.zip and (not doc.lat or not doc.lng):
+            frappe.enqueue("tag_workflow.tag_data.update_old_emp_lat_lng",is_async=True,doc_name=doc.name)
+    except Exception as e:
+        frappe.msgprint(e)
+
+def update_old_emp_lat_lng(doc_name):
+    try:
+        my_data = frappe.db.sql(""" select name, state, city, zip from `tabEmployee` where name='{0}' """.format(doc_name), as_dict=1)
+        for d in my_data:
+            address = d.city + ", " + d.state + ", " + (d.zip if d.zip != 0 and d.zip is not None else "")
+            google_location_data_url = GOOGLE_API_URL + address
+
+            google_response = requests.get(google_location_data_url)
+            location_data = google_response.json()
+            if(google_response.status_code == 200 and len(location_data)>0 and len(location_data['results'])>0):
+                lat, lng = emp_location_data(location_data)
+                frappe.db.set_value('Employee', d.name, 'lat', lat)
+                frappe.db.set_value('Employee', d.name, 'lng', lng)
+    except Exception as e:
+        frappe.log_error(e, "longitude latitude error")
+        print(e)
+def emp_location_data(address_dt):
+    try:
+        lat, lng = '', ''
+        if(len(address_dt['results']) > 0):
+            location = address_dt['results'][0]['geometry']['location']
+            lat = location['lat']
+            lng = location['lng']
+        return lat, lng
+    except Exception as e:
+        frappe.log_error(e, "Longitude latitude address")
+        return '', ''
