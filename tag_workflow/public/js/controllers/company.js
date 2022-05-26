@@ -11,7 +11,7 @@ frappe.ui.form.on("Company", {
 		hide_details();
 		update_company_fields();
 		update_lat_lng(frm);
-		make_invoice(frm);
+		hide_tag_charges(frm);
 		uploaded_file_format(frm);
 		download_document(frm);
 		exclusive_staff_company_fields(frm);
@@ -440,31 +440,11 @@ function make_jazzhr_request(frm){
 		frappe.msgprint("<b>JazzHR API Key</b> is required");
 	}
 }
- 
 
-
-/*---------make invoice------------*/
 function hide_tag_charges(frm){
 	let roles = frappe.user_roles;
-	if(roles.includes("System Manager")){
-		prepare_invoice(frm);
-	}else{
-		cur_frm.toggle_display("tag_charges", 0);
-	}
-}
-
-function make_invoice(frm){
-	hide_tag_charges(frm);
-}
-
-function prepare_invoice(frm){
-	if(["Staffing"].includes(cur_frm.doc.organization_type)){
-		frm.add_custom_button(__("Make Invoice"), function () {
-			frappe.model.open_mapped_doc({
-				method: "tag_workflow.utils.invoice.make_invoice",
-				frm: cur_frm,
-			});
-		}).addClass("btn-primary");
+	if(!roles.includes("System Manager")){
+		frm.toggle_display("tag_charges", 0);
 	}
 }
 
