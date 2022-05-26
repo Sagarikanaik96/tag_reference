@@ -154,7 +154,8 @@ def save_modified_claims(my_data,doc_name):
 def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_org,doc_name):
 	try:
 		job_order_data=frappe.get_doc(jobOrder,job_order)
-		job_order_data.is_single_share = '0'
+		if no_assigned< no_required:
+			job_order_data.is_single_share = '0'
 		job_order_data.bid=1+int(job_order_data.bid)
 		if(job_order_data.claim is None):
 			job_order_data.claim=staffing_org
