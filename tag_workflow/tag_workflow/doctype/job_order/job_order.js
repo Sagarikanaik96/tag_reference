@@ -1570,7 +1570,13 @@ function repeat_order(frm){
 	let condition = (frm.doc.__islocal != 1 && cur_frm.doc.order_status == "Completed" && frappe.boot.tag.tag_user_info.company_type=='Hiring');
 	if(condition){
 		frm.add_custom_button(__("Repeat Order"),function(){
-			repeat_hiring_dia(frm);
+			if(cur_frm.doc.bid==0){
+				var comp
+				trigger_new_order(frm, 0, 1,comp)
+			}
+			else{
+				repeat_hiring_dia(frm);
+			}
 		});
 	}else{
 		repeat_order_remaining_orgs(frm);
