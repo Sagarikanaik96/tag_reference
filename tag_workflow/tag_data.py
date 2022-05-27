@@ -195,7 +195,8 @@ def receive_hiring_notification(user, company_type, hiring_org, job_order, staff
 def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,job_title,hiring_org,doc_name):
     try:
         emp_detail = json.loads(emp_detail)
-        job_order.is_single_share = '0'
+        if int(no_of_worker_req) > len(emp_detail):
+            job_order.is_single_share = '0'
 
         job_order.bid=1+int(job_order.bid)
         if(job_order.claim is None):

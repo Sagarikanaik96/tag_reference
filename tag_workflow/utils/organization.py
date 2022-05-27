@@ -53,6 +53,7 @@ def setup_data():
         update_role_profile()
         update_module_profile()
         update_permissions()
+        update_old_direct_order()
         set_workspace()
         setup_company_permission()
         check_if_user_exists()
@@ -294,3 +295,23 @@ def update_old_lead_status():
     except Exception as e:
         frappe.log_error(e,'Lead Update Error')
         print(e)
+def update_old_direct_order():
+    try:
+        print('----Updating Old Direct Order')
+        old_order=frappe.db.sql(""" select name,staff_company,resumes_required from `tabJob Order` where staff_company is not null and is_single_share=0; """,as_dict=1)
+        if(len(old_order)>0):
+            check_is_single_share(old_order)
+    except Exception as e:
+        frappe.log_error(e,'Old Direct Order')
+def check_is_single_share(old_order):
+    for i in range(len(old_order)):
+        if(old_order[i].resumes_required==0):
+            claims=frappe.db.sql(""" select name from `tabClaim Order` where job_order="{0}" and staff_claims_no!=no_of_workers_joborder and staffing_organization="{1}" """.format(old_order[i].name,old_order[i].staff_company),as_dict=1)
+            if(len(claims)==0):
+                frappe.db.set_value(Job_Label,old_order[i].name,"is_single_share", 1)
+        else:
+            assign_employee=frappe.db.sql(""" select name from `tabAssign Employee` where job_order="{0}"  and company="{1}" """.format(old_order[i].name,old_order[i].staff_company),as_dict=1)
+            if(len(assign_employee)==1):
+                doc=frappe.get_doc('Assign Employee',assign_employee[0].name)
+                if(len(doc.employee_details)==doc.no_of_employee_required):
+                    frappe.db.set_value(Job_Label,old_order[i].name,"is_single_share", 1)  
