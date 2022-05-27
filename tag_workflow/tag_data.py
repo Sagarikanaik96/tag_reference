@@ -295,14 +295,16 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
         print(e)
 
 @frappe.whitelist(allow_guest=False)
-def update_exclusive_org(exclusive_email,staffing_email,staffing_comapny,exclusive_company):
-    from frappe.share import add
+def update_exclusive_org(exclusive_email, staffing_email, staffing_comapny, exclusive_company):
     try:
-        add("Company",staffing_comapny,exclusive_email,write = 0,read = 1,share = 0,everyone=0,notify=1,flags={"ignore_share_permission": 1})
-        add("Company",exclusive_company,exclusive_email,write = 0,read = 1,share = 0,everyone=0,notify=1,flags={"ignore_share_permission": 1})
+        if not frappe.db.exists("DocShare", {"user": exclusive_email, "share_name": staffing_comapny, "read": 1}) and frappe.db.exists("Company", staffing_comapny) and frappe.db.get_value("Company", {"name": staffing_comapny}, "organization_type") == "Staffing":
+            add("Company", staffing_comapny, exclusive_email, write = 0, read = 1, share = 0, everyone=0, notify=1, flags={"ignore_share_permission": 1})
 
+        if not frappe.db.exists("DocShare", {"user": exclusive_email, "share_name": exclusive_company, "read": 1, "write": 1, "share": 1}) and frappe.db.exists("Company", exclusive_company):
+            add("Company", exclusive_company, exclusive_email, write = 1, read = 1, share = 1, everyone=0, notify=1, flags={"ignore_share_permission": 1})
     except Exception as e:
-         frappe.log_error(e, "doc share error")
+        frappe.log_error(e, "doc share error")
+
 
 @frappe.whitelist(allow_guest=False)
 def staff_org_details(company_details=None):

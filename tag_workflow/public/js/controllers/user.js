@@ -145,7 +145,6 @@ frappe.ui.form.on("User", {
 
 	after_save: function(frm){
 		update_employee(frm);
-		add_old_joborder(frm);
 	},
 	birth_date: function(frm){
 		check_bd(frm);
