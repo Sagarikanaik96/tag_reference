@@ -1,14 +1,5 @@
 frappe.listview_settings['User'] = {
-	onload: function(listview){
-		$('[data-fieldname="email"]').hide()
-		$('[data-fieldname="username"]').hide()
-		$('[data-fieldname="organization_type"]').hide()
-		$('[data-fieldname="role_profile_name"]').hide()
-		$('[data-fieldname="company"]').hide()
-		$('[data-fieldname="user_type"]').hide()
-
-
-		
+	onload: function(listview){		
 		$('h3[title="User"]').html('Company Users');
 		cur_list.columns[4].df.label = 'Role'
 		cur_list.render_header(cur_list.columns[4])
@@ -73,12 +64,6 @@ frappe.listview_settings['User'] = {
 		$('#navbar-breadcrumbs > li > a').html('Company Users');
 		listview.$page.find(`div[data-fieldname="name"]`).addClass("hide");
 		let view = listview;
-		let children = view.$list_head_subject[0].children;
-		for(var c in children){
-			if(children[c].innerHTML && children[c].innerHTML.search("\n\t\t\t\t\t\n\t\t\t\t\t\t<span>Name</span>\n\t\t\t\t") >= 0){
-				children[c].innerHTML = "\n\t\t\t\t\t\n\t\t\t\t\t\t<span>Email</span>\n\t\t\t\t";
-			}
-		}
 
 		for (let i of view.data) {
 			frappe.call({

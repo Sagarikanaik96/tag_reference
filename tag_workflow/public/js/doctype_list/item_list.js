@@ -22,9 +22,6 @@ frappe.listview_settings["Item"] = {
       listview.page.add_field(df, '.standard-filter-section')
   },
   refresh:function(){
-    $('div[data-fieldname="item_group"]').hide();
-
-    $('div[data-fieldname="variant_of"]').hide();
     $('div[data-fieldname="name"]').hide()
    
   },

@@ -84,7 +84,6 @@ frappe.listview_settings['Sales Invoice'] = {
 	
 	refresh:function(){
 		$('[data-fieldname="name"]').hide()
-		$('[data-fieldname="company"]').hide()
 
 		$('#navbar-breadcrumbs > li > a').html('Invoices');
 		$('[class="btn btn-primary btn-sm primary-action"]').hide();
