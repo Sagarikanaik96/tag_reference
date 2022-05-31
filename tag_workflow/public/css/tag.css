@@ -1121,3 +1121,7 @@ select.input-with-feedback.form-control.ellipsis {
     right: -230px;
   }
 }
+
+.text-extra-muted.comment-count {
+    display: none !important;
+}
