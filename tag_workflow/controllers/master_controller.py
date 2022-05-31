@@ -258,6 +258,9 @@ def share_old_docs(user, company, company_type):
             exc_data = [{"doctype": "Job Order", "docname": e.name} for e in exc_data]
             data = non_exc_data + exc_data
 
+        elif(company_type in ["Hiring", HIR[1]]):
+            data = frappe.db.sql(""" select DISTINCT share_name as docname, share_doctype as doctype from `tabDocShare` where user in (select name from `tabUser` where company = %s) and share_doctype in ("Claim Order", "Assign Employee", "Sales Invoice") """,company, as_dict=1)
+
 
         for d in data:
             try:
