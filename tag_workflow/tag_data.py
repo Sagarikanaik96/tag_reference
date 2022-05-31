@@ -1165,6 +1165,15 @@ def employee_work_history(employee_no):
                 my_data[i]['workflow_state']='Approval Request'
         return my_data 
 
+@frappe.whitelist(allow_guest=True)
+def get_update_password_user(key):
+    result = frappe._dict()
+    if key:
+        result.user = frappe.db.get_value("User", {"reset_password_key": key})
+        user_type=frappe.get_doc('User',result.user)
+        return user_type.organization_type
+
+
 @frappe.whitelist()
 def update_employee_lat_lng(doc,method):
     try:
