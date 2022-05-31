@@ -33,7 +33,7 @@ frappe.FaceRecognition = Class.extend({
 			args: { "name": company || '',
 					"userid": frappe.user_info().email
 					},
-			callback: function (r) {				
+			callback: function (r) {			
 				setTimeout(hide,10);
 				function hide(){
 					if(frappe.boot.tag.tag_user_info.company_type=== "Staffing"){
@@ -42,6 +42,10 @@ frappe.FaceRecognition = Class.extend({
 					if(frappe.boot.tag.tag_user_info.company_type===r.message[0].organization_type){
 						$("#place_order").hide();
 						$("#work_order").hide();
+					}
+					if(r.message[0].organization_type!= 'Staffing'){
+						$("#coi").hide();
+						$("#safety_manual").hide();
 					}
 				}
 
@@ -64,29 +68,14 @@ frappe.FaceRecognition = Class.extend({
 					rate+= '★'.repeat(r.message[1][k][0]) + "<br>"  + r.message[1][k][1] + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
 				}
 
-				var arr = [];
-				if(my_val.suite_or_apartment_no){
-					arr.push(my_val.suite_or_apartment_no);
+				let arr1= add_ress(my_val)
+				var varr= arr1.join(", ");
+				let link_coi='';
+				let link_sm='';
+				if(r.message[0].cert_of_insurance || r.message[0].safety_manual){
+					link_coi = r.message[0].cert_of_insurance.split(' ').join('%');
+					link_sm= r.message[0].safety_manual.split(' ').join('%');
 				}
-
-				if(my_val.address){
-					arr.push(my_val.address);
-				}
-
-				if(my_val.city){
-					arr.push(my_val.city);
-				}
-
-				if(my_val.state){
-					arr.push(my_val.state);
-				}
-
-				if(my_val.zip){
-					arr.push(my_val.zip);
-				}
-
-				var varr= arr.join(", ");
-
 				let template = `
 					<div class="container form-section m-auto card-section visible-section" style="max-width: 97%;width: 100%;padding: 0;animation: animatop 1.7s cubic-bezier(0.425, 1.14, 0.47, 1.125) forwards;background: transparent;"> 
 					<div id="listdata">
@@ -100,9 +89,28 @@ frappe.FaceRecognition = Class.extend({
 								<p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#">  <u> ${count} review </u> </a> </span> </p>
 							</div>
 							<div class="col-md-6 col-sm-12 order text-left text-md-right ">
-								<a href=javascript:new_order()><button type="button" id="place_order" class="btn btn-primary btn-sm btn-lg mt-1">Place Order</button></a>
-								<a href=javascript:work_order_history()><button type="button" id="work_order" class="btn btn-primary btn-info btn-sm mt-1">Work Order History</button></a>
-							</div>
+                                <div>
+                                    <a href=javascript:new_order() class="text-decoration-none">
+                                        <button type="button" id="place_order" class="btn btn-primary btn-xs mb-1 mt-1 mr-2 ">Place Order</button>
+                                    </a>
+                                    <a href=javascript:work_order_history()>
+                                        <button type="button" id="work_order"  class="btn btn-primary  mb-1 btn-xs mt-1">Work Order History</button>
+                                    </a>
+                                </div>
+                                <div> 
+                                    <a href=javascript:document_download("${link_coi}")>
+                                        <button type="button" id="coi" class="attached-file-link btn btn-primary mr-2 btn-xs mt-2" style="padding:5px 19.5px;"> 
+                                            COI 
+                                            <i class="fa fa-download mx-2" aria-hidden="true"></i>
+                                        </button></a>
+                                    <a href=javascript:document_download("${link_sm}")>
+                                        <button type="button" id="safety_manual" class="btn btn-primary btn-xs mt-2 attached-file-link">
+                                            Safety Manual
+                                            <i class="fa fa-download mx-2" aria-hidden="true"></i>
+                                        </button>
+                                    </a>
+                                </div>
+                            </div>
 						</div>
 								   
 						<div class="accordion mt-4 custom_collapse" id="accordionExample">
@@ -233,7 +241,6 @@ function work_order_history_for_multi_companies(name2){
 	});
 }
 function my_pop_up(message){
-	console.log(message)
 	var job_order=""
 	var created= ""
 	var job_category=""
@@ -300,4 +307,60 @@ function html_data(html,message){
 		
 	}
 	return html
+}
+
+function document_download(file1){
+	let file2=file1.replace(/%/g, ' ');
+	let file=''
+	if(file2.includes('/private')){
+		file = file2.replace('/private/','/');
+	}
+	else{
+		file=file2
+	}
+	if(file=="" || undefined){
+		frappe.msgprint("No File Attached");
+	}
+	let link=''
+	if(file.includes('.')){
+		if(file.length>1){
+			if(file.includes('/files/')){
+				link=window.location.origin+file
+			}
+			else{
+				link=window.location.origin+'/files/'+file
+			}
+			let data=file.split('/')
+			const anchor = document.createElement('a');
+			anchor.href = link;
+			anchor.download = data[data.length-1];
+			document.body.appendChild(anchor);
+			anchor.click();
+			document.body.removeChild(anchor);
+		}
+	}
+}
+
+function add_ress(my_val){
+	var arr = [];
+		if(my_val.suite_or_apartment_no){
+			arr.push(my_val.suite_or_apartment_no);
+		}
+
+		if(my_val.address){
+			arr.push(my_val.address);
+		}
+
+		if(my_val.city){
+			arr.push(my_val.city);
+		}
+
+		if(my_val.state){
+			arr.push(my_val.state);
+		}
+
+		if(my_val.zip){
+			arr.push(my_val.zip);
+		}
+	return arr;	
 }
