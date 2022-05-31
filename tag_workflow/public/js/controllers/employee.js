@@ -210,6 +210,7 @@ frappe.ui.form.on("Employee", {
 		}else{
 			frm.set_value("job_category",null);
 		} 
+		append_job_category(frm)
 	},
 
 	ssn: function(frm){
@@ -299,6 +300,15 @@ frappe.ui.form.on("Employee", {
 		frm.set_value('zip', zip?zip.toUpperCase():zip);
 	}
 });
+
+frappe.ui.form.on('Job Category', {
+	job_category(frm) {
+		append_job_category(frm)
+	},
+	employee_job_category_remove(frm){
+	    append_job_category(frm)
+	}
+})
 
 function hasExtensions(filename, exts){
 	return new RegExp("(" + exts.join("|").replace(/\./g, '\\.') + ')$').test(filename);
@@ -668,3 +678,13 @@ function employee_history(frm){
 		}
 	})
 } 
+
+function append_job_category(frm){
+    var job_categories = ''
+    frm.doc.employee_job_category.forEach(function(d1) { 
+        var next_category = d1.job_category+"\n"
+        job_categories += next_category
+    })
+    frm.set_value("job_categories",job_categories);
+    refresh_field("job_categories");
+}
