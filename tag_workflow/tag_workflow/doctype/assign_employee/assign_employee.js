@@ -4,6 +4,7 @@
  
 frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
+		setTimeout(add_dynamic,500);
         setTimeout(function(){
             staffing_company(frm)
         },1000);
@@ -628,4 +629,14 @@ function employee_resume_fun(frm){
             });
         }
     });
+}
+
+function add_dynamic(){
+	console.log("function")
+	if (cur_frm.doc.company && cur_frm.doc.__islocal!=1){
+		Array.from($('[data-doctype="Company"]')).forEach(_field =>{
+			localStorage.setItem("company", cur_frm.doc.company);
+			_field.href= '/app/dynamic_page';
+		});
+	}
 }
