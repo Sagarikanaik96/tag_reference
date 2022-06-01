@@ -859,7 +859,6 @@ def employee_company(doc,method):
 @frappe.whitelist(allow_guest=False)
 def update_company_employee(doc_name,employee_company):
    emp_doc=frappe.get_doc('Employee',doc_name)
-   comp_doc=frappe.get_doc('Company',employee_company)
    employee_list = frappe.db.get_list('Employee Assign Name', filters={
                                               'parent': employee_company, 'employee':doc_name}, fields={'name'})
    for employee in employee_list:
