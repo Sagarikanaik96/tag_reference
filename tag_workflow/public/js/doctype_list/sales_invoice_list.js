@@ -1,39 +1,5 @@
 frappe.listview_settings['Sales Invoice'] = {
-	add_fields:['company'],
 	onload:function(listview){
-		if (frappe.boot.tag.tag_user_info.company_type == 'Hiring') {
-						
-			const df = {
-				condition: "=",
-				default: null,
-				fieldname: "company",
-				fieldtype: "Autocomplete",
-				input_class: "input-xs",
-				label: "Company",
-				is_filter: 1,
-				onchange: function() {
-					cur_list.refresh();
-				},
-				options: get_staffing_company_invoices(),
-				placeholder: "Company"
-			};
-			listview.page.add_field(df, '.standard-filter-section')
-		}else if(frappe.boot.tag.tag_user_info.company_type == 'Staffing'){
-			const df = {
-				condition: "=",
-				fieldname: "company",
-				fieldtype: "Link",
-				input_class: "input-xs",
-				label: "Company",
-				is_filter: 1,
-				options:'Company',
-				onchange: function() {
-					cur_list.refresh();
-				},
-				placeholder: "Company"
-			};
-			listview.page.add_field(df, '.standard-filter-section')
-		}
 		$('h3[title = "Invoice"]').html('Invoices');
 		if(frappe.session.user!='Administrator'){
 			// $('.custom-actions.hidden-xs.hidden-md').hide()
