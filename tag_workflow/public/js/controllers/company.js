@@ -290,6 +290,7 @@ frappe.ui.form.on("Company", {
 		}
 	},
 	before_save: function(frm){
+		cur_frm.doc.employees=[];
 		if(frm.doc.industry_type && frm.doc.job_titles){
 			let industries=[]
 			for(let i in frm.doc.industry_type){
