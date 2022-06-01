@@ -680,11 +680,13 @@ function employee_history(frm){
 } 
 
 function append_job_category(frm){
-    var job_categories = ''
-    frm.doc.employee_job_category.forEach(function(d1) { 
-        var next_category = d1.job_category+"\n"
-        job_categories += next_category
-    })
-    frm.set_value("job_categories",job_categories);
-    refresh_field("job_categories");
+	var job_categories = ''
+	if(frm.doc.employee_job_category){
+	    frm.doc.employee_job_category.forEach(function(d1) { 
+		var next_category = d1.job_category+"\n"
+		job_categories += next_category
+	    })
+	    frm.set_value("job_categories",job_categories);
+	    refresh_field("job_categories");
+	}
 }
