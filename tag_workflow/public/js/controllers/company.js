@@ -291,6 +291,7 @@ frappe.ui.form.on("Company", {
 	},
 	before_save: function(frm){
 		cur_frm.doc.employees=[];
+		cur_frm.doc.enable_perpetual_inventory=0;
 		if(frm.doc.industry_type && frm.doc.job_titles){
 			let industries=[]
 			for(let i in frm.doc.industry_type){
