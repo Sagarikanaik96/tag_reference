@@ -129,6 +129,7 @@ frappe.ui.form.on("Job Order", {
 
 	},
 	refresh: function(frm) {
+		update_order_status(frm)
 		$('[data-fieldname="company"]').show();
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
@@ -1691,4 +1692,12 @@ function trigger_new_order(frm, direct, normal, company){
 	newdoc.bid = 0;
 	newdoc.claim = "";
 	frappe.set_route("form", newdoc.doctype, newdoc.name);
+}
+
+function update_order_status(frm){
+	if(frm.doc.__islocal!=1){
+		frappe.call({
+			method: "tag_workflow.tag_data.update_job_order_status",
+		})
+	}
 }

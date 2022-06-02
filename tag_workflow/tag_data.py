@@ -445,7 +445,7 @@ def disable_user(company, check):
 @frappe.whitelist()
 def update_job_order_status():
     try:
-        job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','bid','staff_org_claimed','order_status'])
+        job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','bid','staff_org_claimed','order_status','from_date','creation','no_of_workers','worker_filled'],filters={'order_status': ['not like', '%Completed%'] })    
         now_date=datetime.date.today()
         for job in job_order_data:
             start_date = job.from_date if job.from_date else ""
@@ -725,7 +725,8 @@ def replaced_employees(job_order, user=None):
 #-----------------------------------#
 
 def unshare_job_order(job):
-    if job.bid>0 and job.staff_org_claimed:
+    creation=str(job.creation).split(' ')
+    if job.bid>0 and job.staff_org_claimed and (job.no_of_workers-job.worker_filled==0 or str(job.from_date)!=creation[0]) :
         comp_name=f""" select distinct company from `tabUser` where organization_type='Staffing' and email in (select user from `tabDocShare` where share_doctype='Job Order' and share_name='{job.name}' )"""
         comp_data=frappe.db.sql(comp_name,as_list=True)
         for i in comp_data:
