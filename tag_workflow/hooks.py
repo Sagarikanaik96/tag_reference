@@ -125,7 +125,7 @@ override_doctype_dashboards = {
 }
 scheduler_events={
         "all":  [
-	        "tag_workflow.tag_data.update_job_order_status"
+            "tag_workflow.tag_data.update_job_order_status"
 	]
 }
 
@@ -133,10 +133,11 @@ override_whitelisted_methods = {
         "frappe.desk.query_report.run": "tag_workflow.utils.whitelisted.run",
         "frappe.desk.desktop.get_desktop_page": "tag_workflow.utils.whitelisted.get_desktop_page",
         "frappe.desk.reportview.delete_items": "tag_workflow.utils.employee.delete_items",
-}       
+        "frappe.core.doctype.data_import.data_import.form_start_import": "tag_workflow.utils.data_import.form_start_import"
+}
 
 override_doctype_class = {
     "Designation":"tag_workflow.dashboard_data.designation.DesignationOverride",
-    "Company": "tag_workflow.tag_workflow.doctype.company.company.CustomCompany",
-} 
+    "Company": "tag_workflow.tag_workflow.doctype.company.company.CustomCompany"
+}
 
