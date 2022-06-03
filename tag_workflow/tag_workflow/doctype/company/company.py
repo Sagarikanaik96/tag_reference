@@ -4,7 +4,7 @@
 from frappe.model.document import Document
 import frappe
 from frappe import _
-from erpnext.setup.doctype.company.company import *
+from erpnext.setup.doctype.company.company import Company,install_country_fixtures
 from frappe import enqueue
 from frappe.utils.nestedset import NestedSet
 create_default_accounts=Company.create_default_accounts
