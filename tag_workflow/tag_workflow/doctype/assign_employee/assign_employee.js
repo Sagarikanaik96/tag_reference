@@ -15,7 +15,6 @@ frappe.ui.form.on('Assign Employee', {
 			attachrefresh();
 		}
 
-        old_unknown_function(frm);
 		$('.form-footer').hide()
 		if(frm.doc.__islocal==1){
 			$(".grid-add-row").attr('class', 'btn btn-xs btn-secondary grid1-row');
@@ -51,6 +50,7 @@ frappe.ui.form.on('Assign Employee', {
 		child_table_label();
 
 		add_employee_row(frm);
+		old_unknown_function(frm);
 
 	},
 	e_signature_full_name:function(frm){

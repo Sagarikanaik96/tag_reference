@@ -26,7 +26,7 @@ WEB_MAN = "Website Manager"
 USR, EMP, COM = "User", "Employee", "Company"
 Global_defaults="Global Defaults"
 
-ALL_ROLES = [role.name for role in frappe.db.get_list("Role", {"name": ["!=", "Employee"]}) or []]
+ALL_ROLES = [role.name for role in frappe.db.get_list("Role", {"name": ["!=", "Employee"]}, ignore_permissions=True) or []]
 
 ADD_ORGANIZATION = ["Company", "Quotation", "Lead"]
 ADD_ORGANIZATION_DATA = ["TAG", "Hiring", "Staffing", "Exclusive Hiring"]
