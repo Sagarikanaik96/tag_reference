@@ -1,6 +1,6 @@
 
 function sorted(n){
-  var table, rows, switching, i, shouldSwitch, dir, switchcount = 0;
+  let table, rows, switching, i, shouldSwitch, dir, switchcount = 0;
   table = document.getElementById("sorting");
   switching = true;
   dir = "asc";
@@ -25,11 +25,11 @@ function sorted(n){
 
 
 function checking(rows,n,dir) {
-  var shouldSwitch = false;
-  var i;
+  let shouldSwitch = false;
+  let i;
   for (i = 1; i < (rows.length - 1); i++) {
-    var x = rows[i].getElementsByTagName("TD")[n];
-    var y = rows[i + 1].getElementsByTagName("TD")[n];
+    let x = rows[i].getElementsByTagName("TD")[n];
+    let y = rows[i + 1].getElementsByTagName("TD")[n];
     if (dir == "asc") {
       if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
         shouldSwitch = true;

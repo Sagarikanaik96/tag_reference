@@ -1,5 +1,5 @@
 frappe.pages['timesheet-approval'].on_page_load = function(wrapper) {
-	var page = frappe.ui.make_app_page({
+	let page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Timesheet',
 		single_column: true
@@ -9,7 +9,7 @@ frappe.pages['timesheet-approval'].on_page_load = function(wrapper) {
 
 frappe.TimesheetApproval = Class.extend({
 	init: function(wrapper, page) {
-		var me = this;
+		let me = this;
 		this.parent = wrapper;
 		this.page = this.parent.page;
 		setTimeout(function() {
@@ -18,7 +18,7 @@ frappe.TimesheetApproval = Class.extend({
 	},
 
 	setup: function(wrapper, page){
-		var me = this;
+		let me = this;
 		this.body = $('<div></div>').appendTo(this.page.main);
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
@@ -73,7 +73,7 @@ frappe.TimesheetApproval = Class.extend({
         },
 
 	order_info: function(_wrapper, _page){
-		var me = this;
+		let me = this;
 		let values = me.page.fields_dict;
 		let job_order = values.job_order.value || '';
 
@@ -98,7 +98,7 @@ frappe.TimesheetApproval = Class.extend({
 	},
 
 	get_details: function(wrapper, page){
-		var me = this;
+		let me = this;
 		toggle_hide();
 		let values = me.page.fields_dict;
 		me.order = values.job_order.value || '';
@@ -111,7 +111,7 @@ frappe.TimesheetApproval = Class.extend({
 	},
 
 	render_data: function(wrapper, page, order, company){
-		var me = this;
+		let me = this;
 		frappe.call({
 			method: "tag_workflow.tag_workflow.page.timesheet_approval.timesheet_approval.get_data",
 			args: {"company": company, "order": order},
@@ -134,9 +134,9 @@ frappe.TimesheetApproval = Class.extend({
 	},
 
 	make_main_table: function(_wrapper, _page, data, _company){
-		var me = this;
+		let me = this;
 		me.main_data = ``;
-		for(var i in data){
+		for(let i in data){
 			$("#data_approval").empty();
 			let date = data[i].date_of_timesheet ? data[i].date_of_timesheet : '';
 			let workflow = get_state(data[i].workflow_state);
@@ -160,7 +160,7 @@ frappe.TimesheetApproval = Class.extend({
 	},
 
 	make_action(wrapper, page, action){
-		var me = this;
+		let me = this;
 		let rowCount = $("#child tr").length || 0;
 		me.count = [];
 		me.value = [];
@@ -180,7 +180,7 @@ frappe.TimesheetApproval = Class.extend({
 	},
 
 	approve_timesheet(_wrapper, page, count, value, action){
-		var me = this;
+		let me = this;
 		if(count.length && value.length){
 			frappe.call({
 				"method": "tag_workflow.tag_workflow.page.timesheet_approval.timesheet_approval.approve_timesheets",
@@ -206,7 +206,7 @@ frappe.TimesheetApproval = Class.extend({
 			return;
 		}
 
-		var me = this;
+		let me = this;
 		let fields = [];
 		for(let v in value){
 			let id = "#emp_"+String(count[v]);
@@ -228,7 +228,7 @@ frappe.TimesheetApproval = Class.extend({
 			);
 		}
 
-		var dialog = new frappe.ui.Dialog({
+		let dialog = new frappe.ui.Dialog({
 			title: __('Please provide an explanation for the timesheet denial'),
 			fields: fields
 		});
@@ -288,7 +288,7 @@ function render_child_data(order, date, timesheet){
 		"callback": function(r){
 			let data = r.message || [];
 			let html = ``;
-			for(var d in data){
+			for(let d in data){
 				let workflow = get_state(data[d].workflow_state);
 				let state = data[d].state ? `<p class="indicator-pill red filterable ellipsis">${data[d].state}</p>` : '';
 				let inp = ["Approved", "Denied", "In Progress"].includes(data[d].workflow_state) ? `<input type='checkbox' class='grid-row-check pull-left' id="_${d}" value="${data[d].name}" disabled>` : `<input type='checkbox' class='grid-row-check pull-left' id="_${d}" value="${data[d].name}">`; 

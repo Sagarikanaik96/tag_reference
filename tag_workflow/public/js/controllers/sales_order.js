@@ -7,7 +7,7 @@ tag_workflow.controllers.SalesOrderController = Class.extend({
 	},
 
 	refresh: function(){
-		var me = this;
+		let me = this;
 		if(me.frm.doc.docstatus == 1){
 			me.frm.add_custom_button(__("Make Sales Invoice"), function() {
 				frappe.model.open_mapped_doc({
@@ -19,5 +19,5 @@ tag_workflow.controllers.SalesOrderController = Class.extend({
 		}
 	},
 });
-var controller = tag_workflow.controllers.SalesOrderController.extend();
+let controller = tag_workflow.controllers.SalesOrderController.extend();
 cur_frm.script_manager.make(controller);

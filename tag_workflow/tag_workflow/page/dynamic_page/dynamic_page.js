@@ -1,7 +1,7 @@
 let company=localStorage.getItem("company")
 
 frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
-	var page = frappe.ui.make_app_page({
+	let page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Company',
 		single_column: true
@@ -11,7 +11,7 @@ frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 
 frappe.FaceRecognition = Class.extend({
 	init: function(wrapper, page) {
-		var me = this;
+		let me = this;
 		this.parent = wrapper;
 		this.page = this.parent.page;
 		setTimeout(function() {
@@ -21,7 +21,7 @@ frappe.FaceRecognition = Class.extend({
 
 	setup: function(wrapper, page){
 		page.set_secondary_action('', () => me.get_details(wrapper, page), 'refresh');
-		var me = this;
+		let me = this;
 		this.body = $('<div></div>').appendTo(this.page.main);
 		$(frappe.render_template('dynamic_page', "")).appendTo(this.body);
 		me.show_profile(wrapper,page);
@@ -49,27 +49,24 @@ frappe.FaceRecognition = Class.extend({
 					}
 				}
 
-				var my_val= r.message[0];
-				var txt = "";
-				var text = r.message[2];
+				let my_val= r.message[0];
+				let txt = "";
+				let text = r.message[2];
 				for(let i in text){
 					txt += text[i].full_name + "<br>";
 				}
 
-				var industry = "";
-				for(var j in my_val.industry_type){
+				let industry = "";
+				for(let j in my_val.industry_type){
 					industry += my_val.industry_type[j].industry_type + "<br>";
 				}
 
-				var count = 0;
-				var rate = "";
+				let count = 0;
+				let rate = "";
 				for(let k in r.message[1]){
 					count += 1;
 					rate+= '★'.repeat(r.message[1][k][0]) + "<br>"  + r.message[1][k][1] + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
 				}
-
-				let arr1= add_ress(my_val)
-				var varr= arr1.join(", ");
 				let link_coi='';
 				let link_sm='';
 				if(r.message[0].cert_of_insurance || r.message[0].safety_manual){
@@ -184,8 +181,8 @@ frappe.FaceRecognition = Class.extend({
 });
 
 function new_order(){
-	var b = document.getElementById('comp_name').innerHTML;
-	var doc = frappe.model.get_new_doc("Job Order");
+	let b = document.getElementById('comp_name').innerHTML;
+	let doc = frappe.model.get_new_doc("Job Order");
 	doc.company = frappe.boot.tag.tag_user_info.company;
 	doc.staff_company = b;
 	doc.posting_date_time = frappe.datetime.now_date();
@@ -228,7 +225,7 @@ function work_order_history(){
 
 
 function work_order_history_for_multi_companies(name2){
-	var name3= name2.replace(/%@/g, ' ');
+	let name3= name2.replace(/%@/g, ' ');
 	frappe.call({
 		method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link3",
 		args: { "name": company || '',
@@ -241,16 +238,16 @@ function work_order_history_for_multi_companies(name2){
 	});
 }
 function my_pop_up(message){
-	var job_order=""
-	var created= ""
-	var job_category=""
-	var rate1=""
-	var total=""
+	let job_order=""
+	let created= ""
+	let job_category=""
+	let rate1=""
+	let total=""
 	let title1= "Work Order History"
 	for(let l in message[0]){
-		var jobb= message[0][l].name
+		let jobb= message[0][l].name
 		for(let s in message[2]){
-			var invoice= message[2][s][1];
+			let invoice= message[2][s][1];
 			if(invoice==jobb){
 				total+=invoice+ "<br>"+ "<br>"
 			}
@@ -262,19 +259,19 @@ function my_pop_up(message){
 	}
 
 	for(let m in message[0]){
-		var from_date= message[0][m].from_date+ "<br>"+ "<br>";
+		let from_date= message[0][m].from_date+ "<br>"+ "<br>";
 		
 		created+=(from_date)
 	}
 
 	for(let n in message[1]){
-		var job_cat= message[1][n].job_category+ "<br>"+ "<br>";
+		let job_cat= message[1][n].job_category+ "<br>"+ "<br>";
 		
 		job_category+=(job_cat)
 	}
 
 	for(let p in message[0]){
-		var rate= message[0][p].rate+ "<br>"+ "<br>";
+		let rate= message[0][p].rate+ "<br>"+ "<br>";
 		
 		rate1+=(rate)
 	}
@@ -342,7 +339,7 @@ function document_download(file1){
 }
 
 function add_ress(my_val){
-	var arr = [];
+	let arr = [];
 		if(my_val.suite_or_apartment_no){
 			arr.push(my_val.suite_or_apartment_no);
 		}

@@ -105,7 +105,7 @@ frappe.ui.form.on("Contract", {
 	signe_company:function(frm){
 		$('[data-label = "Save"]').css('display', 'block');
 		if(frm.doc.signe_company){
-			var regex = /[^0-9A-Za-z ]/g;
+			let regex = /[^0-9A-Za-z ]/g;
 			if (regex.test(frm.doc.signe_company) === true){
 				frappe.msgprint(__("Signature: Only alphabets and numbers are allowed."));
 				frm.set_value('signe_company','')
@@ -117,7 +117,7 @@ frappe.ui.form.on("Contract", {
 		$('[data-label = "Save"]').css('display', 'block');
 		if(frm.doc.signe_hiring){
 			frm.set_value("sign_date_hiring", frappe.datetime.now_date());
-			var regex = /[^0-9A-Za-z ]/g;
+			let regex = /[^0-9A-Za-z ]/g;
 			if (regex.test(frm.doc.signe_hiring) === true){
 				frappe.msgprint(__("Signature: Only alphabets and numbers are allowed."));
 				frm.set_value('signe_hiring','')
@@ -215,7 +215,7 @@ function update_hiring(){
 		args: {"company_type": "Hiring"},
 		callback: function(r){
 			if(r){
-				var data = r.message || '';
+				let data = r.message || '';
 				cur_frm.set_df_property("hiring_company", "options", data);
 			}
 		}
@@ -230,7 +230,7 @@ function update_user(frm){
 			args: {"company": frm.doc.hiring_company},
 			callback: function(r){
 				if(r){
-					var data = r.message;
+					let data = r.message;
 					cur_frm.set_df_property("end_party_user", "options", data);
 				}
 			}
@@ -275,9 +275,9 @@ function cancel_cantract(frm){
 
 function companyhide(time) {
 	setTimeout(() => {
-		var txt  = $('[data-fieldname="staffing_company"]')[1].getAttribute('aria-owns')
-		var txt2 = 'ul[id="'+txt+'"]'
-		var  arry = document.querySelectorAll(txt2)[0].children
+		let txt  = $('[data-fieldname="staffing_company"]')[1].getAttribute('aria-owns')
+		let txt2 = 'ul[id="'+txt+'"]'
+		let  arry = document.querySelectorAll(txt2)[0].children
 		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
 		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
 

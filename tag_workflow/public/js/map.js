@@ -1,4 +1,4 @@
-var script = document.createElement('script');
+let script = document.createElement('script');
 script.src = `https://maps.googleapis.com/maps/api/js?key=${frappe.boot.tag.tag_user_info.api_key}&libraries=places`;
 script.defer = true;
 // script.async = true;

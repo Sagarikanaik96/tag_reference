@@ -109,7 +109,7 @@ frappe.ui.form.on("Employee", {
 		$('[data-fieldname="company"]').click(function(){
 			if(cur_frm.doc.__islocal !==1){
 				setTimeout(()=>{
-					var cust= cur_frm.fields_dict.company.value
+					let cust= cur_frm.fields_dict.company.value
 					localStorage.setItem("company", cust)
 					window.location.href= "/app/dynamic_page"
 				},600);
@@ -177,8 +177,8 @@ frappe.ui.form.on("Employee", {
 
 	resume:function(frm){
 		if (frm.doc.resume && !hasExtensions(frm.doc.resume, [".pdf", ".txt", ".docx",'.png','jpg'])){
-			var array = frm.doc.resume.split("/")
-			var file_name = array[array.length -1]
+			let array = frm.doc.resume.split("/")
+			let file_name = array[array.length -1]
 			frappe.call({
 				method:"tag_workflow.tag_data.delete_file_data",
 				args:{file_name:file_name}
@@ -317,7 +317,7 @@ function hasExtensions(filename, exts){
 /*----------hide field----------*/
 function trigger_hide(){
 	let hide_fields = ["date_of_birth", "date_of_joining", "gender", "emergency_contact_details","salutation","erpnext_user","joining_details","job-profile","approvers_section","attendance_and_leave_details","salary_information","health_insurance_section","contact_details","sb53","personal_details","educational_qualification","previous_work_experience","history_in_company","exit", "naming_series", "middle_name","employment_details","job_profile"];
-	for(var val in hide_fields){
+	for(let val in hide_fields){
 		cur_frm.toggle_display(hide_fields[val], 0);
 	}
 }
@@ -325,7 +325,7 @@ function trigger_hide(){
 /*------required---------*/
 function required_field(){
 	let reqd_fields = ["email", "last_name"];
-	for(var fld in reqd_fields){
+	for(let fld in reqd_fields){
 		cur_frm.toggle_reqd(reqd_fields[fld], 1);
 	}
 }
@@ -458,10 +458,10 @@ function attachrefresh(){
 
 function companyhide(time){
 	setTimeout(() => {
-		var txt  = $('[data-fieldname="company"]')[0].getAttribute('aria-owns');
+		let txt  = $('[data-fieldname="company"]')[0].getAttribute('aria-owns');
 		if(txt != null){
-			var txt2 = 'ul[id="'+txt+'"]';
-			var  arry = document.querySelectorAll(txt2)[0].children;
+			let txt2 = 'ul[id="'+txt+'"]';
+			let  arry = document.querySelectorAll(txt2)[0].children;
 			if(arry.length && cur_frm.doc.doctype == "Employee"){
 				document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none';
 				document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none';
@@ -652,7 +652,7 @@ function employee_history(frm){
 				frappe.msgprint('Employee '+frm.doc.employee_name+' does not have any Work History')
 			}
 			else{
-				var data = r.message;
+				let data = r.message;
 			let profile_html = `<table class="col-md-12 basic-table table-headers table table-hover"><th>Job Order</th><th>Start Date</th><th>Job Title</th><th>Hiring Company</th><th>Total Hours</th>`;
 			for(let p in data){
 				profile_html += `<tr>
@@ -680,10 +680,10 @@ function employee_history(frm){
 } 
 
 function append_job_category(frm){
-	var job_categories = ''
+	let job_categories = ''
 	if(frm.doc.employee_job_category){
 	    frm.doc.employee_job_category.forEach(function(d1) { 
-		var next_category = d1.job_category+"\n"
+		let next_category = d1.job_category+"\n"
 		job_categories += next_category
 	    })
 	    frm.set_value("job_categories",job_categories);

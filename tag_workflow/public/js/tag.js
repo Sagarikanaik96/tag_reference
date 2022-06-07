@@ -39,22 +39,22 @@ frappe.ui.form.States = Class.extend({
 
 		this.update_fields = frappe.workflow.get_update_fields(this.frm.doctype);
 
-		var me = this;
+		let me = this;
 		$(this.frm.wrapper).bind("render_complete", function() {
 			me.refresh();
 		});
 	},
 
 	setup_help: function() {
-		var me = this;
+		let me = this;
 		this.frm.page.add_action_item(__("Help"), function() {
 			frappe.workflow.setup(me.frm.doctype);
-			var state = me.get_state();
-			var d = new frappe.ui.Dialog({
+			let state = me.get_state();
+			let d = new frappe.ui.Dialog({
 				title: "Workflow: "
 					+ frappe.workflow.workflows[me.frm.doctype].name
 			})
-			var next_html = $.map(frappe.workflow.get_transitions(me.frm.doctype, state),
+			let next_html = $.map(frappe.workflow.get_transitions(me.frm.doctype, state),
 				function(r) {
 					return r.action.bold() + __(" by Role ") + r.allowed;
 				}).join(", ") || __("None: End of Workflow").bold();
@@ -79,7 +79,7 @@ frappe.ui.form.States = Class.extend({
 			return;
 		}
 		// state text
-		var state = this.get_state();
+		let state = this.get_state();
 
 		if(state) {
 			// show actions from that state
@@ -89,8 +89,8 @@ frappe.ui.form.States = Class.extend({
 	},
 
 	show_actions: function(state) {
-		var added = false;
-		var me = this;
+		let added = false;
+		let me = this;
 		this.frm.page.clear_actions_menu();
 
 		// if the loaded doc is dirty, don't show workflow buttons
@@ -103,7 +103,7 @@ frappe.ui.form.States = Class.extend({
 				if(frappe.user_roles.includes(d.allowed)) {
 					added = true;
 					me.frm.page.add_action_item(__(d.action), function() {
-						var action = d.action;
+						let action = d.action;
 						// capture current state
 						if(action  == "Reject"){
 							me.frm.doc.__tran_state = d;
@@ -123,7 +123,7 @@ frappe.ui.form.States = Class.extend({
 	},
 
 	set_default_state: function() {
-		var default_state = frappe.workflow.get_default_state(this.frm.doctype, this.frm.doc.docstatus);
+		let default_state = frappe.workflow.get_default_state(this.frm.doctype, this.frm.doc.docstatus);
 		if(default_state) {
 			this.frm.set_value(this.state_fieldname, default_state);
 		}
@@ -137,7 +137,7 @@ frappe.ui.form.States = Class.extend({
 	},
 
 	bind_action: function() {
-		var me = this;
+		let me = this;
 		this.dropdown.on("click", "[data-action]", function() {
 			me._bind = '0'
 		})
@@ -154,14 +154,14 @@ frappe.form.link_formatters['Employee'] = function(value, doc) {
 	}
 }
 function unreject(me,d) {
-	var doc_before_action = copy_dict(me.frm.doc);
+	let doc_before_action = copy_dict(me.frm.doc);
 	// set new state
-	var next_state = d.next_state;
+	let next_state = d.next_state;
 	me.frm.doc[me.state_fieldname] = next_state;
 
-	var new_state = frappe.workflow.get_document_state(me.frm.doctype, next_state);
+	let new_state = frappe.workflow.get_document_state(me.frm.doctype, next_state);
 	new_state.update_field = me.state_fieldname;
-	var new_docstatus = cint(new_state.doc_status);
+	let new_docstatus = cint(new_state.doc_status);
 
 	if(new_state.update_field) {
 		me.frm.set_value(new_state.update_field, "");
@@ -170,14 +170,14 @@ function unreject(me,d) {
 	}
 
 	// revert state on error
-	var on_error = function() {
+	let on_error = function() {
 		// reset in locals
 		frappe.model.add_to_locals(doc_before_action);
 		me.frm.refresh();
 	}
 
 	// success - add a comment
-	var success = function() {
+	let success = function() {
 		console.log("sahil is here");
 	}
 
@@ -210,14 +210,14 @@ tag_workflow.UpdateField = function update_field(frm, field){
 	}
 }
 frappe.search.AwesomeBar.prototype.setup = function(element){
-	var me = this;
+	let me = this;
 	$('.search-bar').removeClass('hidden');
-	var $input = $(element);
-	var input = $input.get(0);
+	let $input = $(element);
+	let input = $input.get(0);
 	this.options = [];
 	this.global_results = [];
 
-	var awesomplete = new Awesomplete(input, {
+	let awesomplete = new Awesomplete(input, {
 		minChars: 0,
 		maxItems: 99,
 		autoFirst: true,
@@ -234,9 +234,9 @@ frappe.search.AwesomeBar.prototype.setup = function(element){
 		},
 
 		item: function(item) {
-			var d = this.get_item(item.value);
-			var name = __(d.label || d.value);
-			var html = '<span>' + name + '</span>';
+			let d = this.get_item(item.value);
+			let name = __(d.label || d.value);
+			let html = '<span>' + name + '</span>';
 			if (d.description && d.value !== d.description) {
 				html += '<br><span class="text-muted ellipsis">' + __(d.description) + '</span>';
 			}
@@ -254,9 +254,9 @@ frappe.search.AwesomeBar.prototype.setup = function(element){
 	this.awesomplete = awesomplete;
 
 	$input.on("input", frappe.utils.debounce(function(e) {
-		var value = e.target.value;
-		var txt = value.trim().replace(/\s\s+/g, ' ');
-		var last_space = txt.lastIndexOf(' ');
+		let value = e.target.value;
+		let txt = value.trim().replace(/\s\s+/g, ' ');
+		let last_space = txt.lastIndexOf(' ');
 		me.global_results = [];
 		me.options = [];
 
@@ -275,7 +275,7 @@ frappe.search.AwesomeBar.prototype.setup = function(element){
 		awesomplete.list = me.deduplicate(me.options);
 	}, 100));
 
-	var open_recent = function() {
+	let open_recent = function() {
 		if (!this.autocomplete_open) {
 			$(this).trigger("input");
 		}
@@ -291,9 +291,9 @@ frappe.search.AwesomeBar.prototype.setup = function(element){
 	});
 
 	$input.on("awesomplete-select", function(e) {
-		var o = e.originalEvent;
-		var value = o.text.value;
-		var item = awesomplete.get_item(value);
+		let o = e.originalEvent;
+		let value = o.text.value;
+		let item = awesomplete.get_item(value);
 
 		setTimeout(
 			function(){
@@ -362,7 +362,7 @@ frappe.ui.form.ControlInput.prototype.set_label = function(label) {
 	if(label) this.df.label = label;
 	if(this.only_input || this.df.label==this._label)
 		return;
-	var icon = "";
+	let icon = "";
 	this.label_span.innerHTML = (icon ? '<i class="'+icon+'"></i> ' : "") +
 		__(this.df.label)  || "&nbsp;";
 	this._label = this.df.label;

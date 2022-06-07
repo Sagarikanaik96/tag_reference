@@ -1,8 +1,8 @@
 frappe.listview_settings["Company"] = {
   add_fields: ["make_organization_inactive"],
   get_indicator: function (doc) {
-    var status = doc.make_organization_inactive == 0 ? "Active" : "Inactive";
-    var indicator = [
+    let status = doc.make_organization_inactive == 0 ? "Active" : "Inactive";
+    let indicator = [
       __(status),
       frappe.utils.guess_colour(status),
       "status,=," + status,

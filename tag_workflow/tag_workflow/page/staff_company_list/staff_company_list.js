@@ -1,5 +1,5 @@
 frappe.pages['staff_company_list'].on_page_load = function(wrapper) {
-	var page = frappe.ui.make_app_page({
+	let page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Staff Company List',
 		single_column: true
@@ -8,7 +8,7 @@ frappe.pages['staff_company_list'].on_page_load = function(wrapper) {
 }
 frappe.FaceRecognition = Class.extend({
 		init: function(wrapper, page) {
-			var me = this;
+			let me = this;
 			this.parent = wrapper;
 			this.page = this.parent.page;
 			setTimeout(function() {
@@ -16,7 +16,7 @@ frappe.FaceRecognition = Class.extend({
 			}, 0);
 		},
 		setup: function(wrapper, page){
-			var me = this;
+			let me = this;
 			this.body = $('<div></div>').appendTo(this.page.main);
 			$(frappe.render_template('staff_company_list', "")).appendTo(this.body);
 			me.show_profile(wrapper,page);
@@ -30,7 +30,7 @@ frappe.FaceRecognition = Class.extend({
 				
 				callback:function(r){
 
-					var data = r.message;
+					let data = r.message;
 					let profile_html = ``;
 					for(let p in data){
 						let link = data[p].name.split(' ').join('%');
@@ -54,7 +54,7 @@ frappe.FaceRecognition = Class.extend({
 
 
 function dynamic_route(name){
-	var name1= name.replace(/%/g, ' ');
+	let name1= name.replace(/%/g, ' ');
 	localStorage.setItem("company", name1);
 	window.location.href = "/app/dynamic_page";
 }

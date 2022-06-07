@@ -569,7 +569,7 @@ frappe.ui.Page = Class.extend({
 	},
 
 	get_or_add_inner_group_button: function(label) {
-		var $group = this.inner_toolbar.find(`.inner-group-button[data-label="${encodeURIComponent(label)}"]`);
+		let $group = this.inner_toolbar.find(`.inner-group-button[data-label="${encodeURIComponent(label)}"]`);
 		if (!$group.length) {
 			$group = $(
 				`<div class="inner-group-button" data-label="${encodeURIComponent(label)}">
@@ -616,14 +616,14 @@ frappe.ui.Page = Class.extend({
 	* @param {string} group - Label of the group button
 	*/
 	add_inner_button: function(label, action, group, type="default") {
-		var me = this;
+		let me = this;
 		let _action = function() {
 			let btn = $(this);
 			let response = action();
 			me.btn_disable_enable(btn, response);
 		};
 		if(group) {
-			var $group = this.get_or_add_inner_group_button(group);
+			let $group = this.get_or_add_inner_group_button(group);
 			$(this.inner_toolbar).removeClass("hide");
 
 			if (!this.is_in_group_button_dropdown($group.find(".dropdown-menu"), 'a', label)) {
@@ -653,7 +653,7 @@ frappe.ui.Page = Class.extend({
 		label = label.map(l => __(l));
 
 		if (group) {
-			var $group = this.get_inner_group_button(__(group));
+			let $group = this.get_inner_group_button(__(group));
 			if ($group.length) {
 				$group.find(`.dropdown-item[data-label="${encodeURIComponent(label)}"]`).remove();
 			}
@@ -667,7 +667,7 @@ frappe.ui.Page = Class.extend({
 		let btn;
 
 		if (group) {
-			var $group = this.get_inner_group_button(__(group));
+			let $group = this.get_inner_group_button(__(group));
 			if ($group.length) {
 				btn = $group.find(`.dropdown-item[data-label="${encodeURIComponent(label)}"]`);
 			}
@@ -695,9 +695,9 @@ frappe.ui.Page = Class.extend({
 	//-- Sidebar --//
 
 	add_sidebar_item: function(label, action, insert_after, prepend) {
-		var parent = this.sidebar.find(".sidebar-menu.standard-actions");
-		var li = $('<li>');
-		var link = $('<a>').html(label).on("click", action).appendTo(li);
+		let parent = this.sidebar.find(".sidebar-menu.standard-actions");
+		let li = $('<li>');
+		let link = $('<a>').html(label).on("click", action).appendTo(li);
 
 		if (insert_after) {
 			li.insertAfter(parent.find(insert_after));
@@ -809,15 +809,15 @@ frappe.ui.Page = Class.extend({
 			.appendTo(this.page_form);
 	},
 	add_select: function(label, options) {
-		var field = this.add_field({label:label, fieldtype:"Select"});
+		let field = this.add_field({label:label, fieldtype:"Select"});
 		return field.$wrapper.find("select").empty().add_options(options);
 	},
 	add_data: function(label) {
-		var field = this.add_field({label: label, fieldtype: "Data"});
+		let field = this.add_field({label: label, fieldtype: "Data"});
 		return field.$wrapper.find("input").attr("placeholder", label);
 	},
 	add_date: function(label, date) {
-		var field = this.add_field({label: label, fieldtype: "Date", "default": date});
+		let field = this.add_field({label: label, fieldtype: "Date", "default": date});
 		return field.$wrapper.find("input").attr("placeholder", label);
 	},
 	add_check: function(label) {
@@ -838,7 +838,7 @@ frappe.ui.Page = Class.extend({
 
 		df.input_class = 'input-xs';
 
-		var f = frappe.ui.form.make_control({
+		let f = frappe.ui.form.make_control({
 			df: df,
 			parent: parent || this.page_form,
 			only_input: df.fieldtype == "Check" ? false : true,
@@ -886,7 +886,7 @@ frappe.ui.Page = Class.extend({
 		this.page_form.addClass("hide");
 	},
 	get_form_values: function() {
-		var values = {};
+		let values = {};
 		this.page_form.fields_dict.forEach(function(field, key) {
 			values[key] = field.get_value();
 		});

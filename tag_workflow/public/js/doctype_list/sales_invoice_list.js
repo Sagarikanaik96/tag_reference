@@ -79,7 +79,7 @@ frappe.listview_settings['Sales Invoice'] = {
 
 
 function create_monthly_invoice(){
-		var pop_up = new frappe.ui.Dialog({
+		let pop_up = new frappe.ui.Dialog({
 			title: __('Monthly Staffing Sales Invoice'),
 			'fields': [
 				{
@@ -125,7 +125,7 @@ function create_monthly_invoice(){
 			],
 			primary_action: function(){
 				pop_up.hide();
-				var staff_detail=pop_up.get_values()
+				let staff_detail=pop_up.get_values()
 				frappe.call({
 					method: "tag_workflow.utils.invoice.make_month_invoice",
 					freeze: true,
@@ -154,16 +154,16 @@ function month_list(dialog){
 	if (year > current_year){
 		frappe.msgprint('future year is not accepted')
 		cur_dialog.set_value("year",current_year)
-		var op = current_month_year()
+		let op = current_month_year()
 		dialog.set_df_property("month", "options", op);
 
 	}
 	else if(year < current_year){
-		var options1 = 'January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember'
+		let options1 = 'January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember'
 		dialog.set_df_property("month", "options", options1);
 	}
 	else{
-		var month = current_month_year()
+		let month = current_month_year()
 		dialog.set_df_property("month", "options", month);
 	}
 	

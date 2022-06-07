@@ -123,14 +123,14 @@ frappe.ui.form.on("User", {
 	},
 	first_name:function(){
 		if(cur_frm.doc.first_name){
-			var first_name = cur_frm.doc.first_name;
+			let first_name = cur_frm.doc.first_name;
 			first_name = name_update(first_name);
 			cur_frm.set_value("first_name",first_name);
 		}
 	},		
 	last_name:function(){
 		if(cur_frm.doc.last_name){
-			var last_name = cur_frm.doc.last_name;
+			let last_name = cur_frm.doc.last_name;
 			last_name = name_update(last_name);
 			cur_frm.set_value("last_name",last_name);
 		}
@@ -185,12 +185,12 @@ function name_update(string){
 
 /*--------perpare field display-----------*/
 function field_toggle(){
-	var perm_dis_fields = ["sb1", "document_follow_notifications_section", "email_settings", "sb_allow_modules", "sb2", "sb3", "third_party_authentication", "api_access", "full_name", "language", "time_zone", "middle_name", "username", "interest", "bio", "banner_image", "mute_sounds", "desk_theme", "phone"];
+	let perm_dis_fields = ["sb1", "document_follow_notifications_section", "email_settings", "sb_allow_modules", "sb2", "sb3", "third_party_authentication", "api_access", "full_name", "language", "time_zone", "middle_name", "username", "interest", "bio", "banner_image", "mute_sounds", "desk_theme", "phone"];
 	for(let field in perm_dis_fields){
 		cur_frm.toggle_display(perm_dis_fields[field], 0);
 	}
 	if(frappe.session.user!='Administrator'){
-		var gender_dob=['gender','birth_date']
+		let gender_dob=['gender','birth_date']
 		for(let field in gender_dob){
 			cur_frm.toggle_display(gender_dob[field], 0);
 		}
@@ -199,7 +199,7 @@ function field_toggle(){
 
 function field_reqd(){
 	cur_frm.fields_dict["short_bio"].collapse();
-	var data = ["company", "date_of_joining"];
+	let data = ["company", "date_of_joining"];
 	for(let value in data){
 		cur_frm.toggle_reqd(data[value], 1);
 	}
@@ -210,7 +210,7 @@ function field_check(){
 	let pass = "new_password";
 	if(!cur_frm.doc.__islocal){
 		$(".page-title .title-area .title-text").css("cursor", "pointer");
-		for(var vals in values){
+		for(let vals in values){
 			cur_frm.toggle_enable(values[vals], 0);
 		}
 	}else{
@@ -226,7 +226,7 @@ function field_check(){
 function init_values(){
 	if(cur_frm.doc.__islocal == 1){
 		let clear_values = ["username", "email", "first_name", "last_name", "company", "gender", "birth_date", "tag_user_type", "location", "mobile_no"];
-		for(var val in clear_values){
+		for(let val in clear_values){
 			cur_frm.set_value(clear_values[val], "");
 		}
 	}
@@ -340,7 +340,7 @@ function make_multicompany(frm){
 		primary_action(values) {
 			let data = values.company || [];
 			let company = [];
-			for(var d in data){(data[d].company) ? company.push(data[d].company) : console.log(".")}
+			for(let d in data){(data[d].company) ? company.push(data[d].company) : console.log(".")}
 
 			if(company.length > 0){
 				frappe.call({
@@ -423,9 +423,9 @@ function exclusive_fields(frm){
 				$('[data-label="Save"]').hide()
 				$('[data-label="Assign%20Multi%20Company"]').hide()
   
-				var myStringArray = ["first_name", "last_name", "enabled", "terminated", "gender", "birth_date", "location", "mobile_no", "new_password", "logout_all_sessions"];
-				var arrayLength = myStringArray.length;
-				for (var i = 0; i < arrayLength; i++) {
+				let myStringArray = ["first_name", "last_name", "enabled", "terminated", "gender", "birth_date", "location", "mobile_no", "new_password", "logout_all_sessions"];
+				let arrayLength = myStringArray.length;
+				for (let i = 0; i < arrayLength; i++) {
 					frm.set_df_property(myStringArray[i], "read_only", 1);
 				}
 				frm.set_df_property('change_password','hidden',1);
@@ -439,9 +439,9 @@ function exclusive_fields(frm){
 
 function companyhide(time) {
 	setTimeout(() => {
-		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns')
-		var txt2 = 'ul[id="'+txt+'"]'
-		var  arry = document.querySelectorAll(txt2)[0].children
+		let txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns')
+		let txt2 = 'ul[id="'+txt+'"]'
+		let arry = document.querySelectorAll(txt2)[0].children
 		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
 		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
 

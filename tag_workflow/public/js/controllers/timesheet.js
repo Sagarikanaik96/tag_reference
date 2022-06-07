@@ -31,7 +31,7 @@ frappe.ui.form.on("Timesheet", {
 				approval_timesheet();
 			}
 		}
-		var timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
+		let timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
 		hide_timesheet_field(timesheet_fields);
 
 		check_update_timesheet(frm);
@@ -102,14 +102,14 @@ frappe.ui.form.on("Timesheet", {
 		if(frm.doc.workflow_state === 'Denied' && (frappe.user_roles.includes('Staffing Admin') || frappe.user_roles.includes('Staffing User'))){
 			return new Promise(function(resolve, reject){
 				if(frappe.session.user!='Administrator'){
-					var pop_up = new frappe.ui.Dialog({
+					let pop_up = new frappe.ui.Dialog({
 						title: __('Please provide an explanation for the timesheet denial '),
 						'fields': [
 							{'fieldname': 'Comment', 'fieldtype': 'Long Text','label':'comment','reqd':1}
 						],
 						primary_action: function(){
 							pop_up.hide();
-							var comment=pop_up.get_values();
+							let comment=pop_up.get_values();
 							frappe.call({
 								method:"tag_workflow.utils.timesheet.timesheet_dispute_comment_box",
 								freeze:true,
@@ -184,9 +184,9 @@ function job_order_details(frm){
 /*-----------timesheet-----------------*/
 function check_update_timesheet(frm){
 	if(frm.doc.workflow_state == "Approval Request"){
-		var current_date = new Date(frappe.datetime.now_datetime());
-		var approved_date = new Date(frm.doc.modified);
-		var diff=current_date.getTime()-approved_date.getTime();
+		let current_date = new Date(frappe.datetime.now_datetime());
+		let approved_date = new Date(frm.doc.modified);
+		let diff=current_date.getTime()-approved_date.getTime();
 		diff = parseInt(diff/1000);
 
 		if (diff<25 && (frappe.boot.tag.tag_user_info.company_type=="Hiring" || frappe.boot.tag.tag_user_info.company_type=="Exclusive Hiring")){
@@ -196,7 +196,7 @@ function check_update_timesheet(frm){
 		if((frappe.user_roles.includes('Hiring Admin') || frappe.user_roles.includes('Hiring User')) && frappe.session.user!='Administrator'){
 			frappe.db.get_value("Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
 				if(!r.rating){
-					var pop_up = new frappe.ui.Dialog({
+					let pop_up = new frappe.ui.Dialog({
 						title: __('Staffing Company Review'),
 						'fields': [
 							{'fieldname': 'Rating', 'fieldtype': 'Rating','label':'Rating','reqd':1},
@@ -205,7 +205,7 @@ function check_update_timesheet(frm){
 						primary_action: function(){
 							pop_up.hide();
 							console.log('Submitting Review')
-							var comp_rating=pop_up.get_values();
+							let comp_rating=pop_up.get_values();
 							frappe.call({
 								method:"tag_workflow.utils.timesheet.company_rating",
 								args:{
@@ -245,7 +245,7 @@ function update_job_detail(){
 			callback:function(r){
 				if(r.message){
 					cur_frm.clear_table("time_logs");
-					var child = frappe.model.get_new_doc("Timesheet Detail", cur_frm.doc, "time_logs");
+					let child = frappe.model.get_new_doc("Timesheet Detail", cur_frm.doc, "time_logs");
 					$.extend(child, {"activity_type": r.message[0], "is_billable":1,"billing_rate":r.message[4],"flat_rate":r.message[5],"extra_hours":r.message[6],"extra_rate":r.message[7]});
 					cur_frm.refresh_field("time_logs");
 				}
@@ -295,7 +295,7 @@ function denied_timesheet(frm){
 }
 
 function employee_timesheet_rating(frm){
-	var pop_up = new frappe.ui.Dialog({
+	let pop_up = new frappe.ui.Dialog({
 		title: __('Employee Rating'),
 		'fields': [
 			{'fieldname': 'thumbs_up', 'fieldtype': 'Check','label':"<i class='fa fa-thumbs-up' type='radio' style='font-size: 50px;' value='up' id = '1'> "},
@@ -340,7 +340,7 @@ function employee_timesheet_rating(frm){
 function approval_timesheet(){
 	frappe.db.get_value("Hiring Company Review", {"name": cur_frm.doc.employee_company+"-"+cur_frm.doc.job_order_detail},['rating'], function(r){
 		if(!r.rating){
-			var pop_up = new frappe.ui.Dialog({
+			let pop_up = new frappe.ui.Dialog({
 				title: __('Hiring Company Rating'),
 				'fields': [
 					{'fieldname': 'Rating', 'fieldtype': 'Rating','label':'Rating','reqd':1},
@@ -348,7 +348,7 @@ function approval_timesheet(){
 				],
 				primary_action: function(){
 					pop_up.hide();
-					var comp_rating=pop_up.get_values()
+					let comp_rating=pop_up.get_values()
 					frappe.call({
 						method:"tag_workflow.utils.timesheet.hiring_company_rating",
 						args:{
@@ -378,7 +378,7 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	is_billable:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn];
+		let child=locals[cdt][cdn];
 		if(child.is_billable==1){
 			frappe.model.set_value(cdt, cdn, "billing_rate", frm.doc.per_hour_rate);
 			frappe.model.set_value(cdt, cdn, "flat_rate", frm.doc.flat_rate);
@@ -386,7 +386,7 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	to_time:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn];
+		let child=locals[cdt][cdn];
 
 		let f_time = new Date(child.from_time);
 		let t_time = new Date(child.to_time);
@@ -413,7 +413,7 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	from_time:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn];
+		let child=locals[cdt][cdn];
 		
 		if((child.from_time).slice(0,10)<(frm.doc.from_date)){
 			frappe.msgprint('Start Date cant be before Job Order Start Date');
@@ -434,7 +434,7 @@ frappe.ui.form.on("Timesheet Detail", {
 		}
 	},
 	break_start_time:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn];
+		let child=locals[cdt][cdn];
 		if((child.break_start_time).slice(0,10)<((child.from_time).slice(0,10))){
 			setTimeout(() => {
 				frappe.model.set_value(cdt, cdn, "break_start_time", window.start);
@@ -450,7 +450,7 @@ frappe.ui.form.on("Timesheet Detail", {
 		update_time(frm,cdt,cdn)
 	},
 	break_end_time:function(frm,cdt,cdn){
-		var child=locals[cdt][cdn];
+		let child=locals[cdt][cdn];
 		if((child.break_end_time).slice(0,10)<((child.break_start_time).slice(0,10))){
 			setTimeout(() => {
 				frappe.model.set_value(cdt, cdn, "break_start_time", window.end);
@@ -502,7 +502,7 @@ function update_child_amount(frm){
 }
 
 function update_time(frm, cdt, cdn){
-	var child = locals[cdt][cdn];
+	let child = locals[cdt][cdn];
 	let sec = (moment(child.to_time).diff(moment(child.from_time), "seconds"));
 	let break_sec = 0;
 	let amount = 0;
@@ -545,7 +545,7 @@ function update_time(frm, cdt, cdn){
 }
 
 
-var calculate_end_time = function(_frm, cdt, cdn) {
+let calculate_end_time = function(_frm, cdt, cdn) {
         let child = locals[cdt][cdn];
 	console.log(child.name);
 };

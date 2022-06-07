@@ -119,7 +119,7 @@ frappe.ui.form.on("Job Order", {
 	},
 	e_signature_full_name:function(frm){
 		if(frm.doc.e_signature_full_name){
-			var regex = /[^0-9A-Za-z ]/g;
+			let regex = /[^0-9A-Za-z ]/g;
 			if (regex.test(frm.doc.e_signature_full_name) === true){
 				frappe.msgprint(__("E-Signature Full Name: Only alphabets and numbers are allowed."));
 				frm.set_value('e_signature_full_name','')
@@ -220,7 +220,7 @@ frappe.ui.form.on("Job Order", {
 					else{
 						profile_html = "<span style='font-size: 14px;'>"+"<b>Job Category: </b>" + frm.doc.category + "<br><b>Start Date: </b>" + frm.doc.from_date + "<br><b>End Date: </b>" + frm.doc.to_date + "<br><b>Job Duration: </b>" + frm.doc.job_order_duration +"<br><b>Est. Daily Hours: </b>" + frm.doc.estimated_hours_per_day + "<br><b>Start Time: </b>" + frm.doc.job_start_time.slice(0, -3) + "<br><b>Job Site: </b>" + frm.doc.job_site + "<br><b>Job Site Contact: </b>" + frm.doc.contact_name + "<br><b>No. of Workers: </b>" + frm.doc.no_of_workers + "<br><b>Base Price: </b>$" + (frm.doc.rate).toFixed(2) + "<br><b>Rate Increase: </b>$" + (frm.doc.per_hour - frm.doc.rate).toFixed(2) + "<br><b>Additional Flat Rate: </b>$" + (frm.doc.flat_rate).toFixed(2) + "<br><b>Total Per Hour Rate: </b>$" + (frm.doc.per_hour).toFixed(2) + "</span>";
 					}
-					var confirm_joborder = new frappe.ui.Dialog({
+					let confirm_joborder = new frappe.ui.Dialog({
 						title: __('Confirm Job Order Details'),
 						fields: [{fieldname: "save_joborder", fieldtype: "HTML", options: profile_html},]
 					});
@@ -291,7 +291,7 @@ frappe.ui.form.on("Job Order", {
 	},
 
 	view_contract: function() {
-		var contracts = "<div class='contract_div'><h3>Staffing/Vendor Contract</h3>This Staffing/Vendor Contract (“Contract”) is entered into by and between Staffing Company and Hiring Company as further described and as set forth below. By agreeing to the Temporary Assistance Guru, Inc. (“TAG”) End-User License Agreement, and using the TAG application service and website (the “Service”) Staffing Company and Hiring Company agree that they have a contractual relationship with each other and that the following terms apply to such relationship: <br> <ol> <li> The billing rate Hiring Company shall pay Staffing Company to hire each temporary worker provided by Staffing Company (the “Worker”) is the rate set forth by the TAG Service for the location and position sought to be filled, and this rate includes all wages, worker’s compensation premiums, unemployment insurance, payroll taxes, and all other employer burdens recruiting, administration, payroll funding, and liability insurance.</li><li> Hiring Company agrees not to directly hire and employ the Worker until the Worker has completed at least 720 work hours. Hiring Company agrees to pay Staffing Company an administrative placement fee of $3,000.00 if Hiring Company directly employs the Worker prior to completion of 720 work hours.</li> <li> Hiring Company acknowledges that it has complete care, custody, and control of workplaces and job sites. Hiring Company agrees to comply with all applicable laws, regulations, and ordinances relating to health and safety, and agrees to provide any site/task specific training and/or safety devices and protective equipment necessary or required by law. Hiring Company will not, without prior written consent of Staffing Company, entrust Staffing Company employees with the handling of cash, checks, credit cards, jewelry, equipment, tools, or other valuables.</li> <li> Hiring Company agrees that it will maintain a written safety program, a hazard communication program, and an accident investigation program. Hiring Company agrees that it will make first aid kits available to Workers, that proper lifting techniques are to be used, that fall protection is to be used, and that Hiring Company completes regular inspections on electrical cords and equipment. Hiring Company represents, warrants, and covenants that it handles and stores hazardous materials properly and in compliance with all applicable laws. </li> <li> Hiring Company agrees to post Occupational Safety and Health Act (“OSHA”) of 1970 information and other safety information, as required by law. Hiring Company agrees to log all accidents in its OSHA 300 logs. Hiring Company agrees to indemnify and hold harmless Staffing Company for all claims, damages, or penalties arising out of violations of the OSHA or any state law with respect to workplaces or equipment owned, leased, or supervised by Hiring Company and to which employees are assigned. </li> <li>  Hiring Company will not, without prior written consent of Staffing Company, utilize Workers to operate machinery, equipment, or vehicles. Hiring Company agrees to indemnify and save Staffing Company and Workers harmless from any and all claims and expenses (including litigation) for bodily injury or property damage or other loss as asserted by Hiring Company, its employees, agents, the owner of any such vehicles and/or equipment or contents thereof, or by members of the general public, or any other third party, arising out of the operation or use of said vehicles and/or equipment by Workers. </li> <li> Commencement of work by dispatched Workers, or Hiring Company’s signature on work ticket serves as confirmation of Hiring Company’s agreement to conditions of service listed in or referred to by this Contract. </li> <li> Hiring Company agrees not to place Workers in a supervisory position except for a Worker designated as a “lead,” and, in that position, Hiring Company agrees to supervise all Workers at all times. </li> <li> Billable time begins at the time Workers report to the workplace as designated by the Hiring Company. </li> <li> Jobs must be canceled a minimum of 24 hours prior to start time to avoid a minimum of four hours billing per Worker. </li> <li> Staffing Company guarantees that its Workers will satisfy Hiring Company, or the first two hours are free of charge. If Hiring Company is not satisfied with the Workers, Hiring Company is to call the designated phone number for the Staffing Company within the first two hours, and Staffing Company will replace them free of charge.</li> <li> Staffing Company agrees that it will comply with Hiring Company’s safety program rules. </li> <li> Overtime will be billed at one and one-half times the regular billing rate for all time worked over forty hours in a pay period and/or eight hours in a day as provided by state law. </li> <li> Invoices are due 30 days from receipt, unless other arrangements have been made and agreed to by each of the parties. </li> <li> Interest Rate: Any outstanding balance due to Staffing Company is subject to an interest rate of two percent (2%) per month, commencing on the 90th day after the date the balance was due, until the balance is paid in full by Hiring Company. </li> <li> Severability. If any provision of this Contract is held to be invalid and unenforceable, then the remainder of this Contract shall nevertheless remain in full force and effect. </li> <li> Attorney’s Fees. Hiring Company agrees to pay reasonable attorney’s fees and/or collection fees for any unpaid account balances or in any action incurred to enforce this Contract. </li> <li> Governing Law. This Contract is governed by the laws of the state of Florida, regardless of its conflicts of laws rules. </li> <li>  If Hiring Company utilizes a Staffing Company employee to work on a prevailing wage job, Hiring Company agrees to notify Staffing Company with the correct prevailing wage rate and correct job classification for duties Staffing Company employees will be performing. Failure to provide this information or providing incorrect information may result in the improper reporting of wages, resulting in fines or penalties being imposed upon Staffing Company. The Hiring Company agrees to reimburse Staffing Company for any and all fines, penalties, wages, lost revenue, administrative and/or supplemental charges incurred by Staffing Company.</li> <li> WORKERS' COMPENSATION COSTS: Staffing Company represents and warrants that it has a strong safety program, and it is Staffing Company’s highest priority to bring its Workers home safely every day. AFFORDABLE CARE ACT (ACA): Staffing Company represents and warrants that it is in compliance with all aspects of the ACA. </li> <li> Representatives. The Hiring Company and the Staffing Company each certifies that its authorized representative has read all of the terms and conditions of this Contract and understands and agrees to the same. </li> ";
+		let contracts = "<div class='contract_div'><h3>Staffing/Vendor Contract</h3>This Staffing/Vendor Contract (“Contract”) is entered into by and between Staffing Company and Hiring Company as further described and as set forth below. By agreeing to the Temporary Assistance Guru, Inc. (“TAG”) End-User License Agreement, and using the TAG application service and website (the “Service”) Staffing Company and Hiring Company agree that they have a contractual relationship with each other and that the following terms apply to such relationship: <br> <ol> <li> The billing rate Hiring Company shall pay Staffing Company to hire each temporary worker provided by Staffing Company (the “Worker”) is the rate set forth by the TAG Service for the location and position sought to be filled, and this rate includes all wages, worker’s compensation premiums, unemployment insurance, payroll taxes, and all other employer burdens recruiting, administration, payroll funding, and liability insurance.</li><li> Hiring Company agrees not to directly hire and employ the Worker until the Worker has completed at least 720 work hours. Hiring Company agrees to pay Staffing Company an administrative placement fee of $3,000.00 if Hiring Company directly employs the Worker prior to completion of 720 work hours.</li> <li> Hiring Company acknowledges that it has complete care, custody, and control of workplaces and job sites. Hiring Company agrees to comply with all applicable laws, regulations, and ordinances relating to health and safety, and agrees to provide any site/task specific training and/or safety devices and protective equipment necessary or required by law. Hiring Company will not, without prior written consent of Staffing Company, entrust Staffing Company employees with the handling of cash, checks, credit cards, jewelry, equipment, tools, or other valuables.</li> <li> Hiring Company agrees that it will maintain a written safety program, a hazard communication program, and an accident investigation program. Hiring Company agrees that it will make first aid kits available to Workers, that proper lifting techniques are to be used, that fall protection is to be used, and that Hiring Company completes regular inspections on electrical cords and equipment. Hiring Company represents, warrants, and covenants that it handles and stores hazardous materials properly and in compliance with all applicable laws. </li> <li> Hiring Company agrees to post Occupational Safety and Health Act (“OSHA”) of 1970 information and other safety information, as required by law. Hiring Company agrees to log all accidents in its OSHA 300 logs. Hiring Company agrees to indemnify and hold harmless Staffing Company for all claims, damages, or penalties arising out of violations of the OSHA or any state law with respect to workplaces or equipment owned, leased, or supervised by Hiring Company and to which employees are assigned. </li> <li>  Hiring Company will not, without prior written consent of Staffing Company, utilize Workers to operate machinery, equipment, or vehicles. Hiring Company agrees to indemnify and save Staffing Company and Workers harmless from any and all claims and expenses (including litigation) for bodily injury or property damage or other loss as asserted by Hiring Company, its employees, agents, the owner of any such vehicles and/or equipment or contents thereof, or by members of the general public, or any other third party, arising out of the operation or use of said vehicles and/or equipment by Workers. </li> <li> Commencement of work by dispatched Workers, or Hiring Company’s signature on work ticket serves as confirmation of Hiring Company’s agreement to conditions of service listed in or referred to by this Contract. </li> <li> Hiring Company agrees not to place Workers in a supervisory position except for a Worker designated as a “lead,” and, in that position, Hiring Company agrees to supervise all Workers at all times. </li> <li> Billable time begins at the time Workers report to the workplace as designated by the Hiring Company. </li> <li> Jobs must be canceled a minimum of 24 hours prior to start time to avoid a minimum of four hours billing per Worker. </li> <li> Staffing Company guarantees that its Workers will satisfy Hiring Company, or the first two hours are free of charge. If Hiring Company is not satisfied with the Workers, Hiring Company is to call the designated phone number for the Staffing Company within the first two hours, and Staffing Company will replace them free of charge.</li> <li> Staffing Company agrees that it will comply with Hiring Company’s safety program rules. </li> <li> Overtime will be billed at one and one-half times the regular billing rate for all time worked over forty hours in a pay period and/or eight hours in a day as provided by state law. </li> <li> Invoices are due 30 days from receipt, unless other arrangements have been made and agreed to by each of the parties. </li> <li> Interest Rate: Any outstanding balance due to Staffing Company is subject to an interest rate of two percent (2%) per month, commencing on the 90th day after the date the balance was due, until the balance is paid in full by Hiring Company. </li> <li> Severability. If any provision of this Contract is held to be invalid and unenforceable, then the remainder of this Contract shall nevertheless remain in full force and effect. </li> <li> Attorney’s Fees. Hiring Company agrees to pay reasonable attorney’s fees and/or collection fees for any unpaid account balances or in any action incurred to enforce this Contract. </li> <li> Governing Law. This Contract is governed by the laws of the state of Florida, regardless of its conflicts of laws rules. </li> <li>  If Hiring Company utilizes a Staffing Company employee to work on a prevailing wage job, Hiring Company agrees to notify Staffing Company with the correct prevailing wage rate and correct job classification for duties Staffing Company employees will be performing. Failure to provide this information or providing incorrect information may result in the improper reporting of wages, resulting in fines or penalties being imposed upon Staffing Company. The Hiring Company agrees to reimburse Staffing Company for any and all fines, penalties, wages, lost revenue, administrative and/or supplemental charges incurred by Staffing Company.</li> <li> WORKERS' COMPENSATION COSTS: Staffing Company represents and warrants that it has a strong safety program, and it is Staffing Company’s highest priority to bring its Workers home safely every day. AFFORDABLE CARE ACT (ACA): Staffing Company represents and warrants that it is in compliance with all aspects of the ACA. </li> <li> Representatives. The Hiring Company and the Staffing Company each certifies that its authorized representative has read all of the terms and conditions of this Contract and understands and agrees to the same. </li> ";
 
 		if(cur_frm.doc.contract_add_on){
 			frappe.db.get_value("Company", {name: cur_frm.doc.company}, ["contract_addendums"], function() {
@@ -392,9 +392,9 @@ frappe.ui.form.on("Job Order", {
 		rate_calculation(frm);
 		time_validation(frm)
 		set_custom_base_price(frm)
-		var l = {Company: frm.doc.company, "Select Job": frm.doc.select_job, Category: frm.doc.category, "Job Order Start Date": cur_frm.doc.from_date, "Job Site": cur_frm.doc.job_site, "No Of Workers": cur_frm.doc.no_of_workers, Rate: cur_frm.doc.rate, "Job Order End Date": cur_frm.doc.to_date, "Job Duration": cur_frm.doc.job_order_duration, "Estimated Hours Per Day": cur_frm.doc.estimated_hours_per_day, "E-Signature Full Name": cur_frm.doc.e_signature_full_name,};
+		let l = {Company: frm.doc.company, "Select Job": frm.doc.select_job, Category: frm.doc.category, "Job Order Start Date": cur_frm.doc.from_date, "Job Site": cur_frm.doc.job_site, "No Of Workers": cur_frm.doc.no_of_workers, Rate: cur_frm.doc.rate, "Job Order End Date": cur_frm.doc.to_date, "Job Duration": cur_frm.doc.job_order_duration, "Estimated Hours Per Day": cur_frm.doc.estimated_hours_per_day, "E-Signature Full Name": cur_frm.doc.e_signature_full_name,};
 
-		var message = "<b>Please Fill Mandatory Fields:</b>";
+		let message = "<b>Please Fill Mandatory Fields:</b>";
 		for (let k in l) {
 			if (l[k] === undefined || !l[k]) {
 				message = message + "<br>" + k;
@@ -486,7 +486,7 @@ frappe.ui.form.on("Job Order", {
 function check_company_detail(frm) {
 	let roles = frappe.user_roles;
 	if (roles.includes("Hiring User") || roles.includes("Hiring Admin") && frm.doc.company) {
-		var company_name = frm.doc.company;
+		let company_name = frm.doc.company;
 		frappe.call({
 			method: "tag_workflow.tag_data.company_details",
 			args: {
@@ -515,8 +515,8 @@ function assign_employe(frm) {
 }
 
 function redirect_quotation(frm) {
-	var doc = frappe.model.get_new_doc("Assign Employee");
-	var staff_company = staff_company_direct_or_general(frm);
+	let doc = frappe.model.get_new_doc("Assign Employee");
+	let staff_company = staff_company_direct_or_general(frm);
 	doc.transaction_date = frappe.datetime.now_date();
 	doc.company = staff_company[0];
 	doc.job_order = frm.doc.name;
@@ -558,9 +558,9 @@ function staff_company_direct_or_general(frm){
 }
 
 function set_read_fields(frm){
-	var myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description","category"];
-	var arrayLength = myStringArray.length;
-	for(var i = 0; i < arrayLength; i++){
+	let myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description","category"];
+	let arrayLength = myStringArray.length;
+	for(let i = 0; i < arrayLength; i++){
 		frm.set_df_property(myStringArray[i], "read_only", 1);
 	}
 }
@@ -568,9 +568,9 @@ function set_read_fields(frm){
 function timer_value(frm) {
 	if(frm.doc.order_status=='Completed'){
 		frm.toggle_display('section_break_8', 0)
-		var myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
-		var arrayLength = myStringArray.length;
-		for (var i = 0; i < arrayLength; i++) {
+		let myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
+		let arrayLength = myStringArray.length;
+		for (let i = 0; i < arrayLength; i++) {
 			frm.set_df_property(myStringArray[i], "read_only", 1);
 		}
 		frm.set_df_property("time_remaining_for_make_edits", "options", " ");
@@ -588,17 +588,17 @@ function timer_value(frm) {
 }
 
 function time_value(frm){
-	var entry_datetime = frappe.datetime.now_datetime().split(" ")[1];
-	var splitEntryDatetime = entry_datetime.split(":");
-	var splitExitDatetime = cur_frm.doc.job_start_time.split(":");
-	var totalMinsOfEntry = splitEntryDatetime[0] * 60 + parseInt(splitEntryDatetime[1]) + splitEntryDatetime[0] / 60;
-	var totalMinsOfExit = splitExitDatetime[0] * 60 + parseInt(splitExitDatetime[1]) + splitExitDatetime[0] / 60;
-	var entry_date = new Date(frappe.datetime.now_datetime().split(" ")[0]);
-	var exit_date = new Date(cur_frm.doc.from_date.split(" ")[0]);
-	var diffTime = Math.abs(exit_date - entry_date);
+	let entry_datetime = frappe.datetime.now_datetime().split(" ")[1];
+	let splitEntryDatetime = entry_datetime.split(":");
+	let splitExitDatetime = cur_frm.doc.job_start_time.split(":");
+	let totalMinsOfEntry = splitEntryDatetime[0] * 60 + parseInt(splitEntryDatetime[1]) + splitEntryDatetime[0] / 60;
+	let totalMinsOfExit = splitExitDatetime[0] * 60 + parseInt(splitExitDatetime[1]) + splitExitDatetime[0] / 60;
+	let entry_date = new Date(frappe.datetime.now_datetime().split(" ")[0]);
+	let exit_date = new Date(cur_frm.doc.from_date.split(" ")[0]);
+	let diffTime = Math.abs(exit_date - entry_date);
 	if(exit_date-entry_date>0){
-		var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-		var x = parseInt(diffDays * (24 * 60) + totalMinsOfExit - totalMinsOfEntry);
+		let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+		let x = parseInt(diffDays * (24 * 60) + totalMinsOfExit - totalMinsOfEntry);
 		let data1 = Math.floor(x / 24 / 60) + " Days:" + Math.floor((x / 60) % 24) + " Hours:" + (x % 60) + " Minutes";
 		let data = `<p><b>Time Remaining for Job Order Start: </b> ${[data1]}</p>`;
 		frm.set_df_property("time_remaining_for_make_edits", "options", data);
@@ -684,9 +684,9 @@ function rate_hour_contract_change(frm) {
 
 function rate_calculation(frm) {
 	const rate = frm.doc.rate || 0;
-	var extra_price_increase = frm.doc.extra_price_increase || 0;
-	var total_per_hour = extra_price_increase + parseFloat(rate);
-	var total_flat_rate = 0;
+	let extra_price_increase = frm.doc.extra_price_increase || 0;
+	let total_per_hour = extra_price_increase + parseFloat(rate);
+	let total_flat_rate = 0;
 	const optional_field_data = [frm.doc.drug_screen, frm.doc.background_check, frm.doc.driving_record, frm.doc.shovel,];
 	const optional_fields = ["drug_screen", "background_check", "driving_record", "shovel",];
 
@@ -748,7 +748,7 @@ function fields_setup() {
 			];
 
 			const optional_field_data = ["drug_screen", "background_check", "driving_record", "shovel",];
-			var a = 0;
+			let a = 0;
 			for (let i = 0; i <= 3; i++) {
 				cur_frm.set_df_property(optional_field_data[i], "options", "None\n" + "Flat Rate Person:$" + org_optional_data[a] + "\n" + "Hour Per Person:$" + org_optional_data[a + 1]);
 				a = a + 2;
@@ -776,12 +776,12 @@ function job_order_duration(frm){
 }
 
 function claim_job_order_staffing(frm){
-	var doc = frappe.model.get_new_doc("Claim Order");
+	let doc = frappe.model.get_new_doc("Claim Order");
 	if(frm.doc.is_single_share == 1){
 		doc.staffing_organization = frm.doc.staff_company;
 		doc.single_share = 1;
 	}else{
-		var staff_company = frappe.boot.tag.tag_user_info.company || [];
+		let staff_company = frappe.boot.tag.tag_user_info.company || [];
 		doc.staffing_organization = staff_company[0];
 	}
 
@@ -1090,7 +1090,7 @@ function claim_orders(frm){
 }
 
 function messages(){
-	var x = document.getElementsByClassName('li.nav-item.dropdown.dropdown-notifications.dropdown-mobile.chat-navbar-icon');
+	let x = document.getElementsByClassName('li.nav-item.dropdown.dropdown-notifications.dropdown-mobile.chat-navbar-icon');
 	$('li.nav-item.dropdown.dropdown-notifications.dropdown-mobile.chat-navbar-icon').click();
 	if(frappe.route_history.length>1){
 		$(x.css("display", "block"));
@@ -1111,14 +1111,14 @@ function set_custom_base_price(frm){
 
 function hide_unnecessary_data(frm){
 	let field_name = ['select_days', "worker_filled"];
-	var arrayLength = field_name.length;
-	for(var i = 0; i < arrayLength; i++){
+	let arrayLength = field_name.length;
+	for(let i = 0; i < arrayLength; i++){
 		frm.set_df_property(field_name[i], "hidden", 1);
 	}
 
 	let display_fields = ["base_price", "rate_increase"];
-	var display_length = display_fields.length;
-	for(var j = 0; j < display_length; j++){
+	let display_length = display_fields.length;
+	for(let j = 0; j < display_length; j++){
 		frm.set_df_property(display_fields[j], "hidden", 0);
 	}
 }
@@ -1229,9 +1229,9 @@ function staff_claim_button(frm){
 
 function time_validation(frm){
 	if(frm.doc.from_date && frm.doc.from_date==frappe.datetime.nowdate()){
-		var order_date=new Date(frm.doc.from_date+' '+frm.doc.job_start_time);
-		var current_date=new Date(frappe.datetime.now_datetime());
-		var diff=current_date.getTime()-order_date.getTime();
+		let order_date=new Date(frm.doc.from_date+' '+frm.doc.job_start_time);
+		let current_date=new Date(frappe.datetime.now_datetime());
+		let diff=current_date.getTime()-order_date.getTime();
 		diff=diff/60000;
 		if(diff>=0){
 			cur_frm.set_value('job_start_time',(current_date.getHours())+':'+(current_date.getMinutes()+1));
@@ -1251,10 +1251,10 @@ function approved_emp(){
 			'job_order': cur_frm.doc.name
 		},
 		callback: function(rm) {
-			var data = rm.message;
+			let data = rm.message;
 			let profile_html = `<table style="width: 100%;"><th>Employee Name</th><th>Marked As</th><th>Staffing Company</th>`;
 			for (let p in data) {
-				var marked_as = '';
+				let marked_as = '';
 				if (data[p].no_show){
 					marked_as  += ' '+ data[p].no_show;
 				}
@@ -1276,7 +1276,7 @@ function approved_emp(){
 			}
 			profile_html += `</table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`
 
-			var dialog = new frappe.ui.Dialog({
+			let dialog = new frappe.ui.Dialog({
 				title: __('Assigned Employees'),
 				fields: [{fieldname: "staff_companies", fieldtype: "HTML", options: profile_html},]
 			});
@@ -1303,10 +1303,10 @@ function assigned_emp(){
 		method: "tag_workflow.tag_data.staffing_assigned_employee",
 		args: {'job_order': cur_frm.doc.name},
 		callback: function(rm) {
-			var data = rm.message || [];
+			let data = rm.message || [];
 			let profile_html = `<table style="width: 100%;"><th>Employee Name</th><th>Marked As</th><th>Actions</th>`;
 			for (let p in data) {
-				var marked_as = '';
+				let marked_as = '';
 				if (data[p].no_show){
 					marked_as  += ' '+ data[p].no_show;
 				}
@@ -1334,7 +1334,7 @@ function assigned_emp(){
 			}
 
 			profile_html += `</table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`;
-			var dialog1 = new frappe.ui.Dialog({
+			let dialog1 = new frappe.ui.Dialog({
 				title: __('Assigned Employees'),
 				fields: [{fieldname: "staff_companies",	fieldtype: "HTML", options: profile_html}]
 			});
@@ -1469,9 +1469,9 @@ function claim_order_button(frm) {
 function staff_company_read_only(frm){
 	if(frm.doc.__islocal!=1 && frm.doc.company_type=='Non Exclusive' && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 		$('[data-label="Save"]').hide()
-		var myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
-		var arrayLength = myStringArray.length;
-		for(var i = 0; i < arrayLength; i++){
+		let myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
+		let arrayLength = myStringArray.length;
+		for(let i = 0; i < arrayLength; i++){
 			frm.set_df_property(myStringArray[i], "read_only", 1);
 		}
 	}
@@ -1487,9 +1487,9 @@ function direct_order_staff_company(frm){
  
 function companyhide(time){
 	setTimeout(() => {
-		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns');
-		var txt2 = 'ul[id="'+txt+'"]';
-		var arry = document.querySelectorAll(txt2)[0].children;
+		let txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns');
+		let txt2 = 'ul[id="'+txt+'"]';
+		let arry = document.querySelectorAll(txt2)[0].children;
 		if(arry.length){
 			document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none';
 			document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none';
@@ -1512,9 +1512,9 @@ function staff_company_asterisks(frm){
 }
 
 function remove_asterisks(frm){
-	var myStringArray = ["company", "category", "select_job", "from_date", "rate", "to_date", "job_start_time", "estimated_hours_per_day", "job_site", "no_of_workers","e_signature_full_name","agree_to_contract"];
-	var arrayLength = myStringArray.length;
-	for (var i = 0; i < arrayLength; i++) {
+	let myStringArray = ["company", "category", "select_job", "from_date", "rate", "to_date", "job_start_time", "estimated_hours_per_day", "job_site", "no_of_workers","e_signature_full_name","agree_to_contract"];
+	let arrayLength = myStringArray.length;
+	for (let i = 0; i < arrayLength; i++) {
 		frm.set_df_property(myStringArray[i], "reqd", 0);
 	}
 	frm.set_df_property('agree_to_contract','label','Agree To Contract');
@@ -1571,7 +1571,7 @@ function repeat_order(frm){
 	if(condition){
 		frm.add_custom_button(__("Repeat Order"),function(){
 			if(cur_frm.doc.bid==0){
-				var comp
+				let comp
 				trigger_new_order(frm, 0, 1,comp)
 			}
 			else{
@@ -1585,7 +1585,7 @@ function repeat_order(frm){
 
 /*--------------hiring dialog----------------------*/
 function repeat_hiring_dia(frm){
-	var dialog = new frappe.ui.Dialog({
+	let dialog = new frappe.ui.Dialog({
 		title: __('Repeat Order'),
 		fields: [
 			{
@@ -1673,18 +1673,18 @@ function trigger_exc_stf_odr(frm){
 
 function trigger_new_order(frm, direct, normal, company){
 	let doc = frm.doc;
-	var no_copy_list = ["name", "amended_from", "amendment_date", "cancel_reason"];
-	var newdoc = frappe.model.get_new_doc(doc.doctype, doc, "");
+	let no_copy_list = ["name", "amended_from", "amendment_date", "cancel_reason"];
+	let newdoc = frappe.model.get_new_doc(doc.doctype, doc, "");
 	console.log(normal);
-	for(var key in doc){
+	for(let key in doc){
 		// dont copy name and blank fields
-		var df = frappe.meta.get_docfield(doc.doctype, key);
+		let df = frappe.meta.get_docfield(doc.doctype, key);
 		let from_amend = 0;
 		if(df && key.slice(0, 2) != "__" && !in_list(no_copy_list, key) && !(df && (!from_amend && cint(df.no_copy) == 1))){
-			var value = doc[key] || [];
+			let value = doc[key] || [];
 			if (frappe.model.table_fields.includes(df.fieldtype)) {
-				for (var i = 0, j = value.length; i < j; i++) {
-					var d = value[i];
+				for (let i = 0, j = value.length; i < j; i++) {
+					let d = value[i];
 					frappe.model.copy_doc(d, from_amend, newdoc, df.fieldname);
 				}
 			}else{
@@ -1693,7 +1693,7 @@ function trigger_new_order(frm, direct, normal, company){
 		}
 	}
 
-	var user = frappe.session.user;
+	let user = frappe.session.user;
 	newdoc.__islocal = 1;
 	newdoc.company = cur_frm.doc.company;
 	newdoc.is_direct = direct;
@@ -1719,7 +1719,7 @@ function trigger_new_order(frm, direct, normal, company){
 }
 
 function get_company_list(){
-	var existed_comp
+	let existed_comp
 	if(cur_dialog){
 		console.log("current_dialog",cur_dialog.get_value('company'))
 		existed_comp=cur_dialog.get_value('selected_companies')

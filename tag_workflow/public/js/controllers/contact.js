@@ -120,9 +120,9 @@ frappe.ui.form.on("Contact", {
 
 /*---------hide field------------*/
 function init_fields(){
-	var contact_field = ["middle_name","last_name","email_id","user","sync_with_google_contacts","status","salutation","designation","gender","image", "sb_00","sb_01","contact_details","more_info","company_name"];
+	let contact_field = ["middle_name","last_name","email_id","user","sync_with_google_contacts","status","salutation","designation","gender","image", "sb_00","sb_01","contact_details","more_info","company_name"];
 
-	for(var field in contact_field){
+	for(let field in contact_field){
 		cur_frm.toggle_display(contact_field[field], 0);
 	}
 }
@@ -144,9 +144,9 @@ function cancel_cantact(frm){
 
 function companyhide(time) {
 	setTimeout(() => {
-		var txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns')
-		var txt2 = 'ul[id="'+txt+'"]'
-		var  arry = document.querySelectorAll(txt2)[0].children
+		let txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns')
+		let txt2 = 'ul[id="'+txt+'"]'
+		let  arry = document.querySelectorAll(txt2)[0].children
 		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
 		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
 

@@ -4,7 +4,7 @@ frappe.breadcrumbs.clear();
 frappe.flags.wrapper = null;
 
 frappe.pages['staff-home'].on_page_load = function(wrapper) {
-	var page = frappe.ui.make_app_page({
+	let page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Home',
 		single_column: true
@@ -17,7 +17,7 @@ frappe.pages['staff-home'].on_page_load = function(wrapper) {
 
 frappe.StaffHome = Class.extend({
 	init: function(wrapper, page) {
-		var me = this;
+		let me = this;
 		this.parent = wrapper;
 		this.page = this.parent.page;
 		setTimeout(function() {
@@ -26,35 +26,35 @@ frappe.StaffHome = Class.extend({
 		}, 900);
 	},
 	setup: function(wrapper, page){
-		var me = this;
+		let me = this;
 		this.body = $('<div></div>').appendTo(this.page.main);
 		$(frappe.render_template('staff_home', "")).appendTo(this.body);
 		me.make_data(wrapper, page);
 		me.init_map(wrapper, page);
 	},
 	init_map: function(_wrapper, _page){
-		var me = this;
-		var center = { lat: 38.889248, lng: -77.050636 };
+		let me = this;
+		let center = { lat: 38.889248, lng: -77.050636 };
 		me.map = new google.maps.Map(document.getElementById('maps'), {
 			zoom: 3.8,
 			center: center
 		});
 	},
 	make_data: function(wrapper, page){
-		var me = this;
+		let me = this;
 		me.update_job_order(wrapper, page);
 	},
 
 	update_job_order: function(wrapper, page){
-		var me = this;
+		let me = this;
 		frappe.call({
 			method: "tag_workflow.tag_workflow.page.staff_home.staff_home.get_order_info",
 			args: {"company1": company1},
 			callback: function(r){
-				var location = r.message.location;
-				var order = r.message.order;
-				var org_type = r.message.org_type;
-				var category = r.message.category;
+				let location = r.message.location;
+				let order = r.message.order;
+				let org_type = r.message.org_type;
+				let category = r.message.category;
 				me.update_dropdown_item(wrapper,page)
 				for (let c in category){
 					let a = document.createElement('a');
@@ -70,7 +70,7 @@ frappe.StaffHome = Class.extend({
 		});
 	},
 	update_map: function(_wrapper, _page, location){
-		var me = this;
+		let me = this;
 		let locations = location;
 		for(let c in locations) {
 			let marker = new google.maps.Marker({
@@ -176,10 +176,10 @@ frappe.StaffHome = Class.extend({
 		}
 	},
 	render_map:function(r,wrapper,page){
-		var me = this;
-		var location = r.message.location;
-		var order = r.message.order;
-		var org_type = r.message.org_type;
+		let me = this;
+		let location = r.message.location;
+		let order = r.message.order;
+		let org_type = r.message.org_type;
 		me.init_map();
 		frappe.flags.wrapper.update_map(wrapper, page, location);
 		frappe.flags.wrapper.update_order(wrapper, page, order, org_type);
@@ -300,7 +300,7 @@ function redirect_doc(name){
 	location.href = '/app/'+name
 }
 function filterOrder() {
-    var input, filter, o, j, a, i;
+    let input, filter, o, j, a, i;
     input = document.getElementById("my-input");
     filter = input.value.toUpperCase();
     o = document.getElementById("order");
@@ -321,9 +321,9 @@ function ajaxCallOrderBy(category,wrapper,page){
 		method: "tag_workflow.tag_workflow.page.staff_home.staff_home.filter_category",
 		args:{"company": company1,"category":category},
 		callback: function(r){
-			var location = r.message.location;
-			var order = r.message.order;
-			var org_type = r.message.org_type;
+			let location = r.message.location;
+			let order = r.message.order;
+			let org_type = r.message.org_type;
 			frappe.flags.wrapper.update_map(wrapper, page, location);
 			frappe.flags.wrapper.update_order(wrapper, page, order, org_type);
 			localStorage.removeItem('order_by')
@@ -335,9 +335,9 @@ function ajaxCallCategory(ob,wrapper,page){
 		method: "tag_workflow.tag_workflow.page.staff_home.staff_home.filter_category",
 		args:{"company": company1,"order_by":ob},
 		callback: function(r){
-			var location = r.message.location;
-			var order = r.message.order;
-			var org_type = r.message.org_type;
+			let location = r.message.location;
+			let order = r.message.order;
+			let org_type = r.message.org_type;
 			frappe.flags.wrapper.update_map(wrapper, page, location);
 			frappe.flags.wrapper.update_order(wrapper, page, order, org_type);
 			localStorage.removeItem('category')

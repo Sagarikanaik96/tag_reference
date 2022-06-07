@@ -1,5 +1,5 @@
 frappe.standard_pages['Workspaces'] = function() {
-	var wrapper = frappe.container.add_page('Workspaces');
+	let wrapper = frappe.container.add_page('Workspaces');
 
 	frappe.ui.make_app_page({
 		parent: wrapper,

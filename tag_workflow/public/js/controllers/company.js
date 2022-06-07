@@ -87,10 +87,10 @@ frappe.ui.form.on("Company", {
 		$('[data-fieldname="parent_staffing"]').click(function(){ return false})
 		$('[data-fieldname="parent_staffing"]').click(function(){
 			if(cur_frm.doc.__islocal !==1){
-				var cust= $(this).text()
-				var txt= cust.split('.')[1]
-				var name1= txt.replace(/%/g, ' ');
-				var name= name1.trim()
+				let cust= $(this).text()
+				let txt= cust.split('.')[1]
+				let name1= txt.replace(/%/g, ' ');
+				let name= name1.trim()
 				localStorage.setItem("company", name)
 				window.location.href= "/app/dynamic_page"
 			}
@@ -334,7 +334,7 @@ function hide_details(){
 function init_values(){
 	if(cur_frm.doc.__islocal == 1){
 		$(".page-title .title-area .title-text").css("cursor", "auto");
-		var company_data = {
+		let company_data = {
 			default_currency: "USD",
 			country: "United States",
 			create_chart_of_accounts_based_on: "Standard Template",
@@ -342,8 +342,8 @@ function init_values(){
 			parent_staffing: "",
 		};
 
-		var keys = Object.keys(company_data);
-		for (var val in keys) {
+		let keys = Object.keys(company_data);
+		for (let val in keys) {
 			cur_frm.set_value(keys[val], company_data[keys[val]]);
 			cur_frm.toggle_enable(keys[val], 0);
 		}

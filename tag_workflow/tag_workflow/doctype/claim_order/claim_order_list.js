@@ -95,7 +95,7 @@ function refresh(listview){
         },
         callback:function(rm){
             frappe.db.get_value("Job Order",{ name: listview.data[0].job_order},["company",'select_job','from_date','to_date','no_of_workers','per_hour'],function (r) {
-                        var data = rm.message;
+                        let data = rm.message;
                         let profile_html = `<table><th>Staffing Company</th><th>Workers</th><th>Approve</th>`;
                         for(let p in data){
 
@@ -125,9 +125,9 @@ function refresh(listview){
                             ],
                             primary_action: function(){
                                 new_pop_up.hide();
-                                var data_len=data.length
-                                var l=0
-                                var dict = {}
+                                let data_len=data.length
+                                let l=0
+                                let dict = {}
 
                                 dict=update_no(data_len,l,dict,data,r)
                                 if(Object.keys(dict.dict).length>0 && (dict.valid!="False"))
@@ -225,7 +225,7 @@ function modify_claims(listview){
         },
         callback:function(rm){
             frappe.db.get_value("Job Order",{ name: listview.data[0].job_order},["company",'select_job','from_date','to_date','no_of_workers','per_hour','worker_filled'],function (r) {
-                        var job_data = rm.message;
+                        let job_data = rm.message;
                         let profile_html = `<table><th>Staffing Company</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th>`;
                         for(let p in job_data){
 
@@ -255,9 +255,9 @@ function modify_claims(listview){
                             ],
                             primary_action: function(){
                                 modified_pop_up.hide();
-                                var data_len=job_data.length
-                                var l=0
-                                var dict = {}
+                                let data_len=job_data.length
+                                let l=0
+                                let dict = {}
 
                                 dict=update_claims(data_len,l,dict,job_data,r)
                                 if(Object.keys(dict.dict).length>0 && (dict.valid1!="False"))

@@ -13,7 +13,7 @@ function get_first_sunday(month,year){
     let toNextSun = day !== 0 ? 7 - day : 0;
     tempDate.setDate(tempDate.getDate() + toNextSun);
 
-	var first_sunday = moment(tempDate).format("YYYY-MM-DD")
+	let first_sunday = moment(tempDate).format("YYYY-MM-DD")
     
 	if(first_sunday < frappe.datetime.get_today()){
 		return first_sunday

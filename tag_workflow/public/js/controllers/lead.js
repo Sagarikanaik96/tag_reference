@@ -45,7 +45,7 @@ frappe.ui.form.on("Lead", {
   },
   sign:function(frm){
     if(frm.doc.sign){
-			var regex = /[^0-9A-Za-z ]/g;
+			let regex = /[^0-9A-Za-z ]/g;
 			if (regex.test(frm.doc.sign) === true){
 				frappe.msgprint(__("Signature: Only alphabets and numbers are allowed."));
 				frm.set_value('sign','')
@@ -219,11 +219,11 @@ function reqd_fields(frm) {
 
 /*------------onboard----------------*/
 function onboard_org(frm) {
-  var email = frm.doc.email_id;
-  var exclusive = frm.doc.company_name;
-  var person_name = frm.doc.lead_name;
-  var organization_type = frm.doc.organization_type;
-  var lead = frm.doc.name;
+  let email = frm.doc.email_id;
+  let exclusive = frm.doc.company_name;
+  let person_name = frm.doc.lead_name;
+  let organization_type = frm.doc.organization_type;
+  let lead = frm.doc.name;
 
   frappe.db.get_value(
     "User",
@@ -443,7 +443,7 @@ function check_bd(frm){
 }
 
 function email_box(frm){
-      var pop_up = new frappe.ui.Dialog({
+      let pop_up = new frappe.ui.Dialog({
         title: __('Send Email '),
         'fields': [
           {'fieldname': 'Email', 'fieldtype': 'Data','label':'To','reqd':1},
@@ -454,7 +454,7 @@ function email_box(frm){
         ],
         primary_action: function(){
           pop_up.hide();
-          var comment=pop_up.get_values();
+          let comment=pop_up.get_values();
           frappe.call({
             method:"tag_workflow.tag_data.send_email1",
             freeze:true,
@@ -477,9 +477,9 @@ function email_box(frm){
 
 function companyhide(time) {
   setTimeout(() => {
-    var txt  = $('[data-fieldname="owner_company"]')[1].getAttribute('aria-owns')
-    var txt2 = 'ul[id="'+txt+'"]'
-    var  arry = document.querySelectorAll(txt2)[0].children
+    let txt  = $('[data-fieldname="owner_company"]')[1].getAttribute('aria-owns')
+    let txt2 = 'ul[id="'+txt+'"]'
+    let arry = document.querySelectorAll(txt2)[0].children
     document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
     document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
 
