@@ -133,8 +133,10 @@ override_whitelisted_methods = {
         "frappe.desk.query_report.run": "tag_workflow.utils.whitelisted.run",
         "frappe.desk.desktop.get_desktop_page": "tag_workflow.utils.whitelisted.get_desktop_page",
         "frappe.desk.reportview.delete_items": "tag_workflow.utils.employee.delete_items",
+        "frappe.desk.search.search_link": "tag_workflow.utils.whitelisted.search_link",
         "frappe.core.doctype.data_import.data_import.form_start_import": "tag_workflow.utils.data_import.form_start_import"
 }
+
 
 override_doctype_class = {
     "Designation":"tag_workflow.dashboard_data.designation.DesignationOverride",
