@@ -253,14 +253,14 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
             sql = '''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org)
             org_type=frappe.db.sql(sql, as_list=1)
             if staff_company and org_type[0][0]=="Hiring":
-                doc.company_type = 'Non Exclusive'
-                doc.is_single_share = 1
-                doc.save(ignore_permissions = True)
-                user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL'''.format(staff_company),as_list=1)
-                l = [l[0] for l in user_list]
-                for user in l:
-                    add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
-                frappe.enqueue(single_job_order_notification,now=True,job_order_title=job_order_title,hiring_org=hiring_org,job_order=job_order,subject=subject,l=l,staff_company=staff_company)
+                save_job_order_value(job_order,staff_company)
+                staff_company=(staff_company.strip()).split(',')
+                for i in staff_company:
+                    user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL'''.format(i.strip()),as_list=1)
+                    l = [l[0] for l in user_list]
+                    for user in l:
+                        add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
+                    frappe.enqueue(single_job_order_notification,now=True,job_order_title=job_order_title,hiring_org=hiring_org,job_order=job_order,subject=subject,l=l,staff_company=i)
             else:
                 frappe.enqueue(staff_email_notification_cont,now=True,hiring_org=hiring_org, job_order=job_order, job_order_title=job_order_title,doc=doc,subject=subject)
     except Exception as e:
@@ -1211,3 +1211,10 @@ def emp_location_data(address_dt):
     except Exception as e:
         frappe.log_error(e, "Longitude latitude address")
         return '', ''
+def save_job_order_value(job_order,staff_company):
+    doc=frappe.get_doc(jobOrder,job_order)
+    doc.company_type = 'Non Exclusive'
+    doc.is_single_share = 1
+    if(',' in staff_company):
+        doc.claim=staff_company
+    doc.save(ignore_permissions = True)

@@ -1595,12 +1595,13 @@ function repeat_hiring_dia(frm){
 						cur_dialog.fields_dict.direct_2.df.hidden = 1;
 						cur_dialog.fields_dict.company.df.hidden = 1;
 						cur_dialog.fields_dict.company.df.reqd = 0;
+						cur_dialog.set_value("selected_companies", "");
 					}
 					cur_dialog.fields_dict.company.refresh();
 					cur_dialog.fields_dict.direct_2.refresh()
 				}
 			},
-			{fieldname:"company", fieldtype:"Select", label:"Select Company", hidden:1, options:frappe.boot.tag.tag_user_info.comps.join("\n"), default: cur_frm.doc.staff_company},
+			{fieldname:"selected_companies", fieldtype:"Select", label:"Select Company", hidden:1, options:frappe.boot.tag.tag_user_info.comps.join("\n"), default: cur_frm.doc.staff_company},
 			{fieldname: "direct_1", fieldtype: "Column Break"},
 			{
 				fieldname: "normal", fieldtype: "Check", label: "open order",
@@ -1613,15 +1614,26 @@ function repeat_hiring_dia(frm){
 				}
 			},
 			{fieldname: "direct_2", fieldtype: "Section Break", hidden: 1},
-			{fieldname: "company", fieldtype: "Select", label: "Select Company", options: frappe.boot.tag.tag_user_info.comps.join("\n")},
-		]
+			{fieldname: "company", fieldtype: "Select", label: "Select Company", options: get_company_list(),onchange: function(){
+				cur_dialog.set_df_property('selected_companies','hidden',0)
+				let direct = cur_dialog.get_value("company");
+				let existed_company=cur_dialog.get_value('selected_companies')
+				if(existed_company===undefined || existed_company.length==1 && direct){
+					cur_dialog.set_value('selected_companies',direct)
+				}
+				else if(!existed_company.includes(direct)  && direct){
+					let new_value=existed_company+','+direct
+					cur_dialog.set_value('selected_companies',new_value)
+				}
+			}},
+			{fieldname:"selected_companies",fieldtype:"Data",label:"Selected Companies",default:" ",read_only:1,hidden:1},]
 	});
 
 	dialog.set_primary_action(__('Proceed'), function() {
 		let values = dialog.get_values();
 		let dia_cond = (values.direct || values.normal);
 		if(dia_cond){
-			trigger_new_order(frm, values.direct, values.normal, values.company);
+			trigger_new_order(frm, values.direct, values.normal, values.selected_companies);
 			dialog.hide();
 		}else{
 			frappe.msgprint({message: __("Please mark your selection"), title: __("Repeat Order"), indicator: "red",});
@@ -1687,7 +1699,7 @@ function trigger_new_order(frm, direct, normal, company){
 	newdoc.is_repeat = 1;
 	newdoc.repeat_from = cur_frm.doc.name;
 	newdoc.repeat_from_company = cur_frm.doc.company;
-	newdoc.repeat_staff_company = cur_frm.doc.staff_company ? cur_frm.doc.staff_company : "";
+	newdoc.repeat_staff_company = company ? company : "";
 	newdoc.from_date = "";
 	newdoc.to_date = "";
 	newdoc.staff_org_claimed = "";
@@ -1698,6 +1710,24 @@ function trigger_new_order(frm, direct, normal, company){
 	newdoc.bid = 0;
 	newdoc.claim = "";
 	frappe.set_route("form", newdoc.doctype, newdoc.name);
+}
+
+function get_company_list(){
+	var existed_comp
+	if(cur_dialog){
+		console.log("current_dialog",cur_dialog.get_value('company'))
+		existed_comp=cur_dialog.get_value('selected_companies')
+	}
+	let company = '\n';
+	frappe.call({
+		"method": "tag_workflow.tag_workflow.doctype.job_order.job_order.claim_data_list",
+		"args": {"job_order_name": cur_frm.doc.name,"exist_comp":existed_comp},
+		"async": 0,
+		"callback": function(r){
+			company += r.message;
+		}
+	});
+	return company
 }
 
 function update_order_status(frm){

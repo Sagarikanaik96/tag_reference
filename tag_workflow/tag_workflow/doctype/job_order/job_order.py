@@ -3,7 +3,7 @@
 import frappe
 from frappe.utils import user
 from frappe.share import add
-from tag_workflow.tag_data import hiring_org_name
+from tag_workflow.tag_data import hiring_org_name,joborder_email_template,chat_room_created,job_order_notification
 from tag_workflow.utils.notification import sendmail
 from tag_workflow.utils.notification import make_system_notification
 from frappe.model.document import Document
@@ -27,34 +27,48 @@ class JobOrder(Document):
 
     def check_assign(self):
         if(self.is_repeat == 1 and self.repeat_staff_company and self.repeat_from and self.is_direct == 1 and self.repeat_staff_company == self.staff_company):
-            frappe.db.set_value(ORD, self.name, "staff_org_claimed", self.repeat_staff_company)
-            frappe.db.set_value(ORD, self.name, "bid", 1)
-            if(frappe.db.exists(ASN, {"job_order": self.repeat_from, "company": self.repeat_staff_company, "tag_status": "Approved"})):
-                old_assign = frappe.get_doc(ASN, {"job_order": self.repeat_from, "company": self.repeat_staff_company, "tag_status": "Approved"})
-                new_doc = frappe.copy_doc(old_assign)
-                new_doc.tag_status = "Open"
-                new_doc.job_order= self.name
-                new_doc.flags.ignore_permissions = True
-                new_doc.save(ignore_permissions=True)
-                self.assign_doc(new_doc.name, ASN)
-                self.auto_email(new_doc)
+            selected_companies=self.repeat_staff_company.strip()
+            staff_selected_companies=selected_companies.split(',')
+            frappe.db.set_value(ORD, self.name, "claim", selected_companies)
+            frappe.db.set_value(ORD, self.name, "staff_org_claimed", selected_companies)
+            frappe.db.set_value(ORD, self.name, "bid", len(staff_selected_companies))
+            worker_filled=0
+            for comp in staff_selected_companies:
+                comp=comp.strip()
+                if(frappe.db.exists(ASN, {"job_order": self.repeat_from, "company": comp, "tag_status": "Approved"})):
+                    old_assign = frappe.get_doc(ASN, {"job_order": self.repeat_from, "company": comp, "tag_status": "Approved"})
+                    new_doc = frappe.copy_doc(old_assign)
+                    new_doc.tag_status = "Open"
+                    new_doc.job_order= self.name
+                    new_doc.flags.ignore_permissions = True
+                    new_doc.save(ignore_permissions=True)
+                    worker_filled=len(new_doc.employee_details)+worker_filled
+                    if(self.resumes_required==0):
+                        dat=f'update `tabAssign Employee` set tag_status="Approved" where name="{new_doc.name}"'
+                        frappe.db.sql(dat)
+                        frappe.db.commit()
+                    self.assign_doc(new_doc.name, ASN,comp)
+                    self.auto_email(new_doc,comp)
 
-            if(frappe.db.exists(CLM, {"job_order": self.repeat_from, "staffing_organization": self.repeat_staff_company})):
-                frappe.db.set_value(ORD, self.name, "claim", ","+self.repeat_staff_company)
-                old_claim = frappe.get_doc(CLM, {"job_order": self.repeat_from, "staffing_organization": self.repeat_staff_company})
-                new_claim = frappe.copy_doc(old_claim)
-                new_claim.job_order = self.name
-                new_claim.save(ignore_permissions=True)
-                self.assign_doc(new_claim.name, CLM)
+                if(frappe.db.exists(CLM, {"job_order": self.repeat_from, "staffing_organization": comp})):
+                    frappe.db.set_value(ORD, self.name, "claim", ","+comp)
+                    old_claim = frappe.get_doc(CLM, {"job_order": self.repeat_from, "staffing_organization": comp})
+                    new_claim = frappe.copy_doc(old_claim)
+                    new_claim.job_order = self.name
+                    new_claim.save(ignore_permissions=True)
+                    self.assign_doc(new_claim.name, CLM,comp)
+            frappe.db.set_value(ORD, self.name, "worker_filled", worker_filled)
+            self.remaining_companies(self.no_of_workers,worker_filled,self.staff_company,self.repeat_from,self.name,self.company,self.select_job)
 
-    def assign_doc(self, name, doc_type):
-        stf_usr = frappe.db.get_list("Employee", {"company": self.repeat_staff_company, "user_id": ["not like", None]}, "user_id as name", ignore_permissions=1)
+
+    def assign_doc(self, name, doc_type,comp):
+        stf_usr = frappe.db.get_list("Employee", {"company": comp, "user_id": ["not like", None]}, "user_id as name", ignore_permissions=1)
         hir_usr = frappe.db.get_list("User", {"company": self.company}, "name", ignore_permissions=1)
         usrs = hir_usr+stf_usr
         for u in usrs:
             add(doc_type, name, u.name, read=1, write = 1, share = 1, everyone = 0,flags={"ignore_share_permission": 1})
 
-    def auto_email(self, new_doc):
+    def auto_email(self, new_doc,comp):
         emp = ""
         for e in new_doc.employee_details:
             emp += e.employee_name + ', '
@@ -63,13 +77,26 @@ class JobOrder(Document):
         usrs = [u.name for u in usr]
 
         sub = "Employee Assigned"
-        msg = f'{self.repeat_staff_company} has submitted a claim for {emp[:-1]} for {self.select_job} at {self.job_site} on {self.posting_date_time}'
+        msg = f'{comp} has submitted a claim for {emp[:-1]} for {self.select_job} at {self.job_site} on {self.posting_date_time}'
         make_system_notification(usrs, msg, ASN, new_doc.name, sub)
-        msg = f'{self.repeat_staff_company} has submitted a claim for {emp[:-1]} for {self.select_job} at {self.job_site} on {self.posting_date_time}. Please review and/or approve this claim .'
+        msg = f'{comp} has submitted a claim for {emp[:-1]} for {self.select_job} at {self.job_site} on {self.posting_date_time}. Please review and/or approve this claim .'
         link = f'href="/app/assign-employee/{new_doc.name}"'
         email_temp = joborder_email_template(sub, msg, usrs, link)
-        chat_room_created(self.company, self.repeat_staff_company, self.name)
         print(email_temp)
+        chat_room_created(self.company, comp, self.name)
+    def remaining_companies(self,workers_required,worker_filled,staff_company,repeat_job_order_name,new_order,hiring_company,job_title):
+        if(workers_required!=worker_filled):
+            old_staff_companies=frappe.get_doc(ORD,repeat_job_order_name)
+            staff_selected_companies=old_staff_companies.staff_org_claimed.split(',')
+            comp_list=[c.strip() for c in staff_selected_companies]
+            comp_list=tuple(comp_list)
+            usr_sql = '''select email from `tabUser` where organization_type='staffing' and company not in {0} '''.format(comp_list)
+            user_list = frappe.db.sql(usr_sql, as_list=1)
+            l = [l[0] for l in user_list if l[0]!=frappe.session.user]
+            for user in l:
+                add(ORD, new_order, user, read=1, write = 0, share = 0, everyone = 0)
+            subject="New Work Order"
+            job_order_notification(job_title,hiring_company,new_order,subject,l)
 
 @frappe.whitelist()
 def joborder_notification(organizaton,doc_name,company,job_title,posting_date,job_site=None):
@@ -393,3 +420,22 @@ def get_redirect_doc(company, name):
         return docname
     except Exception as e:
         frappe.msgprint(e)
+@frappe.whitelist()
+def claim_data_list(job_order_name=None,exist_comp=None):
+    try:
+        data = []
+        sql = """ select staff_org_claimed from `tabJob Order` where name='{0}' """.format(job_order_name)
+        companies = frappe.db.sql(sql, as_dict=1)
+        company=companies[0].staff_org_claimed
+        data=company.split(",")
+        comp_data=[]
+        if exist_comp:
+            for c in data:
+                if c not in exist_comp:
+                    comp_data.append(c)
+        else:
+            comp_data = [c for c in data]
+        return "\n".join(comp_data)
+    except Exception as e:
+        print(e)
+        return []
