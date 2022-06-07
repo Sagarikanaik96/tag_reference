@@ -140,7 +140,7 @@ frappe.StaffHome = Class.extend({
 						<div class="col-lg-4">
 							<!--<a href="#" class="text-secondary pt-2">See on map</a> -->
 						</div>
-						<div class="col-lg-8"> 
+						<div class="col-lg-8 px-2"> 
 							<div class="d-flex flex-wrap">
 								<button type="button" class="btn btn-light btn-sm ml-3 border order-btn text-center" onclick=redirect_order('${order[o].name}')>Order Details</button>
 								<button type="button" class="btn btn-primary btn-sm ml-3 rounded  text-center" onclick=show_info_order('${order[o].name}')>Quick Info</button>

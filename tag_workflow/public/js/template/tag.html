@@ -148,6 +148,31 @@
         display: inline-block;
         width: 80px;
       }
+      .custom-slide {
+            display: inline-block;
+            cursor: pointer;
+            margin-top: 8px;
+      }
+
+      .bar1, .bar2, .bar3 {
+        width: 17px;
+        height: 3px;
+        background-color: #333;
+        margin: 3px 0;
+        transition: 0.4s;
+      }
+
+      .change .bar1 {
+        -webkit-transform: rotate(-45deg) translate(-1px, 0px);
+        transform: rotate(-45deg) translate(-1px, 0px);
+      }
+
+      .change .bar2 {opacity: 0;}
+
+      .change .bar3 {
+        -webkit-transform: rotate(45deg) translate(-8px, -8px);
+        transform: rotate(45deg) translate(-8px, -8px);
+      }
 
       @media (max-width: 768px) {
         .sub-menu {
@@ -182,7 +207,11 @@
         <div class="col-xl-2 col-md-2 position-relative">
           <div class="row">
             <div class="toggle_icon">
-              <i class="fa fa-bars" aria-hidden="true"></i>
+              <div class="custom-slide" aria-hidden="true" onclick="myFunction(this)">
+                <div class="bar1"></div>
+                <div class="bar2"></div>
+                <div class="bar3"></div>
+              </div>
             </div>
             <div class="sub-menu w-100 border-top border-right" id="myDIV">
               {% if frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" %}
@@ -355,6 +384,11 @@
         </div>
       </div>
     </div>
+    <script>
+      function myFunction(x) {
+        x.classList.toggle("change");
+      }
+    </script>
   </body>
 </html>
 

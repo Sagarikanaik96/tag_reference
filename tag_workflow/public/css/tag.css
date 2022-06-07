@@ -432,7 +432,7 @@ input::-webkit-credentials-auto-fill-button {
 [data-route="Workspaces/My Activities"] .sub-menu,
 [data-route="staff-home"] .sub-menu {
   top: 61px !important;
-  z-index: 9 !important;
+  z-index: 99 !important;
   transition: 0.5s ease !important;
 }
 [data-route="staff-home"] #page-staff-home .page-head {
@@ -1008,6 +1008,13 @@ select.input-with-feedback.form-control.ellipsis {
 }
 
 @media (max-width: 768px) {
+  .navbar-light .navbar-nav .nav-item .btn-login-area {
+    text-align: right;
+    margin-right: 7px;
+  }
+  #order {
+    padding: 0;
+  }
   [data-route="Form/Add Timesheet/Add Timesheet"]
     .layout-main-section-wrapper
     .layout-main-section
@@ -1028,9 +1035,10 @@ select.input-with-feedback.form-control.ellipsis {
   }
   .col.layout-main-section-wrapper,
   .col-md-12.layout-main-section-wrapper {
-    left: 0rem;
+    left: 1rem;
     max-width: 100%;
     width: 100%;
+    padding: 0;
   }
   #page-Workspaces .page-title .title-area .title-text {
     margin-left: 0px;
