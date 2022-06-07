@@ -148,7 +148,6 @@ frappe.StaffHome = Class.extend({
 						</div>
 					</div>
 				</div>
-				</div>
 			</div>`
 		}
 		let total_order = `<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;"><div class="d-flex flex-wrap p-3" style="width: 100%;"><div class="d-flex justify-content-between w-100 "><h6 class="mb-0">Total Number Of Today's Order: </h6><h6 class="mb-0" id="counter">${order.length}</h6></div></div></div>`;
