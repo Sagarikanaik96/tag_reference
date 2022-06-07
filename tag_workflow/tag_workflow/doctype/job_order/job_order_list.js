@@ -1,4 +1,5 @@
 frappe.listview_settings['Job Order'] = {
+	add_fields:['no_of_workers',"worker_filled"],
 	onload:function(listview){
 		$('h3[title = "Job Order"]').html('Job Orders');
 		$('.list-header-subject > div:nth-child(7) > span:nth-child(1)').html('Industry');
@@ -86,7 +87,7 @@ frappe.listview_settings['Job Order'] = {
 
 	formatters: {
 		order_status(val, d, f) {
-			if (frappe.boot.tag.tag_user_info.company_type == 'Staffing' && val == 'Upcoming') {
+			if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && (val=='Upcoming' || (val=='Ongoing' && f.creation.includes(frappe.datetime.get_today()))) && (f.no_of_workers!=f.worker_filled)){
 				let y
 				frappe.call({
 					method:'tag_workflow.tag_data.vals',
@@ -99,7 +100,7 @@ frappe.listview_settings['Job Order'] = {
 					{
 						if(r.message=='success')
 						{
-							y="Upcoming"
+							y=val
 						}
 						else{
 							y='Available'
@@ -116,7 +117,7 @@ frappe.listview_settings['Job Order'] = {
 				}
 				else{
 					return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
-								<a class=" indicator-pill gray ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >Upcoming</a>
+								<a class=" indicator-pill gray ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a>
 							</span>`
 				}
 			

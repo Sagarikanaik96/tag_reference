@@ -726,7 +726,7 @@ def replaced_employees(job_order, user=None):
 
 def unshare_job_order(job):
     creation=str(job.creation).split(' ')
-    if job.bid>0 and job.staff_org_claimed and (job.no_of_workers-job.worker_filled==0 or str(job.from_date)!=creation[0]) :
+    if job.bid>0 and job.staff_org_claimed and (job.no_of_workers==job.worker_filled or str(job.from_date)!=creation[0]) :
         comp_name=f""" select distinct company from `tabUser` where organization_type='Staffing' and email in (select user from `tabDocShare` where share_doctype='Job Order' and share_name='{job.name}' )"""
         comp_data=frappe.db.sql(comp_name,as_list=True)
         for i in comp_data:
