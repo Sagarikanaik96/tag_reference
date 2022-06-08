@@ -82,7 +82,7 @@ frappe.StaffHome = Class.extend({
 		}
 	},
 	update_order: function(_wrapper, _page, order, org_type){
-		let html = ``; 
+		let html = `<div style="max-height: 385px; overflow: auto;">`; 
 		for(let o in order){
 			let from = moment(order[0].from_date)._d.toDateString();
 			let to = moment(order[0].to_date)._d.toDateString();
@@ -92,7 +92,7 @@ frappe.StaffHome = Class.extend({
 			st1.push(sh, st[1])
 			let st2= st1.join(":")
 			html += `
-				<div style="max-height: 385px; overflow: auto;">
+				
 				<div class="row bg-white mx-2 my-3 rounded border job" data-job="${order[o].select_job}" style="margin-top: 0px !important;">
 					<div class="d-flex flex-wrap p-3 ">
 						<div class="d-flex justify-content-between w-100 ">
@@ -150,6 +150,7 @@ frappe.StaffHome = Class.extend({
 				</div>
 			</div>`
 		}
+		html+=`</div>`
 		let total_order = `<div class="row bg-white mx-2 my-4 rounded border" style="margin-top: 0px !important;"><div class="d-flex flex-wrap p-3" style="width: 100%;"><div class="d-flex justify-content-between w-100 "><h6 class="mb-0">Total Number Of Today's Order: </h6><h6 class="mb-0" id="counter">${order.length}</h6></div></div></div>`;
 		$("#order").html(total_order+html);
 	},

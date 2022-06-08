@@ -890,7 +890,7 @@ function view_button(frm){
 function view_buttons_hiring(frm){
 	hiring_buttons(frm);
 	if (cur_frm.doc.__islocal != 1){
-		let datad1 = `<div class="my-2 p-3 border rounded" id="data" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Claims  </p><label class="badge m-0 bg-danger rounded-circle font-weight-normal mr-4 text-white"> ${frm.doc.bid} </label></div>`;
+		let datad1 = `<div class="my-2 p-3 border rounded cursor-pointer" id="data" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Claims  </p><label class="badge m-0 bg-danger rounded-circle font-weight-normal mr-4 text-white"> ${frm.doc.bid} </label></div>`;
 
 		$('[data-fieldname = related_details]').click(function() {
 			claim_orders(frm);
@@ -898,7 +898,7 @@ function view_buttons_hiring(frm){
 		frm.set_df_property("related_details", "options", datad1);
 		frm.toggle_display('related_actions_section', 1);
 		if (frm.doc.claim) {
-			let datad2 = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg">Messages </p></div>`;
+			let datad2 = `<div class="my-2 p-3 border rounded cursor-pointer" style="display: flex;justify-content: space-between;"><p class="m-0 msg">Messages </p></div>`;
 			$('[data-fieldname = messages]').click(function() {
 				messages();
 			});
@@ -908,7 +908,7 @@ function view_buttons_hiring(frm){
 		}
 
 		if (frm.doc.from_date <= frappe.datetime.nowdate()) {
-			let datad3 = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Timesheets  </p> </div>`;
+			let datad3 = `<div class="my-2 p-3 border rounded cursor-pointer" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Timesheets  </p> </div>`;
 			$('[data-fieldname = timesheets]').click(function() {
 				timesheets_view(frm);
 			});
@@ -927,7 +927,7 @@ function view_buttons_hiring(frm){
 				},
 				callback: function(r) {
 					if (r.message == 'success') {
-					let datad4 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg"> Invoices </p> </div>`;
+					let datad4 = `<div class="my-2 p-3 border rounded cursor-pointer" style="display:flex;justify-content: space-between;"><p class="m-0 msg"> Invoices </p> </div>`;
 						$('[data-fieldname = invoices]').click(function() {
 							sales_invoice_data(frm);
 						});
@@ -968,7 +968,7 @@ function view_buttons_staffing(frm) {
 			},
 			callback: function(r) {
 				if (r.message != 'unsuccess') {
-					let data4 = `<div class=" p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Timesheets </p>  </div>`;
+					let data4 = `<div class=" p-3 border rounded cursor-pointer" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Timesheets </p>  </div>`;
 					$('[data-fieldname = timesheets]').click(function() {
 						timesheets_view(frm);
 					});
@@ -1031,7 +1031,7 @@ function hiring_buttons(frm) {
 						approved_emp()
 					}, __("View"));
 					$('[data-fieldname = assigned_employees_hiring]').attr('id', 'approved_inactive')
-					let data = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
+					let data = `<div class="my-2 p-3 border rounded cursor-pointer" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
                     $('[data-fieldname = assigned_employees_hiring]').click(function() {
 						if($('[data-fieldname = assigned_employees_hiring]').attr('id')=='approved_inactive'){
 							approved_emp();
@@ -1163,7 +1163,7 @@ function claim_assign_button(frm){
 }
 
 function assign_button(frm) {
-	let data2 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Claims </p></div>`;
+	let data2 = `<div class="my-2 p-3 border rounded cursor-pointer" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Claims </p></div>`;
 	$('[data-fieldname = related_details]').click(function() {
 		staff_assign_redirect(frm);
 	});
@@ -1190,7 +1190,7 @@ function staff_claim_button(frm){
 				if (r.message != 'unsuccess') {
 					frappe.db.get_value("Assign Employee", {'job_order': frm.doc.name, 'company': frappe.boot.tag.tag_user_info.company}, ["name"], function(rr) {
 						if (rr.name === undefined) {
-							let datadda1 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg"> Assign Employees </p></div>`;
+							let datadda1 = `<div class="my-2 p-3 border rounded cursor-pointer" style="display:flex;justify-content: space-between;"><p class="m-0 msg"> Assign Employees </p></div>`;
 							$('[data-fieldname = assigned_employees]').click(function() {
 								assign_employe(frm);
 							});
