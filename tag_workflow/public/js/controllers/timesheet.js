@@ -545,9 +545,9 @@ function update_time(frm, cdt, cdn){
 }
 
 
-let calculate_end_time = function(_frm, cdt, cdn) {
+var calculate_end_time = function(_frm, cdt, cdn) {
         let child = locals[cdt][cdn];
-	console.log(child.name);
+		console.log("Calculate End Time", child.name);
 };
 
 function add_button_submit(frm){
