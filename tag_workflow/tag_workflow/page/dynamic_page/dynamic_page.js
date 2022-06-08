@@ -67,6 +67,10 @@ frappe.FaceRecognition = Class.extend({
 					count += 1;
 					rate+= '★'.repeat(r.message[1][k][0]) + "<br>"  + r.message[1][k][1] + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
 				}
+
+				let arr1= add_ress(my_val)
+				let jobsite_address= arr1.join(", ");
+
 				let link_coi='';
 				let link_sm='';
 				if(r.message[0].cert_of_insurance || r.message[0].safety_manual){
@@ -81,7 +85,7 @@ frappe.FaceRecognition = Class.extend({
 							<div class="col-md-6 col-sm-12 company_list">
 								<h5 class="col-md-4 px-0" id="comp_name">${my_val.name}</h5> 
 								<div id="jobsite">
-									<div id="address"> ${varr}</div>
+									<div id="address"> ${jobsite_address}</div>
 								</div>
 								<p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#">  <u> ${count} Reviews </u> </a> </span> </p>
 							</div>
