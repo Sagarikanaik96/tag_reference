@@ -110,6 +110,9 @@ function check_date(frm){
 			frappe.msgprint("Date can't be future date.");
 			frm.set_value("date", "");
 		}else if(frm.doc.date >= frm.doc.from_date && frm.doc.date <= frm.doc.to_date){
+			frappe.db.get_value("Job Order", frm.doc.job_order, ["availability","selected_days"], function(r) {
+				check_availability(r,frm)
+			});
 			console.log("TAG");
 		}else{
 			frappe.msgprint("Date must be in between Job order start and end date");
@@ -402,4 +405,36 @@ function check_replaced_emp(child, frm){
             }
         });
     }
+}
+function check_availability(r,frm){
+	const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+	if(r['availability']=='Mon-Fri'){
+		const f_d = new Date(frm.doc.date);
+		let day = weekday[f_d.getDay()];
+		const my_days=["Monday","Tuesday","Wednesday","Thursday","Friday"]
+		if(!my_days.includes(day)){
+			frappe.msgprint('The job order is available from Monday To Friday')
+			frm.set_value("date", "");			
+		}
+	}
+	else if(r['availability']=='Sat & Sun'){
+		const avl_days=['Saturday','Sunday']
+		const f_d = new Date(frm.doc.date);
+		let day = weekday[f_d.getDay()];
+		if(!avl_days.includes(day)){
+			frappe.msgprint('The job order is available only for Saturday and Sunday')
+			frm.set_value("date", "");
+		}
+	}
+	else if(r['availability']=='Custom'){
+		const selected=r['selected_days']
+		const f_d = new Date(frm.doc.date);
+		let day = weekday[f_d.getDay()];
+		const my_days=selected.split(",")
+		if(!my_days.includes(day)){
+			console.log('exkkist')
+			frappe.msgprint('The job order is available only for '+my_days)
+			frm.set_value("date", "");
+		}
+	}
 }

@@ -139,6 +139,7 @@ frappe.ui.form.on("Job Order", {
 		job_order_cancel_button(frm);
 		staff_company_asterisks(frm);
 		repeat_order(frm);
+		set_read_fields(frm)
 		$(document).on('click', '[data-fieldname="job_start_time"]', function(){
 			$('.datepicker').show()
 			time_validation(frm)
@@ -209,6 +210,9 @@ frappe.ui.form.on("Job Order", {
 
 	before_save: function(frm) {
 		if (frm.doc.__islocal === 1) {
+			if(frm.doc.availability=="Custom"){
+				set_custom_days(frm)
+			}
 			set_custom_base_price(frm)
 			rate_hour_contract_change(frm);
 			if (frappe.validated) {
@@ -561,13 +565,14 @@ function staff_company_direct_or_general(frm){
 }
 
 function set_read_fields(frm){
-	let myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description","category"];
-	let arrayLength = myStringArray.length;
-	for(let i = 0; i < arrayLength; i++){
-		frm.set_df_property(myStringArray[i], "read_only", 1);
+	if(frm.doc.__islocal!=1){
+		let myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description","category","availability",'select_days','selected_days'];
+		let arrayLength = myStringArray.length;
+		for(let i = 0; i < arrayLength; i++){
+			frm.set_df_property(myStringArray[i], "read_only", 1);
+		}
 	}
 }
-
 function timer_value(frm) {
 	if(frm.doc.order_status=='Completed'){
 		frm.toggle_display('section_break_8', 0)
@@ -1472,7 +1477,7 @@ function claim_order_button(frm) {
 function staff_company_read_only(frm){
 	if(frm.doc.__islocal!=1 && frm.doc.company_type=='Non Exclusive' && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 		$('[data-label="Save"]').hide()
-		let myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
+		let myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time',"availability",'select_days','selected_days'];
 		let arrayLength = myStringArray.length;
 		for(let i = 0; i < arrayLength; i++){
 			frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -1745,4 +1750,15 @@ function update_order_status(frm){
 			method: "tag_workflow.tag_data.update_job_order_status",
 		})
 	}
+}
+
+function set_custom_days(frm){
+	let selected=""
+	let data=frm.doc.select_days.length
+	for (let i = 0; i < data; i++) {
+	  if(frm.doc.select_days[i]!="None"){
+		selected=selected+frm.doc.select_days[i].days+","
+	  }
+	}	
+	frm.set_value("selected_days",selected.slice(0, -1))
 }
