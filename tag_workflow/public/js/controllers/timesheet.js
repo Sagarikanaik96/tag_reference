@@ -42,6 +42,7 @@ frappe.ui.form.on("Timesheet", {
 				$(this).attr('title', file);
 			});
 		}
+		public_profile();
 	},
 	setup: function(frm){
 		job_order_details(frm);
@@ -571,4 +572,13 @@ function submit_timesheet(frm){
 			}
 		}
 	});
+}
+
+function public_profile(){
+	if(cur_frm.doc.__islocal!=1){
+		Array.from($('[data-doctype="Company"]')).forEach(field =>{
+			localStorage.setItem("company", cur_frm.doc.company);
+			field.href= '/app/dynamic_page';
+		});
+	}
 }
