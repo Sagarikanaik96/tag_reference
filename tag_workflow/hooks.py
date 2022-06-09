@@ -105,9 +105,6 @@ doc_events = {
        "Item":{
                "after_insert":'tag_workflow.tag_data.job_title_add'
        },
-       "Employee":{
-               "after_insert":'tag_workflow.tag_data.update_employee_lat_lng'
-       }
 }
 
 # logo

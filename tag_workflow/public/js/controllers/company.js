@@ -686,7 +686,7 @@ function update_lat_lng(frm){
 				frappe.msgprint('Please same the form first.');
 			}else{
 				frappe.call({
-					method: "tag_workflow.utils.organization.update_lat_lng",
+					method: "tag_workflow.tag_data.update_lat_lng",
 					args: {"company": frm.doc.name},
 					freeze: true,
 					freeze_message: "<p><b>Fetching records from JazzHR...</b></p>",

@@ -245,45 +245,6 @@ def update_tag_user_type():
     except Exception as e:
         frappe.log_error(e, "Update Tag User Type")
         print(e)
-@frappe.whitelist()
-def update_lat_lng(company):
-    try:
-        frappe.enqueue("tag_workflow.utils.organization.update_old_emp_lat_lng", queue='long', job_name=company, is_async=True, company=company)
-    except Exception as e:
-        frappe.msgprint(e)
-
-def update_old_emp_lat_lng(company):
-    try:
-        count = 0
-        print("*------lat lng updtae--------------------------*\n")
-        my_data = frappe.db.sql(""" select name, state, city, zip from `tabEmployee` where (lat is null or lat ='' or lng is null or lng='') and employee_number is null and city is not null and state is not null and company = %s """, company, as_dict=1)
-        for d in my_data:
-            address = d.city + ", " + d.state + ", " + (d.zip if d.zip != 0 and d.zip is not None else "")
-            google_location_data_url = GOOGLE_API_URL + address
-            if(count % 80 == 0):
-                time.sleep(5)
-            google_response = requests.get(google_location_data_url)
-            location_data = google_response.json()
-            if(google_response.status_code == 200 and len(location_data)>0 and len(location_data['results'])>0):
-                lat, lng = emp_location_data(location_data)
-                frappe.db.set_value('Employee', d.name, 'lat', lat)
-                frappe.db.set_value('Employee', d.name, 'lng', lng)
-            count += 1
-    except Exception as e:
-        frappe.log_error(e, "longitude latitude error")
-        print(e)
-
-def emp_location_data(address_dt):
-    try:
-        lat, lng = '', ''
-        if(len(address_dt['results']) > 0):
-            location = address_dt['results'][0]['geometry']['location']
-            lat = location['lat']
-            lng = location['lng']
-        return lat, lng
-    except Exception as e:
-        frappe.log_error(e, "Longitude latitude address")
-        return '', ''
 def update_old_lead_status():
     try:
         print('*------Updating Old Lead Status------*')
