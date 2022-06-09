@@ -5,13 +5,19 @@ import requests
 @frappe.whitelist()
 def get_link1(name, userid):
    company = frappe.get_doc("Company", name)
-
-   sql = """select * from `tabCompany Review`  """
-   data = frappe.db.sql(sql, as_dict=True)
    review=[]
-   for i in data:      
-      if i['staffing_company']== name:
-         review.append((i['rating'],i['comments'],i['hiring_company']))
+   if company.organization_type == 'Staffing':
+      sql= """select * from `tabCompany Review`"""
+      data = frappe.db.sql(sql, as_dict=True)
+      for i in data:
+         if i['staffing_company']== name:
+            review.append((i['rating'],i['comments'],i['hiring_company']))
+   elif company.organization_type == 'Hiring' or company.organization_type == 'Exclusive Hiring':
+      sql= """select * from `tabHiring Company Review`"""
+      data= frappe.db.sql(sql, as_dict=True)
+      for i in data:
+         if i['hiring_company']== name:
+            review.append((i['rating'],i['comments'],i['staffing_company']))
 
    users=[]
    sql1= f"select full_name, enabled from `tabUser` where company='{name}' and enabled=1"
@@ -20,7 +26,6 @@ def get_link1(name, userid):
       users.append(i['full_name'])
 
    return company, review, data1
-   
 
 @frappe.whitelist()
 def get_link2(name,comp, comp_type, user_id):

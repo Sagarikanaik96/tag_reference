@@ -71,6 +71,8 @@ frappe.FaceRecognition = Class.extend({
 				let arr1= add_ress(my_val)
 				let jobsite_address= arr1.join(", ");
 
+				count = count>1?count + ' Reviews': count + ' Review';
+				let description = my_val.about_organization?my_val.about_organization:"No description added."
 				let link_coi='';
 				let link_sm='';
 				if(r.message[0].cert_of_insurance || r.message[0].safety_manual){
@@ -87,7 +89,7 @@ frappe.FaceRecognition = Class.extend({
 								<div id="jobsite">
 									<div id="address"> ${jobsite_address}</div>
 								</div>
-								<p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#">  <u> ${count} Reviews </u> </a> </span> </p>
+								<p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#">  <u> ${count} </u> </a> </span> </p>
 							</div>
 							<div class="col-md-6 col-sm-12 order text-left text-md-right ">
                                 <div>
@@ -124,7 +126,7 @@ frappe.FaceRecognition = Class.extend({
 										</button>
 									</div>
 									<div class="card-text collapse pb-2 show" id="collapse">
-										${my_val.about_organization}   
+										${description}
 									</div>
 								</div>
 							</div>
@@ -363,5 +365,5 @@ function add_ress(my_val){
 		if(my_val.zip){
 			arr.push(my_val.zip);
 		}
-	return arr;	
+	return arr;
 }
