@@ -171,7 +171,11 @@ class Importer:
             elif total_payload_count > 5:
                 frappe.publish_realtime("data_import_progress", {"current": current_index, "total": total_payload_count, "docname": doc, "data_import": self.data_import.name, "success": True, "row_indexes": row_indexes, "eta": eta,},)
 
-            import_log.append(frappe._dict(success=True, docname=doc, row_indexes=row_indexes))
+            if doc:
+                import_log.append(frappe._dict(success=True, docname=doc, row_indexes=row_indexes))
+            else:
+                import_log.append(frappe._dict(success=False, exception="Data Error", docname=doc, row_indexes=row_indexes))
+
             frappe.db.commit()
         except Exception:
             import_log.append(frappe._dict(success=False,exception=frappe.get_traceback(),messages=frappe.local.message_log,row_indexes=row_indexes,))
@@ -185,11 +189,13 @@ class Importer:
             if(doc.first_name):
                 bools = list(map(lambda char: char in special_chars, doc.first_name))
                 if any(bools):
+                    doc.first_name = ''
                     raise Exception("Special characters not allowed in First Name")
 
             if(doc.last_name):
                 bools = list(map(lambda char: char in special_chars, doc.last_name))
                 if any(bools):
+                    doc.last_name = ''
                     raise Exception("Special characters not allowed in Last Name")
 
             if(doc.email):
@@ -211,6 +217,12 @@ class Importer:
 
     def check_rem_emp(self, doc):
         try:
+            if(doc.employee_gender not in ["Female", "Male", "Decline to answer"]):
+                doc.employee_gender = ''
+
+            if(doc.status not in ["Active", "Inactive", "Suspended", "Left"]):
+                doc.status = ''
+
             if doc.contact_number and '+' not in doc.contact_number and not doc.contact_number.isdigit():
                 doc.contact_number = ''
                 raise Exception("Only Number Accepted in Contact Number")
@@ -240,15 +252,19 @@ class Importer:
 
     def insert_record(self, doc):
         try:
-            name = "HR-EMP-"+str(self.emp_series)
-            lat, lng = self.update_emp_lat_lng(doc)
-            self.sql += str(tuple([name, (doc.first_name + " " + doc.last_name), doc.first_name, doc.last_name, doc.email, doc.company, doc.status, doc.contact_number, doc.employee_gender, doc.sssn, doc.military_veteran, doc.street_address, doc.suite_or_apartment_no, doc.city, doc.state, doc.zip, lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
+            name = ''
+            if(doc.first_name and doc.last_name and doc.email and doc.status):
+                name = "HR-EMP-"+str(self.emp_series)
+                lat, lng = self.update_emp_lat_lng(doc)
+                self.sql += str(tuple([name, (doc.first_name + " " + doc.last_name), doc.first_name, doc.last_name, doc.email, doc.company, doc.status, doc.contact_number, doc.employee_gender, doc.sssn, doc.military_veteran, doc.street_address, doc.suite_or_apartment_no, doc.city, doc.state, doc.zip, lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
 
-            self.emp_series += 1
-            time.sleep(0.1)
+                self.emp_series += 1
+                time.sleep(0.1)
+                return name
             return name
         except Exception as e:
             frappe.log_error(e, "insert_record")
+            return ''
 
     def update_emp_lat_lng(self, doc):
         try:
@@ -278,7 +294,8 @@ class Importer:
 
     def update_record(self, doc):
         try:
-            if(doc.name and frappe.db.exists("Company", doc.company)):
+            self.check_emp_error(doc)
+            if(doc.name and frappe.db.exists("Company", doc.company) and doc.first_name and doc.last_name and doc.email and doc.status):
                 full_name = (doc.first_name + " " + doc.last_name)
                 lat, lng = self.update_emp_lat_lng(doc)
                 self.sql = """employee_name = '{0}', first_name = '{1}', last_name = '{2}', email = '{3}', company = '{4}', status = '{5}', contact_number = '{6}', employee_gender = '{7}', sssn = '{8}', military_veteran = {9}, street_address = '{10}', suite_or_apartment_no = '{11}', city = '{12}', state = '{13}', zip = '{14}', lat = '{15}', lng = '{16}', creation = '{17}' """.format(full_name, (doc.first_name or ''), (doc.last_name or ''), (doc.email or ''), doc.company, doc.status, (doc.contact_number or ''), (doc.employee_gender or ''), (doc.sssn or ''), doc.military_veteran, (doc.street_address or ''), (doc.suite_or_apartment_no or ''), (doc.city or ''), (doc.state or ''), (doc.zip or 0), lat, lng, frappe.utils.now())
@@ -287,8 +304,10 @@ class Importer:
                 frappe.db.sql(sql)
                 frappe.db.commit()
                 return doc.name
+            return doc.name
         except Exception as e:
             frappe.msgprint(e)
+            return ''
 
     def get_eta(self, current, total, processing_time):
         self.last_eta = getattr(self, "last_eta", 0)
