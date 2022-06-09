@@ -2,7 +2,6 @@ import os
 import frappe
 from frappe import _
 from frappe.core.doctype.data_import.exporter import Exporter
-from frappe.core.doctype.data_import.importer import Importer
 from frappe.model.document import Document
 from frappe.modules.import_file import import_file_by_path
 from frappe.utils.background_jobs import enqueue
@@ -33,6 +32,10 @@ def start_import(data_import):
     """This method runs in background job"""
     data_import = frappe.get_doc("Data Import", data_import)
     try:
+        if(data_import.reference_doctype != "Employee"):
+            from frappe.core.doctype.data_import.importer import Importer
+        else:
+            from tag_workflow.utils.importer import Importer
         i = Importer(data_import.reference_doctype, data_import=data_import)
         i.import_data()
     except Exception:
