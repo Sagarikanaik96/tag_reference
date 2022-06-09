@@ -46,15 +46,24 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
 @frappe.whitelist()
 def get_timesheet_data(job_order, user, company_type):
     try:
+        jo= frappe.get_doc(JOB, job_order)
+        comp= jo.owner
+        comp_detail=frappe.get_doc("User",comp)
+        comp_type= comp_detail.organization_type
+
         result, rep_result = [], []
         if(company_type == 'Staffing'):
             company_type = 'Exclusive Hiring'
 
         if(company_type in ["Hiring", "Exclusive Hiring"]):
-            sql = """ select employee, employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
+            if jo.resumes_required==1 and comp_type != 'Staffing':
+                sql = """ select employee, employee_name,approved from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") and approved=1 """.format(job_order)
+            
+            else:
+                sql = """ select employee, employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
+
             data = frappe.db.sql(sql, as_dict=1)
             result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company"), "status": ""} for d in data]
-
             res_sql = """ select DISTINCT employee, employee_name from `tabReplaced Employee` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
             rep_data = frappe.db.sql(res_sql, as_dict=1)
             rep_result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company"), "status": "Replaced"} for d in rep_data]
@@ -88,7 +97,7 @@ def check_old_timesheet(child_from, child_to, employee):
         print(e)
         return 0
 
-def check_if_employee_assign(items):
+def check_if_employee_assign(items): 
     try:
         is_employee = 1
         for item in items['items']:

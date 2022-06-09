@@ -244,8 +244,10 @@ frappe.ui.form.on("Job Order", {
 	},
 
 	after_save: function(frm) {
-		if(frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.resumes_required==0){
-			frappe.call({
+		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+			localStorage.setItem("exclusive_case", 1);
+			if(frm.doc.resumes_required==0){
+				frappe.call({
 				method: "tag_workflow.tag_data.claim_order_insert",
 				freeze:true,
 				freeze_message:'Please wait while order is claiming',
@@ -272,6 +274,7 @@ frappe.ui.form.on("Job Order", {
 					}
 				}
 			});
+		}
 		}
 
 		if(frm.doc.staff_org_claimed){

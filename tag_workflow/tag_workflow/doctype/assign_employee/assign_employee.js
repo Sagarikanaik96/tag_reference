@@ -1,10 +1,11 @@
 // // Copyright (c) 2021, SourceFuse and contributors
 // // For license information, please see license.txt
-
+let condition=localStorage.getItem("exclusive_case");
  
 frappe.ui.form.on('Assign Employee', {
 	refresh : function(frm){
 		setTimeout(add_dynamic,500);
+		select_employees(frm);
         setTimeout(function(){
             staffing_company(frm)
         },1000);
@@ -95,6 +96,7 @@ frappe.ui.form.on('Assign Employee', {
 	},
 	
 	after_save:function(frm){
+		localStorage.clear();
 		if(frm.doc.tag_status=='Open' && cur_frm.doc.resume_required==1){
 			make_hiring_notification(frm);
 		}
@@ -214,7 +216,9 @@ function check_employee_data(frm){
 		resume_data(msg,table)
 
 	}
-	table_emp(frm,table,msg)
+	if((frm.doc.resume_required!=1 ) || condition==1){
+		table_emp(frm,table,msg)
+	}
 	company_check(frm,table,msg)
 
 	for(let e in table){(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg.push('Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details');}
@@ -263,6 +267,16 @@ function approved_employee(frm){
 		let diff = current_date.getTime()-approved_date.getTime();
 		console.log(cur_frm.doc.employee_details.length)
 		let table_len = cur_frm.doc.employee_details.length
+		if(table_len> cur_frm.doc.no_of_employee_required){
+			let count=0
+			for(let d in cur_frm.doc.employee_details){
+				let approv=cur_frm.doc.employee_details[d].approved
+				if(approv==1){
+					count+=1;
+				}
+			}
+			table_len=count;
+		}
 		diff = parseInt(diff/1000);
 		if(diff<60){
 			frappe.call({
@@ -332,7 +346,7 @@ function worker_notification(frm){
 			},
 			callback:function(r){
 				let worker_required=r.message[0].no_of_workers-r.message[0].worker_filled
-				if(worker_required<frm.doc.employee_details.length){
+				if(worker_required<frm.doc.employee_details.length &&(frm.doc.resume_required!=1 || condition==1 || frappe.boot.tag.tag_user_info.company_type== 'Hiring')){
 					frappe.msgprint("No Of Workers required for "+frm.doc.job_order+" is "+worker_required)
 					cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = false;
 					frm.set_df_property("employee_details","read_only",0)
@@ -632,7 +646,6 @@ function employee_resume_fun(frm){
 }
 
 function add_dynamic(){
-	console.log("function")
 	if (cur_frm.doc.company && cur_frm.doc.__islocal!=1){
 		Array.from($('[data-doctype="Company"]')).forEach(_field =>{
 			localStorage.setItem("company", cur_frm.doc.company);
@@ -640,3 +653,78 @@ function add_dynamic(){
 		});
 	}
 }
+
+function select_employees(frm){
+	if(frappe.boot.tag.tag_user_info.company_type== "Hiring"){
+		frm.add_custom_button(__('Select Employees'), function(){
+			pop_up();
+		});
+	}
+}
+
+function pop_up(){
+	
+	let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead><tr><th><input type="checkbox" class="grid-row-check pull-left" onclick="select_all1()" id="all"></th><th>Employee ID</th><th>Employee Name</th><th>Resume</th><th></th></tr></thead><tbody>`;
+	let html = ``;
+	
+	for(let d in cur_frm.doc.employee_details){
+		let resume= (cur_frm.doc.employee_details[d].resume).split('/');
+		let resume1= resume[resume.length-1] 
+		html += `<tr><td><input type="checkbox" id="${cur_frm.doc.employee_details[d].employee}" </td><td>${cur_frm.doc.employee_details[d].employee}</td><td>${cur_frm.doc.employee_details[d].employee_name}</td><td>${resume1}</td></tr>`;
+	}
+	let body;
+	if(html){
+		body = head + html + "</tbody></table>";
+	}else{
+		body = head + `<tr><td></td><td></td><td>No Data Found</td><td></td><td></td><td></td></tbody></table>`;
+	}
+
+	let fields = [{"fieldname": "", "fieldtype": "HTML", "options": body}];
+	let dialog = new frappe.ui.Dialog({title: "Select Employees",	fields: fields});
+	dialog.show();
+	dialog.$wrapper.find('.modal-dialog').css('max-width', '980px');
+	dialog.set_primary_action(__('Submit'), function() {
+		update_table(dialog);
+	});
+}
+
+window.select_all1 = function(){
+	let all_len=$('[id="all"]').length;
+	let all= $('[id="all"]')[all_len-1].checked
+	for(let d in cur_frm.doc.employee_details){
+		let id1=cur_frm.doc.employee_details[d].employee
+		let l=($('[id='+id1+']').length)
+		if(all){
+			$('[id='+id1+']')[l-1].checked= true;
+		}
+		else{
+			$('[id='+id1+']')[l-1].checked= false;
+		}		
+	}
+}
+
+function update_table(dialog){
+	let data=[];
+	for(let d in cur_frm.doc.employee_details){
+		let id1=cur_frm.doc.employee_details[d].employee
+		let l=($('[id='+id1+']').length)
+		if($('[id='+id1+']')[l-1].checked){
+			data.push(id1)
+		}
+	}
+	frappe.call({
+		method:"tag_workflow.tag_data.approved_employee",
+		args: {id: data,name:cur_frm.doc.name, count:cur_frm.doc.no_of_employee_required},
+		callback:function(r){
+			if(r.message== "error"){
+				frappe.msgprint("No. of selected employees is greater than no. of employees required")
+				setTimeout(cur_frm.reload_doc(),2000)	
+			}
+			cur_frm.refresh_field("employee_details");
+			cur_frm.reload_doc()
+			cur_frm.reload_doc()
+		}
+	});
+	dialog.hide();
+}
+
