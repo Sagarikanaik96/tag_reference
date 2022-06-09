@@ -955,7 +955,7 @@ function view_buttons_hiring(frm){
 function view_buttons_staffing(frm) {
 	claim_assign_button(frm);
 	if ((frm.doc.claim).includes(frappe.boot.tag.tag_user_info.company)) {
-		let data3 = `<div class="my-2 p-3 border rounded" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Messages </p></div>`;
+		let data3 = `<div class="my-2 p-3 border rounded cursor-pointer" style="display:flex;justify-content: space-between;"><p class="m-0 msg">Messages </p></div>`;
 		$('[data-fieldname = messages]').click(function() {
 			messages();
 		});
@@ -1141,7 +1141,7 @@ function staff_assigned_emp(frm){
 					assigned_emp();
 				}, __("View"));
 				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_inactive');
-				let data = `<div class="my-2 p-3 border rounded" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
+				let data = `<div class="my-2 p-3 border rounded cursor-pointer" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
 				$('[data-fieldname = assigned_employees]').click(function() {
 					if($('[data-fieldname = assigned_employees]').attr('id')=='assigned_inactive'){
 						assigned_emp();
@@ -1312,7 +1312,7 @@ function assigned_emp(){
 		args: {'job_order': cur_frm.doc.name},
 		callback: function(rm) {
 			let data = rm.message || [];
-			let profile_html = `<table style="width: 100%;"><th>Employee Name</th><th>Marked As</th><th>Actions</th>`;
+			let profile_html = `<div class="table-responsive pb-2 pb-sm-0"><table style="width: 100%;"><th>Employee Name</th><th>Marked As</th><th>Actions</th>`;
 			for (let p in data) {
 				let marked_as = '';
 				if (data[p].no_show){
@@ -1341,7 +1341,7 @@ function assigned_emp(){
 				profile_html += `</tr>`;
 			}
 
-			profile_html += `</table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`;
+			profile_html += `</div></table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`;
 			let dialog1 = new frappe.ui.Dialog({
 				title: __('Assigned Employees'),
 				fields: [{fieldname: "staff_companies",	fieldtype: "HTML", options: profile_html}]

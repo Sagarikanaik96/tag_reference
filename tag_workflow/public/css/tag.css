@@ -994,6 +994,9 @@ select.input-with-feedback.form-control.ellipsis {
   .ellipsis {
   white-space: normal;
 }
+.modal {
+  z-index: 99999;
+}
 
 /*------ Media query start ----*/
 @media (max-width: 1300px) {
@@ -1131,5 +1134,5 @@ select.input-with-feedback.form-control.ellipsis {
 }
 
 .text-extra-muted.comment-count {
-    display: none !important;
+  display: none !important;
 }
