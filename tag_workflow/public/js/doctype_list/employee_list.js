@@ -77,11 +77,8 @@ frappe.listview_settings['Employee'] = {
 			$('.menu-btn-group').hide();
 		}
 		if(frappe.boot.tag.tag_user_info.company_type== 'Staffing' || frappe.boot.tag.tag_user_info.company_type=="TAG"){
-			listview.page.set_secondary_action('Import', function(){
-				frappe.route_options = {
-					'reference_doctype': 'Employee'
-				}
-				frappe.set_route('Form', 'Data Import', 'new-data-import');
+			listview.page.set_secondary_action('Data Import', function(){
+				frappe.set_route('List', 'Data Import');
 			});
 		}
 	}

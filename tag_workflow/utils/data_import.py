@@ -46,3 +46,13 @@ def start_import(data_import):
         frappe.flags.in_import = False
 
     frappe.publish_realtime("data_import_refresh", {"data_import": data_import.name})
+
+@frappe.whitelist()
+def get_import_list(doctype, txt, searchfield, page_len, start, filters):
+    company_type=filters.get('user_type')
+    if company_type=='Staffing':
+        sql = ''' select name from `tabDocType` where name in("Employee","Contact") and name like "%%{0}%%" '''.format('%s' %txt)
+        return frappe.db.sql(sql)
+    else:
+        sql = ''' select name from `tabDocType` where name like "%%{0}%%" '''.format('%s' % txt)
+        return frappe.db.sql(sql)

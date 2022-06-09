@@ -5,11 +5,8 @@ frappe.listview_settings["Contact"] = {
             $('[data-original-title="Refresh"]').hide()
             $('.menu-btn-group').hide()
             if(frappe.boot.tag.tag_user_info.user_type != 'Staffing User'){
-                listview.page.set_secondary_action('Import', function(){
-                    frappe.route_options = {
-                        'reference_doctype': 'Contact'
-                    }
-                    frappe.set_route('Form', 'Data Import', 'new-data-import');
+                listview.page.set_secondary_action('Data Import', function(){
+                    frappe.set_route('List', 'Data Import');
                 });
             }
         }
