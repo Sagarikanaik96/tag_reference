@@ -137,13 +137,14 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
             lst_sql = """ select user_id from `tabEmployee` where company = '{0}' and user_id IS NOT NULL""".format(staffing_org)
             user_list = frappe.db.sql(lst_sql, as_dict=1)
             users = [usr['user_id'] for usr in user_list]
-            make_system_notification(users,msg,jobOrder,job_name,sub)   
+            enqueue(make_system_notification,users=users,message=msg,doctype=jobOrder,docname=job_name,subject=sub)   
             enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name)
 
             sql = """ UPDATE `tabAssign Employee` SET approve_employee_notification = 0 where name="{0}" """.format(name)
             frappe.db.sql(sql)
             frappe.db.commit()
-            return sendmail(users, msg, sub, assignEmployees, name)
+            enqueue(sendmail,emails=users, message=msg,subject= sub, doctype=assignEmployees, docname=name)
+            return []
         return []
     except Exception as e:
         frappe.db.rollback()
