@@ -67,11 +67,11 @@ class Importer:
     def upload_record(self):
         try:
             self.column = 'insert into `tabEmployee` (name, employee_name, first_name, last_name, email, company, status, contact_number, employee_gender, sssn, military_veteran, street_address, suite_or_apartment_no, city, state, zip, lat, lng, naming_series, lft, rgt, creation) values ' + self.sql
-
             frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-EMP-" """, self.emp_series)
             frappe.db.sql(self.column[0:-1])
             frappe.db.commit()
         except Exception as e:
+            frappe.db.rollback()
             frappe.log_error(e, "bulk import upload_record")
 
     def import_data(self):
@@ -162,7 +162,7 @@ class Importer:
             if '+' not in y and doc.contact_number:
                 doc.contact_number = "+" + doc.contact_number
 
-            doc = self.process_doc(doc)
+            doc, message = self.process_doc(doc)
             processing_time = timeit.default_timer() - start
             eta = self.get_eta(current_index, total_payload_count, processing_time)
 
@@ -171,17 +171,20 @@ class Importer:
             elif total_payload_count > 5:
                 frappe.publish_realtime("data_import_progress", {"current": current_index, "total": total_payload_count, "docname": doc, "data_import": self.data_import.name, "success": True, "row_indexes": row_indexes, "eta": eta,},)
 
-            if doc:
+            if message == "Pass":
                 import_log.append(frappe._dict(success=True, docname=doc, row_indexes=row_indexes))
             else:
-                import_log.append(frappe._dict(success=False, exception="Data Error", docname=doc, row_indexes=row_indexes))
+                message_log = ['{"title": "Error", "message": "Data Error"}']
+                msg_exc = """<b>First Name* and Last Name*</b>: accepts alphanumeric values.\n<b>Email*</b>: accepts the alphanumeric value in format abc@xyz.com.\n<b>Status*</b>: Active/Inactive/Suspended/Left.\n<b>Company*</b>: You can add data in your company. if kept empty it takes the value of your own company.\n<b>Military Veteran</b>: Please type only 0 or 1, and Yes or NO in Military Veteran.\n<b>Gender</b>: Male, Female or Decline to answer.\n<b>SSN</b>: accepts the 9 digits.\n<b>Contact No.</b>: accepts the 10 to 12 digit. """
+                import_log.append(frappe._dict(success=False, exception=msg_exc, messages=message_log, docname=doc, row_indexes=row_indexes))
 
             frappe.db.commit()
-        except Exception:
+        except Exception as e:
             import_log.append(frappe._dict(success=False,exception=frappe.get_traceback(),messages=frappe.local.message_log,row_indexes=row_indexes,))
             frappe.clear_messages()
             # rollback if exception
             frappe.db.rollback()
+            frappe.log_error(e, "check_import_data")
 
     def check_emp_error(self, doc):
         try:
@@ -190,26 +193,19 @@ class Importer:
                 bools = list(map(lambda char: char in special_chars, doc.first_name))
                 if any(bools):
                     doc.first_name = ''
-                    raise Exception("Special characters not allowed in First Name")
 
             if(doc.last_name):
                 bools = list(map(lambda char: char in special_chars, doc.last_name))
                 if any(bools):
                     doc.last_name = ''
-                    raise Exception("Special characters not allowed in Last Name")
 
             if(doc.email):
                 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
                 if(not re.fullmatch(regex, doc.email)):
                     doc.email = ''
-                    raise Exception("Invalid Email")
 
-            if(doc.sssn and not doc.sssn.isdigit()):
+            if((doc.sssn and (not doc.sssn.isdigit() or len(doc.sssn) != 9)) or doc.sssn is None):
                 doc.sssn = ''
-                raise Exception("Only Number Accepted in SSN")
-            elif doc.sssn and len(doc.sssn) != 9:
-                doc.sssn = ''
-                raise Exception("Only 9 Digits are allowed in SSN")
 
             self.check_rem_emp(doc)
         except Exception as e:
@@ -225,18 +221,23 @@ class Importer:
 
             if doc.contact_number and '+' not in doc.contact_number and not doc.contact_number.isdigit():
                 doc.contact_number = ''
-                raise Exception("Only Number Accepted in Contact Number")
             elif doc.contact_number:
                 if len(doc.contact_number) < 10 or len(doc.contact_number) > 12:
                     doc.contact_number = ''
-                    raise Exception("Contact Number Can Only of 10 digits or 12 digits")
+            elif doc.contact_number is None:
+                doc.contact_number = ''
 
-            if doc.zip and not doc.zip.isalnum():
+            self.check_rem_emp_data(doc)
+        except Exception as e:
+            print(e)
+
+    def check_rem_emp_data(self, doc):
+        try:
+            if((doc.zip and (not doc.zip.isalnum() or (len(doc.zip) < 3 or len(doc.zip) > 15))) or doc.zip is None):
                 doc.zip = 0
-                raise Exception("Only Number And Alphabets Accepted in Zip Code")
-            elif doc.zip is not None and (len(doc.zip) < 3 or len(doc.zip) > 15):
-                doc.zip = 0
-                raise Exception("Zip Code Can Only be of 3 digits to 15 digits")
+
+            if((doc.military_veteran and not doc.military_veteran.isalnum()) or doc.military_veteran is None):
+                doc.military_veteran = 0
         except Exception as e:
             print(e)
 
@@ -252,19 +253,25 @@ class Importer:
 
     def insert_record(self, doc):
         try:
-            name = ''
-            if(doc.first_name and doc.last_name and doc.email and doc.status):
-                name = "HR-EMP-"+str(self.emp_series)
-                lat, lng = self.update_emp_lat_lng(doc)
-                self.sql += str(tuple([name, (doc.first_name + " " + doc.last_name), doc.first_name, doc.last_name, doc.email, doc.company, doc.status, doc.contact_number, doc.employee_gender, doc.sssn, doc.military_veteran, doc.street_address, doc.suite_or_apartment_no, doc.city, doc.state, doc.zip, lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
+            name = 'No Name'
+            keys = doc.keys()
+            if(frappe.db.exists("Company", doc.company) and "first_name" in keys and "last_name" in keys and "email" in keys and "status" in keys):
+                if(doc.first_name and doc.last_name and doc.email and doc.status):
+                    name = "HR-EMP-"+str(self.emp_series)
+                    lat, lng = self.update_emp_lat_lng(doc)
 
-                self.emp_series += 1
-                time.sleep(0.1)
-                return name
-            return name
+                    self.sql += str(tuple([name, (doc.first_name + " " + doc.last_name), doc.first_name, doc.last_name, doc.email, doc.company, doc.status, doc.contact_number, doc.employee_gender, doc.sssn, doc.military_veteran, doc.street_address, doc.suite_or_apartment_no, doc.city, doc.state, doc.zip, lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
+
+                    self.emp_series += 1
+                    time.sleep(0.1)
+                    return name, "Pass"
+                else:
+                    return name, "Failed"
+            else:
+                return name, "Failed"
         except Exception as e:
             frappe.log_error(e, "insert_record")
-            return ''
+            return 'No Name', 'Failed'
 
     def update_emp_lat_lng(self, doc):
         try:
@@ -295,19 +302,24 @@ class Importer:
     def update_record(self, doc):
         try:
             self.check_emp_error(doc)
-            if(doc.name and frappe.db.exists("Company", doc.company) and doc.first_name and doc.last_name and doc.email and doc.status):
-                full_name = (doc.first_name + " " + doc.last_name)
-                lat, lng = self.update_emp_lat_lng(doc)
-                self.sql = """employee_name = '{0}', first_name = '{1}', last_name = '{2}', email = '{3}', company = '{4}', status = '{5}', contact_number = '{6}', employee_gender = '{7}', sssn = '{8}', military_veteran = {9}, street_address = '{10}', suite_or_apartment_no = '{11}', city = '{12}', state = '{13}', zip = '{14}', lat = '{15}', lng = '{16}', creation = '{17}' """.format(full_name, (doc.first_name or ''), (doc.last_name or ''), (doc.email or ''), doc.company, doc.status, (doc.contact_number or ''), (doc.employee_gender or ''), (doc.sssn or ''), doc.military_veteran, (doc.street_address or ''), (doc.suite_or_apartment_no or ''), (doc.city or ''), (doc.state or ''), (doc.zip or 0), lat, lng, frappe.utils.now())
+            keys = doc.keys()
+            if("name" in keys and frappe.db.exists("Company", doc.company) and "first_name" in keys and "last_name" in keys and "email" in keys and "status" in keys):
+                if(doc.name and doc.first_name and doc.last_name and doc.email and doc.status):
+                    full_name = (doc.first_name + " " + doc.last_name)
+                    lat, lng = self.update_emp_lat_lng(doc)
+                    self.sql = """employee_name = '{0}', first_name = '{1}', last_name = '{2}', email = '{3}', company = '{4}', status = '{5}', contact_number = '{6}', employee_gender = '{7}', sssn = '{8}', military_veteran = {9}, street_address = '{10}', suite_or_apartment_no = '{11}', city = '{12}', state = '{13}', zip = '{14}', lat = '{15}', lng = '{16}', creation = '{17}' """.format(full_name, doc.first_name, doc.last_name, doc.email, doc.company, doc.status, doc.contact_number, doc.employee_gender, doc.sssn, doc.military_veteran, doc.street_address, doc.suite_or_apartment_no, doc.city, doc.state, doc.zip, lat, lng, frappe.utils.now())
 
-                sql = """update `tabEmployee` set {0} where name = '{1}'""".format(self.sql, doc.name)
-                frappe.db.sql(sql)
-                frappe.db.commit()
-                return doc.name
-            return doc.name
+                    sql = """update `tabEmployee` set {0} where name = '{1}'""".format(self.sql, doc.name)
+                    frappe.db.sql(sql)
+                    frappe.db.commit()
+                    return doc.name, "Pass"
+                else:
+                    return doc.name, "Falied"
+            else:
+                return doc.name, "Falied"
         except Exception as e:
-            frappe.msgprint(e)
-            return ''
+            print(e)
+            return '', 'Failed'
 
     def get_eta(self, current, total, processing_time):
         self.last_eta = getattr(self, "last_eta", 0)
