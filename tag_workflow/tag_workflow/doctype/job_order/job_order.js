@@ -130,7 +130,6 @@ frappe.ui.form.on("Job Order", {
 	},
 	refresh: function(frm) {
 		update_order_status(frm)
-		$('[data-fieldname="company"]').show();
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
@@ -263,7 +262,6 @@ frappe.ui.form.on("Job Order", {
 					staff_company: frappe.boot.tag.tag_user_info.company,
 				},callback:function(r){
 					if(r.message==1){
-						console.log("claimed")
 						frappe.msgprint('Job Order has been claimed')
 						setTimeout(function(){
 							location.reload()
@@ -271,7 +269,6 @@ frappe.ui.form.on("Job Order", {
 					}
 					else{
 						frappe.msgprint('Automatic claim is not successful');
-						console.log("not claimed")
 						setTimeout(function(){
 							location.reload()
 						},5000)
@@ -1747,7 +1744,8 @@ function get_company_list(){
 function update_order_status(frm){
 	if(frm.doc.__islocal!=1){
 		frappe.call({
-			method: "tag_workflow.tag_data.update_job_order_status",
+			method: "tag_workflow.tag_data.update_order_status",
+			"args": {"job_order_name": cur_frm.doc.name},
 		})
 	}
 }

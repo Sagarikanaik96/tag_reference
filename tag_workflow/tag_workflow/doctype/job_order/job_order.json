@@ -104,7 +104,6 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -334,7 +333,6 @@
    "fieldname": "order_status",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Order Status",
    "options": "\nCompleted\nOngoing\nUpcoming",
    "read_only": 1
@@ -657,7 +655,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-06 01:01:50.790581",
+ "modified": "2022-06-09 02:19:04.540291",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

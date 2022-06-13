@@ -411,7 +411,6 @@ def hiring_category(doctype,txt,searchfield,page_len,start,filters):
 @frappe.whitelist(allow_guest=False)
 def org_industy_type(company=None):
     sql=sql_cmd.format(company)
-    print(sql)
     return frappe.db.sql(sql)
 
 
@@ -1138,11 +1137,11 @@ def job_industry_type_add(company,user_industry):
     for i in new_industry.industry_type:
         if(i.industry_type == user_industry):
             break
-    else:
-        new_industry.append('industry_type',{
-            'industry_type':user_industry
-        })
-        new_industry.save(ignore_permissions=True)
+        else:
+            new_industry.append('industry_type',{
+                'industry_type':user_industry
+            })
+            new_industry.save(ignore_permissions=True)
 @frappe.whitelist()
 def new_activity(activity):
     if not frappe.db.exists("Activity Type", {"name":activity}):
@@ -1245,3 +1244,22 @@ def save_job_order_value(job_order,staff_company):
     if(',' in staff_company):
         doc.claim=staff_company
     doc.save(ignore_permissions = True)
+
+@frappe.whitelist()
+def update_order_status(job_order_name):
+    try:
+        job_order_detail=frappe.get_all(jobOrder,fields=['name','from_date','to_date','bid','staff_org_claimed','order_status','from_date','creation','no_of_workers','worker_filled'],filters={'name':job_order_name })    
+        current_date=datetime.date.today()
+        for each in job_order_detail:
+            start = each.from_date if each.from_date else ""
+            end = each.to_date if each.to_date else ""
+            if(type(start) is not str):
+                if start <= current_date <= end:
+                    frappe.db.set_value(jobOrder, each.name, "order_status", "Ongoing")
+                    unshare_job_order(each)
+                elif  current_date < start:
+                    frappe.db.set_value(jobOrder, each.name, "order_status", "Upcoming")
+                elif current_date > end:
+                    frappe.db.set_value(jobOrder, each.name, "order_status", "Completed")
+    except Exception as e:
+        frappe.msgprint(e)

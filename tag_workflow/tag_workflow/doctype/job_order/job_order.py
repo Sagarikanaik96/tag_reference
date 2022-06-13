@@ -350,6 +350,7 @@ def get_joborder_value(user, company_type, name):
         print(e)
         frappe.log_error(str(e)+','+name+',session user-'+frappe.session.user+','+company_type+',user-'+user, 'Job order list popup')
         return 'error_occur'
+        
 @frappe.whitelist()
 def selected_days(doctype, txt, searchfield, page_len, start, filters):
    days="select name from `tabDays` order by creation desc"

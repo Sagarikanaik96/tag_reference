@@ -53,12 +53,10 @@ frappe.listview_settings['Job Order'] = {
 			}
 		, true);
 	},
-	refresh:function(listview){
+	refresh:function(){
 		$('.custom-actions.hidden-xs.hidden-md').hide();
 		$('#navbar-breadcrumbs > li:nth-child(2) > a').html('Job Orders');
 		$('[data-original-title="Menu"]').hide();
-		$('div[data-fieldname="order_status"]').hide();
-		$('div[data-original-title="Company"]').hide();
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 			frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
 				if(r.name===undefined){
@@ -67,21 +65,6 @@ frappe.listview_settings['Job Order'] = {
 			});
 		}
 
-		let children = listview.$list_head_subject[0].children;
-		setTimeout( function() {
-			for(var c in children){
-				if(children[c].innerText && children[c].innerText =="Name"){
-					children[c].innerHTML = `<input class="level-item list-check-all" type="checkbox" title="Select All">
-						<span class="level-item list-liked-by-me hidden-xs">
-							<span title="Likes"><svg class="icon  icon-sm" style="">
-						<use class="like-icon" href="#icon-heart"></use>
-						</svg></span>
-						</span>
-						<span class="level-item">Order ID</span>`
-				}
-			}
-             
-         }, 50 );
 		$('[role = "tooltip"]').popover('dispose');
 	},	
 
@@ -287,10 +270,9 @@ function get_company_job_order(){
 		"async": 0,
 		"callback": function(r){
 			if(r.message){
-				text += r.message
+				text +=r.message
 			}
 		}
 	});
 	return text
-
 }

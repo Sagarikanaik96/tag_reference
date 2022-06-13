@@ -658,7 +658,6 @@ def get_company_job_order(user_type):
         data = []
         if user_type=='Staffing':
             sql=f'''select name from `tabCompany` where organization_type="Hiring" or parent_staffing in (select company from `tabEmployee` where email="{current_user}") '''
-            frappe.db.sql(sql)
             companies = frappe.db.sql(sql, as_dict=1)
             data = [c['name'] for c in companies]
             return "\n".join(data)
