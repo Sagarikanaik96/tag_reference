@@ -58,7 +58,7 @@ class JobOrder(Document):
                     new_claim.save(ignore_permissions=True)
                     self.assign_doc(new_claim.name, CLM,comp)
             frappe.db.set_value(ORD, self.name, "worker_filled", worker_filled)
-            self.remaining_companies(self.no_of_workers,worker_filled,self.staff_company,self.repeat_from,self.name,self.company,self.select_job)
+            self.remaining_companies(self.staff_company,self.repeat_from,self.name,self.company,self.select_job)
 
 
     def assign_doc(self, name, doc_type,comp):
@@ -84,10 +84,11 @@ class JobOrder(Document):
         email_temp = joborder_email_template(sub, msg, usrs, link)
         print(email_temp)
         chat_room_created(self.company, comp, self.name)
-    def remaining_companies(self,workers_required,worker_filled,staff_company,repeat_job_order_name,new_order,hiring_company,job_title):
-        if(workers_required!=worker_filled):
-            old_staff_companies=frappe.get_doc(ORD,repeat_job_order_name)
-            staff_selected_companies=old_staff_companies.staff_org_claimed.split(',')
+    def remaining_companies(self,staff_company,repeat_job_order_name,new_order,hiring_company,job_title):
+        old_staff_companies=frappe.get_doc(ORD,repeat_job_order_name)
+        staff_selected_companies=old_staff_companies.staff_org_claimed.split(',')
+        new_selected_companies=staff_company.split(',')
+        if(len(staff_selected_companies)!=len(new_selected_companies)):
             comp_list=[c.strip() for c in staff_selected_companies]
             comp_list=tuple(comp_list)
             usr_sql = '''select email from `tabUser` where organization_type='staffing' and company not in {0} '''.format(comp_list)

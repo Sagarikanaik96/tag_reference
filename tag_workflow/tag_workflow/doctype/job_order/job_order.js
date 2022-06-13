@@ -1406,7 +1406,7 @@ function deleting_data(frm){
 }
 
 function deny_job_order(frm){
-	if(((cur_frm.doc.is_direct==1 && cur_frm.doc.is_repeat==1) || cur_frm.doc.is_single_share == 1) && frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.order_status!="Completed"){
+	if(!cur_frm.doc.is_repeat &&  cur_frm.doc.is_single_share == 1 && frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.order_status!="Completed"){
 		frm.add_custom_button(__("Deny Job Order"), function() {
 			frappe.call({
 				method: "tag_workflow.tag_workflow.doctype.job_order.job_order.after_denied_joborder",
