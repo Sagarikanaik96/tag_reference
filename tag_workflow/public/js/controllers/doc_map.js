@@ -110,9 +110,11 @@ function make(value, _key, componentForm, data) {
     }
 
 }
-function update_address(data) {
+function update_address(data){
+    let street = data.street_number ? (data.street_number + " " + data.route) : data.route;
     if (cur_frm.doc.doctype == 'Employee') {
-        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "street_address", document.getElementById("autocomplete-address").value);
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "complete_address", document.getElementById("autocomplete-address").value);
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "street_address", street);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state", data["administrative_area_level_1"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city", data["locality"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
@@ -123,16 +125,20 @@ function update_address(data) {
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city", data["locality"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "country_2", data["country"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
-        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address", document.getElementById("autocomplete-address").value);
-    } else if (cur_frm.doc.doctype == 'Lead') {
-        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address_lines_1", document.getElementById("autocomplete-address").value);
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address", street);
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "complete_address", document.getElementById("autocomplete-address").value);
+    } else if (cur_frm.doc.doctype == 'Lead'){
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "complete_address", document.getElementById("autocomplete-address").value);
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address_lines_1", street);
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address_lines_2", "");
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address_lines_2", (data["street_number"] + " " + data["route"]));
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state_2", data["administrative_area_level_1"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city_or_town", data["locality"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "country_2", data["country"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
-    } else if (cur_frm.doc.doctype == 'Contact') {
-        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "contact_address", document.getElementById("autocomplete-address").value);
+    } else if (cur_frm.doc.doctype == 'Contact'){
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "complete_address", document.getElementById("autocomplete-address").value);
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "contact_address", street);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state", data["administrative_area_level_1"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city", data["locality"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "country_2", data["country"]);

@@ -269,6 +269,7 @@ frappe.ui.form.on("Employee", {
 			show_addr(frm);
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
 			cur_frm.set_df_property('map','hidden',1);
+            show_addr(frm);
 		}
 	},
 
@@ -280,6 +281,7 @@ frappe.ui.form.on("Employee", {
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
 			cur_frm.set_df_property('map','hidden',1);
 			hide_field(frm);
+            show_addr(frm);
 		}
 	},
 	onload_post_render:function(frm){
@@ -575,6 +577,13 @@ function show_addr(frm){
 	}else if(frm.doc.enter_manually){
 		frm.get_docfield('street_address').label ='Street Address';
 	}
+
+    if(frm.doc.enter_manually == 1){
+        cur_frm.toggle_display("complete_address", 0);
+    }else{
+        cur_frm.toggle_display("complete_address", 1);
+    }
+
 	frm.refresh_field('street_address');
 }
 

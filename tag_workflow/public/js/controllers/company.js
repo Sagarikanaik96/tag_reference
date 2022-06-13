@@ -275,7 +275,8 @@ frappe.ui.form.on("Company", {
 			hide_fields(frm)
 			show_addr(frm)
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
-			cur_frm.set_df_property('map','hidden',1)
+			cur_frm.set_df_property('map','hidden',1);
+            show_addr(frm);
 		}
 	},
 
@@ -286,7 +287,8 @@ frappe.ui.form.on("Company", {
 			show_addr(frm)
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
 			hide_fields(frm);
-			cur_frm.set_df_property('map','hidden',1)
+			cur_frm.set_df_property('map','hidden',1);
+            show_addr(frm);
 		}
 	},
 	before_save: function(frm){
@@ -605,13 +607,20 @@ function update_existing_employees(frm){
 }
 
 function show_addr(frm){
-  if(frm.doc.search_on_maps){
-    frm.get_docfield('address').label ='Complete Address';
-  }else if(frm.doc.enter_manually){
-    frm.get_docfield('address').label ='Address';
-  }
-  frm.refresh_field('address');
+    if(frm.doc.search_on_maps){
+        frm.get_docfield('address').label ='Complete Address';
+    }else if(frm.doc.enter_manually){
+        frm.get_docfield('address').label ='Address';
+    }
+
+    if(frm.doc.enter_manually == 1){
+        cur_frm.toggle_display("complete_address", 0);
+    }else{
+        cur_frm.toggle_display("complete_address", 1);
+    }
+    frm.refresh_field('address');
 }
+
 const html=`<!doctype html>
   <html>
     <head>

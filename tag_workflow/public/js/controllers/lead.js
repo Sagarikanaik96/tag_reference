@@ -169,9 +169,10 @@ frappe.ui.form.on("Lead", {
     if(cur_frm.doc.search_on_maps == 1){
       tag_workflow.UpdateField(frm, "map");
       hide_fields(frm);
-      show_addr(frm)
+      show_addr(frm);
     }else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
-      cur_frm.set_df_property('map','hidden',1)
+      cur_frm.set_df_property('map','hidden',1);
+      show_addr(frm);
     }
   },
 
@@ -181,8 +182,9 @@ frappe.ui.form.on("Lead", {
       show_fields(frm);
       show_addr(frm)
     }else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
-      cur_frm.set_df_property('map','hidden',1)
-      hide_fields(frm)
+      cur_frm.set_df_property('map','hidden',1);
+      hide_fields(frm);
+      show_addr(frm);
     }
   },
   phone_no: function(frm){
@@ -503,14 +505,26 @@ function show_fields(frm){
   frm.set_df_property('zip','hidden',0);
   frm.set_df_property('country_2','hidden',0);
 }
+
 function show_addr(frm){
-  if(frm.doc.search_on_maps){
-    frm.get_docfield('address_lines_1').label ='Complete Address';
-  }else if(frm.doc.enter_manually){
-    frm.get_docfield('address_lines_1').label ='Address Line 1';
-  }
-  frm.refresh_field('address_lines_1');
+    if(frm.doc.search_on_maps){
+        frm.get_docfield('address_lines_1').label ='Complete Address';
+    }else if(frm.doc.enter_manually){
+        frm.get_docfield('address_lines_1').label ='Address Line 1';
+    }
+
+    if(frm.doc.enter_manually == 1){
+        cur_frm.toggle_reqd("complete_address", 0);
+        cur_frm.toggle_reqd("address_lines_1", 1);
+        cur_frm.toggle_display("complete_address", 0);
+    }else{
+        cur_frm.toggle_reqd("complete_address", 1);
+        cur_frm.toggle_reqd("address_lines_1", 0);
+        cur_frm.toggle_display("complete_address", 1);
+    }
+    frm.refresh_field('address_lines_1');
 }
+
 const html=`<!doctype html>
   <html>
     <head>
