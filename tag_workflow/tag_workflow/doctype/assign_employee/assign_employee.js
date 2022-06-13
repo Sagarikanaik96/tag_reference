@@ -297,6 +297,11 @@ function approved_employee(frm){
 }
 
 function hide_resume(frm){
+	if ((frm.doc.resume_required && frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.tag_status!='Approved') || !frm.doc.resume_required){
+        let table=frappe.meta.get_docfield("Assign Employee Details", "approved",frm.doc.name);
+        table.hidden=1;
+        frm.refresh_fields();
+    }
 	if (!frm.doc.resume_required){
 		let table=frappe.meta.get_docfield("Assign Employee Details", "resume",frm.doc.name);
 		table.hidden=1;
