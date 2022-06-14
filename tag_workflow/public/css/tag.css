@@ -1030,6 +1030,29 @@ select.input-with-feedback.form-control.ellipsis {
 }
 
 @media (max-width: 768px) {
+  [data-page-route="Employee"]
+    .editable-form
+    .layout-main-section-wrapper
+    .layout-main-section {
+    margin-top: 40px;
+  }
+  [data-page-route="Employee"] .page-head .page-head-content div:nth-child(2) {
+    flex-wrap: wrap;
+    margin: 15px 0px;
+    display: contents;
+    background: #fff;
+  }
+  [data-page-route="Employee"]
+    .layout-main-section-wrapper
+    .layout-main-section {
+    margin-top: 15px !important;
+  }
+  [data-page-route="Employee"] .page-head-content {
+    display: inline-block;
+  }
+  [data-page-route="Employee"] .container {
+    padding-bottom: 10px;
+  }
   .navbar-light .navbar-nav .nav-item .btn-login-area {
     text-align: right;
     margin-right: 7px;
