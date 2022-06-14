@@ -170,6 +170,7 @@ function submit_claim(frm){
 function staffing_claim_joborder(frm){
 	frappe.call({
 		"method":"tag_workflow.tag_workflow.doctype.claim_order.claim_order.staffing_claim_joborder",
+		async:0,
 		"freeze": true,
 		"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
 		"args":{
@@ -224,31 +225,21 @@ function org_info(frm){
 }
 
 
-
 function claim_order_save(frm){
-    frappe.call({
-        method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.order_details",
-        args:{
-            'doc_name':frm.doc.job_order
-        },
-        callback:function(){
-        	let dict = {}
-        	dict[frm.doc.staffing_organization]=frm.doc.staff_claims_no
-    		frappe.call({
-                method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_claims",
-                args:{
-                    'my_data':dict,
-                    'doc_name':frm.doc.job_order
-                },
-                callback:function(){
-                    setTimeout(function () {
-                        window.location.href='/app/job-order/'+frm.doc.job_order
-                    }, 3000);
-                        frappe.msgprint('Notification send successfully')	
-                }
-            })
-        }
-    })
+	frappe.call({
+		method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_claims",
+		args:{
+			'staff_company':frm.doc.staffing_organization,
+			'claims_assigned':frm.doc.staff_claims_no,
+			'doc_name':frm.doc.job_order
+		},
+		callback:function(){
+			setTimeout(function () {
+				window.location.href='/app/job-order/'+frm.doc.job_order
+			}, 3000);
+				frappe.msgprint('Notification send successfully')
+		}
+	})
 }
                                 
 function update_claim_by_staffing(frm){
