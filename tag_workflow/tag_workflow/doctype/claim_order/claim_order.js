@@ -226,18 +226,19 @@ function org_info(frm){
 
 
 function claim_order_save(frm){
+	let dict = {}
+	dict[frm.doc.staffing_organization]=frm.doc.staff_claims_no
 	frappe.call({
 		method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_claims",
 		args:{
-			'staff_company':frm.doc.staffing_organization,
-			'claims_assigned':frm.doc.staff_claims_no,
+			'my_data':dict,
 			'doc_name':frm.doc.job_order
 		},
 		callback:function(){
 			setTimeout(function () {
 				window.location.href='/app/job-order/'+frm.doc.job_order
 			}, 3000);
-				frappe.msgprint('Notification send successfully')
+			frappe.msgprint('Notification send successfully')
 		}
 	})
 }
