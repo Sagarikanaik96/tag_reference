@@ -128,6 +128,18 @@ frappe.ui.form.on("Job Order", {
 		}
 
 	},
+	select_days:function(frm){
+		if(frm.doc.select_days){
+			$('span.btn-link-to-form').click(false);
+			$( "button.data-pill.btn.tb-selected-value" ).on('mouseover',function(e) {
+				let file=e.target.innerText;
+				$(this).attr('title', file);
+			});
+			$( ".control-input.form-control.table-multiselect" ).on('mouseover',function() {
+				$(this).attr('title', '');
+			});
+		}
+	},
 	refresh: function(frm) {
 		update_order_status(frm)
 		$('.form-footer').hide();
