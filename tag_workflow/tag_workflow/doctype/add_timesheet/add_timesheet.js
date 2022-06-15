@@ -430,9 +430,8 @@ function check_availability(r,frm){
 		const selected=r['selected_days']
 		const f_d = new Date(frm.doc.date);
 		let day = weekday[f_d.getDay()];
-		const my_days=selected.split(",")
+		const my_days=selected.split(", ")
 		if(!my_days.includes(day)){
-			console.log('exkkist')
 			frappe.msgprint('The job order is available only for '+my_days)
 			frm.set_value("date", "");
 		}

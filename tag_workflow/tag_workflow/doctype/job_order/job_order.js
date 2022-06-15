@@ -383,6 +383,8 @@ frappe.ui.form.on("Job Order", {
 	availability: function(frm){
 		if(frm.doc.availability == "Custom"){
 			cur_frm.set_value("select_days", "");
+			cur_frm.set_value("selected_days", undefined)
+			cur_frm.set_df_property('select_days','reqd',1)
 		}
 	},
 
@@ -405,7 +407,7 @@ frappe.ui.form.on("Job Order", {
 		rate_calculation(frm);
 		time_validation(frm)
 		set_custom_base_price(frm)
-		let l = {Company: frm.doc.company, "Select Job": frm.doc.select_job, Category: frm.doc.category, "Job Order Start Date": cur_frm.doc.from_date, "Job Site": cur_frm.doc.job_site, "No Of Workers": cur_frm.doc.no_of_workers, Rate: cur_frm.doc.rate, "Job Order End Date": cur_frm.doc.to_date, "Job Duration": cur_frm.doc.job_order_duration, "Estimated Hours Per Day": cur_frm.doc.estimated_hours_per_day, "E-Signature Full Name": cur_frm.doc.e_signature_full_name,};
+		let l = {Company: frm.doc.company, "Select Job": frm.doc.select_job, Category: frm.doc.category, "Job Order Start Date": cur_frm.doc.from_date, "Job Site": cur_frm.doc.job_site, "No Of Workers": cur_frm.doc.no_of_workers, Rate: cur_frm.doc.rate, "Job Order End Date": cur_frm.doc.to_date, "Job Duration": cur_frm.doc.job_order_duration, "Estimated Hours Per Day": cur_frm.doc.estimated_hours_per_day, "E-Signature Full Name": cur_frm.doc.e_signature_full_name,'Availability':cur_frm.doc.availability};
 
 		let message = "<b>Please Fill Mandatory Fields:</b>";
 		for (let k in l) {
@@ -449,6 +451,7 @@ frappe.ui.form.on("Job Order", {
 				frm.set_value('phone_number', validate_phone(phone));
 			}
 		}
+		custom_availability_mandatory(frm)
 	},
 
 	drug_screen: (frm) => {
@@ -1774,8 +1777,18 @@ function set_custom_days(frm){
 	let data=frm.doc.select_days.length
 	for (let i = 0; i < data; i++) {
 	  if(frm.doc.select_days[i]!="None"){
-		selected=selected+frm.doc.select_days[i].days+","
+		selected=selected+frm.doc.select_days[i].days+", "
 	  }
 	}	
-	frm.set_value("selected_days",selected.slice(0, -1))
+	frm.set_value("selected_days",selected.slice(0, -2))
+}
+function custom_availability_mandatory(frm){
+	if(frm.doc.availability=='Custom'){
+		if(frm.doc.selected_days===undefined){
+			let message="<b>Please Fill Mandatory Fields:</b><br>Select Days"
+			frappe.msgprint({message: __(message), title: __("Error"), indicator: "orange",});
+			frappe.validated = false;
+
+		}
+	}
 }
