@@ -167,6 +167,15 @@ frappe.ui.form.on("Job Order", {
 	  	document.addEventListener("keydown", function(){
 	  		companyhide(500)
 	    })
+		$(document).on('click', '[data-fieldname="select_days"]', function(){
+			advance_hide(3000)
+		});
+		$('[data-fieldname="select_days"]').mouseover(function(){
+			advance_hide(500)
+		})
+	  	document.addEventListener("keydown", function(){
+			advance_hide(500)
+	    })
 
 		$('[data-fieldname="company"]').click(function(){ return false})
 	    $('[data-fieldname="company"]').click(function(){
@@ -1497,6 +1506,16 @@ function companyhide(time){
 		let arry = document.querySelectorAll(txt2)[0].children;
 		if(arry.length){
 			document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none';
+			document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none';
+		}
+	}, time);
+}
+function advance_hide(time){
+	setTimeout(() => {
+		let txt  = $('[data-fieldname="select_days"]')[1].getAttribute('aria-owns');
+		let txt2 = 'ul[id="'+txt+'"]';
+		let arry = document.querySelectorAll(txt2)[0].children;
+		if(arry.length){
 			document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none';
 		}
 	}, time);
