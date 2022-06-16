@@ -20,7 +20,7 @@ def get_order_info(company1):
         job_order = frappe.db.sql(sql, as_dict=1)
         for j in job_order:
             if j.name in order_detail:
-                sql = "select name, category, select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order` where name = '{}'".format(j.name)
+                sql = "select name, category, select_job, from_date, to_date, no_of_workers, worker_filled, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order` where name = '{}'".format(j.name)
                 data = frappe.db.sql(sql, as_dict=1)
                 for d in data:
                     cat.append(d.category)

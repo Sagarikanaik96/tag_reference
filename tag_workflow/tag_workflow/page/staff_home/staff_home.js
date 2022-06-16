@@ -97,7 +97,7 @@ frappe.StaffHome = Class.extend({
 					<div class="d-flex flex-wrap p-3 ">
 						<div class="d-flex justify-content-between w-100 ">
 							<h6>${order[o].select_job}</h6>
-							<h6>$${order[o].per_hour}</h6>
+							<h6>$${order[o].per_hour.toFixed(2)}</h6>
 						</div>
 						<div class="d-flex w-100 ">
 							<span class="badge badge-pill exclusive">${order[o].name}</span>

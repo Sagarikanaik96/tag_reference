@@ -251,7 +251,7 @@ function set_options(frm){
 function setup_profile(frm){
 	let role_profile = "role_profile_name";
 	let module_profile = "module_profile";
-	var type = frm.doc.tag_user_type;
+	let type = frm.doc.tag_user_type;
 	let doctype = frm.doc.doctype;
 	let docname = frm.doc.name;
 
