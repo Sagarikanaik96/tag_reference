@@ -37,7 +37,7 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
         msg = f'{company} has submitted a timesheet on {today} for {job_title} for approval. '
         subject = 'Timesheet For Approval'
         make_system_notification(staffing_user, msg, 'Timesheet', docname,subject)
-        sendmail(staffing_user, msg, subject, 'Timesheet', docname)
+        enqueue("tag_workflow.tag_workflow.utils.notification.sendmail", emails=staffing_user, msg=msg, subject=subject, doctype='Timesheet', docname=docname)
         return True
     except Exception as e:
         frappe.log_error(e, "Job Order Approval")

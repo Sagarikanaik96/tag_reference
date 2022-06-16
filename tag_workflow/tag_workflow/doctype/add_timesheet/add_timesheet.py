@@ -112,7 +112,7 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
         else:
             frappe.msgprint(_("Date must be in between Job Order start date and end date for timesheets"))
 
-        enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.send_timesheet_for_approval", timesheets=timesheets,now=True)
+        enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.send_timesheet_for_approval", timesheets=timesheets)
         return True if added == 1 else False
     except Exception as e:
         frappe.msgprint(e)
@@ -169,7 +169,7 @@ def send_timesheet_for_approval(timesheets):
             dnr_notification(time,staffing_user)
             subject = 'Timesheet For Approval'
 
-            sendmail(staffing_user, msg, subject, 'Timesheet', time['docname'])
+            enqueue("tag_workflow.tag_workflow.utils.notification.sendmail", emails=staffing_user, msg=msg, subject=subject, doctype='Timesheet', docname=time['docname'])
     except Exception as e:
         frappe.log_error(e, "Timesheet Approval")
 

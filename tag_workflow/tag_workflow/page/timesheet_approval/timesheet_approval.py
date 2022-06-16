@@ -88,9 +88,9 @@ def approve_timesheets(timesheet, action):
         timesheet = ast.literal_eval(timesheet)
         for t in timesheet:
             doc = frappe.get_doc("Timesheet", {"name": t}, ignore_permissions=True)
-            doc.workflow_state = action
-            doc.save(ignore_permissions=True)
-            doc.submit()
+            frappe.db.set_value('Timesheet',t,'workflow_state',action)
+            frappe.db.set_value('Timesheet',t,'status',action)
+            frappe.db.set_value('Timesheet',t,'docstatus',1)
             data.append({"date": doc.date_of_timesheet, "timesheet": t})
         return data[0] if(len(data) > 0) else {"date": "", "timesheet": ""}
     except Exception as e:
@@ -107,10 +107,10 @@ def deny_timesheet(data, count):
             res = "reason"+str(c)
             if(tm in data.keys()):
                 doc = frappe.get_doc("Timesheet", {"name": data[tm]}, ignore_permissions=True)
-                doc.workflow_state = "Denied"
+                frappe.db.set_value('Timesheet',data[tm],'workflow_state',"Denied")
+                frappe.db.set_value('Timesheet',data[tm],'status',"Denied")
                 if(res in data.keys()):
-                    doc.dispute = data[res]
-                doc.save(ignore_permissions=True)
+                    frappe.db.set_value('Timesheet',data[tm],'dispute',data[res])
                 result.append({"date": doc.date_of_timesheet, "timesheet": doc.name})
         return result[0] if(len(result) > 0) else {"date": "", "timesheet": ""}
     except Exception as e:

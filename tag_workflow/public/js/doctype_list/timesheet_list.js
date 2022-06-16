@@ -18,7 +18,6 @@ frappe.listview_settings['Timesheet'] = {
 
 	formatters: {
 		total_hours(val,d,f){
-			console.log(val);
 			if(typeof(val)=="number"){
 				val=((val).toFixed(2));
 			}
