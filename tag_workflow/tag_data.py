@@ -152,18 +152,17 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
 
 
 @frappe.whitelist(allow_guest=False)
-def receive_hiring_notification(user, company_type, hiring_org, job_order, staffing_org, emp_detail, doc_name, no_of_worker_req, is_single_share, job_title,employee_filled):
+def receive_hiring_notification(user, company_type, hiring_org, job_order, staffing_org, emp_detail, doc_name, no_of_worker_req, is_single_share, job_title,employee_filled,notification_check):
     try:
         if(company_type == "Staffing" and user == frappe.session.user):
-            update_values=frappe.db.sql(''' select data from `tabVersion` where docname='{}' '''.format(doc_name),as_list=1)
-            if(len(update_values)<2):
+            if int(notification_check)==0:
                 bid_receive=frappe.get_doc(jobOrder,job_order)
 
             if int(is_single_share):
                 check_partial_employee(bid_receive,staffing_org,emp_detail,no_of_worker_req,job_title,hiring_org,doc_name)
                 return
 
-            bid_receive.bid=1+int(bid_receive.bid)
+            bid_receive.bid=1+int(bid_receive.bid)  
             if(bid_receive.claim is None):
                 bid_receive.claim=staffing_org
                 chat_room_created(hiring_org,staffing_org,job_order)
@@ -187,9 +186,10 @@ def receive_hiring_notification(user, company_type, hiring_org, job_order, staff
                 add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)
             sub="Employee Assigned"
             msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}'
-            frappe.enqueue(make_system_notification,now=True,users=l,message=msg,doctype='Assign Employee',docname=doc_name,subject=sub)
+            frappe.enqueue(make_system_notification,now=True,users=l,message=msg,doctype=assignEmployees,docname=doc_name,subject=sub)
             msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim .'
             link =  f'  href="/app/assign-employee/{doc_name}" '
+            frappe.db.set_value(assignEmployees, doc_name, 'notification_check', 1)
             return frappe.enqueue(joborder_email_template,now=True,sub=sub, msg=msg, l=l, link=link)
         else:
             return NOASS

@@ -34,7 +34,8 @@
   "is_single_share",
   "approve_employee_notification",
   "view_contract",
-  "previous_worker"
+  "previous_worker",
+  "notification_check"
  ],
  "fields": [
   {
@@ -229,6 +230,13 @@
    "label": "Items",
    "options": "Replaced Employee",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "notification_check",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Notification Check"
   }
  ],
  "index_web_pages_for_search": 1,
