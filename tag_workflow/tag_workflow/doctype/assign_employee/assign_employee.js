@@ -211,7 +211,7 @@ function check_employee_data(frm){
 	let msg = [];
 	let table = frm.doc.employee_details || [];
 	let employees = [];
-
+	let assigned = 0;
 	
 	if(frm.doc.resume_required==1){
 		resume_data(msg,table)
@@ -222,7 +222,11 @@ function check_employee_data(frm){
 	}
 	company_check(frm,table,msg)
 
-	for(let e in table){(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg.push('Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details');}
+	for(let e in table){
+		(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg.push('Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details');
+		assigned += (table[e].approved == 1)?1:0;
+	}
+	if(assigned == 0  && frm.doc.__islocal!=1){ msg.push('Please select an employee to assign.'); }
 	if(msg.length){frappe.msgprint({message: msg.join("<br>"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
 }
 
