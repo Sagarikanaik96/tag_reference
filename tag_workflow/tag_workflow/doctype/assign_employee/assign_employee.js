@@ -31,7 +31,6 @@ frappe.ui.form.on('Assign Employee', {
 		worker_notification(frm)
 		render_table(frm);
 		approved_employee(frm);
-		hide_resume(frm);
 		back_job_order_form(frm);
 		document_download()
 
@@ -50,9 +49,6 @@ frappe.ui.form.on('Assign Employee', {
 	    })
 		child_table_label();
 
-		add_employee_row(frm);
-		old_unknown_function(frm);
-
 	},
 	e_signature_full_name:function(frm){
 		if(frm.doc.e_signature_full_name){
@@ -64,6 +60,11 @@ frappe.ui.form.on('Assign Employee', {
 			}
 		}
 
+	},
+
+	onload_post_render: function(frm){
+		add_employee_row(frm);
+		old_unknown_function(frm);
 	},
 
 	onload:function(frm){
@@ -302,14 +303,16 @@ function approved_employee(frm){
 }
 
 function hide_resume(frm){
-	if ((frm.doc.resume_required && frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.tag_status!='Approved') || !frm.doc.resume_required){
+	if ((frm.doc.resume_required && frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.tag_status!='Approved')){
         let table=frappe.meta.get_docfield("Assign Employee Details", "approved",frm.doc.name);
         table.hidden=1;
         frm.refresh_fields();
     }
 	if (!frm.doc.resume_required){
-		let table=frappe.meta.get_docfield("Assign Employee Details", "resume",frm.doc.name);
-		table.hidden=1;
+		let resume=frappe.meta.get_docfield("Assign Employee Details", "resume",frm.doc.name);
+		resume.hidden=1;
+		let approved=frappe.meta.get_docfield("Assign Employee Details", "approved",frm.doc.name);
+		approved.hidden=1;
 		frm.refresh_fields();
 		if(frm.doc.job_order){
 			frappe.call({
