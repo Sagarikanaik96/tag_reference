@@ -1139,11 +1139,11 @@ def job_industry_type_add(company,user_industry):
     for i in new_industry.industry_type:
         if(i.industry_type == user_industry):
             break
-        else:
-            new_industry.append('industry_type',{
-                'industry_type':user_industry
-            })
-            new_industry.save(ignore_permissions=True)
+    else:
+        new_industry.append('industry_type',{
+            'industry_type':user_industry
+        })
+        new_industry.save(ignore_permissions=True)
 @frappe.whitelist()
 def new_activity(activity):
     if not frappe.db.exists("Activity Type", {"name":activity}):
