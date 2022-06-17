@@ -725,7 +725,7 @@ from frappe.desk.search import search_widget, build_for_autosuggest
 def search_link(doctype, txt, query=None, filters=None, page_length=100, searchfield=None, reference_doctype=None, ignore_user_permissions=False):
     search_widget(doctype, txt.strip(), query, searchfield=searchfield, page_length=page_length, filters=filters, reference_doctype=reference_doctype, ignore_user_permissions=ignore_user_permissions)
     temp = build_for_autosuggest(frappe.response["values"])
-    if temp[0]['value']=='Monday':
+    if temp and temp[0]['value']=='Monday':
         frappe.response['results']=temp
     else:
         frappe.response['results'] = sorted(temp, key=lambda d: d['value'].lower())
