@@ -563,7 +563,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.availability==\"Custom\"",
+   "depends_on": "eval:doc.availability==\"Custom\" && doc.__islocal!=1",
    "fieldname": "selected_days",
    "fieldtype": "Data",
    "label": "Selected Days",
@@ -655,7 +655,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-15 02:40:58.496572",
+ "modified": "2022-06-17 00:58:08.098064",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

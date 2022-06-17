@@ -138,6 +138,7 @@ frappe.ui.form.on("Job Order", {
 			$( ".control-input.form-control.table-multiselect" ).on('mouseover',function() {
 				$(this).attr('title', '');
 			});
+			set_custom_days(frm)
 		}
 	},
 	refresh: function(frm) {
@@ -236,6 +237,7 @@ frappe.ui.form.on("Job Order", {
 			set_custom_base_price(frm)
 			rate_hour_contract_change(frm);
 			if (frappe.validated) {
+				frm.set_df_property('select_days','reqd',0)
 				return new Promise(function(resolve, reject) {
 					let profile_html;
 					if(frm.doc.contact_number){
@@ -438,32 +440,19 @@ frappe.ui.form.on("Job Order", {
 				frm.set_value("no_of_workers", r["no_of_workers"]);
 			});
 		}
+		if(frm.doc.availability=='Custom'){
+			let selected_my_days=frm.doc.selected_days
+			if(frm.doc.selected_days===undefined || selected_my_days.length==0){
+				message = message + "<br>Select Days";
+				frm.set_df_property('select_days','reqd',1)	
+			}
+		}
 
 		if (message != "<b>Please Fill Mandatory Fields:</b>") {
 			frappe.msgprint({message: __(message), title: __("Error"), indicator: "orange",});
 			frappe.validated = false;
 		}
-
-		let email = frm.doc.email;
-		if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))) {
-			frappe.msgprint({
-				message: __("Not A Valid Email"),
-				indicator: "red"
-			});
-			frappe.validated = false;
-		}
-
-		let phone = frm.doc.phone_number;
-		if (phone) {
-			if(!validate_phone(phone)){
-				frappe.msgprint({message: __("Invalid Phone Number!"),indicator: "red"});
-				frappe.validated = false;
-			}
-			else{
-				frm.set_value('phone_number', validate_phone(phone));
-			}
-		}
-		custom_availability_mandatory(frm)
+		validate_email_number(frm)
 	},
 
 	drug_screen: (frm) => {
@@ -1794,13 +1783,24 @@ function set_custom_days(frm){
 	}	
 	frm.set_value("selected_days",selected.slice(0, -2))
 }
-function custom_availability_mandatory(frm){
-	if(frm.doc.availability=='Custom'){
-		if(frm.doc.selected_days===undefined){
-			let message="<b>Please Fill Mandatory Fields:</b><br>Select Days"
-			frappe.msgprint({message: __(message), title: __("Error"), indicator: "orange",});
-			frappe.validated = false;
 
+function validate_email_number(frm){
+	let email = frm.doc.email;
+		if (email && (email.length > 120 || !frappe.utils.validate_type(email, "email"))) {
+			frappe.msgprint({
+				message: __("Not A Valid Email"),
+				indicator: "red"
+			});
+			frappe.validated = false;
 		}
-	}
+		let phone = frm.doc.phone_number;
+		if (phone) {
+			if(!validate_phone(phone)){
+				frappe.msgprint({message: __("Invalid Phone Number!"),indicator: "red"});
+				frappe.validated = false;
+			}
+			else{
+				frm.set_value('phone_number', validate_phone(phone));
+			}
+		}
 }
