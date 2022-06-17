@@ -24,7 +24,6 @@ frappe.ui.form.on('Claim Order', {
 
 		let message = "<b>Please Fill Mandatory Fields:</b>";
 		for (let k in l) {
-			console.log(cur_frm.doc.agree_to_contract, "contract")
 			if (l[k] === undefined || !l[k] || l[k]==0) {
 				message = message + "<br>" + k;
 			}

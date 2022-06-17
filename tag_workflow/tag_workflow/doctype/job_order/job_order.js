@@ -1483,7 +1483,7 @@ function claim_order_button(frm) {
 	if(frm.doc.__islocal != 1 && frm.doc.no_of_workers != frm.doc.worker_filled){
 		frappe.call({
 			"method": "tag_workflow.tag_data.claim_order_company",
-			"args": {"user_name": frappe.session.user, "claimed": cur_frm.doc.staff_org_claimed || ""},
+			"args": {"user_name": frappe.session.user, "claimed": cur_frm.doc.claim || ""},
 			"callback": function(r){
 				if(r.message == "unsuccess"){
 					cur_frm.add_custom_button(__('Claim Order'), function(){

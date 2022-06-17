@@ -25,14 +25,14 @@ def staffing_claim_joborder(job_order,hiring_org, staffing_org, doc_name,single_
 
 		bid_receive=frappe.get_doc(jobOrder,job_order)
 
-		bid_receive.bid=1+int(bid_receive.bid)
-
 		if(bid_receive.claim is None):
+			bid_receive.bid=1+int(bid_receive.bid)
 			bid_receive.claim=staffing_org
 			chat_room_created(hiring_org,staffing_org,job_order)
 
 		else:
 			if(staffing_org not in bid_receive.claim):
+				bid_receive.bid=1+int(bid_receive.bid)
 				bid_receive.claim=str(bid_receive.claim)+str(",")+staffing_org
 				chat_room_created(hiring_org,staffing_org,job_order)
 
