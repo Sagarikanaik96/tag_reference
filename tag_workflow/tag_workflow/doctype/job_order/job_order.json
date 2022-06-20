@@ -7,6 +7,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_break_8",
+  "time_remaining_for_make_edits",
+  "hiring_section_break",
+  "hiring_html",
   "section_break_html1",
   "html_2",
   "section_break_html2",
@@ -16,8 +20,6 @@
   "messages",
   "timesheets",
   "invoices",
-  "section_break_8",
-  "time_remaining_for_make_edits",
   "section_break_3",
   "company",
   "naming_series",
@@ -464,7 +466,7 @@
   {
    "fieldname": "html_2",
    "fieldtype": "HTML",
-   "options": "<h3>You have submitted a claim for this order</h3>"
+   "options": "<h3>Your company has submitted a claim for this order.</h3>"
   },
   {
    "fieldname": "related_actions_section",
@@ -603,7 +605,7 @@
   {
    "fieldname": "html_3",
    "fieldtype": "HTML",
-   "options": "<h3>Your claim has been approved</h3>"
+   "options": "<h3>Your company\\u2019s claim has been approved. Please assign employees.</h3>"
   },
   {
    "fieldname": "section_break_83",
@@ -651,11 +653,20 @@
    "fieldtype": "Check",
    "label": "Is Direct",
    "read_only": 1
+  },
+  {
+   "fieldname": "hiring_section_break",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "hiring_html",
+   "fieldtype": "HTML"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-17 00:58:08.098064",
+ "modified": "2022-06-19 12:02:25.675827",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

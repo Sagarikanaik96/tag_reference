@@ -142,6 +142,7 @@ frappe.ui.form.on("Job Order", {
 		}
 	},
 	refresh: function(frm) {
+		
 		update_order_status(frm)
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
@@ -167,7 +168,10 @@ frappe.ui.form.on("Job Order", {
 			hide_unnecessary_data(frm);
 		}
 		cancel_job_order_deatils(frm);
+		update_section(frm);
 		deny_job_order(frm);
+		hiring_sections(frm);
+
 
 		$(document).on('click', '[data-fieldname="company"]', function(){
 			companyhide(3000)
@@ -584,6 +588,9 @@ function set_read_fields(frm){
 	}
 }
 function timer_value(frm) {
+	if(frm.doc.bid>0){
+		frm.toggle_display('section_break_8', 0)
+	}
 	if(frm.doc.order_status=='Completed'){
 		frm.toggle_display('section_break_8', 0)
 		let myStringArray = ["company", "posting_date_time", "from_date", "to_date", "category", "order_status", "resumes_required", "require_staff_to_wear_face_mask", "select_job", "job_title", "job_site", "rate", "description", "no_of_workers", "job_order_duration", "extra_price_increase", "extra_notes", "drug_screen", "background_check", "driving_record", "shovel", "phone_number", "estimated_hours_per_day", "address", "e_signature_full_name", "agree_to_contract", "age_reqiured", "per_hour", "flat_rate", "email",'job_start_time'];
@@ -592,7 +599,7 @@ function timer_value(frm) {
 			frm.set_df_property(myStringArray[i], "read_only", 1);
 		}
 		frm.set_df_property("time_remaining_for_make_edits", "options", " ");
-	}else if(frm.doc.order_status == "Upcoming"){
+	}else if(frm.doc.order_status == "Upcoming" || frm.doc.order_status=='Ongoing'){
 		set_read_fields(frm);
 		time_value(frm);
 		setTimeout(function() {
@@ -614,12 +621,17 @@ function time_value(frm){
 	let entry_date = new Date(frappe.datetime.now_datetime().split(" ")[0]);
 	let exit_date = new Date(cur_frm.doc.from_date.split(" ")[0]);
 	let diffTime = Math.abs(exit_date - entry_date);
-	if(exit_date-entry_date>0){
+	if(exit_date-entry_date>0 || exit_date-entry_date==0 ){
 		let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 		let x = parseInt(diffDays * (24 * 60) + totalMinsOfExit - totalMinsOfEntry);
-		let data1 = Math.floor(x / 24 / 60) + " Days:" + Math.floor((x / 60) % 24) + " Hours:" + (x % 60) + " Minutes";
-		let data = `<p><b>Time Remaining for Job Order Start: </b> ${[data1]}</p>`;
-		frm.set_df_property("time_remaining_for_make_edits", "options", data);
+		if(x>0){
+			let data1 = Math.floor(x / 24 / 60) + " Days:" + Math.floor((x / 60) % 24) + " Hours:" + (x % 60) + " Minutes";
+			let data = `<p><b>Time Remaining for Job Order Start: </b> ${[data1]}</p>`;
+			frm.set_df_property("time_remaining_for_make_edits", "options", data);
+		}
+		else{
+			frm.set_df_property("time_remaining_for_make_edits", "hidden", 1);
+		}	
 	}
 	else{
 		frm.set_df_property("time_remaining_for_make_edits", "hidden", 1);
@@ -1803,4 +1815,86 @@ function validate_email_number(frm){
 				frm.set_value('phone_number', validate_phone(phone));
 			}
 		}
+}
+
+// updating job order status messages for staffing side.
+function update_section(frm){
+	if(frm.doc.__islocal!=1){
+		frappe.call({
+			method: "tag_workflow.tag_data.update_section_status",
+			args: {company: frappe.boot.tag.tag_user_info.company, jo: frm.doc.name},
+			callback: function(r) {
+				if(r.message){
+					if(r.message=="Complete"){
+						cur_frm.set_df_property('html_3','options',"<h3>Job Order Closed.</h3>")
+					}
+					else if(r.message=="Approved"){
+						cur_frm.set_df_property('html_3','options',"<h3>Please submit an invoice to complete the order.</h3>")
+					}
+					else if(r.message== "Approval Request"){
+						cur_frm.set_df_property('html_3','options',"<h3>Timesheet available for approval.</h3>")
+					}
+				}
+			}
+		})
+	}
+}
+
+
+
+// updating job order status messages for hiring side.
+function hiring_sections(frm){
+	if (frm.doc.__islocal!=1 && (frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type=='Exclusive Hiring')){
+		frappe.call({
+			method:'tag_workflow.tag_workflow.doctype.job_order.job_order.hiring_diff_status',
+			args:{
+				'job_order_name':frm.doc.name,
+			},
+			callback:function(r){
+				if(r.message){
+					if(r.message=='Completed'){
+						frm.toggle_display('hiring_section_break', 1)
+						cur_frm.set_df_property('hiring_html','options','<h3>Job Order Closed</h3>')
+					}
+					else if(r.message=='Invoice'){
+						frm.toggle_display('hiring_section_break', 1)
+						cur_frm.set_df_property('hiring_html','options','<h3>Please review invoice.</h3>')
+					}
+					else if(r.message=='Timesheet'){
+						frm.toggle_display('hiring_section_break', 1)
+						cur_frm.set_df_property('hiring_html','options','<h3>Timesheets require review</h3>')
+					}
+				}
+				else{
+					hiring_review_box(frm)
+					
+				}
+			}
+		})
+		
+		
+		
+	}
+}
+function hiring_review_box(frm){
+	if(frm.doc.staff_org_claimed){
+		frappe.db.get_value("Assign Employee", { job_order: frm.doc.name},"name", function(r1){
+			if(r1.name){
+				frm.toggle_display('hiring_section_break', 1)
+				cur_frm.set_df_property('hiring_html','options','<h3>Employees have been assigned. Please submit their timesheets.</h3>')
+				
+			}
+			else{
+				if(frm.doc.bid>0){
+					frm.toggle_display('hiring_section_break', 1)
+					cur_frm.set_df_property('hiring_html','options','<h3>Please review submitted claims.</h3>')
+				}
+			}
+		});
+
+	}
+	else if(frm.doc.bid>0){
+		cur_frm.toggle_display('hiring_section_break', 1)
+		cur_frm.set_df_property('hiring_html','options',"<h3>Please review submitted claims.</h3>")
+	}
 }

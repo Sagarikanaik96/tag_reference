@@ -251,16 +251,16 @@ class Importer:
         elif self.import_type == UPDATE:
             return self.update_record(doc)
 
-    def insert_record(self, doc):
+    def insert_record(self, docs):
         try:
             name = 'No Name'
-            keys = doc.keys()
-            if(frappe.db.exists("Company", doc.company) and "first_name" in keys and "last_name" in keys and "email" in keys and "status" in keys):
-                if(doc.first_name and doc.last_name and doc.email and doc.status):
+            keys = docs.keys()
+            if(frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) == True and frappe.db.exists("Company", docs.company) and "first_name" in keys and "last_name" in keys and "email" in keys and "status" in keys):
+                if(docs.first_name and docs.last_name and docs.email and docs.status):
                     name = "HR-EMP-"+str(self.emp_series)
-                    lat, lng = self.update_emp_lat_lng(doc)
+                    lat, lng = self.update_emp_lat_lng(docs)
 
-                    self.sql += str(tuple([name, (doc.first_name + " " + doc.last_name), doc.first_name, doc.last_name, doc.email, doc.company, doc.status, doc.contact_number, doc.employee_gender, doc.sssn, doc.military_veteran, doc.street_address, doc.suite_or_apartment_no, doc.city, doc.state, doc.zip, lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
+                    self.sql += str(tuple([name, (docs.first_name + " " + docs.last_name), docs.first_name, docs.last_name, docs.email, docs.company, docs.status, docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, docs.street_address, docs.suite_or_apartment_no, docs.city, docs.state, docs.zip, lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
 
                     self.emp_series += 1
                     time.sleep(0.1)
@@ -272,6 +272,7 @@ class Importer:
         except Exception as e:
             frappe.log_error(e, "insert_record")
             return 'No Name', 'Failed'
+
 
     def update_emp_lat_lng(self, doc):
         try:
@@ -299,24 +300,24 @@ class Importer:
             frappe.log_error(e, "Longitude latitude address")
             return '', ''
 
-    def update_record(self, doc):
+    def update_record(self, docs):
         try:
-            self.check_emp_error(doc)
-            keys = doc.keys()
-            if("name" in keys and frappe.db.exists("Company", doc.company) and "first_name" in keys and "last_name" in keys and "email" in keys and "status" in keys):
-                if(doc.name and doc.first_name and doc.last_name and doc.email and doc.status):
-                    full_name = (doc.first_name + " " + doc.last_name)
-                    lat, lng = self.update_emp_lat_lng(doc)
-                    self.sql = """employee_name = '{0}', first_name = '{1}', last_name = '{2}', email = '{3}', company = '{4}', status = '{5}', contact_number = '{6}', employee_gender = '{7}', sssn = '{8}', military_veteran = {9}, street_address = '{10}', suite_or_apartment_no = '{11}', city = '{12}', state = '{13}', zip = '{14}', lat = '{15}', lng = '{16}', creation = '{17}' """.format(full_name, doc.first_name, doc.last_name, doc.email, doc.company, doc.status, doc.contact_number, doc.employee_gender, doc.sssn, doc.military_veteran, doc.street_address, doc.suite_or_apartment_no, doc.city, doc.state, doc.zip, lat, lng, frappe.utils.now())
+            self.check_emp_error(docs)
+            keys = docs.keys()
+            if(frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) == True and "name" in keys and frappe.db.exists("Company", docs.company) and "first_name" in keys and "last_name" in keys and "email" in keys and "status" in keys):
+                if(docs.name and docs.first_name and docs.last_name and docs.email and docs.status):
+                    full_name = (docs.first_name + " " + docs.last_name)
+                    lat, lng = self.update_emp_lat_lng(docs)
+                    self.sql = """employee_name = '{0}', first_name = '{1}', last_name = '{2}', email = '{3}', company = '{4}', status = '{5}', contact_number = '{6}', employee_gender = '{7}', sssn = '{8}', military_veteran = {9}, street_address = '{10}', suite_or_apartment_no = '{11}', city = '{12}', state = '{13}', zip = '{14}', lat = '{15}', lng = '{16}', creation = '{17}' """.format(full_name, docs.first_name, docs.last_name, docs.email, docs.company, docs.status, docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, docs.street_address, docs.suite_or_apartment_no, docs.city, docs.state, docs.zip, lat, lng, frappe.utils.now())
 
-                    sql = """update `tabEmployee` set {0} where name = '{1}'""".format(self.sql, doc.name)
+                    sql = """update `tabEmployee` set {0} where name = '{1}'""".format(self.sql, docs.name)
                     frappe.db.sql(sql)
                     frappe.db.commit()
-                    return doc.name, "Pass"
+                    return docs.name, "Pass"
                 else:
-                    return doc.name, "Falied"
+                    return docs.name, "Falied"
             else:
-                return doc.name, "Falied"
+                return docs.name, "Falied"
         except Exception as e:
             print(e)
             return '', 'Failed'

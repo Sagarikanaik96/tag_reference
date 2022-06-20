@@ -442,3 +442,24 @@ def claim_data_list(job_order_name=None,exist_comp=None):
     except Exception as e:
         print(e)
         return []
+
+@frappe.whitelist()
+def hiring_diff_status(job_order_name):
+    doc=frappe.get_doc('Job Order',job_order_name)
+    sql=f'select docstatus from `tabSales Invoice` where job_order="{job_order_name}"'
+    invoice_comp_data=frappe.db.sql(sql,as_list=1)
+    if(len(invoice_comp_data)>0 and doc.order_status=='Completed'):
+        for i in invoice_comp_data:
+            if i[0]==0:
+                break
+        else:
+            return 'Completed'
+
+    sql=f'select name from `tabSales Invoice` where job_order="{job_order_name}" and docstatus=1'
+    invoice_data=frappe.db.sql(sql,as_list=1)
+    if(len(invoice_data)>0):
+        return 'Invoice'
+    sql=f'select name from `tabTimesheet` where job_order_detail="{job_order_name}" and workflow_state="Denied" '
+    timesheet_data=frappe.db.sql(sql,as_list=1)
+    if(len(timesheet_data)>0):
+        return 'Timesheet'
