@@ -1178,6 +1178,11 @@ select.input-with-feedback.form-control.ellipsis {
 .text-extra-muted.comment-count {
   display: none !important;
 }
+
+span.comment-count{
+  display: none !important;
+}
+
 [data-fieldname="hiring_html"] h3 {
   font-size: 14px;
   margin: -5px 0 0 0;
