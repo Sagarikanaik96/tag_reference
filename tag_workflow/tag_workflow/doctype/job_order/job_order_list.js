@@ -262,7 +262,7 @@ frappe.listview_settings['Job Order'] = {
 }
 
 frappe.views.BaseList.prototype.prepare_data = function(r) {
-  this.page_length = 500;
+  this.page_length = 20;
   let data = r.message || {};
   data = !Array.isArray(data) ?
       frappe.utils.dict(data.keys, data.values) :
