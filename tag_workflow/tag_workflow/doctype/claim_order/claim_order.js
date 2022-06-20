@@ -20,7 +20,7 @@ frappe.ui.form.on('Claim Order', {
 		frm.set_value('approved_no_of_workers',0)
 	},
 	validate: function(frm) {
-		let l = {"Job Order": frm.doc.job_order, "Staffing Organization": frm.doc.staffing_organization, "E Signature": frm.doc.e_signature, "Agree To Contract": cur_frm.doc.agree_to_contract};
+		let l = {"Job Order": frm.doc.job_order, "Staffing Organization": frm.doc.staffing_organization, "E Signature": frm.doc.e_signature, "Agree To Contract": cur_frm.doc.agree_to_contract, "Claim no. of Workers":cur_frm.doc.staff_claims_no};
 
 		let message = "<b>Please Fill Mandatory Fields:</b>";
 		for (let k in l) {
@@ -38,6 +38,10 @@ frappe.ui.form.on('Claim Order', {
 		let claim_no = frm.doc.staff_claims_no
 		if(claim_no > no_of_worker){
 			frappe.msgprint(__("Claims Is Not Greater Than No Of Workers Required"));
+            frappe.validated = false;
+		}
+		else if(claim_no <1){
+			frappe.msgprint(__("Claim no. of workers must be greater than 0"));
             frappe.validated = false;
 		}
 	},
