@@ -137,13 +137,13 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
             lst_sql = """ select user_id from `tabEmployee` where company = '{0}' and user_id IS NOT NULL""".format(staffing_org)
             user_list = frappe.db.sql(lst_sql, as_dict=1)
             users = [usr['user_id'] for usr in user_list]
-            enqueue(make_system_notification,users=users,message=msg,doctype=jobOrder,docname=job_name,subject=sub)   
-            enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name)
+            enqueue(make_system_notification,users=users,message=msg,doctype=jobOrder,docname=job_name,subject=sub, now= True)   
+            enqueue("tag_workflow.tag_data.assign_employee_data", hiringorg=hiringorg, name=name, now=True)
 
             sql = """ UPDATE `tabAssign Employee` SET approve_employee_notification = 0 where name="{0}" """.format(name)
             frappe.db.sql(sql)
             frappe.db.commit()
-            enqueue(sendmail,emails=users, message=msg,subject= sub, doctype=assignEmployees, docname=name)
+            enqueue(sendmail,emails=users, message=msg,subject= sub, doctype=assignEmployees, docname=name, now=True)
             return []
         return []
     except Exception as e:
@@ -254,16 +254,16 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
             sql = '''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org)
             org_type=frappe.db.sql(sql, as_list=1)
             if staff_company and org_type[0][0]=="Hiring":
-                enqueue(save_job_order_value,job_order=job_order,staff_company=staff_company)
+                enqueue(save_job_order_value,job_order=job_order,staff_company=staff_company, now=True)
                 staff_company=(staff_company.strip()).split(',')
                 for i in staff_company:
                     user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL'''.format(i.strip()),as_list=1)
                     l = [l[0] for l in user_list]
                     for user in l:
                         add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
-                    frappe.enqueue(single_job_order_notification,job_order_title=job_order_title,hiring_org=hiring_org,job_order=job_order,subject=subject,l=l,staff_company=i)
+                    frappe.enqueue(single_job_order_notification,job_order_title=job_order_title,hiring_org=hiring_org,job_order=job_order,subject=subject,l=l,staff_company=i, now=True)
             else:
-                frappe.enqueue(staff_email_notification_cont,hiring_org=hiring_org, job_order=job_order, job_order_title=job_order_title,doc=doc,subject=subject)
+                frappe.enqueue(staff_email_notification_cont,hiring_org=hiring_org, job_order=job_order, job_order_title=job_order_title,doc=doc,subject=subject, now=True)
     except Exception as e:
         print(e, frappe.get_traceback())
 
@@ -544,9 +544,9 @@ def email_recipient(doctype, txt, searchfield, page_len, start, filters):
 def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l,staff_company):
     try:
         msg=f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond.'
-        enqueue(make_system_notification,users=l,message=msg,doctype=jobOrder,docname=job_order,subject=subject)   
+        enqueue(make_system_notification,users=l,message=msg,doctype=jobOrder,docname=job_order,subject=subject, now= True)   
         message=f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
-        enqueue(send_email,subject=subject,message=message,emails=l)
+        enqueue(send_email,subject=subject,message=message,emails=l, now=True)
     except Exception as e:
         frappe.log_error(e, "Single Job Order Notification Error")
 
@@ -1203,7 +1203,7 @@ def get_update_password_user(key):
 @frappe.whitelist()
 def update_lat_lng(company):
     try:
-        frappe.enqueue("tag_workflow.tag_data.update_old_emp_lat_lng", queue='long', job_name=company, is_async=True, company=company)
+        frappe.enqueue("tag_workflow.tag_data.update_old_emp_lat_lng", queue='long', job_name=company, is_async=True, company=company, now=True)
     except Exception as e:
         frappe.msgprint(e)
 
