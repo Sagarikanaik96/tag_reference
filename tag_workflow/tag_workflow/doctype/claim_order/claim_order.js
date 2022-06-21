@@ -65,6 +65,7 @@ frappe.ui.form.on('Claim Order', {
 
 	},
 	refresh:function(frm){
+		setTimeout(save_hide,1200);
 		setTimeout(submit_hide,1000);
 		$('.form-footer').hide();
 		if(frm.doc.__islocal==1){
@@ -288,4 +289,9 @@ function hr(){
 			_field.href= '/app/dynamic_page';
 		});
 	}
+}
+
+function save_hide(){
+	$('[data-label="Save"]').hide();
+	$('[data-label="View"]').hide();
 }
