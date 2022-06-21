@@ -61,6 +61,7 @@ frappe.ui.form.on("Sales Invoice", {
 			});
 		}
 		$('[data-label="Save"]').show();
+        sync_with_quickbook(frm);
 	},
 	on_submit: function(frm) {
 		if(frm.doc.docstatus ==1){
@@ -174,7 +175,7 @@ function update_payment(frm){
 
 
 function go_joborder_list(frm){
-	frm.add_custom_button(__('Go Job Order List'), function(){
+	frm.add_custom_button(__('Go To Job Order List'), function(){
 		frappe.set_route("List", "Job Order")
 	}).addClass("btn-primary");
 }
@@ -191,4 +192,39 @@ function cancel_salesinvoice(frm){
 	frm.add_custom_button(__('Cancel'), function(){
 		frappe.set_route("Form", "Sales Invoice");
 	});
+}
+
+
+/*--------------------QuickBooks Export------------------*/
+function sync_with_quickbook(frm){
+        let roles = frappe.user_roles || [];
+        if(frm.doc.docstatus == 1 && ((roles.includes("Staffing User") || roles.includes("Staffing Admin")) || (roles.includes("Tag User") || roles.includes("Tag Admin")))){
+                frm.add_custom_button(__("Export to QuickBooks"), function () {
+                        frappe.call({
+                                "method": "tag_workflow.utils.quickbooks.auth_quickbook_and_sync",
+                                "args": {"company": frm.doc.company, "invoice": frm.doc.name},
+                                freeze: true,
+                                freeze_message: "<p><b>Exporting to QuickBooks...</b></p>",
+                                "callback": function(r){
+                                        let data = r.message;
+                                        if(data.authorization_url){
+                                                frappe.msgprint("Please Authenticate yourself before Migrating Data to Quickbook. We are now redirecting you to the Authentication page");
+                                                sleep(1000).then(() => {
+                                                        window.open(data.authorization_url);
+                                                });
+                                        }else if(data.invoice_id){
+                                                frappe.msgprint("Invoice <b>"+frm.doc.name+"</b> successfully exported to QuickBooks.");
+                                                cur_frm.reload_doc();
+                                        }else if(data.error){
+                                                frappe.msgprint("Invoice <b>"+frm.doc.name+"</b> failed to export with the following error: "+data.error+".");
+                                        }
+                                }
+                        });
+                }).addClass("btn-primary");
+        }
+}
+
+// sleep time expects milliseconds
+function sleep (time) {
+        return new Promise((resolve) => setTimeout(resolve, time));
 }

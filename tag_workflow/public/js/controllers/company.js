@@ -1,5 +1,12 @@
 frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("Company", {
+    client_id: function(frm){
+        update_auth_url(frm);
+    },
+
+    client_secret: function(frm){
+        update_auth_url(frm);
+    },
 	refresh: function (frm){
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
@@ -706,4 +713,14 @@ function update_lat_lng(frm){
 			}
 		}).addClass("btn-primary");
 	}
+}
+
+
+/*-------------auth url------------*/
+function update_auth_url(frm){
+    let domain = frappe.urllib.get_base_url();
+    let redirect_url = `${domain}/api/method/tag_workflow.utils.quickbooks.callback`;
+    if(frm.doc.redirect_url != redirect_url){
+        frm.set_value("redirect_url", redirect_url);
+    }
 }

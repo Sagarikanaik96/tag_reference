@@ -1,2 +1,4 @@
 frappe
 googlemaps
+intuit-oauth
+python-quickbooks

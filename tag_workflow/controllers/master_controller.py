@@ -10,6 +10,7 @@ from frappe import _, msgprint, throw
 from tag_workflow.controllers import base_controller
 from frappe import enqueue
 from tag_workflow.utils.trigger_session import share_company_with_user
+from requests_oauthlib import OAuth2Session
 
 GROUP = "All Customer Groups"
 TERRITORY = "All Territories"
@@ -35,6 +36,11 @@ class MasterController(base_controller.BaseController):
             if not frappe.db.exists("Customer", {"name": self.doc.name}): 
                 customer = frappe.get_doc(dict(doctype="Customer", customer_name=self.doc.name, customer_type="Company", territory=TERRITORY, customer_group=GROUP))
                 customer.insert(ignore_permissions=True)
+
+            if not self.doc.authorization_url and self.doc.client_id and self.doc.redirect_url and self.doc.quickbooks_company_id:
+                self.oauth = OAuth2Session(client_id=self.doc.client_id, redirect_uri=self.doc.redirect_url, scope=self.doc.scope)
+                self.doc.authorization_url = self.oauth.authorization_url(self.doc.authorization_endpoint)[0]
+
         elif(self.dt == "User"):
             if(frappe.session.user not in STANDARD and (not self.doc.tag_user_type or not self.doc.organization_type)):
                 frappe.msgprint(_("Please select <b>Organization Type</b> and <b>TAG User Type</b> before saving the User."))
