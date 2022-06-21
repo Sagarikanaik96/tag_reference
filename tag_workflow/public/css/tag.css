@@ -1052,19 +1052,49 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-col:nth-child(4) {
   flex: 2;
 }
-[data-page-route="List/Contact/List"]
+[data-page-route="List/Lead/List"]
   .frappe-card
   header
   .level-left
-  .list-row-col:nth-child(5) {
+  .list-row-col:nth-child(6) {
+  flex: 2;
+}
+[data-page-route="List/Lead/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(6) {
   flex: 2;
 }
 [data-page-route="List/Contact/List"]
   .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(5),
+[data-page-route="List/Job Order/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(8) {
+  flex: 2;
+}
+
+[data-page-route="List/Contact/List"]
+  .frappe-card
   .list-row-container
   .level-left
-  .list-row-col:nth-child(5) {
+  .list-row-col:nth-child(5),
+[data-page-route="List/Job Order/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(8) {
   flex: 2;
+}
+
+.list-row .level-right,
+.list-row-head .level-right {
+  flex: 0.5;
 }
 
 /*------ Media query start ----*/
@@ -1229,7 +1259,7 @@ select.input-with-feedback.form-control.ellipsis {
   display: none !important;
 }
 
-span.comment-count{
+span.comment-count {
   display: none !important;
 }
 
