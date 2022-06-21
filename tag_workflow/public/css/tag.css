@@ -1016,6 +1016,56 @@ select.input-with-feedback.form-control.ellipsis {
   right: 17px;
   top: 6px;
 }
+[data-page-route="List/Employee/List"]
+  .frappe-card
+  .frappe-list
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(3) {
+  flex: 2;
+}
+[data-page-route="List/Employee/List"]
+  .frappe-card
+  .frappe-list
+  header
+  .level-left
+  .list-row-col:nth-child(3) {
+  flex: 2;
+}
+.frappe-card .list-row-container .ellipsis {
+  text-align: center;
+  white-space: unset;
+  text-overflow: inherit;
+  word-break: break-all;
+}
+[data-page-route="List/Lead/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(4) {
+  flex: 2;
+}
+[data-page-route="List/Lead/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(4) {
+  flex: 2;
+}
+[data-page-route="List/Contact/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(5) {
+  flex: 2;
+}
+[data-page-route="List/Contact/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(5) {
+  flex: 2;
+}
 
 /*------ Media query start ----*/
 @media (max-width: 1300px) {
