@@ -436,7 +436,11 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 	break_start_time:function(frm,cdt,cdn){
 		let child=locals[cdt][cdn];
-		if((child.break_start_time).slice(0,10)<((child.from_time).slice(0,10))){
+		if(child.break_start_time === undefined || child.break_end_time === undefined){
+			setTimeout(() => {
+				make_break_zero(child);
+			},1000);
+		}else if((child.break_start_time).slice(0,10)<((child.from_time).slice(0,10))){
 			setTimeout(() => {
 				frappe.model.set_value(cdt, cdn, "break_start_time", window.start);
 				frappe.msgprint('break start date  before Job Order Start Date');
@@ -448,11 +452,16 @@ frappe.ui.form.on("Timesheet Detail", {
 			},1000);
 		}
 
+
 		update_time(frm,cdt,cdn)
 	},
 	break_end_time:function(frm,cdt,cdn){
 		let child=locals[cdt][cdn];
-		if((child.break_end_time).slice(0,10)<((child.break_start_time).slice(0,10))){
+		if(child.break_start_time === undefined || child.break_end_time === undefined){
+			setTimeout(() => {
+				make_break_zero(child);
+			},1000);
+		}else if((child.break_end_time).slice(0,10)<((child.break_start_time).slice(0,10))){
 			setTimeout(() => {
 				frappe.model.set_value(cdt, cdn, "break_start_time", window.end);
 				frappe.msgprint('break end date  before break start date');
@@ -482,6 +491,11 @@ function cancel_timesheet(frm){
 	});
 }
 
+function make_break_zero(child){
+	child.break_start_time = "";
+	child.break_end_time = "";
+
+}
 
 /*-----------------------------------*/
 function update_child_amount(frm){
