@@ -41,7 +41,7 @@ frappe.ui.form.on('Add Timesheet', {
 		}
 		setTimeout(status_field,1000);
 		update_title(frm);
-
+		sort_employees(frm);
 	},
 
 	job_order: function(frm){
@@ -80,6 +80,9 @@ frappe.ui.form.on('Add Timesheet', {
 
 	break_to_time: function(frm){
 		update_time(frm);
+	},
+	onload_post_render: function(frm){
+		sort_employees(frm);
 	}
 });
 
@@ -195,6 +198,7 @@ frappe.ui.form.on("Timesheet Item", {
 		let child = frappe.get_doc(cdt, cdn);
 		add_pre_data(child, frm);
         check_replaced_emp(child, frm);
+		sort_employees(frm);
 	}
 });
 
@@ -433,4 +437,30 @@ function check_availability(r,frm){
 			frm.set_value("date", "");
 		}
 	}
+}
+
+function sort_employees(frm){
+	let idx = 1;
+	frm.doc.items.sort(function(a,b){
+		if(a.company && b.company){
+			if(a.company.toLowerCase() < b.company.toLowerCase()){
+				return -1;
+			}
+			else if(a.company.toLowerCase() > b.company.toLowerCase()){
+				return 1;
+			}
+			else{
+				if(a.employee_name.toLowerCase() < b.employee_name.toLowerCase()){
+					return -1;
+				}
+				else if(a.employee_name.toLowerCase() > b.employee_name.toLowerCase()){
+					return 1;
+				}
+			}
+		}
+	});
+	frm.doc.items.map(function(item){
+		item.idx = idx++;
+	});
+	frm.refresh_field('items');
 }
