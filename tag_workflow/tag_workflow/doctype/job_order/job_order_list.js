@@ -261,20 +261,6 @@ frappe.listview_settings['Job Order'] = {
 	},
 }
 
-frappe.views.BaseList.prototype.prepare_data = function(r) {
-  this.page_length = 20;
-  let data = r.message || {};
-  data = !Array.isArray(data) ?
-      frappe.utils.dict(data.keys, data.values) :
-      data;
-
-  if (this.start === 0) {
-      this.data = data;
-  } else {
-      this.data = this.data.concat(data);
-  }	
-} 
-
 function get_company_job_order(){
 	let text='\n'
 
