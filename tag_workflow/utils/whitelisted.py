@@ -725,8 +725,14 @@ from frappe.desk.search import search_widget, build_for_autosuggest
 def search_link(doctype, txt, query=None, filters=None, page_length=100, searchfield=None, reference_doctype=None, ignore_user_permissions=False):
     search_widget(doctype, txt.strip(), query, searchfield=searchfield, page_length=page_length, filters=filters, reference_doctype=reference_doctype, ignore_user_permissions=ignore_user_permissions)
     temp = build_for_autosuggest(frappe.response["values"])
-    if temp and temp[0]['value']=='Monday' or reference_doctype == 'Assign Employee Details':
+    if temp and temp[0]['value']=='Monday':
         frappe.response['results']=temp
     else:
         frappe.response['results'] = sorted(temp, key=lambda d: d['value'].lower())
     del frappe.response["values"]
+
+@frappe.whitelist()
+def get_contract_prepared_by(contract_prepared_by):
+    sql1 = ''' select organization_type from `tabUser` where email='{}' '''.format(contract_prepared_by)
+    organization_type=frappe.db.sql(sql1, as_list=1)
+    return organization_type
