@@ -110,9 +110,6 @@ function check_date(frm){
 			frappe.msgprint("Date can't be future date.");
 			frm.set_value("date", "");
 		}else if(frm.doc.date >= frm.doc.from_date && frm.doc.date <= frm.doc.to_date){
-			frappe.db.get_value("Job Order", frm.doc.job_order, ["availability","selected_days"], function(r) {
-				check_availability(r,frm)
-			});
 			console.log("TAG");
 		}else{
 			frappe.msgprint("Date must be in between Job order start and end date");
