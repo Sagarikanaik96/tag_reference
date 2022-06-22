@@ -90,7 +90,7 @@ def approve_timesheets(timesheet, action):
         for t in timesheets:
             doc = frappe.get_doc("Timesheet", t)
             frappe.db.set_value('Timesheet',t,'workflow_state',action)
-            frappe.db.set_value('Timesheet',t,'status',action)
+            frappe.db.set_value('Timesheet',t,'status',"Submitted")
             frappe.db.set_value('Timesheet',t,'docstatus',1)
             approval_notification(job_order=doc.job_order_detail,staffing_company=doc.employee_company,date=None, hiring_company=doc.company, timesheet_name=doc.name, timesheet_approved_time=doc.modified, current_time=frappe.utils.now())
             data.append({"date": doc.date_of_timesheet, "timesheet": t})
