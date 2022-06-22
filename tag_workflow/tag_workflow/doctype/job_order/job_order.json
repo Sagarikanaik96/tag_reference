@@ -337,6 +337,7 @@
    "fieldname": "order_status",
    "fieldtype": "Select",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Order Status",
    "options": "\nCompleted\nOngoing\nUpcoming",
    "read_only": 1
@@ -678,7 +679,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-21 02:36:39.488669",
+ "modified": "2022-06-22 04:12:00.442405",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

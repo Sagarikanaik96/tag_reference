@@ -5,6 +5,7 @@ frappe.listview_settings['Job Order'] = {
 		$('.list-header-subject > div:nth-child(7) > span:nth-child(1)').html('Industry');
 		$('[data-fieldname="name"]').attr('placeholder','Order ID');
 		$('[data-fieldname="category"]').attr('placeholder','Industry');
+        $('[data-fieldname="order_status"]').hide();
 		if(frappe.session.user!='Administrator'){
 			$('.custom-actions.hidden-xs.hidden-md').hide();
 			$('[data-original-title="Refresh"]').hide();
@@ -57,6 +58,7 @@ frappe.listview_settings['Job Order'] = {
 		$('.custom-actions.hidden-xs.hidden-md').hide();
 		$('#navbar-breadcrumbs > li:nth-child(2) > a').html('Job Orders');
 		$('[data-original-title="Menu"]').hide();
+        $('[data-fieldname="order_status"]').hide();
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 			frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
 				if(r.name===undefined){
