@@ -317,6 +317,11 @@ frappe.ui.form.on("Job Order", {
 					job_order_title: cur_frm.doc.select_job,
 					staff_company: cur_frm.doc.staff_company,
 				},
+				callback:function(r){
+				    if(r.message==1){
+				        frappe.msgprint('Email Sent Successfully')
+				    }
+				}	
 			});
 		}
 

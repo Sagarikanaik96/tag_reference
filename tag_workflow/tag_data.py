@@ -73,7 +73,6 @@ def joborder_email_template(subject = None,content = None,recipients = None,link
         make(subject = subject, content=frappe.render_template("templates/emails/email_template_custom.html",
             {"sitename": sitename, "content":content,"subject":subject,"link":link}),
             recipients= recipients,send_email=True)
-        frappe.msgprint("Email Sent Successfully")
         return True
     except Exception as e:
         frappe.log_error(e, "Doc Share Error")
@@ -144,7 +143,7 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
             frappe.db.sql(sql)
             frappe.db.commit()
             enqueue(sendmail,emails=users, message=msg,subject= sub, doctype=assignEmployees, docname=name, now=True)
-            return []
+            return 1
         return []
     except Exception as e:
         frappe.db.rollback()
@@ -190,7 +189,8 @@ def receive_hiring_notification(user, company_type, hiring_org, job_order, staff
             msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim .'
             link =  f'  href="/app/assign-employee/{doc_name}" '
             frappe.db.set_value(assignEmployees, doc_name, 'notification_check', 1)
-            return frappe.enqueue(joborder_email_template,now=True,sub=sub, msg=msg, l=l, link=link)
+            frappe.enqueue(joborder_email_template,now=True,sub=sub, msg=msg, l=l, link=link)
+            return 1
         else:
             return NOASS
     except Exception as e:
@@ -262,8 +262,10 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
                     for user in l:
                         add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
                     frappe.enqueue(single_job_order_notification,job_order_title=job_order_title,hiring_org=hiring_org,job_order=job_order,subject=subject,l=l,staff_company=i, now=True)
+                    return 1
             else:
                 frappe.enqueue(staff_email_notification_cont,hiring_org=hiring_org, job_order=job_order, job_order_title=job_order_title,doc=doc,subject=subject, now=True)
+                return 1
     except Exception as e:
         print(e, frappe.get_traceback())
 
@@ -791,7 +793,8 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
             make_system_notification(l,msg,'Assign Employee',doc_name,sub)
             msg = f'{staffing_org} has assigned the Employees to the {job_detail[0]["select_job"]}'
             link =  f'  href="/app/assign-employee/{doc_name}" '
-            return joborder_email_template(sub, msg, l, link)
+            joborder_email_template(sub, msg, l, link)
+            return 1
         else:
             return "Something Went Access"
     except Exception as e:

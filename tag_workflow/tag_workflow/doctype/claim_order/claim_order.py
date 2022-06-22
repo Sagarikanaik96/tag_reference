@@ -53,7 +53,8 @@ def staffing_claim_joborder(job_order,hiring_org, staffing_org, doc_name,single_
 		make_system_notification(l,msg,claimOrder,doc_name,sub)
 		msg = f'{staffing_org} has submitted a claim for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim .'
 		link =  f'  href="/app/claim-order/{doc_name}" '
-		return joborder_email_template(sub,msg,l,link)
+		joborder_email_template(sub,msg,l,link)
+		return 1
 
 	except Exception as e:
 		frappe.msgprint(e)
@@ -92,6 +93,7 @@ def save_claims(my_data,doc_name):
 			make_system_notification(l,msg,claimOrder,doc.name,sub)
 			link =  f'  href="/app/claim-order/{doc.name}" '
 			joborder_email_template(sub,msg,l,link)
+		return 1
 	except Exception as e:
 		print(e, frappe.get_traceback())
 		frappe.db.rollback()
@@ -147,7 +149,7 @@ def save_modified_claims(my_data,doc_name):
 			make_system_notification(l,msg,claimOrder,doc.name,sub)
 			link =  f'  href="/app/claim-order/{doc.name}" '
 			joborder_email_template(sub,msg,l,link)
-		return "success"
+		return 1
 	except Exception as e:
 		print(e, frappe.get_traceback())
 		frappe.db.rollback()
@@ -183,6 +185,7 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 			make_system_notification(hiring_user_list,msg,claimOrder,doc_name,subject)
 			link =  f'  href="/app/claim-order/{doc_name}" '
 			joborder_email_template(subject,msg,hiring_user_list,link)
+			return 1
 		else:
 			if hiring_user_list:
 				subject = 'Job Order Notification'
@@ -193,6 +196,7 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 				make_system_notification(hiring_user_list,msg,claimOrder,doc_name,subject)
 				link =  f'  href="/app/claim-order/{doc_name}" '
 				joborder_email_template(subject,msg,hiring_user_list,link)
+				return 1
 	except Exception as e:
 		frappe.log_error(e, "Partial Job order Failed ")
 def assign_notification(share_list,hiring_user_list,doc_name,job_order):

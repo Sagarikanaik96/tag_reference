@@ -179,7 +179,10 @@ function staffing_claim_joborder(frm){
 		"freeze_message": "<p><b>preparing notification for Hiring orgs...</b></p>",
 		"args":{
 			"job_order" :frm.doc.job_order,"hiring_org" : frm.doc.hiring_organization,"staffing_org" : frm.doc.staffing_organization,"doc_name" : frm.doc.name,"single_share":frm.doc.single_share,'no_assigned':frm.doc.staff_claims_no,'no_required':frm.doc.no_of_workers_joborder},
-		callback:function(){
+		callback:function(r){
+			if(r.message==1){
+				frappe.msgprint('Email Sent Successfully')
+			}
 			if (frm.doc.single_share !=1){
 				setTimeout(function () {
 					window.location.href='/app/job-order/'+frm.doc.job_order

@@ -138,12 +138,14 @@ function refresh(listview){
                                             'my_data':dict.dict,
                                             'doc_name':listview.data[0].job_order
                                         },
-                                        callback:function(){
-                                            setTimeout(function () {
-                                                window.location.href='/app/job-order/'+listview.data[0].job_order
-                                            }, 3000);
-                                                frappe.show_alert({message:__('Notification send successfully'),indicator:'green'}, 5);	
-                                        }
+                                        callback:function(r1){
+                                            if(r1.message==1){
+                                                frappe.msgprint('Email Sent Successfully');	
+                                                setTimeout(function () {
+                                                    window.location.href='/app/job-order/'+listview.data[0].job_order
+                                                }, 3000);
+                                            }
+                                        }                 
                                     })
                                 }
                             }
@@ -269,12 +271,13 @@ function modify_claims(listview){
                                             'my_data':dict.dict,
                                             'doc_name':listview.data[0].job_order
                                         },
-                                        callback:function(){
-                                            setTimeout(function () {
-                                                window.location.href='/app/job-order/'+listview.data[0].job_order
-                                            }, 2000); 
-                                                frappe.show_alert({message:__('Notification send successfully'),indicator:'green'}, 5);	
-	
+                                        callback:function(r2){
+                                            if(r2.message==1){
+                                                frappe.msgprint('Email Sent Successfully');	
+                                                setTimeout(function () {
+                                                    window.location.href='/app/job-order/'+listview.data[0].job_order
+                                                }, 3000);
+                                            }
                                         }
                                     })
                                 }

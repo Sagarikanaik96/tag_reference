@@ -175,10 +175,8 @@ function make_hiring_notification(frm){
 						"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,
 						"notification_check":frm.doc.notification_check
 					},
-					callback:function(){
-						setTimeout(function () {
-							window.location.href='/app/job-order/'+frm.doc.job_order
-						}, 3000);
+					callback:function(r1){
+						pop_up_message(r1,frm)
 					}
 				});
 			}
@@ -293,6 +291,9 @@ function approved_employee(frm){
 					"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "sid": frappe.boot.tag.tag_user_info.sid,
 					"job_name" : cur_frm.doc.job_order, "employee_filled" : table_len,
 					"staffing_org" : cur_frm.doc.company, "hiringorg" : cur_frm.doc.hiring_organization, "name": frm.doc.name
+				},
+				callback:function(r){
+					pop_up_message(r,frm)
 				}
 			});
 		}
@@ -424,10 +425,8 @@ function make_notification_approved(frm){
 			"staffing_org" : cur_frm.doc.company, "emp_detail" : cur_frm.doc.employee_details, "doc_name" : cur_frm.doc.name,
 			"no_of_worker_req":frm.doc.no_of_employee_required,"is_single_share" :cur_frm.doc.is_single_share,"job_title":frm.doc.job_category,"worker_fill":count
 		},
-		callback:function(){
-			setTimeout(function () {
-				window.location.href='/app/job-order/'+frm.doc.job_order
-			}, 4000);
+		callback:function(r){
+			pop_up_message(r,frm)
 		}
 	});
 }
@@ -741,3 +740,11 @@ function update_table(dialog){
 	dialog.hide();
 }
 
+function pop_up_message(r,frm){
+	if(r.message==1){
+		frappe.msgprint('Email Sent Successfully');
+		setTimeout(function () {
+			window.location.href='/app/job-order/'+frm.doc.job_order
+		}, 3000);
+	}
+}
