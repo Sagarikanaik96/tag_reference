@@ -20,27 +20,15 @@ frappe.ui.form.on('Claim Order', {
 		frm.set_value('approved_no_of_workers',0)
 	},
 	validate: function(frm) {
-		let l = {"Job Order": frm.doc.job_order, "Staffing Organization": frm.doc.staffing_organization, "E Signature": frm.doc.e_signature, "Agree To Contract": cur_frm.doc.agree_to_contract, "Claim no. of Workers":cur_frm.doc.staff_claims_no};
-
-		let message = "<b>Please Fill Mandatory Fields:</b>";
-		for (let k in l) {
-			if (l[k] === undefined || !l[k] || l[k]==0) {
-				message = message + "<br>" + k;
-			}
-		}
-
-		if (message != "<b>Please Fill Mandatory Fields:</b>") {
-			frappe.msgprint({message: __(message), title: __("Missing Fields"), indicator: "orange",});
-			frappe.validated = false;
-		}
-
+		
+		mandatory_fn(frm);
 		let no_of_worker = frm.doc.no_of_workers_joborder
 		let claim_no = frm.doc.staff_claims_no
 		if(claim_no > no_of_worker){
 			frappe.msgprint(__("Claims Is Not Greater Than No Of Workers Required"));
             frappe.validated = false;
 		}
-		else if(claim_no <1){
+		else if(claim_no!= undefined && claim_no!= null && claim_no <1){
 			frappe.msgprint(__("Claim no. of workers must be greater than 0"));
             frappe.validated = false;
 		}
@@ -109,6 +97,7 @@ frappe.ui.form.on('Claim Order', {
 		setTimeout(hr,1000);
 		
 		frm.set_df_property('agree_to_contract','label','Agree To Contract <span style="color: red;">&#42;</span>');
+		frm.set_df_property('staff_claims_no','label','Claim no. of Workers <span style="color: red;">&#42;</span>');
 
 	},
 	setup:function(frm){
@@ -297,4 +286,28 @@ function hr(){
 function save_hide(){
 	$('[data-label="Save"]').hide();
 	$('[data-label="View"]').hide();
+}
+
+function mandatory_fn(frm){
+	let l = {"Job Order": frm.doc.job_order, "Staffing Organization": frm.doc.staffing_organization, "E Signature": frm.doc.e_signature, "Agree To Contract": cur_frm.doc.agree_to_contract, "Claim no. of Workers":cur_frm.doc.staff_claims_no};
+
+		let message = "<b>Please Fill Mandatory Fields:</b>";
+		for (let k in l) {
+			if(k == "Claim no. of Workers" ){
+				if (l[k] == undefined || l[k]==null) {
+					message = message + "<br>" + k;
+				}
+			}
+			else{
+				if (l[k] === undefined || !l[k]  || l[k]==0) {
+					message = message + "<br>" + k;
+				}	
+			}
+		}
+
+		if (message != "<b>Please Fill Mandatory Fields:</b>") {
+			frappe.msgprint({message: __(message), title: __("Missing Fields"), indicator: "orange",});
+			frappe.validated = false;
+		}
+
 }
