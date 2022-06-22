@@ -43,7 +43,8 @@ def get_access_token(comp):
         frappe.db.set_value("Company", comp.name, "refresh_token", token["refresh_token"])
         return token["access_token"]
     except Exception as e:
-        print(e, "get_access_token")
+        frappe.log_error(e, "get_access_token")
+        frappe.msgprint(e)
 
 
 
@@ -83,6 +84,7 @@ def check_customer(customer, client):
             cust.CompanyName = customer
             cust.GivenName = customer
             cust.save(qb=client)
+            return cust
         else:
             for c in customers:
                 return c
