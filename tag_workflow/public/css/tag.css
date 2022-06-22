@@ -1043,34 +1043,7 @@ select.input-with-feedback.form-control.ellipsis {
   text-overflow: inherit;
   word-break: break-all;
 }
-[data-page-route="List/Lead/List"]
-  .frappe-card
-  header
-  .level-left
-  .list-row-col:nth-child(4) {
-  flex: 2;
-}
-[data-page-route="List/Lead/List"]
-  .frappe-card
-  .list-row-container
-  .level-left
-  .list-row-col:nth-child(4) {
-  flex: 2;
-}
-[data-page-route="List/Lead/List"]
-  .frappe-card
-  header
-  .level-left
-  .list-row-col:nth-child(6) {
-  flex: 2;
-}
-[data-page-route="List/Lead/List"]
-  .frappe-card
-  .list-row-container
-  .level-left
-  .list-row-col:nth-child(6) {
-  flex: 2;
-}
+
 [data-page-route="List/Contact/List"]
   .frappe-card
   header
@@ -1080,7 +1053,27 @@ select.input-with-feedback.form-control.ellipsis {
   .frappe-card
   header
   .level-left
-  .list-row-col:nth-child(8) {
+  .list-row-col:nth-child(8),
+[data-page-route="List/Lead/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(6),
+[data-page-route="List/Lead/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(4),
+[data-page-route="List/Timesheet/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(4),
+[data-page-route="List/Item/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(7) {
   flex: 2;
 }
 
@@ -1093,13 +1086,57 @@ select.input-with-feedback.form-control.ellipsis {
   .frappe-card
   .list-row-container
   .level-left
-  .list-row-col:nth-child(8) {
+  .list-row-col:nth-child(8),
+[data-page-route="List/Lead/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(6),
+[data-page-route="List/Lead/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(4),
+[data-page-route="List/Timesheet/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(4),
+[data-page-route="List/Item/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(7) {
   flex: 2;
+}
+
+[data-page-route="List/Item/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(1) {
+  flex: 1;
+}
+
+[data-page-route="List/Item/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(1) {
+  flex: 1;
+}
+[data-page-route="List/Item/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(7) {
+  height: 43px;
+  overflow: auto;
 }
 
 .list-row .level-right,
 .list-row-head .level-right {
-  flex: 0.5;
+  flex: 0.3;
 }
 
 /*------ Media query start ----*/
