@@ -453,7 +453,6 @@ def update_job_order_status():
             if(type(start_date) is not str):
                 if start_date <= now_date <= end_date:
                     frappe.db.set_value(jobOrder, job.name, "order_status", "Ongoing")
-                    unshare_job_order(job)
                 elif  now_date < start_date:
                     frappe.db.set_value(jobOrder, job.name, "order_status", "Upcoming")
                 elif now_date > end_date:
@@ -1258,7 +1257,6 @@ def update_order_status(job_order_name):
             if(type(start) is not str):
                 if start <= current_date <= end:
                     frappe.db.set_value(jobOrder, each.name, "order_status", "Ongoing")
-                    unshare_job_order(each)
                 elif  current_date < start:
                     frappe.db.set_value(jobOrder, each.name, "order_status", "Upcoming")
                 elif current_date > end:

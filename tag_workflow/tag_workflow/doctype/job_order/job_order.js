@@ -212,7 +212,8 @@ frappe.ui.form.on("Job Order", {
 			frm.set_df_property("time_remaining_for_make_edits", "hidden", 1);
 		}
 		$('[data-fieldname = "phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
-		set_exc_industry_company(frm)
+		set_exc_industry_company(frm);
+		order_claimed(frm);
 	},
 
 	select_job: function(frm) {
@@ -1896,5 +1897,11 @@ function hiring_review_box(frm){
 	else if(frm.doc.bid>0){
 		cur_frm.toggle_display('hiring_section_break', 1)
 		cur_frm.set_df_property('hiring_html','options',"<h3>Please review submitted claims.</h3>")
+	}
+}
+
+function order_claimed(frm){
+	if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.bid > 0 && frm.doc.staff_org_claimed && !frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company) && frm.doc.no_of_workers == frm.doc.worker_filled){
+		frm.set_df_property('section_break_html3', "hidden", 0);
 	}
 }

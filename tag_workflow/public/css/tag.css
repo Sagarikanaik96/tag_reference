@@ -678,6 +678,11 @@ input::-webkit-credentials-auto-fill-button {
   font-weight: bold;
   margin-left: -17px;
 }
+[data-fieldname="claimed_html"] h3 {
+  font-size: 14px;
+  margin: -5px 0 0 0;
+  font-weight: 500;
+}
 
 /* job order Hiring button */
 [data-page-route="List/Job Order/List"] .btn.btn-secondary {

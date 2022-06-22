@@ -15,6 +15,8 @@
   "html_2",
   "section_break_html2",
   "html_3",
+  "section_break_html3",
+  "claimed_html",
   "related_actions_section",
   "related_details",
   "messages",
@@ -662,11 +664,21 @@
   {
    "fieldname": "hiring_html",
    "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_html3",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "claimed_html",
+   "fieldtype": "HTML",
+   "options": "<h3>This Job Order is ongoing and has reached its desired head count.</h3>"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-19 12:02:25.675827",
+ "modified": "2022-06-21 02:36:39.488669",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
