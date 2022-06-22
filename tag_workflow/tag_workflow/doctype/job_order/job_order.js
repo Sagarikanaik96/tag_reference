@@ -142,7 +142,7 @@ frappe.ui.form.on("Job Order", {
 		}
 	},
 	refresh: function(frm) {
-		
+		setTimeout(add_id,500);
 		update_order_status(frm)
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
@@ -1402,6 +1402,9 @@ function job_order_cancel_button(frm){
 					cancel_job_order(frm);
 				});
 			}
+			if (frm.doc.order_status != 'Completed'){
+				$('[data-fieldname="rate"]').attr('id','div_rate');
+			}
 		}
 	});
 }
@@ -1908,5 +1911,15 @@ function hiring_review_box(frm){
 function order_claimed(frm){
 	if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.bid > 0 && frm.doc.staff_org_claimed && !frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company) && frm.doc.no_of_workers == frm.doc.worker_filled){
 		frm.set_df_property('section_break_html3', "hidden", 0);
+	}
+}
+
+
+function add_id(){
+	if(cur_frm.doc.order_status=='Completed'){
+		$('[data-fieldname="rate"]').attr('id','_rate');
+	}
+	if(cur_frm.doc.__islocal==1){
+		$('[data-fieldname="rate"]').attr('id','div_rate');
 	}
 }
