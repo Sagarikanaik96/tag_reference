@@ -114,7 +114,8 @@ function update_address(data){
     let street = data.street_number ? (data.street_number + " " + data.route) : data.route;
     if (cur_frm.doc.doctype == 'Employee') {
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "complete_address", document.getElementById("autocomplete-address").value);
-        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "street_address", street);
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "street_address", data.route);
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "suite_or_apartment_no", data.street_number);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state", data["administrative_area_level_1"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city", data["locality"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
