@@ -1,4 +1,3 @@
-frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("User", {
 	refresh: function(frm){
 		$('.form-footer').hide();
@@ -8,7 +7,6 @@ frappe.ui.form.on("User", {
 		cur_frm.clear_custom_buttons();
 		multi_company_setup(frm);
 		set_options(frm);
-		field_toggle();
 		field_reqd();
 		field_check();
 		exclusive_fields(frm);
@@ -35,7 +33,7 @@ frappe.ui.form.on("User", {
 				event.preventDefault();
 			}
 		});
-
+	frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 	},
 	setup: function(frm){
 		let roles = frappe.user_roles;
@@ -150,7 +148,6 @@ frappe.ui.form.on("User", {
 		check_bd(frm);
 	},
 	enabled: function(frm){
-		field_toggle();
 		multi_company_setup(frm);
 	},
 	onload:function(){
@@ -183,22 +180,7 @@ function name_update(string){
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-/*--------perpare field display-----------*/
-function field_toggle(){
-	let perm_dis_fields = ["sb1", "document_follow_notifications_section", "email_settings", "sb_allow_modules", "sb2", "sb3", "third_party_authentication", "api_access", "full_name", "language", "time_zone", "middle_name", "username", "interest", "bio", "banner_image", "mute_sounds", "desk_theme", "phone"];
-	for(let field in perm_dis_fields){
-		cur_frm.toggle_display(perm_dis_fields[field], 0);
-	}
-	if(frappe.session.user!='Administrator'){
-		let gender_dob=['gender','birth_date']
-		for(let field in gender_dob){
-			cur_frm.toggle_display(gender_dob[field], 0);
-		}
-	}
-}
-
 function field_reqd(){
-	cur_frm.fields_dict["short_bio"].collapse();
 	let data = ["company", "date_of_joining"];
 	for(let value in data){
 		cur_frm.toggle_reqd(data[value], 1);
@@ -214,7 +196,6 @@ function field_check(){
 			cur_frm.toggle_enable(values[vals], 0);
 		}
 	}else{
-		cur_frm.toggle_reqd(pass, 1);
 		cur_frm.set_value(pass, "Entry@123");
 		$(".page-title .title-area .title-text").css("cursor", "auto");
 	}
