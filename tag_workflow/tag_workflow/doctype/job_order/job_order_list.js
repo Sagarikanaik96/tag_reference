@@ -65,22 +65,6 @@ frappe.listview_settings['Job Order'] = {
 			});
 		}
 
-		let children = listview.$list_head_subject[0].children;
-		setTimeout( function() {
-			for(let c in children){
-				if(children[c].innerText && children[c].innerText =="Name"){
-					children[c].innerHTML = `<input class="level-item list-check-all" type="checkbox" title="Select All">
-						<span class="level-item list-liked-by-me hidden-xs">
-							<span title="Likes"><svg class="icon  icon-sm" style="">
-						<use class="like-icon" href="#icon-heart"></use>
-						</svg></span>
-						</span>
-						<span class="level-item">Order ID</span>`
-				}
-			}
-             
-         }, 50 );
-
 		$('[role = "tooltip"]').popover('dispose');
 	},	
 
