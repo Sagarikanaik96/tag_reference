@@ -225,7 +225,7 @@ function check_employee_data(frm){
 		(!employees.includes(table[e].employee)) ? employees.push(table[e].employee) : msg.push('Employee <b>'+table[e].employee+' </b>appears multiple time in Employee Details');
 		assigned += (table[e].approved == 1)?1:0;
 	}
-	if(assigned == 0  && frm.doc.__islocal!=1 && frm.doc.tag_status=='Open'){ msg.push('Please select an employee to assign.'); }
+	if(assigned == 0  && frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){ msg.push('Please select an employee to assign.'); }
 	if(msg.length){frappe.msgprint({message: msg.join("<br>"), title: __('Warning'), indicator: 'red'});frappe.validated = false;}
 }
 
