@@ -250,7 +250,7 @@ frappe.ui.form.on("Employee", {
 			frm.set_value("sssn", "");
 
 		}
-
+		remove_lat_lng(frm)
 	},
 	setup:function(frm){
 		frm.set_query("company", function() {
@@ -697,5 +697,24 @@ function append_job_category(frm){
 	    })
 	    frm.set_value("job_categories",job_categories);
 	    refresh_field("job_categories");
+	}
+}
+function remove_lat_lng(frm){
+	if((frm.doc.enter_manually) && (!frm.doc.zip && !frm.doc.city && !frm.doc.state)  && (frm.doc.lat || frm.doc.lng)){
+		frm.set_value('complete_address',undefined)
+		frm.set_value('suite_or_apartment_no',undefined)
+		frm.set_value('street_address',undefined)
+		frm.set_value('lat',undefined)
+		frm.set_value('lng',undefined)
+
+	}
+	else if((frm.doc.search_on_maps) && (!cur_frm.doc.complete_address) && (frm.doc.lat || frm.doc.lng)){
+		frm.set_value('state',undefined)
+		frm.set_value('city',undefined)
+		frm.set_value('zip',undefined)
+		frm.set_value('suite_or_apartment_no',undefined)
+		frm.set_value('street_address',undefined)
+		frm.set_value('lat',undefined)
+		frm.set_value('lng',undefined)
 	}
 }
