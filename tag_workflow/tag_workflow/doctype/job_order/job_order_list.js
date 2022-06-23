@@ -13,7 +13,6 @@ frappe.listview_settings['Job Order'] = {
         }
 		
 		if (window.location.search){
-	        $("button.btn.btn-default.btn-sm.filter-button").hide();
 	        $("button.btn.btn-sm.filter-button.btn-primary-light").hide();
         	frappe.route_options = {
 				"order_status": "",
