@@ -115,7 +115,7 @@ def deny_timesheet(data, count):
                 if(res in data.keys()):
                     frappe.db.set_value('Timesheet',data[tm],'dispute',data[res])
                 result.append({"date": doc.date_of_timesheet, "timesheet": doc.name})
-        denied_notification(job_order=doc.job_order_detail,staffing_company=doc.employee_company, hiring_company=doc.company, timesheet_name=doc.name)
+                denied_notification(job_order=doc.job_order_detail,staffing_company=doc.employee_company, hiring_company=doc.company, timesheet_name=doc.name)
         return result[0] if(len(result) > 0) else {"date": "", "timesheet": ""}
     except Exception as e:
         frappe.msgprint(e)
