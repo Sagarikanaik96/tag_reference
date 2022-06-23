@@ -72,7 +72,7 @@ frappe.listview_settings['User'] = {
 					"email":i["name"]
 				},
 				callback:function(r){
-					if (r.message.length > 1){
+					if (r.message && r.message.length > 1){
 						listview.$page.find(`a[data-filter="company,=,${r.message[0]}"]`).addClass("indicator-pill green");
 					}
 				}

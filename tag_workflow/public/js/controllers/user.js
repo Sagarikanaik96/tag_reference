@@ -3,6 +3,7 @@ frappe.ui.form.on("User", {
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
+		field_toggle();
 
 		cur_frm.clear_custom_buttons();
 		multi_company_setup(frm);
@@ -148,6 +149,7 @@ frappe.ui.form.on("User", {
 		check_bd(frm);
 	},
 	enabled: function(frm){
+		field_toggle();
 		multi_company_setup(frm);
 	},
 	onload:function(){
@@ -430,4 +432,10 @@ function companyhide(time) {
 	}, time)
 }
 
-
+/*--------perpare field display-----------*/
+function field_toggle(){
+	let perm_dis_fields = ["sb1","sb3"];
+	for(let field in perm_dis_fields){
+		cur_frm.toggle_display(perm_dis_fields[field], 0);
+	}
+}

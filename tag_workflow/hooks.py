@@ -15,41 +15,7 @@ sales_invoice="Sales Invoice"
 map= "public/js/controllers/doc_map.js"
 # Includes in <head>
 # ------------------
-fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow", "Workflow State", "Workflow Action Master",
-{"dt": "Property Setter",
-        "filters": [
-	[
-		"name","in",
- 			[
-				"User-document_follow_notifications_section-hidden",
-				"User-sb1-hidden",
-				"User-email_settings-hidden",
-				"User-sb_allow_modules-hidden",
-				"User-sb3-hidden",
-				"User-gender-depends_on",
-				"User-birth_date-depends_on",
-				"User-bio-collapsible",
-				"User-new_password-mandatory_depends_on",
-				"User-email-read_only_depends_on",
-				"User-short_bio-collapsible",
-				"User-sb2-hidden",
-				"User-third_party_authentication-hidden",
-				"User-api_access-hidden",
-				"User-full_name-hidden",
-				"User-language-hidden",
-				"User-time_zone-hidden",
-				"User-middle_name-hidden",
-				"User-username-hidden",
-				"User-interest-hidden",
-				"User-banner_image-hidden",
-				"User-mute_sounds-hidden",
-				"User-desk_theme-hidden",
-				"User-phone-hidden",
-				"User-bio-hidden"
-			]
-	]
-	]}
-]
+fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow", "Workflow State", "Workflow Action Master"]
 
 boot_session = "tag_workflow.utils.trigger_session.update_boot"
 
