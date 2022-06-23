@@ -20,20 +20,19 @@ frappe.FaceRecognition = Class.extend({
 	},
 
 	setup: function(wrapper, page){
-		page.set_secondary_action('', () => me.get_details(wrapper, page), 'refresh');
 		let me = this;
 		this.body = $('<div></div>').appendTo(this.page.main);
 		$(frappe.render_template('dynamic_page', "")).appendTo(this.body);
 		me.show_profile(wrapper,page);
 	},
 
-	show_profile: function(_wrapper, _page){
+	show_profile: function(_wrapper, page){
 		frappe.call({
 			method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link1",
 			args: { "name": company || '',
 					"userid": frappe.user_info().email
 					},
-			callback: function (r) {			
+			callback: function (r) {
 				setTimeout(hide,10);
 				function hide(){
 					if(frappe.boot.tag.tag_user_info.company_type=== "Staffing"){
@@ -47,6 +46,7 @@ frappe.FaceRecognition = Class.extend({
 						$("#coi").hide();
 						$("#safety_manual").hide();
 					}
+					get_blocked_list(page)
 				}
 
 				let my_val= r.message[0];
@@ -366,4 +366,71 @@ function add_ress(my_val){
 			arr.push(my_val.zip);
 		}
 	return arr;
+}
+
+function block_company(){
+	frappe.call({
+		method:'tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.block_company',
+		"freeze": true,
+		"freeze_message": "<p><b>Blocking Staffing Company</b></p>",
+		args:{
+			'company_blocked':company,
+			'blocked_by':frappe.boot.tag.tag_user_info.company
+		},
+		callback:function(r){
+			if(r.message==1){
+				frappe.msgprint("The "+ company +" is blocked successfully.")
+				setTimeout(function () {
+					window.location.reload()
+				}, 5000);
+			}		
+		}
+	})
+}
+
+function unblock_company(){
+	frappe.call({
+		method:'tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.unblock_company',
+		"freeze": true,
+		"freeze_message": "<p><b>Unblocking Staffing Company</b></p>",
+		args:{
+			'company_blocked':company,
+			'blocked_by':frappe.boot.tag.tag_user_info.company
+		},
+		callback:function(r){
+			if(r.message==1){
+				frappe.msgprint("The "+ company +" is unblocked successfully.")
+				setTimeout(function () {
+					window.location.reload()
+				},5000);
+			}
+		}
+	})
+}
+function get_blocked_list(page){
+	if(frappe.boot.tag.tag_user_info.company_type=='Hiring'){
+		frappe.call({
+			method:'tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.checking_blocked_list',
+			args:{
+				'company_blocked':company,
+				'blocked_by':frappe.boot.tag.tag_user_info.company
+			},
+			callback:function(r){
+				if(frappe.boot.tag.tag_user_info.user_type=='Hiring Admin'){
+					if(r.message==1){
+						page.set_secondary_action('Block Staffing Company ', () => block_company()).addClass("btn-primary block-company-btn");
+					}
+					else{
+						page.set_secondary_action('Unblock Staffing Company ', () => unblock_company()).addClass("btn-primary block-company-btn");
+						$("#place_order").hide();
+					}
+				}
+				else{
+					if(r.message!=1){
+						$("#place_order").hide();
+					}
+				}
+			}
+		})
+	}
 }

@@ -86,3 +86,70 @@ def get_link3(name,comp, comp_type):
          invoice.append(i)
 
    return job, data2, invoice
+@frappe.whitelist()
+def block_company(company_blocked,blocked_by):
+   try:
+      frappe.enqueue("tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.company_to_blocked", queue='long', job_name='Blocking Company', is_async=True,blocked_by=blocked_by,company_blocked=company_blocked, now=True)
+      return 1
+   except Exception as e:
+      frappe.log_error(e, "Block time error")
+      frappe.msgprint("Blocking error Not Send")
+      return False  
+
+def company_to_blocked(blocked_by,company_blocked):
+   comp_doc=frappe.get_doc('Company',blocked_by)
+   comp_doc.append('blocked_staff_companies_list',{'staffing_company_name':company_blocked})
+   comp_doc.save(ignore_permissions = True)
+   delete_order_unclaimed(blocked_by,company_blocked)
+
+def delete_order_unclaimed(blocked_by,company_blocked):
+   job_orders=f'select name,claim from `tabJob Order` where order_status!="Completed" and company="{blocked_by}" '
+   my_orders=frappe.db.sql(job_orders,as_dict=1)
+   if(len(my_orders)>0):
+      for i in my_orders:
+         if (i.claim and company_blocked not in i.claim) or (not i.claim):
+            user_name=f'select name from `tabUser` where company="{company_blocked}"'
+            user_data=frappe.db.sql(user_name,as_list=0)
+            for j in user_data:
+               del_data=f'''DELETE FROM `tabDocShare` where share_doctype='Job Order' and share_name="{i.name}" and user="{j[0]}"'''
+               del_notification=f''' DELETE from `tabNotification Log` where document_name="{i.name}" and for_user="{j[0]}" '''
+               frappe.db.sql(del_data)
+               frappe.db.sql(del_notification)
+               frappe.db.commit()
+
+@frappe.whitelist()
+def unblock_company(company_blocked,blocked_by):
+   try:
+      frappe.enqueue("tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.company_to_unblocked", queue='long', job_name='Blocking Company', is_async=True,blocked_by=blocked_by,company_blocked=company_blocked, now=True)
+      return 1
+   except Exception as e:
+      frappe.log_error(e, "UnBlock time error")
+      frappe.msgprint("unBlocking error Not Send")
+      return False  
+
+def company_to_unblocked(blocked_by,company_blocked):
+   comp_doc=frappe.get_doc('Company',blocked_by)
+   if len(comp_doc.blocked_staff_companies_list)!=0:
+      for i in comp_doc.blocked_staff_companies_list:
+         if i.staffing_company_name==company_blocked:
+            remove_row = i
+      comp_doc.remove(remove_row)
+      comp_doc.save(ignore_permissions=True)     
+
+@frappe.whitelist()
+def checking_blocked_list(company_blocked,blocked_by):
+   try:
+      comp_doc=frappe.get_doc('Company',blocked_by)
+      if len(comp_doc.blocked_staff_companies_list)!=0:
+         for i in comp_doc.blocked_staff_companies_list:
+            if i.staffing_company_name==company_blocked:
+               break
+         else:
+            return 1
+      else:
+         return 1
+
+   except Exception as e:
+      frappe.log_error(e, "company checkig")
+      frappe.msgprint("Company Blocked checking")
+      return False  

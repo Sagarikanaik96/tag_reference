@@ -277,7 +277,7 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
             doc.company_type = 'Non Exclusive'
             doc.save(ignore_permissions = True)
 
-            sql = ''' select email from `tabUser` where organization_type='staffing' '''
+            sql = f''' select email from `tabUser` where organization_type='staffing' and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}") '''
             user_list=frappe.db.sql(sql, as_list=1)
             l = [l[0] for l in user_list]
             for user in l:

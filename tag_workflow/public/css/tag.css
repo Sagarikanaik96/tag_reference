@@ -1138,7 +1138,9 @@ select.input-with-feedback.form-control.ellipsis {
 .list-row-head .level-right {
   flex: 0.3;
 }
-
+.block-company-btn{
+  margin-right: 50px;
+}
 /*------ Media query start ----*/
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
