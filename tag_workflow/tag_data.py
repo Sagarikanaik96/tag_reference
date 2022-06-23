@@ -671,11 +671,10 @@ def assigned_employee_data(job_order):
         comp_detail=frappe.get_doc("User",comp)
         comp_type= comp_detail.organization_type
         if jo.resumes_required==1 and comp_type != 'Staffing':
-            sql = f""" select `tabAssign Employee`.company as staff_company,`tabAssign Employee Details`.employee_name as employee_name, `tabAssign Employee Details`.approved as approved,`tabAssign Employee Details`.employee as employee from `tabAssign Employee`,`tabAssign Employee Details` where `tabAssign Employee`.name=`tabAssign Employee Details`.parent and job_order="{job_order}" and tag_status="Approved" and `tabAssign Employee Details`.approved =1 """;
+            sql = f""" select `tabAssign Employee`.company as staff_company,`tabAssign Employee Details`.employee_name as employee_name, `tabAssign Employee Details`.approved as approved,`tabAssign Employee Details`.employee as employee from `tabAssign Employee`,`tabAssign Employee Details` where `tabAssign Employee`.name=`tabAssign Employee Details`.parent and job_order="{job_order}" and tag_status="Approved" and `tabAssign Employee Details`.approved =1 order by staff_company, employee_name""";
 
         else:
-            sql = f""" select `tabAssign Employee`.company as staff_company,`tabAssign Employee Details`.employee_name as employee_name,`tabAssign Employee Details`.employee as employee from `tabAssign Employee`,`tabAssign Employee Details` where `tabAssign Employee`.name=`tabAssign Employee Details`.parent and job_order="{job_order}" and tag_status="Approved" """;
-            
+            sql = f""" select `tabAssign Employee`.company as staff_company,`tabAssign Employee Details`.employee_name as employee_name,`tabAssign Employee Details`.employee as employee from `tabAssign Employee`,`tabAssign Employee Details` where `tabAssign Employee`.name=`tabAssign Employee Details`.parent and job_order="{job_order}" and tag_status="Approved" order by staff_company, employee_name""";
         emp_data = frappe.db.sql(sql, as_dict=1)
         emp_list=[]
         for i in range(len(emp_data)):
@@ -708,7 +707,7 @@ def staff_assigned_employees(job_order):
 @frappe.whitelist(allow_guest=False)
 def staffing_assigned_employee(job_order):
     try:
-        assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabAssign Employee Details`.employee_name as employee_name, `tabAssign Employee Details`.employee as employee, `tabAssign Employee Details`.name as child_name from `tabAssign Employee`, `tabAssign Employee Details` where `tabAssign Employee`.name = `tabAssign Employee Details`.parent and job_order = "{job_order}" and tag_status = "Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email = '{frappe.session.user}')"""
+        assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabAssign Employee Details`.employee_name as employee_name, `tabAssign Employee Details`.employee as employee, `tabAssign Employee Details`.name as child_name from `tabAssign Employee`, `tabAssign Employee Details` where `tabAssign Employee`.name = `tabAssign Employee Details`.parent and job_order = "{job_order}" and tag_status = "Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email = '{frappe.session.user}') order by company, employee_name"""
         emp_data = frappe.db.sql(assigned_emp, as_dict=1)
         emp_list = []
         for i in range(len(emp_data)):
@@ -733,10 +732,9 @@ def replaced_employees(job_order, user=None):
     try:
         data, emp = [], []
         if user:
-            assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabReplaced Employee`.employee_name as employee_name, `tabReplaced Employee`.employee, `tabReplaced Employee`.name as child_name from `tabAssign Employee`, `tabReplaced Employee` where `tabAssign Employee`.name = `tabReplaced Employee`.parent and job_order = "{job_order}" and tag_status = "Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email = '{frappe.session.user}')  """
+            assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabReplaced Employee`.employee_name as employee_name, `tabReplaced Employee`.employee, `tabReplaced Employee`.name as child_name from `tabAssign Employee`, `tabReplaced Employee` where `tabAssign Employee`.name = `tabReplaced Employee`.parent and job_order = "{job_order}" and tag_status = "Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email = '{frappe.session.user}') order by company, employee_name"""
         else:
-            assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabReplaced Employee`.employee_name as employee_name, `tabReplaced Employee`.employee, `tabReplaced Employee`.name as child_name from `tabAssign Employee`, `tabReplaced Employee` where `tabAssign Employee`.name = `tabReplaced Employee`.parent and job_order = "{job_order}" and tag_status = "Approved"  """
-
+            assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabReplaced Employee`.employee_name as employee_name, `tabReplaced Employee`.employee, `tabReplaced Employee`.name as child_name from `tabAssign Employee`, `tabReplaced Employee` where `tabAssign Employee`.name = `tabReplaced Employee`.parent and job_order = "{job_order}" and tag_status = "Approved" order by company, employee_name"""
 
         emp_data = frappe.db.sql(assigned_emp,as_dict=1)
         for e in emp_data:
