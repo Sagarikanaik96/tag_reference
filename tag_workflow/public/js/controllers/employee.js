@@ -260,6 +260,9 @@ frappe.ui.form.on("Employee", {
 		});
 
 	},
+	after_save:function(frm){
+		update_lat_lng(frm)
+	},
 
 
 	search_on_maps: function(frm){
@@ -716,5 +719,16 @@ function remove_lat_lng(frm){
 		frm.set_value('street_address',undefined)
 		frm.set_value('lat',undefined)
 		frm.set_value('lng',undefined)
+	}
+}
+function update_lat_lng(frm){
+	if((frm.doc.enter_manually) && (frm.doc.zip && frm.doc.city && frm.doc.state)){
+		frappe.call({
+			method:"tag_workflow.tag_data.update_lat_lng_required",
+			args:{
+				'employee_id':frm.doc.name,
+				'company':frm.doc.company
+			}
+		})
 	}
 }

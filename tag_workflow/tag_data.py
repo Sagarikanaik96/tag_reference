@@ -1203,15 +1203,18 @@ def get_update_password_user(key):
 @frappe.whitelist()
 def update_lat_lng(company):
     try:
-        frappe.enqueue("tag_workflow.tag_data.update_old_emp_lat_lng", queue='long', job_name=company, is_async=True, company=company, now=True)
+        frappe.enqueue("tag_workflow.tag_data.update_old_emp_lat_lng", queue='long', job_name=company, is_async=True, company=company)
     except Exception as e:
         frappe.msgprint(e)
 
-def update_old_emp_lat_lng(company):
+def update_old_emp_lat_lng(company,employee_id=None):
     try:
         count = 0
         print("*------lat lng updtae--------------------------*\n")
-        my_data = frappe.db.sql(""" select name, state, city, zip from `tabEmployee` where (lat is null or lat ='' or lng is null or lng='') and employee_number is null and city is not null and state is not null and company = %s """, company, as_dict=1)
+        if(employee_id!=None):
+            my_data = frappe.db.sql(""" select name, state, city, zip from `tabEmployee` where company = '{0}' and name ='{1}'  """.format(company,employee_id), as_dict=1)
+        else:
+            my_data = frappe.db.sql(""" select name, state, city, zip from `tabEmployee` where (lat is null or lat ='' or lng is null or lng='') and employee_number is null and city is not null and state is not null and company = %s """, company, as_dict=1)
         for d in my_data:
             address = d.city + ", " + d.state + ", " + (d.zip if d.zip != 0 and d.zip is not None else "")
             google_location_data_url = GOOGLE_API_URL + address
@@ -1284,3 +1287,9 @@ def update_section_status(company, jo):
 
     elif "Approval Request" in timesheet_state_data:
         return "Approval Request"
+@frappe.whitelist()
+def update_lat_lng_required(company,employee_id):
+    try:
+        update_old_emp_lat_lng(company,employee_id)
+    except Exception as e:
+        frappe.error_log(e,'Employee Lat Lng error')
