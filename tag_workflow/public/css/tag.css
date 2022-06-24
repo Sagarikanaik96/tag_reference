@@ -159,10 +159,11 @@ input:visited {
 }
 
 .layout-main-section .frappe-list .list-row {
-  padding: 25px 15px 25px 0px;
+  padding: 0;
   background: var(--white);
   border-radius: 8px;
   margin: 7px 0;
+  height: auto;
 }
 .form-section .section-head {
   font-size: 18px;
@@ -974,10 +975,10 @@ input.input-with-feedback.form-control,
 .frappe-card .frappe-list header .ellipsis {
   white-space: normal;
   line-height: 1.2;
-  text-align: center;
+  text-align: left;
 }
 .frappe-card .frappe-list .list-row-container .ellipsis {
-  text-align: center;
+  text-align: left;
 }
 .chat-cross-button {
   display: block !important;
@@ -1041,7 +1042,7 @@ select.input-with-feedback.form-control.ellipsis {
   text-align: center;
   white-space: unset;
   text-overflow: inherit;
-  word-break: break-all;
+  word-break: break-word;
 }
 
 [data-page-route="List/Contact/List"]
@@ -1073,10 +1074,7 @@ select.input-with-feedback.form-control.ellipsis {
   .frappe-card
   header
   .level-left
-  .list-row-col:nth-child(7) {
-  flex: 2;
-}
-
+  .list-row-col:nth-child(7),
 [data-page-route="List/Contact/List"]
   .frappe-card
   .list-row-container
@@ -1109,38 +1107,55 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-col:nth-child(7) {
   flex: 2;
 }
-
+[data-page-route="List/Job Order/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(1),
+[data-page-route="List/Job Order/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(1),
 [data-page-route="List/Item/List"]
   .frappe-card
   header
   .level-left
-  .list-row-col:nth-child(1) {
-  flex: 1;
+  .list-row-col:nth-child(4),
+[data-page-route="List/Item/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(4) {
+  flex: 1.4;
 }
 
-[data-page-route="List/Item/List"]
+[data-page-route="List/Job Order/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(3),
+[data-page-route="List/Job Order/List"]
   .frappe-card
   .list-row-container
   .level-left
-  .list-row-col:nth-child(1) {
-  flex: 1;
-}
-[data-page-route="List/Item/List"]
-  .frappe-card
-  .list-row-container
-  .level-left
-  .list-row-col:nth-child(7) {
-  height: 43px;
-  overflow: auto;
+  .list-row-col:nth-child(3) {
+  flex: 1.2;
 }
 
 .list-row .level-right,
 .list-row-head .level-right {
   flex: 0.3;
 }
-.block-company-btn{
+.block-company-btn {
   margin-right: 50px;
 }
+[data-page-route="List/Item/List"] .frappe-card .list-row-container .ellipsis {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: unset;
+}
+
 /*------ Media query start ----*/
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
