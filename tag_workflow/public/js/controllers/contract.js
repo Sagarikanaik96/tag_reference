@@ -270,56 +270,63 @@ function update_lead(frm){
 
 /*------update contract labels-------*/
 function update_contract_labels(frm){
-	frappe.db.get_value('Lead', {'name' : cur_frm.doc.lead}, ['organization_type'],function(r){
-		let organization_type = r.organization_type;
-		if(frappe.boot.tag.tag_user_info.user_type == 'TAG Admin' && organization_type =='Staffing'){
-			frm.set_df_property('staffing_company', 'label', 'TAG Company');
-			frm.set_df_property('hiring_company', 'label', 'Staffing Company');
-			frm.set_df_property('signee_staffing', 'label', 'Signee (TAG Admin)');
-			frm.set_df_property('signe_company', 'label', 'Signee TAG Admin');
-			frm.set_df_property('signe_hiring', 'label', 'Signee Staffing');
-			frm.set_df_property('sign_date_staffing', 'label', 'TAG Admin Signature Date');
-			frm.set_df_property('sign_date_hiring', 'label', 'Stafing Signature Date');
-		}
-		else if(frappe.boot.tag.tag_user_info.user_type == 'TAG Admin' && (organization_type =='Hiring'||organization_type =='Exclusive Hiring')){
-			frm.set_df_property('staffing_company', 'label', 'TAG Company');
-			frm.set_df_property('signee_staffing', 'label', 'Signee (TAG Admin)');
-			frm.set_df_property('signe_company', 'label', 'Signee TAG Admin');
-			frm.set_df_property('sign_date_staffing', 'label', 'TAG Admin Signature Date');
-		}
-
-		  })
-	frappe.call({
-        method: "tag_workflow.utils.whitelisted.get_contract_prepared_by",
-		args: {
-			"contract_prepared_by": frm.doc.contract_prepared_by,
-		},
-        callback: function(r) {
-			let organization_type = r.message;
-			if(frappe.boot.tag.tag_user_info.user_type  == 'Staffing Admin' && organization_type=='TAG'){
+	if(frappe.boot.tag.tag_user_info.user_type == 'TAG Admin'){
+		frappe.db.get_value('Lead', {'name' : cur_frm.doc.lead}, ['organization_type'],function(r){
+			let organization_type = r.organization_type;
+			if(organization_type =='Staffing'){
 				frm.set_df_property('staffing_company', 'label', 'TAG Company');
 				frm.set_df_property('hiring_company', 'label', 'Staffing Company');
-				frm.set_df_property('signe_company', 'label', 'TAG Admin Company');
-				frm.set_df_property('sign_date_staffing', 'label', 'TAG Admin Signature Date');
+				frm.set_df_property('signee_staffing', 'label', 'Signee (TAG Admin)');
+				frm.set_df_property('signe_company', 'label', 'Signee TAG Admin');
 				frm.set_df_property('signe_hiring', 'label', 'Signee Staffing');
+				frm.set_df_property('sign_date_staffing', 'label', 'TAG Admin Signature Date');
 				frm.set_df_property('sign_date_hiring', 'label', 'Stafing Signature Date');
-
 			}
-			else if(frappe.boot.tag.tag_user_info.user_type  == 'Hiring Admin' && organization_type=='TAG'){
+			else if(organization_type =='Hiring'||organization_type =='Exclusive Hiring'){
 				frm.set_df_property('staffing_company', 'label', 'TAG Company');
-				frm.set_df_property('signee_staffing', 'label', 'TAG Admin Company');
-				frm.set_df_property('signe_company', 'label', 'TAG Admin Company');
+				frm.set_df_property('signee_staffing', 'label', 'Signee (TAG Admin)');
+				frm.set_df_property('signe_company', 'label', 'Signee TAG Admin');
 				frm.set_df_property('sign_date_staffing', 'label', 'TAG Admin Signature Date');
 			}
+			  })
 
-			else if(frappe.boot.tag.tag_user_info.user_type  == 'Hiring Admin' && organization_type=='Staffing'){
-				frm.set_df_property('staffing_company', 'label', 'Staffing Company');
-				frm.set_df_property('signee_staffing', 'label', 'Staffing Company');
-				frm.set_df_property('signe_company', 'label', 'Staffing Company');
-				frm.set_df_property('sign_date_staffing', 'label', 'Staffing Signature Date');
+	}
+	else{
+		frappe.call({
+			method: "tag_workflow.utils.whitelisted.get_contract_prepared_by",
+			args: {
+				"contract_prepared_by": frm.doc.contract_prepared_by,
+			},
+			callback: function(r) {
+				let organization_type = r.message;
+				if(frappe.boot.tag.tag_user_info.user_type  == 'Staffing Admin' && organization_type=='TAG'){
+					frm.set_df_property('staffing_company', 'label', 'TAG Company');
+					frm.set_df_property('hiring_company', 'label', 'Staffing Company');
+					frm.set_df_property('signe_company', 'label', 'TAG Admin Company');
+					frm.set_df_property('sign_date_staffing', 'label', 'TAG Admin Signature Date');
+					frm.set_df_property('signe_hiring', 'label', 'Signee Staffing');
+					frm.set_df_property('sign_date_hiring', 'label', 'Stafing Signature Date');
+	
+				}
+				else if(frappe.boot.tag.tag_user_info.user_type  == 'Hiring Admin' && organization_type=='TAG'){
+					frm.set_df_property('staffing_company', 'label', 'TAG Company');
+					frm.set_df_property('signee_staffing', 'label', 'TAG Admin Company');
+					frm.set_df_property('signe_company', 'label', 'TAG Admin Company');
+					frm.set_df_property('sign_date_staffing', 'label', 'TAG Admin Signature Date');
+				}
+	
+				else if(frappe.boot.tag.tag_user_info.user_type  == 'Hiring Admin' && organization_type=='Staffing'){
+					frm.set_df_property('staffing_company', 'label', 'Staffing Company');
+					frm.set_df_property('signee_staffing', 'label', 'Staffing Company');
+					frm.set_df_property('signe_company', 'label', 'Staffing Company');
+					frm.set_df_property('sign_date_staffing', 'label', 'Staffing Signature Date');
+				}
 			}
-    	}
-		});
+			});
+
+	}
+
+
 }
 
 function cancel_cantract(frm){
