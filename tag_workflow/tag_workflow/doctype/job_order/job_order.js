@@ -853,7 +853,8 @@ function show_claim_bar(frm) {
 			},
 			callback: function(r) {
 				if (r.message != 'unsuccess') {
-					cur_frm.toggle_display('section_break_html1', 1);
+					cur_frm.toggle_display('section_break_html2', 1);
+					cur_frm.set_df_property('html_3','options',"<h3>Your company has submitted a claim for this order.</h3>")
 					frm.remove_custom_button('Claim Order');
 				}
 			}
@@ -868,8 +869,8 @@ function show_claim_bar(frm) {
 			callback: function(r) {
 				if (r.message != 'unsuccess') {
 					frm.remove_custom_button('Assign Employee');
-					cur_frm.toggle_display('section_break_html1', 1);
-				}
+					cur_frm.toggle_display('section_break_html2', 1);
+					cur_frm.set_df_property('html_3','options',"<h3>Your company has submitted a claim for this order.</h3>")				}
 			}
 		});
 	}
