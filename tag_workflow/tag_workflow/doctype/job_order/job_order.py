@@ -463,3 +463,17 @@ def hiring_diff_status(job_order_name):
     timesheet_data=frappe.db.sql(sql,as_list=1)
     if(len(timesheet_data)>0):
         return 'Timesheet'
+
+@frappe.whitelist()
+def no_of_workers_changed(doc_name):
+    change = frappe.db.sql('''select data from `tabVersion` where docname = "{}" '''.format(doc_name), as_dict= True)
+    if len(change) > 2:
+        data=frappe.db.sql(''' select data from `tabVersion` where docname='{}' order by modified DESC'''.format(doc_name), as_list=True)
+        new_data=json.loads(data[0][0])
+        if(new_data['changed'][0][0]=='no_of_workers'):
+            frappe.db.sql('''UPDATE `tabClaim Order` set no_of_workers_joborder = "{0}" where job_order="{1}"'''.format(new_data['changed'][0][2],doc_name))
+            assign_emp=frappe.db.sql('''select name from `tabAssign Employee` where job_order="{0}"'''.format(doc_name), as_list=True)
+            if len(assign_emp) > 0:
+                for name in assign_emp:
+                    frappe.db.sql('''UPDATE `tabAssign Employee` set no_of_employee_required = "{0}" where name="{1}"'''.format(new_data['changed'][0][2],name[0]))
+            frappe.db.commit()

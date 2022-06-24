@@ -324,7 +324,7 @@ frappe.ui.form.on("Job Order", {
 				}	
 			});
 		}
-
+		no_of_workers_changed(frm);
 	},
 
 	view_contract: function() {
@@ -1922,5 +1922,16 @@ function add_id(){
 	}
 	if(cur_frm.doc.__islocal==1){
 		$('[data-fieldname="rate"]').attr('id','div_rate');
+	}
+}
+
+function no_of_workers_changed(frm){
+	if(frm.doc.claim && frm.doc.resumes_required==0){
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.job_order.job_order.no_of_workers_changed",
+			args: {
+				doc_name: frm.doc.name
+			},
+		});
 	}
 }
