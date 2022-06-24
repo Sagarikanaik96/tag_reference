@@ -194,34 +194,52 @@ function cancel_salesinvoice(frm){
 	});
 }
 
-
 /*--------------------QuickBooks Export------------------*/
 function sync_with_quickbook(frm){
-        let roles = frappe.user_roles || [];
-        if(frm.doc.docstatus == 1 && ((roles.includes("Staffing User") || roles.includes("Staffing Admin")) || (roles.includes("Tag User") || roles.includes("Tag Admin")))){
-                frm.add_custom_button(__("Export to QuickBooks"), function () {
-                        frappe.call({
-                                "method": "tag_workflow.utils.quickbooks.auth_quickbook_and_sync",
-                                "args": {"company": frm.doc.company, "invoice": frm.doc.name},
-                                freeze: true,
-                                freeze_message: "<p><b>Exporting to QuickBooks...</b></p>",
-                                "callback": function(r){
-                                        let data = r.message;
-                                        if(data.authorization_url){
-                                                frappe.msgprint("Please Authenticate yourself before Migrating Data to Quickbook. We are now redirecting you to the Authentication page");
-                                                sleep(1000).then(() => {
-                                                        window.open(data.authorization_url);
-                                                });
-                                        }else if(data.invoice_id){
-                                                frappe.msgprint("Invoice <b>"+frm.doc.name+"</b> successfully exported to QuickBooks.");
-                                                cur_frm.reload_doc();
-                                        }else if(data.error){
-                                                frappe.msgprint("Invoice <b>"+frm.doc.name+"</b> failed to export with the following error: "+data.error+".");
-                                        }
-                                }
-                        });
-                }).addClass("btn-primary");
-        }
+    let roles = frappe.user_roles || [];
+    if(frm.doc.__islocal !=1 && frm.doc.docstatus == 0 && ((roles.includes("Staffing User") || roles.includes("Staffing Admin")) || (roles.includes("Tag User") || roles.includes("Tag Admin")))){
+        let button;
+		if(frm.doc.quickbook_invoice_id){
+			button = "Update in QuickBooks";
+		}else{
+			button = "Export to QuickBooks";
+		}
+
+		frappe.db.get_value("Company", {"name": frm.doc.company}, ["client_id", "client_secret", "quickbooks_company_id"], function(r){
+			if(r.client_id && r.client_secret && r.quickbooks_company_id){
+				frm.add_custom_button(__(button), function(){
+					insert_update_quickbook_invoice(frm);
+				}).addClass("btn-primary");
+			}
+		});
+	}
+}
+
+function insert_update_quickbook_invoice(frm){
+	frappe.call({
+		"method": "tag_workflow.utils.quickbooks.auth_quickbook_and_sync",
+		"args": {"company": frm.doc.company, "invoice": frm.doc.name},
+		"freeze": true,
+		"freeze_message": "<p><b>Exporting to QuickBooks...</b></p>",
+		"callback": function(r){
+			let data = r.message;
+			if(data.authorization_url){
+				frappe.msgprint("Please Authenticate yourself before Migrating Data to Quickbook. We are now redirecting you to the Authentication page");
+				sleep(1500).then(() => {
+					window.open(data.authorization_url);
+				});
+			}else if(data.invoice_id && !frm.doc.quickbook_invoice_id){
+				frappe.msgprint("Invoice <b>"+frm.doc.name+"</b> successfully exported to QuickBooks.");
+				cur_frm.reload_doc();
+			}else if(data.invoice_id && frm.doc.quickbook_invoice_id){
+				frappe.msgprint("Invoice <b>"+frm.doc.name+"</b> successfully updated in QuickBooks.");
+			}else if(data.error && !frm.doc.quickbook_invoice_id){
+				frappe.msgprint("Invoice <b>"+frm.doc.name+"</b> failed to export with the following error: "+data.error+".");
+			}else if(data.error && frm.doc.quickbook_invoice_id){
+				frappe.msgprint("Invoice <b>"+frm.doc.name+"</b> failed to update with the following error: "+data.error+".");
+			}
+		}
+	});
 }
 
 // sleep time expects milliseconds
