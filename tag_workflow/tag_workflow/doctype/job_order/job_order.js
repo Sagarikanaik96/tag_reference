@@ -594,7 +594,7 @@ function set_read_fields(frm){
 	}
 }
 function timer_value(frm) {
-	if(frm.doc.bid>0){
+	if(frm.doc.bid>0 || frm.doc.claim){
 		frm.toggle_display('section_break_8', 0)
 	}
 	if(frm.doc.order_status=='Completed'){
