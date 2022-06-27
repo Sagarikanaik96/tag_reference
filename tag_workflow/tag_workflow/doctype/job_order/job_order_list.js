@@ -2,6 +2,8 @@ frappe.listview_settings['Job Order'] = {
 	add_fields:['no_of_workers',"worker_filled"],
 	onload:function(listview){
 		$('h3[title = "Job Order"]').html('Job Orders');
+		cur_list.columns[0].df.label = 'Order ID';
+		cur_list.render_header(cur_list.columns)
 		$('.list-header-subject > div:nth-child(7) > span:nth-child(1)').html('Industry');
 		$('[data-fieldname="name"]').attr('placeholder','Order ID');
 		$('[data-fieldname="category"]').attr('placeholder','Industry');
