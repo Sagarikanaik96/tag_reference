@@ -121,7 +121,7 @@ frappe.StaffHome = Class.extend({
 								</div>
 								<div>
 									<small class="text-secondary">No. of Workers </small>
-									<p> ${order[o].no_of_workers} </p>
+									<p> ${order[o].worker_filled} </p>
 								</div>
 							</div>
 						</div>
