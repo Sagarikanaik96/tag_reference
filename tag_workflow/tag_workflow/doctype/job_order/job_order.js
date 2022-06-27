@@ -1919,6 +1919,7 @@ function order_claimed(frm){
 function add_id(){
 	if(cur_frm.doc.order_status=='Completed'){
 		$('[data-fieldname="rate"]').attr('id','_rate');
+		non_claims();
 	}
 	if(cur_frm.doc.__islocal==1){
 		$('[data-fieldname="rate"]').attr('id','div_rate');
@@ -1935,3 +1936,27 @@ function no_of_workers_changed(frm){
 		});
 	}
 }
+
+function non_claims(){
+	let found = false;
+	let claim_comps= cur_frm.doc.claim;
+	if(claim_comps && claim_comps.includes(',')){
+		claim_comps= cur_frm.doc.claim.split(',')
+		for(let i in claim_comps){
+			if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && (frappe.boot.tag.tag_user_info.comps.includes(claim_comps[i]))){
+				cur_frm.toggle_display('section_break_html1', 0);
+				found= true;
+				break;
+			}
+		}
+	}
+	else{
+		if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && (frappe.boot.tag.tag_user_info.comps.includes(claim_comps))){
+			cur_frm.toggle_display('section_break_html1', 0);
+			found= true;
+		}
+	}
+	if(!found){
+		cur_frm.toggle_display('section_break_html1', 1);
+	}
+}		

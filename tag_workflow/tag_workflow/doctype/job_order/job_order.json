@@ -469,7 +469,7 @@
   {
    "fieldname": "html_2",
    "fieldtype": "HTML",
-   "options": "<h3>Your company has submitted a claim for this order.</h3>"
+   "options": "<h3>This Job Order is closed and unclaimed by your company.</h3>"
   },
   {
    "fieldname": "related_actions_section",
@@ -679,7 +679,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-22 04:12:00.442405",
+ "modified": "2022-06-24 08:32:02.651909",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
