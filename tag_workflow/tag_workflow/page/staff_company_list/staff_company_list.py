@@ -22,7 +22,8 @@ def comp(comp_id=None,company_name=None):
 
                 sql = """  select * from `tabCompany` where name in (select parent from `tabIndustry Types` where parent in (select name from `tabCompany` where organization_type='Staffing') and industry_type in (select industry_type  from `tabIndustry Types` where parent='{}')) """.format(user_comp[0][0])
                 data = frappe.db.sql(sql, as_dict=True)
-
+                data = check_blocked_staffing(user_name=user_name, data=data)
+                
                 if comp_id:
                     data=frappe.db.sql(sql, as_list=True)
                     company_name=data[int(comp_id)-1][0]
@@ -55,3 +56,12 @@ def company_data(company_name):
     company_review_rating=frappe.db.sql(rev_sql, as_dict=True)
 
     return company_detail,company_industry,team_member,company_review_rating  
+
+def check_blocked_staffing(user_name, data):
+    sql ='''select staffing_company_name from `tabBlocked Staffing Company` where modified_by='{}' '''.format(user_name)
+    blocked_staffing = frappe.db.sql(sql, as_dict=True)
+    for d in data:
+        for blocked in blocked_staffing:
+            if blocked['staffing_company_name'] == d['name']:
+                d.update({'is_blocked': True})
+    return data

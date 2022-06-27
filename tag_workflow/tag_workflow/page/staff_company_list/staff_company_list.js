@@ -29,20 +29,20 @@ frappe.FaceRecognition = Class.extend({
 				},
 				
 				callback:function(r){
-
 					let data = r.message;
 					let profile_html = ``;
 					for(let p in data){
 						let link = data[p].name.split(' ').join('%');
 						profile_html += `<tr>
-							<td>${parseInt(p)+1}</td>
-							<td ><a onclick=dynamic_route("${link}")>${data[p].name}</a></td>
-							<td>${data[p].address}</td>
-							<td>${data[p].city}</td>
-							<td>${data[p].state}</td>
-							<td>${data[p].zip}</td>
-							<td>${data[p].average_rating}</td>
-							</tr>`;
+						<td>${parseInt(p)+1}</td>
+						<td ><a onclick=dynamic_route("${link}")>${data[p].name}</a></td>
+						<td>${data[p].address == null ? "" : data[p].address}</td>
+						<td>${data[p].city == null ? "" : data[p].city}</td>
+						<td>${data[p].state == null ? "" : data[p].state}</td>
+						<td>${data[p].zip == null ? "" : data[p].zip}</td>
+						<td>${data[p].average_rating == null ? "": data[p].average_rating}</td>
+						<td>${data[p].is_blocked ? '<td></td>': '<td><button class="btn-primary" onclick=trigger_direct_order("${data[p].name}")>Place Direct Order</button></td>'}</td>
+						</tr>`;
 
 						
 					}
@@ -57,4 +57,12 @@ function dynamic_route(name){
 	let name1= name.replace(/%/g, ' ');
 	localStorage.setItem("company", name1);
 	window.location.href = "/app/dynamic_page";
+}
+
+function trigger_direct_order(staff_name){
+	let doc = frappe.model.get_new_doc("Job Order");
+	doc.company = frappe.boot.tag.tag_user_info.company;
+	doc.staff_company = staff_name;
+	doc.posting_date_time = frappe.datetime.now_date();
+	frappe.set_route("Form", doc.doctype, doc.name);
 }
