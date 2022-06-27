@@ -774,8 +774,7 @@ def unshare_job_order(job):
 # checking condition for job_order_status in job order list              
 @frappe.whitelist()
 def vals(name,comp):
-    data=frappe.get_doc(jobOrder,name)
-    claims=data.claim
+    claims=frappe.db.get_value(jobOrder,name,'claim')
     if claims is not None and comp in claims:
         return "success"
 
