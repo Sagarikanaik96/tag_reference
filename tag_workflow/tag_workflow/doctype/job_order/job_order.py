@@ -21,6 +21,8 @@ team = "Sales Team"
 ASN = "Assign Employee"
 CLM = "Claim Order"
 
+site= frappe.utils.get_url().split('/')
+sitename=site[0]+'//'+site[2]
 class JobOrder(Document):
     def after_insert(self):
         self.check_assign()
@@ -80,7 +82,7 @@ class JobOrder(Document):
         msg = f'{comp} has submitted a claim for {emp[:-1]} for {self.select_job} at {self.job_site} on {self.posting_date_time}'
         make_system_notification(usrs, msg, ASN, new_doc.name, sub)
         msg = f'{comp} has submitted a claim for {emp[:-1]} for {self.select_job} at {self.job_site} on {self.posting_date_time}. Please review and/or approve this claim .'
-        link = f'href="/app/assign-employee/{new_doc.name}"'
+        link = f'href="{sitename}/app/assign-employee/{new_doc.name}"'
         email_temp = joborder_email_template(sub, msg, usrs, link)
         print(email_temp)
         chat_room_created(self.company, comp, self.name)

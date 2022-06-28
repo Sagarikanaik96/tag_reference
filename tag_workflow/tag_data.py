@@ -16,7 +16,8 @@ jobOrder = "Job Order"
 assignEmployees = "Assign Employee"
 NOASS = "No Access"
 exclusive_hiring = "Exclusive Hiring"
-
+site= frappe.utils.get_url().split('/')
+sitename=site[0]+'//'+site[2]
 @frappe.whitelist(allow_guest=False)
 def company_details(company_name=None):
     if frappe.session.user != 'Administrator':
@@ -187,7 +188,7 @@ def receive_hiring_notification(user, company_type, hiring_org, job_order, staff
             msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}'
             frappe.enqueue(make_system_notification,now=True,users=l,message=msg,doctype=assignEmployees,docname=doc_name,subject=sub)
             msg = f'{staffing_org} has submitted a claim for {s[:-1]} for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim .'
-            link =  f'  href="/app/assign-employee/{doc_name}" '
+            link =  f'  href="{sitename}/app/assign-employee/{doc_name}" '
             frappe.db.set_value(assignEmployees, doc_name, 'notification_check', 1)
             frappe.enqueue(joborder_email_template,now=True,sub=sub, msg=msg, l=l, link=link)
             return 1
@@ -426,7 +427,7 @@ def job_order_notification(job_order_title,hiring_org,job_order,subject,l):
     msg=f'New Work Order for a {job_order_title} has been created by {hiring_org}.'
     make_system_notification(l,msg,jobOrder,job_order,subject)   
     message=f'New Work Order for a {job_order_title} has been created by {hiring_org}.'
-    link = f' href="/app/assign-employee/{job_order}"'
+    link = f' href="{sitename}/app/job-order/{job_order}"'
     return joborder_email_template(subject,message,l,link)
     
 @frappe.whitelist(allow_guest=False)
@@ -790,7 +791,7 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
             msg = f'{staffing_org} has assigned the Employees to the {job_detail[0]["select_job"]}'
             make_system_notification(l,msg,'Assign Employee',doc_name,sub)
             msg = f'{staffing_org} has assigned the Employees to the {job_detail[0]["select_job"]}'
-            link =  f'  href="/app/assign-employee/{doc_name}" '
+            link =  f'  href="{sitename}/app/assign-employee/{doc_name}" '
             joborder_email_template(sub, msg, l, link)
             return 1
         else:

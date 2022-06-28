@@ -9,6 +9,8 @@ from tag_workflow.utils.notification import sendmail, make_system_notification
 from tag_workflow.tag_data import joborder_email_template
 import json
 
+site= frappe.utils.get_url().split('/')
+sitename=site[0]+'//'+site[2]
 from tenacity import retry
 class ClaimOrder(Document):
 	pass
@@ -52,7 +54,7 @@ def staffing_claim_joborder(job_order,hiring_org, staffing_org, doc_name,single_
 		msg = f'{staffing_org} has submitted a claim for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}'
 		make_system_notification(l,msg,claimOrder,doc_name,sub)
 		msg = f'{staffing_org} has submitted a claim for {job_detail[0]["select_job"]} at {job_detail[0]["job_site"]} on {job_detail[0]["posting_date_time"]}. Please review and/or approve this claim .'
-		link =  f'  href="/app/claim-order/{doc_name}" '
+		link =  f'  href="{sitename}/app/claim-order/{doc_name}" '
 		joborder_email_template(sub,msg,l,link)
 		return 1
 
@@ -91,7 +93,7 @@ def save_claims(my_data,doc_name):
 			sub="Approve Claim Order"
 			msg = f"{doc.hiring_organization} has approved {my_data[i]} employees for {doc_name} - {job.select_job}. Don't forget to assign employees to this order."
 			make_system_notification(l,msg,claimOrder,doc.name,sub)
-			link =  f'  href="/app/claim-order/{doc.name}" '
+			link =  f'  href="{sitename}/app/claim-order/{doc.name}" '
 			joborder_email_template(sub,msg,l,link)
 		return 1
 	except Exception as e:
@@ -147,7 +149,7 @@ def save_modified_claims(my_data,doc_name):
 			l = [l[0] for l in user_list]
 			sub="Approve Claim Order"
 			make_system_notification(l,msg,claimOrder,doc.name,sub)
-			link =  f'  href="/app/claim-order/{doc.name}" '
+			link =  f'  href="{sitename}/app/claim-order/{doc.name}" '
 			joborder_email_template(sub,msg,l,link)
 		return 1
 	except Exception as e:
@@ -183,7 +185,7 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 			subject = 'Job Order Notification'
 			msg=f'{staffing_org} placed partial claim on your work order: {job_order_data.select_job}. Please review.'
 			make_system_notification(hiring_user_list,msg,claimOrder,doc_name,subject)
-			link =  f'  href="/app/claim-order/{doc_name}" '
+			link =  f'  href="{sitename}/app/claim-order/{doc_name}" '
 			joborder_email_template(subject,msg,hiring_user_list,link)
 			return 1
 		else:
@@ -194,7 +196,7 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 
 				msg=f'{staffing_org} placed Full claim on your work order: {job_order_data.select_job}. Please review.'
 				make_system_notification(hiring_user_list,msg,claimOrder,doc_name,subject)
-				link =  f'  href="/app/claim-order/{doc_name}" '
+				link =  f'  href="{sitename}/app/claim-order/{doc_name}" '
 				joborder_email_template(subject,msg,hiring_user_list,link)
 				return 1
 	except Exception as e:
