@@ -41,7 +41,7 @@ frappe.FaceRecognition = Class.extend({
 						<td>${data[p].state == null ? "" : data[p].state}</td>
 						<td>${data[p].zip == null ? "" : data[p].zip}</td>
 						<td>${data[p].average_rating == null ? "": data[p].average_rating}</td>
-						<td>${data[p].is_blocked ? '<td></td>': '<td><button class="btn-primary" onclick=trigger_direct_order("${data[p].name}")>Place Direct Order</button></td>'}</td>
+						<td>${data[p].is_blocked ? "<td></td>": '<td><button class="btn-primary" onclick=trigger_direct_order("'+data[p].name+'")>Place Direct Order</button></td>'}</td>
 						</tr>`;
 
 						
