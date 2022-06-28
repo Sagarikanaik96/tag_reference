@@ -1129,14 +1129,6 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-col:nth-child(4) {
   flex: 1.4;
 }
-[data-page-route="List/Job Order/List"]
-  .frappe-card
-  .list-row-container
-  .level-left
-  .list-row-col:nth-child(7) {
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
 
 [data-page-route="List/Job Order/List"]
   .frappe-card
@@ -1154,6 +1146,10 @@ select.input-with-feedback.form-control.ellipsis {
 .list-row .level-right,
 .list-row-head .level-right {
   flex: 0.3;
+}
+[data-page-route="List/Sales Invoice/List"] .list-row .level-right,
+[data-page-route="List/Sales Invoice/List"] .list-row-head .level-right {
+  flex: 1.5;
 }
 .block-company-btn {
   margin-right: 50px;
