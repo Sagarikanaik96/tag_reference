@@ -1956,7 +1956,7 @@ function non_claims(){
 			found= true;
 		}
 	}
-	if(!found){
+	if(!found && frappe.boot.tag.tag_user_info.company_type == 'Staffing'){
 		cur_frm.toggle_display('section_break_html1', 1);
 	}
 }		
