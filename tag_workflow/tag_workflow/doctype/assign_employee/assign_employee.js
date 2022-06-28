@@ -269,17 +269,9 @@ function approved_employee(frm){
 		let current_date = new Date(frappe.datetime.now_datetime());
 		let approved_date = new Date(frm.doc.modified);
 		let diff = current_date.getTime()-approved_date.getTime();
-		console.log(cur_frm.doc.employee_details.length)
-		let table_len = cur_frm.doc.employee_details.length
-		if(table_len> cur_frm.doc.no_of_employee_required){
-			let count=0
-			for(let d in cur_frm.doc.employee_details){
-				let approv=cur_frm.doc.employee_details[d].approved
-				if(approv==1){
-					count+=1;
-				}
-			}
-			table_len=count;
+		let emp_selected = 0;
+		for(let i in frm.doc.employee_details){
+			emp_selected+=cur_frm.doc.employee_details[i]['approved']
 		}
 		diff = parseInt(diff/1000);
 		if(diff<60){
@@ -289,7 +281,7 @@ function approved_employee(frm){
 				"freeze_message": "<p><b>preparing notification for Staffing orgs...</b></p>",
 				args:{
 					"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "sid": frappe.boot.tag.tag_user_info.sid,
-					"job_name" : cur_frm.doc.job_order, "employee_filled" : table_len,
+					"job_name" : cur_frm.doc.job_order, "employee_filled" : emp_selected,
 					"staffing_org" : cur_frm.doc.company, "hiringorg" : cur_frm.doc.hiring_organization, "name": frm.doc.name
 				},
 				callback:function(r){
