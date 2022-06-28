@@ -197,7 +197,7 @@ function cancel_salesinvoice(frm){
 /*--------------------QuickBooks Export------------------*/
 function sync_with_quickbook(frm){
     let roles = frappe.user_roles || [];
-    if(frm.doc.__islocal !=1 && frm.doc.docstatus == 0 && ((roles.includes("Staffing Admin")) || (roles.includes("Tag User") || roles.includes("Tag Admin")))){
+    if(frm.doc.__islocal !=1 && frm.doc.docstatus == 0 && ((roles.includes("Staffing Admin") || roles.includes("Staffing User")) || (roles.includes("Tag User") || roles.includes("Tag Admin")))){
         let button;
 		if(frm.doc.quickbook_invoice_id){
 			button = "Update in QuickBooks";

@@ -5930,7 +5930,7 @@
    "columns": 0,
    "creation": "2022-06-24 02:01:13.071560",
    "default": null,
-   "depends_on": "eval:doc.__islocal!=1 && doc.organization_type== 'Staffing' && frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring' && frappe.boot.tag.tag_user_info.company_type!='Hiring'",
+   "depends_on": "eval:doc.__islocal!=1 && doc.organization_type== 'Staffing' && frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring' && frappe.boot.tag.tag_user_info.company_type!='Hiring' && frappe.boot.tag.tag_user_info.user_type!=\"Staffing User\"",
    "description": null,
    "docstatus": 0,
    "dt": "Company",

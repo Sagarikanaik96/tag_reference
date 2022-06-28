@@ -177,10 +177,13 @@ def merge_employees_data(invoice, employee):
             n_rate, n_qty, f_rate, o_rate, o_qty = 0, 0, 0, 0, 0
             for t in invoice.timesheets:
                 if(e == t.employee_name):
-                    n_rate, n_qty, f_rate = t.per_hour_rate1, n_qty+t.normal_hour, f_rate+t.flat_rate
+                    n_rate, f_rate = t.per_hour_rate1, f_rate+t.flat_rate
+                    bill_hour = t.billing_hours
                     if(t.overtime_hours > 0):
                         o_qty += o_qty+t.overtime_hours
                         o_rate = t.overtime_rate
+                        bill_hour = t.billing_hours-t.overtime_hours
+                    n_qty += bill_hour
 
             items.append({"employee": e+"(Standard)", "rate": n_rate, "qty": n_qty})
             if(f_rate > 0):
