@@ -674,12 +674,12 @@
   {
    "fieldname": "claimed_html",
    "fieldtype": "HTML",
-   "options": "<h3>This Job Order is ongoing and has reached its desired head count.</h3>"
+   "options": "<h3>This Job Order has reached its desired head count.</h3>"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-24 08:32:02.651909",
+ "modified": "2022-06-28 04:12:00.442405",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

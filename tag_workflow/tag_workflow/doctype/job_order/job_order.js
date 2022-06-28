@@ -1909,13 +1909,6 @@ function hiring_review_box(frm){
 	}
 }
 
-function order_claimed(frm){
-	if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.bid > 0 && frm.doc.staff_org_claimed && !frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company) && frm.doc.no_of_workers == frm.doc.worker_filled){
-		frm.set_df_property('section_break_html3', "hidden", 0);
-	}
-}
-
-
 function add_id(){
 	if(cur_frm.doc.order_status=='Completed'){
 		$('[data-fieldname="rate"]').attr('id','_rate');
@@ -1959,4 +1952,51 @@ function non_claims(){
 	if(!found && frappe.boot.tag.tag_user_info.company_type == 'Staffing'){
 		cur_frm.toggle_display('section_break_html1', 1);
 	}
-}		
+}
+
+function order_claimed(frm){
+	if(frm.doc.resumes_required ==0 && frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.claim && !frm.doc.claim.includes(frappe.boot.tag.tag_user_info.company)){
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.job_order.job_order.claim_headcount",
+			args: {
+				"job_order": frm.doc.name
+			},
+			callback: function(r){
+				if(r.message){
+					order_claimed_contd(r.message, frm);
+				}
+			}
+		});
+	}
+}
+
+function order_claimed_contd(result, frm){
+	let total_approved_emp = 0;
+	for(let i in result){
+		total_approved_emp += result[i]
+	}
+	if (total_approved_emp == frm.doc.no_of_workers){
+		frm.remove_custom_button('Claim Order')
+		frm.set_df_property('section_break_html3', "hidden", 0);
+	}
+	if(frm.doc.staff_org_claimed && !frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company) && frm.doc.no_of_workers > frm.doc.worker_filled){
+		assigned_emp_comp(frm)
+	}
+}
+
+function assigned_emp_comp(frm){
+	frappe.call({
+		method: "tag_workflow.tag_workflow.doctype.job_order.job_order.assigned_emp_comp",
+		args: {
+			job_order: frm.doc.name
+		},
+		callback: function(r){
+			if(r.message.length>0 && !r.message.includes(frappe.boot.tag.tag_user_info.company)){
+				frm.add_custom_button(__('Claim Order'), function(){
+					claim_job_order_staffing(frm);
+				});
+				frm.set_df_property('section_break_html3', "hidden", 1);
+			}
+		}
+	})
+}

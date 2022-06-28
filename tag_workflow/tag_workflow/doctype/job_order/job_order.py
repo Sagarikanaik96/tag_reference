@@ -479,3 +479,15 @@ def no_of_workers_changed(doc_name):
                 for name in assign_emp:
                     frappe.db.sql('''UPDATE `tabAssign Employee` set no_of_employee_required = "{0}" where name="{1}"'''.format(new_data['changed'][0][2],name[0]))
             frappe.db.commit()
+
+@frappe.whitelist()
+def claim_headcount(job_order):
+    sql = '''SELECT approved_no_of_workers from `tabClaim Order` where job_order = "{0}"'''.format(job_order)
+    res = frappe.db.sql(sql, as_list = True)
+    return [element for innerList in res for element in innerList]
+
+@frappe.whitelist()
+def assigned_emp_comp(job_order):
+    sql = '''SELECT company from `tabAssign Employee` where job_order = "{0}"'''.format(job_order)
+    res = frappe.db.sql(sql, as_list = True)
+    return [element for innerList in res for element in innerList]
