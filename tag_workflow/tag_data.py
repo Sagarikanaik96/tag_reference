@@ -764,17 +764,10 @@ def unshare_job_order(job):
 
 # checking condition for job_order_status in job order list              
 @frappe.whitelist()
-def vals(name,comp, user):
+def vals(name,comp):
     data=frappe.get_doc(jobOrder,name)
     claims=data.claim
     if claims is not None and comp in claims:
-        return "success"
-    else:
-        val1 = claim_order_company(user_name=user,claimed=data.claim)
-        if val1=="unsuccess":
-            val= approved_claims(workers=data.no_of_workers,jo= name)
-            if val==1:
-                return "unsuccess"
         return "success"
 
 
@@ -833,9 +826,7 @@ def claim_order_company(user_name,claimed):
     data = f'select company from `tabEmployee` where email="{user_name}"'
     sq = frappe.db.sql(data,as_list=True)
     for i in sq:
-        if(type(i[0]==None)):
-            continue        
-        elif i[0] in claimed:
+        if i[0] in claimed:
             return "success"
     return 'unsuccess'
 

@@ -80,7 +80,6 @@ frappe.listview_settings['Job Order'] = {
 					args:{
 						'name':f.name,
 						'comp':frappe.boot.tag.tag_user_info.company,
-						'user':frappe.session.user
 					},
 					async:0,
 					callback:function(r)
