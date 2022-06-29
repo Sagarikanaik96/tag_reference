@@ -1154,7 +1154,12 @@ select.input-with-feedback.form-control.ellipsis {
 .block-company-btn {
   margin-right: 50px;
 }
-[data-page-route="List/Item/List"] .frappe-card .list-row-container .ellipsis {
+[data-page-route="List/Item/List"] .frappe-card .list-row-container .ellipsis,
+[data-page-route="List/Job Order/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(7) {
   white-space: nowrap;
   text-overflow: ellipsis;
   word-break: unset;
