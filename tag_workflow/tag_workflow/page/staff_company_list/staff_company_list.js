@@ -41,7 +41,7 @@ frappe.FaceRecognition = Class.extend({
 						<td>${data[p].state == null ? "" : data[p].state}</td>
 						<td>${data[p].zip == null ? "" : data[p].zip}</td>
 						<td>${data[p].average_rating == null ? "": data[p].average_rating}</td>
-						<td>${data[p].is_blocked ? "<td></td>": '<td><button class="btn-primary" onclick=trigger_direct_order("'+data[p].name+'")>Place Direct Order</button></td>'}</td>
+						<td>${data[p].is_blocked ? "<td></td>": '<td><button class="btn-primary" onclick=trigger_direct_order("'+link+'")>Place Direct Order</button></td>'}</td>
 						</tr>`;
 
 						
@@ -60,6 +60,7 @@ function dynamic_route(name){
 }
 
 function trigger_direct_order(staff_name){
+	staff_name = staff_name.split('%').join(' ')
 	let doc = frappe.model.get_new_doc("Job Order");
 	doc.company = frappe.boot.tag.tag_user_info.company;
 	doc.staff_company = staff_name;
