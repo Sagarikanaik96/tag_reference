@@ -124,7 +124,10 @@ override_doctype_dashboards = {
 }
 scheduler_events={
         "all":  [
-            "tag_workflow.tag_data.update_job_order_status"
+                "tag_workflow.tag_data.update_job_order_status"
+	],
+        "daily": [
+	        "tag_workflow.tag_data.lead_follow_up"
 	]
 }
 

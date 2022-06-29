@@ -55,9 +55,15 @@
                      {{ content }}
                 </p>
                 {% if link %}
-                <p> 
-                    <a{{link}}> View </a>
-                </p>
+                    {% if lead =='true' %}
+                        <p>
+                            <a {{link}}> View Lead </a>
+                        </p>
+                    {% else %}
+                        <p>
+                            <a {{link}}> View </a>
+                        </p>
+                    {% endif %}
                 {% endif %}
                 <p class="footer"> 
                     © 2022 TAG | All rights reserved

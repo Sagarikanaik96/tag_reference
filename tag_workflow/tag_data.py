@@ -8,6 +8,7 @@ from frappe.utils import date_diff
 import json
 import datetime
 import requests, time
+from frappe.utils.data import getdate
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
@@ -1314,3 +1315,36 @@ def update_lat_lng_required(company,employee_id):
         update_old_emp_lat_lng(company,employee_id)
     except Exception as e:
         frappe.error_log(e,'Employee Lat Lng error')
+
+def no_contact_by(company):
+    try:
+        sql = """select name from `tabUser` where company = '{0}'""".format(company)
+        users = frappe.db.sql(sql, as_list= True)
+        recipients = []
+        if len(users)>0:
+            for user in users:
+                recipients.append(user[0])
+        return recipients
+    except Exception as e:
+        frappe.log_error(e, "Failed to retrieve users of a company for Lead Follow Up")
+
+def lead_follow_up():
+    try:
+        sql = '''select name, contact_date, contact_by, owner_company, lead_name, company_name from tabLead'''
+        data = frappe.db.sql(sql, as_list = True)
+        for i in data:
+            if i[1] and ((getdate(i[1]) - datetime.date.today()).days == 1 or (getdate(i[1]) == datetime.date.today())):
+                if not i[2]:
+                    recipients = no_contact_by(i[3])
+                else:
+                    recipients = []
+                    recipients.append(i[2])
+                site= frappe.utils.get_url().split('/')
+                sitename=site[0]+'//'+site[2]
+                sub = f'Follow Up Reminder'
+                msg = f'Reminder to follow up with {i[4]} at {i[5]} on {i[1]}. Contact information and lead notes can be found in TAG.'
+                link = f'href="/app/lead/{i[0]}"'
+                make_system_notification(users=recipients,message=msg,doctype="Lead",docname=i[0],subject=sub)
+                enqueue(method=frappe.sendmail, recipients=recipients, subject=sub, reference_name=i[0], message=msg, template="email_template_custom", args = {"sitename":sitename,"content":msg,"subject":sub, "lead": "true", "link":link})
+    except Exception as e:
+        frappe.log_error(e, "Lead Follow Up")
