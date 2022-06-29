@@ -761,13 +761,22 @@ def unshare_job_order(job):
                     del_data=f'''DELETE FROM `tabDocShare` where share_doctype='Job Order' and share_name="{job.name}" and user="{i[0]}"'''
                     frappe.db.sql(del_data)
                     frappe.db.commit()
-                
+
+# checking condition for job_order_status in job order list              
 @frappe.whitelist()
-def vals(name,comp):
+def vals(name,comp, user):
     data=frappe.get_doc(jobOrder,name)
     claims=data.claim
     if claims is not None and comp in claims:
         return "success"
+    else:
+        val1 = claim_order_company(user_name=user,claimed=data.claim)
+        if val1=="unsuccess":
+            val= approved_claims(workers=data.no_of_workers,jo= name)
+            if val==1:
+                return "unsuccess"
+        return "success"
+
 
 
 @frappe.whitelist(allow_guest=False)
@@ -805,6 +814,19 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
 def jobcategory_data(job_order):
     sql = """ select job_category from `tabJob Category` where parent='{}' """.format(job_order)
     return frappe.db.sql(sql)
+
+# number of claims approved for job order
+@frappe.whitelist()
+def approved_claims(workers, jo):
+    data1= f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{jo}"'
+    sq1= frappe.db.sql(data1,as_list=True)
+    if sq1[0][0]==None:
+        sq1[0][0]=0
+    value=int(workers)-int(sq1[0][0])
+    if value>0:
+        return 1
+    return 0
+
 
 @frappe.whitelist()
 def claim_order_company(user_name,claimed):

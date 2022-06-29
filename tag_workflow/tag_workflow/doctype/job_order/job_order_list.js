@@ -73,13 +73,14 @@ frappe.listview_settings['Job Order'] = {
 
 	formatters: {
 		order_status(val, d, f) {
-			if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && (val=='Upcoming' || (val=='Ongoing' && f.creation.includes(frappe.datetime.get_today()))) && (f.no_of_workers!=f.worker_filled)){
+			if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && val!='Completed' && (f.no_of_workers!=f.worker_filled)){
 				let y
 				frappe.call({
 					method:'tag_workflow.tag_data.vals',
 					args:{
 						'name':f.name,
-						'comp':frappe.boot.tag.tag_user_info.company
+						'comp':frappe.boot.tag.tag_user_info.company,
+						'user':frappe.session.user
 					},
 					async:0,
 					callback:function(r)

@@ -1099,7 +1099,7 @@ function timesheets_view(frm) {
 }
 
 function claim_orders(frm){
-	if((frm.doc.order_status == 'Upcoming' || (cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date && cur_frm.doc.from_date == frappe.datetime.now_date())) && frm.doc.resumes_required == 0 ){
+	if(frm.doc.order_status != "Completed" && frm.doc.resumes_required == 0 ){
 		if (frm.doc.staff_org_claimed){
 			frappe.route_options = {
 				"job_order": ["=", frm.doc.name],
@@ -1496,8 +1496,16 @@ function claim_order_button(frm) {
 			"args": {"user_name": frappe.session.user, "claimed": cur_frm.doc.claim || ""},
 			"callback": function(r){
 				if(r.message == "unsuccess"){
-					cur_frm.add_custom_button(__('Claim Order'), function(){
-						claim_job_order_staffing(frm);
+					frappe.call({
+						"method": "tag_workflow.tag_data.approved_claims",
+						"args": {"workers":frm.doc.no_of_workers , "jo": cur_frm.doc.name},
+						"callback": function(s){
+								if(s.message == 1){	
+									cur_frm.add_custom_button(__('Claim Order'), function(){
+									claim_job_order_staffing(frm);
+								})
+							}						
+						}
 					});
 				}
 			}
@@ -1606,7 +1614,7 @@ function set_exc_industry_company(frm){
 	}
 }
 function order_buttons(frm){
-	if (((cur_frm.doc.creation && cur_frm.doc.creation.split(' ')[0] == cur_frm.doc.from_date) && (cur_frm.doc.from_date == frappe.datetime.now_date()) && frappe.boot.tag.tag_user_info.company_type == "Staffing") || (frm.doc.order_status == "Upcoming" && (frappe.user_roles.includes("Staffing Admin") || frappe.user_roles.includes("Staffing User")))){
+	if (cur_frm.doc.order_status != 'Completed' && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
 		if (frm.doc.resumes_required){
 			assign_emp_button(frm);
 		}else{
