@@ -510,3 +510,25 @@ def assigned_emp_comp(job_order):
     sql = '''SELECT company from `tabAssign Employee` where job_order = "{0}"'''.format(job_order)
     res = frappe.db.sql(sql, as_list = True)
     return [element for innerList in res for element in innerList]
+@frappe.whitelist()
+def check_order_already_exist(frm):    
+    try:
+        data=json.loads(frm)
+        company=data['company']
+        job_site=data['job_site']
+        category=data['category']
+        select_job=data['select_job']
+        start_date=data['from_date']
+        end_date=data['to_date']
+        check_data_base=f'select name from `tabJob Order` where company="{company}" and job_site="{job_site}" and category="{category}" and select_job="{select_job}" and order_status!="Completed" and ((from_date between "{start_date}" and "{end_date}") or (to_date between "{start_date}" and "{end_date}")  )'
+        data_exist=frappe.db.sql(check_data_base,as_dict=1)
+        if(data_exist):
+            l=[]
+            for i in data_exist:
+                l.append(i['name'])
+            s = ", ".join(l)
+            return l,s
+        else:
+            return 1
+    except Exception as e:
+        frappe.error_log(e,'Check same order') 

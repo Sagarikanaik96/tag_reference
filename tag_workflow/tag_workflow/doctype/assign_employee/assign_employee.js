@@ -90,6 +90,49 @@ frappe.ui.form.on('Assign Employee', {
 	
 	before_save:function(frm){
 		check_employee_data(frm);
+		if(frappe.validated && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+			frappe.call({
+				'method':'tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.check_emp_available',
+				'args':{
+					'frm':frm.doc
+				},
+				async: 1,
+				callback:function(r){
+					if(r.message.length==0 || r.message==1){
+						console.log(r.message)
+					}
+					else{
+						return new Promise(function(resolve,reject) {
+							let pop_up1;
+							let msg1=''
+							for(let i=0;i<=r.message.length-1;i++){
+								let new_msg='Warning: '+r.message[i]["employee"]+'is scheduled for '+r.message[i]["job_order"] +' within this Job Order’s timeframe.'
+								msg1= msg1+"<br>"+new_msg
+							}
+							pop_up1=msg1
+							let confirm_assign = new frappe.ui.Dialog({
+								title: __('Warning'),
+								fields: [{fieldname: "save_joborder", fieldtype: "HTML", options: pop_up1},]
+							});
+							confirm_assign.no_cancel();
+							confirm_assign.set_primary_action(__('Confirm'), function() {
+								let resp = "frappe.validated = false";
+								resolve(resp);
+								confirm_assign.hide();
+							});
+							confirm_assign.set_secondary_action_label(__('Cancel'));
+							confirm_assign.set_secondary_action(() => {
+								reject();
+								confirm_assign.hide();
+							});
+							confirm_assign.show();
+							confirm_assign.$wrapper.find('.modal-dialog').css('width', '450px');
+						});					
+					}
+				}
+			})
+
+		}		
 	},
 	company:function(){
 		cur_frm.clear_table("employee_details")

@@ -257,10 +257,18 @@ frappe.ui.form.on("Job Order", {
 					});
 					confirm_joborder.no_cancel();
 					confirm_joborder.set_primary_action(__('Confirm'), function() {
-						let resp = "frappe.validated = false";
-						resolve(resp);
-						check_company_detail(frm);
 						confirm_joborder.hide();
+						frappe.call({
+							method:"tag_workflow.tag_workflow.doctype.job_order.job_order.check_order_already_exist",
+							args:{
+								'frm':frm.doc
+							},
+							async:1,
+							callback:function(r){
+								check_exist_order(r,frm,resolve,reject)
+	
+							}
+						})	
 					});
 					confirm_joborder.set_secondary_action_label(__('Cancel'));
 					confirm_joborder.set_secondary_action(() => {
@@ -2034,3 +2042,44 @@ function assigned_emp_comp(frm){
 		}
 	})
 }
+function check_exist_order(r,frm,resolve,reject){
+	if(r.message==1){
+		frappe.validated=true
+		let resp = "frappe.validated = false";
+		resolve(resp);
+		check_company_detail(frm);
+
+	}
+	else{
+		return new Promise(function() {
+			let pop_up;
+			if(r.message[0].length>=2){
+				pop_up="Warning:"+r.message[1] +" are scheduled for the same timeframe. "
+			}
+			else
+			{
+				pop_up="Warning:"+r.message[1] +" is scheduled for the same timeframe. "
+			}
+			let confirm_joborder1 = new frappe.ui.Dialog({
+				title: __('Warning'),
+				fields: [{fieldname: "save_joborder", fieldtype: "HTML", options: pop_up},]
+			});
+			confirm_joborder1.no_cancel();
+			confirm_joborder1.set_primary_action(__('Confirm'), function() {
+				let resp = "frappe.validated = false";
+				resolve(resp);
+				check_company_detail(frm);
+				confirm_joborder1.hide();
+
+			});
+			confirm_joborder1.set_secondary_action_label(__('Cancel'));
+			confirm_joborder1.set_secondary_action(() => {
+				reject();
+				confirm_joborder1.hide();
+			});
+			confirm_joborder1.show();
+			confirm_joborder1.$wrapper.find('.modal-dialog').css('width', '450px');
+		});
+	}
+
+} 
