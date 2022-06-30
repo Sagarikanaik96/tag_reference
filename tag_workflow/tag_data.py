@@ -448,7 +448,7 @@ def disable_user(company, check):
 @frappe.whitelist()
 def update_job_order_status():
     try:
-        job_order_data=frappe.get_all(jobOrder,fields=['name','from_date','to_date','bid','staff_org_claimed','order_status','from_date','creation','no_of_workers','worker_filled'],filters={'order_status': ['not like', '%Completed%'] })    
+        job_order_data=frappe.db.sql("select name,from_date,to_date,bid,staff_org_claimed,order_status,from_date,creation,no_of_workers,worker_filled from `tabJob Order` where order_status not like '%Completed%'",as_dict=True)
         now_date=datetime.date.today()
         for job in job_order_data:
             start_date = job.from_date if job.from_date else ""
