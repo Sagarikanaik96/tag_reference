@@ -202,7 +202,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 					if(!me.df.only_select) {
 						if(frappe.model.can_create(doctype)) {
 							// new item
-							if ((cur_list && cur_frm== null) || (cur_list && cur_frm &&cur_frm.doc.doctype!='Assign Employee'))
+							if((frappe.boot.tag.tag_user_info.company_type!='Staffing') ||((frappe.boot.tag.tag_user_info.company_type=='Staffing') && (cur_list && cur_frm== null) || (cur_list && cur_frm &&cur_frm.doc.doctype!='Assign Employee')))
 							{
 								r.results.push({
 									html: "<span class='text-primary link-option'>"
@@ -219,7 +219,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 
 						if (locals && locals['DocType']) {
 							// not applicable in web forms
-							if ((cur_list && cur_frm== null) || (cur_list && cur_frm && cur_frm.doc.doctype!='Assign Employee'))
+							if((frappe.boot.tag.tag_user_info.company_type!='Staffing') ||((frappe.boot.tag.tag_user_info.company_type=='Staffing') && (cur_list && cur_frm== null) || (cur_list && cur_frm &&cur_frm.doc.doctype!='Assign Employee')))
 							{
 								r.results.push({
 									html: "<span class='text-primary link-option'>"
