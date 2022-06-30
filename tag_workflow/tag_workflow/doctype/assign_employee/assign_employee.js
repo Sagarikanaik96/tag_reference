@@ -659,7 +659,7 @@ function add_dynamic(){
 }
 
 function select_employees(frm){
-	if(frappe.boot.tag.tag_user_info.company_type== "Hiring"){
+	if(frappe.boot.tag.tag_user_info.company_type== "Hiring" && frm.doc.tag_status=="Open"){
 		frm.add_custom_button(__('Select Employees'), function(){
 			pop_up();
 		});
