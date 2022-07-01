@@ -122,14 +122,14 @@ frappe.ui.form.on("User", {
 	},
 	first_name:function(){
 		if(cur_frm.doc.first_name){
-			let first_name = cur_frm.doc.first_name;
+			let first_name = (cur_frm.doc.first_name).trim();
 			first_name = name_update(first_name);
 			cur_frm.set_value("first_name",first_name);
 		}
 	},		
 	last_name:function(){
 		if(cur_frm.doc.last_name){
-			let last_name = cur_frm.doc.last_name;
+			let last_name = (cur_frm.doc.last_name).trim();
 			last_name = name_update(last_name);
 			cur_frm.set_value("last_name",last_name);
 		}

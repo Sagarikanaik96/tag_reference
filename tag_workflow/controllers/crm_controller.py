@@ -41,10 +41,10 @@ def get_org_types(staffing, organization_type=None):
 def onboard_org(lead,contract_number):
     try:
         lead_value=frappe.get_doc('Lead',lead)
-        exclusive=lead_value.company_name
+        exclusive=(lead_value.company_name).strip()
         staffing=lead_value.owner_company
-        email=lead_value.email_id
-        person_name=lead_value.lead_name
+        email=(lead_value.email_id).strip()
+        person_name=(lead_value.lead_name).strip()
         phone=lead_value.phone_no
         organization_type=lead_value.organization_type
         lead_value.db_set('status', 'Contract Signing')

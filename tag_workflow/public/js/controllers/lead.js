@@ -196,7 +196,13 @@ frappe.ui.form.on("Lead", {
   zip: function(frm){
 		let zip = frm.doc.zip;
 		frm.set_value('zip', zip?zip.toUpperCase():zip);
-	}
+	},
+  lead_name:function(frm){
+    if(frm.doc.lead_name){
+			let lead_name = (cur_frm.doc.lead_name).trim();
+			cur_frm.set_value("lead_name",lead_name);
+		}
+  }
 });
 
 /*-------reqd------*/
