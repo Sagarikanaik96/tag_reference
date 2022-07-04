@@ -472,17 +472,32 @@ def hiring_diff_status(job_order_name):
 
 @frappe.whitelist()
 def no_of_workers_changed(doc_name):
-    change = frappe.db.sql('''select data from `tabVersion` where docname = "{}" '''.format(doc_name), as_dict= True)
+    change = frappe.db.sql('''SELECT data FROM `tabVersion` WHERE docname = "{0}"'''.format(doc_name), as_dict = True)
     if len(change) > 2:
-        data=frappe.db.sql(''' select data from `tabVersion` where docname='{}' order by modified DESC'''.format(doc_name), as_list=True)
-        new_data=json.loads(data[0][0])
-        if(new_data['changed'][0][0]=='no_of_workers'):
-            frappe.db.sql('''UPDATE `tabClaim Order` set no_of_workers_joborder = "{0}" where job_order="{1}"'''.format(new_data['changed'][0][2],doc_name))
-            assign_emp=frappe.db.sql('''select name from `tabAssign Employee` where job_order="{0}"'''.format(doc_name), as_list=True)
-            if len(assign_emp) > 0:
-                for name in assign_emp:
-                    frappe.db.sql('''UPDATE `tabAssign Employee` set no_of_employee_required = "{0}" where name="{1}"'''.format(new_data['changed'][0][2],name[0]))
+        data = frappe.db.sql('''SELECT data FROM `tabVersion` WHERE docname = "{0}" ORDER BY modified DESC'''.format(doc_name), as_list = True)
+        new_data = json.loads(data[0][0])
+        if(new_data['changed'][0][0] == 'no_of_workers'):
+            frappe.db.sql('''UPDATE `tabClaim Order` SET no_of_workers_joborder = "{0}" WHERE job_order = "{1}"'''.format(new_data['changed'][0][2], doc_name))
             frappe.db.commit()
+            sql = '''SELECT name, no_of_workers_joborder, staff_claims_no FROM `tabClaim Order` WHERE job_order = "{0}"'''.format(doc_name)
+            result = frappe.db.sql(sql, as_list = True)
+            for i in result:
+                if i[1] < i[2]:
+                    frappe.db.sql('''UPDATE `tabClaim Order` SET staff_claims_no = "{0}" WHERE name = "{1}"'''.format(i[2]+(i[1]-i[2]), i[0]))
+                    frappe.db.commit()
+            change_assigned_emp(doc_name, new_data)
+
+@frappe.whitelist()
+def change_assigned_emp(doc_name, new_data=None):
+    if new_data == None:
+        data = frappe.db.sql('''SELECT data FROM `tabVersion` WHERE docname="{0}" ORDER BY modified DESC'''.format(doc_name), as_list = True)
+        new_data = json.loads(data[0][0])
+    if new_data['changed'][0][0] == 'no_of_workers':
+        assign_emp = frappe.db.sql('''SELECT name FROM `tabAssign Employee` WHERE job_order="{0}"'''.format(doc_name), as_list=True)
+        if len(assign_emp) > 0:
+            for name in assign_emp:
+                frappe.db.sql('''UPDATE `tabAssign Employee` SET no_of_employee_required = "{0}" WHERE name="{1}"'''.format(new_data['changed'][0][2],name[0]))
+                frappe.db.commit()
 
 @frappe.whitelist()
 def claim_headcount(job_order):

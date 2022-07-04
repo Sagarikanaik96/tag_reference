@@ -272,6 +272,20 @@ frappe.ui.form.on("Job Order", {
 				});
 			}
 		}
+		else if(frm.doc.resumes_required==0){
+			frappe.call({
+				method: "tag_workflow.tag_workflow.doctype.job_order.job_order.claim_headcount",
+				args: {
+					job_order: frm.doc.name
+				},
+				callback: function(r){
+					if(r.message.length > 0 && frm.doc.no_of_workers < r.message.reduce((a, b) => a + b, 0)){
+						frappe.msgprint({message: __("You cannot decrease the number of workers than the number of selected headcounts."), title: __("Error"),indicator: "red"})
+						frappe.validated = false;
+					}
+				}
+			})
+		}
 	},
 
 	after_save: function(frm) {
@@ -1928,13 +1942,23 @@ function add_id(){
 }
 
 function no_of_workers_changed(frm){
-	if(frm.doc.claim && frm.doc.resumes_required==0){
-		frappe.call({
-			method: "tag_workflow.tag_workflow.doctype.job_order.job_order.no_of_workers_changed",
-			args: {
-				doc_name: frm.doc.name
-			},
-		});
+	if(frm.doc.claim){
+		if(frm.doc.resumes_required==0){
+			frappe.call({
+				method: "tag_workflow.tag_workflow.doctype.job_order.job_order.no_of_workers_changed",
+				args: {
+					doc_name: frm.doc.name
+				},
+			});
+		}
+		else{
+			frappe.call({
+				method: "tag_workflow.tag_workflow.doctype.job_order.job_order.change_assigned_emp",
+				args: {
+					doc_name: frm.doc.name
+				},
+			});
+		}
 	}
 }
 
