@@ -42,6 +42,9 @@ class JobOrder(Document):
                     new_doc = frappe.copy_doc(old_assign)
                     new_doc.tag_status = "Open"
                     new_doc.job_order= self.name
+                    meta = frappe.get_meta(ASN)
+                    for field in meta.get_link_fields():
+                        field.ignore_user_permissions=1
                     new_doc.flags.ignore_permissions = True
                     new_doc.save(ignore_permissions=True)
                     worker_filled=len(new_doc.employee_details)+worker_filled
@@ -52,16 +55,17 @@ class JobOrder(Document):
                     self.assign_doc(new_doc.name, ASN,comp)
                     self.auto_email(new_doc,comp)
 
-                if(frappe.db.exists(CLM, {"job_order": self.repeat_from, "staffing_organization": comp})):
-                    frappe.db.set_value(ORD, self.name, "claim", ","+comp)
-                    old_claim = frappe.get_doc(CLM, {"job_order": self.repeat_from, "staffing_organization": comp})
-                    new_claim = frappe.copy_doc(old_claim)
-                    new_claim.job_order = self.name
-                    new_claim.save(ignore_permissions=True)
-                    self.assign_doc(new_claim.name, CLM,comp)
+                self.check_claims(comp)
             frappe.db.set_value(ORD, self.name, "worker_filled", worker_filled)
             self.remaining_companies(self.staff_company,self.repeat_from,self.name,self.company,self.select_job)
-
+    def check_claims(self,comp):
+        if(frappe.db.exists(CLM, {"job_order": self.repeat_from, "staffing_organization": comp})):
+            frappe.db.set_value(ORD, self.name, "claim", ","+comp)
+            old_claim = frappe.get_doc(CLM, {"job_order": self.repeat_from, "staffing_organization": comp})
+            new_claim = frappe.copy_doc(old_claim)
+            new_claim.job_order = self.name
+            new_claim.save(ignore_permissions=True)
+            self.assign_doc(new_claim.name, CLM,comp)
 
     def assign_doc(self, name, doc_type,comp):
         stf_usr = frappe.db.get_list("Employee", {"company": comp, "user_id": ["not like", None]}, "user_id as name", ignore_permissions=1)
