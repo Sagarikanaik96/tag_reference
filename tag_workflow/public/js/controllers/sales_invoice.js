@@ -197,22 +197,17 @@ function cancel_salesinvoice(frm){
 /*--------------------QuickBooks Export------------------*/
 function sync_with_quickbook(frm){
     let roles = frappe.user_roles || [];
-    if(frm.doc.__islocal !=1 && frm.doc.docstatus == 0 && ((roles.includes("Staffing Admin") || roles.includes("Staffing User")) || (roles.includes("Tag User") || roles.includes("Tag Admin")))){
-        let button;
-		if(frm.doc.quickbook_invoice_id){
-			button = "Update in QuickBooks";
-		}else{
-			button = "Export to QuickBooks";
-		}
-
+    if(!frm.doc.quickbook_invoice_id && frm.doc.docstatus == 1 && ((roles.includes("Staffing Admin") || roles.includes("Staffing User")) || (roles.includes("Tag User") || roles.includes("Tag Admin")))){
 		frappe.db.get_value("Company", {"name": frm.doc.company}, ["client_id", "client_secret", "quickbooks_company_id"], function(r){
 			if(r.client_id && r.client_secret && r.quickbooks_company_id){
-				frm.add_custom_button(__(button), function(){
+				frm.add_custom_button(__("Export to QuickBooks"), function(){
 					insert_update_quickbook_invoice(frm);
 				}).addClass("btn-primary");
 			}
 		});
-	}
+	}else if(frm.doc.quickbook_invoice_id){
+        cur_frm.dashboard.set_headline(__(`<div style="display: flex;flex-direction: inherit;"><p>This Invoice was successfully exported to QuickBooks with quickbooks id: <b>${frm.doc.quickbook_invoice_id}</b></p></div>`));
+    }
 }
 
 function insert_update_quickbook_invoice(frm){
