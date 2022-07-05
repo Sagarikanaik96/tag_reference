@@ -205,6 +205,7 @@ def check_employee(name, first_name, company, last_name=None, gender=None, date_
             enqueue("tag_workflow.controllers.master_controller.user_exclusive_perm", now=True, user=name, company=company, organization_type=None)
             enqueue("tag_workflow.utils.trigger_session.share_company_with_user", now=True, users=users)
             enqueue("tag_workflow.controllers.master_controller.share_old_docs", queue='default', user=name, company=company, company_type=organization_type)
+            enqueue("tag_workflow.controllers.master_controller.new_staff_company", now=True, user=name, company=company, company_type=organization_type)
         elif(organization_type == "TAG"):
             remove_tag_permission(name, emp.name, company)
     except Exception as e:
@@ -277,3 +278,26 @@ def share_old_docs(user, company, company_type):
                 continue
     except Exception as e:
         frappe.error_log(e, "share_old_docs")
+def new_staff_company(user,company,company_type):
+    try:
+        data=[]
+        if company_type=='Staffing':
+            only_single_emp=frappe.db.sql('select count(name) from `tabUser` where company="{0}"'.format(company),as_list=1)
+            if(only_single_emp[0][0]==1):
+                unclaimed_order=frappe.db.sql('select name from `tabJob Order` where (claim is null or claim="")  and order_status!="Completed" and (resumes_required=0 or resumes_required=1)',as_list=1)
+                claimed_order=frappe.db.sql('select distinct job_order from `tabClaim Order` where job_order in (select name from `tabJob Order` where order_status!="Completed" and resumes_required=0);',as_list=1)
+                assigned_order=frappe.db.sql('select name from `tabJob Order` where order_status!="Completed" and staff_company is null and resumes_required=1 and no_of_workers!=worker_filled;',as_list=1)
+                data=unclaimed_order+claimed_order+assigned_order
+                new_staff_old_order(data,user)
+
+    except Exception as e:
+        frappe.error_log(e, "New Staffing Sharing")
+
+def new_staff_old_order(data,user):
+    for d in data:
+        try:
+            if not frappe.db.exists("DocShare", {"user": user, "share_name": d[0], "read": 1}) and frappe.db.exists('Job Order', d[0]):
+                add('Job Order', d[0], user=user, share= 1, read=1, write=0, flags={"ignore_share_permission": 1})
+        except Exception as e:
+            frappe.error_log(e, "share error")
+            continue
