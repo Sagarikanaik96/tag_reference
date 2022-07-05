@@ -122,7 +122,7 @@ def assign_employee_data(hiringorg, name):
 @frappe.whitelist(allow_guest=False)
 def update_job_order(user, company_type, sid, job_name, employee_filled, staffing_org, hiringorg, name):
     try:
-        if(company_type == "Hiring" and user == frappe.session.user):
+        if(company_type == "Hiring" or company_type == exclusive_hiring and user == frappe.session.user):
             frappe.db.set_value("Assign Employee", name, "approve_employee_notification", 0)
             job = frappe.get_doc(jobOrder, job_name)
             claimed = job.staff_org_claimed if job.staff_org_claimed else ""
@@ -171,8 +171,6 @@ def receive_hiring_notification(user, company_type, hiring_org, job_order, staff
                 chat_room_created(hiring_org,staffing_org,job_order)
 
             bid_receive.save(ignore_permissions=True)
-            hiring_type=frappe.get_doc('Company',hiring_org)
-            hiring_auto_approve(hiring_type,job_order,employee_filled,staffing_org,doc_name)
             job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
             job_detail = frappe.db.sql(job_sql, as_dict=1)
             lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)
@@ -708,7 +706,13 @@ def staff_assigned_employees(job_order):
 @frappe.whitelist(allow_guest=False)
 def staffing_assigned_employee(job_order):
     try:
-        assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabAssign Employee Details`.employee_name as employee_name, `tabAssign Employee Details`.employee as employee, `tabAssign Employee Details`.name as child_name from `tabAssign Employee`, `tabAssign Employee Details` where `tabAssign Employee`.name = `tabAssign Employee Details`.parent and job_order = "{job_order}" and tag_status = "Approved" and `tabAssign Employee Details`.approved=1 and `tabAssign Employee`.company in (select company from `tabEmployee` where email = '{frappe.session.user}') order by company, employee_name"""
+        doc=frappe.get_doc(jobOrder,job_order)
+        owner_comp_type=frappe.get_doc('User',doc.owner)
+        if(owner_comp_type.organization_type!='Staffing' and doc.resumes_required==1):
+            assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabAssign Employee Details`.employee_name as employee_name, `tabAssign Employee Details`.employee as employee, `tabAssign Employee Details`.name as child_name from `tabAssign Employee`, `tabAssign Employee Details` where `tabAssign Employee`.name = `tabAssign Employee Details`.parent and job_order = "{job_order}" and tag_status = "Approved" and `tabAssign Employee Details`.approved=1 and `tabAssign Employee`.company in (select company from `tabEmployee` where email = '{frappe.session.user}') order by company, employee_name"""
+        else:
+            assigned_emp = f""" select `tabAssign Employee`.company, `tabAssign Employee`.name as name, `tabAssign Employee Details`.employee_name as employee_name, `tabAssign Employee Details`.employee as employee, `tabAssign Employee Details`.name as child_name from `tabAssign Employee`, `tabAssign Employee Details` where `tabAssign Employee`.name = `tabAssign Employee Details`.parent and job_order = "{job_order}" and tag_status = "Approved" and `tabAssign Employee`.company in (select company from `tabEmployee` where email = '{frappe.session.user}') order by company, employee_name"""
+
         emp_data = frappe.db.sql(assigned_emp, as_dict=1)
         emp_list = []
         for i in range(len(emp_data)):

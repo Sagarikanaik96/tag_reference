@@ -265,7 +265,7 @@ frappe.ui.form.on("Assign Employee Details", {
 });
 
 function approved_employee(frm){
-	if(cur_frm.doc.tag_status == "Approved" && frappe.boot.tag.tag_user_info.company_type=='Hiring' && frm.doc.resume_required==1 && frm.doc.approve_employee_notification===1){
+	if(cur_frm.doc.tag_status == "Approved" && (frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type=='Exclusive Hiring') && frm.doc.resume_required==1 && frm.doc.approve_employee_notification===1){		
 		let current_date = new Date(frappe.datetime.now_datetime());
 		let approved_date = new Date(frm.doc.modified);
 		let diff = current_date.getTime()-approved_date.getTime();
@@ -659,7 +659,7 @@ function add_dynamic(){
 }
 
 function select_employees(frm){
-	if(frappe.boot.tag.tag_user_info.company_type== "Hiring" && frm.doc.tag_status=="Open"){
+	if((frappe.boot.tag.tag_user_info.company_type== "Hiring" ||frappe.boot.tag.tag_user_info.company_type== "Exclusive Hiring") && frm.doc.tag_status=="Open"){
 		frm.add_custom_button(__('Select Employees'), function(){
 			pop_up();
 		});
