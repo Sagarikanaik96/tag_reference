@@ -2011,7 +2011,7 @@ function order_claimed_contd(result, frm){
 		frm.remove_custom_button('Claim Order')
 		frm.set_df_property('section_break_html3', "hidden", 0);
 	}
-	if(frm.doc.staff_org_claimed && !frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company) && frm.doc.no_of_workers > frm.doc.worker_filled){
+	if(frm.doc.staff_org_claimed && !frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company) && frm.doc.no_of_workers > frm.doc.worker_filled && frm.doc.order_status!='Completed'){
 		assigned_emp_comp(frm)
 	}
 }
