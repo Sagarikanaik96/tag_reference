@@ -260,8 +260,8 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
                     l = [l[0] for l in user_list]
                     for user in l:
                         add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
-                    frappe.enqueue(single_job_order_notification,job_order_title=job_order_title,hiring_org=hiring_org,job_order=job_order,subject=subject,l=l,staff_company=i, now=True)
-                    return 1
+                    frappe.enqueue(single_job_order_notification,job_order_title=job_order_title,hiring_org=hiring_org,job_order=job_order,subject=subject,l=l,staff_company=i,now=True)
+                return 1
             else:
                 frappe.enqueue(staff_email_notification_cont,hiring_org=hiring_org, job_order=job_order, job_order_title=job_order_title,doc=doc,subject=subject, now=True)
                 return 1
@@ -546,7 +546,8 @@ def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l
         msg=f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond.'
         enqueue(make_system_notification,users=l,message=msg,doctype=jobOrder,docname=job_order,subject=subject, now= True)   
         message=f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
-        enqueue(send_email,subject=subject,message=message,emails=l, now=True)
+        link = f' href="{sitename}/app/job-order/{job_order}"'
+        return joborder_email_template(subject,message,l,link)
     except Exception as e:
         frappe.log_error(e, "Single Job Order Notification Error")
 
