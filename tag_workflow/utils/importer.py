@@ -77,9 +77,6 @@ class Importer:
     def import_data(self):
         self.before_import()
 
-        # parse docs from rows
-        payloads = self.import_file.get_payloads_for_import()
-
         # dont import if there are non-ignorable warnings
         warnings = self.import_file.get_warnings()
         warnings = [w for w in warnings if w.get("type") != "info"]
@@ -100,33 +97,7 @@ class Importer:
         # remove previous failures from import log
         import_log = [log for log in import_log if log.get("success")]
 
-        # get successfully imported rows
-        imported_rows = []
-        for log in import_log:
-            log = frappe._dict(log)
-            if log.success:
-                imported_rows += log.row_indexes
-
-        # start import
-        total_payload_count = len(payloads)
-        batch_size = frappe.conf.data_import_batch_size or 1000
-
-        for batch_index, batched_payloads in enumerate(frappe.utils.create_batch(payloads, batch_size)):
-            for i, payload in enumerate(batched_payloads):
-                doc = payload.doc
-                row_indexes = [row.row_number for row in payload.rows]
-                current_index = (i + 1) + (batch_index * batch_size)
-
-                if set(row_indexes).intersection(set(imported_rows)):
-                    print("Skipping imported rows", row_indexes)
-                    if total_payload_count > 5:
-                        frappe.publish_realtime("data_import_progress", {"current": current_index, "total": total_payload_count, "skipping": True, "data_import": self.data_import.name,},)
-                    continue
-
-                self.check_import_data(doc, current_index, row_indexes, total_payload_count, import_log)
-
-        import_log = self.bulk_emp_insert(import_log, total_payload_count)
-        return import_log
+        return import_data_contd(self, import_log)
 
     def bulk_emp_insert(self, import_log, total_payload_count):
         try:
@@ -533,22 +504,7 @@ class ImportFile:
                 # then it is the next doc
                 break
 
-        parent_doc = None
-        for row in rows:
-            for doctype, table_df in doctypes:
-                if doctype == self.doctype and not parent_doc:
-                    parent_doc = row.parse_doc(doctype)
-
-                if doctype != self.doctype and table_df:
-                    child_doc = row.parse_doc(doctype, parent_doc, table_df)
-                    if child_doc is None:
-                        continue
-
-                    parent_doc[table_df.fieldname] = parent_doc.get(table_df.fieldname, [])
-                    parent_doc[table_df.fieldname].append(child_doc)
-
-        doc = parent_doc
-        return doc, rows, data[len(rows) :]
+        return parse_next_row_for_import_contd(self, data, doctypes, rows)
 
     def get_warnings(self):
         warnings = []
@@ -639,26 +595,7 @@ class Row:
             if value is not None:
                 doc[df.fieldname] = self.parse_value(value, col)
 
-        is_table = frappe.get_meta(doctype).istable
-        is_update = self.import_type == UPDATE
-        if is_table and is_update:
-            # check if the row already exists
-            # if yes, fetch the original doc so that it is not updated
-            # if no, create a new doc
-            id_field = get_id_field(doctype)
-            id_value = doc.get(id_field.fieldname)
-            if id_value and frappe.db.exists(doctype, id_value):
-                existing_doc = frappe.get_doc(doctype, id_value)
-                existing_doc.update(doc)
-                doc = existing_doc
-            else:
-                # for table rows being inserted in update
-                # create a new doc with defaults set
-                new_doc = frappe.new_doc(doctype, as_dict=True)
-                new_doc.update(doc)
-                doc = new_doc
-
-        return doc
+        return _parse_doc_contd(self, doctype, doc)
 
     def validate_value(self, value, col):
         df = col.df
@@ -931,13 +868,13 @@ class Column:
                 if self.df.name == "Contact-phone_number":
                     values = list(set([cstr(v) for v in self.column_values[1:] if v]))
                     for phone in values:
-                        if not isValid(phone):
+                        if not is_valid(phone):
                             self.warnings.append({"col": self.column_number, "message": ("The Mobile number is invalid")})
 
                 if self.df.name == "Contact-zip":
                     values = list(set([cstr(v) for v in self.column_values[1:] if v]))
                     for phone in values:
-                        if not zipValid(phone):
+                        if not zip_valid(phone):
                             self.warnings.append({"col": self.column_number, "message": ("The zip  is invalid")})
 
     def as_dict(self):
@@ -1011,38 +948,37 @@ def build_fields_dict_for_column_matching(parent_doctype):
             label = (df.label or "").strip()
             fieldtype = df.fieldtype or "Data"
             parent = df.parent or parent_doctype
-            if fieldtype not in no_value_fields:
-                if parent_doctype == doctype:
-                    # for parent doctypes keys will be
-                    # Label
-                    # label
-                    # Label (label)
-                    if not out.get(label):
-                        # if Label is already set, don't set it again
-                        # in case of duplicate column headers
-                        out[label] = df
-                        out[df.fieldname] = df
-                        label_with_fieldname = "{0} ({1})".format(label, df.fieldname)
-                        out[label_with_fieldname] = df
-                    else:
-                        # in case there are multiple table fields with the same doctype
-                        # for child doctypes keys will be
-                        # Label (Table Field Label)
-                        # table_field.fieldname
-                        table_fields = parent_meta.get("fields", {"fieldtype": ["in", table_fieldtypes], "options": parent})
-                        for table_field in table_fields:
-                            by_label = "{0} ({1})".format(label, table_field.label)
-                            by_fieldname = "{0}.{1}".format(table_field.fieldname, df.fieldname)
-                            # create a new df object to avoid mutation problems
-                            if isinstance(df, dict):
-                                new_df = frappe._dict(df.copy())
-                            else:
-                                new_df = df.as_dict()
+            if fieldtype not in no_value_fields and parent_doctype == doctype:
+                # for parent doctypes keys will be
+                # Label
+                # label
+                # Label (label)
+                if not out.get(label):
+                    # if Label is already set, don't set it again
+                    # in case of duplicate column headers
+                    out[label] = df
+                    out[df.fieldname] = df
+                    label_with_fieldname = "{0} ({1})".format(label, df.fieldname)
+                    out[label_with_fieldname] = df
+                else:
+                    # in case there are multiple table fields with the same doctype
+                    # for child doctypes keys will be
+                    # Label (Table Field Label)
+                    # table_field.fieldname
+                    table_fields = parent_meta.get("fields", {"fieldtype": ["in", table_fieldtypes], "options": parent})
+                    for table_field in table_fields:
+                        by_label = "{0} ({1})".format(label, table_field.label)
+                        by_fieldname = "{0}.{1}".format(table_field.fieldname, df.fieldname)
+                        # create a new df object to avoid mutation problems
+                        if isinstance(df, dict):
+                            new_df = frappe._dict(df.copy())
+                        else:
+                            new_df = df.as_dict()
 
-                            new_df.is_child_table_field = True
-                            new_df.child_table_df = table_field
-                            out[by_label] = new_df
-                            out[by_fieldname] = new_df
+                        new_df.is_child_table_field = True
+                        new_df.child_table_df = table_field
+                        out[by_label] = new_df
+                        out[by_fieldname] = new_df
 
     # if autoname is based on field
     # add an entry for "ID (Autoname Field)"
@@ -1092,13 +1028,84 @@ def get_select_options(df):
     return [d for d in (df.options or "").split("\n") if d]
 
 import re
-def isValid(s):
-    Pattern = re.compile("(0|91)?[7-9][0-9]{9}")
-    if  Pattern.match(s):
-        if len(s) == 10:
-            return True
+def is_valid(s):
+    pattern = re.compile("(0|91)?[7-9][\d]{9}")
+    if  pattern.match(s) and len(s) == 10:
+        return True
     return False
 
 import re
-def zipValid(s):
+def zip_valid(s):
     return bool(re.match(r'^[1-9][\d]{4}$',s) and len(re.findall(r'(\d)(?=\d\1)',s))<2)
+
+def import_data_contd(self, import_log):
+    # parse docs from rows
+    payloads = self.import_file.get_payloads_for_import()
+
+    # get successfully imported rows
+    imported_rows = []
+    for log in import_log:
+        log = frappe._dict(log)
+        if log.success:
+            imported_rows += log.row_indexes
+
+    # start import
+    total_payload_count = len(payloads)
+    batch_size = frappe.conf.data_import_batch_size or 1000
+
+    for batch_index, batched_payloads in enumerate(frappe.utils.create_batch(payloads, batch_size)):
+        for i, payload in enumerate(batched_payloads):
+            doc = payload.doc
+            row_indexes = [row.row_number for row in payload.rows]
+            current_index = (i + 1) + (batch_index * batch_size)
+
+            if set(row_indexes).intersection(set(imported_rows)):
+                print("Skipping imported rows", row_indexes)
+                if total_payload_count > 5:
+                    frappe.publish_realtime("data_import_progress", {"current": current_index, "total": total_payload_count, "skipping": True, "data_import": self.data_import.name,},)
+                continue
+
+            self.check_import_data(doc, current_index, row_indexes, total_payload_count, import_log)
+
+    import_log = self.bulk_emp_insert(import_log, total_payload_count)
+    return import_log
+
+def parse_next_row_for_import_contd(self, data, doctypes, rows):
+    parent_doc = None
+    for row in rows:
+        for doctype, table_df in doctypes:
+            if doctype == self.doctype and not parent_doc:
+                parent_doc = row.parse_doc(doctype)
+
+            if doctype != self.doctype and table_df:
+                child_doc = row.parse_doc(doctype, parent_doc, table_df)
+                if child_doc is None:
+                    continue
+
+                parent_doc[table_df.fieldname] = parent_doc.get(table_df.fieldname, [])
+                parent_doc[table_df.fieldname].append(child_doc)
+
+    doc = parent_doc
+    return doc, rows, data[len(rows) :]
+
+def _parse_doc_contd(self, doctype, doc):
+    is_table = frappe.get_meta(doctype).istable
+    is_update = self.import_type == UPDATE
+    if is_table and is_update:
+        # check if the row already exists
+        # if yes, fetch the original doc so that it is not updated
+        # if no, create a new doc
+        id_field = get_id_field(doctype)
+        id_value = doc.get(id_field.fieldname)
+        if id_value and frappe.db.exists(doctype, id_value):
+            existing_doc = frappe.get_doc(doctype, id_value)
+            existing_doc.update(doc)
+            doc = existing_doc
+        else:
+            # for table rows being inserted in update
+            # create a new doc with defaults set
+            new_doc = frappe.new_doc(doctype, as_dict=True)
+            new_doc.update(doc)
+            doc = new_doc
+
+    return doc
