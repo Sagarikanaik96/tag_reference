@@ -284,8 +284,8 @@ def new_staff_company(user,company,company_type):
         if company_type=='Staffing':
             only_single_emp=frappe.db.sql('select count(name) from `tabUser` where company="{0}"'.format(company),as_list=1)
             if(only_single_emp[0][0]==1):
-                unclaimed_order=frappe.db.sql('select name from `tabJob Order` where (claim is null or claim="")  and order_status!="Completed" and (resumes_required=0 or resumes_required=1)',as_list=1)
-                claimed_order=frappe.db.sql('select distinct job_order from `tabClaim Order` where job_order in (select name from `tabJob Order` where order_status!="Completed" and resumes_required=0);',as_list=1)
+                unclaimed_order=frappe.db.sql('select name from `tabJob Order` where (claim is null or claim="")  and order_status!="Completed" and (resumes_required=0 or resumes_required=1) and staff_company is null',as_list=1)
+                claimed_order=frappe.db.sql('select distinct job_order from `tabClaim Order` where job_order in (select name from `tabJob Order` where order_status!="Completed" and resumes_required=0 and staff_company is null);',as_list=1)
                 assigned_order=frappe.db.sql('select name from `tabJob Order` where order_status!="Completed" and staff_company is null and resumes_required=1 and no_of_workers!=worker_filled;',as_list=1)
                 data=unclaimed_order+claimed_order+assigned_order
                 new_staff_old_order(data,user)
