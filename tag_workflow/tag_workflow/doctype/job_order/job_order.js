@@ -625,7 +625,7 @@ function timer_value(frm) {
 		setTimeout(function() {
 			time_value(frm);
 			cur_frm.refresh();
-			view_button();
+			view_button(frm);
 		}, 60000);
 	} else {
 		frm.set_df_property("time_remaining_for_make_edits", "hidden", 1);
@@ -1981,8 +1981,9 @@ function non_claims(){
 			found= true;
 		}
 	}
-	if(!found && frappe.boot.tag.tag_user_info.company_type == 'Staffing'){
+	if(!found && frappe.boot.tag.tag_user_info.company_type == 'Staffing' && cur_frm.doc.order_status=='Completed'){
 		cur_frm.toggle_display('section_break_html1', 1);
+		cur_frm.set_df_property('html_2','options','<h3>This Job Order is closed and unclaimed by your company.</h3>')
 	}
 }
 
@@ -2007,9 +2008,10 @@ function order_claimed_contd(result, frm){
 	for(let i in result){
 		total_approved_emp += result[i]
 	}
-	if (total_approved_emp == frm.doc.no_of_workers){
+	if (total_approved_emp == frm.doc.no_of_workers && frm.doc.order_status!='Completed'){
 		frm.remove_custom_button('Claim Order')
-		frm.set_df_property('section_break_html3', "hidden", 0);
+		frm.set_df_property('section_break_html1', "hidden", 0);
+		cur_frm.set_df_property('html_2','options','<h3>This Job Order has reached its desired head count.</h3>')
 	}
 	if(frm.doc.staff_org_claimed && !frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company) && frm.doc.no_of_workers > frm.doc.worker_filled && frm.doc.order_status!='Completed'){
 		assigned_emp_comp(frm)
@@ -2027,7 +2029,7 @@ function assigned_emp_comp(frm){
 				frm.add_custom_button(__('Claim Order'), function(){
 					claim_job_order_staffing(frm);
 				});
-				frm.set_df_property('section_break_html3', "hidden", 1);
+				frm.set_df_property('section_break_html1', "hidden", 1);
 			}
 		}
 	})
