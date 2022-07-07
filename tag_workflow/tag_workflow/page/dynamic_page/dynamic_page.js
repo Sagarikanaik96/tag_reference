@@ -408,7 +408,7 @@ function unblock_company(){
 	})
 }
 function get_blocked_list(page){
-	if(frappe.boot.tag.tag_user_info.company_type=='Hiring'){
+	if(frappe.boot.tag.tag_user_info.company_type=='Hiring' && frappe.boot.tag.tag_user_info.company!=company){
 		frappe.call({
 			method:'tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.checking_blocked_list',
 			args:{
