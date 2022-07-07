@@ -134,7 +134,7 @@ frappe.ui.Page = Class.extend({
 		this.standard_actions = this.page_actions.find(".standard-actions");
 		this.custom_actions = this.page_actions.find(".custom-actions");
 		
-		if((frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" || frappe.boot.tag.tag_user_info.company_type == "Staffing") && (window.location.pathname == '/app/job-order' || window.location.pathname == 'app/job-order?data=direct')){
+		if((frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring") && (window.location.pathname == '/app/job-order')){
 			this.hiring_filter = $(`
 				<div class="page-form row" id="hiring_filter">
 					<div class="filter-selector">
@@ -169,6 +169,36 @@ frappe.ui.Page = Class.extend({
 						</script>
 					</div>
 				</div>`).prependTo(this.main);
+		}
+		if((frappe.boot.tag.tag_user_info.company_type == "Staffing" ) && (window.location.pathname == '/app/job-order' || window.location.pathname == 'app/job-order?data=direct')){
+			this.staffing_filter = $(`
+					<div class="page-form row" id="staffing__filter">
+							<div class="filter-selector">
+									<button class="btn btn-default btn-sm filter-button" id='staff_filter_button1' title="Available to claim" value='Available Order'>
+											<span class="button-label hidden-xs">Available Order<span></span></span>
+									</button>
+									<button class="btn btn-default btn-sm filter-button" id='staff_filter_button2'  title="Claimed & in progress" value='Ongoing Order'>
+											<span class="button-label hidden-xs">Ongoing Order<span></span></span>
+									</button>
+									<button class="btn btn-default btn-sm filter-button" id='staff_filter_button3' title="Claimed and upcoming" value='Upcoming Order'>
+											<span class="button-label hidden-xs">Upcoming Order<span></span></span>
+									</button>
+									<button class="btn btn-default btn-sm filter-button" id='staff_filter_button4' value='Completed Order'>
+											<span class="button-label hidden-xs">Completed Order<span></span></span>
+									</button>
+									<button class="btn btn-default btn-sm filter-button active" id='staff_filter_button5' value='All Order'>
+											<span class="button-label hidden-xs">All Orders<span></span></span>
+									</button>
+									<script>
+										$(document).ready(function() {
+												$('.filter-selector button').click(function() {
+														$('button.filter-button.active').removeClass("active");
+														$(this).addClass("active");
+												});
+										});
+									</script>
+							</div>
+					</div>`).prependTo(this.main);
 		}
 
 		if(window.location.pathname == '/app/item'){

@@ -19,13 +19,12 @@
   "disable_sidebar_stats": 0,
   "docstatus": 0,
   "doctype": "List View Settings",
-  "fields": "[{\"fieldname\":\"name\",\"label\":\"Name\"},{\"fieldname\":\"company\",\"label\":\"Company\"},{\"fieldname\":\"select_job\",\"label\":\"Job Title\"},{\"fieldname\":\"from_date\",\"label\":\"Start Date\"},{\"fieldname\":\"order_status\",\"label\":\"Order Status\"},{\"fieldname\":\"category\",\"label\":\"Category\"},{\"fieldname\":\"job_site\",\"label\":\"Job Site\"}]",
   "modified": "2022-03-09 00:56:03.240107",
   "name": "Job Order",
   "parent": null,
   "parentfield": null,
   "parenttype": null,
-  "total_fields": "8"
+  "total_fields": "10"
  },
  {
   "disable_auto_refresh": 0,

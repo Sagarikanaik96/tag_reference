@@ -532,3 +532,35 @@ def check_order_already_exist(frm):
             return 1
     except Exception as e:
         frappe.error_log(e,'Check same order') 
+@frappe.whitelist()
+def my_used_job_orders(company_name,status):
+    if status=='All':
+        l=f'select name from `tabJob Order` where claim like "%{company_name}%"  '
+        my_claims=frappe.db.sql(l,as_list=1)
+    elif status=='Available':
+        l=f'select name from `tabJob Order` where (claim not like "%{company_name}%" or claim is Null) and order_status!="Completed" and worker_filled!=no_of_workers'
+        my_claims=frappe.db.sql(l,as_list=1)
+    else:
+        l=f'select name from `tabJob Order` where claim like "%{company_name}%" and order_status="{status}"'
+        my_claims=frappe.db.sql(l,as_list=1)
+    z=[]
+    for i in my_claims:
+        z.append(i[0])
+    return list(set(z)) 
+@frappe.whitelist()
+def claims_left(name,comp):
+    data=frappe.get_doc(ORD,name)
+    claims=data.claim
+    if claims is not None and comp in claims:
+        return "success"
+    else:
+        if(data.resumes_required==1):
+            if(data.no_of_workers!=data.worker_filled):
+                return data.no_of_workers-data.worker_filled
+        else:
+            claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{name}"'
+            data1=frappe.db.sql(claims,as_list=1)
+            if(data1[0][0]!=None):
+                return int(data.no_of_workers)-int(data1[0][0])
+            else:
+                return int(data.no_of_workers) 

@@ -28,6 +28,7 @@
   "select_job",
   "from_date",
   "order_status",
+  "head_count_available",
   "job_start_time",
   "availability",
   "select_days",
@@ -674,11 +675,19 @@
    "fieldname": "claimed_html",
    "fieldtype": "HTML",
    "options": "<h3>This Job Order has reached its desired head count.</h3>"
+  },
+  {
+   "default": "0",
+   "fieldname": "head_count_available",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Head Count Available"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-06 08:12:31.435634",
+ "modified": "2022-07-07 07:44:15.872102",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

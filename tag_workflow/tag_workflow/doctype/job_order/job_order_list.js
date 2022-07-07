@@ -6,8 +6,14 @@ frappe.listview_settings['Job Order'] = {
 		cur_list.render_header(cur_list.columns)
 		$('.list-header-subject > div:nth-child(7) > span:nth-child(1)').html('Industry');
 		$('[data-fieldname="name"]').attr('placeholder','Order ID');
-		$('[data-fieldname="category"]').attr('placeholder','Industry');
-        $('[data-fieldname="order_status"]').hide();
+		$('[data-fieldname="order_status"]').hide();
+		cur_list.columns[6].df.label = 'Head Count Available';
+		cur_list.render_header(cur_list.columns)
+		if(frappe.boot.tag.tag_user_info.company_type != "Staffing"){
+            cur_list.columns.splice(6,1)
+			cur_list.columns[6].df.label = 'Category';
+			cur_list.render_header(cur_list.columns)
+        }
 		if(frappe.session.user!='Administrator'){
 			$('.custom-actions.hidden-xs.hidden-md').hide();
 			$('[data-original-title="Refresh"]').hide();
@@ -73,6 +79,7 @@ frappe.listview_settings['Job Order'] = {
 
 	formatters: {
 		order_status(val, d, f) {
+			console.log(val,d,f)
 			if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && val!='Completed' && (f.no_of_workers!=f.worker_filled)){
 				let y
 				frappe.call({
@@ -244,6 +251,41 @@ frappe.listview_settings['Job Order'] = {
 			} else {
 				return  `<span class="ellipsis" title=""><a class="ellipsis" data-filter="${d.fieldname},=,''"></a></span>`;
 			}
+		},
+		head_count_available(val, d, f){
+			if(frappe.boot.tag.tag_user_info.company_type == 'Staffing'){
+				let y
+				frappe.call({
+					method:'tag_workflow.tag_workflow.doctype.job_order.job_order.claims_left',
+					args:{
+						'name':f.name,
+						'comp':frappe.boot.tag.tag_user_info.company,
+					},
+					async:0,
+					callback:function(r)
+					{
+						if(r.message=='success')
+						{
+							y='claimed'
+						}
+						else{
+							y=r.message
+						}
+
+					}
+				})
+				if(y=="claimed")
+				{
+					return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
+						<a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">0</a>
+					</span>`
+				}
+				else{
+					return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
+						<a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${y}</a>
+					</span>`
+				}		
+			}
 		}
 	},
 }
@@ -265,3 +307,77 @@ function get_company_job_order(){
 	});
 	return text
 }
+frappe.flags.my_list=[]
+frappe.flags.status='All'
+frappe.flags.tag_list=''
+setTimeout(function(){
+  const btn=document.getElementById('staff_filter_button1')
+  btn.addEventListener('click',function(){
+	  passing_current_status('Available',frappe.boot.tag.tag_user_info.company)
+  })
+  const btn2=document.getElementById('staff_filter_button2')
+    btn2.addEventListener('click',function(){
+	 passing_current_status('Ongoing',frappe.boot.tag.tag_user_info.company)
+    })
+	const btn3=document.getElementById('staff_filter_button3')
+	btn3.addEventListener('click',function(){
+		passing_current_status('Upcoming',frappe.boot.tag.tag_user_info.company)
+	}) 
+	const btn4=document.getElementById('staff_filter_button4')
+	btn4.addEventListener('click',function(){
+		passing_current_status('Completed',frappe.boot.tag.tag_user_info.company)
+	}) 
+	const btn5=document.getElementById('staff_filter_button5')
+	btn5.addEventListener('click',function(){
+		passing_current_status('All',frappe.boot.tag.tag_user_info.company)
+	})
+},2000)
+
+function passing_current_status(status,company){
+	frappe.flags.company=company
+	frappe.flags.status=status
+	frappe.call({
+        method:"tag_workflow.tag_workflow.doctype.job_order.job_order.my_used_job_orders",
+        args:{
+          company_name:company,
+          status:status,
+        },
+        callback:function(r){
+	      	if (r.message){
+		        frappe.flags.my_list = r.message
+		        frappe.flags.tag_list='True'
+				frappe.flags.status=status
+		        cur_list.refresh()
+		    }
+        }
+
+      })
+}
+
+frappe.views.BaseList.prototype.prepare_data = function(r) {
+	this.page_length = 20;
+	let data = r.message || {};
+	data = !Array.isArray(data) ?
+		frappe.utils.dict(data.keys, data.values) :
+		data;
+
+	if (this.start === 0) {
+		this.data = data;
+	} else {
+		this.data = this.data.concat(data);
+	}	
+	if((frappe.flags.my_list).length>0 && frappe.flags.tag_list=='True' && frappe.flags.status!='All'){
+		this.data = this.data.filter((d) => frappe.flags.my_list.includes(d.name))
+		if(frappe.flags.status=='Completed'){
+			this.page_length = 500;
+		}
+	}
+	else if((frappe.flags.my_list).length==0 && frappe.flags.tag_list=='True'){
+		this.data = []
+	}
+	else if((frappe.flags.my_list).length>0 && frappe.flags.tag_list=='True' && frappe.flags.status=='All')
+	{
+		this.data = data
+	}
+	this.data = this.data.uniqBy((d) => d.name); 
+  } 
