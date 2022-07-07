@@ -10,7 +10,7 @@ def get_status(order, company, date):
     status = [s['workflow_state'] for s in sheets]
     if("Approval Request" in status):
         return "Approval Request"
-    elif("Denied" in status):
+    elif("Denied" in status or "Open" in status):
         return "In Progress"
     elif("Approved" in status):
         return "Approved"
