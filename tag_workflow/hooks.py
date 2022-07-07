@@ -36,7 +36,8 @@ app_include_js = [
         "/assets/js/tag-min.js",
         "/assets/tag_workflow/js/frappe/form/controls/attach.js",
         "/assets/tag_workflow/js/frappe/form/controls/link.js",
-        "/assets/tag_workflow/js/twilio_utils.js"
+        "/assets/tag_workflow/js/twilio_utils.js",
+        "/assets/tag_workflow/js/list.js"
 ]
 
 web_include_css = [
