@@ -87,7 +87,7 @@ def filter_category(company,category=None,order_by=None):
         job_order = frappe.db.sql(sql, as_dict=1)
         for j in job_order:
             if j.name in order_detail:
-                sql = "select name,  category,select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour from `tabJob Order` where name = '{0}'".format(j.name)
+                sql = "select name,category,select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour,job_start_time,worker_filled from `tabJob Order` where name = '{0}'".format(j.name)
                 data = frappe.db.sql(sql, as_dict=1)
                 for d in data:
                     final_list.append(d)
