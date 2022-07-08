@@ -90,7 +90,7 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
         if(posting_date >= job.from_date and posting_date <= job.to_date):
             from_time, to_time = get_datetime(date, from_time, to_time)
             for item in items:
-                tip_amount = item['tip_amount']
+                tip_amount=check_tip(item)
                 child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, item['from_time'], item['to_time'], item['break_from'], item['break_to'])
                 is_ok = check_old_timesheet(child_from, child_to, item['employee'])
                 if(is_ok == 0):
@@ -223,3 +223,12 @@ def checkreplaced_emp(employee, job_order):
     except Exception as e:
         print(e)
         return 0
+
+#check whether tip is given
+def check_tip(item):
+    if 'tip_amount' in item.keys():
+        tip_amount = item['tip_amount']
+    else:
+        tip_amount=0
+    return tip_amount
+
