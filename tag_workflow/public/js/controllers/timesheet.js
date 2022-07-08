@@ -479,6 +479,12 @@ frappe.ui.form.on("Timesheet Detail", {
 		update_time(frm,cdt,cdn);
 	},
 
+	tip: function(cdt, cdn){
+		let child = locals[cdt][cdn];
+		let flat_rate = child.flat_rate + child.tip;
+		frappe.model.set_value(cdt, cdn, "flat_rate", flat_rate);
+	},
+
 	billing_rate: function(frm, cdt, cdn){
 		update_time(frm,cdt,cdn);
 	}
@@ -500,8 +506,8 @@ function make_break_zero(child){
 /*-----------------------------------*/
 function update_child_amount(frm){
 	let items = frm.doc.time_logs || [];
-	
 	if(frm.doc.no_show == 1){
+		
 		for(let i in items){
 			frappe.model.set_value(items[i].doctype, items[i].name, "is_billable", 0);
 			frappe.model.set_value(items[i].doctype, items[i].name, "billing_rate", 0);
@@ -521,7 +527,6 @@ function update_time(frm, cdt, cdn){
 	let sec = (moment(child.to_time).diff(moment(child.from_time), "seconds"));
 	let break_sec = 0;
 	let amount = 0;
-
 	if(child.break_start_time && child.break_end_time && child.break_start_time >= child.from_time && child.break_end_time <= child.to_time){
 		break_sec = (moment(child.break_end_time).diff(moment(child.break_start_time), "seconds"));
 		if(break_sec < 0){
@@ -551,7 +556,7 @@ function update_time(frm, cdt, cdn){
 		amount = hours*child.billing_rate+child.flat_rate;
 		frappe.model.set_value(cdt, cdn, "extra_rate", 0);
 		frappe.model.set_value(cdt, cdn, "extra_hours", 0);
-	}
+	} 
 
 	setTimeout(() => {
 		frappe.model.set_value(cdt, cdn, "base_billing_amount", amount);

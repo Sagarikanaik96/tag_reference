@@ -263,7 +263,6 @@ def make_sales_invoice(source_name, company, emp_sql,target_doc=None, ignore_per
             team: {"doctype": team, "add_if_empty": True},
             payment: {"doctype": payment,"add_if_empty": True}
         }, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
-
     customer = customer_doc(company)
     doclist = make_invoice(source_name, target_doc)
     update_timesheet(company, source_name, doclist,emp_sql)
@@ -284,14 +283,12 @@ def update_time_timelogs(sheet,doclist,time):
             status = 'DNR'
         elif sheet.replaced:
             status = 'Replaced'
-        job_order_name=frappe.get_doc('Job Order',sheet.job_order_detail)
-
 
         if time.no_show == 1:
             # add zero all value in time sheet in invoice
             activity = {"activity_type": logs.activity_type, "billing_amount": 0, "billing_hours": 0, "time_sheet": logs.parent, "from_time": 0, "to_time": 0, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":0,"overtime_hours":0,"per_hour_rate1":0,'flat_rate':0}
         else:
-            activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours,"per_hour_rate1":logs.billing_rate,'flat_rate':job_order_name.flat_rate}
+            activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours,"per_hour_rate1":logs.billing_rate,'flat_rate':logs.flat_rate}
         doclist.append("timesheets", activity)
     return doclist
 

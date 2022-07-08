@@ -16,6 +16,7 @@
   "column_break_5",
   "hours",
   "amount",
+  "tip_amount",
   "status",
   "working_hours",
   "overtime_hours",
@@ -126,12 +127,19 @@
    "hidden": 1,
    "label": "Overtime Rate",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "tip_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Tip (USD)"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-05-19 00:34:54.149448",
+ "modified": "2022-07-01 01:58:17.340765",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Timesheet Item",

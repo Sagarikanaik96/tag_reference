@@ -29,7 +29,6 @@ frappe.ui.form.on('Add Timesheet', {
 				update_timesheet(frm,save);
 			}).addClass("btn-primary");
 		}
-		
 		frm.add_custom_button(__('Submit Timesheet'), function() {
 			let save=0
 			update_timesheet(frm,save);
@@ -140,7 +139,8 @@ function get_employee_data(frm){
 						"employee": data[d]['employee'],
 						"employee_name": data[d]['employee_name'],
 						"company": data[d]['company'],
-						"status": data[d]['status']
+						"status": data[d]['status'],
+						"tip_amount": data[d]['tip_amount']
 					});
 				}
 				cur_frm.refresh_field("items");
@@ -188,6 +188,12 @@ frappe.ui.form.on("Timesheet Item", {
 		let child = frappe.get_doc(cdt, cdn);
 		update_child_time(child, frm);
 	},
+
+	tip_amount: function(frm, cdt, cdn){
+		let child = frappe.get_doc(cdt, cdn);
+		update_child_time(child, frm);
+	},
+
 
 	status: function(frm, cdt, cdn){
 		let child = frappe.get_doc(cdt, cdn);
@@ -341,7 +347,6 @@ function update_timesheet(frm,save){
 		let to_time = frm.doc.to_time;
 		let break_from_time = frm.doc.break_from_time;
 		let break_to_time = frm.doc.break_to_time;
-
 		frappe.call({
 			method: "tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_timesheet",
 			args: {"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "items": items, "job_order": job_order, "date": date, "from_time": from_time, "to_time": to_time, "break_from_time": break_from_time, "break_to_time": break_to_time,"save":save},

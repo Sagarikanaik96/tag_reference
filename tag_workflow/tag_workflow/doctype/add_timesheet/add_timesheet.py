@@ -90,14 +90,15 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
         if(posting_date >= job.from_date and posting_date <= job.to_date):
             from_time, to_time = get_datetime(date, from_time, to_time)
             for item in items:
+                tip_amount = item['tip_amount']
                 child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, item['from_time'], item['to_time'], item['break_from'], item['break_to'])
                 is_ok = check_old_timesheet(child_from, child_to, item['employee'])
                 if(is_ok == 0):
                     timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=job.company, job_order_detail=job_order, employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate, status_of_work_order=job.order_status, date_of_timesheet=date))
-
+                    flat_rate = job.flat_rate + tip_amount
                     timesheet.append("time_logs", {
                         "activity_type": job.select_job, "from_time": child_from, "to_time": child_to, "hrs": str(item['hours'])+" hrs",
-                        "hours": float(item['hours']), "is_billable": 1, "billing_rate": job.per_hour, "flat_rate": job.flat_rate, "break_start_time": break_from,
+                        "hours": float(item['hours']), "is_billable": 1, "billing_rate": job.per_hour,"tip":tip_amount, "flat_rate": flat_rate, "break_start_time": break_from,
                         "break_end_time": break_to, "extra_hours": float(item['overtime_hours']), "extra_rate": float(item['overtime_rate'])
                     })
 
