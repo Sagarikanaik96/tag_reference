@@ -1316,6 +1316,33 @@ def update_lat_lng_required(company,employee_id):
     except Exception as e:
         frappe.error_log(e,'Employee Lat Lng error')
 
+@frappe.whitelist(allow_guest=False)
+def jazz_api_sec(frm=None):
+    try:
+        comp = frappe.get_doc("Company",frm)
+        jazzhr_decrypt = comp.get_password('jazzhr_api_key')
+        return jazzhr_decrypt
+    except Exception:
+        frappe.log_error("No JazzHR API Key in Database", "Warning")
+
+@frappe.whitelist(allow_guest=False)
+def client_id_sec(frm=None):
+    try:
+        comp = frappe.get_doc("Company",frm)
+        client_id_decrypt = comp.get_password('client_id')
+        return client_id_decrypt
+    except Exception:
+        frappe.log_error("No Client ID in Database", "Warning")
+
+@frappe.whitelist(allow_guest=False)
+def client_secret_sec(frm=None):
+    try:
+        comp = frappe.get_doc("Company",frm)
+        client_secret_decrypt = comp.get_password('client_secret')
+        return client_secret_decrypt
+    except Exception:
+        frappe.log_error("No Client Secret in Database", "Warning")
+
 def no_contact_by(company):
     try:
         sql = """select name from `tabUser` where company = '{0}'""".format(company)

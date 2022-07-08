@@ -36,9 +36,9 @@ class MasterController(base_controller.BaseController):
             if not frappe.db.exists("Customer", {"name": self.doc.name}): 
                 customer = frappe.get_doc(dict(doctype="Customer", customer_name=self.doc.name, customer_type="Company", territory=TERRITORY, customer_group=GROUP))
                 customer.insert(ignore_permissions=True)
-
-            if not self.doc.authorization_url and self.doc.client_id and self.doc.redirect_url and self.doc.quickbooks_company_id:
-                self.oauth = OAuth2Session(client_id=self.doc.client_id, redirect_uri=self.doc.redirect_url, scope=self.doc.scope)
+            client_id_decrypt = self.doc.get_password('client_id')
+            if not self.doc.authorization_url and client_id_decrypt and self.doc.redirect_url and self.doc.quickbooks_company_id:
+                self.oauth = OAuth2Session(client_id=client_id_decrypt, redirect_uri=self.doc.redirect_url, scope=self.doc.scope)
                 self.doc.authorization_url = self.oauth.authorization_url(self.doc.authorization_endpoint)[0]
 
         elif(self.dt == "User"):

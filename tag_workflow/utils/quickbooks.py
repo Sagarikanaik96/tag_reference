@@ -26,9 +26,10 @@ def callback(*args, **kwargs):
             company = frappe.get_doc("Company", {"quickbooks_company_id": company_id})
             company.refresh_token = ''
             company.code = kwargs.get("code")
-
-            oauth = OAuth2Session(client_id=company.client_id, redirect_uri=company.redirect_url, scope=company.scope)
-            token = oauth.fetch_token(token_url=company.token_endpoint, client_secret=company.client_secret, code=kwargs.get("code"))
+            client_id = company.get_password('client_id')
+            client_secret = company.get_password('client_secret')
+            oauth = OAuth2Session(client_id=client_id, redirect_uri=company.redirect_url, scope=company.scope)
+            token = oauth.fetch_token(token_url=company.token_endpoint, client_secret=client_secret, code=kwargs.get("code"))
             company.access_token = token["access_token"]
             company.refresh_token = token["refresh_token"]
             company.save()
@@ -40,9 +41,11 @@ def callback(*args, **kwargs):
 
 
 def get_access_token(comp):
+    client_id = comp.get_password('client_id')
+    client_secret = comp.get_password('client_secret')
     try:
-        oauth = OAuth2Session(client_id=comp.client_id, redirect_uri=comp.redirect_url, scope=comp.scope)
-        token = oauth.refresh_token(token_url=comp.token_endpoint, client_id=comp.client_id, refresh_token=comp.refresh_token, client_secret=comp.client_secret, code=comp.code)
+        oauth = OAuth2Session(client_id=client_id, redirect_uri=comp.redirect_url, scope=comp.scope)
+        token = oauth.refresh_token(token_url=comp.token_endpoint, client_id=client_id, refresh_token=comp.refresh_token, client_secret=client_secret, code=comp.code)
         frappe.db.set_value("Company", comp.name, "access_token", token["access_token"])
         frappe.db.set_value("Company", comp.name, "refresh_token", token["refresh_token"])
         return token["access_token"]
@@ -58,8 +61,9 @@ def auth_quickbook_and_sync(company, invoice):
     try:
         result = {"authorization_url": "", "invoice_id": "", "error": ""}
         com = frappe.get_doc("Company", company)
-
-        if(not com.client_id or not com.client_secret or not com.quickbooks_company_id):
+        client_id = com.get_password('client_id')
+        client_secret = com.get_password('client_secret')
+        if(not client_id or not client_secret or not com.quickbooks_company_id):
             frappe.msgprint(_("Please add <b>Client ID</b>, <b>Client Secret</b> and <b>QuickBook Company ID</b> in <b>{0}</b> profile").format(company))
         elif(not com.refresh_token and com.authorization_url):
             com.refresh_token, com.code, com.access_token, com.refresh_token, com.authorization_url = '', '', '', '', ''
@@ -200,12 +204,13 @@ def sync_invoice(invoice, result, request_id=None):
     try:
         print(invoice.company)
         company = frappe.get_doc("Company", invoice.company)
-
+        client_id = company.get_password('client_id')
+        client_secret = company.get_password('client_secret')
         #fetching access token from quickbook
         access_token = get_access_token(company)
         if(access_token):
             #Setting up an AuthClient
-            auth_client = AuthClient(client_id=company.client_id, client_secret=company.client_secret, access_token=access_token, environment='sandbox', redirect_uri=company.redirect_url)
+            auth_client = AuthClient(client_id=client_id, client_secret=client_secret, access_token=access_token, environment='sandbox', redirect_uri=company.redirect_url)
             client = QuickBooks(auth_client=auth_client, refresh_token=company.refresh_token, company_id=company.quickbooks_company_id)
             #checking customer in quickbook database
             cust = check_customer(invoice.customer, client)

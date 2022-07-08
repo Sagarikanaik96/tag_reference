@@ -53,6 +53,45 @@ frappe.ui.form.on("Company", {
 		$('[data-fieldname = "accounts_payable_phone_number"]>div>div>div>input').attr("placeholder", 'Example: +XX XXX-XXX-XXXX');
 		$('[data-fieldname = "accounts_receivable_phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 	},
+
+	decrypt_jazzhr_api_key: function(frm) {
+		frappe.call({
+			method: "tag_workflow.tag_data.jazz_api_sec",
+			args: {
+				'frm': frm.doc.name,
+			},
+			callback: function(r) {
+				frm.set_value('decrypted_jazzhr_api_key', r.message);
+				refresh_field('decrypted_jazzhr_api_key');
+			}
+		})
+	},
+
+	decrypt_client_id: function(frm) {
+		frappe.call({
+			method: "tag_workflow.tag_data.client_id_sec",
+			args: {
+				'frm': frm.doc.name,
+			},
+			callback: function(r) {
+				frm.set_value('decrypted_client_id', r.message);
+				refresh_field('decrypted_client_id');
+			}
+		})
+	},
+	decrypt_client_secret: function(frm) {
+		frappe.call({
+			method: "tag_workflow.tag_data.client_secret_sec",
+			args: {
+				'frm': frm.doc.name,
+			},
+			callback: function(r) {
+				frm.set_value('decrypted_client_secret', r.message);
+				refresh_field('decrypted_client_secret');
+			}
+		})
+	},
+	
 	update_employee_records: function (frm){
 		update_existing_employees(frm)
 	}, 

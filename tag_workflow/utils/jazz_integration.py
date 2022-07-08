@@ -16,8 +16,10 @@ JAZZHR_MAX_ITR = 1500
 
 @frappe.whitelist()
 def jazzhr_fetch_applicants(api_key, company):
+    comp = frappe.get_doc("Company",company)
+    decrypted_api_key = comp.get_password('jazzhr_api_key')
     try:
-        frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_fetch_applicants_data", queue='default', is_async=True, job_name=company, timeout=25000, api_key=api_key, company=company)
+        frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_fetch_applicants_data", queue='default', is_async=True, job_name=company, timeout=25000, api_key=decrypted_api_key, company=company)
     except Exception as e:
         frappe.log_error(e, "JazzHR - jazzhr_fetch_applicants fail long")
 
