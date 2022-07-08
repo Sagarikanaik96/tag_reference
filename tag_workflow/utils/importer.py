@@ -231,7 +231,7 @@ class Importer:
                     name = "HR-EMP-"+str(self.emp_series)
                     lat, lng = self.update_emp_lat_lng(docs)
 
-                    self.sql += str(tuple([name, (docs.first_name + " " + docs.last_name), docs.first_name, docs.last_name, docs.email, docs.company, docs.status, docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, docs.street_address, docs.suite_or_apartment_no, docs.city, docs.state, docs.zip, lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
+                    self.sql += str(tuple([name, (docs.first_name + " " + docs.last_name), docs.first_name, docs.last_name, docs.email, docs.company, docs.status, docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
 
                     self.emp_series += 1
                     time.sleep(0.1)
@@ -279,7 +279,7 @@ class Importer:
                 if(docs.name and docs.first_name and docs.last_name and docs.email and docs.status):
                     full_name = (docs.first_name + " " + docs.last_name)
                     lat, lng = self.update_emp_lat_lng(docs)
-                    self.sql = """employee_name = '{0}', first_name = '{1}', last_name = '{2}', email = '{3}', company = '{4}', status = '{5}', contact_number = '{6}', employee_gender = '{7}', sssn = '{8}', military_veteran = {9}, street_address = '{10}', suite_or_apartment_no = '{11}', city = '{12}', state = '{13}', zip = '{14}', lat = '{15}', lng = '{16}', creation = '{17}' """.format(full_name, docs.first_name, docs.last_name, docs.email, docs.company, docs.status, docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, docs.street_address, docs.suite_or_apartment_no, docs.city, docs.state, docs.zip, lat, lng, frappe.utils.now())
+                    self.sql = """employee_name = '{0}', first_name = '{1}', last_name = '{2}', email = '{3}', company = '{4}', status = '{5}', contact_number = '{6}', employee_gender = '{7}', sssn = '{8}', military_veteran = {9}, street_address = '{10}', suite_or_apartment_no = '{11}', city = '{12}', state = '{13}', zip = '{14}', lat = '{15}', lng = '{16}', creation = '{17}' """.format(full_name, docs.first_name, docs.last_name, docs.email, docs.company, docs.status, docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, frappe.utils.now())
 
                     sql = """update `tabEmployee` set {0} where name = '{1}'""".format(self.sql, docs.name)
                     frappe.db.sql(sql)
