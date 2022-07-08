@@ -44,7 +44,8 @@ def onboard_org(lead,contract_number):
         exclusive=(lead_value.company_name).strip()
         staffing=lead_value.owner_company
         email=(lead_value.email_id).strip()
-        person_name=(lead_value.lead_name).strip()
+        person_first_name=(lead_value.contact_first_name).strip()
+        person_last_name=(lead_value.contact_last_name).strip()
         phone=lead_value.phone_no
         organization_type=lead_value.organization_type
         lead_value.db_set('status', 'Contract Signing')
@@ -62,7 +63,7 @@ def onboard_org(lead,contract_number):
             is_company = 0
 
         if not frappe.db.exists("User", email):
-            user = make_user(exclusive, email, person_name, org_type, user_type, tag_user_type, phone)
+            user = make_user(exclusive, email, person_first_name,person_last_name, org_type, user_type, tag_user_type, phone)
             is_user = 0
         enqueue("tag_workflow.controllers.master_controller.make_update_comp_perm", docname=exclusive)
         return is_company, is_user, company_doc, user
@@ -96,9 +97,9 @@ def make_company(exclusive, staffing, org_type,contract_number):
         frappe.throw(e)
 
 
-def make_user(exclusive, email, person_name, org_type, user_type, tag_user_type,phone):
+def make_user(exclusive, email, person_first_name,person_last_name, org_type, user_type, tag_user_type,phone):
     try:
-        user = frappe.get_doc(dict(doctype="User", organization_type=org_type, tag_user_type=tag_user_type, company=exclusive, email=email, first_name=person_name, module_profile=user_type, role_profile_name=tag_user_type, date_of_joining=frappe.utils.nowdate(), mobile_no=phone))
+        user = frappe.get_doc(dict(doctype="User", organization_type=org_type, tag_user_type=tag_user_type, company=exclusive, email=email, first_name=person_first_name,last_name=person_last_name, module_profile=user_type, role_profile_name=tag_user_type, date_of_joining=frappe.utils.nowdate(), mobile_no=phone))
         user.save(ignore_permissions=True)
         return user.name
     except Exception as e:

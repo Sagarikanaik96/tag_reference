@@ -131,6 +131,9 @@ frappe.ui.form.on("Lead", {
     });
   },
   before_save: function(frm){
+    if(frm.doc.contact_first_name && frm.doc.contact_last_name){
+      cur_frm.set_value('lead_name',(frm.doc.contact_first_name).trim()+' '+(frm.doc.contact_last_name).trim())
+    }
    if (frappe.boot.tag.tag_user_info.company_type=='Staffing') {
     frm.set_value("organization_type", "Exclusive Hiring");} 
     if(frm.doc.notes && frm.doc.user_notes){
@@ -207,7 +210,7 @@ frappe.ui.form.on("Lead", {
 
 /*-------reqd------*/
 function reqd_fields(frm) {
-  let reqd = ["lead_name", "company_name", "email_id"];
+  let reqd = ["company_name", "email_id"];
   for (let r in reqd) {
     cur_frm.toggle_reqd(reqd[r], 1);
   }
