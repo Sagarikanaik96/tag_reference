@@ -222,21 +222,32 @@ function org_info(frm){
 
 
 function claim_order_save(frm){
-	let dict = {}
-	dict[frm.doc.staffing_organization]=frm.doc.staff_claims_no
-	frappe.call({
-		method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_claims",
-		args:{
-			'my_data':dict,
-			'doc_name':frm.doc.job_order
-		},
-		callback:function(){
+	frappe.db.get_value("Job Order", { name: frm.doc.job_order},"is_repeat", function(r1){
+		if(r1.is_repeat!=1){
+			let dict = {}
+			dict[frm.doc.staffing_organization]=frm.doc.staff_claims_no
+			frappe.call({
+				method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_claims",
+				args:{
+					'my_data':dict,
+					'doc_name':frm.doc.job_order
+				},
+				callback:function(){
+					setTimeout(function () {
+						window.location.href='/app/job-order/'+frm.doc.job_order
+					}, 3000);
+					frappe.msgprint('Notification send successfully')
+				}
+			})
+		}
+		else{
 			setTimeout(function () {
 				window.location.href='/app/job-order/'+frm.doc.job_order
 			}, 3000);
 			frappe.msgprint('Notification send successfully')
 		}
-	})
+	});
+	
 }
                                 
 function update_claim_by_staffing(frm){

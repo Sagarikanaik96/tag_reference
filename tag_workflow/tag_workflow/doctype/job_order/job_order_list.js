@@ -79,7 +79,6 @@ frappe.listview_settings['Job Order'] = {
 
 	formatters: {
 		order_status(val, d, f) {
-			console.log(val,d,f)
 			if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && val!='Completed' && (f.no_of_workers!=f.worker_filled)){
 				let y
 				frappe.call({
