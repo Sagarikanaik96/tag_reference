@@ -14,6 +14,7 @@ from frappe.model.base_document import get_controller
 import googlemaps
 import json, requests, time
 from haversine import haversine, Unit
+from tag_workflow.tag_workflow.doctype.job_order.job_order import claims_left
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
@@ -38,6 +39,7 @@ def get():
             organization_type = frappe.db.get_value("User", frappe.session.user, "organization_type") or ''
             if(args.doctype == JOB and organization_type == "Staffing"):
                 data = staffing_data(data, radius)
+                data = claim_left(data)
         return data
     except Exception as e:
         frappe.msgprint(e)
@@ -58,6 +60,17 @@ def staffing_data(data, radius):
     except Exception as e:
         frappe.msgprint(e)
         return data
+
+def claim_left(data):
+    try:
+        data_list = data
+        company = frappe.db.get_value("User", frappe.session.user, "company")
+        for d in data['values']:
+            d[-6] = claims_left(d[0], company)
+        return data
+    except Exception as e:
+        frappe.msgprint(e)
+        return data_list
 
 
 def get_data(user_company, radius, data):
@@ -97,9 +110,9 @@ def check_distance(company_address, data, radius):
 def get_location():
     try:
         result = []
-        order = frappe.get_list(JOB, ["name", "job_site"])
+        order = frappe.get_list(JOB, ["name", "job_site"], ignore_permissions=0)
         for o in order:
-            if(frappe.has_permission(doctype=JOB, ptype="read", doc=o.name) and o.job_site not in result):
+            if(o.job_site not in result):
                 result.append(o.job_site)
         return result
     except Exception as e:

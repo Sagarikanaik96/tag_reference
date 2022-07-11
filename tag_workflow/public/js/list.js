@@ -27,8 +27,8 @@ frappe.views.BaseList.prototype.get_call_args = function() {
     return {
         method: this.method,
         args: args,
-        freeze: this.freeze_on_refresh || false,
-        freeze_message: this.freeze_message || __("Loading") + "...",
+        freeze: true,
+        freeze_message: __("<b>Loading") + "...</b>",
     };
 }
 
@@ -50,7 +50,6 @@ frappe.views.BaseList.prototype.setup_paging_area = function() {
         </div>`).hide();
 
     if(this.doctype == "Job Order" && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
-        this.order_location = get_order_location();
         this.$paging_area = $(`
             <div class="list-paging-area level">
                 <div class="level-left">
@@ -97,6 +96,7 @@ frappe.views.BaseList.prototype.setup_paging_area = function() {
                 this.page_length = 100;
                 this.refresh();
             }else if(val == "Custom Address"){
+                this.order_location = get_order_location();
                 this.add_fields = [{label: 'Address', fieldname: 'address', fieldtype: 'Select', options: this.order_location, 'reqd': 1}];
                 let dialog = new frappe.ui.Dialog({
                     title: 'Please Select an Address',
@@ -130,6 +130,8 @@ function get_order_location(){
     frappe.call({
         "method": "tag_workflow.utils.reportview.get_location",
         "async": 0,
+        "freeze": true,
+        "freeze_message":  __("<b>Loading Job Site(s)") + "...</b>",
         "callback": function(r){
             let data = r.message;
             order_location = data.join("\n");

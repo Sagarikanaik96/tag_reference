@@ -252,38 +252,10 @@ frappe.listview_settings['Job Order'] = {
 			}
 		},
 		head_count_available(val, d, f){
-			if(frappe.boot.tag.tag_user_info.company_type == 'Staffing'){
-				let y
-				frappe.call({
-					method:'tag_workflow.tag_workflow.doctype.job_order.job_order.claims_left',
-					args:{
-						'name':f.name,
-						'comp':frappe.boot.tag.tag_user_info.company,
-					},
-					async:0,
-					callback:function(r)
-					{
-						if(r.message=='success')
-						{
-							y='claimed'
-						}
-						else{
-							y=r.message
-						}
-
-					}
-				})
-				if(y=="claimed")
-				{
-					return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
-						<a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">0</a>
-					</span>`
-				}
-				else{
-					return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
-						<a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${y}</a>
-					</span>`
-				}		
+            if(val == "success"){
+                return `<span class=" ellipsis" title="" id="${val}-${f.name}" ><a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">0</a></span>`
+			}else{
+                return `<span class=" ellipsis" title="" id="${val}-${f.name}" ><a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a></span>`
 			}
 		}
 	},
