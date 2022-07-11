@@ -1,5 +1,6 @@
 frappe.listview_settings['Sales Invoice'] = {
 	onload:function(listview){
+		$('input[data-fieldname="name"]')[0].value = '';
 		$('h3[title = "Invoice"]').html('Invoices');
 		if(frappe.session.user!='Administrator'){
 			// $('.custom-actions.hidden-xs.hidden-md').hide()
