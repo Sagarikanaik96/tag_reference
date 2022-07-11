@@ -105,6 +105,7 @@ frappe.views.BaseList.prototype.setup_paging_area = function() {
                 dialog.show();
                 dialog.set_primary_action(__('Submit'), function() {
                     let values = dialog.get_values();
+                    cur_list.start = 0;
                     cur_list.page_length = 500;
                     cur_list.radius = values.address;
                     cur_list.refresh();

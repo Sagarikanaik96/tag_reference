@@ -12,8 +12,11 @@ from frappe.core.doctype.access_log.access_log import make_access_log
 from frappe.utils import cstr, format_duration
 from frappe.model.base_document import get_controller
 import googlemaps
+import json, requests, time
+from haversine import haversine, Unit
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
+GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
 distance_value = {"5": 5, "10": 10, "25": 25, "50": 50, "100": 100}
 distance = ['5', '10', '25', '50', '100']
 JOB = "Job Order"
@@ -32,7 +35,8 @@ def get():
             data = compress(controller(args.doctype).get_list(args))
         else:
             data = compress(execute(**args), args=args)
-            if(args.doctype == JOB and (frappe.db.get_value("User", frappe.session.user, "organization_type") == "Staffing")):
+            organization_type = frappe.db.get_value("User", frappe.session.user, "organization_type") or ''
+            if(args.doctype == JOB and organization_type == "Staffing"):
                 data = staffing_data(data, radius)
         return data
     except Exception as e:
@@ -62,40 +66,32 @@ def get_data(user_company, radius, data):
         for com in user_company:
             add = " ".join(frappe.db.get_value("Company", com.company, ["IFNULL(suite_or_apartment_no, '')", "IFNULL(state, '')", "IFNULL(city, '')", "IFNULL(zip, '')"]))
             if(add and add not in company_address):
-                company_address.append(add)
-        data["values"] = google_distance_values(data, radius, company_address)
+                lat, lng = get_lat_lng(add)
+                lat_lng = tuple([lat, lng])
+                if(lat != 0 and lng != 0 and lat_lng not in company_address):
+                    company_address.append(lat_lng)
+        if(check_distance):
+            data["values"] = check_distance(company_address, data, radius)
         return data
     except Exception as e:
         frappe.msgprint(e)
 
-def google_distance_values(data, radius, company_address):
+def check_distance(company_address, data, radius):
     try:
-        result, order = [], []
-        gmaps = googlemaps.Client(key=tag_gmap_key)
+        result, orders = [], []
         for add in company_address:
             for d in data['values']:
                 try:
-                    my_dist = gmaps.distance_matrix(add, d[-4])
-                    result, order = google_distance(my_dist, d, radius, result, order)
-                except Exception as e:
-                    print(e)
+                    lat, lng = frappe.db.get_value("Job Site", d[-4], ["IFNULL(lat, '')", "IFNULL(lng, '')"])
+                    rds = haversine(add, tuple([float(lat), float(lng)]), unit='km')
+                    if(rds <= distance_value[radius] and d[0] not in orders):
+                        result.append(d)
+                        orders.append(d[0])
+                except Exception:
                     continue
         return result
     except Exception as e:
         frappe.msgprint(e)
-        return data["values"]
-
-def google_distance(my_dist, d, radius, result, order):
-    try:
-        if(my_dist['status'] == 'OK' and my_dist['rows'][0]['elements'][0]['distance']):
-            km = my_dist['rows'][0]['elements'][0]['distance']['value']/1000 or 0
-            if(((km*0.62137) <= distance_value[radius] or km == 0) and d[0] not in order):
-                result.append(d)
-                order.append(d[0])
-        return result, order
-    except Exception as e:
-        print(e)
-
 
 @frappe.whitelist()
 def get_location():
@@ -109,3 +105,20 @@ def get_location():
     except Exception as e:
         print(e)
         return []
+
+
+#-------------------------------#
+def get_lat_lng(address):
+    try:
+        lat, lng = 0, 0
+        google_location_data_url = GOOGLE_API_URL + address
+        google_response = requests.get(google_location_data_url)
+        location_data = google_response.json()
+        if(google_response.status_code == 200 and len(location_data)>0 and len(location_data['results'])>0):
+            location = location_data['results'][0]['geometry']['location']
+            lat = location['lat']
+            lng = location['lng']
+        return lat, lng
+    except Exception as e:
+        frappe.msgprint(e)
+        return 0, 0
