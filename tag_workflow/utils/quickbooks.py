@@ -210,7 +210,8 @@ def sync_invoice(invoice, result, request_id=None):
         access_token = get_access_token(company)
         if(access_token):
             #Setting up an AuthClient
-            auth_client = AuthClient(client_id=client_id, client_secret=client_secret, access_token=access_token, environment='sandbox', redirect_uri=company.redirect_url)
+            qb_environment = frappe.get_site_config().qb_environment or 'sandbox'
+            auth_client = AuthClient(client_id=client_id, client_secret=client_secret, access_token=access_token, environment=qb_environment, redirect_uri=company.redirect_url)
             client = QuickBooks(auth_client=auth_client, refresh_token=company.refresh_token, company_id=company.quickbooks_company_id)
             #checking customer in quickbook database
             cust = check_customer(invoice.customer, client)
