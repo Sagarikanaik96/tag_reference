@@ -70,6 +70,7 @@ frappe.listview_settings['Employee'] = {
 	},
 	
 	onload: function(listview){
+		$('input[data-fieldname="name"]')[0].value="";
 		$('h3[title="Employee"]').html('Employees');
 		if(frappe.session.user!='Administrator'){
 			$('.custom-actions.hidden-xs.hidden-md').hide();
