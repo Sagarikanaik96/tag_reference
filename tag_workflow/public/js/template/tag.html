@@ -47,11 +47,28 @@
       .sub-menu .dropdown-item {
         color: #78849e !important;
       }
-      .sub-menu .tab-button.active {
+     .sub-menu .tab-button.active {
         background: #e8f8fc;
-        border-left: 4px solid #37c0e6;
         color: #2e3c54 !important;
       }
+       .sub-menu .tab-button.active::before {
+        background: #37c0e6;
+        height: 40px;
+        width: 4px;
+        content: "";
+        z-index: 99999999;
+        position: absolute;
+        margin-top: -10px;
+       }
+        .sub-menu .tab-button:hover::before {
+        background: #37c0e6;
+        height: 40px;
+        width: 4px;
+        content: "";
+        z-index: 99999999;
+        position: absolute;
+        margin-top: -10px;
+       }
       .footer-admin img {
         height: 30px;
         margin-top: 5px;
@@ -129,7 +146,6 @@
       .sub-menu .custom-btn:hover {
         text-decoration: none;
         background: #e8f8fc;
-        border-left: 4px solid #37c0e6;
         transition: 0.2s ease-in-out;
       }
       .sub-menu .inner-menu .active a {
@@ -224,7 +240,7 @@
               {% endif %}
 
 	      {% if frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" || frappe.boot.tag.tag_user_info.company_type == "TAG" || frappe.session.user == "Administrator" %}
-		      <a href="/app/home">
+		      <a href="/app/home" class="position-relative">
 			      <div class="tab-button custom-btn">
 				      <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-5" alt="home"/>Home
 			      </div>
@@ -232,13 +248,13 @@
 	      {% endif %}
 
 	      {% if frappe.boot.tag.tag_user_info.company_type == "Staffing" %}
-	      	<a href="/app/staff-home">
+	      	<a href="/app/staff-home" class="position-relative">
 			<div class="tab-button custom-btn">
 				<img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-5" alt="home"/>Home
 			</div>
 		</a>
 	      {% endif %}
-
+        
               <div class="tab-button custom-btn">
                 <ul class="nav order">
                   <li>
@@ -321,6 +337,23 @@
                       <li class="py-2"><a href="/app/staffing-email">Emails</a></li>
                       <li class="py-2"><a href="/app/contract">Contract</a></li>
 
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="tab-button custom-btn">
+                <ul class="nav crm">
+                  <li>
+                    <a href="#" id="2" data-toggle="collapse" data-target="#submenu3" aria-expanded="false">
+                      <span class="pl-3 ml-3"><img src="/assets/tag_workflow/images/ico-ats.svg" class="pr-3 pl-3"
+                          alt="crm" /></span>
+                      <span class="slide-text">ATS </span>
+                      <span><i class="fa fa-angle-down" aria-hidden="true"></i></span>
+                    </a>
+                    <ul class="inner-menu pl-5 ml-5 list-unstyled collapse" id="submenu3" role="menu" aria-labelledby="btn-2">
+                      <li class="py-2 mt-1"><a href="/app/employee-onboarding">Onboarding</a></li>
+                      <li class="py-2"><a href="/app/employee-onboarding-template">Set Up</a></li>
                     </ul>
                   </li>
                 </ul>
