@@ -1107,16 +1107,6 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-col:nth-child(7) {
   flex: 2;
 }
-[data-page-route="List/Job Order/List"]
-  .frappe-card
-  header
-  .level-left
-  .list-row-col:nth-child(1),
-[data-page-route="List/Job Order/List"]
-  .frappe-card
-  .list-row-container
-  .level-left
-  .list-row-col:nth-child(1),
 [data-page-route="List/Item/List"]
   .frappe-card
   header
@@ -1148,7 +1138,17 @@ select.input-with-feedback.form-control.ellipsis {
   flex: 0.3;
 }
 [data-page-route="List/Sales Invoice/List"] .list-row .level-right,
-[data-page-route="List/Sales Invoice/List"] .list-row-head .level-right {
+[data-page-route="List/Sales Invoice/List"] .list-row-head .level-right,
+[data-page-route="List/Job Order/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(1),
+[data-page-route="List/Job Order/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(1) {
   flex: 1.5;
 }
 .block-company-btn {
