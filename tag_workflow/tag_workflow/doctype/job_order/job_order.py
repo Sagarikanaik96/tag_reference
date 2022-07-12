@@ -532,14 +532,13 @@ def check_order_already_exist(frm):
 @frappe.whitelist()
 def my_used_job_orders(company_name,status):
     my_aval_claims=[]
+    unclaimed_noresume_by_company=[]
     if status=='All':
-        l=f'select name from `tabJob Order` where claim like "%{company_name}%"  '
-        my_claims=frappe.db.sql(l,as_list=1)
-        unclaimed_by_comp=f'select name from `tabJob Order` where (claim not like "%{company_name}%" or claim is Null) and order_status!="Completed" and worker_filled!=no_of_workers'
-        my_aval_claims=frappe.db.sql(unclaimed_by_comp,as_list=1)
+        my_claims,my_aval_claims,unclaimed_noresume_by_company=all_orders_data(company_name)
     elif status=='Available':
-        l=f'select name from `tabJob Order` where (claim not like "%{company_name}%" or claim is Null) and order_status!="Completed" and worker_filled!=no_of_workers'
-        my_claims=frappe.db.sql(l,as_list=1)
+        unclaimed_resume_by_comp=f'select name from `tabJob Order` where (claim not like "%{company_name}%" or claim is Null) and order_status!="Completed" and resumes_required=1 and worker_filled!=no_of_workers'
+        my_aval_claims=frappe.db.sql(unclaimed_resume_by_comp,as_list=1)
+        my_claims=check_avail(company_name,unclaimed_noresume_by_company)
     else:
         l=f'select name from `tabJob Order` where claim like "%{company_name}%" and order_status="{status}"'
         my_claims=frappe.db.sql(l,as_list=1)
@@ -549,6 +548,9 @@ def my_used_job_orders(company_name,status):
     if(len(my_aval_claims)>0):
         for i in my_aval_claims:
             z.append(i[0])
+    if(len(unclaimed_noresume_by_company)>0):
+        for i in unclaimed_noresume_by_company:
+            z.append(i)
     return list(set(z)) 
 @frappe.whitelist()
 def claims_left(name,comp):
@@ -567,3 +569,26 @@ def claims_left(name,comp):
                 return int(data.no_of_workers)-int(data1[0][0])
             else:
                 return int(data.no_of_workers) 
+def all_orders_data(company_name):
+    my_aval_claims=[]
+    unclaimed_noresume_by_company=[]
+    l=f'select name from `tabJob Order` where claim like "%{company_name}%"  '
+    my_claims=frappe.db.sql(l,as_list=1)
+    unclaimed_resume_by_comp=f'select name from `tabJob Order` where (claim not like "%{company_name}%" or claim is Null) and order_status!="Completed" and resumes_required=1 and worker_filled!=no_of_workers'
+    my_aval_claims=frappe.db.sql(unclaimed_resume_by_comp,as_list=1)
+    unclaimed_noresume_by_company=check_avail(company_name,unclaimed_noresume_by_company)
+    return my_claims,my_aval_claims,unclaimed_noresume_by_company
+
+def check_avail(company_name,unclaimed_noresume_by_company):
+    unclaimed_noresume_by_comp=f'select name from `tabJob Order` where (claim not like "%{company_name}%" or claim is Null) and order_status!="Completed" and resumes_required=0'
+    my_unaval_claims=frappe.db.sql(unclaimed_noresume_by_comp,as_list=1)
+    for i in my_unaval_claims:
+        data=frappe.get_doc(ORD,i[0])
+        claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{data.name}"'
+        data1=frappe.db.sql(claims,as_list=1)
+        if(data1[0][0]!=None):
+            if int(data.no_of_workers)-int(data1[0][0])!=0:
+                unclaimed_noresume_by_company.append(data.name)
+        else:
+            unclaimed_noresume_by_company.append(data.name)
+    return unclaimed_noresume_by_company
