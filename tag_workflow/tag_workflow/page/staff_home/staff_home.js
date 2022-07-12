@@ -120,8 +120,8 @@ frappe.StaffHome = Class.extend({
 									<img src="/assets/tag_workflow/images/ico-worker.svg">
 								</div>
 								<div>
-									<small class="text-secondary">No. of Workers </small>
-									<p> ${order[o].worker_filled} </p>
+									<small class="text-secondary">No. of Employees </small>
+									<p> ${order[o].approved_no_of_workers} </p>
 								</div>
 							</div>
 						</div>

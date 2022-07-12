@@ -20,8 +20,7 @@ def get_order_info(company1):
         job_order = frappe.db.sql(sql, as_dict=1)
         for j in job_order:
             if j.name in order_detail:
-                sql = "select name, category, select_job, from_date, to_date, no_of_workers, worker_filled, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order` where name = '{}'".format(j.name)
-                data = frappe.db.sql(sql, as_dict=1)
+                data=check_claims(j.name,company1)
                 for d in data:
                     cat.append(d.category)
                     final_list.append(d)
@@ -87,8 +86,7 @@ def filter_category(company,category=None,order_by=None):
         job_order = frappe.db.sql(sql, as_dict=1)
         for j in job_order:
             if j.name in order_detail:
-                sql = "select name,category,select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour,job_start_time,worker_filled from `tabJob Order` where name = '{0}'".format(j.name)
-                data = frappe.db.sql(sql, as_dict=1)
+                data=check_claims(j.name,company)
                 for d in data:
                     final_list.append(d)
 
@@ -113,3 +111,19 @@ def filter_data(category,order_by):
     elif order_by:
         sql = f'select name from `tabJob Order`  where "{frappe.utils.nowdate()}"  between from_date and to_date and company_type="{order_by}" order by creation desc'
     return sql
+def check_claims(j,company1):
+    doc=frappe.get_doc('Job Order',j)
+    if(doc.resumes_required==0):
+        sql = "select `tabJob Order`.name, category, select_job, from_date, to_date, no_of_workers, approved_no_of_workers, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order`,`tabClaim Order` where `tabJob Order`.name = '{}' and `tabClaim Order`.job_order=`tabJob Order`.name ".format(j)
+        data = frappe.db.sql(sql, as_dict=1)
+    else:
+        assign_emp = frappe.db.sql(""" select name from `tabAssign Employee` where company = "{0}" and job_order="{1}"  """.format(company1,j), as_dict=1)
+        doc=frappe.get_doc('Assign Employee',assign_emp[0]['name'])
+        sql = "select `tabJob Order`.name, category, select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order`,`tabAssign Employee` where `tabJob Order`.name = '{}' and `tabAssign Employee`.job_order=`tabJob Order`.name ".format(j)
+        data = frappe.db.sql(sql, as_dict=1)
+        emp_approved=0
+        for i in range(len(doc.employee_details)):
+            if(doc.employee_details[i].approved):
+                emp_approved+=1
+        data[0]['approved_no_of_workers']=emp_approved
+    return data
