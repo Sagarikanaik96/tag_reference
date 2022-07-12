@@ -42,6 +42,14 @@ frappe.ui.form.on("Lead", {
     hide_fields(frm);
     show_addr(frm);
     $('[data-fieldname = "phone_no"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
+    frm.set_query("contact_by", function (doc) {
+      return {
+        query: "tag_workflow.utils.lead.contact_person",
+        filters: {
+          owner_company: doc.owner_company,
+        },
+      };
+    });
   },
   sign:function(frm){
     if(frm.doc.sign){
@@ -114,16 +122,6 @@ frappe.ui.form.on("Lead", {
     frm.set_query("lead_owner", function (doc) {
       return {
         query: "tag_workflow.utils.lead.lead_owner",
-        filters: {
-          owner_company: doc.owner_company,
-        },
-      };
-    });
-  },
-  contact_by:function(frm){
-    frm.set_query("contact_by", function (doc) {
-      return {
-        query: "tag_workflow.utils.lead.contact_person",
         filters: {
           owner_company: doc.owner_company,
         },
