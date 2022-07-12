@@ -1,5 +1,8 @@
 frappe.listview_settings['Sales Invoice'] = {
 	onload:function(listview){
+		if(frappe.route_history.length>1){
+			window.location.reload();
+		}
 		$('input[data-fieldname="name"]')[0].value = '';
 		$('h3[title = "Invoice"]').html('Invoices');
 		if(frappe.session.user!='Administrator'){
