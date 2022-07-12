@@ -281,6 +281,9 @@ function get_company_job_order(){
 frappe.flags.my_list=[]
 frappe.flags.status='All'
 frappe.flags.tag_list=''
+if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+	passing_current_status('All',frappe.boot.tag.tag_user_info.company)
+}
 setTimeout(function(){
   const btn=document.getElementById('staff_filter_button1')
   btn.addEventListener('click',function(){
@@ -326,7 +329,7 @@ function passing_current_status(status,company){
 }
 
 frappe.views.BaseList.prototype.prepare_data = function(r) {
-	this.page_length = 20;
+	this.page_length = 500;
 	let data = r.message || {};
 	data = !Array.isArray(data) ?
 		frappe.utils.dict(data.keys, data.values) :
@@ -343,12 +346,16 @@ frappe.views.BaseList.prototype.prepare_data = function(r) {
 			this.page_length = 500;
 		}
 	}
-	else if((frappe.flags.my_list).length==0 && frappe.flags.tag_list=='True'){
+	else if((frappe.flags.my_list).length==0 && frappe.flags.tag_list=='True' && frappe.flags.status!='All'){
 		this.data = []
 	}
 	else if((frappe.flags.my_list).length>0 && frappe.flags.tag_list=='True' && frappe.flags.status=='All')
 	{
-		this.data = data
+		this.page_length = 500;
+		this.data = this.data.filter((d) => frappe.flags.my_list.includes(d.name))
+	}
+	else{
+		this.data=data
 	}
 	this.data = this.data.uniqBy((d) => d.name); 
   } 

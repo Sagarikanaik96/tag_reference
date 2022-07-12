@@ -531,9 +531,12 @@ def check_order_already_exist(frm):
         frappe.error_log(e,'Check same order') 
 @frappe.whitelist()
 def my_used_job_orders(company_name,status):
+    my_aval_claims=[]
     if status=='All':
         l=f'select name from `tabJob Order` where claim like "%{company_name}%"  '
         my_claims=frappe.db.sql(l,as_list=1)
+        unclaimed_by_comp=f'select name from `tabJob Order` where (claim not like "%{company_name}%" or claim is Null) and order_status!="Completed" and worker_filled!=no_of_workers'
+        my_aval_claims=frappe.db.sql(unclaimed_by_comp,as_list=1)
     elif status=='Available':
         l=f'select name from `tabJob Order` where (claim not like "%{company_name}%" or claim is Null) and order_status!="Completed" and worker_filled!=no_of_workers'
         my_claims=frappe.db.sql(l,as_list=1)
@@ -543,6 +546,9 @@ def my_used_job_orders(company_name,status):
     z=[]
     for i in my_claims:
         z.append(i[0])
+    if(len(my_aval_claims)>0):
+        for i in my_aval_claims:
+            z.append(i[0])
     return list(set(z)) 
 @frappe.whitelist()
 def claims_left(name,comp):

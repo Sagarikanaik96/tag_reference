@@ -183,7 +183,7 @@ frappe.ui.Page = Class.extend({
 									<button class="btn btn-default btn-sm filter-button" id='staff_filter_button3' title="Claimed and upcoming" value='Upcoming Order'>
 											<span class="button-label hidden-xs">Upcoming Order<span></span></span>
 									</button>
-									<button class="btn btn-default btn-sm filter-button" id='staff_filter_button4' value='Completed Order'>
+									<button class="btn btn-default btn-sm filter-button" id='staff_filter_button4' title="Completed" value='Completed Order'>
 											<span class="button-label hidden-xs">Completed Order<span></span></span>
 									</button>
 									<button class="btn btn-default btn-sm filter-button active" id='staff_filter_button5' value='All Order'>
