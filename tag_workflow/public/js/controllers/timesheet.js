@@ -479,10 +479,13 @@ frappe.ui.form.on("Timesheet Detail", {
 		update_time(frm,cdt,cdn);
 	},
 
-	tip: function(cdt, cdn){
-		let child = locals[cdt][cdn];
-		let flat_rate = child.flat_rate + child.tip;
-		frappe.model.set_value(cdt, cdn, "flat_rate", flat_rate);
+	tip: function(frm, cdt, cdn){
+		frappe.db.get_value("Job Order", {name: frm.doc.job_order_detail}, ["flat_rate"], function(d){
+			let child = locals[cdt][cdn];
+			let flat_rate1 = d.flat_rate + child.tip;
+			frappe.model.set_value(cdt, cdn, "flat_rate", flat_rate1);
+		})		
+		
 	},
 
 	billing_rate: function(frm, cdt, cdn){
