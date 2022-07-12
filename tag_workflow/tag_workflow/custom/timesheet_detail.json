@@ -33,7 +33,7 @@
    "in_preview": 0,
    "in_standard_filter": 0,
    "insert_after": "billing_rate",
-   "label": "Flat Rate",
+   "label": "Tip Amount and Flat Rate (USD)",
    "length": 0,
    "mandatory_depends_on": null,
    "modified": "2022-01-05 11:35:34.782377",
