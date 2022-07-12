@@ -1345,3 +1345,13 @@ span.comment-count {
   font-weight: bold;
   margin-left: -17px;
 }
+
+[data-page-route="Add Timesheet"] .form-grid .grid-static-col {
+    height: auto;
+}
+
+[data-page-route="Add Timesheet"] .form-grid .static-area {
+    white-space: unset;
+    text-overflow: inherit;
+    word-break: break-word;
+}
