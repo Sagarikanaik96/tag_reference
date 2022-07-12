@@ -29,7 +29,8 @@ def get():
         args = get_form_params()
         # If virtual doctype get data from controller het_list method
         radius = args.radius
-        del args["radius"]
+        if 'radius' in args.keys():
+            del args["radius"]
 
         if frappe.db.get_value("DocType", filters={"name": args.doctype}, fieldname="is_virtual"):
             controller = get_controller(args.doctype)
@@ -53,7 +54,7 @@ def staffing_data(data, radius):
             data = get_data(user_company, radius, data)
         elif(radius != 'All'):
             for d in data['values']:
-                if(radius == d[-4]):
+                if(len(d)>3 and radius == d[-4]):
                     result.append(d)
             data["values"] = result
         return data

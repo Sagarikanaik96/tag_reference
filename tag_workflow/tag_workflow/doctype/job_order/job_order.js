@@ -1567,14 +1567,16 @@ function companyhide(time){
 	}, time);
 }
 function advance_hide(time){
-	setTimeout(() => {
-		let txt  = $('[data-fieldname="select_days"]')[1].getAttribute('aria-owns');
-		let txt2 = 'ul[id="'+txt+'"]';
-		let arry = document.querySelectorAll(txt2)[0].children;
-		if(arry.length){
-			document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none';
-		}
-	}, time);
+	if($('[data-fieldname="select_days"]')[1]){
+		setTimeout(() => {
+			let txt  = $('[data-fieldname="select_days"]')[1].getAttribute('aria-owns');
+			let txt2 = 'ul[id="'+txt+'"]';
+			let arry = document.querySelectorAll(txt2)[0].children;
+			if(arry.length){
+				document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none';
+			}
+		}, time);
+	}
 }
 
 function staff_company_asterisks(frm){
