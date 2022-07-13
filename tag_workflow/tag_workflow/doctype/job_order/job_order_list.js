@@ -278,84 +278,40 @@ function get_company_job_order(){
 	});
 	return text
 }
-frappe.flags.my_list=[]
-frappe.flags.status='All'
-frappe.flags.tag_list=''
-if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-	passing_current_status('All',frappe.boot.tag.tag_user_info.company)
-}
+
 setTimeout(function(){
-  const btn=document.getElementById('staff_filter_button1')
-  btn.addEventListener('click',function(){
-	  passing_current_status('Available',frappe.boot.tag.tag_user_info.company)
-  })
-  const btn2=document.getElementById('staff_filter_button2')
+    const btn = document.getElementById('staff_filter_button1');
+    btn.addEventListener('click',function(){
+        cur_list.order_status = "Available";
+        cur_list.start = 0;
+        cur_list.refresh();
+    });
+
+    const btn2=document.getElementById('staff_filter_button2');
     btn2.addEventListener('click',function(){
-	 passing_current_status('Ongoing',frappe.boot.tag.tag_user_info.company)
-    })
-	const btn3=document.getElementById('staff_filter_button3')
+        cur_list.order_status = 'Ongoing';
+        cur_list.start = 0;
+        cur_list.refresh();
+    });
+
+	const btn3=document.getElementById('staff_filter_button3');
 	btn3.addEventListener('click',function(){
-		passing_current_status('Upcoming',frappe.boot.tag.tag_user_info.company)
-	}) 
-	const btn4=document.getElementById('staff_filter_button4')
+        cur_list.order_status = 'Upcoming';
+        cur_list.start = 0;
+        cur_list.refresh();
+	});
+
+	const btn4=document.getElementById('staff_filter_button4');
 	btn4.addEventListener('click',function(){
-		passing_current_status('Completed',frappe.boot.tag.tag_user_info.company)
-	}) 
-	const btn5=document.getElementById('staff_filter_button5')
+        cur_list.order_status = 'Completed';
+        cur_list.start = 0;
+        cur_list.refresh();
+	});
+
+	const btn5=document.getElementById('staff_filter_button5');
 	btn5.addEventListener('click',function(){
-		passing_current_status('All',frappe.boot.tag.tag_user_info.company)
-	})
-},2000)
-
-function passing_current_status(status,company){
-	frappe.flags.company=company
-	frappe.flags.status=status
-	frappe.call({
-        method:"tag_workflow.tag_workflow.doctype.job_order.job_order.my_used_job_orders",
-        args:{
-          company_name:company,
-          status:status,
-        },
-        callback:function(r){
-	      	if (r.message){
-		        frappe.flags.my_list = r.message
-		        frappe.flags.tag_list='True'
-				frappe.flags.status=status
-		        cur_list.refresh()
-		    }
-        }
-
-      })
-}
-
-frappe.views.BaseList.prototype.prepare_data = function(r) {
-	this.page_length = 500;
-	let data = r.message || {};
-	data = !Array.isArray(data) ?
-		frappe.utils.dict(data.keys, data.values) :
-		data;
-
-	if (this.start === 0) {
-		this.data = data;
-	} else {
-		this.data = this.data.concat(data);
-	}	
-	if((frappe.flags.my_list).length>0 && frappe.flags.tag_list=='True' && frappe.flags.status!='All'){
-		this.data = this.data.filter((d) => frappe.flags.my_list.includes(d.name))
-		if(frappe.flags.status=='Completed'){
-			this.page_length = 500;
-		}
-	}
-	else if((frappe.flags.my_list).length==0 && frappe.flags.tag_list=='True' && frappe.flags.status!='All'){
-		this.data = []
-	}
-	else if((frappe.flags.my_list).length>0 && frappe.flags.tag_list=='True' && frappe.flags.status=='All')
-	{
-		this.page_length = 500;
-		this.data = this.data.filter((d) => frappe.flags.my_list.includes(d.name))
-	}
-	else{
-		this.data=data
-	}
-	this.data = this.data.uniqBy((d) => d.name); 
-  } 
+        cur_list.order_status = 'All';
+        cur_list.start = 0;
+        cur_list.refresh();
+	});
+}, 2000);
