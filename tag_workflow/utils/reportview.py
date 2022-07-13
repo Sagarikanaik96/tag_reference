@@ -100,8 +100,9 @@ def claim_left(data):
     try:
         data_list = data
         company = frappe.db.get_value("User", frappe.session.user, "company")
-        for d in data['values']:
-            d[-6] = claims_left(d[0], company)
+        if(data):
+            for d in data['values']:
+                d[-6] = claims_left(d[0], company)
         return data
     except Exception as e:
         print(e)
