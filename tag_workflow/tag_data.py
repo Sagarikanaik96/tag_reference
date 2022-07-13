@@ -1366,16 +1366,11 @@ def lead_follow_up():
                 else:
                     recipients = []
                     recipients.append(i[2])
-                try:
-                    full_url = frappe.request.url.split('/')
-                    url = full_url[0]+'//'+full_url[2]
-                except Exception:
-                    port = frappe.get_site_config().webserver_port or '8000'
-                    url = f"http://localhost:{port}"
                 sub = f'Follow Up Reminder'
                 msg = f'Reminder to follow up with {i[4]} at {i[5]} on {i[1]}. Contact information and lead notes can be found in TAG.'
-                link = f'href="{url}/app/lead/{i[0]}"'
+                env_url = frappe.get_site_config().env_url
+                link = f'href="{env_url}/app/lead/{i[0]}"'
                 make_system_notification(users=recipients,message=msg,doctype="Lead",docname=i[0],subject=sub)
-                enqueue(method=frappe.sendmail, recipients=recipients, subject=sub, reference_name=i[0], message=msg, template="email_template_custom", args = {"sitename":url,"content":msg,"subject":sub, "lead": "true", "link":link})
+                enqueue(method=frappe.sendmail, recipients=recipients, subject=sub, reference_name=i[0], message=msg, template="email_template_custom", args = {"sitename":env_url,"content":msg,"subject":sub, "lead": "true", "link":link})
     except Exception as e:
         frappe.log_error(e, "Lead Follow Up")
