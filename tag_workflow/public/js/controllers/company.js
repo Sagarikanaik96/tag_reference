@@ -64,48 +64,112 @@ frappe.ui.form.on("Company", {
 	},
 
 	decrypt_jazzhr_api_key: function(frm) {
-		frappe.call({
-			method: "tag_workflow.tag_data.jazz_api_sec",
-			args: {
-				'frm': frm.doc.name,
-			},
-			callback: function(r) {
-				frm.set_value('decrypted_jazzhr_api_key', r.message);
-				refresh_field('decrypted_jazzhr_api_key');
+		if(frm.doc.decrypt_jazzhr_api_key==1){
+			if(frm.doc.jazzhr_api_key){
+				frappe.call({
+					method: "tag_workflow.tag_data.jazz_api_sec",
+					args: {
+						'frm': frm.doc.name,
+					},
+					callback: function(r) {
+						if(r.message!='Not Found'){
+							frm.set_value('decrypted_jazzhr_api_key', r.message);
+							frm.set_df_property('decrypted_jazzhr_api_key','hidden',0)
+							refresh_field('decrypted_jazzhr_api_key');
+						}
+						else{
+							frm.set_df_property('decrypted_jazzhr_api_key','hidden',1)
+							frm.set_value('decrypt_jazzhr_api_key',0)
+							frappe.msgprint('Please save to proceed further')
+						}	
+					}
+				})
 			}
-		})
+			else{
+				frm.set_df_property('decrypted_jazzhr_api_key','hidden',1)
+				frm.set_value('decrypted_jazzhr_api_key', '');
+				frm.set_value('decrypt_jazzhr_api_key',0)
+				frappe.msgprint('Nothing to decrypt')
+			}
+		}
 	},
 
 	decrypt_client_id: function(frm) {
-		frappe.call({
-			method: "tag_workflow.tag_data.client_id_sec",
-			args: {
-				'frm': frm.doc.name,
-			},
-			callback: function(r) {
-				frm.set_value('decrypted_client_id', r.message);
-				refresh_field('decrypted_client_id');
+		if(frm.doc.decrypt_client_id==1){
+			if(frm.doc.client_id){
+				frappe.call({
+					method: "tag_workflow.tag_data.client_id_sec",
+					args: {
+						'frm': frm.doc.name,
+					},
+					callback: function(r) {
+						if(r.message!='Not Found'){
+							frm.set_value('decrypted_client_id', r.message);
+							frm.set_df_property('decrypted_client_id','hidden',0)
+							refresh_field('decrypted_client_id');
+						}
+						else{
+							frm.set_df_property('decrypted_client_id','hidden',1)
+							frm.set_value('decrypt_client_id',0)
+							frappe.msgprint('Please save to proceed further')
+						}
+					}
+				})
 			}
-		})
+			else{
+				frm.set_df_property('decrypted_client_id','hidden',1)
+				frm.set_value('decrypted_client_id', '');
+				frm.set_value('decrypt_client_id',0)
+				frappe.msgprint('Nothing to decrypt')
+			}
+		}
 	},
 	decrypt_client_secret: function(frm) {
-		frappe.call({
-			method: "tag_workflow.tag_data.client_secret_sec",
-			args: {
-				'frm': frm.doc.name,
-			},
-			callback: function(r) {
-				frm.set_value('decrypted_client_secret', r.message);
-				refresh_field('decrypted_client_secret');
+		if(frm.doc.decrypt_client_secret==1){
+			if(frm.doc.client_secret){
+				frappe.call({
+					method: "tag_workflow.tag_data.client_secret_sec",
+					args: {
+						'frm': frm.doc.name,
+					},
+					callback: function(r) {
+						if(r.message!='Not Found'){
+							frm.set_value('decrypted_client_secret', r.message);
+							frm.set_df_property('decrypted_client_secret','hidden',0)
+							refresh_field('decrypted_client_secret');
+						}
+						else{
+							frm.set_df_property('decrypted_client_secret','hidden',1)
+							frm.set_value('decrypt_client_secret',0)
+							frappe.msgprint('Please save to proceed further')
+						}	
+					}
+				})
 			}
-		})
+			else{
+				frm.set_df_property('decrypted_client_secret','hidden',1)
+				frm.set_value('decrypted_client_secret', '');
+				frm.set_value('decrypt_client_secret',0)
+				frappe.msgprint('Nothing to decrypt')
+			}
+		}
 	},
 	
 	update_employee_records: function (frm){
-		update_existing_employees(frm)
+		if(cur_frm.is_dirty()){
+			frappe.msgprint('Please save to proceed further')
+		}
+		else{
+			update_existing_employees(frm)
+		}
 	}, 
 	get_data_from_jazzhr: function (frm){
-		make_jazzhr_request(frm)
+		if(cur_frm.is_dirty()){
+			frappe.msgprint('Please save to proceed further')
+		}
+		else{
+			make_jazzhr_request(frm)
+		}
 	},
 
 	setup: function (frm){

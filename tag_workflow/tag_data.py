@@ -19,6 +19,7 @@ NOASS = "No Access"
 exclusive_hiring = "Exclusive Hiring"
 site= frappe.utils.get_url().split('/')
 sitename=site[0]+'//'+site[2]
+response='Not Found'
 @frappe.whitelist(allow_guest=False)
 def company_details(company_name=None):
     if frappe.session.user != 'Administrator':
@@ -1320,8 +1321,11 @@ def update_lat_lng_required(company,employee_id):
 def jazz_api_sec(frm=None):
     try:
         comp = frappe.get_doc("Company",frm)
-        jazzhr_decrypt = comp.get_password('jazzhr_api_key')
-        return jazzhr_decrypt
+        if(comp.jazzhr_api_key):
+            jazzhr_decrypt = comp.get_password('jazzhr_api_key')
+            return jazzhr_decrypt
+        else:
+            return response
     except Exception:
         frappe.log_error("No JazzHR API Key in Database", "Warning")
 
@@ -1329,8 +1333,11 @@ def jazz_api_sec(frm=None):
 def client_id_sec(frm=None):
     try:
         comp = frappe.get_doc("Company",frm)
-        client_id_decrypt = comp.get_password('client_id')
-        return client_id_decrypt
+        if(comp.client_id):
+            client_id_decrypt = comp.get_password('client_id')
+            return client_id_decrypt
+        else:
+            return response
     except Exception:
         frappe.log_error("No Client ID in Database", "Warning")
 
@@ -1338,8 +1345,11 @@ def client_id_sec(frm=None):
 def client_secret_sec(frm=None):
     try:
         comp = frappe.get_doc("Company",frm)
-        client_secret_decrypt = comp.get_password('client_secret')
-        return client_secret_decrypt
+        if(comp.client_secret):
+            client_secret_decrypt = comp.get_password('client_secret')
+            return client_secret_decrypt
+        else:
+            return response
     except Exception:
         frappe.log_error("No Client Secret in Database", "Warning")
 

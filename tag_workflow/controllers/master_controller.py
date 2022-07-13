@@ -35,10 +35,7 @@ class MasterController(base_controller.BaseController):
             if not frappe.db.exists("Customer", {"name": self.doc.name}): 
                 customer = frappe.get_doc(dict(doctype="Customer", customer_name=self.doc.name, customer_type="Company", territory=TERRITORY, customer_group=GROUP))
                 customer.insert(ignore_permissions=True)
-            if self.doc.client_id != None:
-                client_id_decrypt = self.doc.get_password('client_id')
-            else:
-                client_id_decrypt = None
+            client_id_decrypt=client_id_values(self.doc.client_id,self.doc)
             if not self.doc.authorization_url and client_id_decrypt and self.doc.redirect_url and self.doc.quickbooks_company_id:
                 self.oauth = OAuth2Session(client_id=client_id_decrypt, redirect_uri=self.doc.redirect_url, scope=self.doc.scope)
                 self.doc.authorization_url = self.oauth.authorization_url(self.doc.authorization_endpoint)[0]
@@ -303,3 +300,9 @@ def new_staff_old_order(data,user):
         except Exception as e:
             frappe.error_log(e, "share error")
             continue
+def client_id_values(client_id,doc):
+    if client_id != None and len(client_id)>0:
+        client_id_decrypt = doc.get_password('client_id')
+    else:
+        client_id_decrypt = None
+    return client_id_decrypt
