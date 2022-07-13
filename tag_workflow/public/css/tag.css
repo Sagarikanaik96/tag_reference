@@ -1050,11 +1050,6 @@ select.input-with-feedback.form-control.ellipsis {
   header
   .level-left
   .list-row-col:nth-child(5),
-[data-page-route="List/Job Order/List"]
-  .frappe-card
-  header
-  .level-left
-  .list-row-col:nth-child(8),
 [data-page-route="List/Lead/List"]
   .frappe-card
   header
@@ -1080,11 +1075,6 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-container
   .level-left
   .list-row-col:nth-child(5),
-[data-page-route="List/Job Order/List"]
-  .frappe-card
-  .list-row-container
-  .level-left
-  .list-row-col:nth-child(8),
 [data-page-route="List/Lead/List"]
   .frappe-card
   .list-row-container
@@ -1146,9 +1136,29 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-col:nth-child(1),
 [data-page-route="List/Job Order/List"]
   .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(8),
+[data-page-route="List/Job Order/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(9),
+[data-page-route="List/Job Order/List"]
+  .frappe-card
   .list-row-container
   .level-left
-  .list-row-col:nth-child(1) {
+  .list-row-col:nth-child(1),
+[data-page-route="List/Job Order/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(8),
+[data-page-route="List/Job Order/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(9) {
   flex: 1.5;
 }
 .block-company-btn {
@@ -1163,6 +1173,33 @@ select.input-with-feedback.form-control.ellipsis {
   white-space: nowrap;
   text-overflow: ellipsis;
   word-break: unset;
+}
+[data-page-route="Add Timesheet"]
+  .form-grid
+  .grid-heading-row
+  .data-row
+  .sortable-handle,
+[data-page-route="Add Timesheet"]
+  .form-grid
+  .grid-body
+  .data-row
+  .sortable-handle {
+  max-width: 3.5% !important;
+  flex: 0 0 3.5% !important;
+  height: auto;
+}
+[data-page-route="Add Timesheet"]
+  .form-grid
+  .grid-heading-row
+  .data-row
+  div.grid-static-col:nth-child(2),
+[data-page-route="Add Timesheet"]
+  .form-grid
+  .grid-body
+  .data-row
+  div.grid-static-col:nth-child(2) {
+  max-width: 13.3% !important;
+  flex: 0 0 13.3% !important;
 }
 
 /*------ Media query start ----*/
@@ -1347,11 +1384,11 @@ span.comment-count {
 }
 
 [data-page-route="Add Timesheet"] .form-grid .grid-static-col {
-    height: auto;
+  height: auto;
 }
 
 [data-page-route="Add Timesheet"] .form-grid .static-area {
-    white-space: unset;
-    text-overflow: inherit;
-    word-break: break-word;
+  white-space: unset;
+  text-overflow: inherit;
+  word-break: break-word;
 }
