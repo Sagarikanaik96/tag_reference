@@ -53,6 +53,7 @@ def setup_data():
         update_role_profile()
         update_module_profile()
         update_permissions()
+        update_old_companies()
         update_old_direct_order()
         set_workspace()
         setup_company_permission()
@@ -276,3 +277,14 @@ def check_is_single_share(old_order):
                 doc=frappe.get_doc('Assign Employee',assign_employee[0].name)
                 if(len(doc.employee_details)==doc.no_of_employee_required):
                     frappe.db.set_value(Job_Label,old_order[i].name,"is_single_share", 1)  
+
+def update_old_companies():
+    try:
+        print("*------updating old companies-------------------*\n")
+        comp_list=frappe.get_list('Company',fields= ['name'],filters={'organization_type':'Staffing'},as_list=1)
+        for i in comp_list:
+            doc=frappe.get_doc('Company',i[0])
+            doc.save()
+    except Exception as e:
+        frappe.log_error(e, "Update staff company Type")
+        print(e) 
