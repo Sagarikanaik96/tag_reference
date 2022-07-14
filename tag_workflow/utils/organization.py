@@ -53,7 +53,6 @@ def setup_data():
         update_role_profile()
         update_module_profile()
         update_permissions()
-        update_old_companies()
         update_old_direct_order()
         set_workspace()
         setup_company_permission()
@@ -99,19 +98,22 @@ def update_role_profile():
         print("*------updating role profile----------------*\n")
         profiles = {k for role in ROLE_PROFILE for k in role.keys()}
         for profile in profiles:
-            profile_data = [role[profile] for role in ROLE_PROFILE if profile in role][0]
+            try:
+                profile_data = [role[profile] for role in ROLE_PROFILE if profile in role][0]
 
-            if not frappe.db.exists(Role_Profile, {"name": profile}):
-                profile_doc = frappe.new_doc(Role_Profile)
-                profile_doc.role_profile = profile
-                for data in profile_data:
-                    profile_doc.append("roles", {"role": data})
-            else:
-                profile_doc = frappe.get_doc(Role_Profile, {"name": profile})
-                profile_doc.roles = []
-                for data in profile_data:
-                    profile_doc.append("roles", {"role": data})
-            profile_doc.save()
+                if not frappe.db.exists(Role_Profile, {"name": profile}):
+                    profile_doc = frappe.new_doc(Role_Profile)
+                    profile_doc.role_profile = profile
+                    for data in profile_data:
+                        profile_doc.append("roles", {"role": data})
+                else:
+                    profile_doc = frappe.get_doc(Role_Profile, {"name": profile})
+                    profile_doc.roles = []
+                    for data in profile_data:
+                        profile_doc.append("roles", {"role": data})
+                profile_doc.save()
+            except Exception:
+                continue
     except Exception as e:
         print(e)
         frappe.log_error(frappe.get_traceback(), "update_role_profile")
@@ -246,6 +248,7 @@ def update_tag_user_type():
     except Exception as e:
         frappe.log_error(e, "Update Tag User Type")
         print(e)
+
 def update_old_lead_status():
     try:
         print('*------Updating Old Lead Status------*')
@@ -257,6 +260,7 @@ def update_old_lead_status():
     except Exception as e:
         frappe.log_error(e,'Lead Update Error')
         print(e)
+
 def update_old_direct_order():
     try:
         print('----Updating Old Direct Order')
@@ -265,8 +269,18 @@ def update_old_direct_order():
             check_is_single_share(old_order)
     except Exception as e:
         frappe.log_error(e,'Old Direct Order')
+
 def check_is_single_share(old_order):
-    for i in range(len(old_order)):
+    try:
+        for i in range(len(old_order)):
+            single_share(old_order,i)
+
+    except Exception as e:
+        frappe.log_error(e, 'check_is_single_share')
+
+    
+def single_share(old_order,i):
+    try:
         if(old_order[i].resumes_required==0):
             claims=frappe.db.sql(""" select name from `tabClaim Order` where job_order="{0}" and staff_claims_no!=no_of_workers_joborder and staffing_organization="{1}" """.format(old_order[i].name,old_order[i].staff_company),as_dict=1)
             if(len(claims)==0):
@@ -276,15 +290,6 @@ def check_is_single_share(old_order):
             if(len(assign_employee)==1):
                 doc=frappe.get_doc('Assign Employee',assign_employee[0].name)
                 if(len(doc.employee_details)==doc.no_of_employee_required):
-                    frappe.db.set_value(Job_Label,old_order[i].name,"is_single_share", 1)  
-
-def update_old_companies():
-    try:
-        print("*------updating old companies-------------------*\n")
-        comp_list=frappe.get_list('Company',fields= ['name'],filters={'organization_type':'Staffing'},as_list=1)
-        for i in comp_list:
-            doc=frappe.get_doc('Company',i[0])
-            doc.save()
+                    frappe.db.set_value(Job_Label,old_order[i].name,"is_single_share", 1)
     except Exception as e:
-        frappe.log_error(e, "Update staff company Type")
-        print(e) 
+        frappe.log_error(e, 'check_is_single_share')

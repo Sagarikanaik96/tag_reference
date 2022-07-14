@@ -150,16 +150,19 @@ def check_emp_available(frm):
         data=f'select name,job_order from `tabAssign Employee` where company="{company}" and tag_status="Approved" and job_order in (select name from `tabJob Order` where order_status!="Completed" and ((from_date between "{job_start_date}" and "{job_end_date}") or (to_date between "{job_start_date}" and "{job_end_date}")  ))'
         my_dta=frappe.db.sql(data,as_dict=1)
         if my_dta:
+            emp_lists=[]
             for i in my_dta:
                 check_emp=f'select employee,employee_name,parent from `tabAssign Employee Details` where parent="{i.name}"'
                 my_emp_data=frappe.db.sql(check_emp,as_dict=1)
-                l=my_emp_work(emps,my_emp_data)
+                for j in my_emp_data:
+                    emp_lists.append(j)
+            l=my_emp_work(emps,emp_lists)
             z=[]
             for i in l:
                 d1={}
-                y=frappe.get_doc('Assign Employee',i['parent'])
+                y=frappe.get_doc('Assign Employee',i[1])
                 d1['job_order']=y.job_order
-                d1['employee']=i['assign']
+                d1['employee']=i[0]
                 z.append(d1)
             return z
         else:
@@ -170,11 +173,7 @@ def my_emp_work(emps,my_emp_data):
     if emps and len(emps):
         l=[]
         for i in emps:
-            d={}
             for k in my_emp_data:
                 if i['employee'] in k.values():
-                    d['assign']=k['employee_name']
-                    d['parent']=k['parent']
-                    l.append(d)
-                    break
+                    l.append([k['employee_name'],k['parent']])
         return l 
