@@ -297,7 +297,7 @@ input::-webkit-credentials-auto-fill-button {
   display: none !important;
 }
 /* Inner report Table UI update  */
-.layout-main-section .datatable.dt-instance-1 .dt-cell {
+.layout-main-section .datatable .dt-cell {
   border: none;
 }
 .layout-main-section .datatable .dt-header .dt-cell--header .dt-cell__content {
@@ -313,6 +313,7 @@ input::-webkit-credentials-auto-fill-button {
   border-radius: 8px;
   margin: 3px 0;
   border-bottom: none !important;
+  position: static !important;
 }
 
 #page-dashboard-view .dashboard .dashboard-graph {
@@ -1060,11 +1061,6 @@ select.input-with-feedback.form-control.ellipsis {
   header
   .level-left
   .list-row-col:nth-child(4),
-[data-page-route="List/Timesheet/List"]
-  .frappe-card
-  header
-  .level-left
-  .list-row-col:nth-child(4),
 [data-page-route="List/Item/List"]
   .frappe-card
   header
@@ -1081,11 +1077,6 @@ select.input-with-feedback.form-control.ellipsis {
   .level-left
   .list-row-col:nth-child(6),
 [data-page-route="List/Lead/List"]
-  .frappe-card
-  .list-row-container
-  .level-left
-  .list-row-col:nth-child(4),
-[data-page-route="List/Timesheet/List"]
   .frappe-card
   .list-row-container
   .level-left
@@ -1115,11 +1106,21 @@ select.input-with-feedback.form-control.ellipsis {
   header
   .level-left
   .list-row-col:nth-child(3),
+[data-page-route="List/Timesheet/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(4),
 [data-page-route="List/Job Order/List"]
   .frappe-card
   .list-row-container
   .level-left
-  .list-row-col:nth-child(3) {
+  .list-row-col:nth-child(3),
+[data-page-route="List/Timesheet/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(4) {
   flex: 1.2;
 }
 
@@ -1200,6 +1201,12 @@ select.input-with-feedback.form-control.ellipsis {
   div.grid-static-col:nth-child(2) {
   max-width: 13.3% !important;
   flex: 0 0 13.3% !important;
+}
+.dt-instance-1 .dt-cell {
+  flex: 1 1 0px;
+}
+.datatable .dt-scrollable {
+  width: auto !important;
 }
 
 /*------ Media query start ----*/
