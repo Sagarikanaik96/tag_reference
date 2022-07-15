@@ -29,6 +29,9 @@ frappe.listview_settings['Assign Employee'] = {
         
             }
             </script>`;
+		},
+        job_order(val,f){
+            return `<span class="ellipsis" title="" id="${val}-${f.name}" ><a class="ellipsis" href="/app/job-order/${val}" data-fieldname="${val}-${f.name}" >${val}</a></span>`            
 		}
 	},
     refresh:function(){
