@@ -1,7 +1,8 @@
 import frappe
 import requests
 
-
+from frappe.share import add
+ORD='Job Order'
 @frappe.whitelist()
 def get_link1(name, userid):
    company = frappe.get_doc("Company", name)
@@ -129,12 +130,25 @@ def unblock_company(company_blocked,blocked_by):
 
 def company_to_unblocked(blocked_by,company_blocked):
    comp_doc=frappe.get_doc('Company',blocked_by)
+   unclaimed_noresume_by_company=[]
    if len(comp_doc.blocked_staff_companies_list)!=0:
       for i in comp_doc.blocked_staff_companies_list:
          if i.staffing_company_name==company_blocked:
             remove_row = i
       comp_doc.remove(remove_row)
       comp_doc.save(ignore_permissions=True)     
+   unclaimed_resume_by_comp=f'select name from `tabJob Order` where (claim not like "%{company_blocked}%" or claim is Null) and order_status!="Completed" and company="{blocked_by}" and resumes_required=1 and worker_filled!=no_of_workers'
+   my_aval_claims=frappe.db.sql(unclaimed_resume_by_comp,as_list=1)
+   my_claims=check_avail(blocked_by,company_blocked,unclaimed_noresume_by_company)
+   z=[]
+   if(len(my_aval_claims)>0):
+      for i in my_aval_claims:
+         z.append(i[0])
+   if(len(my_claims)>0):
+      for i in my_claims:
+         z.append(i)
+   my_job_order= list(set(z)) 
+   share_job_order(my_job_order,company_blocked)  
 
 @frappe.whitelist()
 def checking_blocked_list(company_blocked,blocked_by):
@@ -153,3 +167,33 @@ def checking_blocked_list(company_blocked,blocked_by):
       frappe.log_error(e, "company checkig")
       frappe.msgprint("Company Blocked checking")
       return False  
+
+def check_avail(blocked_by,company_blocked,unclaimed_noresume_by_company):
+   try:
+      unclaimed_noresume_by_comp=f'select name from `tabJob Order` where (claim not like "%{company_blocked}%" or claim is Null) and order_status!="Completed" and company="{blocked_by}" and resumes_required=0'
+      my_unaval_claims=frappe.db.sql(unclaimed_noresume_by_comp,as_list=1)
+      for i in my_unaval_claims:
+         data=frappe.get_doc(ORD,i[0])
+         claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{data.name}"'
+         data1=frappe.db.sql(claims,as_list=1)
+         if(data1[0][0]!=None):
+            if int(data.no_of_workers)-int(data1[0][0])!=0:
+                  unclaimed_noresume_by_company.append(data.name)
+         else:
+            unclaimed_noresume_by_company.append(data.name)
+      return unclaimed_noresume_by_company
+   except Exception as e:
+      frappe.log_error(e, "Checking order")
+      frappe.msgprint("Company unBlocked order checking")
+
+def share_job_order(my_job_order,company_blocked):
+   try:
+      sql = f''' select email from `tabUser` where organization_type='staffing' and company ="{company_blocked}" '''
+      user_list=frappe.db.sql(sql, as_list=1)
+      l = [l[0] for l in user_list]
+      for user in l:
+         for job in my_job_order:
+            add(ORD, job, user, read=1, write = 0, share = 0, everyone = 0)
+   except Exception as e:
+      frappe.log_error(e, "company unblock order sharing")
+      frappe.msgprint("company unblock order sharing")
