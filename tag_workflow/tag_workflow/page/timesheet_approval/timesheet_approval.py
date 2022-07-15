@@ -62,15 +62,7 @@ def get_child_data(order, timesheet, date=None):
             break_start = ":".join(str(d['break_start_time']).split(" ").pop().split(":")[:-1])
             break_end = ":".join(str(d['break_end_time']).split(" ").pop().split(":")[:-1])
 
-            state = ''
-            if(d.dnr == 1):
-                state = 'DNR'
-            elif(d.non_satisfactory == 1):
-                state = 'Non Satisfactory'
-            elif(d.no_show == 1):
-                state = 'No Show'
-            elif(d.replaced == 1):
-                state = 'Replaced'
+            state=employee_status(d)
 
             result.append({"employee": d['employee'], "employee_name": d['employee_name'], "from_time": from_time, "to_time": to_time, "break_start": break_start, "break_end": break_end, "name": d['name'], "hours": d['hours'], "workflow_state": d['workflow_state'], "state": state})
 
@@ -119,3 +111,19 @@ def deny_timesheet(data, count):
         return result[0] if(len(result) > 0) else {"date": "", "timesheet": ""}
     except Exception as e:
         frappe.msgprint(e)
+
+#Employee Status
+def employee_status(d):
+    status = []
+    state=''
+    if(d.dnr == 1):
+        status.append('DNR')
+    if(d.non_satisfactory == 1):
+        status.append('Non Satisfactory')
+    if(d.no_show == 1):
+        status.append('No Show')
+    if(len(status)>0):
+        state=','.join(status)
+    if(d.replaced == 1):
+        state = 'Replaced'
+    return state
