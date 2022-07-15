@@ -112,12 +112,12 @@ def filter_data(category,order_by):
 def check_claims(j,company1):
     doc=frappe.get_doc('Job Order',j)
     if(doc.resumes_required==0):
-        sql = "select `tabJob Order`.name, category, select_job, from_date, to_date, no_of_workers, approved_no_of_workers, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order`,`tabClaim Order` where `tabJob Order`.name = '{}' and `tabClaim Order`.job_order=`tabJob Order`.name ".format(j)
+        sql = "select distinct `tabJob Order`.name, category, select_job, from_date, to_date, no_of_workers, approved_no_of_workers, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order`,`tabClaim Order` where `tabJob Order`.name = '{}' and `tabClaim Order`.job_order=`tabJob Order`.name ".format(j)
         data = frappe.db.sql(sql, as_dict=1)
     else:
         assign_emp = frappe.db.sql(""" select name from `tabAssign Employee` where company = "{0}" and job_order="{1}"  """.format(company1,j), as_dict=1)
         doc=frappe.get_doc('Assign Employee',assign_emp[0]['name'])
-        sql = "select `tabJob Order`.name, category, select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order`,`tabAssign Employee` where `tabJob Order`.name = '{}' and `tabAssign Employee`.job_order=`tabJob Order`.name ".format(j)
+        sql = "select distinct `tabJob Order`.name, category, select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order`,`tabAssign Employee` where `tabJob Order`.name = '{}' and `tabAssign Employee`.job_order=`tabJob Order`.name ".format(j)
         data = frappe.db.sql(sql, as_dict=1)
         emp_approved=0
         for i in range(len(doc.employee_details)):
