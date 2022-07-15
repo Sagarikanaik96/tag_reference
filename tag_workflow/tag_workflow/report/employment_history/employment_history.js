@@ -4,22 +4,19 @@
 function get_data(filter_name){
 	let data = ['\n'];
 	frappe.call({
-		'method' : 'tag_workflow.tag_workflow.report.employment_history.employment_history.fetch_data_contd',
+		'method' : 'tag_workflow.utils.whitelisted.fetch_data',
+		'args': {
+			'filter_name': filter_name
+		},
 		'callback': function(r){
 			if(r.message){
-				for(let i in r.message){
-					if(!data.includes(r.message[i][filter_name])){
-						data.push(r.message[i][filter_name]);
-					}
+				for (let i in r.message){
+					data.push(r.message[i])
 				}
 			}
-			data.sort((a, b) => {
-				return a.localeCompare(b, undefined, {
-					numeric: true,
-					sensitivity: 'base'
-				})
-			});
-		}
+		},
+		freeze: true,
+		freeze_message: "<b>Please wait while report is being prepared!</b>"
 	})
 	return data
 }
@@ -73,4 +70,9 @@ frappe.query_reports['Employment History'] = {
 			'options': '\nDNR\nNo Show\nNon Satisfactory'
 		},
 	],
+	onload: function(){
+		$(document).on('input', '[data-fieldname="total_hours"]', function(){
+			this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+		});
+	}
 };

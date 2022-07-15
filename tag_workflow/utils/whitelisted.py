@@ -736,3 +736,25 @@ def get_contract_prepared_by(contract_prepared_by):
     sql1 = ''' select organization_type from `tabUser` where email='{}' '''.format(contract_prepared_by)
     organization_type=frappe.db.sql(sql1, as_list=1)
     return organization_type
+
+@frappe.whitelist()
+def fetch_data(filter_name):
+    try:
+        user_data = frappe.db.get_value('User', frappe.session.user, ['organization_type', 'company'])
+        if user_data[0] == 'Hiring' or user_data[0] == 'Exclusive Hiring':
+            condition = '''AND AE.hiring_organization = "{0}"'''.format(user_data[1])
+        elif user_data[0] == 'TAG' or frappe.session.user == 'Administrator':
+            condition = ''
+        if filter_name == 'emp_id':
+            sql = '''SELECT AED.employee AS emp_id FROM `tabAssign Employee` AS AE,`tabAssign Employee Details` AS AED, `tabJob Order` AS JO  WHERE AED.approved = CASE WHEN JO.resumes_required=1 THEN 1 ELSE 0 END AND AE.name = AED.parent AND AE.tag_status = "Approved" AND JO.name = AE.job_order {0} GROUP BY AED.employee'''.format(condition)
+        elif filter_name == 'emp_name':
+            sql = '''SELECT AED.employee_name as emp_name FROM `tabAssign Employee` AS AE,`tabAssign Employee Details` AS AED, `tabJob Order` AS JO  WHERE AED.approved = CASE WHEN JO.resumes_required=1 THEN 1 ELSE 0 END AND AE.name = AED.parent AND AE.tag_status = "Approved" AND JO.name = AE.job_order {0} GROUP BY AED.employee_name'''.format(condition)
+        elif filter_name == 'company':
+            sql = '''SELECT AE.company AS company FROM `tabAssign Employee` AS AE,`tabAssign Employee Details` AS AED, `tabJob Order` AS JO  WHERE AED.approved = CASE WHEN JO.resumes_required=1 THEN 1 ELSE 0 END AND AE.name = AED.parent AND AE.tag_status = "Approved" AND JO.name = AE.job_order {0} GROUP BY AE.company'''.format(condition)
+        elif filter_name == 'job_order':
+            sql = '''SELECT AE.job_order AS job_order FROM `tabAssign Employee` AS AE,`tabAssign Employee Details` AS AED, `tabJob Order` AS JO  WHERE AED.approved = CASE WHEN JO.resumes_required=1 THEN 1 ELSE 0 END AND AE.name = AED.parent AND AE.tag_status = "Approved" AND JO.name = AE.job_order {0} GROUP BY AE.job_order'''.format(condition)
+        else:
+            sql = '''SELECT DISTINCT AE.job_category AS job_title FROM `tabAssign Employee` AS AE,`tabAssign Employee Details` AS AED, `tabJob Order` AS JO  WHERE AED.approved = CASE WHEN JO.resumes_required=1 THEN 1 ELSE 0 END AND AE.name = AED.parent AND AE.tag_status = "Approved" AND JO.name = AE.job_order {0} ORDER BY AE.job_category'''.format(condition)
+        return frappe.db.sql(sql, as_list=True)
+    except Exception as e:
+        frappe.msgprint(e, 'Employment History Filter: Fetch Data Error')
