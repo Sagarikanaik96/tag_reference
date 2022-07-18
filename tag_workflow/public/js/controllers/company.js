@@ -22,6 +22,7 @@ frappe.ui.form.on("Company", {
 		uploaded_file_format(frm);
 		download_document(frm);
 		exclusive_staff_company_fields(frm);
+        bulk_upload_resume(frm);
 		if(frappe.user.has_role("Tag Admin")){
 			frm.set_df_property("employees", "read_only", 1);
 		}
@@ -834,5 +835,31 @@ function update_auth_url(frm){
     let redirect_url = `${domain}/api/method/tag_workflow.utils.quickbooks.callback`;
     if(frm.doc.redirect_url != redirect_url){
         frm.set_value("redirect_url", redirect_url);
+    }
+}
+
+/*------------------------------------*/
+function bulk_upload_resume(frm){
+    if(frm.doc.__islocal != 1 && frm.doc.bulk_resume && frappe.boot.tag.tag_user_info.company_type != "Hiring"){
+        frm.add_custom_button(__("Upload Resume"), function(){
+            let attachments = cur_frm.attachments.get_attachments();
+            let attachment = [];
+            for(let a in attachments){
+                if(frm.doc.bulk_resume == attachments[a].file_url){
+                    attachment.push(attachments[a]);
+                }
+            }
+            if(attachment){
+                frappe.call({
+                    method: "tag_workflow.utils.bulk_upload_resume.update_resume",
+                    args: {"company": frm.doc.name, "zip_file": frm.doc.bulk_resume, "name": frm.doc.name, "attachment_name": attachment[0].name, "file_name": attachment[0].file_name, "file_url": attachment[0].file_url},
+                    freeze: 1,
+                    freeze_message: "<b>Please wait while we are working the file...</b>",
+                    callback: function(){
+                        frappe.msgprint('Resume(s) are being updated in the background. You may continue using the application');
+                    }
+                });
+            }
+        }).addClass("btn-primary");
     }
 }
