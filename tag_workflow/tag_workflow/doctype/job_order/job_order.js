@@ -290,6 +290,9 @@ frappe.ui.form.on("Job Order", {
 					if(r.message.length > 0 && frm.doc.no_of_workers < r.message.reduce((a, b) => a + b, 0)){
 						frappe.msgprint({message: __("You cannot decrease the number of workers than the number of selected headcounts."), title: __("Error"),indicator: "red"})
 						frappe.validated = false;
+						frappe.db.get_value("Job Order", {name: frm.doc.name}, ['no_of_workers'], function (res) {
+							frm.set_value('no_of_workers', res['no_of_workers'])
+						})
 					}
 				}
 			})
