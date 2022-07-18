@@ -1100,7 +1100,7 @@ function hiring_buttons(frm) {
 					}, __("View"));
 					$('[data-fieldname = assigned_employees_hiring]').attr('id', 'approved_inactive')
 					let data = `<div class="my-2 p-3 border rounded cursor-pointer" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
-                    $('[data-fieldname = assigned_employees_hiring]').click(function() {
+                    $('[data-fieldname = assigned_employees_hiring]').off().click(function() {
 						if($('[data-fieldname = assigned_employees_hiring]').attr('id')=='approved_inactive'){
 							approved_emp();
 						}
@@ -1202,7 +1202,7 @@ function staff_assigned_emp(frm){
 				}, __("View"));
 				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_inactive');
 				let data = `<div class="my-2 p-3 border rounded cursor-pointer" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
-				$('[data-fieldname = assigned_employees]').click(function() {
+				$('[data-fieldname = assigned_employees]').off().click(function() {
 					if($('[data-fieldname = assigned_employees]').attr('id')=='assigned_inactive'){
 						assigned_emp();
 					}
@@ -1259,7 +1259,7 @@ function staff_claim_button(frm){
 					frappe.db.get_value("Assign Employee", {'job_order': frm.doc.name, 'company': frappe.boot.tag.tag_user_info.company}, ["name"], function(rr) {
 						if (rr.name === undefined) {
 							let datadda1 = `<div class="my-2 p-3 border rounded cursor-pointer" style="display:flex;justify-content: space-between;"><p class="m-0 msg"> Assign Employees </p></div>`;
-							$('[data-fieldname = assigned_employees]').click(function() {
+							$('[data-fieldname = assigned_employees]').off().click(function() {
 								assign_employe(frm);
 							});
 							frm.set_df_property("assigned_employees", "options", datadda1);

@@ -16,3 +16,6 @@ class ProjectController(base_controller.BaseController):
         elif(self.doc.workflow_state == "Approved") and self.doc.check_fun==0:
             self.doc.check_fun=1
             enqueue("tag_workflow.utils.timesheet.approval_notification", now=True, job_order=self.doc.job_order_detail, staffing_company=self.doc.employee_company, date=None, hiring_company=self.doc.company, timesheet_name=self.doc.name, timesheet_approved_time=self.doc.modified, current_time=frappe.utils.now())
+        elif(self.doc.workflow_state == "Approval Request"):
+            enqueue("tag_workflow.utils.timesheet.send_timesheet_for_approval", now=True,	employee=self.doc.employee, docname= self.doc.name,company=self.doc.company,job_order=self.doc.job_order_detail )
+
