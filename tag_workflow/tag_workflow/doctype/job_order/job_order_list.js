@@ -1,6 +1,6 @@
 frappe.listview_settings['Job Order'] = {
 	add_fields:['no_of_workers',"worker_filled"],
-	onload:function(listview){
+	onload:function(){
 		$('h3[title = "Job Order"]').html('Job Orders');
 		cur_list.columns[0].df.label = 'Order ID';
 		cur_list.render_header(cur_list.columns)
@@ -42,26 +42,12 @@ frappe.listview_settings['Job Order'] = {
 		if(frappe.session.user=='Administrator' || frappe.boot.tag.tag_user_info.company_type=="TAG"){
 			$('.btn-primary').hide();
 		}
-		const df = {
-            condition: "=",
-            default: null,
-            fieldname: "company",
-            fieldtype: "Select",
-            input_class: "input-xs",
-            is_filter: 1,
-            onchange: function() {
-                cur_list.refresh();
-            },
-			options: get_company_job_order(),
-            placeholder: "Company"
-        };
-        listview.page.add_field(df, '.standard-filter-section');
 		document.body.addEventListener('click', function(){
 				$('[role = "tooltip"]').popover('dispose');
 			}
 		, true);
 	},
-	refresh:function(){
+	refresh:function(listview){
 		$('.custom-actions.hidden-xs.hidden-md').hide();
 		$('#navbar-breadcrumbs > li:nth-child(2) > a').html('Job Orders');
 		$('[data-original-title="Menu"]').hide();
@@ -75,6 +61,22 @@ frappe.listview_settings['Job Order'] = {
 		}
 
 		$('[role = "tooltip"]').popover('dispose');
+        const df = {
+            condition: "=",
+            default: null,
+            fieldname: "company",
+            fieldtype: "Select",
+            input_class: "input-xs",
+            is_filter: 1,
+            onchange: function() {
+                cur_list.refresh();
+            },
+            options: get_company_job_order(),
+            placeholder: "Company"
+        };
+        if(cur_list.page.fields_dict.company === undefined){
+            listview.page.add_field(df, '.standard-filter-section');
+        }
 	},	
 
 	formatters: {
