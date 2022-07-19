@@ -51,6 +51,8 @@ fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflo
 	]}
 ]
 
+on_login = "tag_workflow.utils.trigger_session.first_login"
+
 boot_session = "tag_workflow.utils.trigger_session.update_boot"
 
 on_session_creation = [

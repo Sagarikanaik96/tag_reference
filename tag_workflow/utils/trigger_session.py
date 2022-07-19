@@ -1,8 +1,8 @@
-import frappe, tag_workflow
-from frappe import _, msgprint, throw
+import frappe
+from frappe import enqueue
 from frappe.share import add
-from frappe.utils import cint, cstr, flt
 from frappe.core.doctype.session_default_settings.session_default_settings import set_session_default_values
+from frappe.sessions import Session, get_expiry_period, get_geo_ip_country
 
 USR = "User"
 
@@ -87,3 +87,62 @@ def share_company_with_user(users=None):
     except Exception as e:
         frappe.log_error(e, "sharing company")
         print(e)
+
+def welcome_email():
+    try:
+        user = frappe.session.user
+        last_login = frappe.db.get_value("User", {"name" : user}, ['last_login'])
+        if not last_login:
+            env_url = frappe.get_site_config().env_url
+            link = env_url + '/login'
+            sub = "Welcome to Temporary Assistance Guru!"
+            enqueue(method = frappe.sendmail, recipients = user, template = "welcome_email", subject = sub, args = { "subject": sub, "sitename": env_url, "link": link })
+    except Exception as e:
+        frappe.log_error('Welcome Email Error', e)
+        print(e)
+
+def start(self):
+    """start a new session"""
+    # generate sid
+    if self.user=='Guest':
+        sid = 'Guest'
+    else:
+        sid = frappe.generate_hash()
+
+    self.data.user = self.user
+    self.data.sid = sid
+    self.data.data.user = self.user
+    self.data.data.session_ip = frappe.local.request_ip
+    if self.user != "Guest":
+        self.data.data.update({
+            "last_updated": frappe.utils.now(),
+            "session_expiry": get_expiry_period(self.device),
+            "full_name": self.full_name,
+            "user_type": self.user_type,
+            "device": self.device,
+            "session_country": get_geo_ip_country(frappe.local.request_ip) if frappe.local.request_ip else None,
+        })
+
+    # insert session
+    if self.user!="Guest":
+        self.insert_session_record()
+
+        # update user
+        welcome_email()
+        user = frappe.get_doc("User", self.data['user'])
+        frappe.db.sql("""UPDATE `tabUser`
+            SET
+                last_login = %(now)s,
+                last_ip = %(ip)s,
+                last_active = %(now)s
+            WHERE name=%(name)s""", {
+                'now': frappe.utils.now(),
+                'ip': frappe.local.request_ip,
+                'name': self.data['user']
+            })
+        user.run_notifications("before_change")
+        user.run_notifications("on_update")
+        frappe.db.commit()
+
+def first_login():
+    Session.start = start
