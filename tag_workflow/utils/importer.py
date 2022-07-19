@@ -826,10 +826,7 @@ class Column:
         return max_occurred_date_format
 
     def validate_values(self):
-        if not self.df:
-            return
-
-        if self.skip_import:
+        if not self.df or self.skip_import:
             return
 
         if self.df.fieldtype == "Link":
@@ -841,41 +838,50 @@ class Column:
             if not_exists:
                 missing_values = ", ".join(not_exists)
                 self.warnings.append({"col": self.column_number, "message": ("The following values do not exist for {}: {}".format(self.df.options, missing_values)), "type": "warning",})
-            elif self.df.fieldtype in ("Date", "Time", "Datetime"):
-                # guess date format
-                self.date_format = self.guess_date_format_for_column()
-                if not self.date_format:
-                    self.date_format = "%Y-%m-%d"
-                    self.warnings.append({"col": self.column_number, "message": _("Date format could not be determined from the values in this column. Defaulting to yyyy-mm-dd."), "type": "info",})
 
-            elif self.df.fieldtype == "Select":
-                options = get_select_options(self.df)
-                if options:
-                    values = list(set([cstr(v) for v in self.column_values[1:] if v]))
-                    invalid = list(set(values) - set(options))
-                    if invalid:
-                        valid_values = ", ".join([frappe.bold(o) for o in options])
-                        invalid_values = ", ".join([frappe.bold(i) for i in invalid])
-                        self.warnings.append({"col": self.column_number, "message": ("The following values are invalid: {0}. Values must be one of {1}".format(invalid_values, valid_values)),})
+        elif self.df.fieldtype in ("Date", "Time", "Datetime"):
+            # guess date format
+            self.date_format = self.guess_date_format_for_column()
+            if not self.date_format:
+                self.date_format = "%Y-%m-%d"
+                self.warnings.append({"col": self.column_number, "message": _("Date format could not be determined from the values in this column. Defaulting to yyyy-mm-dd."), "type": "info",})
 
-            elif self.df.fieldtype == "Data":
-                if self.df.name == "Contact-email_address":
-                    values = list(set([cstr(v) for v in self.column_values[1:] if v]))
-                    for email in values:
-                        if not validate_email_address(email):
-                            self.warnings.append({"col": self.column_number, "message": ("The Email address is Invalid")})
+        elif self.df.fieldtype == "Select":
+            self.fieldtype_select_check()
 
-                if self.df.name == "Contact-phone_number":
-                    values = list(set([cstr(v) for v in self.column_values[1:] if v]))
-                    for phone in values:
-                        if not is_valid(phone):
-                            self.warnings.append({"col": self.column_number, "message": ("The Mobile number is invalid")})
+        elif self.df.fieldtype == "Data":
+            self.fieldtype_data_check()
 
-                if self.df.name == "Contact-zip":
-                    values = list(set([cstr(v) for v in self.column_values[1:] if v]))
-                    for phone in values:
-                        if not zip_valid(phone):
-                            self.warnings.append({"col": self.column_number, "message": ("The zip  is invalid")})
+    def fieldtype_select_check(self):
+        options = get_select_options(self.df)
+        if options:
+            values = list(set([cstr(v) for v in self.column_values[1:] if v]))
+            invalid = list(set(values) - set(options))
+            if invalid:
+                valid_values = ", ".join([frappe.bold(o) for o in options])
+                invalid_values = ", ".join([frappe.bold(i) for i in invalid])
+                self.warnings.append({"col": self.column_number, "message": ("The following values are invalid: {0}. Values must be one of {1}".format(invalid_values, valid_values)),})
+
+    def fieldtype_data_check(self):
+        if self.df.name == "Contact-email_address":
+            values = list(set([cstr(v) for v in self.column_values[1:] if v]))
+            for email in values:
+                if not validate_email_address(email):
+                    self.warnings.append({"col": self.column_number, "message": ("The Email address is Invalid")})
+        self.fieldtype_data_check_remaining()
+
+    def fieldtype_data_check_remaining(self)
+        if self.df.name == "Contact-phone_number":
+            values = list(set([cstr(v) for v in self.column_values[1:] if v]))
+            for phone in values:
+                if not is_valid(phone):
+                    self.warnings.append({"col": self.column_number, "message": ("The Mobile number is invalid")})
+
+        if self.df.name == "Contact-zip":
+            values = list(set([cstr(v) for v in self.column_values[1:] if v]))
+            for phone in values:
+                if not zip_valid(phone):
+                    self.warnings.append({"col": self.column_number, "message": ("The zip  is invalid")})
 
     def as_dict(self):
         d = frappe._dict()

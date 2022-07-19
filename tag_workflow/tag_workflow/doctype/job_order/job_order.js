@@ -19,7 +19,7 @@ frappe.ui.form.on("Job Order", {
 	onload: function(frm) {
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.__islocal==1){
 			frm.set_value('e_signature_full_name', frappe.session.user_fullname);
-			frm.set_df_property("e_signature_full_name", "read_only", 1);
+			frm.set_df_property("e_signature_full_name", "read_only", 0);
 		}
 
 		make_invoice(frm);
@@ -614,6 +614,18 @@ function set_read_fields(frm){
 			frm.set_df_property(myStringArray[i], "read_only", 1);
 		}
 	}
+
+    if(frm.doc.is_repeat == 1 && frm.doc.order_status != "Completed"){
+        let myStringArray = ["job_site", "worker_filled", "order_status", "select_job", "category"];
+        for(let i in myStringArray){
+            frm.set_df_property(myStringArray[i], "read_only", 1);
+        }
+
+        let custom = ["availability", "select_days"];
+        for(let c in custom){
+            frm.set_df_property(custom[c], "read_only", 0);
+        }
+    }
 }
 function timer_value(frm) {
 	if(frm.doc.bid>0 || frm.doc.claim){

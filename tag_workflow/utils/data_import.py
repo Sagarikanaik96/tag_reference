@@ -15,7 +15,7 @@ def form_start_import(data_import):
         doc = frappe.get_doc("Data Import", data_import)
 
         if is_scheduler_inactive() and not frappe.flags.in_test:
-            frappe.throw(_("Scheduler is inactive. Cannot import data. sahil is here"), title=_("Scheduler Inactive"))
+            frappe.throw(_("Scheduler is inactive. Cannot import data."), title=_("Scheduler Inactive"))
 
         enqueued_jobs = [d.get("job_name") for d in get_info()]
         if doc.name not in enqueued_jobs:
