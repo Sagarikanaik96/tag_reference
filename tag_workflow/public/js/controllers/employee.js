@@ -303,7 +303,11 @@ frappe.ui.form.on("Employee", {
 	zip: function(frm){
 		let zip = frm.doc.zip;
 		frm.set_value('zip', zip?zip.toUpperCase():zip);
-	}
+	},
+
+    download_resume: function(frm){
+        download_emp_resume(frm);
+    }
 });
 
 frappe.ui.form.on('Job Category', {
@@ -731,4 +735,29 @@ function update_lat_lng(frm){
 			}
 		})
 	}
+}
+
+
+/*--------------------download---------------------*/
+function download_emp_resume(frm){
+    if(frm.doc.resume){
+        frappe.call({
+            "method": "tag_workflow.utils.bulk_upload_resume.download_resume",
+            "args": {"resume": frm.doc.resume},
+            "freeze": true,
+            "freeze_message": "<b>working...</b>",
+            "callback": function(r){
+                let msg = r.message;
+                if(msg == 1){
+                    let file = frm.doc.resume.split("/");
+					let filename = frappe.urllib.get_base_url() + "/files/" + file[file.length-1];
+					window.open(filename);
+				}else{
+					frappe.msgprint("Error while downloading file: "+msg);
+				}
+			}
+		});
+	}else{
+        frappe.msgprint("No File Attached");
+    }
 }

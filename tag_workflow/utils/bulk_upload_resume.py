@@ -202,8 +202,32 @@ def updatemultiple(employees=None, newlist=None):
     try:
         for e in employees:
             for new in newlist:
-                if(new.find(str(emp)) > 0):
+                if(new.find(str(e)) > 0):
                     url = frappe.get_site_config().s3_url +"/"+ new
                     frappe.db.set_value("Employee", e.name, "resume", url)
     except Exception as e:
         frappe.log_error(e, "updatemultiple")
+
+
+#----------------resume download-----------------------#
+@frappe.whitelist()
+def download_resume(resume):
+    try:
+        resume = resume.split("/")[-1]
+        file_os_path = os.getcwd() + "/" + resume
+        dest_os_path = os.getcwd() + "/" + frappe.get_site_path() + "/public/files/" + resume
+
+        s3 = boto3.resource('s3')
+        BUC = frappe.get_site_config().s3_bucket or ''
+        if(BUC):
+            my_bucket = s3.Bucket(BUC)
+            for s3_object in my_bucket.objects.all():
+                if(s3_object.key == resume):
+                    my_bucket.download_file(s3_object.key, resume)
+                    shutil.move(file_os_path, dest_os_path)
+            return 1
+        else:
+            return "AWS S3 Bucket is not defined in config."
+    except Exception as e:
+        frappe.log_error(e,  "upload_to_s3")
+        return str(e)
