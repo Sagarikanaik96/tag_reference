@@ -173,7 +173,9 @@ override_whitelisted_methods = {
         "frappe.desk.desktop.get_desktop_page": "tag_workflow.utils.whitelisted.get_desktop_page",
         "frappe.desk.reportview.delete_items": "tag_workflow.utils.employee.delete_items",
         "frappe.desk.search.search_link": "tag_workflow.utils.whitelisted.search_link",
-        "frappe.core.doctype.data_import.data_import.form_start_import": "tag_workflow.utils.data_import.form_start_import"
+        "frappe.core.doctype.data_import.data_import.form_start_import": "tag_workflow.utils.data_import.form_start_import",
+        "frappe.desk.form.save.savedocs": "tag_workflow.utils.whitelisted.savedocs",
+        "frappe.client.save": "tag_workflow.utils.whitelisted.save"
 }
 
 

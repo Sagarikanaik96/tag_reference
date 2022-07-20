@@ -11,6 +11,8 @@ from tag_workflow.utils.notification import sendmail, make_system_notification, 
 from frappe.desk.query_report import get_report_doc, generate_report_result
 from frappe.desk.desktop import Workspace
 from frappe import enqueue
+from frappe.desk.form.save import set_local_name,send_updated_docs
+from six import string_types
 
 #-------global var------#
 item = "Timesheet Activity Cost"
@@ -758,3 +760,45 @@ def fetch_data(filter_name):
         return frappe.db.sql(sql, as_list=True)
     except Exception as e:
         frappe.msgprint(e, 'Employment History Filter: Fetch Data Error')
+
+@frappe.whitelist()
+def savedocs(doc, action):
+	"""save / submit / update doclist"""
+	try:
+		#if '__islocal' in json.loads(doc):
+		doc_dict=json.loads(doc)
+		doc = frappe.get_doc(json.loads(doc))
+		set_local_name(doc)
+
+		if '__islocal' in doc_dict and frappe.session.user!=doc.owner:
+			frappe.throw('Invalid owner')
+		# action
+		doc.docstatus = {"Save":0, "Submit": 1, "Update": 1, "Cancel": 2}[action]
+
+		if doc.docstatus==1:
+			doc.submit()
+		else:
+			doc.save()
+
+		# update recent documents
+		run_onload(doc)
+		send_updated_docs(doc)
+
+		frappe.msgprint(frappe._("Saved"), indicator='green', alert=True)
+	except Exception:
+		frappe.errprint(frappe.utils.get_traceback())
+		raise
+
+@frappe.whitelist(methods=['POST', 'PUT'])
+def save(doc):
+	'''Update (save) an existing document
+
+	:param doc: JSON or dict object with the properties of the document to be updated'''
+	if isinstance(doc, string_types):
+		doc = json.loads(doc)
+	if '__islocal' in doc and frappe.session.user!=doc['owner']:
+		frappe.throw('Invalid owner')
+	doc = frappe.get_doc(doc)
+	doc.save()
+
+	return doc.as_dict()
