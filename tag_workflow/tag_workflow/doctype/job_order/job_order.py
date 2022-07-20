@@ -47,6 +47,7 @@ class JobOrder(Document):
                         field.ignore_user_permissions=1
                     new_doc.flags.ignore_permissions = True
                     new_doc.save(ignore_permissions=True)
+                    frappe.db.set_value(ASN, new_doc.name, "tag_status", "Approved")
                     worker_filled=len(new_doc.employee_details)+worker_filled
                     if(self.resumes_required==0):
                         dat=f'update `tabAssign Employee` set tag_status="Approved" where name="{new_doc.name}"'
