@@ -13,7 +13,7 @@ frappe.listview_settings['Timesheet'] = {
 		if(cur_list.doctype == "Timesheet"){
 			cur_list.page.btn_primary[0].style.display = "none";
 		}
-			
+		$('[data-original-title="Name"]').hide();
 	},
 
 	formatters: {
@@ -62,7 +62,7 @@ frappe.listview_settings['Timesheet'] = {
 				update_job_order(listview);
 			}).addClass("btn-primary");
 		}
-		
+		add_filters(listview);
 	},
 			
 }
@@ -81,4 +81,53 @@ function update_job_order(listview){
 		}
 	}
 	frappe.set_route("form", "add-timesheet");
+}
+
+function add_filters(listview){
+	const df1 = {
+		condition: "like",
+		default: null,
+		fieldname: "employee_name",
+		fieldtype: "Data",
+		input_class: "input-xs",
+		label: "Employee Name",
+		is_filter: 1,
+		onchange: function() {
+			listview.refresh();
+		},
+		placeholder: "Employee Name"
+	};
+	const df2 = {
+		condition: "like",
+		default: null,
+		fieldname: "employee_company",
+		fieldtype: "Data",
+		input_class: "input-xs",
+		label: "Staffing Company",
+		is_filter: 1,
+		onchange: function() {
+			listview.refresh();
+		},
+		placeholder: "Staffing Company"
+	};
+	const df3 = {
+		condition: "=",
+		default: null,
+		fieldname: "workflow_state",
+		fieldtype: "Select",
+		input_class: "input-xs",
+		label: "Status",
+		is_filter: 1,
+		onchange: function() {
+			listview.refresh();
+		},
+		options: ["Open", "Approval Request", "Approved", "Denied"],
+		placeholder: "Status"
+	};
+	let standard_filters_wrapper = listview.page.page_form.find('.standard-filter-section');
+	listview.page.add_field(df1, standard_filters_wrapper);
+	listview.page.add_field(df2, standard_filters_wrapper);
+	listview.page.add_field(df3, standard_filters_wrapper);
+	let doc_filter = document.querySelector('select[data-fieldname = "workflow_state"]')
+    doc_filter.options.add(new Option(), 0);
 }

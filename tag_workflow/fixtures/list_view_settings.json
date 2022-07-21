@@ -6,12 +6,12 @@
   "docstatus": 0,
   "doctype": "List View Settings",
   "fields": null,
-  "modified": "2022-04-09 00:11:46.506371",
+  "modified": "2022-07-21 03:07:14.454020",
   "name": "Timesheet",
   "parent": null,
   "parentfield": null,
   "parenttype": null,
-  "total_fields": "8"
+  "total_fields": "9"
  },
  {
   "disable_auto_refresh": 0,
