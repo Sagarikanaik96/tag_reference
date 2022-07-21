@@ -95,7 +95,8 @@ doctype_js = {
         "Lead": ["public/js/controllers/lead.js",map],
         "Contract": "public/js/controllers/contract.js",
         "Job Site": "public/js/controllers/job_sites.js",
-        "Data Import":"public/js/controllers/data_import.js"
+        "Data Import":"public/js/controllers/data_import.js",
+        "Notification Log": "public/js/controllers/notification_log.js"
 }
 
 # doctype list
