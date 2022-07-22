@@ -733,7 +733,7 @@ function check_value(field, name, value){
 		frappe.msgprint({message: __("<b>" + field + "</b> Cannot be Less Than Zero"),	title: __("Error"),indicator: "orange",});
 		cur_frm.set_value(name, (cur_frm.doc.repeat_old_worker && name == "no_of_workers" ? cur_frm.doc.repeat_old_worker : 0));
 	}else if(cur_frm.doc.no_of_workers >= 0 && cur_frm.doc.is_repeat && cur_frm.doc.repeat_from && cur_frm.doc.repeat_old_worker > 0){
-		if(cur_frm.doc.no_of_workers < cur_frm.doc.repeat_old_worker || cur_frm.doc.no_of_workers > cur_frm.doc.repeat_old_worker){
+		if(cur_frm.doc.no_of_workers < cur_frm.doc.repeat_old_worker){
 			frappe.msgprint("For Repeat Order, <b>No. of workers</b> must be same as the old order.");
 			cur_frm.set_value("no_of_workers", cur_frm.doc.repeat_old_worker);
 		}
