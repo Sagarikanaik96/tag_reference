@@ -175,12 +175,12 @@ def update_single_emps(path, company, emp_name, dates, newlist):
                     except Exception:
                         continue
                 else:
-                    emp_and_date_data_one(newlist, e.name)
+                    emp_and_date_data_one(path, newlist, e.name)
     except Exception as e:
         print(e)
         frappe.log_error(str(frappe.get_traceback()), "single emp update")
 
-def emp_and_date_data_one(newlist, emp):
+def emp_and_date_data_one(path, newlist, emp):
     try:
         url = frappe.get_site_config().s3_url +"/"+ newlist[0]
         url_check = path + newlist[0]
@@ -188,7 +188,7 @@ def emp_and_date_data_one(newlist, emp):
         if not frappe.db.get_value("Employee", emp, "resume") and result:
             frappe.db.set_value("Employee", emp, "resume", url)
             frappe.db.commit()
-        elif(result):
+        elif(result and len(newlist) > 1):
             update_miscellaneous(url, emp)
     except Exception as e:
         print(e)
@@ -211,13 +211,14 @@ def update_multiple(date, emp, newlist):
     try:
         sql = 'insert into `tabEmployee Attachments` (name, attachments, parent, parentfield, parenttype, idx) values '
         count, is_value = 0, 0
-        filename = ''
+        filename, resume = '', ''
         for new in newlist:
             url = frappe.get_site_config().s3_url +"/"+ new
             if(new.find(str(date).replace(":", "-")) > 0):
+                resume = url
                 frappe.db.set_value("Employee", emp, "resume", url)
 
-            if(filename != url and not frappe.db.exists("Employee Attachments", {"parent": emp, "attachments": url})):
+            if(filename != url and resume != url and not frappe.db.exists("Employee Attachments", {"parent": emp, "attachments": url})):
                 is_value = 1
                 sql += str(tuple([str(emp)+"-"+str(count), url, emp, "miscellaneous", "Employee", (count+1)])) + ","
                 count += 1

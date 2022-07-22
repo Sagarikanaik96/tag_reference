@@ -403,10 +403,10 @@ function tag_company(frm){
 
 function download_document(frm){
 	if(frm.doc.resume && frm.doc.resume.length>1){
-		$('[data-fieldname="resume"]').on('click',(e)=> {
-            e.preventDefault();
-            download_emp_resume(frm.doc.resume);
-		});
+        $(".attached-file-link").on("click",function(){
+            download_emp_resume(this.innerHTML);
+            return false;
+        });
 	}
 
 	if(frm.doc.w4 && frm.doc.w4.length>1){
@@ -416,8 +416,10 @@ function download_document(frm){
 	}
 
 	$('[data-fieldname="attachments"]').on('click',(e)=> {
-		e.preventDefault();
-        download_emp_resume(e.target.innerHTML);
+        e.preventDefault();
+        if (e.target.target === '_blank') {
+            download_emp_resume(e.target.innerHTML);
+        }
 	});
 }
 
@@ -737,8 +739,8 @@ function update_lat_lng(frm){
 
 /*--------------------download---------------------*/
 function download_emp_resume(file){
-	if(file){
-		frappe.call({
+    if(file){
+        frappe.call({
 			"method": "tag_workflow.utils.bulk_upload_resume.download_resume",
 			"args": {"resume": file},
 			"freeze": true,
@@ -751,7 +753,5 @@ function download_emp_resume(file){
                 window.open(filename);
 			}
 		});
-	}else{
-		frappe.msgprint("No File Attached");
 	}
 }
