@@ -177,3 +177,11 @@ def my_emp_work(emps,my_emp_data):
                 if i['employee'] in k.values():
                     l.append([k['employee_name'],k['parent']])
         return l 
+
+@frappe.whitelist()
+def validate_employee(doc,method):
+	for employee in doc.employee_details:
+		employee_doc=frappe.get_doc('Employee',employee.employee)
+		if not employee_doc.has_permission("read"):
+			frappe.flags.error_message = _('Insufficient Permission for {0}').format(frappe.bold('Employee' + ' ' + employee.employee_name))
+			raise frappe.PermissionError(("read", "Employee", employee.employee_name))

@@ -144,6 +144,9 @@ doc_events = {
        "Item":{
                "after_insert":'tag_workflow.tag_data.job_title_add'
        },
+       'Assign Employee':{
+               "before_save":'tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.validate_employee'
+	}
 }
 
 # logo
