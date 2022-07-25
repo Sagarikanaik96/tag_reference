@@ -214,18 +214,17 @@ def update_multiple(date, emp, newlist):
         filename, resume = '', ''
         for new in newlist:
             url = frappe.get_site_config().s3_url +"/"+ new
-            if(new.find(str(date).replace(":", "-")) > 0):
+            if(new.find(str(date).replace(":", "-")) > 0 and not frappe.db.get_value("Employee", emp, "resume")):
                 resume = url
                 frappe.db.set_value("Employee", emp, "resume", url)
 
             if(filename != url and resume != url and not frappe.db.exists("Employee Attachments", {"parent": emp, "attachments": url})):
                 is_value = 1
-                sql += str(tuple([str(emp)+"-"+str(count), url, emp, "miscellaneous", "Employee", (count+1)])) + ","
+                sql += str(tuple([str(emp)+"-"+str(count)+"-"+str(url), url, emp, "miscellaneous", "Employee", (count+1)])) + ","
                 count += 1
                 filename = url
 
         if(is_value > 0):
-            frappe.db.sql(""" delete from `tabEmployee Attachments` where parent = %s """, emp)
             frappe.db.sql(sql[0:-1])
             frappe.db.commit()
     except Exception as e:
@@ -242,7 +241,7 @@ def update_multiple_emps(path, company, emp_name, dates, newlist):
                     updatemultiple(path, employees, newlist)
                 except Exception:
                     continue
-    except Exceptio as e:
+    except Exception as e:
         frappe.log_error(e, "multiple emp update")
 
 def updatemultiple(path, employees=None, newlist=None):
@@ -251,7 +250,7 @@ def updatemultiple(path, employees=None, newlist=None):
             for new in newlist:
                 url_check = path + new
                 result = get_file_size(url_check)
-                if(new.find(str(e)) > 0 and result):
+                if(new.find(str(e)) > 0 and result and not frappe.db.get_value("Employee", e.name, "resume")):
                     url = frappe.get_site_config().s3_url +"/"+ new
                     frappe.db.set_value("Employee", e.name, "resume", url)
     except Exception as e:
