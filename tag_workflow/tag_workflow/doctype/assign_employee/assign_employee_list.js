@@ -1,13 +1,10 @@
 frappe.listview_settings['Assign Employee'] = {
     onload: function(){
-        if(frappe.boot.tag.tag_user_info.company_type!='Staffing'){
-            $('.page-actions').hide();
-        }
-        else{
             $('.custom-actions.hidden-xs.hidden-md').hide();
 			$('[data-original-title="Refresh"]').hide();
 			$('.menu-btn-group').hide();
-        }
+            $("button.btn.btn-primary.btn-sm.primary-action").hide()
+            $("button.btn.btn-default.btn-sm.ellipsis").hide()    
     },
 
     formatters: {
@@ -33,5 +30,9 @@ frappe.listview_settings['Assign Employee'] = {
             }
             </script>`;
 		}
-	}
+	},
+    refresh:function(){
+        $("button.btn.btn-primary.btn-sm.primary-action").hide()
+        $("button.btn.btn-default.btn-sm.ellipsis").hide()
+    }
 }
