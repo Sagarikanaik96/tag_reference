@@ -1135,19 +1135,19 @@ function claim_orders(frm){
 			frappe.route_options = {
 				"job_order": ["=", frm.doc.name],
 				"hiring_organization": ["=", frm.doc.company],
-				"no_of_workers_joborder": ["=", frm.doc.no_of_workers]
 			};
 			frappe.set_route("List", "Claim Order");
 		}else{
 			frappe.route_options = {
 				"job_order": ["=", frm.doc.name],
-				"no_of_workers_joborder": ["=", frm.doc.no_of_workers]
 			};
 			frappe.set_route("List", "Claim Order");
 		}
 	}else if(frm.doc.resumes_required == 0){
 		frappe.route_options = {
 			"job_order": ["=", frm.doc.name],
+			"hiring_organization": ["=", frm.doc.company],
+			"no_of_workers_joborder": ["=", frm.doc.no_of_workers]
 		};
 		frappe.set_route("List", "Claim Order");
 	}

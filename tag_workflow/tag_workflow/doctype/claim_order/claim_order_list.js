@@ -8,15 +8,12 @@ frappe.listview_settings['Claim Order'] = {
         $("button.btn.btn-sm.filter-button.btn-primary-light").hide();
         if((listview.data[0]["approved_no_of_workers"])!=0 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
             listview.page.set_secondary_action('Modify Head Count', () => modify_claims(listview), 'octicon octicon-sync');
-
         }
-
-        else if((listview.filters).length==2 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){  
+        else if((listview.filters).length==1 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
             listview.page.set_secondary_action('Select Head Count', () => refresh(listview), 'octicon octicon-sync');
         }
-        else if((listview.filters).length==3 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
+        else if((listview.filters).length==2 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
             listview.page.set_secondary_action('Modify Head Count', () => modify_claims(listview), 'octicon octicon-sync');
-
         }
 
     },
