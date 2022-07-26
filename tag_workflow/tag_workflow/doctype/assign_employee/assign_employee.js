@@ -728,7 +728,7 @@ function update_table(dialog){
 	}
 	frappe.call({
 		method:"tag_workflow.tag_data.approved_employee",
-		args: {id: data,name:cur_frm.doc.name, count:cur_frm.doc.no_of_employee_required},
+		args: {id: data,name:cur_frm.doc.name,job_order:cur_frm.doc.job_order},
 		callback:function(r){
 			if(r.message== "error"){
 				frappe.msgprint("No. of selected employees is greater than no. of employees required")

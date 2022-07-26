@@ -604,13 +604,15 @@ def joborder_resume(name):
     return frappe.db.sql(sql,as_dict=1)
 
 @frappe.whitelist(allow_guest=False)
-def approved_employee(id,name, count):
+def approved_employee(id,name,job_order):
     sql1=""" UPDATE `tabAssign Employee Details` SET approved = 0 where parent="{0}" """.format(name)
     frappe.db.sql(sql1)
     c=(str(id)[1:-1])
-    r=c.split(",") 
+    r=c.split(",")
     g1 = [j.replace('"', '') for j in r]
-    if(len(g1)>int(count)):
+    exist_job=frappe.get_doc('Job Order',job_order)
+    emp_count=exist_job.no_of_workers-exist_job.worker_filled
+    if(len(g1)>int(emp_count)):
         return "error"
     for i in g1:
         sql=""" UPDATE `tabAssign Employee Details` SET approved = 1 where employee = "{0}" and parent="{1}" """.format(i,name)
