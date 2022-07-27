@@ -6,6 +6,7 @@ import boto3
 
 #-----------------------------#
 TM_FT = "%Y-%m-%d %H-%M-%S"
+employee_attachments= "Employee Attachments"
 
 
 @frappe.whitelist()
@@ -64,6 +65,7 @@ def upload_to_emps(company=None, pdfs=None, dest_os_path=None):
             for fil in p['filenames']:
                 pattern = re.compile(f".*{fil.split('-')[0]}")
                 newlist = [fil] + list(filter(pattern.match, p['filenames']))
+                newlist = list(set(newlist))
                 frappe.enqueue("tag_workflow.utils.bulk_upload_resume.upload_to_s3", queue='default', is_async=True, path=p['path'], newlist=newlist)
                 frappe.enqueue("tag_workflow.utils.bulk_upload_resume.make_data", queue='default', is_async=True, path=p['path'], company=company, newlist=newlist)
         frappe.enqueue("tag_workflow.utils.bulk_upload_resume.remove_dir", queue='default', is_async=True, path=dest_os_path)
@@ -157,7 +159,7 @@ def update_emp_record(path, emp_name, company, newlist, dates):
         if(len(emp_name) == 1 and len(emp_name[0].split(", ")) == 2):
             update_single_emps(path, company, emp_name, dates, newlist)
         else:
-            update_multiple_emps(path, company, emp_name, dates, newlist)
+            update_multiple_emps(path, company, emp_name,newlist)
     except Exception as e:
         frappe.log_error(e,  "update_emp_record")
 
@@ -175,25 +177,28 @@ def update_single_emps(path, company, emp_name, dates, newlist):
                     except Exception:
                         continue
                 else:
-                    emp_and_date_data_one(path, newlist, e.name)
+                    emp_and_date_data_one(newlist, e.name, dates)
     except Exception as e:
         print(e)
         frappe.log_error(str(frappe.get_traceback()), "single emp update")
 
-def emp_and_date_data_one(path, newlist, emp):
+def emp_and_date_data_one(newlist, emp, dates):
     try:
-        url = frappe.get_site_config().s3_url +"/"+ newlist[0]
-        url_check = path + newlist[0]
-        result = get_file_size(url_check)
-        if not frappe.db.get_value("Employee", emp, "resume") and result:
-            frappe.db.set_value("Employee", emp, "resume", url)
-            frappe.db.commit()
-        elif(result and len(newlist) > 1):
-            update_miscellaneous(url, emp)
+        resume = ""
+        for new in newlist:
+            url = frappe.get_site_config().s3_url +"/"+ new
+            if(new.find(str(dates).replace(":", "-")) > 0 and not frappe.db.get_value("Employee", emp, "resume")):
+                resume = url
+                frappe.db.set_value("Employee", emp, "resume", url)
+
+        if not resume:
+            resume = frappe.db.get_value("Employee", emp, "resume")
+            
+        for new in newlist:
+            sub_employee_and_date_data_one(new, resume, emp)
     except Exception as e:
         print(e)
         frappe.log_error(str(frappe.get_traceback()), "emp_and_date_data_one")
-
 
 def update_miscellaneous(url, name):
     try:
@@ -212,17 +217,21 @@ def update_multiple(date, emp, newlist):
         sql = 'insert into `tabEmployee Attachments` (name, attachments, parent, parentfield, parenttype, idx) values '
         count, is_value = 0, 0
         filename, resume = '', ''
+        resume=update_sub_empss(newlist,date,emp,resume)
+        if not resume:
+            resume = frappe.db.get_value("Employee", emp, "resume")
+            
         for new in newlist:
             url = frappe.get_site_config().s3_url +"/"+ new
-            if(new.find(str(date).replace(":", "-")) > 0 and not frappe.db.get_value("Employee", emp, "resume")):
-                resume = url
-                frappe.db.set_value("Employee", emp, "resume", url)
-
-            if(filename != url and resume != url and not frappe.db.exists("Employee Attachments", {"parent": emp, "attachments": url})):
-                is_value = 1
-                sql += str(tuple([str(emp)+"-"+str(count)+"-"+str(url), url, emp, "miscellaneous", "Employee", (count+1)])) + ","
-                count += 1
-                filename = url
+            if(resume != url and not frappe.db.exists(employee_attachments, {"parent": emp, "attachments": url})):
+                if(frappe.db.get_value("Employee", emp, "resume") or "") < url:
+                    frappe.db.set_value("Employee", emp, "resume", url)
+                    resume = url
+                
+                if(resume != url and not frappe.db.exists(employee_attachments, {"parent": emp, "attachments": url})):
+                    is_value = 1
+                    sql += str(tuple([str(emp)+"-"+str(count)+"-"+str(url), url, emp, "miscellaneous", "Employee", (count+1)])) + ","
+                    count += 1
 
         if(is_value > 0):
             frappe.db.sql(sql[0:-1])
@@ -230,9 +239,8 @@ def update_multiple(date, emp, newlist):
     except Exception as e:
         frappe.log_error(e,  "update_multiple")
 
-def update_multiple_emps(path, company, emp_name, dates, newlist):
+def update_multiple_emps(path, company, emp_name, newlist):
     try:
-        print(path, dates)
         for emp in emp_name:
             if(len(emp.split(", ")) == 2):
                 try:
@@ -279,3 +287,21 @@ def download_resume(resume):
     except Exception as e:
         frappe.log_error(e,  "upload_to_s3")
         return str(e)
+
+
+def sub_employee_and_date_data_one(new, resume, emp,):
+    url = frappe.get_site_config().s3_url + "/" + new
+    if resume != url and not frappe.db.exists(employee_attachments, {"parent": emp, "attachments": url}):
+        if (frappe.db.get_value("Employee", emp, "resume") or "") < url:
+            frappe.db.set_value("Employee", emp, "resume", url)
+            resume = url
+        if resume != url and not frappe.db.exists(employee_attachments, {"parent": emp, "attachments": url}):
+            update_miscellaneous(url, emp)
+
+def update_sub_empss(newlist,date,emp,resume):
+    for new in newlist:
+        url = frappe.get_site_config().s3_url +"/"+ new
+        if(new.find(str(date).replace(":", "-")) > 0 and not frappe.db.get_value("Employee", emp, "resume")):
+            resume = url
+            frappe.db.set_value("Employee", emp, "resume", url)
+    return resume
