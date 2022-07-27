@@ -573,7 +573,6 @@ function redirect_quotation(frm) {
 	doc.company = staff_company[0];
 	doc.job_order = frm.doc.name;
 	doc.no_of_employee_required = frm.doc.no_of_workers - frm.doc.worker_filled;
-
 	if(frm.doc.staff_company){
 		doc.company = frm.doc.staff_company;
 	}
@@ -597,6 +596,7 @@ function redirect_quotation(frm) {
 			} else {
 				frappe.set_route("Form", "Assign Employee", doc.name);
 			}
+			
 		},
 	});
 }
@@ -1374,6 +1374,7 @@ function assigned_emp(){
 			let data = rm.message || [];
 			let profile_html = `<div class="table-responsive pb-2 pb-sm-0"><table style="width: 100%;"><th>Employee Name</th><th>Marked As</th><th>Actions</th>`;
 			for (let p in data) {
+
 				let marked_as = '';
 				if (data[p].no_show){
 					marked_as  += ' '+ data[p].no_show;
@@ -1400,27 +1401,39 @@ function assigned_emp(){
 
 				profile_html += `</tr>`;
 			}
-
+			
 			profile_html += `</div></table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`;
+
 			let dialog1 = new frappe.ui.Dialog({
 				title: __('Assigned Employees'),
-				fields: [{fieldname: "staff_companies",	fieldtype: "HTML", options: profile_html}]
+				fields: [{fieldname: "staff_companies",	fieldtype: "HTML", options: profile_html},
+				{"fieldtype": "Button", "label": __("Go to Assign Employee Form"), "fieldname": "assign_new_emp"}
+			]
 			});
-
+			if($('[data-fieldname = assigned_employees]').attr('id')=='assigned_inactive'){
+				dialog1.fields_dict.assign_new_emp.$input[0].className="btn btn-xs btn-default d-flex m-auto";
+				dialog1.fields_dict.assign_new_emp.input.onclick = function() {
+					frappe.db.get_value("Assign Employee", {'job_order': cur_frm.doc.name, 'company': frappe.boot.tag.tag_user_info.company}, ["name","claims_approved"], function(rr) {
+						redirect_job(rr.name, cur_frm.doc.nam);
+						})
+				}
+			}
 			dialog1.no_cancel();
 			dialog1.$wrapper.on('hidden.bs.modal', function () {
 				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_inactive');
 			});
+
+			
 			dialog1.set_primary_action(__('Close'), function() {
 				dialog1.hide();
 				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_inactive');
 			});
-
 			if($('[data-fieldname = assigned_employees]').attr('id')=='assigned_inactive'){
 				dialog1.show();
 				dialog1.$wrapper.find('.modal-dialog').css('max-width', '880px');
 				dialog1.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
 				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_active');
+
 			}
 		}
 	});

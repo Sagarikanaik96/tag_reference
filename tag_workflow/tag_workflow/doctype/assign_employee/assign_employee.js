@@ -10,9 +10,14 @@ frappe.ui.form.on('Assign Employee', {
         setTimeout(function(){
             staffing_company(frm)
         },1000);
-
         $('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
+		if (cur_frm.doc.claims_approved > cur_frm.doc.employee_details.length){
+			frm.set_df_property("employee_details","read_only",0);
+		}
+		else{
+			frm.set_df_property("employee_details","read_only",1);
+		}
 		window.onclick = function() {
 			attachrefresh();
 		}
