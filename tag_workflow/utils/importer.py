@@ -870,7 +870,7 @@ class Column:
                     self.warnings.append({"col": self.column_number, "message": ("The Email address is Invalid")})
         self.fieldtype_data_check_remaining()
 
-    def fieldtype_data_check_remaining(self)
+    def fieldtype_data_check_remaining(self):
         if self.df.name == "Contact-phone_number":
             values = list(set([cstr(v) for v in self.column_values[1:] if v]))
             for phone in values:
@@ -913,80 +913,13 @@ def build_fields_dict_for_column_matching(parent_doctype):
             'Sales Invoice Item:item_code': df3,
         }
     """
-    def get_standard_fields(doctype):
-        meta = frappe.get_meta(doctype)
-        if meta.istable:
-            standard_fields = [{"label": "Parent", "fieldname": "parent"}, {"label": "Parent Type", "fieldname": "parenttype"}, {"label": "Parent Field", "fieldname": "parentfield"}, {"label": "Row Index", "fieldname": "idx"},]
-
-        else:
-            standard_fields = [{"label": "Owner", "fieldname": "owner"}, {"label": "Document Status", "fieldname": "docstatus", "fieldtype": "Int"},]
-
-        out = []
-        for df in standard_fields:
-            df = frappe._dict(df)
-            df.parent = doctype
-            out.append(df)
-        return out
 
     parent_meta = frappe.get_meta(parent_doctype)
     out = {}
     # doctypes and fieldname if it is a child doctype
     doctypes = [[parent_doctype, None]] + [[df.options, df] for df in parent_meta.get_table_fields()]
 
-    for doctype, table_df in doctypes:
-        # name field
-        name_by_label = ("ID" if doctype == parent_doctype else "ID ({0})".format(table_df.label))
-
-        name_by_fieldname = ("name" if doctype == parent_doctype else "{0}.name".format(table_df.fieldname))
-
-        name_df = frappe._dict({"fieldtype": "Data", "fieldname": "name", "label": "ID", "reqd": 1, "parent": doctype,})
-
-        if doctype != parent_doctype:
-            name_df.is_child_table_field = True
-            name_df.child_table_df = table_df
-
-        out[name_by_label] = name_df
-        out[name_by_fieldname] = name_df
-
-        # other fields
-        fields = get_standard_fields(doctype) + frappe.get_meta(doctype).fields
-        for df in fields:
-            label = (df.label or "").strip()
-            fieldtype = df.fieldtype or "Data"
-            parent = df.parent or parent_doctype
-            if fieldtype not in no_value_fields and parent_doctype == doctype:
-                # for parent doctypes keys will be
-                # Label
-                # label
-                # Label (label)
-                if not out.get(label):
-                    # if Label is already set, don't set it again
-                    # in case of duplicate column headers
-                    out[label] = df
-                    out[df.fieldname] = df
-                    label_with_fieldname = "{0} ({1})".format(label, df.fieldname)
-                    out[label_with_fieldname] = df
-                else:
-                    # in case there are multiple table fields with the same doctype
-                    # for child doctypes keys will be
-                    # Label (Table Field Label)
-                    # table_field.fieldname
-                    table_fields = parent_meta.get("fields", {"fieldtype": ["in", table_fieldtypes], "options": parent})
-                    for table_field in table_fields:
-                        by_label = "{0} ({1})".format(label, table_field.label)
-                        by_fieldname = "{0}.{1}".format(table_field.fieldname, df.fieldname)
-                        # create a new df object to avoid mutation problems
-                        if isinstance(df, dict):
-                            new_df = frappe._dict(df.copy())
-                        else:
-                            new_df = df.as_dict()
-
-                        new_df.is_child_table_field = True
-                        new_df.child_table_df = table_field
-                        out[by_label] = new_df
-                        out[by_fieldname] = new_df
-
-    # if autoname is based on field
+    sub_build_fields_for_column(doctypes,parent_doctype,parent_meta)    # if autoname is based on field
     # add an entry for "ID (Autoname Field)"
     autoname_field = get_autoname_field(parent_doctype)
     if autoname_field:
@@ -995,7 +928,6 @@ def build_fields_dict_for_column_matching(parent_doctype):
         out["ID"] = autoname_field
         out["name"] = autoname_field
     return out
-
 
 def get_df_for_column_header(doctype, header):
     def build_fields_dict_for_doctype():
@@ -1115,3 +1047,76 @@ def _parse_doc_contd(self, doctype, doc):
             doc = new_doc
 
     return doc
+def get_standard_fields(doctype):
+    meta = frappe.get_meta(doctype)
+    if meta.istable:
+        standard_fields = [{"label": "Parent", "fieldname": "parent"}, {"label": "Parent Type", "fieldname": "parenttype"}, {"label": "Parent Field", "fieldname": "parentfield"}, {"label": "Row Index", "fieldname": "idx"},]
+
+    else:
+        standard_fields = [{"label": "Owner", "fieldname": "owner"}, {"label": "Document Status", "fieldname": "docstatus", "fieldtype": "Int"},]
+
+    out = []
+    for df in standard_fields:
+        df = frappe._dict(df)
+        df.parent = doctype
+        out.append(df)
+    return out
+
+def sub_build_fields_for_column(doctypes,parent_doctype,parent_meta):
+    out = {}
+    for doctype, table_df in doctypes:
+        # name field
+        name_by_label = ("ID" if doctype == parent_doctype else "ID ({0})".format(table_df.label))
+
+        name_by_fieldname = ("name" if doctype == parent_doctype else "{0}.name".format(table_df.fieldname))
+
+        name_df = frappe._dict({"fieldtype": "Data", "fieldname": "name", "label": "ID", "reqd": 1, "parent": doctype,})
+
+        if doctype != parent_doctype:
+            name_df.is_child_table_field = True
+            name_df.child_table_df = table_df
+
+        out[name_by_label] = name_df
+        out[name_by_fieldname] = name_df
+
+        # other fields
+        fields = get_standard_fields(doctype) + frappe.get_meta(doctype).fields
+        for df in fields:
+            new_sub_build_fields_for_column(df,parent_doctype,doctype,parent_meta,out)
+def new_sub_build_fields_for_column(df,parent_doctype,doctype,parent_meta,out):
+    label = (df.label or "").strip()
+    fieldtype = df.fieldtype or "Data"
+    parent = df.parent or parent_doctype
+    if fieldtype not in no_value_fields and parent_doctype == doctype:
+        # for parent doctypes keys will be
+        # Label
+        # label
+        # Label (label)
+        new_sub_build_fields_for_column_match(out,label,df,parent_meta,parent)
+def new_sub_build_fields_for_column_match(out,label,df,parent_meta,parent):
+    if not out.get(label):
+        # if Label is already set, don't set it again
+        # in case of duplicate column headers
+        out[label] = df
+        out[df.fieldname] = df
+        label_with_fieldname = "{0} ({1})".format(label, df.fieldname)
+        out[label_with_fieldname] = df
+    else:
+        # in case there are multiple table fields with the same doctype
+        # for child doctypes keys will be
+        # Label (Table Field Label)
+        # table_field.fieldname
+        table_fields = parent_meta.get("fields", {"fieldtype": ["in", table_fieldtypes], "options": parent})
+        for table_field in table_fields:
+            by_label = "{0} ({1})".format(label, table_field.label)
+            by_fieldname = "{0}.{1}".format(table_field.fieldname, df.fieldname)
+            # create a new df object to avoid mutation problems
+            if isinstance(df, dict):
+                new_df = frappe._dict(df.copy())
+            else:
+                new_df = df.as_dict()
+
+            new_df.is_child_table_field = True
+            new_df.child_table_df = table_field
+            out[by_label] = new_df
+            out[by_fieldname] = new_df
