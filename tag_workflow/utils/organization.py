@@ -5,11 +5,10 @@
 import frappe
 from frappe import _
 from frappe.config import get_modules_from_all_apps
-import json, os
+import json
 from pathlib import Path
 from tag_workflow.utils.trigger_session import share_company_with_user
 from tag_workflow.controllers.master_controller import make_update_comp_perm, user_exclusive_perm
-import requests, time
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
@@ -60,6 +59,7 @@ def setup_data():
         update_job_title_list()
         update_old_lead_status()
         share_company_with_user()
+        emp_job_title()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -224,7 +224,7 @@ def check_if_user_exists():
 # job title update
 def update_job_title_list():
     try:
-        print("*------job title list--------------------------*\n")
+        print("*------job title list-----------------------*\n")
         job_designation_list=frappe.db.sql('select name,industry_type,price,description,designation_name from `tabDesignation` where organization is null and industry_type is not null;',as_dict=1)      
         if(len(job_designation_list)>0):
             for i in range(len(job_designation_list)):  
@@ -251,7 +251,7 @@ def update_tag_user_type():
 
 def update_old_lead_status():
     try:
-        print('*------Updating Old Lead Status------*')
+        print('*------updating old lead status-------------*\n')
         old_leads=frappe.db.sql('select name, company_name,status from `tabLead` where company_name in (select name from `tabCompany` where organization_type="Exclusive Hiring") and status="Open";',as_dict=1)
         if(len(old_leads)>0):
             for i in range(len(old_leads)):
@@ -263,7 +263,7 @@ def update_old_lead_status():
 
 def update_old_direct_order():
     try:
-        print('----Updating Old Direct Order')
+        print('*------updating old direct order------------*\n')
         old_order=frappe.db.sql(""" select name,staff_company,resumes_required from `tabJob Order` where staff_company is not null and is_single_share=0; """,as_dict=1)
         if(len(old_order)>0):
             check_is_single_share(old_order)
@@ -293,3 +293,18 @@ def single_share(old_order,i):
                     frappe.db.set_value(Job_Label,old_order[i].name,"is_single_share", 1)
     except Exception as e:
         frappe.log_error(e, 'check_is_single_share')
+
+def emp_job_title():
+    try:
+        print("*------updating employee job title----------*\n")
+        sql = '''SELECT parent, GROUP_CONCAT(job_category ORDER BY idx) AS category FROM `tabJob Category` GROUP BY parent'''
+        emp = frappe.db.sql(sql, as_dict = 1)
+        for i in emp:
+            categories = i.category.split(',')
+            if len(categories) > 1:
+                job_title = f'{categories[0]} + {len(categories)-1}'
+            else:
+                job_title = categories[0]
+            frappe.db.set_value(EMP, i.parent, 'job_categories', job_title)
+    except Exception as e:
+        frappe.log_error(e, 'Update employee job title error')

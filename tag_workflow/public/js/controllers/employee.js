@@ -697,13 +697,25 @@ function employee_history(frm){
 } 
 
 function append_job_category(frm){
-	let job_categories = ''
-	if(frm.doc.employee_job_category){
-	    frm.doc.employee_job_category.forEach(function(d1) { 
-		let next_category = d1.job_category+"\n"
-		job_categories += next_category
-	    })
-	    frm.set_value("job_categories",job_categories);
+	let emp_category = frm.doc.employee_job_category;
+	let length = emp_category.length;
+	let title = '';
+	if(emp_category && length>0){
+		for(let i in emp_category){
+			if(!emp_category[i].job_category){
+				length -= 1
+			}
+			else if(title == ''){
+				title = emp_category[i].job_category
+			}
+		}
+
+		let job_categories = length > 1 ? title + ' + ' + (length-1) : title
+	    frm.set_value("job_categories", job_categories);
+	    refresh_field("job_categories");
+	}
+	else{
+		frm.set_value("job_categories", null);
 	    refresh_field("job_categories");
 	}
 }
