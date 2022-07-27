@@ -7,7 +7,7 @@ import boto3
 #-----------------------------#
 TM_FT = "%Y-%m-%d %H-%M-%S"
 employee_attachments= "Employee Attachments"
-
+my_sql_query='insert into `tabEmployee Attachments` (name, attachments, parent, parentfield, parenttype, idx) values '
 
 @frappe.whitelist()
 def update_resume(company, zip_file, name, attachment_name, file_name, file_url):
@@ -202,19 +202,29 @@ def emp_and_date_data_one(newlist, emp, dates):
 
 def update_miscellaneous(url, name):
     try:
-        count = frappe.db.sql("""select count(name) as count from `tabEmployee Attachments` where parent = %s """, name, as_dict=1)
-        count_idx = count[0]['count'] if(count) else 0
-        sql = 'insert into `tabEmployee Attachments` (name, attachments, parent, parentfield, parenttype, idx) values '
-        sql += str(tuple([str(name)+"-"+str(count_idx), url,name, "miscellaneous", "Employee", (count_idx+1)])) + ","
-        frappe.db.sql(sql[0:-1])
-        frappe.db.commit()
+        if('@' in url):
+            l=frappe.get_doc('Employee',name)
+            if l.email in url:
+                count = frappe.db.sql("""select count(name) as count from `tabEmployee Attachments` where parent = %s """, name, as_dict=1)
+                count_idx = count[0]['count'] if(count) else 0
+                sql = my_sql_query
+                sql += str(tuple([str(name)+"-"+str(count_idx), url,name, "miscellaneous", "Employee", (count_idx+1)])) + ","
+                frappe.db.sql(sql[0:-1])
+                frappe.db.commit()
+        else:
+            count = frappe.db.sql("""select count(name) as count from `tabEmployee Attachments` where parent = %s """, name, as_dict=1)
+            count_idx = count[0]['count'] if(count) else 0
+            sql = my_sql_query
+            sql += str(tuple([str(name)+"-"+str(count_idx), url,name, "miscellaneous", "Employee", (count_idx+1)])) + ","
+            frappe.db.sql(sql[0:-1])
+            frappe.db.commit()
     except Exception as e:
         frappe.log_error(e, "update_miscellaneous")
 
 
 def update_multiple(date, emp, newlist):
     try:
-        sql = 'insert into `tabEmployee Attachments` (name, attachments, parent, parentfield, parenttype, idx) values '
+        sql = my_sql_query
         count, is_value = 0, 0
         filename, resume = '', ''
         resume=update_sub_empss(newlist,date,emp,resume)
@@ -230,9 +240,7 @@ def update_multiple(date, emp, newlist):
                 
                 if(resume != url and not frappe.db.exists(employee_attachments, {"parent": emp, "attachments": url})):
                     is_value = 1
-                    sql += str(tuple([str(emp)+"-"+str(count)+"-"+str(url), url, emp, "miscellaneous", "Employee", (count+1)])) + ","
-                    count += 1
-
+                    sql,count=new_functionss(url,emp,count,sql)
         if(is_value > 0):
             frappe.db.sql(sql[0:-1])
             frappe.db.commit()
@@ -293,8 +301,7 @@ def sub_employee_and_date_data_one(new, resume, emp,):
     url = frappe.get_site_config().s3_url + "/" + new
     if resume != url and not frappe.db.exists(employee_attachments, {"parent": emp, "attachments": url}):
         if (frappe.db.get_value("Employee", emp, "resume") or "") < url:
-            frappe.db.set_value("Employee", emp, "resume", url)
-            resume = url
+            resume=check_emails(emp,url)
         if resume != url and not frappe.db.exists(employee_attachments, {"parent": emp, "attachments": url}):
             update_miscellaneous(url, emp)
 
@@ -305,3 +312,25 @@ def update_sub_empss(newlist,date,emp,resume):
             resume = url
             frappe.db.set_value("Employee", emp, "resume", url)
     return resume
+
+def check_emails(emp,url):
+    resume=''
+    if('@' in url):
+        l=frappe.get_doc('Employee',emp)
+        if(l.email in url):
+            frappe.db.set_value("Employee", emp, "resume", url)
+            resume = url
+    else:
+        frappe.db.set_value("Employee", emp, "resume", url)
+        resume = url
+    return resume
+def new_functionss(url,emp,count,sql):
+    if('@' in url):
+        l=frappe.get_doc('Employee',emp)
+        if l.email in url:
+            sql += str(tuple([str(emp)+"-"+str(count)+"-"+str(url), url, emp, "miscellaneous", "Employee", (count+1)])) + ","
+            count += 1
+    else:
+        sql += str(tuple([str(emp)+"-"+str(count)+"-"+str(url), url, emp, "miscellaneous", "Employee", (count+1)])) + ","
+        count += 1
+    return sql,count
