@@ -157,14 +157,15 @@ def check_distance(company_address, data, radius):
         frappe.msgprint(e)
 
 @frappe.whitelist()
-def get_location():
+def get_location(comp):
     try:
-        result = []
-        order = frappe.get_list(JOB, ["name", "job_site"], ignore_permissions=0)
-        for o in order:
-            if(o.job_site not in result):
-                result.append(o.job_site)
-        return result
+        sql = '''select job_site,claim from `tabJob Order`'''
+        data = frappe.db.sql(sql)
+        job_site = set() 
+        for i in data:
+            if i[1] == None or i[1]=='TAG' or i[1]==comp:
+                job_site.add(i[0])
+        return job_site
     except Exception as e:
         print(e)
         return []

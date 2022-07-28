@@ -109,7 +109,7 @@ frappe.views.BaseList.prototype.setup_paging_area = function() {
                 this.page_length = 20;
                 this.refresh();
             }else if(val == "Custom Address"){
-                this.order_location = get_order_location();
+                this.order_location = get_order_location(frappe.boot.tag.tag_user_info.company);
                 this.add_fields = [{label: 'Address', fieldname: 'address', fieldtype: 'Select', options: this.order_location, 'reqd': 1}];
                 let dialog = new frappe.ui.Dialog({
                     title: 'Please Select an Address',
@@ -145,11 +145,12 @@ frappe.views.BaseList.prototype.remove_data = function() {
 
 
 /*-----------------------order location(s)-------------------------*/
-function get_order_location(){
+function get_order_location(comp){
     let order_location = "";
     frappe.call({
         "method": "tag_workflow.utils.reportview.get_location",
         "async": 0,
+        'args':{'comp':comp},
         "freeze": true,
         "freeze_message":  __("<b>Loading Job Site(s)") + "...</b>",
         "callback": function(r){
