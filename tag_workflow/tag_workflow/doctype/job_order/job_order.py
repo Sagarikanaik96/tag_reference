@@ -41,6 +41,7 @@ class JobOrder(Document):
                     old_assign = frappe.get_doc(ASN, {"job_order": self.repeat_from, "company": comp, "tag_status": "Approved"})
                     new_doc = frappe.copy_doc(old_assign)
                     new_doc.tag_status = "Open"
+                    new_doc.no_of_employee_required = self.no_of_workers
                     new_doc.job_order= self.name
                     meta = frappe.get_meta(ASN)
                     for field in meta.get_link_fields():
@@ -55,6 +56,7 @@ class JobOrder(Document):
                         frappe.db.commit()
                     self.assign_doc(new_doc.name, ASN,comp)
                     self.auto_email(new_doc,comp)
+                    self.emp_assignment(new_doc, comp)
 
                 self.check_claims(comp)
             frappe.db.set_value(ORD, self.name, "worker_filled", worker_filled)
@@ -105,6 +107,33 @@ class JobOrder(Document):
                 add(ORD, new_order, user, read=1, write = 0, share = 0, everyone = 0)
             subject="New Work Order"
             job_order_notification(job_title,hiring_company,new_order,subject,l)
+
+    def emp_assignment(self, new_doc, comp):
+        try:
+            worker_required = 0
+            if(new_doc.resume_required == 1):
+                for emp in new_doc.employee_details:
+                    if(emp.approved):
+                        worker_required += 1
+            else:
+                worker_required = len(new_doc.employee_details)
+
+            if(worker_required < self.no_of_workers):
+                required_emp = self.no_of_workers - worker_required
+                self.send_emp_assignment_email(comp, new_doc, required_emp)
+        except Exception as e:
+            frappe.msgprint(e)
+
+    def send_emp_assignment_email(self, comp, new_doc, required_emp):
+        try:
+            frappe.db.set_value(ASN, new_doc.name, "tag_status", "Open")
+            usr = frappe.db.get_list("User", {"company": comp}, "name", ignore_permissions=1)
+            usrs = [u.name for u in usr]
+            sub = "Update Employee Assignments on Repeated Job Orders"
+            msg = f'{new_doc.hiring_organization} is requesting a repeat of a work order for {new_doc.job_category} specifically with {comp}. {required_emp} employees require replacing. Please assign additional employees.'
+            sendmail(emails=usrs, message=msg, subject=sub, doctype=ASN, docname=new_doc.name)
+        except Exception as e:
+            frappe.msgprint(e)
 
 @frappe.whitelist()
 def joborder_notification(organizaton,doc_name,company,job_title,posting_date,job_site=None):

@@ -49,7 +49,7 @@ frappe.ui.form.on('Assign Employee', {
 	  		companyhide(500)
 	    })
 		child_table_label();
-
+        render_tab(frm);
 	},
 	e_signature_full_name:function(frm){
 		if(frm.doc.e_signature_full_name){
@@ -66,6 +66,7 @@ frappe.ui.form.on('Assign Employee', {
 	onload_post_render: function(frm){
 		add_employee_row(frm);
 		old_unknown_function(frm);
+        render_tab(frm);
 	},
 
 	onload:function(frm){
@@ -202,7 +203,7 @@ function make_hiring_notification(frm){
 					"freeze_message": "<p><b>preparing notification</b></p>",
 					"args":{
 						"job_order" : cur_frm.doc.job_order,"staffing_org":cur_frm.doc.company,
-						 "emp_detail" : count_len, "doc_name" : cur_frm.doc.name					},
+						 "emp_detail" : count_len, "doc_name" : cur_frm.doc.name},
 					callback:function(){
 						setTimeout(function () {
 							window.location.href='/app/job-order/'+frm.doc.job_order
@@ -259,6 +260,30 @@ function render_table(frm){
 	}
 }
 
+function render_tab(frm){
+    let items = frm.doc.employee_details || [];
+    let emps = 0;
+    let is_open = 0;
+    for(let i in items){
+        if(frm.doc.resume_required == 1 && items[i].approved){
+            emps += 1
+        }
+    }
+
+    if((frm.doc.resume_required == 1 && emps < frm.doc.no_of_employee_required) || (frm.doc.resume_required == 0 && items.length < frm.doc.no_of_employee_required)){
+        is_open = 1;
+    }
+
+    if(is_open == 1){
+        frm.set_df_property("employee_details", "read_only", 0);
+        cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = false;
+        cur_frm.fields_dict['employee_details'].refresh();
+        cur_frm.refresh_field("employee_details");
+    }
+}
+
+/*-------------------------------*/
+
 frappe.ui.form.on("Assign Employee Details", {
 	before_employee_details_remove: function(frm, cdt, cdn){
 		let child = frappe.get_doc(cdt, cdn);
@@ -306,37 +331,35 @@ function approved_employee(frm){
 }
 
 function hide_resume(frm){
-	if ((frm.doc.resume_required && frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.tag_status!='Approved')){
+    if((frm.doc.resume_required && frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.tag_status!='Approved')){
         let table=frappe.meta.get_docfield("Assign Employee Details", "approved",frm.doc.name);
-        table.hidden=1;
+        table.hidden = 1;
         frm.refresh_fields();
     }
-	if (!frm.doc.resume_required){
-		let resume=frappe.meta.get_docfield("Assign Employee Details", "resume",frm.doc.name);
-		resume.hidden=1;
-		let approved=frappe.meta.get_docfield("Assign Employee Details", "approved",frm.doc.name);
-		approved.hidden=1;
-		frm.refresh_fields();
-		if(frm.doc.job_order){
-			frappe.call({
-				method:"tag_workflow.tag_data.check_status_job_order",
-				args:{
-					"job_name" : cur_frm.doc.job_order
-				},
-				"async": 0,
-				"callback": function(r){
-					if (r.message=="Completed"){
-						frm.set_df_property("employee_details","read_only",1)
-						frm.set_df_property("distance_radius","read_only",1)
-						frm.set_df_property("show_all_employees","read_only",1)
-					}
-				}
-			});
-	}
-	}
 
-
-
+    if(!frm.doc.resume_required){
+        let resume = frappe.meta.get_docfield("Assign Employee Details", "resume",frm.doc.name);
+        resume.hidden = 1;
+        let approved = frappe.meta.get_docfield("Assign Employee Details", "approved",frm.doc.name);
+        approved.hidden = 1;
+        frm.refresh_fields();
+        if(frm.doc.job_order){
+            frappe.call({
+                method:"tag_workflow.tag_data.check_status_job_order",
+                args:{
+                    "job_name" : cur_frm.doc.job_order
+                },
+                "async": 0,
+                "callback": function(r){
+                    if(r.message=="Completed"){
+                        frm.set_df_property("employee_details","read_only",1);
+						frm.set_df_property("distance_radius","read_only",1);
+						frm.set_df_property("show_all_employees","read_only",1);
+                    }
+                }
+            });
+        }
+    }
 }
 
 
