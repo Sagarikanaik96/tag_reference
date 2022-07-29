@@ -14,11 +14,10 @@ def get_order_info(company1):
         assign = frappe.db.sql(""" select job_order from `tabAssign Employee` where company = "{}" and tag_status = "Approved" """.format(company1), as_dict=1)
         for a in assign:
             order_detail.append(a.job_order)
-
-        sql  = f'select name from `tabJob Order`  where "{frappe.utils.nowdate()}"  between from_date and to_date order by creation desc'
+        order_details=tuple(order_detail)
+        sql  = f'select name from `tabJob Order`  where "{frappe.utils.nowdate()}"  between from_date and to_date and name in {order_details} order by creation desc'
         job_order = frappe.db.sql(sql, as_dict=1)
         for j in job_order:
-            if j.name in order_detail:
                 data=check_claims(j.name,company1)
                 for d in data:
                     cat.append(d.category)
