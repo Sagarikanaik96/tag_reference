@@ -149,7 +149,6 @@ frappe.ui.form.on("User", {
 		check_bd(frm);
 	},
 	enabled: function(frm){
-		field_toggle();
 		multi_company_setup(frm);
 	},
 	onload:function(){
@@ -235,27 +234,24 @@ function setup_profile(frm){
 	let role_profile = "role_profile_name";
 	let module_profile = "module_profile";
 	let type = frm.doc.tag_user_type;
-	let doctype = frm.doc.doctype;
-	let docname = frm.doc.name;
-
 	if(type == "Hiring Admin"){
-		frappe.model.set_value(doctype, docname, role_profile, "Hiring Admin");
-		frappe.model.set_value(doctype, docname, module_profile, "Hiring");
+		frm.set_value(role_profile, "Hiring Admin");
+		frm.set_value( module_profile, "Hiring");
 	}else if(type == "Hiring User"){
-		frappe.model.set_value(doctype, docname, role_profile, "Hiring User");
-		frappe.model.set_value(doctype, docname, module_profile, "Hiring");
+		frm.set_value(role_profile, "Hiring User");
+		frm.set_value(module_profile, "Hiring");
 	}else if(type == "Staffing Admin"){
-		frappe.model.set_value(doctype, docname, role_profile, "Staffing Admin");
-		frappe.model.set_value(doctype, docname, module_profile, "Staffing");
+		frm.set_value(role_profile, "Staffing Admin");
+		frm.set_value(module_profile, "Staffing");
 	}else if(type == "Staffing User"){
-		frappe.model.set_value(doctype, docname, role_profile, "Staffing User");
-		frappe.model.set_value(doctype, docname, module_profile, "Staffing");
+		frm.set_value(role_profile, "Staffing User");
+		frm.set_value(module_profile, "Staffing");
 	}else if(type == "TAG Admin"){
-		frappe.model.set_value(doctype, docname, role_profile, "Tag Admin");
-		frappe.model.set_value(doctype, docname, module_profile, "Tag Admin");
+		frm.set_value(role_profile, "Tag Admin");
+		frm.set_value(module_profile, "Tag Admin");
 	}else if(type == "TAG User"){
-		frappe.model.set_value(doctype, docname, role_profile, "Tag User");
-		frappe.model.set_value(doctype, docname, module_profile, "Tag Admin");
+		frm.set_value(role_profile, "Tag User");
+		frm.set_value(module_profile, "Tag Admin");
 	}
 }
 
