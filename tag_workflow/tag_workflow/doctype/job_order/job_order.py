@@ -41,8 +41,11 @@ class JobOrder(Document):
                     old_assign = frappe.get_doc(ASN, {"job_order": self.repeat_from, "company": comp, "tag_status": "Approved"})
                     new_doc = frappe.copy_doc(old_assign)
                     new_doc.tag_status = "Open"
+                    new_doc.items = []
+                    new_doc.employee_details = []
                     new_doc.no_of_employee_required = self.no_of_workers
                     new_doc.job_order= self.name
+                    new_doc = self.check_employee_active(old_assign, new_doc)
                     meta = frappe.get_meta(ASN)
                     for field in meta.get_link_fields():
                         field.ignore_user_permissions=1
@@ -61,6 +64,19 @@ class JobOrder(Document):
                 self.check_claims(comp)
             frappe.db.set_value(ORD, self.name, "worker_filled", worker_filled)
             self.remaining_companies(self.staff_company,self.repeat_from,self.name,self.company,self.select_job)
+
+    def check_employee_active(self, old_assign, new_doc):
+        try:
+            _new_doc = new_doc
+            for emp in old_assign.employee_details:
+                is_dnr = frappe.db.sql(""" select count(name) as count from `tabTimesheet` where (dnr = 1 or non_satisfactory = 1) and employee =%s and job_order_detail = %s """,(emp.employee, old_assign.job_order), as_dict=1)
+                if(frappe.db.get_value("Employee", emp.employee, "status") == "Active" and is_dnr[0]['count'] == 0):
+                    new_doc.append("employee_details", emp)
+            return new_doc
+        except Exception as e:
+            frappe.msgprint(e)
+            return _new_doc
+
     def check_claims(self,comp):
         if(frappe.db.exists(CLM, {"job_order": self.repeat_from, "staffing_organization": comp})):
             frappe.db.set_value(ORD, self.name, "claim", ","+comp)
