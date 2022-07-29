@@ -24,19 +24,18 @@ response='Not Found'
 def company_details(company_name=None):
     if frappe.session.user != 'Administrator':
         comp_data=frappe.get_doc('Company',company_name)
-
-        sql = """ select fein, title, address, city, state, zip, contact_name, email, phone_no, primary_language, accounts_payable_contact_name, accounts_payable_email, accounts_payable_phone_number from `tabCompany` where name="{}" """.format(company_name)
-
-        company_info = frappe.db.sql(sql, as_list=1)
-        is_ok = "failed"
-        if None in company_info[0]:
-            return is_ok
-        for i in company_info[0]:
-            if(len(i)==0):
-                return is_ok
+        sql = """ select fein as "FEIN", title as "Title", address as "Address", city as "City", state as "State", zip as "Zip", contact_name as "Contact Name", email as "Contact Email", phone_no as "Company Phone No", primary_language as "Primary Language", accounts_payable_contact_name as "Accounts Payable Contact Name", accounts_payable_email as "Accounts Payable Email", accounts_payable_phone_number as "Accounts Payable Phone Number" from `tabCompany` where name="{}" """.format(company_name)
+        required_field=[]
+        company_info = frappe.db.sql(sql, as_dict=1)
         if(len(comp_data.industry_type)==0):
-            return is_ok
-        return "success"
+            required_field.append('Industry Type')
+        for i in company_info[0]:
+            if company_info[0][i] is None or len(company_info[0][i])==0:
+                required_field.append(i)
+        if(len(required_field)):
+            return required_field
+        else:
+            return "success"
 
 
 
@@ -318,16 +317,18 @@ def update_exclusive_org(exclusive_email, staffing_email, staffing_comapny, excl
 @frappe.whitelist(allow_guest=False)
 def staff_org_details(company_details=None):
     comp_data=frappe.get_doc('Company',company_details)
-
-    sql = """ select fein, title, address, city, state, zip, contact_name, email, phone_no, primary_language,accounts_receivable_rep_email,accounts_receivable_name,accounts_receivable_phone_number, cert_of_insurance,safety_manual,w9 from `tabCompany` where name="{}" """.format(company_details)
-
-    company_info = frappe.db.sql(sql, as_list=1)
-    is_ok = "failed"
-    if None in company_info[0]:
-        return is_ok
+    sql = """ select fein as "FEIN", title as "Title", address as "Address", city as "City", state as "State", zip as "Zip", contact_name as "Contact Name", email as "Contact Email", phone_no  as "Company Phone No", primary_language as "Primary Language",accounts_receivable_rep_email as "Accounts Receivable Rep email",accounts_receivable_name as "Accounts Receivable Name",accounts_receivable_phone_number as "Accounts Receivable phone number", cert_of_insurance as "Cert of Insurance",safety_manual as "Safety Manual",w9 as "W9" from `tabCompany` where name="{}" """.format(company_details)
+    company_info = frappe.db.sql(sql, as_dict=1)
+    mandatory_field=[]
     if(len(comp_data.industry_type)==0):
-        return is_ok
-    return "success"
+        mandatory_field.append('Industry Type')
+    for i in company_info[0]:
+        if company_info[0][i] is None or len(company_info[0][i])==0:
+            mandatory_field.append(i)
+    if(len(mandatory_field)):
+        return mandatory_field
+    else:
+        return "success"
 
 
 @frappe.whitelist(allow_guest=False)

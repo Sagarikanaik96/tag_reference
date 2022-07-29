@@ -509,19 +509,7 @@ frappe.ui.form.on("Job Order", {
 		}
 		if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.company){
 			fields_setup();
-			frappe.call({
-				method: "tag_workflow.tag_data.company_details",
-				args: {
-					company_name: frm.doc.company
-				},
-				callback: function(r) {
-					if (r.message != "success") {
-						msgprint("You can't create a Job Order until <b>"+frm.doc.company+"'s</b> details are completed.");
-						frm.set_value("company", '');
-						frappe.validated = false;
-					}
-				},
-			});
+			staffing_create_job_order(frm)
 		}
 		sessionStorage.setItem('joborder_company', frm.doc.company);
 		sessionStorage.setItem('exc_joborder_company', frm.doc.company);	
@@ -546,16 +534,7 @@ function check_company_detail(frm) {
 			},
 			callback: function(r) {
 				if (r.message != "success") {
-					if(frappe.boot.tag.tag_user_info.company_type == 'Exclusive Hiring'){
-						frappe.msgprint(__("You can't create a Job Order until <b>"+frm.doc.company+"'s</b> details are completed."));
-						frm.set_value('company','')
-					}
-					else{
-						frappe.msgprint(__("You can't create a Job Order until your Company Details are completed."));
-						frm.set_value('company','')
-					}
-					frappe.validated = false;
-				}
+					check_company_complete_details(r,frm)				}
 			},
 		});
 	}
@@ -590,9 +569,8 @@ function redirect_quotation(frm) {
 			company_details: frappe.boot.tag.tag_user_info.company,
 		},
 		callback: function(r) {
-			if (r.message == "failed") {
-				msgprint("You can't Assign Employees Until Your Company Details are Completed.");
-				frappe.validated = false;
+			if (r.message !='success') {
+				staffing_company_details(r)
 			} else {
 				frappe.set_route("Form", "Assign Employee", doc.name);
 			}
@@ -862,7 +840,19 @@ function claim_job_order_staffing(frm){
 	doc.no_of_workers_joborder = frm.doc.no_of_workers;
 	doc.hiring_organization = frm.doc.company;
 	doc.contract_add_on = frm.doc.contract_add_on;
-	frappe.set_route("Form", "Claim Order", doc.name);
+	frappe.call({
+		method: "tag_workflow.tag_data.staff_org_details",
+		args: {
+			company_details: frappe.boot.tag.tag_user_info.company,
+		},
+		callback: function(r) {
+			if (r.message !='success') {
+				staffing_company_details(r)
+			} else {
+				frappe.set_route("Form", "Claim Order", doc.name);
+			}
+		},
+	});
 }
 
 function show_claim_bar(frm) {
@@ -2111,3 +2101,75 @@ function check_exist_order(r,frm,resolve,reject){
 	}
 
 } 
+
+function check_company_complete_details(r,frm){
+	let msg=''
+	msg="<b>Your company profile is incomplete! Please define the the following fields on the My Company Profile page before creating a Job Order.</b><br>"
+	for(let i of r.message){
+		msg+="- "+i+"<br>"
+	}
+	frappe.msgprint({message: __(msg), title: __("Error"), indicator: "orange",});
+	frm.set_value('company','')
+	frappe.validated = false;
+}
+function staffing_company_details(r){
+	let staff_message="<b>Your company profile is incomplete! Please define the following fields on the My Company Profile page before submitting a claim for this Job Order.</b><br>"
+	for(let i of r.message){
+		staff_message+="- "+i+"<br>"
+	}
+	frappe.msgprint({message: __(staff_message), title: __("Error"), indicator: "orange",});
+	frappe.validated = false;
+}
+function staffing_create_job_order(frm){
+	frappe.call({
+		method: "tag_workflow.tag_data.company_details",
+		args: {
+			company_name: frm.doc.company
+		},
+		callback: function(r_hiring) {
+			frappe.call({
+				method: "tag_workflow.tag_data.staff_org_details",
+				args: {
+					company_details: frappe.boot.tag.tag_user_info.company,
+				},
+				callback: function(r_staff) {
+					if(frm.doc.company){
+						check_hiring_staffing_values(r_hiring,r_staff,frm)
+					}
+				},
+			});
+		},
+	});
+}
+function check_hiring_staffing_values(r_hiring,r_staff,frm){
+	let msg=""
+	if(r_hiring.message!= "success" && r_staff.message != "success"){
+		msg="<b>Your company & "+ frm.doc.company+"'s company profile is incomplete! Please define the following fields on the My Company Profile page before creating a Job Order.</b><br>"
+		msg+="<b>"+frm.doc.company+"</b><br>"
+		for(let l of r_hiring.message){
+			msg+="- "+l+"<br>"
+		}
+		msg+="<b>"+frappe.boot.tag.tag_user_info.company+"</b><br>"
+		for(let m of r_staff.message){
+			msg+="- "+m+"<br>"
+		}
+	
+	}
+	else if(r_hiring.message!= "success"){
+		msg="<b>"+frm.doc.company+"'s company profile is incomplete! Please define the following fields on the My Company Profile page before creating a Job Order.</b><br>"
+		for(let j of r_hiring.message){
+			msg+="- "+j+"<br>"
+		}
+	}
+	else if(r_staff.message != "success"){
+		msg="<b>Your company profile is incomplete! Please define the the following fields on the My Company Profile page before creating a Job Order.</b><br>"
+		for(let k of r_staff.message){
+			msg+="- "+k+"<br>"
+		}
+	}
+	if(msg!=""){
+		frappe.msgprint({message: __(msg), title: __("Error"), indicator: "orange",});
+		frm.set_value('company','')
+		frappe.validated = false;
+	}	
+}
