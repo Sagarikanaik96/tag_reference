@@ -930,12 +930,6 @@ function assign_employees(frm){
 		}else{
 			assign_employe(frm);
 		}
-	}else if(frm.doc.worker_filled >= frm.doc.no_of_workers){
-		frappe.msgprint({
-			message: __('No of workers already filled for this job order'),
-			title: __('Worker Filled'),
-			indicator: 'red'
-		});
 	}
 }
 
@@ -1547,6 +1541,8 @@ function claim_order_button(frm) {
 				}
 			}
 		});
+	}else if(frm.doc.__islocal != 1 && frm.doc.no_of_workers >= frm.doc.worker_filled && frm.doc.claim.includes(frappe.boot.tag.tag_user_info.company) && !frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company)){
+		frm.set_df_property('section_break_html3', "hidden", 0);
 	}
 }
 
@@ -1619,10 +1615,6 @@ function remove_asterisks(frm){
 }
 
 function assign_emp_button(frm){
-	check_assigned_emp(frm);
-}
-
-function check_assigned_emp(frm){
 	frappe.db.get_value("Assign Employee", {'job_order': frm.doc.name, 'company': frappe.boot.tag.tag_user_info.company}, ["name"], function(rr) {
 		if (rr.name === undefined) {
 			frm.add_custom_button(__('Assign Employee'), function(){
@@ -1655,8 +1647,14 @@ function set_exc_industry_company(frm){
 function order_buttons(frm){
 	if (cur_frm.doc.order_status != 'Completed' && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
 		if (frm.doc.resumes_required){
-			assign_emp_button(frm);
-		}else{
+			if(frm.doc.no_of_workers < frm.doc.worker_filled){
+				assign_emp_button(frm);
+			}
+			else if(!frm.doc.claim.includes(frappe.boot.tag.tag_user_info.company) || !frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company)){
+				frm.set_df_property('section_break_html3', "hidden", 0);
+			}
+		}
+		else{
 			claim_order_button(frm);
 		}
 	}
