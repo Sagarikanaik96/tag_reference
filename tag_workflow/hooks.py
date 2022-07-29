@@ -96,7 +96,8 @@ doctype_js = {
         "Contract": "public/js/controllers/contract.js",
         "Job Site": "public/js/controllers/job_sites.js",
         "Data Import":"public/js/controllers/data_import.js",
-        "Notification Log": "public/js/controllers/notification_log.js"
+        "Notification Log": "public/js/controllers/notification_log.js",
+        "Employee Onboarding Template": "public/js/controllers/employee_onboarding_template.js"
 }
 
 # doctype list
@@ -113,6 +114,7 @@ doctype_list_js = {
         "Contract": "public/js/doctype_list/contract_list.js",
         "Role Profile": "public/js/doctype_list/role_profile.js",
         "Item": "public/js/doctype_list/item_list.js",
+        "Employee Onboarding Template": "public/js/doctype_list/employee_onboarding_template_list.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]

@@ -1403,3 +1403,8 @@ def update_complete_address(data):
     except Exception as e:
         frappe.log_error(e, "Update complete address")
         print(e)
+
+@frappe.whitelist()
+def emp_onboarding_comp(user):
+    sql = '''select UP.for_value from `tabUser Permission` as UP, tabCompany as COM where UP.for_value = COM.name and COM.organization_type = "Staffing" and user="{0}"'''.format(user)
+    return frappe.db.sql(sql, as_list = 1)
