@@ -405,8 +405,16 @@ def jb_ord_dispute_comment_box(comment,job_order):
 
 
 @frappe.whitelist()
-def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None,job_order=None):
+def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None,job_order=None,timesheet=None):
     try:
+        timesheet_doc=frappe.get_doc('Timesheet', timesheet)
+        user_company_name=frappe.db.get_value("User", frappe.session.user, "company")
+        if not timesheet_doc.has_permission("read"):
+            frappe.throw('Insufficient permission')
+        elif timesheet_doc.employee_company!=user_company_name:
+            frappe.throw('Logged in user does not belong to the Timesheet Staffing Company')
+        elif timesheet_doc.job_order_detail!=job_order:
+            frappe.throw('Timesheet '+timesheet_doc.name+' does not belong to the Job Order '+job_order)
         ratings = json.loads(ratings)
         doc = frappe.new_doc('Hiring Company Review')
         doc.staffing_company=staffing_company
