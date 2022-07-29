@@ -171,6 +171,7 @@ frappe.ui.form.on("Lead", {
       tag_workflow.UpdateField(frm, "map");
       hide_fields(frm);
       show_addr(frm);
+      update_complete_address(frm)
     }else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
       cur_frm.set_df_property('map','hidden',1);
       show_addr(frm);
@@ -554,3 +555,42 @@ function set_map (frm) {
     frm.set_df_property('map','hidden',1);
   }
 }
+
+
+/*--------------------Update Complete Address---------------------*/
+function update_complete_address(frm){
+	if(frm.doc.zip && frm.doc.state_2 && frm.doc.city_or_town){
+	    let data = {
+	        street_number: frm.doc.address_lines_1 ? frm.doc.address_lines_1:'',
+	        route: frm.doc.suite_or_apartment_no ? frm.doc.suite_or_apartment_no    :'',
+	        locality:frm.doc.city_or_town,
+	        administrative_area_level_1: frm.doc.state_2,
+	        postal_code: frm.doc.zip ? frm.doc.zip:0,
+	    };
+		update_comp_address(frm,data)
+	}
+	else{
+	    frm.set_value('complete_address','')
+    }
+}
+
+function update_comp_address(frm,data){
+	frappe.call({
+	    method:'tag_workflow.tag_data.update_complete_address',
+	    args:{
+	        data:data
+	    },
+	    callback:function(r){
+	        if(r.message!='No Data')
+	        {
+	            if(r.message!=frm.doc.complete_address){
+	                frm.set_value('complete_address',r.message)
+	            }
+	        }
+	        else{
+	            frm.set_value('complete_address','')
+	        }
+	    }
+	})
+}
+	

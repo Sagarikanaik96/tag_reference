@@ -270,6 +270,7 @@ frappe.ui.form.on("Employee", {
 			tag_workflow.UpdateField(frm, "map");
 			hide_field(frm);
 			show_addr(frm);
+			update_complete_address(frm)
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.enter_manually==0){
 			cur_frm.set_df_property('map','hidden',1);
             show_addr(frm);
@@ -709,20 +710,14 @@ function append_job_category(frm){
 function remove_lat_lng(frm){
 	if((frm.doc.enter_manually) && (!frm.doc.zip && !frm.doc.city && !frm.doc.state)  && (frm.doc.lat || frm.doc.lng)){
 		frm.set_value('complete_address',undefined)
-		frm.set_value('suite_or_apartment_no',undefined)
-		frm.set_value('street_address',undefined)
-		frm.set_value('lat',undefined)
-		frm.set_value('lng',undefined)
+		set_lat_lng_undefined(frm)
 
 	}
 	else if((frm.doc.search_on_maps) && (!cur_frm.doc.complete_address) && (frm.doc.lat || frm.doc.lng)){
 		frm.set_value('state',undefined)
 		frm.set_value('city',undefined)
 		frm.set_value('zip',undefined)
-		frm.set_value('suite_or_apartment_no',undefined)
-		frm.set_value('street_address',undefined)
-		frm.set_value('lat',undefined)
-		frm.set_value('lng',undefined)
+		set_lat_lng_undefined(frm)
 	}
 }
 function update_lat_lng(frm){
@@ -754,4 +749,48 @@ function download_emp_resume(file){
 			}
 		});
 	}
+}
+
+/*--------------------Update Complete Address---------------------*/
+function update_complete_address(frm){
+	if(frm.doc.zip && frm.doc.state && frm.doc.city){
+	    let data = {
+	        street_number: frm.doc.street_address ? frm.doc.street_address:'',
+	        route: frm.doc.suite_or_apartment_no ? frm.doc.suite_or_apartment_no    :'',
+	        locality:frm.doc.city,
+	        administrative_area_level_1: frm.doc.state,
+	        postal_code: frm.doc.zip ? frm.doc.zip:0,
+	    };
+		update_comp_address(frm,data)
+	}
+	else{
+	    frm.set_value('complete_address','')
+    }
+}
+
+function update_comp_address(frm,data){
+	frappe.call({
+	    method:'tag_workflow.tag_data.update_complete_address',
+	    args:{
+	        data:data
+	    },
+	    callback:function(r){
+	        if(r.message!='No Data')
+	        {
+	            if(r.message!=frm.doc.complete_address){
+	                frm.set_value('complete_address',r.message)
+	            }
+	        }
+	        else{
+	            frm.set_value('complete_address','')
+	        }
+	    }
+	})
+}
+	
+function set_lat_lng_undefined(frm){
+	frm.set_value('suite_or_apartment_no',undefined)
+	frm.set_value('street_address',undefined)
+	frm.set_value('lat',undefined)
+	frm.set_value('lng',undefined)
 }

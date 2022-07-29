@@ -1386,3 +1386,20 @@ def lead_follow_up():
                 enqueue(method=frappe.sendmail, recipients=recipients, subject=sub, reference_name=i[0], message=msg, template="email_template_custom", args = {"sitename":env_url,"content":msg,"subject":sub, "lead": "true", "link":link})
     except Exception as e:
         frappe.log_error(e, "Lead Follow Up")
+
+
+@frappe.whitelist()
+def update_complete_address(data):
+    try:
+        data=json.loads(data)
+        address = data['street_number'] + ", " + data['route'] + ", " + data['locality']+', '+data['administrative_area_level_1']+', '+data['postal_code']
+        google_location_data_url = GOOGLE_API_URL + address
+        google_response = requests.get(google_location_data_url)
+        location_data = google_response.json()
+        if(google_response.status_code == 200 and len(location_data)>0 and len(location_data['results'])>0):
+            return location_data['results'][0]['formatted_address']
+        else:
+            return 'No Data'
+    except Exception as e:
+        frappe.log_error(e, "Update complete address")
+        print(e)
