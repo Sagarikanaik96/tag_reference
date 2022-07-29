@@ -12,6 +12,7 @@
   "hiring_organization",
   "staffing_organization",
   "no_of_workers_joborder",
+  "no_of_emplyooes_remaining",
   "staff_claims_no",
   "approved_no_of_workers",
   "html_4",
@@ -106,11 +107,17 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Contract Add On"
+  },
+  {
+   "fieldname": "no_of_emplyooes_remaining",
+   "fieldtype": "Int",
+   "label": "No of Emplyooes Remaining",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-23 03:08:11.521152",
+ "modified": "2022-07-12 02:40:26.581551",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Claim Order",

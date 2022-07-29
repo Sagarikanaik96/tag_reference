@@ -112,6 +112,15 @@ def order_details(doc_name):
 		frappe.db.rollback()
 
 @frappe.whitelist()
+def remaining_emp(doc_name):
+	try:
+		datas=''' select * from `tabClaim Order` where job_order = "{}"  '''.format(doc_name)
+		return frappe.db.sql(datas,as_dict=True)
+	except Exception as e:
+		print(e, frappe.get_traceback())
+		frappe.db.rollback()
+
+@frappe.whitelist()
 def modify_heads(doc_name):
 	try:
 		claim_data=f''' select staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{doc_name}" and staffing_organization not in (select company from `tabAssign Employee` where job_order="{doc_name}" and tag_status="Approved")'''
