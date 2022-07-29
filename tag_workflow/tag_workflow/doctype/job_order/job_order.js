@@ -142,6 +142,7 @@ frappe.ui.form.on("Job Order", {
 		}
 	},
 	refresh: function(frm) {
+		date_pick();
 		setTimeout(add_id,500);
 		update_order_status(frm)
 		$('.form-footer').hide();
@@ -2173,3 +2174,14 @@ function check_hiring_staffing_values(r_hiring,r_staff,frm){
 		frappe.validated = false;
 	}	
 }
+
+function date_pick(){
+	if(cur_frm.doc.is_repeat==1 && cur_frm.doc.__islocal==1){
+		cur_frm.doc.from_date= frappe.datetime.now_date();
+		cur_frm.doc.to_date= frappe.datetime.now_date();
+		refresh_field("from_date");
+		refresh_field("to_date");
+		cur_frm.doc.from_date="";
+		cur_frm.doc.to_date="";
+	}
+} 
