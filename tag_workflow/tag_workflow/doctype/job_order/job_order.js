@@ -145,6 +145,7 @@ frappe.ui.form.on("Job Order", {
 		date_pick();
 		setTimeout(add_id,500);
 		update_order_status(frm)
+		availability_single_day(frm)
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
@@ -812,6 +813,8 @@ function fields_setup() {
 function job_order_duration(frm){
 	if(!frm.doc.from_date || !frm.doc.to_date){
 		frm.set_value('job_order_duration', '');
+		frm.set_df_property('availability','hidden',0)
+		frm.set_df_property('availability','reqd',1)
 	}else{
 		const to_date = cur_frm.doc.to_date.split(" ")[0].split("-");
 		const from_date = cur_frm.doc.from_date.split(" ")[0].split("-");
@@ -821,8 +824,17 @@ function job_order_duration(frm){
 		let days = diff / (1000 * 3600 * 24) + 1;
 		if(days == 1){
 			cur_frm.set_value('job_order_duration', days + ' Day');
+			frm.set_df_property('availability','hidden',1)
+			frm.set_df_property('availability','reqd',0)
+			frm.set_df_property('select_days','reqd',0)
+			frm.set_value('availability','Everyday')
 		}else{
 			cur_frm.set_value('job_order_duration', days + ' Days');
+			frm.set_value('availability','')
+			frm.set_df_property('availability','hidden',0)
+			frm.set_df_property('availability','reqd',1)
+
+
 		}
 	}
 }
@@ -2173,6 +2185,13 @@ function check_hiring_staffing_values(r_hiring,r_staff,frm){
 		frm.set_value('company','')
 		frappe.validated = false;
 	}	
+}
+
+
+function availability_single_day(frm){
+	if(frm.doc.__islocal!=1 && frm.doc.job_order_duration=='1 Day'){
+		frm.set_df_property('availability','hidden',1)
+  }
 }
 
 function date_pick(){
