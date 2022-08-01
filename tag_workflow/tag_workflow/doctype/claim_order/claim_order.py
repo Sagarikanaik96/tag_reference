@@ -123,7 +123,11 @@ def remaining_emp(doc_name):
 @frappe.whitelist()
 def modify_heads(doc_name):
 	try:
-		claim_data=f''' select staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{doc_name}" and staffing_organization not in (select company from `tabAssign Employee` where job_order="{doc_name}" and tag_status="Approved")'''
+		job= frappe.get_doc(jobOrder, doc_name)
+		if job.worker_filled== 0:
+			claim_data=f''' select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{doc_name}" and staffing_organization not in (select company from `tabAssign Employee` where job_order="{doc_name}" and tag_status="Approved")'''
+		else:
+			claim_data=f''' select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{doc_name}" and approved_no_of_workers=0 and staffing_organization in (select company from `tabAssign Employee` where job_order='{doc_name}' and tag_status='Approved')'''
 		claims=frappe.db.sql(claim_data,as_dict=True)
 		return claims
 	except Exception as e:
@@ -133,34 +137,29 @@ def modify_heads(doc_name):
 @frappe.whitelist()
 def save_modified_claims(my_data,doc_name):
 	try:
-		companies=[]
+		claims_id=[]
 		my_data=json.loads(my_data)
 		for key in my_data:
-			companies.append(key)
-
-		for i in companies:
-			job = frappe.get_doc(jobOrder, doc_name)
-			claimed = job.staff_org_claimed if job.staff_org_claimed else ""
-			if(len(claimed)==0):
-				frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+str(i)))
-			elif(str(i) not in claimed):
-				frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+", "+str(i)))
-
-			sql=f'select name from `tabClaim Order` where job_order="{doc_name}" and staffing_organization="{i}"'
-			claim_order_name=frappe.db.sql(sql,as_dict=1)
-			doc=frappe.get_doc('Claim Order',claim_order_name[0].name)
-			msg = f"{doc.hiring_organization} has update the approved no. of employees needed for {doc_name} - {job.select_job} from {doc.approved_no_of_workers} to {my_data[i]}"
-			doc.approved_no_of_workers=my_data[i]
-			doc.save(ignore_permissions=True)
-
-			user_data = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(i)
-			user_list = frappe.db.sql(user_data, as_list=1)
-			l = [l[0] for l in user_list]
-			sub="Approve Claim Order"
-			make_system_notification(l,msg,claimOrder,doc.name,sub)
-			link =  f'  href="{sitename}/app/claim-order/{doc.name}" '
-			joborder_email_template(sub,msg,l,link)
-		return 1
+			claims_id.append(key)
+		if claims_id:
+			for i in claims_id:
+				if type(my_data[i])== int:
+					job = frappe.get_doc(jobOrder, doc_name)
+					claimed = job.staff_org_claimed if job.staff_org_claimed else ""
+					doc=frappe.get_doc('Claim Order',i)
+					claim_comp_assigned(claimed,doc_name,doc)
+					msg = f"{doc.hiring_organization} has update the approved no. of employees needed for {doc_name} - {job.select_job} from {doc.approved_no_of_workers} to {my_data[i]}"
+					
+					doc.approved_no_of_workers=my_data[i]
+					doc.save(ignore_permissions=True)
+					user_data = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(doc.staffing_organization)
+					user_list = frappe.db.sql(user_data, as_list=1)
+					l = [l[0] for l in user_list]
+					sub="Approve Claim Order"
+					make_system_notification(l,msg,claimOrder,doc.name,sub)
+					link =  f'  href="{sitename}/app/claim-order/{doc.name}" '
+					joborder_email_template(sub,msg,l,link)
+			return 1
 	except Exception as e:
 		print(e, frappe.get_traceback())
 		frappe.db.rollback()
@@ -217,3 +216,10 @@ def assign_notification(share_list,hiring_user_list,doc_name,job_order):
 	for user in hiring_user_list:
 		add(claimOrder, doc_name, user, read=1, write = 0, share = 0, everyone = 0,flags={"ignore_share_permission": 1})
 
+
+def claim_comp_assigned(claimed,doc_name,doc):
+	if(len(claimed)==0):
+		frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+str(doc.staffing_organization)))
+	elif(str(doc.staffing_organization) not in claimed):
+		frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+", "+str(doc.staffing_organization)))
+					

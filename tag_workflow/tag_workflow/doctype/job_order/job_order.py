@@ -542,6 +542,23 @@ def change_assigned_emp(doc_name, new_data=None):
                 frappe.db.sql('''UPDATE `tabAssign Employee` SET no_of_employee_required = "{0}" WHERE name="{1}"'''.format(new_data['changed'][0][2],name[0]))
                 frappe.db.commit()
 
+# for claculating headcount and submit
+@frappe.whitelist()
+def submit_headcount(job_order, staff_company):
+    data=frappe.get_doc('Job Order',job_order)
+    claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{job_order}"'
+    data1=frappe.db.sql(claims,as_list=1)
+    if(data1[0][0]!=None):
+        approved= int(data.no_of_workers)-int(data1[0][0])
+    else:
+        approved= int(data.no_of_workers)
+    sql = '''SELECT approved_no_of_workers from `tabClaim Order` where job_order = "{0}"'''.format(job_order)
+    res = frappe.db.sql(sql, as_list = True)
+    sql1= '''SELECT sum(staff_claims_no) from `tabClaim Order` where job_order = "{0}" and staffing_organization="{1}" '''.format(job_order, staff_company)
+    res1 = frappe.db.sql(sql1, as_list = True)
+    return [element for innerList in res for element in innerList],res1,approved
+
+
 @frappe.whitelist()
 def claim_headcount(job_order):
     sql = '''SELECT approved_no_of_workers from `tabClaim Order` where job_order = "{0}"'''.format(job_order)

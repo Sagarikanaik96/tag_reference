@@ -71,6 +71,7 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
         company = filters.get('company')
         distance = filters.get('distance_radius')
         job_location = filters.get('job_location')
+        job_order=filters.get('job_order')
         employee_lis = filters.get('employee_lis')
         all_employees=filters.get('all_employees')
         doc = frappe.get_doc('Job Site',job_location)
@@ -88,6 +89,7 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
                 3959 * Acos( Least(1.0,Cos( Radians({4}) )*Cos( Radians(lat) )*Cos( Radians(lng) - Radians ({5}) )+Sin( Radians({4}) )*Sin( Radians(lat)))),1), " miles") as `distance`
                 from `tabEmployee`
                 where company = '{0}' and status = 'Active'
+                and name NOT IN (select e.employee from `tabAssign Employee Details` e inner join `tabAssign Employee` a where a.name = e.parent and e.approved=1 and a.job_order='{7}')
                 and (lat!="" or lat is Null) and (lng!="" or lng is Null)
                 and user_id is Null
                 and name NOT IN (select parent from `tabBlocked Employees` where blocked_from = '{1}')
@@ -95,7 +97,7 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
                 and (name NOT IN (select parent from `tabUnsatisfied Organization` where unsatisfied_organization_name = '{1}')) 
                 and name NOT IN ('{2}') and (name like '%%{3}%%' or employee_name like  '%%{3}%%')) t
                 where (`distance` < {6} or `distance` is NULL) order by `distance` is NULL,`distance`*1
-                """.format(emp_company, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance])
+                """.format(emp_company, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance],job_order)
         else:
             sql = """
                 select * from(
@@ -103,6 +105,7 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
                 3959 * Acos( Least(1.0,Cos( Radians({5}) )*Cos( Radians(lat) )*Cos( Radians(lng) - Radians ({6}) )+Sin( Radians({5}) )*Sin( Radians(lat)))),1), " miles") as `distance`
                 from `tabEmployee`where company = '{0}'and status = 'Active' and zip!=0
                 and lat!="" and lng!=""
+                and name NOT IN (select e.employee from `tabAssign Employee Details` e inner join `tabAssign Employee` a where a.name = e.parent and e.approved=1 and a.job_order='{8}')
                 and employee_name like '%%{4}%%' 
                 and user_id is Null
                 and name in (select parent from `tabJob Category` where job_category = '{1}'
@@ -112,7 +115,7 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
                 and (name NOT IN (select parent from `tabUnsatisfied Organization` where unsatisfied_organization_name = '{2}'))and name NOT IN ('{3}')
                 and (name like '%%{4}%%' or employee_name like  '%%{4}%%')) t
                 where `distance` < {7} order by `distance`*1
-                """.format(emp_company, job_category, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance])
+                """.format(emp_company, job_category, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance],job_order)
         emp = frappe.db.sql(sql)
         return emp
     except Exception as e:
@@ -127,8 +130,14 @@ def worker_data(job_order):
 
 @frappe.whitelist()
 def approved_workers(job_order,user_email):
-    sql=f"select staffing_organization,approved_no_of_workers from `tabClaim Order` where job_order='{job_order}' and staffing_organization in (select company from `tabEmployee` where user_id='{user_email}') "
+    sql=f"select name, staffing_organization, sum(approved_no_of_workers) as approved_no_of_workers from `tabClaim Order` where job_order='{job_order}' and staffing_organization in (select company from `tabEmployee` where user_id='{user_email}') group by staffing_organization "
     data=frappe.db.sql(sql,as_dict=True)
+    sql=""" select name from `tabAssign Employee` where job_order="{0}" and company= "{1}" """.format(job_order,data[0]['staffing_organization'])
+    my_assign_emp=frappe.db.sql(sql,as_list=1)
+    if(len(my_assign_emp)>0):
+        doc=frappe.get_doc('Assign Employee',my_assign_emp[0][0])
+        if int(doc.claims_approved)!=int(data[0]['approved_no_of_workers']):
+            frappe.db.set_value("Assign Employee", str(my_assign_emp[0][0]), "claims_approved", int(data[0]['approved_no_of_workers']))
     return data
 
 @frappe.whitelist()

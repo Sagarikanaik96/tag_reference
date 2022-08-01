@@ -554,6 +554,13 @@ function redirect_quotation(frm) {
 	doc.company = staff_company[0];
 	doc.job_order = frm.doc.name;
 	doc.no_of_employee_required = frm.doc.no_of_workers - frm.doc.worker_filled;
+	if(frm.doc.resumes_required==1){
+		doc.no_of_employee_required = frm.doc.no_of_workers - frm.doc.worker_filled;
+	}
+	else{
+		doc.no_of_employee_required = frm.doc.no_of_workers
+	}
+		
 	if(frm.doc.staff_company){
 		doc.company = frm.doc.staff_company;
 	}
@@ -840,19 +847,6 @@ function job_order_duration(frm){
 }
 
 function claim_job_order_staffing(frm){
-	let doc = frappe.model.get_new_doc("Claim Order");
-	if(frm.doc.is_single_share == 1){
-		doc.staffing_organization = frm.doc.staff_company;
-		doc.single_share = 1;
-	}else{
-		let staff_company = frappe.boot.tag.tag_user_info.company || [];
-		doc.staffing_organization = staff_company[0];
-	}
-
-	doc.job_order = frm.doc.name;
-	doc.no_of_workers_joborder = frm.doc.no_of_workers;
-	doc.hiring_organization = frm.doc.company;
-	doc.contract_add_on = frm.doc.contract_add_on;
 	frappe.call({
 		method: "tag_workflow.tag_data.staff_org_details",
 		args: {
@@ -862,14 +856,41 @@ function claim_job_order_staffing(frm){
 			if (r.message !='success') {
 				staffing_company_details(r)
 			} else {
-				frappe.set_route("Form", "Claim Order", doc.name);
+				let doc = frappe.model.get_new_doc("Claim Order");
+				if(frm.doc.is_single_share == 1){
+					doc.staffing_organization = frm.doc.staff_company;
+					doc.single_share = 1;
+				}else{
+					let staff_company = frappe.boot.tag.tag_user_info.company || [];
+					doc.staffing_organization = staff_company[0];
+				}
+				frappe.call({
+					method: "tag_workflow.tag_workflow.doctype.job_order.job_order.submit_headcount",
+					args: {
+						"job_order": frm.doc.name,
+						"staff_company":frappe.boot.tag.tag_user_info.company
+					},
+					callback: function(s){
+						if(s.message){
+							let total_claims= s.message[1][0][0] || 0
+							let claims_left= frm.doc.no_of_workers - total_claims
+							let remaining_approved_emp= s.message[2]
+							let final_count= claims_left>remaining_approved_emp? remaining_approved_emp:claims_left
+							doc.job_order = frm.doc.name;
+							doc.no_of_workers_joborder = final_count;
+							doc.hiring_organization = frm.doc.company;
+							doc.contract_add_on = frm.doc.contract_add_on;
+							frappe.set_route("Form", "Claim Order", doc.name);
+						}
+					}
+				})
 			}
 		},
 	});
 }
 
 function show_claim_bar(frm) {
-	if(frm.doc.staff_org_claimed){
+	if(frm.doc.staff_org_claimed && frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company)){
 		frappe.call({
 			'method': 'tag_workflow.tag_data.claim_order_company',
 			'args': {
@@ -878,13 +899,12 @@ function show_claim_bar(frm) {
 			},
 			callback: function(r) {
 				if (r.message != 'unsuccess') {
-					cur_frm.toggle_display('section_break_html2', 1);
-					frm.remove_custom_button('Assign Employee');
-					frm.remove_custom_button('Claim Order');
+					claim_bar_data_hide(frm)
+					
 				}
 			}
 		});
-	}else if(frm.doc.claim && frm.doc.resumes_required == 0){
+	}else if(frm.doc.claim && frm.doc.claim.includes(frappe.boot.tag.tag_user_info.company) && frm.doc.resumes_required == 0){
 		frappe.call({
 			'method': 'tag_workflow.tag_data.claim_order_company',
 			'args': {
@@ -899,7 +919,7 @@ function show_claim_bar(frm) {
 				}
 			}
 		});
-	}else if(frm.doc.claim && frm.doc.resumes_required == 1){
+	}else if(frm.doc.claim && frm.doc.claim. includes(frappe.boot.tag.tag_user_info.company) && frm.doc.resumes_required == 1){
 		frappe.call({
 			'method': 'tag_workflow.tag_data.claim_order_company',
 			'args': {
@@ -915,6 +935,7 @@ function show_claim_bar(frm) {
 		});
 	}
 }
+
 
 function assign_employees(frm){
 	if(frm.doc.to_date < frappe.datetime.nowdate()){
@@ -1149,8 +1170,6 @@ function claim_orders(frm){
 	}else if(frm.doc.resumes_required == 0){
 		frappe.route_options = {
 			"job_order": ["=", frm.doc.name],
-			"hiring_organization": ["=", frm.doc.company],
-			"no_of_workers_joborder": ["=", frm.doc.no_of_workers]
 		};
 		frappe.set_route("List", "Claim Order");
 	}
@@ -1197,26 +1216,21 @@ function hide_unnecessary_data(frm){
 function staff_assigned_emp(frm){
 	frappe.call({
 		method: "tag_workflow.tag_data.staff_assigned_employees",
-		args: {job_order: cur_frm.doc.name,},
+		args: {job_order: cur_frm.doc.name,
+				user_email: frappe.session.user_email,
+				resume_required:frm.doc.resumes_required
+		},
 		callback: function(r) {
-			if (r.message == 'success1') {
-				frm.add_custom_button(__('Assigned Employees'), function(){
-					assigned_emp();
-				}, __("View"));
-				$('[data-fieldname = assigned_employees]').attr('id', 'assigned_inactive');
-				let data = `<div class="my-2 p-3 border rounded cursor-pointer" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
-				$('[data-fieldname = assigned_employees]').off().click(function() {
-					if($('[data-fieldname = assigned_employees]').attr('id')=='assigned_inactive'){
-						assigned_emp();
-					}
-				});
-				frm.set_df_property("assigned_employees", "options", data);
-				frm.toggle_display('related_actions_section', 1);
-				frm.remove_custom_button('Assign Employee');
+			if(frm.doc.resumes_required==0){
+				staff_assign_button_claims(frm,r)
 			}
+			else{
+				staff_assign_button_resume(frm,r)
+			}		
 		}
 	});
 }
+
 
 function cancel_joborder(frm){
 	frm.add_custom_button(__('Cancel'), function() {
@@ -1666,7 +1680,7 @@ function order_buttons(frm){
 			if(frm.doc.no_of_workers > frm.doc.worker_filled){
 				assign_emp_button(frm);
 			}
-			else if(!frm.doc.claim.includes(frappe.boot.tag.tag_user_info.company) || !frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company)){
+			else if((frm.doc.claim && !frm.doc.claim.includes(frappe.boot.tag.tag_user_info.company)) || (frm.doc.staff_org_claimed &&!frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company))){
 				frm.set_df_property('section_break_html3', "hidden", 0);
 			}
 		}
@@ -2204,3 +2218,80 @@ function date_pick(){
 		cur_frm.doc.to_date="";
 	}
 } 
+function claim_bar_data_hide(frm){
+	cur_frm.toggle_display('section_break_html2', 1);
+	if(frm.doc.resumes_required==1){
+		frm.remove_custom_button('Assign Employee');
+		frm.remove_custom_button('Claim Order');
+	}
+	else{
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.job_order.job_order.submit_headcount",
+			args: {
+				"job_order": frm.doc.name,
+				"staff_company":frappe.boot.tag.tag_user_info.company
+			},
+			callback: function(s){
+				if(s.message){
+					let total_claims= s.message[1][0][0]
+					let remaining_approved_emp= s.message[2]
+					if (remaining_approved_emp !=0 && frm.doc.order_status!='Completed' && total_claims< frm.doc.no_of_workers){
+						frm.add_custom_button(__('Claim Order'), function(){
+							claim_job_order_staffing(frm);
+						});
+					}
+				}
+			}
+		});
+	}
+}
+function staff_assign_button_claims(frm,r){
+	let claims_app= r.message[2]
+	let assigned_empls= r.message[1].employee_details.length
+	if (r.message[0] == 'success1' || r.message=='success2') {
+		assign_emp_hide_button(frm);
+		if(frm.doc.no_of_workers-frm.doc.worker_filled!=0 && r.message!='success2' && claims_app> assigned_empls){
+			frm.add_custom_button(__('Assign Employee'), function(){
+				frappe.set_route("Form", "Assign Employee", r.message[1].name);
+			});
+		}
+		else if(frm.doc.no_of_workers-frm.doc.worker_filled>0 && r.message!='success2' && frm.doc.resumes_required == 0 && claims_app> assigned_empls){	
+			frm.add_custom_button(__('Assign Employee'), function(){
+				staff_assign_redirect(frm);
+			});
+		}
+		else{
+			frm.remove_custom_button('Assign Employee');
+		}
+	}
+}
+
+function staff_assign_button_resume(frm,r){
+	if (r.message == 'success1' || r.message=='success2') {
+		assign_emp_hide_button(frm)
+		if(frm.doc.no_of_workers-frm.doc.worker_filled!=0 && r.message!='success2' ){
+			frm.add_custom_button(__('Assign Employee'), function(){
+				assign_employees(frm);
+			});
+		}
+		else{
+			frm.remove_custom_button('Assign Employee');
+		}
+	}
+}
+
+function assign_emp_hide_button(frm){
+	frm.add_custom_button(__('Assigned Employees'), function(){
+			assigned_emp();
+		}, __("View"));
+		$('[data-fieldname = assigned_employees]').attr('id', 'assigned_inactive');
+		let data = `<div class="my-2 p-3 border rounded cursor-pointer" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Assigned Employees  </p> </div>`;
+		$('[data-fieldname = assigned_employees]').click(function() {
+			if($('[data-fieldname = assigned_employees]').attr('id')=='assigned_inactive'){
+				assigned_emp();
+			}
+		});
+		frm.set_df_property("assigned_employees", "options", data);
+		frm.toggle_display('related_actions_section', 1);
+}
+

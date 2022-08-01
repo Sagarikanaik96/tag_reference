@@ -69,7 +69,12 @@ frappe.ui.form.on('Assign Employee', {
 	},
 
 	onload_post_render: function(frm){
-		add_employee_row(frm);
+		if(cur_frm.doc.resume_required==1){
+			add_employee_button(frm)
+		}
+		else{
+			add_employee_row(frm);
+		}
 		old_unknown_function(frm);
         render_tab(frm);
 	},
@@ -88,9 +93,9 @@ frappe.ui.form.on('Assign Employee', {
 			return {
 				query: "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.get_employee",
 				filters: {
-					company: doc.hiring_organization, emp_company: doc.company,all_employees:doc.show_all_employees,
-					job_category: doc.job_category,	distance_radius: doc.distance_radius, job_location: doc.job_location, employee_lis : employees_list
-				}
+                    company: doc.hiring_organization, emp_company: doc.company,all_employees:doc.show_all_employees,
+                    job_category: doc.job_category, distance_radius: doc.distance_radius, job_location: doc.job_location, employee_lis : employees_list,job_order:doc.job_order
+                }
 			}
 		}
 	},
@@ -399,7 +404,7 @@ function worker_notification(frm){
 			}
 		})
 	}
-	else if(frm.doc.tag_status=="Open" && frappe.boot.tag.tag_user_info.company_type=="Staffing" && frm.doc.__islocal==1 && frm.doc.resume_required==0 && frm.doc.job_order){
+	else if(frappe.boot.tag.tag_user_info.company_type=="Staffing" && frm.doc.resume_required==0 && frm.doc.job_order){
 		frappe.call({
 			"method":"tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.approved_workers",
 			"args":{
@@ -429,6 +434,9 @@ function worker_notification(frm){
 
 function table_emp(frm,table,msg){
 	if(frm.doc.tag_status=='Approved'){
+		if(frm.doc.resume_required==0){
+			(table.length > Number(frm.doc.claims_approved)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more than No. Of Employees Approved(<b>'+frm.doc.claims_approved+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
+		}
 		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more than No. Of Employees Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 	}
 	else if(frm.doc.resume_required==0){
@@ -823,4 +831,15 @@ function confirm_message(frm){
 			}
 		}
 	})
+}
+
+function add_employee_button(frm){
+	if (frm.doc.tag_status=='Open'){
+			cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = false;
+			cur_frm.fields_dict['employee_details'].refresh();
+	}
+	else{
+		cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = true;
+		cur_frm.fields_dict['employee_details'].refresh();
+	}
 }

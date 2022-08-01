@@ -225,15 +225,14 @@ function modify_claims(listview){
         callback:function(rm){
             frappe.db.get_value("Job Order",{ name: listview.data[0].job_order},["company",'select_job','from_date','to_date','no_of_workers','per_hour','worker_filled'],function (r) {
                         let job_data = rm.message;
-                        let profile_html = `<table><th>Staffing Company</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th>`;
+                        let profile_html = `<table><th>Claim No.</th><th>Staffing Company</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th>`;
                         for(let p in job_data){
-
                             profile_html += `<tr>
-                                <td style="margin-right:20px;" >${job_data[p].staffing_organization}</td>
+                                <td>${job_data[p].name}</td>
+                                <td style="margin-right:20px;" id="${job_data[p].claims}">${job_data[p].staffing_organization}</td>
                                 <td>${job_data[p].staff_claims_no}</td>
                                 <td>${job_data[p].approved_no_of_workers}</td>
-
-                                <td><input type="number" id="_${job_data[p].staffing_organization}" min="0" max=${job_data[p].staff_claims_no}></td>
+                                <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no}></td>
                                 </tr>`;
                         }
                         profile_html+=`</table><style>th, td {
@@ -261,7 +260,6 @@ function modify_claims(listview){
                                 dict=update_claims(data_len,l,dict,job_data,r)
                                 if(Object.keys(dict.dict).length>0 && (dict.valid1!="False"))
                                 {
-
                                     frappe.call({
                                         method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_modified_claims",
                                         args:{
@@ -290,7 +288,7 @@ function update_claims(data_len,l,dict,job_data,r){
     let total_count = 0
     for(let i=0;i<data_len;i++){     
                                
-        let y=document.getElementById("_"+job_data[i].staffing_organization).value
+        let y=document.getElementById(job_data[i].name).value
         if(y.length==0){
             total_count  += job_data[i].approved_no_of_workers
             continue
@@ -299,7 +297,7 @@ function update_claims(data_len,l,dict,job_data,r){
         l=parseInt(l)+parseInt(y)
         if(y==job_data[i].approved_no_of_workers){
             frappe.msgprint({
-                message: __("No Of Workers Are Same that previously assigned For:"+job_data[i].staffing_organization),
+                message: __("No Of Workers Are Same that previously assigned For:"+job_data[i].name),
                 title: __("Error"),
                 indicator: "red",
               });
@@ -308,8 +306,6 @@ function update_claims(data_len,l,dict,job_data,r){
               setTimeout(function () {
                 location.reload()                                    
               }, 5000);
-
-
         }
         else if(y<0){
             frappe.msgprint({
@@ -325,10 +321,10 @@ function update_claims(data_len,l,dict,job_data,r){
 
         }
     
-        else if(y>job_data[i].staff_claims_no)
+        else if(y>job_data[i].name)
         {
             frappe.msgprint({
-                message: __("No Of Workers Exceed For:"+job_data[i].staffing_organization),
+                message: __("No Of Workers Exceed For:"+job_data[i].name),
                 title: __("Error"),
                 indicator: "red",
               });
@@ -339,9 +335,9 @@ function update_claims(data_len,l,dict,job_data,r){
               }, 5000);
         }
         else if(l>(r['no_of_workers']-r['worker_filled']))
-        {
+        {   
             frappe.msgprint({
-                message: __("No Of Workers Exceed For Than required"),
+                message: __("No Of Workers Exceed For Than required "),
                 title: __("Error"),
                 indicator: "red",
               });
@@ -353,13 +349,13 @@ function update_claims(data_len,l,dict,job_data,r){
         }
         else{
             total_count += y
-            dict[job_data[i].staffing_organization]=y
+            dict[job_data[i].name]=y
         }
     
     }
-    if (total_count > r['no_of_workers']-r['worker_filled']){
+    if (total_count > r['no_of_workers']){
         frappe.msgprint({
-            message: __("No Of Workers Exceed For Than required"),
+            message: __("No Of Workers Exceed For Than required",total_count, r['no_of_workers'],r['worker_filled'],r['no_of_workers']-r['worker_filled']),
             title: __("Error"),
             indicator: "red",
           });

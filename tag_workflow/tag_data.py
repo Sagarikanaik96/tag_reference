@@ -699,14 +699,32 @@ def assigned_employee_data(job_order):
         frappe.log_error(e, "Assigned Employee")
 
 @frappe.whitelist(allow_guest=False)
-def staff_assigned_employees(job_order):
+def staff_assigned_employees(job_order, user_email,resume_required):
     try:
-        sql=f" select name from `tabAssign Employee` where job_order='{job_order}' and tag_status='Approved' and  company in (select company from `tabEmployee` where email='{frappe.session.user}')"
-        assigned_data=frappe.db.sql(sql)
-        if(len(assigned_data)>0):
-            return "success1"
+        if(int(resume_required)==0):
+            sql1=f"select sum(approved_no_of_workers) as approved_no_of_workers from `tabClaim Order` where job_order='{job_order}' and staffing_organization in (select company from `tabEmployee` where user_id='{user_email}') group by staffing_organization "
+            data1=frappe.db.sql(sql1,as_dict=True)
+            sql=f" select name, claims_approved from `tabAssign Employee` where job_order='{job_order}' and tag_status='Approved' and  company in (select company from `tabEmployee` where email='{frappe.session.user}')"
+            assigned_data=frappe.db.sql(sql, as_dict=1)
+            emp_data= frappe.get_doc('Assign Employee', assigned_data[0]['name'])
+            if(len(assigned_data)>0):
+                sql=f" select name from `tabAssign Employee` where job_order='{job_order}' and tag_status='Open' and  company in (select company from `tabEmployee` where email='{frappe.session.user}')"
+                assigned_data=frappe.db.sql(sql)
+                if(len(assigned_data)>0):
+                    return 'success2'
+                return "success1", emp_data, data1[0]['approved_no_of_workers']
+        else:
+            sql=f" select name from `tabAssign Employee` where job_order='{job_order}' and tag_status='Approved' and  company in (select company from `tabEmployee` where email='{frappe.session.user}')"
+            assigned_data=frappe.db.sql(sql)
+            if(len(assigned_data)>0):
+                sql=f" select name from `tabAssign Employee` where job_order='{job_order}' and tag_status='Open' and  company in (select company from `tabEmployee` where email='{frappe.session.user}')"
+                assigned_data=frappe.db.sql(sql)
+                if(len(assigned_data)>0):
+                    return 'success2'
+                return "success1"
     except Exception as e:
         frappe.log_error(e, "Staff Employee")
+        
 
 
 @frappe.whitelist(allow_guest=False)
