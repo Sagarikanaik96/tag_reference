@@ -347,7 +347,8 @@ function approval_timesheet(){
 							'hiring_company':cur_frm.doc.company,
 							'staffing_company':cur_frm.doc.employee_company,
 							'ratings':comp_rating,
-							'job_order':cur_frm.doc.job_order_detail
+							'job_order':cur_frm.doc.job_order_detail,
+							'timesheet':cur_frm.doc.name
 						},
 						callback:function(){
 								frappe.msgprint('Review Submitted Successfully')	
