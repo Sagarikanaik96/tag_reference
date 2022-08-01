@@ -1130,7 +1130,7 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-container
   .level-left
   .list-row-col:nth-child(4) {
-  flex: 1.2;
+  flex: 1.3;
 }
 
 .list-row .level-right,
@@ -1219,6 +1219,51 @@ select.input-with-feedback.form-control.ellipsis {
 }
 .toggle_list_view ul li:nth-child(2) {
   display: none;
+}
+[data-page-route="List/Timesheet/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(8),
+[data-page-route="List/Timesheet/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(8),
+[data-page-route="List/Timesheet/List"]
+  #staffing_timesheet
+  header
+  .level-left
+  .list-row-col:nth-child(7),
+[data-page-route="List/Timesheet/List"]
+  #staffing_timesheet
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(7),
+[data-page-route="List/Timesheet/List"]
+  #staffing_timesheet
+  header
+  .level-left
+  .list-row-col:nth-child(6),
+[data-page-route="List/Timesheet/List"]
+  #staffing_timesheet
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(6) {
+  flex: 0.5;
+}
+
+[data-page-route="List/Timesheet/List"]
+  #staffing_timesheet
+  header
+  .level-left
+  .list-row-col:nth-child(8),
+[data-page-route="List/Timesheet/List"]
+  #staffing_timesheet
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(8) {
+  flex: 1;
 }
 
 /*------ Media query start ----*/
