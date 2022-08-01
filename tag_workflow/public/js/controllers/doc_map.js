@@ -124,7 +124,7 @@ function update_address(data){
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state", data["administrative_area_level_1"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city", data["locality"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "country_2", data["country"]);
-        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address", street);
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address", document.getElementById("autocomplete-address").value);
     } else if (cur_frm.doc.doctype == 'Lead'){
         update_basic_value(data)
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address_lines_1", street);
