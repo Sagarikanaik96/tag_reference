@@ -12,6 +12,7 @@
   "hiring_organization",
   "staffing_organization",
   "no_of_workers_joborder",
+  "no_of_remaining_employee",
   "no_of_emplyooes_remaining",
   "staff_claims_no",
   "approved_no_of_workers",
@@ -113,11 +114,17 @@
    "fieldtype": "Int",
    "label": "No of Emplyooes Remaining",
    "read_only": 1
+  },
+  {
+   "fieldname": "no_of_remaining_employee",
+   "fieldtype": "Data",
+   "label": "No. of remaining employee",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-12 02:40:26.581551",
+ "modified": "2022-08-01 05:28:09.854797",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Claim Order",
