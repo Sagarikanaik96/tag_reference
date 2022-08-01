@@ -98,7 +98,7 @@ def welcome_email():
             sub = "Welcome to Temporary Assistance Guru!"
             enqueue(method = frappe.sendmail, recipients = user, template = "welcome_email", subject = sub, args = { "subject": sub, "sitename": env_url, "link": link })
     except Exception as e:
-        frappe.log_error('Welcome Email Error', e)
+        frappe.log_error(e, 'Welcome Email Error')
         print(e)
 
 def start(self):

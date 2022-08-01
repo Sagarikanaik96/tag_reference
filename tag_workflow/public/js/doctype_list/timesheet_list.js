@@ -125,8 +125,15 @@ function add_filters(listview){
 		placeholder: "Status"
 	};
 	let standard_filters_wrapper = listview.page.page_form.find('.standard-filter-section');
+	if(frappe.boot.tag.tag_user_info.company_type != 'Staffing'){
+		listview.page.add_field(df2, standard_filters_wrapper);
+	}
+	else{
+		listview.columns.splice(6,1);
+		listview.render_header(listview.columns[6]);
+		listview.refresh();
+	}
 	listview.page.add_field(df1, standard_filters_wrapper);
-	listview.page.add_field(df2, standard_filters_wrapper);
 	listview.page.add_field(df3, standard_filters_wrapper);
 	let doc_filter = document.querySelector('select[data-fieldname = "workflow_state"]')
     doc_filter.options.add(new Option(), 0);
