@@ -131,16 +131,17 @@ function add_filters(listview) {
     placeholder: "Employee Name",
   };
   const df2 = {
-    condition: "like",
+    condition: "=",
     default: null,
     fieldname: "employee_company",
-    fieldtype: "Data",
+    fieldtype: "Autocomplete",
     input_class: "input-xs",
     label: "Staffing Company",
     is_filter: 1,
     onchange: function () {
       listview.refresh();
     },
+    options: get_company(),
     placeholder: "Staffing Company",
   };
   const df3 = {
@@ -174,4 +175,21 @@ function add_filters(listview) {
     'select[data-fieldname = "workflow_state"]'
   );
   doc_filter.options.add(new Option(), 0);
+}
+
+function get_company(){
+	let text='';
+	frappe.call({
+		'method': 'tag_workflow.tag_data.timesheet_company',
+		'args': {
+			"hiring_company":frappe.boot.tag.tag_user_info.company
+		},
+		'async': 0,
+		'callback': function(r){
+			if(r.message){
+				text += r.message;
+			}
+		}
+	});
+	return text;
 }

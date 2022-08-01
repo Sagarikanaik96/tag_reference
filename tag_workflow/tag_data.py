@@ -1426,3 +1426,17 @@ def update_complete_address(data):
 def emp_onboarding_comp(user):
     sql = '''select UP.for_value from `tabUser Permission` as UP, tabCompany as COM where UP.for_value = COM.name and COM.organization_type = "Staffing" and user="{0}"'''.format(user)
     return frappe.db.sql(sql, as_list = 1)
+
+@frappe.whitelist()
+def timesheet_company(hiring_company):
+    try:
+        if hiring_company == '' or hiring_company == 'TAG':
+            sql = '''SELECT DISTINCT(employee_company) FROM tabTimesheet ORDER BY employee_company'''
+        else:
+            sql = '''SELECT DISTINCT(employee_company) FROM tabTimesheet WHERE company = "{0}" ORDER BY employee_company'''.format(hiring_company)
+        companies = frappe.db.sql(sql, as_dict=True)
+        data = [c['employee_company'] for c in companies]
+        return '\n'.join(data)
+    except Exception as e:
+        frappe.log_error(e, "Staffing Company Filter Error on Timesheet")
+        print(e)
