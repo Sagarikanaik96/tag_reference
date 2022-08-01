@@ -1663,7 +1663,7 @@ function set_exc_industry_company(frm){
 function order_buttons(frm){
 	if (cur_frm.doc.order_status != 'Completed' && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
 		if (frm.doc.resumes_required){
-			if(frm.doc.no_of_workers < frm.doc.worker_filled){
+			if(frm.doc.no_of_workers > frm.doc.worker_filled){
 				assign_emp_button(frm);
 			}
 			else if(!frm.doc.claim.includes(frappe.boot.tag.tag_user_info.company) || !frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company)){
