@@ -12,12 +12,7 @@ frappe.ui.form.on('Assign Employee', {
         },1000);
         $('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
-		if (cur_frm.doc.claims_approved > cur_frm.doc.employee_details.length){
-			frm.set_df_property("employee_details","read_only",0);
-		}
-		else{
-			frm.set_df_property("employee_details","read_only",1);
-		}
+		assigned_direct(frm);
 		window.onclick = function() {
 			attachrefresh();
 		}
@@ -841,5 +836,16 @@ function add_employee_button(frm){
 	else{
 		cur_frm.fields_dict['employee_details'].grid.cannot_add_rows = true;
 		cur_frm.fields_dict['employee_details'].refresh();
+	}
+}
+
+function assigned_direct(frm){
+	if(frm.doc.__islocal !=1){
+		if (cur_frm.doc.claims_approved && cur_frm.doc.claims_approved > cur_frm.doc.employee_details.length){
+			frm.set_df_property("employee_details","read_only",0);
+		}
+		else{
+			frm.set_df_property("employee_details","read_only",1);
+		}
 	}
 }
