@@ -311,6 +311,8 @@ def make_sales_invoice(source_name, company, emp_sql,target_doc=None, ignore_per
         }, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
     customer = customer_doc(company)
     doclist = make_invoice(source_name, target_doc)
+    doclist.posting_date = frappe.utils.nowdate()
+    doclist.due_date = frappe.utils.add_to_date(frappe.utils.nowdate(), days=30)
     update_timesheet(company, source_name, doclist,emp_sql)
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
     hiring_org_name = frappe.db.get_value(ORD,source_name,["company"])

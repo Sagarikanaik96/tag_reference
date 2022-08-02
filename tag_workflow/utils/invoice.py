@@ -221,3 +221,15 @@ def update_salesinvoice_is_check_in_sales_invoice(name):
         frappe.db.commit()
     except Exception as e:
         frappe.error_log(e,'update failed is_check_in_sales_invoice')
+
+
+#----------------due date---------------#
+@frappe.whitelist()
+def get_due_date(posting_date, party_type, party, company=None, bill_date=None):
+    try:
+        due_date = None
+        if(posting_date):
+            due_date = frappe.utils.add_to_date(posting_date, days=30)
+        return due_date
+    except Exception as e:
+        frappe.msgprint(e)
