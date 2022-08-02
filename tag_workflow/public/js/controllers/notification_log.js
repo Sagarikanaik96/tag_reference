@@ -1,6 +1,6 @@
 // Copyright (c) 2019, Frappe Technologies and contributors
 // For license information, please see license.txt
-
+frappe.ui.form.off("Notification Log", "open_reference_document");
 frappe.ui.form.on('Notification Log', {
 	open_reference_document: function(frm) {
 		const dt = frm.doc.document_type;

@@ -97,7 +97,7 @@ doctype_js = {
         "Job Site": "public/js/controllers/job_sites.js",
         "Data Import":"public/js/controllers/data_import.js",
         "Notification Log": "public/js/controllers/notification_log.js",
-        "Employee Onboarding Template": "public/js/controllers/employee_onboarding_template.js"
+        "Employee Onboarding Template": "public/js/controllers/employee_onboarding_template.js",
 }
 
 # doctype list
