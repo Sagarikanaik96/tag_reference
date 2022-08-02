@@ -13,7 +13,6 @@
   "staffing_organization",
   "no_of_workers_joborder",
   "no_of_remaining_employee",
-  "no_of_emplyooes_remaining",
   "staff_claims_no",
   "approved_no_of_workers",
   "html_4",
@@ -75,7 +74,7 @@
   {
    "fieldname": "no_of_workers_joborder",
    "fieldtype": "Int",
-   "label": "No of workers Required",
+   "label": "Total Required Employees",
    "read_only": 1
   },
   {
@@ -110,21 +109,15 @@
    "label": "Contract Add On"
   },
   {
-   "fieldname": "no_of_emplyooes_remaining",
-   "fieldtype": "Int",
-   "label": "No of Emplyooes Remaining",
-   "read_only": 1
-  },
-  {
    "fieldname": "no_of_remaining_employee",
    "fieldtype": "Data",
-   "label": "No. of remaining employee",
+   "label": "No. of Employees Remaining",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-01 05:28:09.854797",
+ "modified": "2022-08-02 07:03:09.539468",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Claim Order",

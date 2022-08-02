@@ -96,7 +96,7 @@ frappe.ui.form.on('Claim Order', {
 		setTimeout(hr, 1000);
 
 		frm.set_df_property('agree_to_contract', 'label', 'Agree To Contract <span style="color: red;">&#42;</span>');
-		frm.set_df_property('staff_claims_no', 'label', 'Claim no. of Workers <span style="color: red;">&#42;</span>');
+		frm.set_df_property('staff_claims_no', 'label', 'No. of Employees to Claim <span style="color: red;">&#42;</span>');
 		frm.set_value('no_of_remaining_employee', 0)
 		get_remaining_employee(frm.doc.job_order,frm)
 		frm.set_df_property('no_of_remaining_employee', 'read_only', 1)
@@ -305,19 +305,24 @@ function get_remaining_employee(name,frm) {
 			'doc_name': name,
 		},
 		callback: function (r) {
-			let remaining_emp = r.message[0].no_of_workers_joborder - r.message[0].staff_claims_no
+			let remaining_emp = 0;
+			for( let i in r.message){
+				remaining_emp += parseInt(r.message[i].approved_no_of_workers)
+			}
+			remaining_emp = r.message[0].no_of_workers_joborder - remaining_emp
 			frm.set_value('no_of_remaining_employee', remaining_emp)
+			frm.set_value('no_of_workers_joborder', r.message[0].no_of_workers_joborder)
 		}
 	})
 
 }
 
 function mandatory_fn(frm) {
-	let l = { "Job Order": frm.doc.job_order, "Staffing Organization": frm.doc.staffing_organization, "E Signature": frm.doc.e_signature, "Agree To Contract": cur_frm.doc.agree_to_contract, "Claim no. of Workers": cur_frm.doc.staff_claims_no };
+	let l = { "Job Order": frm.doc.job_order, "Staffing Organization": frm.doc.staffing_organization, "E Signature": frm.doc.e_signature, "Agree To Contract": cur_frm.doc.agree_to_contract, "No. of Employees to Claim": cur_frm.doc.staff_claims_no };
 
 	let message = "<b>Please Fill Mandatory Fields:</b>";
 	for (let k in l) {
-		if (k == "Claim no. of Workers") {
+		if (k == "No. of Employees to Claim") {
 			if (l[k] == undefined || l[k] == null) {
 				message = message + "<br>" + k;
 			}
