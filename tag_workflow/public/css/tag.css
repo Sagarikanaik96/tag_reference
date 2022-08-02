@@ -1168,7 +1168,17 @@ select.input-with-feedback.form-control.ellipsis {
   .frappe-card
   .list-row-container
   .level-left
-  .list-row-col:nth-child(9) {
+  .list-row-col:nth-child(9),
+[data-page-route="List/Timesheet/List"]
+  #staffing_timesheet
+  header
+  .level-left
+  .list-row-col:nth-child(1),
+[data-page-route="List/Timesheet/List"]
+  #staffing_timesheet
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(1) {
   flex: 1.5;
 }
 .block-company-btn {
@@ -1250,7 +1260,8 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-container
   .level-left
   .list-row-col:nth-child(6) {
-  flex: 0.5;
+  flex: 0.7;
+  text-align: left !important;
 }
 
 [data-page-route="List/Timesheet/List"]
