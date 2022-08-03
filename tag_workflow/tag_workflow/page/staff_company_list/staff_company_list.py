@@ -79,6 +79,20 @@ def favourite_company(company_to_favourite,user_name):
         return "True"
     except Exception as e:
         frappe.log_error(e, "company checkig")
+        return "False" 
+
+@frappe.whitelist()
+def sorted_favourite_companies(user_name):
+    try:
+        comp_doc=frappe.get_doc('Company',user_name)
+        comp=[]
+        for i in comp_doc.favourite_staffing_company_list:
+            comp.append(i.favourite_staffing_company)
+        comp.sort()
+        return comp          
+
+    except Exception as e:
+        frappe.log_error(e, "company sorting")
         frappe.msgprint("Company favourites checking")
         return "False"  
 
