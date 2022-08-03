@@ -21,8 +21,9 @@ team = "Sales Team"
 ASN = "Assign Employee"
 CLM = "Claim Order"
 
-site= frappe.utils.get_url().split('/')
-sitename=site[0]+'//'+site[2]
+site = frappe.utils.get_url().split('/')
+sitename = site[0]+'//'+site[2]
+
 class JobOrder(Document):
     def after_insert(self):
         self.check_assign()
@@ -37,6 +38,8 @@ class JobOrder(Document):
             worker_filled=0
             for comp in staff_selected_companies:
                 comp=comp.strip()
+                self.check_claims(comp)
+
                 if(frappe.db.exists(ASN, {"job_order": self.repeat_from, "company": comp, "tag_status": "Approved"})):
                     old_assign = frappe.get_doc(ASN, {"job_order": self.repeat_from, "company": comp, "tag_status": "Approved"})
                     new_doc = frappe.copy_doc(old_assign)
@@ -47,22 +50,22 @@ class JobOrder(Document):
                     new_doc.job_order= self.name
                     new_doc = self.check_employee_active(old_assign, new_doc)
                     meta = frappe.get_meta(ASN)
+
                     for field in meta.get_link_fields():
-                        field.ignore_user_permissions=1
+                        field.ignore_user_permissions = 1
                     new_doc.flags.ignore_permissions = True
                     new_doc.save(ignore_permissions=True)
-                    frappe.db.set_value(ASN, new_doc.name, "tag_status", "Approved")
-                    worker_filled=len(new_doc.employee_details)+worker_filled
+
+                    worker_filled = self.get_number_of_worker(new_doc)
                     if(self.resumes_required==0):
-                        dat=f'update `tabAssign Employee` set tag_status="Approved" where name="{new_doc.name}"'
-                        frappe.db.sql(dat)
-                        frappe.db.commit()
+                        frappe.db.set_value(ASN, new_doc.name, "tag_status", "Approved")
+                        worker_filled = len(new_doc.employee_details)+worker_filled
+
                     self.assign_doc(new_doc.name, ASN,comp)
                     self.auto_email(new_doc,comp)
                     self.emp_assignment(new_doc, comp)
-
-                self.check_claims(comp)
             frappe.db.set_value(ORD, self.name, "worker_filled", worker_filled)
+            frappe.db.commit()
             self.remaining_companies(self.staff_company,self.repeat_from,self.name,self.company,self.select_job)
 
     def check_employee_active(self, old_assign, new_doc):
@@ -109,6 +112,7 @@ class JobOrder(Document):
         email_temp = joborder_email_template(sub, msg, usrs, link)
         print(email_temp)
         chat_room_created(self.company, comp, self.name)
+
     def remaining_companies(self,staff_company,repeat_job_order_name,new_order,hiring_company,job_title):
         old_staff_companies=frappe.get_doc(ORD,repeat_job_order_name)
         staff_selected_companies=old_staff_companies.staff_org_claimed.split(',')
@@ -128,9 +132,7 @@ class JobOrder(Document):
         try:
             worker_required = 0
             if(new_doc.resume_required == 1):
-                for emp in new_doc.employee_details:
-                    if(emp.approved):
-                        worker_required += 1
+                worker_required = self.get_number_of_worker(new_doc)
             else:
                 worker_required = len(new_doc.employee_details)
 
@@ -150,6 +152,18 @@ class JobOrder(Document):
             sendmail(emails=usrs, message=msg, subject=sub, doctype=ASN, docname=new_doc.name)
         except Exception as e:
             frappe.msgprint(e)
+
+    def get_number_of_worker(self, new_doc):
+        try:
+            worker_required = 0
+            if(new_doc.resume_required == 1):
+                for emp in new_doc.employee_details:
+                    if(emp.approved):
+                        worker_required += 1
+            return worker_required
+        except Exception as e:
+            frappe.msgprint(e)
+            return 0
 
 @frappe.whitelist()
 def joborder_notification(organizaton,doc_name,company,job_title,posting_date,job_site=None):
