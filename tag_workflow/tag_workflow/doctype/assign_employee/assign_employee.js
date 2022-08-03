@@ -428,11 +428,8 @@ function worker_notification(frm){
 }
 
 function table_emp(frm,table,msg){
-	if(frm.doc.tag_status=='Approved'){
-		if(frm.doc.resume_required==0){
-			(table.length > Number(frm.doc.claims_approved)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more than No. Of Employees Approved(<b>'+frm.doc.claims_approved+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
-		}
-		(table.length > Number(frm.doc.no_of_employee_required)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more than No. Of Employees Required(<b>'+frm.doc.no_of_employee_required+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
+	if(frm.doc.tag_status=='Approved' && frm.doc.resume_required==0){
+		(table.length > Number(frm.doc.claims_approved)) ? msg.push('Employee Details(<b>'+table.length+'</b>) value is more than No. Of Employees Approved(<b>'+frm.doc.claims_approved+'</b>) for the Job Order(<b>'+frm.doc.job_order+'</b>)') : console.log("TAG");
 	}
 	else if(frm.doc.resume_required==0){
         (table.length > Number(frm.doc.claims_approved)) ? msg.push('Please Assign '+frm.doc.claims_approved+' Employee(s)') : console.log("TAG");
