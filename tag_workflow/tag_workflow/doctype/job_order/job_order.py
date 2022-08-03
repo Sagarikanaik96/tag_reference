@@ -269,7 +269,7 @@ def set_missing_values(source, target, customer=None, ignore_permissions=True):
     target.run_method("set_missing_values")
     target.run_method("calculate_taxes_and_totals")
 
-def make_sales_invoice(source_name, company, emp_sql,target_doc=None, ignore_permissions=True):
+def make_sales_invoice(source_name, company, emp_sql,invoice_exist,target_doc=None, ignore_permissions=True):
     def customer_doc(source_name):
         return frappe.get_doc("Customer", {"name": source_name})
 
@@ -281,7 +281,8 @@ def make_sales_invoice(source_name, company, emp_sql,target_doc=None, ignore_per
         for_company,for_company_city,for_company_state,for_company_zip = frappe.db.get_value("Company",hiring_org_name,["address","city","state","zip"])
         sql = """ select name,no_show,non_satisfactory,dnr from `tabTimesheet` where job_order_detail = '{0}' and docstatus = 1 and employee in ({1}) and is_check_in_sales_invoice = 0 """.format(source, emp_sql)
         timesheet = frappe.db.sql(sql, as_dict=1)
-
+        doclist.items=[]
+        doclist.timesheets=[]
         for time in timesheet:
             try:
                 add("Timesheet", time.name, user=frappe.session.user, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
@@ -324,14 +325,18 @@ def make_sales_invoice(source_name, company, emp_sql,target_doc=None, ignore_per
             payment: {"doctype": payment,"add_if_empty": True}
         }, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
     customer = customer_doc(company)
-    doclist = make_invoice(source_name, target_doc)
+    if(len(invoice_exist)):
+        doclist=frappe.get_doc('Sales Invoice',invoice_exist[0]['name'])
+    else:
+        doclist = make_invoice(source_name, target_doc)
     doclist.posting_date = frappe.utils.nowdate()
     doclist.due_date = frappe.utils.add_to_date(frappe.utils.nowdate(), days=30)
     update_timesheet(company, source_name, doclist,emp_sql)
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
     hiring_org_name = frappe.db.get_value(ORD,source_name,["company"])
     doclist.customer = hiring_org_name
-
+    if(len(invoice_exist)):
+        doclist.save()
     return doclist
 
 def update_time_timelogs(sheet,doclist,time):
@@ -374,7 +379,8 @@ def make_invoice(source_name, target_doc=None):
 
 def prepare_invoice(company, source_name,emp_sql):
     try:
-        return make_sales_invoice(source_name, company,emp_sql, target_doc=None)
+        invoice_exist=frappe.get_all('Sales Invoice',fields=['name'],filters={'job_order':source_name,'company':company,'status':'Draft' })
+        return make_sales_invoice(source_name, company,emp_sql,invoice_exist, target_doc=None)
     except Exception as e:
         frappe.msgprint(frappe.get_traceback())
         frappe.log_error(e, 'make_invoice')
