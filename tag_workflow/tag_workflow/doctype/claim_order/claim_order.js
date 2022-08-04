@@ -32,6 +32,10 @@ frappe.ui.form.on('Claim Order', {
 			frappe.msgprint(__("Claim no. of workers must be greater than 0"));
 			frappe.validated = false;
 		}
+		if (claim_no > frm.doc.no_of_remaining_employee) {
+			frappe.msgprint(__("Claims Is Not Greater Than No. of remaining employee"));
+			frappe.validated = false;
+		}
 	},
 	staff_claims_no: function (frm) {
 		let no_of_workers = frm.doc.staff_claims_no
