@@ -1363,8 +1363,18 @@ function approved_emp(){
 
 			let dialog = new frappe.ui.Dialog({
 				title: __('Assigned Employees'),
-				fields: [{fieldname: "staff_companies", fieldtype: "HTML", options: profile_html},]
+				fields: [{fieldname: "staff_companies", fieldtype: "HTML", options: profile_html},
+				{"fieldtype": "Button", "label": __("Go to Assign Employee Form"), "fieldname": "assign_new_emp"}
+			],
 			});
+			if($('[data-fieldname = assigned_employees_hiring]').attr('id')=='approved_inactive'){
+				dialog.fields_dict.assign_new_emp.$input[0].className="btn btn-xs btn-default d-flex m-auto";
+				dialog.fields_dict.assign_new_emp.input.onclick = function() {
+					frappe.db.get_value("Assign Employee", {'job_order': cur_frm.doc.name, 'company': cur_frm.doc.staff_org_claimed }, ["name","claims_approved"], function(rr) {
+						redirect_job(rr.name, cur_frm.doc.nam);
+						})
+				}
+			}
 			dialog.no_cancel();
 			dialog.$wrapper.on('hidden.bs.modal', function () {
 				$('[data-fieldname = assigned_employees_hiring]').attr('id', 'approved_inactive');
