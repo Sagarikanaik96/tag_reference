@@ -2260,12 +2260,12 @@ function staff_assign_button_claims(frm,r){
 	let assigned_empls= r.message[1].employee_details.length
 	if (r.message[0] == 'success1' || r.message=='success2') {
 		assign_emp_hide_button(frm);
-		if(frm.doc.no_of_workers-frm.doc.worker_filled!=0 && r.message!='success2' && claims_app> assigned_empls){
+		if(frm.doc.no_of_workers-frm.doc.worker_filled!=0 && r.message!='success2' && claims_app> assigned_empls  && frm.doc.order_status!='Completed'){
 			frm.add_custom_button(__('Assign Employee'), function(){
 				frappe.set_route("Form", "Assign Employee", r.message[1].name);
 			});
 		}
-		else if(frm.doc.no_of_workers-frm.doc.worker_filled>0 && r.message!='success2' && frm.doc.resumes_required == 0 && claims_app> assigned_empls){	
+		else if(frm.doc.no_of_workers-frm.doc.worker_filled>0 && r.message!='success2' && frm.doc.resumes_required == 0 && claims_app> assigned_empls && frm.doc.order_status!='Completed'){	
 			frm.add_custom_button(__('Assign Employee'), function(){
 				staff_assign_redirect(frm);
 			});
@@ -2279,7 +2279,7 @@ function staff_assign_button_claims(frm,r){
 function staff_assign_button_resume(frm,r){
 	if (r.message == 'success1' || r.message=='success2') {
 		assign_emp_hide_button(frm)
-		if(frm.doc.no_of_workers-frm.doc.worker_filled!=0 && r.message!='success2' ){
+		if(frm.doc.no_of_workers-frm.doc.worker_filled!=0 && r.message!='success2' && frm.doc.order_status!='Completed'){
 			frm.add_custom_button(__('Assign Employee'), function(){
 				assign_employees(frm);
 			});
