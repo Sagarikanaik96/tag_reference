@@ -299,21 +299,22 @@ function save_hide() {
 }
 
 function get_remaining_employee(name,frm) {
-	frappe.call({
-		method: 'tag_workflow.tag_workflow.doctype.claim_order.claim_order.remaining_emp',
-		args: {
-			'doc_name': name,
-		},
-		callback: function (r) {
-			let remaining_emp = 0;
-			for( let i in r.message){
-				remaining_emp += parseInt(r.message[i].approved_no_of_workers)
+	if(frm.doc.__islocal==1){
+		frappe.call({
+			method: 'tag_workflow.tag_workflow.doctype.claim_order.claim_order.remaining_emp',
+			args: {
+				'doc_name': name,
+			},
+			callback: function (r) {
+				let remaining_emp = 0;
+				for( let i in r.message){
+					remaining_emp += parseInt(r.message[i].approved_no_of_workers)
+				}
+				remaining_emp = r.message[0].no_of_workers_joborder - remaining_emp
+				frm.set_value('no_of_remaining_employee', remaining_emp)
 			}
-			remaining_emp = r.message[0].no_of_workers_joborder - remaining_emp
-			frm.set_value('no_of_remaining_employee', remaining_emp)
-			frm.set_value('no_of_workers_joborder', r.message[0].no_of_workers_joborder)
-		}
-	})
+		})
+	}
 
 }
 
