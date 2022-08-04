@@ -95,7 +95,7 @@ def welcome_email():
         if not last_login:
             env_url = frappe.get_site_config().env_url
             link = env_url + '/login'
-            sub = "Welcome to Temporary Assistance Guru!"
+            sub = "Welcome to TAG!"
             enqueue(method = frappe.sendmail, recipients = user, template = "welcome_email", subject = sub, args = { "subject": sub, "sitename": env_url, "link": link })
     except Exception as e:
         frappe.log_error(e, 'Welcome Email Error')
