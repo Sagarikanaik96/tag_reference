@@ -306,5 +306,6 @@ def emp_job_title():
             else:
                 job_title = categories[0]
             frappe.db.set_value(EMP, i.parent, 'job_categories', job_title)
+            frappe.db.set_value(EMP, i.parent, 'job_title_filter', i.category)
     except Exception as e:
         frappe.log_error(e, 'Update employee job title error')

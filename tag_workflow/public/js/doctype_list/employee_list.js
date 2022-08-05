@@ -82,6 +82,22 @@ frappe.listview_settings['Employee'] = {
 				frappe.set_route('List', 'Data Import');
 			});
 		}
+		let job_title_filter = {
+			condition: "like",
+			default: null,
+			fieldname: "job_title_filter",
+			fieldtype: "Autocomplete",
+			input_class: "input-xs",
+			label: "Job Title",
+			is_filter: 1,
+			onchange: function () {
+				listview.refresh();
+			},
+			options: get_job_titles(),
+			placeholder: "Job Title"
+		}
+		let standard_filters_wrapper = listview.page.page_form.find(".standard-filter-section");
+		listview.page.add_field(job_title_filter, standard_filters_wrapper)
 	}
 };
 
@@ -115,3 +131,17 @@ frappe.confirm = function(_message, confirm_action, reject_action) {
 
 	return d;
 };
+
+function get_job_titles(){
+	let text='';
+	frappe.call({
+		method: "tag_workflow.tag_data.job_title_list",
+		async:0,
+		callback: (r)=>{
+			if(r.message){
+				text += r.message;
+			}
+		}
+	});
+	return text;
+}

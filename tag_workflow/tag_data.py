@@ -1440,3 +1440,14 @@ def timesheet_company(hiring_company):
     except Exception as e:
         frappe.log_error(e, "Staffing Company Filter Error on Timesheet")
         print(e)
+
+@frappe.whitelist()
+def job_title_list():
+    try:
+        sql = '''SELECT name FROM `tabActivity Type` ORDER BY name'''
+        job_titles = frappe.db.sql(sql, as_dict=True)
+        data = [title['name'] for title in job_titles]
+        return '\n'.join(data)
+    except Exception as e:
+        frappe.log_error(e, "Staffing Company Filter Error on Timesheet")
+        print(e)

@@ -251,6 +251,7 @@ frappe.ui.form.on("Employee", {
 
 		}
 		remove_lat_lng(frm)
+		job_title_filter(frm);
 	},
 	setup:function(frm){
 		frm.set_query("company", function() {
@@ -806,4 +807,15 @@ function set_lat_lng_undefined(frm){
 	frm.set_value('street_address',undefined)
 	frm.set_value('lat',undefined)
 	frm.set_value('lng',undefined)
+}
+
+function job_title_filter(frm){
+	let job_categories = [];
+	if(frm.doc.employee_job_category){
+	    frm.doc.employee_job_category.forEach(function(row) {
+			job_categories.push(row.job_category)
+	    })
+	    frm.set_value("job_title_filter",job_categories.join(','));
+	    refresh_field("job_title_filter");
+	}
 }
