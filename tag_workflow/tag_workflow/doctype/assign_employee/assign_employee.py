@@ -189,8 +189,9 @@ def my_emp_work(emps,my_emp_data):
 
 @frappe.whitelist()
 def validate_employee(doc,method):
-	for employee in doc.employee_details:
-		employee_doc=frappe.get_doc('Employee',employee.employee)
-		if not employee_doc.has_permission("read"):
-			frappe.flags.error_message = _('Insufficient Permission for {0}').format(frappe.bold('Employee' + ' ' + employee.employee_name))
-			raise frappe.PermissionError(("read", "Employee", employee.employee_name))
+	job_order=frappe.get_doc('Job Order',doc.job_order)
+	if job_order.is_repeat!=1:
+		for employee in doc.employee_details:
+			employee_doc=frappe.get_doc('Employee',employee.employee)
+			if not employee_doc.has_permission("read"):
+				frappe.flags.error_message = _('Insufficient Permission for {0}').format(frappe.bold('Employee' + ' ' + employee.employee_name))
