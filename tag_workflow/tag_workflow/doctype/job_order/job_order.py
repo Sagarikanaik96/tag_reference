@@ -57,13 +57,16 @@ class JobOrder(Document):
                     new_doc.save(ignore_permissions=True)
 
                     worker_filled = self.get_number_of_worker(new_doc)
-                    if(self.resumes_required==0):
-                        frappe.db.set_value(ASN, new_doc.name, "tag_status", "Approved")
-                        worker_filled = len(new_doc.employee_details)+worker_filled
-
+                    
                     self.assign_doc(new_doc.name, ASN,comp)
                     self.auto_email(new_doc,comp)
                     self.emp_assignment(new_doc, comp)
+                    if(self.resumes_required==0):
+                        worker_filled = len(new_doc.employee_details)+worker_filled
+                        dat=f'update `tabAssign Employee` set tag_status="Approved" where name="{new_doc.name}"'
+                        frappe.db.sql(dat)
+                        frappe.db.commit()
+
             frappe.db.set_value(ORD, self.name, "worker_filled", worker_filled)
             frappe.db.commit()
             self.remaining_companies(self.staff_company,self.repeat_from,self.name,self.company,self.select_job)
@@ -83,11 +86,13 @@ class JobOrder(Document):
     def check_claims(self,comp):
         if(frappe.db.exists(CLM, {"job_order": self.repeat_from, "staffing_organization": comp})):
             frappe.db.set_value(ORD, self.name, "claim", ","+comp)
-            old_claim = frappe.get_doc(CLM, {"job_order": self.repeat_from, "staffing_organization": comp})
-            new_claim = frappe.copy_doc(old_claim)
-            new_claim.job_order = self.name
-            new_claim.save(ignore_permissions=True)
-            self.assign_doc(new_claim.name, CLM,comp)
+            old_claims = frappe.get_list(CLM, {"job_order": self.repeat_from, "staffing_organization": comp})
+            for i in old_claims:
+                old_claim= frappe.get_doc(CLM, i)
+                new_claim = frappe.copy_doc(old_claim)
+                new_claim.job_order = self.name
+                new_claim.save(ignore_permissions=True)
+                self.assign_doc(new_claim.name, CLM,comp)
 
     def assign_doc(self, name, doc_type,comp):
         stf_usr = frappe.db.get_list("Employee", {"company": comp, "user_id": ["not like", None]}, "user_id as name", ignore_permissions=1)
