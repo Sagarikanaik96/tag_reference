@@ -2,8 +2,8 @@ import frappe
 from frappe import _
 from frappe.desk.reportview import get_list, get_count, execute, get_form_params, validate_args, validate_fields, validate_filters, setup_group_by, raise_invalid_field, is_standard, extract_fieldname, get_meta_and_docfield, update_wildcard_field_param, clean_params, parse_json, get_parenttype_and_fieldname, compress, save_report, export_query, append_totals_row, get_labels, handle_duration_fieldtype_values, delete_items, delete_bulk, get_sidebar_stats, get_stats, get_filter_dashboard_data, scrub_user_tags, get_match_cond, build_match_conditions, get_filters_cond
 
-import frappe, json
-from six.moves import range
+import frappe
+import json
 import frappe.permissions
 from frappe.model.db_query import DatabaseQuery
 from frappe.model import default_fields, optional_fields
@@ -12,16 +12,19 @@ from frappe.core.doctype.access_log.access_log import make_access_log
 from frappe.utils import cstr, format_duration
 from frappe.model.base_document import get_controller
 import googlemaps
-import json, requests, time
+import json
+import requests
+import time
 from haversine import haversine, Unit
 from tag_workflow.tag_workflow.doctype.job_order.job_order import claims_left
 from tag_workflow.tag_workflow.doctype.job_order.job_order import my_used_job_orders
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
-GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
+GOOGLE_API_URL = f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
 distance_value = {"5": 5, "10": 10, "25": 25, "50": 50, "100": 100}
 distance = ['5', '10', '25', '50', '100']
 JOB = "Job Order"
+
 
 @frappe.whitelist()
 @frappe.read_only()
@@ -41,11 +44,13 @@ def get():
             controller = get_controller(args.doctype)
             data = compress(controller(args.doctype).get_list(args))
         else:
-            organization_type = frappe.db.get_value("User", frappe.session.user, "organization_type") or ''
+            organization_type = frappe.db.get_value(
+                "User", frappe.session.user, "organization_type") or ''
             if(args.doctype == JOB and organization_type == "Staffing"):
                 page_length = int(args['page_length']) + int(args['start'])
                 args['start'] = '0'
-                args['page_length'] = str(10*(int(args['page_length']) + int(args['page_length'])))
+                args['page_length'] = str(
+                    10*(int(args['page_length']) + int(args['page_length'])))
 
                 data = compress(execute(**args), args=args)
                 if(data):
@@ -64,12 +69,13 @@ def get():
 def staffing_data(data, radius, page_length):
     try:
         result = []
-        user_company = frappe.db.get_list("Employee", {"user_id": frappe.session.user}, "company")
+        user_company = frappe.db.get_list(
+            "Employee", {"user_id": frappe.session.user}, "company")
         if(radius in distance):
             data = get_data(user_company, radius, data, page_length)
         elif(radius != 'All'):
             for d in data['values']:
-                if(len(d)>3 and radius == d[-4]):
+                if(len(d) > 3 and radius == d[-4]):
                     result.append(d)
             data["values"] = result
         else:
@@ -81,6 +87,7 @@ def staffing_data(data, radius, page_length):
     except Exception as e:
         frappe.msgprint(e)
         return data
+
 
 def get_actual_number(data, based_list):
     old_data = data
@@ -96,6 +103,7 @@ def get_actual_number(data, based_list):
         print(e)
         return old_data
 
+
 def claim_left(data):
     try:
         data_list = data
@@ -107,6 +115,7 @@ def claim_left(data):
     except Exception as e:
         print(e)
         return data_list
+
 
 def compare_order(order_status):
     try:
@@ -123,7 +132,8 @@ def get_data(user_company, radius, data, page_length):
         company_address = []
         result = []
         for com in user_company:
-            add = " ".join(frappe.db.get_value("Company", com.company, ["IFNULL(suite_or_apartment_no, '')", "IFNULL(state, '')", "IFNULL(city, '')", "IFNULL(zip, '')"]))
+            add = " ".join(frappe.db.get_value("Company", com.company, [
+                           "IFNULL(suite_or_apartment_no, '')", "IFNULL(state, '')", "IFNULL(city, '')", "IFNULL(zip, '')"]))
             if(add and add not in company_address):
                 lat, lng = get_lat_lng(add)
                 lat_lng = tuple([lat, lng])
@@ -139,14 +149,17 @@ def get_data(user_company, radius, data, page_length):
     except Exception as e:
         frappe.msgprint(e)
 
+
 def check_distance(company_address, data, radius):
     try:
         result, orders = [], []
         for add in company_address:
             for d in data['values']:
                 try:
-                    lat, lng = frappe.db.get_value("Job Site", d[-4], ["IFNULL(lat, '')", "IFNULL(lng, '')"])
-                    rds = haversine(add, tuple([float(lat), float(lng)]), unit='mi')
+                    lat, lng = frappe.db.get_value(
+                        "Job Site", d[-4], ["IFNULL(lat, '')", "IFNULL(lng, '')"])
+                    rds = haversine(add, tuple(
+                        [float(lat), float(lng)]), unit='mi')
                     if(rds <= distance_value[radius] and d[0] not in orders):
                         result.append(d)
                         orders.append(d[0])
@@ -156,29 +169,67 @@ def check_distance(company_address, data, radius):
     except Exception as e:
         frappe.msgprint(e)
 
+
 @frappe.whitelist()
 def get_location(comp):
     try:
-        sql = '''select job_site,claim from `tabJob Order`'''
+        sql = '''select job_site,order_status,staff_org_claimed,name,claim from `tabJob Order`'''
         data = frappe.db.sql(sql)
-        job_site = set() 
+        job_site = set()
         for i in data:
-            if i[1] == None or i[1]=='TAG' or i[1]==comp:
-                job_site.add(i[0])
+            check_company_status(comp, job_site, i)
         return job_site
     except Exception as e:
         print(e)
         return []
 
 
+def check_company_status(comp, job_site, i):
+    if ((i[1] in ["Completed", "Ongoing"]) and (i[2] == None and ((i[4] != None) and (comp in i[4].split(",")))) or (i[2] != None and (comp in i[2].split(",")))):
+        job_site.add(i[0])
+    elif i[1] == "Upcoming":
+        if (i[2] is None) or (comp in i[2].split(",")):
+            job_site.add(i[0])
+        else:
+            if check_staffing(i[3]):
+                job_site.add(i[0])
+    elif i[1] == "Availabe":
+        job_site.add(i[0])
+
+
+def employee_email_filter(email):
+    sql = """SELECT company from `tabEmployee` where user_id="{}" """.format(
+        email)
+    data = frappe.db.sql(sql, as_dict=True)
+    for i in data:
+        return i["company"]
+
+
+def check_staffing(doc_name):
+    try:
+        datas = ''' select no_of_workers_joborder,approved_no_of_workers,job_order from `tabClaim Order` where job_order = "{}"  '''.format(
+            doc_name)
+        data_list = frappe.db.sql(datas)
+        approved_no_of_workers = []
+        for j in data_list:
+            approved_no_of_workers.append(j[1])
+        if (data_list[0][0]-sum(approved_no_of_workers)) > 0:
+            return True
+        return False
+
+    except Exception as e:
+        print(e, frappe.get_traceback())
+        frappe.db.rollback()
 #-------------------------------#
+
+
 def get_lat_lng(address):
     try:
         lat, lng = 0, 0
         google_location_data_url = GOOGLE_API_URL + address
         google_response = requests.get(google_location_data_url)
         location_data = google_response.json()
-        if(google_response.status_code == 200 and len(location_data)>0 and len(location_data['results'])>0):
+        if(google_response.status_code == 200 and len(location_data) > 0 and len(location_data['results']) > 0):
             location = location_data['results'][0]['geometry']['location']
             lat = location['lat']
             lng = location['lng']
