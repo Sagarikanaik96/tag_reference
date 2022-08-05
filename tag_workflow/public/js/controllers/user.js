@@ -149,7 +149,14 @@ frappe.ui.form.on("User", {
 		check_bd(frm);
 	},
 	enabled: function(frm){
+		field_toggle()
 		multi_company_setup(frm);
+		terminated_option()
+	},
+	terminated: function(){
+		if(cur_frm.doc.terminated==1){
+			cur_frm.set_value('enabled',0)
+		}
 	},
 	onload:function(){
 		if(frappe.session.user!='Administrator'){
@@ -433,5 +440,11 @@ function field_toggle(){
 	let perm_dis_fields = ["sb1","sb3"];
 	for(let field in perm_dis_fields){
 		cur_frm.toggle_display(perm_dis_fields[field], 0);
+	}
+}
+
+function terminated_option(){
+	if(cur_frm.doc.enabled==1){
+		cur_frm.set_value('terminated',0)
 	}
 }
