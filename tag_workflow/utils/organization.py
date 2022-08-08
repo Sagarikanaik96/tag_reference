@@ -52,6 +52,7 @@ def setup_data():
         update_role_profile()
         update_module_profile()
         update_permissions()
+        update_old_data_import()
         update_old_direct_order()
         set_workspace()
         setup_company_permission()
@@ -309,3 +310,17 @@ def emp_job_title():
             frappe.db.set_value(EMP, i.parent, 'job_title_filter', i.category)
     except Exception as e:
         frappe.log_error(e, 'Update employee job title error')
+
+        
+
+#------Update Old Data Import-------
+def update_old_data_import():
+    try:
+        data_imp=frappe.get_all('Data Import',fields=['name','user_company'],filters={'owner':'Administrator','reference_doctype':'Employee','user_company':['is','not set']})
+        tag_comp=frappe.get_all('User',fields=['company'],filters={"organization_type": 'TAG'})
+        if(len(data_imp)>0 and len(tag_comp)>0):
+            for i in data_imp:
+                sql = """ UPDATE `tabData Import` SET user_company = "{0}" where name = "{1}" """.format(tag_comp[0].company,i.name )
+                frappe.db.sql(sql)
+    except Exception as e:
+        frappe.log_error(e, 'Update OLd Data Import')

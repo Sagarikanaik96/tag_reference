@@ -1,7 +1,14 @@
 frappe.ui.form.on("Data Import", {
     before_save: function(frm){
         if(frm.doc.__islocal==1){
-            cur_frm.set_value('user_company',frappe.boot.tag.tag_user_info.company)
+            if(frappe.session.user!='Administrator'){
+                cur_frm.set_value('user_company',frappe.boot.tag.tag_user_info.company)
+            }
+            else{
+                frappe.db.get_value("User", {organization_type: 'TAG'}, ["company"], function (res) {
+                    frm.set_value("user_company", res["company"])
+                })
+            }
         }
     },
     refresh: function(frm){
