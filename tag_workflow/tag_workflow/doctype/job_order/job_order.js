@@ -282,6 +282,12 @@ frappe.ui.form.on("Job Order", {
 				});
 			}
 		}
+		else{
+			if (frappe.validated) {
+				frm.set_df_property('select_days','reqd',0)
+			}
+
+		}
 	},
 
 	after_save: function(frm) {
@@ -436,6 +442,7 @@ frappe.ui.form.on("Job Order", {
 			cur_frm.set_value("select_days", "");
 			cur_frm.set_value("selected_days", undefined)
 			cur_frm.set_df_property('select_days','reqd',1)
+			cur_frm.set_df_property('select_days','read_only',0)
 		}
 	},
 
@@ -839,6 +846,7 @@ function job_order_duration(frm){
 			cur_frm.set_value('job_order_duration', days + ' Days');
 			frm.set_value('availability','')
 			frm.set_df_property('availability','hidden',0)
+			frm.set_df_property('availability','read_only',0)
 			frm.set_df_property('availability','reqd',1)
 
 
