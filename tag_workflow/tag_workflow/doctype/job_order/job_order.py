@@ -284,7 +284,7 @@ def make_sales_invoice(source_name, company, emp_sql,invoice_exist,target_doc=No
         total_hours = 0
         hiring_org_name,job_title= frappe.db.get_value(ORD,source,["company","select_job"])
         for_company,for_company_city,for_company_state,for_company_zip = frappe.db.get_value("Company",hiring_org_name,["address","city","state","zip"])
-        sql = """ select name,no_show,non_satisfactory,dnr from `tabTimesheet` where job_order_detail = '{0}' and docstatus = 1 and employee in ({1}) and is_check_in_sales_invoice = 0 """.format(source, emp_sql)
+        sql = """ select name,no_show,non_satisfactory,dnr from `tabTimesheet` where job_order_detail = '{0}' and docstatus = 1 and employee in ({1}) and is_check_in_sales_invoice = 0 order by creation asc """.format(source, emp_sql)
         timesheet = frappe.db.sql(sql, as_dict=1)
         doclist.items=[]
         doclist.timesheets=[]
@@ -340,9 +340,56 @@ def make_sales_invoice(source_name, company, emp_sql,invoice_exist,target_doc=No
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
     hiring_org_name = frappe.db.get_value(ORD,source_name,["company"])
     doclist.customer = hiring_org_name
+    doclist = merge_employee_data(doclist)
     if(len(invoice_exist)):
         doclist.save()
     return doclist
+
+
+#--------------------merge------------------#
+def merge_employee_data(doclist):
+    try:
+        items = []
+        if(doclist.timesheets):
+            employees, dates = get_timesheet_employees(doclist.timesheets)
+            dates.sort()
+            for e in employees:
+                bill_amount, bill_hours, overtime_rate, overtime_hours, per_hr_rate, flat_rate = 0, 0 ,0, 0, 0, 0
+                timesheet, employee_name, activity_type = "", "", ""
+                for item in doclist.timesheets:
+                    if(e == item.description):
+                        bill_amount += item.billing_amount
+                        bill_hours += item.billing_hours
+                        overtime_hours += item.overtime_hours
+                        overtime_rate = item.overtime_rate
+                        per_hr_rate = item.per_hour_rate1
+                        flat_rate = item.flat_rate
+                        timesheet = item.time_sheet
+                        employee_name = item.employee_name
+                        activity_type = item.activity_type
+                items.append({"activity_type": activity_type, "billing_amount": bill_amount, "billing_hours": bill_hours, "time_sheet": timesheet, "from_time": dates[0], "to_time": dates[-1], "description": e, "employee_name": employee_name, 'status': "-", "overtime_rate": overtime_rate, "overtime_hours": overtime_hours,"per_hour_rate1": per_hr_rate,'flat_rate': flat_rate})
+
+        if(items):
+            doclist.timesheets = []
+            for i in items:
+                doclist.append("timesheets", i)
+        return doclist
+    except Exception as e:
+        frappe.msgprint(e)
+
+def get_timesheet_employees(items):
+    try:
+        employees, dates = [], []
+        for i in items:
+            if(i.description not in employees):
+                employees.append(i.description)
+
+            if(i.from_time and i.to_time):
+                dates.append(i.from_time)
+                dates.append(i.to_time)
+        return employees, dates
+    except Exception as e:
+        frappe.msgprint(e)
 
 def update_time_timelogs(sheet,doclist,time):
     for logs in sheet.time_logs:
