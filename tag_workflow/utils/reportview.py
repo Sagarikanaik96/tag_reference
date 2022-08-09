@@ -170,31 +170,54 @@ def check_distance(company_address, data, radius):
         frappe.msgprint(e)
 
 
+def get_loc(data):
+    doc_args = set()
+    for j in data:
+        doc_args.add(j[-1])
+    doc_args =  sorted(doc_args)
+    return doc_args
+
+
 @frappe.whitelist()
-def get_location(comp):
+def get_location():
     try:
-        sql = '''select job_site,order_status,staff_org_claimed,name,claim from `tabJob Order`'''
-        data = frappe.db.sql(sql)
-        job_site = set()
-        for i in data:
-            check_company_status(comp, job_site, i)
-        return job_site
-    except Exception as e:
-        print(e)
-        return []
+        args = {
+            'doctype': 'Job Order',
+            'fields': [
+                '`tabJob Order`.`name`',
+                '`tabJob Order`.`job_site`',
+            ],
+            'filters': [],
+            'order_by': '`tabJob Order`.`modified` desc',
+            'group_by': '`tabJob Order`.`name`',
+            'order_status': 'All',
+            'save_user_settings': True,
+            'strict': None
+        }
+        order_status = args.get('order_status') or ''
+        if 'order_status' in args.keys():
+            del args['order_status']
 
-
-def check_company_status(comp, job_site, i):
-    if ((i[1] in ["Completed", "Ongoing"]) and (i[2] == None and ((i[4] != None) and (comp in i[4].split(",")))) or (i[2] != None and (comp in i[2].split(",")))):
-        job_site.add(i[0])
-    elif i[1] == "Upcoming":
-        if (i[2] is None) or (comp in i[2].split(",")):
-            job_site.add(i[0])
+        if frappe.db.get_value("DocType", filters={"name": args.get('doctype')}, fieldname="is_virtual"):
+            controller = get_controller(args.get('doctype'))
+            data = compress(controller(args.get('doctype')).get_list(args))
         else:
-            if check_staffing(i[3]):
-                job_site.add(i[0])
-    elif i[1] == "Availabe":
-        job_site.add(i[0])
+            organization_type = frappe.db.get_value(
+                "User", frappe.session.user, "organization_type") or ''
+            if(args.get('doctype') == JOB and organization_type == "Staffing"):
+                data = compress(execute(**args), args=args)
+                if(data):
+                    data['order_length'] = 0
+                    based_list = compare_order(order_status)
+                    data = get_actual_number(data, based_list)
+                    print(data)
+                    data = get_loc(data['values'])
+            else:
+                data = []
+        return data
+    except Exception as e:
+        frappe.msgprint(e)
+        return []
 
 
 def employee_email_filter(email):
