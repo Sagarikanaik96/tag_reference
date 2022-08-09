@@ -25,15 +25,15 @@ frappe.ui.form.on('Claim Order', {
 		let no_of_worker = frm.doc.no_of_workers_joborder
 		let claim_no = frm.doc.staff_claims_no
 		if (claim_no > no_of_worker) {
-			frappe.msgprint(__("Claims Is Not Greater Than No Of Workers Required"));
+			frappe.msgprint(__("Claims should not be greater than no. of workers required"));
 			frappe.validated = false;
 		}
 		else if (claim_no != undefined && claim_no != null && claim_no < 1) {
 			frappe.msgprint(__("Claim no. of workers must be greater than 0"));
 			frappe.validated = false;
 		}
-		if (claim_no > frm.doc.no_of_remaining_employee) {
-			frappe.msgprint(__("Claims Is Not Greater Than No. of remaining employee"));
+		else if (claim_no > frm.doc.no_of_remaining_employee) {
+			frappe.msgprint(__("Claims should not be greater than no. of remaining employee"));
 			frappe.validated = false;
 		}
 	},
@@ -98,11 +98,9 @@ frappe.ui.form.on('Claim Order', {
 			companyhide(300)
 		});
 		setTimeout(hr, 1000);
-
 		frm.set_df_property('agree_to_contract', 'label', 'Agree To Contract <span style="color: red;">&#42;</span>');
 		frm.set_df_property('staff_claims_no', 'label', 'No. of Employees to Claim <span style="color: red;">&#42;</span>');
-		frm.set_value('no_of_remaining_employee', 0)
-		get_remaining_employee(frm.doc.job_order,frm)
+		get_remaining_employee(frm.doc.job_order,frm,frm.doc.no_of_workers_joborder)
 		frm.set_df_property('no_of_remaining_employee', 'read_only', 1)
 
 	},
@@ -302,7 +300,7 @@ function save_hide() {
 	$('[data-label="View"]').hide();
 }
 
-function get_remaining_employee(name,frm) {
+function get_remaining_employee(name,frm,joborder) {
 	if(frm.doc.__islocal==1){
 		frappe.call({
 			method: 'tag_workflow.tag_workflow.doctype.claim_order.claim_order.remaining_emp',
@@ -310,12 +308,18 @@ function get_remaining_employee(name,frm) {
 				'doc_name': name,
 			},
 			callback: function (r) {
-				let remaining_emp = 0;
-				for( let i in r.message){
-					remaining_emp += parseInt(r.message[i].approved_no_of_workers)
+				if(r.message.length != 0){
+					let total = r.message[0].no_of_workers_joborder
+					frm.set_value('no_of_workers_joborder', total)
+					let remaining_emp = 0;
+					for(let i in r.message){
+						remaining_emp += parseInt(r.message[i].approved_no_of_workers)
+					}
+					remaining_emp = total - remaining_emp
+					frm.set_value('no_of_remaining_employee', remaining_emp)
+				}else{
+					frm.set_value('no_of_remaining_employee', joborder)
 				}
-				remaining_emp = r.message[0].no_of_workers_joborder - remaining_emp
-				frm.set_value('no_of_remaining_employee', remaining_emp)
 			}
 		})
 	}
