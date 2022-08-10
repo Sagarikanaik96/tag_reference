@@ -546,7 +546,13 @@ def email_recipient(doctype, txt, searchfield, page_len, start, filters):
  
 def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l,staff_company):
     try:
-        msg=f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond.'
+        is_repeat, no_of_workers, worker_filled = frappe.db.get_value(jobOrder, {"name": job_order}, ["is_repeat", "no_of_workers", "worker_filled"])
+        if(is_repeat):
+            emp_reqd = no_of_workers - worker_filled
+            msg = f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}.{emp_reqd} employees require replacing. Please assign additional employees.'
+        else:
+            msg=f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond.'
+
         enqueue(make_system_notification,users=l,message=msg,doctype=jobOrder,docname=job_order,subject=subject, now= True)   
         message=f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond. <br> <br><a href="/app/job-order/{job_order}">View Work Order</a>'
         link = f' href="{sitename}/app/job-order/{job_order}"'
