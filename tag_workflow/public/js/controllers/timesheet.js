@@ -9,6 +9,7 @@ frappe.ui.form.on("Timesheet", {
 		$('.custom-actions.hidden-xs.hidden-md').show();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		add_button_submit(frm);
+		fields_label_update(frm)
 		$(document).on('click', '[data-fieldname="from_time"]', function(){
 			$('.datepicker').show()
 		});
@@ -158,13 +159,14 @@ frappe.ui.form.on("Timesheet", {
 
 function job_order_details(frm){
 	if(frm.doc.job_order_detail){
-		frappe.db.get_value("Job Order", {"name": frm.doc.job_order_detail}, ["select_job", "job_site", "job_order_duration", "per_hour","from_date","to_date","per_hour","flat_rate"], function(r){
+		frappe.db.get_value("Job Order", {"name": frm.doc.job_order_detail}, ["select_job", "job_site", "job_order_duration", "per_hour","from_date","to_date","per_hour","flat_rate","order_status"], function(r){
 			if(r){
 				let data = `<div style="display: flex;flex-direction: column;min-height: 1px;padding: 19px;border-radius: var(--border-radius-md);height: 100%;box-shadow: var(--card-shadow);background-color: var(--card-bg);">
 					<p><b>Job Title: </b> ${r['select_job']}</p>
 					<p><b>Job Site: </b> ${r['job_site']}</p>
 					<p><b>Job Duration: </b> ${r['job_order_duration']}</p>
 					<p><b>Rate Per Hour: </b> ${r['per_hour']}</p>
+					<p><b>Work Order Status: </b> ${r['order_status']}</p>
 				</div>`;
 				frm.set_df_property("job_details", "options", data);
 				if(cur_frm.doc.__islocal == 1){
@@ -596,3 +598,15 @@ function public_profile(){
 		});
 	}
 }
+
+ 
+function fields_label_update(frm){
+	if(frm.doc.__islocal!=1){
+		let usd="(USD)"
+		frm.set_df_property("timesheet_billable_amount",'label',"Timesheet Billable Amount "+usd)
+		frm.set_df_property("total_job_order_amount",'label',"Total Job Order Amount "+usd)
+		frm.set_df_property("timesheet_billable_overtime_amount",'label',"Timesheet Billable Overtime Amount "+usd)
+		frm.set_df_property("total_job_order_billable_overtime_amount_",'label',"Total Job Order Billable Overtime Amount  "+usd)
+	}
+ }
+ 

@@ -191,7 +191,7 @@ def update_cost(self):
                 bill_rate, cost_rate = get_bill_cost(rate, data)
                 data.billing_rate = bill_rate
                 data.costing_rate = cost_rate
-                data.billing_amount = ((data.billing_rate * (hours-data.extra_hours))+data.flat_rate)+(data.extra_hours*data.extra_rate)
+                data.billing_amount = self.timesheet_billable_amount
                 data.costing_amount = data.costing_rate * costing_hours
                 data.base_billing_amount = data.billing_amount
             else:
