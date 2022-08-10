@@ -954,6 +954,14 @@ input.input-with-feedback.form-control,
 [data-page-route="Item"] input#id_mvr_hour {
   padding-left: 20px;
 }
+[data-route="staff_company_list"] table tbody tr td use.like-icon,
+[data-route="List/Job Order/List"] .liked use.like-icon {
+  stroke: #e24c4c;
+}
+[data-route="staff_company_list"] table thead tr th .icon,
+[data-route="List/Job Order/List"] .result header use.like-icon {
+  display: none;
+}
 
 [data-route="query-report/TAG Earnings"]
   select.input-with-feedback.form-control.ellipsis,
