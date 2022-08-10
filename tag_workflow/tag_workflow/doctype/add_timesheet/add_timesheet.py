@@ -1,6 +1,7 @@
 # Copyright (c) 2022, SourceFuse and contributors
 # For license information, please see license.txt
 
+import datetime
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -87,6 +88,7 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
 
         job = frappe.get_doc("Job Order", {"name": job_order})
         posting_date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+    
         if(posting_date >= job.from_date and posting_date <= job.to_date):
             from_time, to_time = get_datetime(date, from_time, to_time)
             for item in items:
@@ -94,7 +96,14 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
                 child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, item['from_time'], item['to_time'], item['break_from'], item['break_to'])
                 is_ok = check_old_timesheet(child_from, child_to, item['employee'])
                 if(is_ok == 0):
-                    timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=job.company, job_order_detail=job_order, employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate, status_of_work_order=job.order_status, date_of_timesheet=date))
+                    week_job_hours, week_all_hours, all_job_hours, week_hiring_hours = timesheet_biiling_hours(jo=job_order, timesheet_date=posting_date, employee=item['employee'], user= frappe.session.user)
+                    cur_timesheet_hours=item['hours']
+                    w1= all_week_jo(employee=item['employee'], jo=job_order)
+    
+                    w1, overtime_hours, overtime_all_hours, overtime_hiring_hours, hiring_timesheet_oh= sub_update_timesheet(week_job_hours, w1, cur_timesheet_hours, week_all_hours,week_hiring_hours)
+
+                    timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=job.company, job_order_detail=job_order, employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate, status_of_work_order=job.order_status, date_of_timesheet=date, timesheet_hours=cur_timesheet_hours,total_weekly_hours= week_all_hours+cur_timesheet_hours, current_job_order_hours=all_job_hours+cur_timesheet_hours, overtime_timesheet_hours= overtime_hours, total_weekly_overtime_hours= overtime_all_hours, cuurent_job_order_overtime_hours= w1, total_weekly_hiring_hours= week_hiring_hours + cur_timesheet_hours, total_weekly_overtime_hiring_hours= overtime_hiring_hours, overtime_timesheet_hours1= hiring_timesheet_oh, billable_weekly_overtime_hours= overtime_hiring_hours, unbillable_weekly_overtime_hours= overtime_all_hours- overtime_hiring_hours ))
+                
                     flat_rate = job.flat_rate + tip_amount
                     timesheet.append("time_logs", {
                         "activity_type": job.select_job, "from_time": child_from, "to_time": child_to, "hrs": str(item['hours'])+" hrs",
@@ -232,3 +241,106 @@ def check_tip(item):
         tip_amount=0
     return tip_amount
 
+def timesheet_biiling_hours(jo, timesheet_date, employee, user):
+    last_sat= check_day(timesheet_date)
+   
+    sql1= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and date_of_timesheet between '{last_sat}' and '{timesheet_date}' and job_order_detail='{jo}' "
+    data1= frappe.db.sql(sql1, as_dict=1)
+
+    sql2= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and date_of_timesheet between '{last_sat}' and '{timesheet_date}' "
+    data2= frappe.db.sql(sql2, as_dict=1)
+
+    sql3= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and job_order_detail='{jo}'"
+    data3= frappe.db.sql(sql3, as_dict=1)
+
+    sql4= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and date_of_timesheet between '{last_sat}' and '{timesheet_date}' and company in (select company from `tabEmployee` where email= '{user}') "
+    data4= frappe.db.sql(sql4, as_dict=1)
+
+    week_job_hours= data1[0]['total_hours'] or 0
+    week_all_hours= data2[0]['total_hours'] or 0
+    all_job_hours= data3[0]['total_hours'] or 0
+    week_hiring_hours= data4[0]['total_hours'] or 0    
+
+    return week_job_hours, week_all_hours, all_job_hours, week_hiring_hours
+
+def all_week_jo(employee, jo):
+    sql= f" select min(date_of_timesheet) as min_date, max(date_of_timesheet) as max_date from `tabTimesheet` where employee='{employee}' and job_order_detail='{jo}'"
+    data= frappe.db.sql(sql, as_dict=1)
+    d1= data[0]['min_date']
+    d2= data[0]['max_date']
+    if d1 and d2:
+        last_saturday= check_day(d2)
+
+        week_oh= 0
+        last_sql= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and date_of_timesheet between '{last_saturday}' and '{d2}' and job_order_detail='{jo}' "
+        last_data= frappe.db.sql(last_sql, as_dict=1)
+
+        if last_data[0]['total_hours']> 40:
+            week_oh+= last_data[0]['total_hours']- 40
+
+
+        week_oh= sub_all_week_jo(week_oh, d1, d2, employee, jo)
+        return week_oh
+
+
+
+def sub_update_timesheet(week_job_hours, w1, cur_timesheet_hours, week_all_hours,week_hiring_hours ):
+    if week_job_hours>=40:
+        w1+= cur_timesheet_hours
+    elif week_job_hours+ cur_timesheet_hours >40:
+        w1+= week_job_hours+ cur_timesheet_hours -40
+
+    overtime_hours=0
+    overtime_all_hours=0
+    overtime_hiring_hours=0
+    hiring_timesheet_oh=0
+
+    if week_all_hours>= 40:
+        overtime_hours= cur_timesheet_hours
+        overtime_all_hours= week_all_hours+ cur_timesheet_hours-40.00
+        
+    elif week_all_hours + cur_timesheet_hours>40.00:
+        overtime_hours= week_all_hours + cur_timesheet_hours-40.00
+        overtime_all_hours= week_all_hours+ cur_timesheet_hours-40.00
+    
+    if week_hiring_hours>=40:
+        hiring_timesheet_oh+= cur_timesheet_hours
+        overtime_hiring_hours= week_hiring_hours+ cur_timesheet_hours-40.00
+
+    elif week_hiring_hours+ cur_timesheet_hours> 40:
+        hiring_timesheet_oh+= week_hiring_hours+ cur_timesheet_hours- 40
+        overtime_hiring_hours= week_hiring_hours+ cur_timesheet_hours-40.00
+
+    return w1, overtime_hours, overtime_all_hours, overtime_hiring_hours, hiring_timesheet_oh
+                        
+def check_day(timesheet_date):
+    day_name= timesheet_date.strftime("%A")
+    if day_name != "Saturday" and day_name !='Sunday':
+        last_sat = timesheet_date - datetime.timedelta(days=timesheet_date.weekday()+2)
+    elif day_name =='Sunday':
+        last_sat = timesheet_date - datetime.timedelta(days=timesheet_date.weekday()-5)
+    else:
+        last_sat= timesheet_date
+    
+    return last_sat
+
+def sub_all_week_jo(week_oh, d1, d2, employee, jo):
+    dates=[]
+
+    for d_ord in range(d1.toordinal(), d2.toordinal()+1):
+        d = datetime.date.fromordinal(d_ord)
+        if (d.weekday() == 4):
+            dates.append(d)
+
+    if len(dates)>0:
+        for i in dates:
+            last_sat = i - datetime.timedelta(days=i.weekday()+2)
+
+            week_sql= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and date_of_timesheet between '{last_sat}' and '{i}' and job_order_detail='{jo}'"
+            week_data= frappe.db.sql(week_sql, as_dict=1)
+
+            if week_data[0]['total_hours']> 40:
+                oh= week_data[0]['total_hours']-40
+                week_oh += oh
+
+        return week_oh
