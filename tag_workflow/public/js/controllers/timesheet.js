@@ -152,6 +152,10 @@ frappe.ui.form.on("Timesheet", {
 
 	dnr: function(frm){
 		trigger_email(frm, "dnr", frm.doc.dnr, "DNR");
+	},
+
+	before_load: (frm)=>{
+		hide_pay_rate(frm);
 	}
 
 });
@@ -561,12 +565,6 @@ function update_time(frm, cdt, cdn){
 	}, 10);
 }
 
-
-var calculate_end_time = function(_frm, cdt, cdn) {
-        let child = locals[cdt][cdn];
-		console.log("Calculate End Time", child.name);
-};
-
 function add_button_submit(frm){
 	if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.workflow_state=='Open'){
 		frm.add_custom_button(__('Submit Timesheet'), function() {
@@ -610,3 +608,11 @@ function fields_label_update(frm){
 	}
  }
  
+
+function hide_pay_rate(frm){
+	if(['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type) && frm.doc.time_logs){
+		let pay_amount = frappe.meta.get_docfield("Timesheet Detail", "pay_amount",frm.doc.name);
+        pay_amount.hidden = 1;
+		frm.refresh_fields();
+	}
+}
