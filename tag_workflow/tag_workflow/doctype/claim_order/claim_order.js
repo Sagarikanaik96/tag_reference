@@ -1,14 +1,14 @@
 // Copyright (c) 2022, SourceFuse and contributors
 // For license information, please see license.txt
 
-
-
+window.conf = 0
 frappe.ui.form.on('Claim Order', {
 	after_save: function (frm) {
 		staffing_claim_joborder(frm)
 		if (frm.doc.single_share == 1) {
 			claim_order_save(frm)
 		}
+		create_pay_rate(frm);
 	},
 	before_save: function (frm) {
 		if (!frm.doc.hiring_organization) {
@@ -36,6 +36,9 @@ frappe.ui.form.on('Claim Order', {
 			frappe.msgprint(__("Claims should not be greater than no. of remaining employee"));
 			frappe.validated = false;
 		}
+		if(window.conf==0 && frappe.validated && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+			check_pay_rate(frm);
+		}
 	},
 	staff_claims_no: function (frm) {
 		let no_of_workers = frm.doc.staff_claims_no
@@ -58,7 +61,6 @@ frappe.ui.form.on('Claim Order', {
 	},
 	refresh: function (frm) {
 		setTimeout(save_hide, 1200);
-		setTimeout(submit_hide, 1000);
 		$('.form-footer').hide();
 		if (frm.doc.__islocal == 1) {
 			if (!frm.doc.hiring_organization) {
@@ -70,7 +72,6 @@ frappe.ui.form.on('Claim Order', {
 			}
 			frm.set_df_property('approved_no_of_workers', "hidden", 1);
 			cancel_claimorder(frm);
-			submit_claim(frm);
 			if (frappe.boot.tag.tag_user_info.company_type == 'Staffing') {
 				setTimeout(() => { org_info(frm); }, 500)
 			}
@@ -102,9 +103,11 @@ frappe.ui.form.on('Claim Order', {
 		frm.set_df_property('staff_claims_no', 'label', 'No. of Employees to Claim <span style="color: red;">&#42;</span>');
 		get_remaining_employee(frm.doc.job_order,frm,frm.doc.no_of_workers_joborder)
 		frm.set_df_property('no_of_remaining_employee', 'read_only', 1)
+		set_payrate_field(frm);
 		if (frappe.boot.tag.tag_user_info.company_type == "Staffing"){
 			frm.set_df_property('notes', 'read_only', 1);
 		}
+
 
 	},
 	setup: function (frm) {
@@ -158,6 +161,11 @@ frappe.ui.form.on('Claim Order', {
 			contract.show();
 		}
 	},
+	staffing_organization: function(frm){
+		if(frm.doc.staffing_organization){
+			set_pay_rate(frm);
+		}
+	}
 });
 
 function submit_claim(frm) {
@@ -167,6 +175,20 @@ function submit_claim(frm) {
 }
 
 function staffing_claim_joborder(frm) {
+	frappe.call({
+		method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.payrate_change",
+		args: {
+			"docname": frm.doc.name
+		},
+		callback: function(r){
+			if(r.message == 'success'){
+				staffing_claim_joborder_contd(frm);
+			}
+		}
+	})
+}
+
+function staffing_claim_joborder_contd(frm) {
 	frappe.call({
 		"method": "tag_workflow.tag_workflow.doctype.claim_order.claim_order.staffing_claim_joborder",
 		async: 0,
@@ -251,7 +273,7 @@ function claim_order_save(frm) {
 			setTimeout(function () {
 				window.location.href = '/app/job-order/' + frm.doc.job_order
 			}, 3000);
-			frappe.msgprint('Notification send successfully')
+			frappe.msgprint('Notification sent successfully')
 		}
 	});
 
@@ -259,12 +281,18 @@ function claim_order_save(frm) {
 
 function update_claim_by_staffing(frm) {
 	if (cur_frm.doc.__islocal != 1) {
-		frappe.db.get_value('User', { 'name': frm.doc.modified_by }, ['organization_type'], function (r) {
-			if (r.organization_type != 'Staffing' || r == null) {
-				frm.set_df_property('staff_claims_no', 'read_only', 1)
-			}
-			else {
-				submit_claim(frm)
+		frappe.call({
+			method: 'tag_workflow.tag_workflow.doctype.claim_order.claim_order.claim_field_readonly',
+			args:{
+				'docname': frm.doc.name
+			},
+			callback: (r) => {
+				if(r.message == 'headcount_selected' || (frm.doc.single_share == 1 && frm.doc.approved_no_of_workers > 0)){
+					frm.set_df_property('staff_claims_no', 'read_only', 1);
+				}
+				else {
+					submit_claim(frm);
+				}
 			}
 		})
 	}
@@ -280,13 +308,6 @@ function companyhide(time) {
 
 
 	}, time)
-}
-
-
-function submit_hide() {
-	if (cur_frm.doc.single_share == 1 && cur_frm.doc.__islocal != 1) {
-		$('.btn-primary').hide();
-	}
 }
 
 function hr() {
@@ -330,7 +351,7 @@ function get_remaining_employee(name,frm,joborder) {
 }
 
 function mandatory_fn(frm) {
-	let l = { "Job Order": frm.doc.job_order, "Staffing Organization": frm.doc.staffing_organization, "E Signature": frm.doc.e_signature, "Agree To Contract": cur_frm.doc.agree_to_contract, "No. of Employees to Claim": cur_frm.doc.staff_claims_no };
+	let l = { "Job Order": frm.doc.job_order, "Staffing Organization": frm.doc.staffing_organization, "E Signature": frm.doc.e_signature, "Agree To Contract": cur_frm.doc.agree_to_contract, "No. of Employees to Claim": cur_frm.doc.staff_claims_no, "Employee Pay Rate": frm.doc.employee_pay_rate};
 
 	let message = "<b>Please Fill Mandatory Fields:</b>";
 	for (let k in l) {
@@ -351,4 +372,85 @@ function mandatory_fn(frm) {
 		frappe.validated = false;
 	}
 
+}
+
+function set_payrate_field(frm){
+	if(localStorage.getItem('exclusive_case')!=1){
+		frappe.db.get_value('Job Order', {'name': frm.doc.job_order}, ['order_status'], (r)=>{
+			if(r.order_status == 'Completed' || frappe.boot.tag.tag_user_info.user_type == 'Staffing User'){
+				frm.set_df_property('employee_pay_rate', 'read_only', 1);
+			}
+			else if(!['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type)){
+				$('[data-fieldname = "employee_pay_rate"]').attr('id', 'emp_pay_rate');
+				set_pay_rate(frm);
+				submit_claim(frm);
+			}
+		})
+	}else{
+		$('[data-fieldname = "employee_pay_rate"]').attr('id', 'emp_pay_rate');
+	}
+}
+
+function set_pay_rate(frm){
+	if(frm.doc.__islocal == 1){
+		frappe.db.get_value('Job Order',{'name':frm.doc.job_order},['select_job', 'job_site'], function(r){
+			frappe.call({
+				method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.set_pay_rate",
+				args:{
+					"hiring_company": frm.doc.hiring_organization,
+					"job_title": r.select_job,
+					"job_site": r.job_site,
+					"staffing_company": frm.doc.staffing_organization
+				},
+				callback: function(res){
+					let rate = res && res.message ? res.message : undefined;
+					frm.set_value('employee_pay_rate', rate);
+				}
+			});
+		});
+	}
+}
+
+function create_pay_rate(frm){
+	frappe.db.get_value('Job Order',{'name':frm.doc.job_order},['select_job', 'job_site'], function(r){
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.create_pay_rate",
+			args:{
+				"hiring_company": frm.doc.hiring_organization,
+				"job_title": r.select_job,
+				"job_site": r.job_site,
+				"employee_pay_rate": frm.doc.employee_pay_rate,
+				"staffing_company": frm.doc.staffing_organization
+			}
+		})
+	})
+}
+
+function check_pay_rate(frm){
+	return new Promise(function(resolve) {
+		frappe.db.get_value('Job Order', {'name': frm.doc.job_order}, ['per_hour', 'flat_rate'], function(r){
+			if(frm.doc.employee_pay_rate && frm.doc.employee_pay_rate > (r.per_hour + r.flat_rate) && frappe.boot.tag.tag_user_info.user_type != 'Staffing User'){
+				frappe.validated = false
+				let profile_html = "Pay Rate of $" + frm.doc.employee_pay_rate + " is greater than the bill rate of $" + (r.per_hour + r.flat_rate) + " for " + frm.doc.job_order + ". Please confirm.";
+				let resp;
+				let dialog = new frappe.ui.Dialog({
+					title: __('Warning!'),
+					fields: [{fieldname: "check_pay_rate", fieldtype: "HTML", options: profile_html}]
+				});
+				dialog.no_cancel();
+				dialog.set_primary_action(__('Yes'), function(){
+					resp = "frappe.validated = false";
+					window.conf=1;
+					frm.save();
+					resolve(resp);
+					dialog.hide();
+				});
+				dialog.set_secondary_action_label(__('No'));
+				dialog.set_secondary_action(function(){
+					dialog.hide();
+				});
+				dialog.show();
+			}
+		});
+	});
 }

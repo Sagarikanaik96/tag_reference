@@ -13,6 +13,7 @@
   "transaction_date",
   "job_category",
   "claims_approved",
+  "employee_pay_rate",
   "column_break_3",
   "tag_status",
   "hiring_organization",
@@ -237,12 +238,20 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Notification Check"
+  },
+  {
+   "depends_on": "eval:frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring' && frappe.boot.tag.tag_user_info.company_type!='Hiring'",
+   "fieldname": "employee_pay_rate",
+   "fieldtype": "Currency",
+   "label": "Employee Pay Rate",
+   "non_negative": 1,
+   "precision": "2"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-13 06:32:16.706528",
+ "modified": "2022-08-08 04:13:47.023140",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",

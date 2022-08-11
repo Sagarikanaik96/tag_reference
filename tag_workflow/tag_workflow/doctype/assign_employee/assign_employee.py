@@ -195,3 +195,20 @@ def validate_employee(doc,method):
 			employee_doc=frappe.get_doc('Employee',employee.employee)
 			if not employee_doc.has_permission("read"):
 				frappe.flags.error_message = _('Insufficient Permission for {0}').format(frappe.bold('Employee' + ' ' + employee.employee_name))
+
+@frappe.whitelist()
+def payrate_change(docname):
+    try:
+        sql = '''select data from `tabVersion` where docname="{0}" order by modified DESC'''.format(docname)
+        data = frappe.db.sql(sql, as_list=1)
+        new_data = json.loads(data[0][0])
+        if ('changed' not in new_data and 'row_changed' not in new_data) or len(new_data['added']) > 0 or len(new_data['removed']) > 0:
+            return 'success'
+        elif 'row_changed' in new_data:
+            for i in new_data['row_changed'][0][3]:
+                if i[0] == 'employee_name':
+                    return 'success'
+        return 'failure'
+    except Exception as e:
+        frappe.log_error(e, 'Pay Rate Change Error')
+        print(e, frappe.get_traceback())

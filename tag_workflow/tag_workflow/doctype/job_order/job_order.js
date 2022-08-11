@@ -304,6 +304,7 @@ frappe.ui.form.on("Job Order", {
 					no_of_workers_joborder: cur_frm.doc.no_of_workers,
 					e_signature_full_name:cur_frm.doc.e_signature_full_name,
 					staff_company: frappe.boot.tag.tag_user_info.company,
+					pay_rate: (frm.doc.per_hour + frm.doc.flat_rate).toFixed(2)
 				},callback:function(r){
 					if(r.message==1){
 						frappe.msgprint('Job Order has been claimed')

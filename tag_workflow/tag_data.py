@@ -899,7 +899,7 @@ def company_exist(hiring_company):
 from frappe.share import add
 
 @frappe.whitelist(allow_guest=False)
-def claim_order_insert(hiring_org=None,job_order=None,no_of_workers_joborder=None,e_signature_full_name=None,staff_company=None):
+def claim_order_insert(pay_rate, hiring_org=None,job_order=None,no_of_workers_joborder=None,e_signature_full_name=None,staff_company=None):
     try:
         doc = frappe.new_doc('Claim Order')
         doc.agree_to_contract = 1
@@ -911,6 +911,7 @@ def claim_order_insert(hiring_org=None,job_order=None,no_of_workers_joborder=Non
         doc.staff_claims_no = no_of_workers_joborder
         doc.staffing_organization = staff_company
         doc.e_signature = e_signature_full_name
+        doc.employee_pay_rate = pay_rate
         doc.insert()
         sql1 = '''select email from `tabUser` where  company = "{}"'''.format(hiring_org)
         hiring_list = frappe.db.sql(sql1,as_dict=1)

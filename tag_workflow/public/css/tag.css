@@ -963,6 +963,28 @@ input.input-with-feedback.form-control,
   display: none;
 }
 
+[data-page-route="Claim Order"] #emp_pay_rate:after {
+  position: absolute;
+  left: 10px;
+  top: 56%;
+  font-size: 13px;
+  content: "$";
+}
+[data-page-route="Claim Order"] input#emp_pay_rate {
+  padding-left: 20px;
+}
+
+[data-page-route="Assign Employee"] #emp_pay_rate:after {
+  position: absolute;
+  left: 10px;
+  top: 56%;
+  font-size: 13px;
+  content: "$";
+}
+[data-page-route="Assign Employee"] input#emp_pay_rate {
+  padding-left: 20px;
+}
+
 [data-route="query-report/TAG Earnings"]
   select.input-with-feedback.form-control.ellipsis,
 [data-route="query-report/Orders"]

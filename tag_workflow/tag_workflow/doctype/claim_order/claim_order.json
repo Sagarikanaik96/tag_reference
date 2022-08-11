@@ -14,6 +14,7 @@
   "no_of_workers_joborder",
   "no_of_remaining_employee",
   "staff_claims_no",
+  "employee_pay_rate",
   "approved_no_of_workers",
   "html_4",
   "e_signature",
@@ -113,11 +114,19 @@
    "fieldtype": "Data",
    "label": "No. of Employees Remaining",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring' && frappe.boot.tag.tag_user_info.company_type!='Hiring'",
+   "fieldname": "employee_pay_rate",
+   "fieldtype": "Currency",
+   "label": "Employee Pay Rate",
+   "non_negative": 1,
+   "precision": "2"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-02 07:03:09.539468",
+ "modified": "2022-08-08 01:19:40.559938",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Claim Order",
@@ -161,5 +170,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

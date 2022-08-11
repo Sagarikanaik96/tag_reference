@@ -11,12 +11,13 @@ import json
 
 site= frappe.utils.get_url().split('/')
 sitename=site[0]+'//'+site[2]
-from tenacity import retry
+
 class ClaimOrder(Document):
 	pass
 
 jobOrder = 'Job Order'
 claimOrder = "Claim Order"
+EPR = 'Employee Pay Rate'
 
 @frappe.whitelist()
 def staffing_claim_joborder(job_order,hiring_org, staffing_org, doc_name,single_share,no_required,no_assigned):
@@ -224,4 +225,68 @@ def claim_comp_assigned(claimed,doc_name,doc):
 		frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+str(doc.staffing_organization)))
 	elif(str(doc.staffing_organization) not in claimed):
 		frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+", "+str(doc.staffing_organization)))
-					
+
+@frappe.whitelist()
+def claim_field_readonly(docname):
+	try:
+		sql = '''select owner from tabVersion where docname = "{0}"'''.format(docname)
+		data = frappe.db.sql(sql, as_dict=1)
+		if data:
+			new_data = list(set([d['owner'] for d in data]))
+			for i in new_data:
+				user_type = frappe.db.get_value('User', {"name": i}, ['organization_type'])
+				if user_type == 'Hiring':
+					return 'headcount_selected'
+
+		return 'headcount_not_selected'
+	except Exception as e:
+		frappe.log_error(e, 'Claim Field Read Only Error')
+		print(e, frappe.get_traceback())
+
+@frappe.whitelist()
+def set_pay_rate(hiring_company, job_title, job_site, staffing_company):
+	try:
+		emp_pay_rate = frappe.db.exists(EPR, {"hiring_company": hiring_company,"job_title": job_title, "job_site": job_site, "staffing_company": staffing_company})
+		if emp_pay_rate:
+			return frappe.db.get_value(EPR, {"name": emp_pay_rate}, ['employee_pay_rate'])
+	except Exception as e:
+		frappe.log_error(e, 'Set Pay Rate Error')
+		print(e, frappe.get_traceback())
+
+@frappe.whitelist()
+def payrate_change(docname):
+	try:
+		sql = '''select data from `tabVersion` where docname="{0}" order by modified DESC'''.format(docname)
+		data = frappe.db.sql(sql, as_list=1)
+		new_data = json.loads(data[0][0]) if data else []
+		if 'changed' not in new_data:
+			return 'success'
+		else:
+			for i in new_data['changed']:
+				if i[0] == 'staff_claims_no':
+					return 'success'
+		return 'failure'
+	except Exception as e:
+		frappe.log_error(e, 'Pay Rate Change Error')
+		print(e, frappe.get_traceback())
+
+@frappe.whitelist()
+def create_pay_rate(hiring_company, job_title, job_site, employee_pay_rate, staffing_company):
+	try:
+		emp_pay_rate = frappe.db.exists(EPR, {"hiring_company": hiring_company,"job_title": job_title, "job_site": job_site, "staffing_company": staffing_company})
+		if emp_pay_rate:
+			pay_rate = frappe.db.get_value(EPR, {"name": emp_pay_rate}, ['employee_pay_rate'])
+			if pay_rate != employee_pay_rate:
+				frappe.db.set_value(EPR, emp_pay_rate,"employee_pay_rate", employee_pay_rate)
+
+		else:
+			doc = frappe.new_doc(EPR)
+			doc.hiring_company = hiring_company
+			doc.job_title = job_title
+			doc.job_site = job_site
+			doc.employee_pay_rate = employee_pay_rate
+			doc.staffing_company = staffing_company
+			doc.insert()
+	except Exception as e:
+		frappe.log_error(e, 'Set Pay Rate Error')
+		print(e, frappe.get_traceback())
