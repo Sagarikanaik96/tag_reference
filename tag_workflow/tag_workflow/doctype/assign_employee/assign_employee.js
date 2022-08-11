@@ -411,6 +411,8 @@ function worker_notification(frm){
 				if(r.message.length!=0){
 					frm.set_value('claims_approved',r.message[0].approved_no_of_workers)
 					frm.set_value('company',r.message[0].staffing_organization)
+					frm.set_df_property('notes', 'read_only',1);
+					frm.set_value('notes', r.message[0].notes);
 					frm.set_query("company", function(){
 						return {
 							filters: [
@@ -419,6 +421,7 @@ function worker_notification(frm){
 						}
 					});
 					frm.set_df_property('claims_approved',"hidden",0)
+					
 				}
 			
 			}

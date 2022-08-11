@@ -83,7 +83,8 @@ def save_claims(my_data,doc_name):
 			sql=f'select name from `tabClaim Order` where job_order="{doc_name}" and staffing_organization="{i}"'
 			claim_order_name=frappe.db.sql(sql,as_dict=1)
 			doc=frappe.get_doc('Claim Order',claim_order_name[0].name)
-			doc.approved_no_of_workers=my_data[i]
+			doc.approved_no_of_workers=my_data[i]['approve_count']
+			doc.notes = my_data[i]['notes']
 			doc.save(ignore_permissions=True)
 
 			frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", value1)
@@ -150,7 +151,8 @@ def save_modified_claims(my_data,doc_name):
 					claim_comp_assigned(claimed,doc_name,doc)
 					msg = f"{doc.hiring_organization} has update the approved no. of employees needed for {doc_name} - {job.select_job} from {doc.approved_no_of_workers} to {my_data[i]}"
 					
-					doc.approved_no_of_workers=my_data[i]
+					doc.approved_no_of_workers=my_data[i]["approve_count"]
+					doc.notes = my_data[i]["notes"]
 					doc.save(ignore_permissions=True)
 					user_data = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(doc.staffing_organization)
 					user_list = frappe.db.sql(user_data, as_list=1)

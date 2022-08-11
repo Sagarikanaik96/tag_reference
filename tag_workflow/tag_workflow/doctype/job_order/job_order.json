@@ -201,7 +201,7 @@
   {
    "fieldname": "extra_notes",
    "fieldtype": "Small Text",
-   "label": "Notes"
+   "label": "Job Order Notes"
   },
   {
    "fieldname": "additional_addons_section",
@@ -687,7 +687,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-07 07:44:15.872102",
+ "modified": "2022-08-09 02:54:08.333671",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

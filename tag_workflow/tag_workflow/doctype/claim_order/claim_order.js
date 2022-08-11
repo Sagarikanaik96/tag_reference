@@ -102,6 +102,9 @@ frappe.ui.form.on('Claim Order', {
 		frm.set_df_property('staff_claims_no', 'label', 'No. of Employees to Claim <span style="color: red;">&#42;</span>');
 		get_remaining_employee(frm.doc.job_order,frm,frm.doc.no_of_workers_joborder)
 		frm.set_df_property('no_of_remaining_employee', 'read_only', 1)
+		if (frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+			frm.set_df_property('notes', 'read_only', 1);
+		}
 
 	},
 	setup: function (frm) {

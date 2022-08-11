@@ -93,13 +93,14 @@ function refresh(listview){
         callback:function(rm){
             frappe.db.get_value("Job Order",{ name: listview.data[0].job_order},["company",'select_job','from_date','to_date','no_of_workers','per_hour'],function (r) {
                         let data = rm.message;
-                        let profile_html = `<table><th>Staffing Company</th><th>Workers</th><th>Approve</th>`;
+                        let profile_html = `<table><th>Staffing Company</th><th>Workers</th><th>Approve</th><th>Notes</th>`;
                         for(let p in data){
 
                             profile_html += `<tr>
                                 <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
                                 <td>${data[p].staff_claims_no}</td>
                                 <td><input type="number" id="_${data[p].staffing_organization}" min="0" max=${data[p].staff_claims_no}></td>
+                                <td><input type="text" id="notes" ></td>
                                 </tr>`;
                         }
                         profile_html+=`</table>`
@@ -154,6 +155,7 @@ function refresh(listview){
 }
 function update_no(data_len,l,dict,data,r){
     let valid=""
+    let notes=document.getElementById("notes").value
     for(let i=0;i<data_len;i++){     
                                
         let y=document.getElementById("_"+data[i].staffing_organization).value
@@ -204,6 +206,7 @@ function update_no(data_len,l,dict,data,r){
         }
         else{
             if(y!=0){
+                y = {'approve_count': y, 'notes': notes}
                 dict[data[i].staffing_organization]=y
             }
            
@@ -225,7 +228,7 @@ function modify_claims(listview){
         callback:function(rm){
             frappe.db.get_value("Job Order",{ name: listview.data[0].job_order},["company",'select_job','from_date','to_date','no_of_workers','per_hour','worker_filled'],function (r) {
                         let job_data = rm.message;
-                        let profile_html = `<table><th>Claim No.</th><th>Staffing Company</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th>`;
+                        let profile_html = `<table><th>Claim No.</th><th>Staffing Company</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th><th>Notes</th>`;
                         for(let p in job_data){
                             profile_html += `<tr>
                                 <td>${job_data[p].name}</td>
@@ -233,6 +236,7 @@ function modify_claims(listview){
                                 <td>${job_data[p].staff_claims_no}</td>
                                 <td>${job_data[p].approved_no_of_workers}</td>
                                 <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no}></td>
+                                <td><input type="text" id="notes"></td>
                                 </tr>`;
                         }
                         profile_html+=`</table><style>th, td {
@@ -289,6 +293,7 @@ function update_claims(data_len,l,dict,job_data,r){
     for(let i=0;i<data_len;i++){     
                                
         let y=document.getElementById(job_data[i].name).value
+        let notes=document.getElementById("notes").value
         if(y.length==0){
             total_count  += job_data[i].approved_no_of_workers
             continue
@@ -349,6 +354,7 @@ function update_claims(data_len,l,dict,job_data,r){
         }
         else{
             total_count += y
+            y = {'approve_count': y, 'notes': notes}
             dict[job_data[i].name]=y
         }
     

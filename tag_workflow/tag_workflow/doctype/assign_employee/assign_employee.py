@@ -130,7 +130,7 @@ def worker_data(job_order):
 
 @frappe.whitelist()
 def approved_workers(job_order,user_email):
-    sql=f"select name, staffing_organization, sum(approved_no_of_workers) as approved_no_of_workers from `tabClaim Order` where job_order='{job_order}' and staffing_organization in (select company from `tabEmployee` where user_id='{user_email}') group by staffing_organization "
+    sql=f"select name, staffing_organization, notes, sum(approved_no_of_workers) as approved_no_of_workers from `tabClaim Order` where job_order='{job_order}' and staffing_organization in (select company from `tabEmployee` where user_id='{user_email}') group by staffing_organization "
     data=frappe.db.sql(sql,as_dict=True)
     sql=""" select name from `tabAssign Employee` where job_order="{0}" and company= "{1}" """.format(job_order,data[0]['staffing_organization'])
     my_assign_emp=frappe.db.sql(sql,as_list=1)
