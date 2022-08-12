@@ -30,46 +30,52 @@ class JobOrder(Document):
 
     def check_assign(self):
         if(self.is_repeat == 1 and self.repeat_staff_company and self.repeat_from and self.is_direct == 1 and self.repeat_staff_company == self.staff_company):
-            selected_companies=self.repeat_staff_company.strip()
-            staff_selected_companies=selected_companies.split(',')
+            selected_companies = self.repeat_staff_company.strip()
+            staff_selected_companies = selected_companies.split(',')
             frappe.db.set_value(ORD, self.name, "claim", selected_companies)
             frappe.db.set_value(ORD, self.name, "staff_org_claimed", selected_companies)
             frappe.db.set_value(ORD, self.name, "bid", len(staff_selected_companies))
-            worker_filled=0
+            worker_filled = 0
             for comp in staff_selected_companies:
-                comp=comp.strip()
+                comp = comp.strip()
                 self.check_claims(comp)
-
-                if(frappe.db.exists(ASN, {"job_order": self.repeat_from, "company": comp, "tag_status": "Approved"})):
-                    old_assign = frappe.get_doc(ASN, {"job_order": self.repeat_from, "company": comp, "tag_status": "Approved"})
-                    new_doc = frappe.copy_doc(old_assign)
-                    new_doc.tag_status = "Open"
-                    new_doc.items = []
-                    new_doc.employee_details = []
-                    new_doc.no_of_employee_required = self.no_of_workers
-                    new_doc.job_order= self.name
-                    new_doc = self.check_employee_active(old_assign, new_doc)
-                    meta = frappe.get_meta(ASN)
-
-                    for field in meta.get_link_fields():
-                        field.ignore_user_permissions = 1
-                    new_doc.flags.ignore_permissions = True
-                    new_doc.save(ignore_permissions=True)
-
-                    worker_filled = self.get_number_of_worker(new_doc)
-                    
-                    self.assign_doc(new_doc.name, ASN,comp)
-                    self.auto_email(new_doc,comp)
-                    self.emp_assignment(new_doc, comp)
-                    if(self.resumes_required==0):
-                        worker_filled = len(new_doc.employee_details)+worker_filled
-                        dat=f'update `tabAssign Employee` set tag_status="Approved" where name="{new_doc.name}"'
-                        frappe.db.sql(dat)
-                        frappe.db.commit()
+                worker_filled += self.check_assign_doc(comp, worker_filled)
 
             frappe.db.set_value(ORD, self.name, "worker_filled", worker_filled)
             frappe.db.commit()
-            self.remaining_companies(self.staff_company,self.repeat_from,self.name,self.company,self.select_job)
+            self.remaining_companies(self.staff_company, self.repeat_from, self.name, self.company, self.select_job)
+
+    def check_assign_doc(self, comp, worker_filled):
+        if(frappe.db.exists(ASN, {"job_order": self.repeat_from, "company": comp, "tag_status": "Approved"})):
+            old_assign = frappe.get_doc(ASN, {"job_order": self.repeat_from, "company": comp, "tag_status": "Approved"})
+            new_doc = frappe.copy_doc(old_assign)
+            new_doc.tag_status = "Open"
+            new_doc.items = []
+            new_doc.employee_details = []
+            new_doc.no_of_employee_required = self.no_of_workers
+            new_doc.job_order= self.name
+            new_doc = self.check_employee_active(old_assign, new_doc)
+            if(new_doc.employee_details):
+                meta = frappe.get_meta(ASN)
+
+                for field in meta.get_link_fields():
+                    field.ignore_user_permissions = 1
+                new_doc.flags.ignore_permissions = True
+                new_doc.save(ignore_permissions=True)
+
+                worker_filled = self.get_number_of_worker(new_doc)
+
+                self.assign_doc(new_doc.name, ASN,comp)
+                self.auto_email(new_doc,comp)
+                self.emp_assignment(new_doc, comp)
+                if(self.resumes_required==0):
+                    worker_filled = len(new_doc.employee_details)+worker_filled
+                    dat=f'update `tabAssign Employee` set tag_status="Approved" where name="{new_doc.name}"'
+                    frappe.db.sql(dat)
+                    frappe.db.commit()
+            else:
+                frappe.msgprint(_("Original order employees may not be available due to status change."))
+        return worker_filled
 
     def check_employee_active(self, old_assign, new_doc):
         try:
