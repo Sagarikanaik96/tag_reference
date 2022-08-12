@@ -1497,3 +1497,10 @@ span.comment-count {
   text-overflow: inherit;
   word-break: break-word;
 }
+
+.assign_new_emp_btn{
+  position: absolute;
+  top: 32px;
+  z-index: 99;
+  left: 20rem;
+}

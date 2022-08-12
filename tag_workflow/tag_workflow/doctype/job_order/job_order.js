@@ -1377,12 +1377,13 @@ function approved_emp(){
 			],
 			});
 			if($('[data-fieldname = assigned_employees_hiring]').attr('id')=='approved_inactive'){
-				dialog.fields_dict.assign_new_emp.$input[0].className="btn btn-xs btn-default d-flex m-auto";
-				dialog.fields_dict.assign_new_emp.input.onclick = function() {
+				dialog.fields_dict.assign_new_emp.$input[0].className="btn btn-xs btn-default d-flex m-auto assign_new_emp_btn";
+				dialog.fields_dict.assign_new_emp.$input[0].onclick = function() {
 					frappe.db.get_value("Assign Employee", {'job_order': cur_frm.doc.name, 'company': cur_frm.doc.staff_org_claimed }, ["name","claims_approved"], function(rr) {
 						redirect_job(rr.name, cur_frm.doc.nam);
 						})
 				}
+
 			}
 			dialog.no_cancel();
 			dialog.$wrapper.on('hidden.bs.modal', function () {
@@ -1392,6 +1393,7 @@ function approved_emp(){
 				dialog.hide();
 				$('[data-fieldname = assigned_employees_hiring]').attr('id', 'approved_inactive');
 			});
+
 			if($('[data-fieldname = assigned_employees_hiring]').attr('id') == 'approved_inactive'){
 				dialog.show();
 				dialog.$wrapper.find('.modal-dialog').css('max-width', '880px');
@@ -1447,7 +1449,7 @@ function assigned_emp(){
 			]
 			});
 			if($('[data-fieldname = assigned_employees]').attr('id')=='assigned_inactive'){
-				dialog1.fields_dict.assign_new_emp.$input[0].className="btn btn-xs btn-default d-flex m-auto";
+				dialog1.fields_dict.assign_new_emp.$input[0].className="btn btn-xs btn-default d-flex m-auto assign_new_emp_btn";
 				dialog1.fields_dict.assign_new_emp.input.onclick = function() {
 					frappe.db.get_value("Assign Employee", {'job_order': cur_frm.doc.name, 'company': frappe.boot.tag.tag_user_info.company}, ["name","claims_approved"], function(rr) {
 						redirect_job(rr.name, cur_frm.doc.nam);
