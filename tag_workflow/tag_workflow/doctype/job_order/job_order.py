@@ -739,3 +739,18 @@ def check_avail(company_name,unclaimed_noresume_by_company):
         else:
             unclaimed_noresume_by_company.append(data.name)
     return unclaimed_noresume_by_company
+@frappe.whitelist()
+def claim_order_updated_by(docname,staff_company):
+    try:
+        claims=f'select name,modified_by from `tabClaim Order` where job_order="{docname}" and staffing_organization="{staff_company}"'
+        data = frappe.db.sql(claims, as_dict=1)
+        if data:
+            new_data = list(set([d['modified_by'] for d in data]))
+            for i in new_data:
+                user_type = frappe.db.get_value('User', {"name": i}, ['organization_type'])
+                if user_type == 'Staffing':
+                    return 'headcount_not_selected'
+        return 'headcount_selected'
+    except Exception as e:
+        frappe.log_error(e, 'Claim order Error')
+        print(e, frappe.get_traceback())

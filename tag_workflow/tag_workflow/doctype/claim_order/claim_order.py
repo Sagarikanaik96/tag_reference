@@ -145,7 +145,7 @@ def save_modified_claims(my_data,doc_name):
 			claims_id.append(key)
 		if claims_id:
 			for i in claims_id:
-				if type(my_data[i])== int:
+				if type(my_data[i]['approve_count'])== int:
 					job = frappe.get_doc(jobOrder, doc_name)
 					claimed = job.staff_org_claimed if job.staff_org_claimed else ""
 					doc=frappe.get_doc('Claim Order',i)

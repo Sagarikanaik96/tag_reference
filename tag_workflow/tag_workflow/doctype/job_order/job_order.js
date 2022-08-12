@@ -2257,9 +2257,7 @@ function claim_bar_data_hide(frm){
 					let total_claims= s.message[1][0][0]
 					let remaining_approved_emp= s.message[2]
 					if (remaining_approved_emp !=0 && frm.doc.order_status!='Completed' && total_claims< frm.doc.no_of_workers){
-						frm.add_custom_button(__('Claim Order'), function(){
-							claim_job_order_staffing(frm);
-						});
+						reclaim_button(frm)
 					}
 				}
 			}
@@ -2316,3 +2314,20 @@ function assign_emp_hide_button(frm){
 		frm.toggle_display('related_actions_section', 1);
 }
 
+function reclaim_button(frm){
+	frappe.call({
+		method: 'tag_workflow.tag_workflow.doctype.job_order.job_order.claim_order_updated_by',
+		args:{
+			'docname': frm.doc.name,
+			"staff_company":frappe.boot.tag.tag_user_info.company
+		},
+		callback: (r) => {
+			if(r.message == 'headcount_selected'){
+					frm.add_custom_button(__('Claim Order'), function(){
+							claim_job_order_staffing(frm);
+					});             
+			}
+		}
+	})
+}
+	
