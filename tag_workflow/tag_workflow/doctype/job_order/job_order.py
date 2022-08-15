@@ -469,6 +469,10 @@ def get_company_details(comp_name):
 @frappe.whitelist(allow_guest=False)
 def get_joborder_value(user, company_type, name):
     try:
+        jo_doc=frappe.get_doc(ORD,name)
+        if not jo_doc.has_permission("read"):
+            frappe.local.response['http_status_code'] = 500
+            frappe.throw(_('Insufficient Permission for Job Order '+name))
         if(company_type and company_type in ["Staffing", "Hiring", "TAG", "Exclusive Hiring"] and frappe.session.user and user and user == frappe.session.user and name):
             sql = ''' select name,category,from_date,to_date,select_job,job_order_duration,job_site,no_of_workers,rate from `tabJob Order` where name = "{0}" '''.format(name)
             value = frappe.db.sql(sql,as_dict=True)
