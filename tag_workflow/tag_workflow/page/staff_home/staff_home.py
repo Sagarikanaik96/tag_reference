@@ -15,22 +15,23 @@ def get_order_info(company1):
         for a in assign:
             order_detail.append(a.job_order)
         order_details=tuple(order_detail)
-        sql  = f'select name from `tabJob Order`  where "{frappe.utils.nowdate()}"  between from_date and to_date and name in {order_details} order by creation desc'
-        job_order = frappe.db.sql(sql, as_dict=1)
-        for j in job_order:
-                data=check_claims(j.name,company1)
-                for d in data:
-                    cat.append(d.category)
-                    if d not in final_list:
-                        final_list.append(d)
+        if(len(order_details)>0):
+            sql  = f'select name from `tabJob Order`  where "{frappe.utils.nowdate()}"  between from_date and to_date and name in {order_details} order by creation desc'
+            job_order = frappe.db.sql(sql, as_dict=1)
+            for j in job_order:
+                    data=check_claims(j.name,company1)
+                    for d in data:
+                        cat.append(d.category)
+                        if d not in final_list:
+                            final_list.append(d)
 
-                sql = "select name, lat, lng from `tabJob Site` where name = (select job_site from `tabJob Order` where name = '{}') and lat != '' and lng != ''".format(j.name)
-                data = frappe.db.sql(sql, as_dict=1)
-                for d in data:
-                    location.append([d['name'], float(d['lat']), float(d['lng']), j.name])
+                    sql = "select name, lat, lng from `tabJob Site` where name = (select job_site from `tabJob Order` where name = '{}') and lat != '' and lng != ''".format(j.name)
+                    data = frappe.db.sql(sql, as_dict=1)
+                    for d in data:
+                        location.append([d['name'], float(d['lat']), float(d['lng']), j.name])
 
-        value = {"location": location, "order": final_list, "org_type": com,"category":set(cat)}
-        return value
+            value = {"location": location, "order": final_list, "org_type": com,"category":set(cat)}
+            return value
     except Exception as e:
         print(e)
         frappe.msgprint(frappe.get_traceback())
