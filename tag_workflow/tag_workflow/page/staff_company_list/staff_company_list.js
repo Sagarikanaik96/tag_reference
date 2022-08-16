@@ -1,3 +1,4 @@
+// this file for TG-2607
 frappe.pages['staff_company_list'].on_page_load = function (wrapper) {
 	let page = frappe.ui.make_app_page({
 		parent: wrapper,
