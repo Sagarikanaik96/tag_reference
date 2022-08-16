@@ -468,11 +468,21 @@ def update_job_order_status():
 @frappe.whitelist(allow_guest=False)
 def sales_invoice_notification(user, sid, job_order, company, invoice_name):
     try:
-        sql = """ select company,select_job,job_site from `tabJob Order` where name='{0}' """.format(job_order)
-        job_order_details = frappe.db.sql(sql, as_dict=1)
-        msg = f'{company} has submitted an invoice for {job_order_details[0].select_job} at {job_order_details[0].job_site}.'
+        jo_company=frappe.db.get_value(jobOrder,{'name':job_order},'company')
+        jo_select_job=frappe.db.get_value(jobOrder,{'name':job_order},'select_job')
+        jo_job_site=frappe.db.get_value(jobOrder,{'name':job_order},'job_site')
+        company_doc=frappe.get_doc('Company',company)
+        invoice_doc=frappe.get_doc('Sales Invoice',invoice_name)
+        if not company_doc.has_permission("read"):
+            frappe.flags.error_message = _('Insufficient Permission for {0}').format(frappe.bold('Company' + ' ' + company))
+            raise frappe.PermissionError(("read", "Company", company))        
+        if invoice_doc.company!=company:
+            frappe.throw('Invalid Company')
+        if invoice_doc.job_order and invoice_doc.job_order!=job_order:
+            frappe.throw('Invalid Job Order')
+        msg = f'{company} has submitted an invoice for {jo_select_job} at {jo_job_site}.'
         subject = "Invoice Submitted"
-        sql = ''' select name from `tabUser` where company='{}' '''.format(job_order_details[0].company)
+        sql = ''' select name from `tabUser` where company='{}' '''.format(jo_company)
         user_list = frappe.db.sql(sql, as_dict=1)
         users = [l.name for l in user_list]
         for usr in users:
