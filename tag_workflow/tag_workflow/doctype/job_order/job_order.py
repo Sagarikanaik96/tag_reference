@@ -702,18 +702,19 @@ def my_used_job_orders(company_name,status):
 @frappe.whitelist()
 def claims_left(name,comp):
     data=frappe.get_doc(ORD,name)
-    claims=data.claim
-    if claims is not None and comp in claims:
+    if(data.order_status=='Completed'):
         return "success"
     else:
         if(data.resumes_required==1):
             if(data.no_of_workers!=data.worker_filled):
                 return data.no_of_workers-data.worker_filled
+            else:
+                return '0'
         else:
             claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{name}"'
             data1=frappe.db.sql(claims,as_list=1)
             if(data1[0][0]!=None):
-                return int(data.no_of_workers)-int(data1[0][0])
+                return str(int(data.no_of_workers)-int(data1[0][0]))
             else:
                 return int(data.no_of_workers) 
 def all_orders_data(company_name):
