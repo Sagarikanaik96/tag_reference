@@ -93,7 +93,7 @@ def save_claims(my_data,doc_name):
 			user_list = frappe.db.sql(user_data, as_list=1)
 			l = [l[0] for l in user_list]
 			sub="Approve Claim Order"
-			msg = f"{doc.hiring_organization} has approved {my_data[i]} employees for {doc_name} - {job.select_job}. Don't forget to assign employees to this order."
+			msg = f"{doc.hiring_organization} has approved {my_data[i]['approve_count']} employees for {doc_name} - {job.select_job}. Don't forget to assign employees to this order."
 			make_system_notification(l,msg,claimOrder,doc.name,sub)
 			link =  f'  href="{sitename}/app/claim-order/{doc.name}" '
 			joborder_email_template(sub,msg,l,link)

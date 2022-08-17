@@ -991,8 +991,19 @@ function view_button(frm){
 function view_buttons_hiring(frm){
 	hiring_buttons(frm);
 	if (cur_frm.doc.__islocal != 1){
-		let datad1 = `<div class="my-2 p-3 border rounded cursor-pointer" id="data" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Claims  </p><label class="badge m-0 bg-danger rounded-circle font-weight-normal mr-4 text-white"> ${frm.doc.bid} </label></div>`;
+		let no_of_claims = 0;
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.job_order.job_order.no_of_claims",
+			args: {
+				"job_order": frm.doc.name
+			},
+			async: 0,
+			callback: (r)=>{
+				no_of_claims += r.message
+			}
+		})
 
+		let datad1 = `<div class="my-2 p-3 border rounded cursor-pointer" id="data" style="display: flex;justify-content: space-between;"><p class="m-0 msg"> Claims  </p><label class="badge m-0 bg-danger rounded-circle font-weight-normal mr-4 text-white"> ${no_of_claims} </label></div>`;
 		$('[data-fieldname = related_details]').click(function() {
 			claim_orders(frm);
 		});

@@ -739,6 +739,13 @@ def check_avail(company_name,unclaimed_noresume_by_company):
         else:
             unclaimed_noresume_by_company.append(data.name)
     return unclaimed_noresume_by_company
+
+@frappe.whitelist()
+def no_of_claims(job_order):
+    sql = '''SELECT COUNT(name) FROM `tabClaim Order` WHERE job_order = "{0}"'''.format(job_order)
+    no_of_claims = frappe.db.sql(sql, as_list=1)
+    return no_of_claims[0][0]
+
 @frappe.whitelist()
 def claim_order_updated_by(docname,staff_company):
     try:
