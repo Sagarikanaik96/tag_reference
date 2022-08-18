@@ -375,6 +375,7 @@ function mandatory_fn(frm) {
 }
 
 function set_payrate_field(frm){
+	frm.set_df_property('employee_pay_rate', 'label', 'Employee Pay Rate <span style="color: red;">&#42;</span>');
 	if(localStorage.getItem('exclusive_case')!=1){
 		frappe.db.get_value('Job Order', {'name': frm.doc.job_order}, ['order_status'], (r)=>{
 			if(r.order_status == 'Completed' || frappe.boot.tag.tag_user_info.user_type == 'Staffing User'){
