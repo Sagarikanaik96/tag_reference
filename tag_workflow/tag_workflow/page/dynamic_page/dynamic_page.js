@@ -77,9 +77,11 @@ frappe.FaceRecognition = Class.extend({
 				let description = my_val.about_organization?my_val.about_organization:"No description added."
 				let link_coi='';
 				let link_sm='';
-				if(r.message[0].cert_of_insurance || r.message[0].safety_manual){
+				let w_nine='';
+				if(r.message[0].cert_of_insurance || r.message[0].safety_manual ||r.message[0].w9){
 					link_coi = r.message[0].cert_of_insurance.split(' ').join('%');
 					link_sm= r.message[0].safety_manual.split(' ').join('%');
+					w_nine = r.message[0].w9.split(' ').join('%'); 
 				}
 				let template = `
 					<div class="container form-section m-auto card-section visible-section" style="max-width: 97%;width: 100%;padding: 0;animation: animatop 1.7s cubic-bezier(0.425, 1.14, 0.47, 1.125) forwards;background: transparent;"> 
@@ -120,6 +122,14 @@ frappe.FaceRecognition = Class.extend({
                                         </button>
                                     </a>
                                 </div>
+								<div>
+									<a href=javascript:document_download("${w_nine}")>
+                                        <button type="button" id="w_nine" class="btn btn-primary btn-xs mt-2 attached-file-link">
+                                             W9
+                                            <i class="fa fa-download mx-2" aria-hidden="true"></i>
+                                        </button>
+                                    </a>
+								</div>
                             </div>
 						</div>
 								   
