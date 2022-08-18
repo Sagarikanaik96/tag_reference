@@ -18,7 +18,6 @@ frappe.ui.form.on('Claim Order', {
 				frappe.set_route("Form", "Job Order", frm.doc.job_order)
 			}, 3000);
 		}
-		frm.set_value('approved_no_of_workers', 0)
 	},
 	validate: function (frm) {
 		mandatory_fn(frm);
@@ -36,7 +35,7 @@ frappe.ui.form.on('Claim Order', {
 			frappe.msgprint(__("Claims should not be greater than no. of remaining employee"));
 			frappe.validated = false;
 		}
-		if(window.conf==0 && frappe.validated && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		if(window.conf==0 && frappe.validated && !['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type)){
 			check_pay_rate(frm);
 		}
 	},
@@ -107,8 +106,7 @@ frappe.ui.form.on('Claim Order', {
 		if (frappe.boot.tag.tag_user_info.company_type == "Staffing"){
 			frm.set_df_property('notes', 'read_only', 1);
 		}
-
-
+		window.conf = 0;
 	},
 	setup: function (frm) {
 		$('[data-label="Save"]').hide()
@@ -280,7 +278,7 @@ function claim_order_save(frm) {
 }
 
 function update_claim_by_staffing(frm) {
-	if (cur_frm.doc.__islocal != 1) {
+	if (cur_frm.doc.__islocal != 1 && !['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type)) {
 		frappe.call({
 			method: 'tag_workflow.tag_workflow.doctype.claim_order.claim_order.claim_field_readonly',
 			args:{
@@ -378,7 +376,7 @@ function set_payrate_field(frm){
 	frm.set_df_property('employee_pay_rate', 'label', 'Employee Pay Rate <span style="color: red;">&#42;</span>');
 	if(localStorage.getItem('exclusive_case')!=1){
 		frappe.db.get_value('Job Order', {'name': frm.doc.job_order}, ['order_status'], (r)=>{
-			if(r.order_status == 'Completed' || frappe.boot.tag.tag_user_info.user_type == 'Staffing User'){
+			if(r.order_status == 'Completed'){
 				frm.set_df_property('employee_pay_rate', 'read_only', 1);
 			}
 			else if(!['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type)){
@@ -404,7 +402,7 @@ function set_pay_rate(frm){
 					"staffing_company": frm.doc.staffing_organization
 				},
 				callback: function(res){
-					let rate = res && res.message ? res.message : undefined;
+					let rate = res && res.message ? res.message.toFixed(2) : undefined;
 					frm.set_value('employee_pay_rate', rate);
 				}
 			});
@@ -430,7 +428,7 @@ function create_pay_rate(frm){
 function check_pay_rate(frm){
 	return new Promise(function(resolve) {
 		frappe.db.get_value('Job Order', {'name': frm.doc.job_order}, ['per_hour', 'flat_rate'], function(r){
-			if(frm.doc.employee_pay_rate && frm.doc.employee_pay_rate > (r.per_hour + r.flat_rate) && frappe.boot.tag.tag_user_info.user_type != 'Staffing User'){
+			if(frm.doc.employee_pay_rate && frm.doc.employee_pay_rate > (r.per_hour + r.flat_rate)){
 				frappe.validated = false
 				let profile_html = "Pay Rate of $" + frm.doc.employee_pay_rate + " is greater than the bill rate of $" + (r.per_hour + r.flat_rate) + " for " + frm.doc.job_order + ". Please confirm.";
 				let resp;

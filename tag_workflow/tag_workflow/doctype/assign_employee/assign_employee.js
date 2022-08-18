@@ -149,35 +149,14 @@ frappe.ui.form.on('Assign Employee', {
 		create_pay_rate(frm);
 	},
 	validate:function(frm){
-		let sign = cur_frm.doc.e_signature_full_name;
-		let emp_tab=frm.doc.employee_details;
 		let emp_pay_rate = frm.doc.employee_pay_rate;
-		let no_pay_rate = false;
 		let message="<b>Please Fill Mandatory Fields:</b>";
-
 		if(emp_pay_rate === undefined || !emp_pay_rate || emp_pay_rate == 0){
 			message=message+"<br>Employee Pay Rate";
 		}
+		message = field_validation(frm, message);
 
-		if(sign===undefined || !sign){
-			message=message+"<br>E Signature Full Name";
-		}
-
-		for(let i in emp_tab){
-			if(!emp_tab[i].pay_rate){
-				no_pay_rate = true
-			}
-		}
-
-		if(emp_tab===undefined || emp_tab.length==0 || no_pay_rate){
-			message=message+"<br>Employee Details";
-		}
-
-		if(frm.doc.agree_contract==0 || frm.doc.agree_contract===undefined){
-			message=message+"<br>Agree To Contract";
-		}
-
-		if(message!="<b>Please Fill Mandatory Fields:</b>" && frm.doc.resume_required == 1){
+		if(message!="<b>Please Fill Mandatory Fields:</b>"){
 			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
 			frappe.validated=false;
 		}
@@ -431,12 +410,7 @@ function hide_resume(frm){
             });
         }
     }
-	if(frappe.boot.tag.tag_user_info.user_type == 'Staffing User'){
-		let rate_field = frappe.meta.get_docfield("Assign Employee Details","pay_rate", frm.doc.name);
-		rate_field.read_only = 1;
-		refresh = 1;
-	}
-	else if(['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type)){
+	if(['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type)){
 		let rate_field = frappe.meta.get_docfield("Assign Employee Details","pay_rate", frm.doc.name);
 		rate_field.hidden = 1;
 		refresh = 1;
@@ -848,7 +822,7 @@ function confirm_message(frm){
 				check_pay_rate(frm, temp);
 			}
 			else{
-				return new Promise(function(resolve,reject) {
+				return new Promise(function(resolve) {
 					let pop_up1;
 					let msg1=''
 					for(let i=0;i<=r.message.length-1;i++){
@@ -879,7 +853,6 @@ function confirm_message(frm){
 					});
 					confirm_assign.set_secondary_action_label(__('Cancel'));
 					confirm_assign.set_secondary_action(() => {
-						reject();
 						confirm_assign.hide();
 					});
 					confirm_assign.show();
@@ -924,7 +897,7 @@ function assigned_direct(frm){
 function set_payrate_field(frm){
 	frm.set_df_property('employee_pay_rate', 'label', 'Employee Pay Rate <span style="color: red;">&#42;</span>');
 	frappe.db.get_value('Job Order', {'name': frm.doc.job_order}, ['order_status'], (r)=>{
-		if(r.order_status == 'Completed' || frappe.boot.tag.tag_user_info.user_type == 'Staffing User'){
+		if(r.order_status == 'Completed'){
 			frm.set_df_property('employee_pay_rate', 'read_only', 1)
 		}
 		else if(!['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type)){
@@ -943,7 +916,7 @@ function set_pay_rate(frm){
 			"staffing_company": frm.doc.company
 		},
 		callback: function(res){
-			let rate = res && res.message ? res.message : undefined
+			let rate = res && res.message ? res.message.toFixed(2) : undefined
 			frm.set_value('employee_pay_rate', rate)
 		}
 	});
@@ -997,4 +970,38 @@ function create_pay_rate(frm){
 			"staffing_company": frm.doc.company
 		}
 	});
+}
+
+function field_validation(frm, message){
+	let emp_tab=frm.doc.employee_details;
+
+	if(emp_tab===undefined || emp_tab.length==0){
+		message=message+"<br>Employee Details";
+	}
+	else{
+		for(let i in emp_tab){
+			if(!emp_tab[i].employee && !message.includes('<br>Employee Details')){
+				message=message+"<br>Employee Details";
+			}
+			if(!emp_tab[i].pay_rate || emp_tab[i].pay_rate == 0 && !message.includes("<br>Pay Rate")){
+				message=message+"<br>Pay Rate";
+			}
+		}
+	}
+
+	return message + field_validation_contd(frm);
+}
+
+function field_validation_contd(frm){
+	let message = '';
+	let sign = cur_frm.doc.e_signature_full_name;
+	if(frm.doc.resume_required == 1){
+		if(sign===undefined || !sign){
+			message=message+"<br>E Signature Full Name";
+		}
+		if(frm.doc.agree_contract==0 || frm.doc.agree_contract===undefined){
+			message=message+"<br>Agree To Contract";
+		}
+	}
+	return message;
 }
