@@ -743,22 +743,29 @@ def check_avail(company_name,unclaimed_noresume_by_company):
 
 @frappe.whitelist()
 def no_of_claims(job_order):
-    sql = '''SELECT COUNT(name) FROM `tabClaim Order` WHERE job_order = "{0}"'''.format(job_order)
+    doc=frappe.get_doc(ORD,job_order)
+    if(doc.resumes_required==1):
+        sql = '''SELECT COUNT(name) FROM `tabAssign Employee` WHERE job_order = "{0}"'''.format(job_order)
+    else:
+        sql = '''SELECT COUNT(name) FROM `tabClaim Order` WHERE job_order = "{0}"'''.format(job_order)
     no_of_claims = frappe.db.sql(sql, as_list=1)
     return no_of_claims[0][0]
 
 @frappe.whitelist()
 def claim_order_updated_by(docname,staff_company):
     try:
-        claims=f'select name,modified_by from `tabClaim Order` where job_order="{docname}" and staffing_organization="{staff_company}"'
+        claims=f'select name from `tabClaim Order` where job_order="{docname}" and staffing_organization="{staff_company}" order by name desc'
         data = frappe.db.sql(claims, as_dict=1)
         if data:
-            new_data = list(set([d['modified_by'] for d in data]))
-            for i in new_data:
-                user_type = frappe.db.get_value('User', {"name": i}, ['organization_type'])
-                if user_type == 'Staffing':
-                    return 'headcount_not_selected'
-        return 'headcount_selected'
+            claims_versin=f"select owner from `tabVersion` where docname='{data[0]['name']}' order by modified DESC;"
+            claims_updater=frappe.db.sql(claims_versin,as_dict=1)
+            if claims_updater:
+                for j in claims_updater:
+                    user_type = frappe.db.get_value('User', {"name": j['owner']}, ['organization_type'])
+                    if user_type == 'Hiring':
+                        return 'headcount_selected'
+                return 'headcount_not_selected'
+
     except Exception as e:
         frappe.log_error(e, 'Claim order Error')
         print(e, frappe.get_traceback())
