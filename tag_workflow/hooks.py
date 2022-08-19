@@ -181,7 +181,8 @@ override_whitelisted_methods = {
         "frappe.core.doctype.data_import.data_import.form_start_import": "tag_workflow.utils.data_import.form_start_import",
         "frappe.desk.form.save.savedocs": "tag_workflow.utils.whitelisted.savedocs",
         "frappe.client.save": "tag_workflow.utils.whitelisted.save",
-        "erpnext.accounts.party.get_due_date": "tag_workflow.utils.invoice.get_due_date"
+        "erpnext.accounts.party.get_due_date": "tag_workflow.utils.invoice.get_due_date",
+        "frappe.model.workflow.bulk_workflow_approval":"tag_workflow.utils.workflow.bulk_workflow_approval"
 }
 
 
