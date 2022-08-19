@@ -7,13 +7,13 @@ frappe.listview_settings['Claim Order'] = {
         $("button.btn.btn-default.btn-sm.filter-button").hide();
         $("button.btn.btn-sm.filter-button.btn-primary-light").hide();
         if((listview.data[0]["approved_no_of_workers"])!=0 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
-            listview.page.set_secondary_action('Modify Head Count', () => modify_claims(listview), 'octicon octicon-sync');
+            modify_head_count(listview)
         }
         else if((listview.filters).length==1 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
             listview.page.set_secondary_action('Select Head Count', () => refresh(listview), 'octicon octicon-sync');
         }
         else if((listview.filters).length==2 && frappe.boot.tag.tag_user_info.company_type!='Staffing'){
-            listview.page.set_secondary_action('Modify Head Count', () => modify_claims(listview), 'octicon octicon-sync');
+            modify_head_count(listview)
         }
 
     },
@@ -100,7 +100,7 @@ function refresh(listview){
                                 <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
                                 <td>${data[p].staff_claims_no}</td>
                                 <td><input type="number" id="_${data[p].staffing_organization}" min="0" max=${data[p].staff_claims_no}></td>
-                                <td><input type="text" id="notes" ></td>
+                                <td><textarea id="notes" class="head_count_tittle" maxlength="1000"> </textarea> </td>
                                 </tr>`;
                         }
                         profile_html+=`</table>`
@@ -152,6 +152,9 @@ function refresh(listview){
             })
         }
     })
+}
+function modify_head_count(listview){
+    listview.page.set_secondary_action('Modify Head Count', () => modify_claims(listview), 'octicon octicon-sync');
 }
 function update_no(data_len,l,dict,data,r){
     let valid=""
@@ -236,7 +239,7 @@ function modify_claims(listview){
                                 <td>${job_data[p].staff_claims_no}</td>
                                 <td>${job_data[p].approved_no_of_workers}</td>
                                 <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no}></td>
-                                <td><input type="text" id="notes"></td>
+                                <td><textarea id="notes" class="head_count_tittle" maxlength="1000"> </textarea> </td>
                                 </tr>`;
                         }
                         profile_html+=`</table><style>th, td {
