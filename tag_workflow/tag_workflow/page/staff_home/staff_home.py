@@ -7,11 +7,10 @@ def get_order_info(company1):
     try:
         cat,location, order_detail, final_list = [], [], [],[]
         com = frappe.db.get_value("Company", {"name": company1}, "organization_type")
-        claim = frappe.db.sql("""select job_order from `tabClaim Order` where staffing_organization = "{}" and approved_no_of_workers != 0 order by creation desc""".format(company1), as_dict=1)
+        claim = frappe.db.sql("""select distinct job_order from `tabClaim Order` where staffing_organization = "{}" and approved_no_of_workers != 0 order by creation desc""".format(company1), as_dict=1)
 
         order_detail=check_claims_order(claim,order_detail)
-
-        assign = frappe.db.sql(""" select job_order from `tabAssign Employee` where company = "{}" and tag_status = "Approved" """.format(company1), as_dict=1)
+        assign = frappe.db.sql(""" select distinct job_order from `tabAssign Employee` where company = "{}" and tag_status = "Approved" """.format(company1), as_dict=1)
         for a in assign:
             order_detail.append(a.job_order)
         order_details=tuple(order_detail)
@@ -19,16 +18,16 @@ def get_order_info(company1):
             sql  = f'select name from `tabJob Order`  where "{frappe.utils.nowdate()}"  between from_date and to_date and name in {order_details} order by creation desc'
             job_order = frappe.db.sql(sql, as_dict=1)
             for j in job_order:
-                    data=check_claims(j.name,company1)
-                    for d in data:
-                        cat.append(d.category)
-                        if d not in final_list:
-                            final_list.append(d)
+                data=check_claims(j.name,company1)
+                for d in data:
+                    cat.append(d.category)
+                    if d not in final_list:
+                        final_list.append(d)
 
-                    sql = "select name, lat, lng from `tabJob Site` where name = (select job_site from `tabJob Order` where name = '{}') and lat != '' and lng != ''".format(j.name)
-                    data = frappe.db.sql(sql, as_dict=1)
-                    for d in data:
-                        location.append([d['name'], float(d['lat']), float(d['lng']), j.name])
+                sql = "select name, lat, lng from `tabJob Site` where name = (select job_site from `tabJob Order` where name = '{}') and lat != '' and lng != ''".format(j.name)
+                data = frappe.db.sql(sql, as_dict=1)
+                for d in data:
+                    location.append([d['name'], float(d['lat']), float(d['lng']), j.name])
 
             value = {"location": location, "order": final_list, "org_type": com,"category":set(cat)}
             return value
@@ -112,17 +111,18 @@ def filter_data(category,order_by):
 def check_claims(j,company1):
     doc=frappe.get_doc('Job Order',j)
     if(doc.resumes_required==0):
-        sql = "select distinct `tabJob Order`.name, category, select_job, from_date, to_date, no_of_workers, approved_no_of_workers, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order`,`tabClaim Order` where `tabJob Order`.name = '{}' and `tabClaim Order`.job_order=`tabJob Order`.name ".format(j)
+        sql = "select `tabJob Order`.name, category, select_job, from_date, to_date, no_of_workers, sum(approved_no_of_workers) as approved_no_of_workers, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order`,`tabClaim Order` where `tabJob Order`.name = '{0}' and `tabClaim Order`.staffing_organization='{1}' and `tabClaim Order`.job_order=`tabJob Order`.name group by `tabClaim Order`.job_order ".format(j,company1)
         data = frappe.db.sql(sql, as_dict=1)
     else:
         assign_emp = frappe.db.sql(""" select name from `tabAssign Employee` where company = "{0}" and job_order="{1}"  """.format(company1,j), as_dict=1)
-        doc=frappe.get_doc('Assign Employee',assign_emp[0]['name'])
-        sql = "select distinct `tabJob Order`.name, category, select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order`,`tabAssign Employee` where `tabJob Order`.name = '{}' and `tabAssign Employee`.job_order=`tabJob Order`.name ".format(j)
+        sql = "select distinct `tabJob Order`.name, category, select_job, from_date, to_date, no_of_workers, estimated_hours_per_day, per_hour, job_start_time from `tabJob Order`,`tabAssign Employee` where `tabJob Order`.name = '{0}' and `tabAssign Employee`.company='{1}' and `tabAssign Employee`.job_order=`tabJob Order`.name ".format(j,company1)
         data = frappe.db.sql(sql, as_dict=1)
         emp_approved=0
-        for i in range(len(doc.employee_details)):
-            if(doc.employee_details[i].approved):
-                emp_approved+=1
+        for i in range(len(assign_emp)):
+            doc=frappe.get_doc('Assign Employee',assign_emp[i]['name'])
+            for j in range(len(doc.employee_details)):
+                if(doc.employee_details[j].approved):
+                    emp_approved+=1
         data[0]['approved_no_of_workers']=emp_approved
     return data
 
