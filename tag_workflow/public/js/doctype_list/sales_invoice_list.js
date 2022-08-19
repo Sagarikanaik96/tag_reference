@@ -1,5 +1,8 @@
 frappe.listview_settings['Sales Invoice'] = {
 	onload:function(listview){
+		document.getElementsByClassName('list-row-col ellipsis')[6].style.textAlign = "right";
+		document.getElementsByClassName('list-row-col ellipsis')[6].innerHTML	 = "Paid";
+		document.getElementsByClassName('list-row-col ellipsis')[3].innerHTML	 = "Job Order";
 		$('input[data-fieldname="name"]')[0].value = '';
 		$('h3[title = "Invoice"]').html('Invoices');
 		if(frappe.session.user!='Administrator'){
@@ -7,6 +10,7 @@ frappe.listview_settings['Sales Invoice'] = {
 			$('[data-original-title="Refresh"]').hide()
 			$('.menu-btn-group').hide()
         }
+		$('[data-original-title="Grand Total"]>input').val(null)
 		if (frappe.boot.tag.tag_user_info.company_type == 'TAG'){
 			listview.page.add_button(__("Create monthly Invoice"), function() {
 				create_monthly_invoice()
@@ -34,6 +38,28 @@ frappe.listview_settings['Sales Invoice'] = {
 		doc_filter.options[1].innerHTML = 'Draft';
 		doc_filter.options[2].innerHTML = 'Submitted';
 		$('[data-original-title = "Status"][data-fieldname = "status"]').hide();
+
+		const filters = {
+            condition: "=",
+            default: null,
+            fieldname: "is_pos",
+            fieldtype: "Select",
+            input_class: "input-xs",
+            label: "Paid Status",
+            is_filter: 1,
+            onchange: function() {
+                listview.refresh();
+            },
+            options: [0,1],
+            placeholder: "Paid Status"
+        };
+		let standard_filters_wrappers= listview.page.page_form.find('.standard-filter-section');
+		listview.page.add_field(filters, standard_filters_wrappers);
+		let doc_filters = document.querySelector('select[data-fieldname = "is_pos"]')
+		doc_filters.options.add(new Option(), "*");
+		doc_filters.options[1].innerHTML = 'Unpaid';
+		doc_filters.options[2].innerHTML = 'Paid';
+		$('[data-original-title = "Status"][data-fieldname = "is_pos"]').hide();
 	},
 
 	formatters: {
@@ -46,16 +72,32 @@ frappe.listview_settings['Sales Invoice'] = {
 				finalAmount=finalAmount.toFixed(2);
 			}
 			return `<span class="filterable ellipsis" title="" id="${val}-${f.name}" ><a class="filterable ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >$ ${finalAmount}</a></span>`;
-		}
+		},
+		is_pos(val,d,f){
+			if(val==1){
+				return `
+				<div class="list-row-col ellipsis text-right" style="margin-right: 0px;">
+				<span class="indicator-pill green ellipsis" title="" id="${val}-${f.name}">
+						<a class=" green ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >Paid</a>
+					</span>
+					</div>`
+			}
+			return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
+						<a data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}"> </a>
+					</span>`
+			},
+		
 	},
-	
 	refresh:function(){
 		$('[data-fieldname="name"]').hide()
-
 		$('#navbar-breadcrumbs > li > a').html('Invoices');
 		$('[class="btn btn-primary btn-sm primary-action"]').hide();
 		$('[class="btn btn-default btn-sm ellipsis"]').hide();
 		$('button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs').hide();
+		let a =document.querySelector('[data-original-title="Grand Total"]>input').value;
+		if(a == 0.00){
+			$('[data-original-title="Grand Total"]>input').val("") 	
+		}
 	},
 	hide_name_column: true,
 	// add_fields: ['type', 'reference_doctype', 'reference_name'],
