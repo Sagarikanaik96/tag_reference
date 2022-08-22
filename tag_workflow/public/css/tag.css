@@ -100,8 +100,10 @@ input:hover {
   border: 1px solid var(--primary-color) !important;
 }
 
-input:active {
+input:active,
+input:focus-visible {
   border: 1px solid var(--primary-color) !important;
+  outline: none !important;
 }
 input:visited {
   border: 1px solid var(--primary-color) !important;
@@ -508,9 +510,20 @@ input::-webkit-credentials-auto-fill-button {
 [data-route="Form/Job Order"] .modal .modal-dialog {
   max-width: 900px !important;
 }
-.contract_div h3 {
+
+[data-route="List/Claim Order/List"] .modal .modal-dialog {
+  max-width: 830px !important;
+}
+[data-route="List/Claim Order/List"] .contract_div h3 {
   color: var(--primary-color);
   font-weight: 600;
+}
+textarea {
+  border: 1px solid#ECECF1 !important;
+}
+textarea:focus-visible {
+  outline: none !important;
+  border: 1px solid var(--primary-color) !important;
 }
 .contract_div {
   height: 600px;
@@ -1498,7 +1511,7 @@ span.comment-count {
   word-break: break-word;
 }
 
-.assign_new_emp_btn{
+.assign_new_emp_btn {
   position: absolute;
   top: 32px;
   z-index: 99;
