@@ -30,19 +30,24 @@ frappe.FaceRecognition = Class.extend({
 			},
 			callback: async function (r) {
 				let data = r.message;
+				let sorted_data =[];
+				let non_fav = [];
 				let profile_html = ``;
 				let favourite_companies = await sorted_favourite_company()
 				for(let p in data){
 					let check = favourite_companies.message.includes(data[p].name);
 					if(check){
-						profile_html = await sorted_favourite_companies(data[p], profile_html);
+						data[p]['LikeStatus'] = true;
+						sorted_data.push(data[p]);
+						
+					}else{
+						data[p]['LikeStatus'] = false;
+						non_fav.push(data[p])
 					}
 				}
-				for(let p in data){
-					let check = favourite_companies.message.includes(data[p].name);
-					if(!check){
-						profile_html = await sorted_favourite_companies(data[p], profile_html);
-					}
+				sorted_data.push(... non_fav)
+				for(let p in sorted_data){
+					profile_html = await sorted_favourite_companies(sorted_data[p], profile_html);
 				}
 				$("#myTable").html(profile_html);
 			}
@@ -53,10 +58,9 @@ frappe.FaceRecognition = Class.extend({
 
 async function sorted_favourite_companies(data, profile_html) {
 		let link = data.name.split(' ').join('%');
-		let datas = await get_favourites_list(data.name);
 		profile_html += `<tr>
 					<td>
-					<svg ${datas.message === "True" ? "class='icon icon-sm liked'" : "class='icon icon-sm not-liked'"}cursor:pointer" onClick = setLike(this,"${link}")>
+					<svg ${data.LikeStatus ? "class='icon icon-sm liked'" : "class='icon icon-sm not-liked'"}cursor:pointer" onClick = setLike(this,"${link}")>
 					<use class="like-icon" href="#icon-heart"></use>
 					</svg>
 					</td>
