@@ -114,6 +114,10 @@ frappe.ui.form.on("Sales Invoice", {
             let due_date = frappe.datetime.add_days(cur_frm.doc.posting_date, 30);
             cur_frm.set_value("due_date", due_date);
         }
+    },
+    due_date: function(frm){
+        cur_frm.clear_table("payment_schedule");
+        cur_frm.refresh_field("payment_schedule");
     }
 });
 
