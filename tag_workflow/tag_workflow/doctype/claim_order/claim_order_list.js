@@ -113,7 +113,7 @@ function refresh(listview) {
                                 <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
                                 <td>${data[p].staff_claims_no}</td>
                                 <td><input type="number" id="_${data[p].staffing_organization}" min="0" max=${data[p].staff_claims_no}></td>
-                                <td><textarea id="notes" class="head_count_tittle" maxlength="1000"> </textarea> </td>
+                                <td><textarea id="_${data[p].staffing_organization}_notes" class="head_count_tittle" maxlength="1000"> </textarea> </td>
                                 </tr>`;
           }
           profile_html += `</table>`;
@@ -200,9 +200,9 @@ function modify_head_count(listview) {
 }
 function update_no(data_len, l, dict, data, r) {
   let valid = "";
-  let notes = document.getElementById("notes").value;
   for (let i = 0; i < data_len; i++) {
     let y = document.getElementById("_" + data[i].staffing_organization).value;
+    let notes=document.getElementById("_"+data[i].staffing_organization+"_notes").value
     if (y.length == 0) {
       y = 0;
     }
@@ -286,7 +286,7 @@ function modify_claims(listview) {
                                 <td>${job_data[p].staff_claims_no}</td>
                                 <td>${job_data[p].approved_no_of_workers}</td>
                                 <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no}></td>
-                                <td><textarea id="notes" class="head_count_tittle" maxlength="1000"> </textarea> </td>
+                                <td><textarea id="_${job_data[p].staffing_organization}_notes" class="head_count_tittle" maxlength="1000"> </textarea> </td>
                                 </tr>`;
           }
           profile_html += `</table><style>th, td {
@@ -370,7 +370,7 @@ function update_claims(data_len, l, dict, job_data, r) {
   let total_count = 0;
   for (let i = 0; i < data_len; i++) {
     let y = document.getElementById(job_data[i].name).value;
-    let notes = document.getElementById("notes").value;
+    let notes=document.getElementById("_"+job_data[i].staffing_organization+"_notes").value
     if (y.length == 0) {
       total_count += job_data[i].approved_no_of_workers;
       continue;

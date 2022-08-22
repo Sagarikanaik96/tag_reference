@@ -150,7 +150,7 @@ def save_modified_claims(my_data,doc_name):
 					claimed = job.staff_org_claimed if job.staff_org_claimed else ""
 					doc=frappe.get_doc('Claim Order',i)
 					claim_comp_assigned(claimed,doc_name,doc)
-					msg = f"{doc.hiring_organization} has update the approved no. of employees needed for {doc_name} - {job.select_job} from {doc.approved_no_of_workers} to {my_data[i]}"
+					msg = f"{doc.hiring_organization} has update the approved no. of employees needed for {doc_name} - {job.select_job} from {doc.approved_no_of_workers} to {my_data[i]['approve_count']}"
 					
 					doc.approved_no_of_workers=my_data[i]["approve_count"]
 					doc.notes = my_data[i]["notes"]
