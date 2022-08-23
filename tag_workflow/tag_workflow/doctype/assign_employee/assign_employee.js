@@ -884,7 +884,7 @@ function assigned_direct(frm){
 	else{
 		frappe.db.get_value('Job Order', {'name': frm.doc.job_order}, ['order_status'], (r)=>{
 			if(r.order_status != 'Completed' && ['Staffing Admin', 'TAG Admin', 'Administrator'].includes(frappe.boot.tag.tag_user_info.user_type)){
-				let table_fields = ['employee', 'employee_name', 'resume', 'job_category', 'company', 'approved']
+				let table_fields = ['employee_name', 'job_category', 'company', 'approved']
 				for(let i in table_fields){
 					frm.fields_dict.employee_details.grid.update_docfield_property(table_fields[i], "read_only", 1);
 					cur_frm.refresh_fields();
