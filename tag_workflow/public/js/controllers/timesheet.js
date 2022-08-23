@@ -527,7 +527,6 @@ function update_time(frm, cdt, cdn){
 	let child = locals[cdt][cdn];
 	let sec = (moment(child.to_time).diff(moment(child.from_time), "seconds"));
 	let break_sec = 0;
-	let amount = 0;
 	if(child.break_start_time && child.break_end_time && child.break_start_time >= child.from_time && child.break_end_time <= child.to_time){
 		break_sec = (moment(child.break_end_time).diff(moment(child.break_start_time), "seconds"));
 		if(break_sec < 0){
@@ -546,23 +545,32 @@ function update_time(frm, cdt, cdn){
 	frappe.model.set_value(cdt, cdn, "billing_hours", hours);
 	frappe.model.set_value(cdt, cdn, "hrs", (hour+'hr '+minutes+'min'));
 	
-	if(hours > frm.doc.estimated_daily_hours && frm.doc.no_show == 0){
-		let ex_rate = frm.doc.per_hour_rate*1.5;
-		let ex_hour = hours-frm.doc.estimated_daily_hours;
-		frappe.model.set_value(cdt, cdn, "extra_rate", ex_rate);
-		frappe.model.set_value(cdt, cdn, "extra_hours", ex_hour);
-		let extra = ex_rate*ex_hour;
-		amount = frm.doc.estimated_daily_hours*child.billing_rate+child.flat_rate + extra;
-	}else{
-		amount = hours*child.billing_rate+child.flat_rate;
-		frappe.model.set_value(cdt, cdn, "extra_rate", 0);
-		frappe.model.set_value(cdt, cdn, "extra_hours", 0);
-	} 
+	frappe.call({
+		'method':'tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_billing_calculation',
+		'args':{
+			'timesheet':frm.doc.name,
+			'jo':frm.doc.job_order_detail,
+			'timesheet_date':frm.doc.date_of_timesheet,
+			'employee':frm.doc.employee,
+			'working_hours':hours,
+			'total_flat_rate':child.flat_rate,
+			'per_hour_rate':child.billing_rate
+		},
+		callback:function(r){
+			setTimeout(() => {
+				frappe.model.set_value(cdt, cdn, "base_billing_amount", r.message[0][0]);
+				frappe.model.set_value(cdt, cdn, "billing_amount", r.message[0][0]);
+				cur_frm.set_value('timesheet_billable_amount',r.message[0][0]);
+				cur_frm.set_value('timesheet_billable_overtime_amount',r.message[0][1]);
+				cur_frm.set_value('total_job_order_amount',r.message[0][2]);
+				cur_frm.set_value('total_job_order_billable_overtime_amount_',r.message[0][3])
+				update_hourly_data(r)
+			}, 10);
 
-	setTimeout(() => {
-		frappe.model.set_value(cdt, cdn, "base_billing_amount", amount);
-		frappe.model.set_value(cdt, cdn, "billing_amount", amount);
-	}, 10);
+		}
+	})
+
+	
 }
 
 function add_button_submit(frm){
@@ -615,4 +623,18 @@ function hide_pay_rate(frm){
         pay_amount.hidden = 1;
 		frm.refresh_fields();
 	}
+}
+
+function update_hourly_data(r){
+	cur_frm.set_value('timesheet_hours',r.message[1][0]);
+	cur_frm.set_value('total_weekly_hours',r.message[1][1]);
+	cur_frm.set_value('current_job_order_hours',r.message[1][2][0]);
+	cur_frm.set_value('overtime_timesheet_hours',r.message[1][3][0])
+	cur_frm.set_value('total_weekly_overtime_hours',r.message[1][4][0]);
+	cur_frm.set_value('cuurent_job_order_overtime_hours',r.message[1][5][0]);
+	cur_frm.set_value('total_weekly_hiring_hours',r.message[1][6][0]);
+	cur_frm.set_value('total_weekly_overtime_hiring_hours',r.message[1][7][0])
+	cur_frm.set_value('overtime_timesheet_hours1',r.message[1][8][0]);
+	cur_frm.set_value('billable_weekly_overtime_hours',r.message[1][9][0]);
+	cur_frm.set_value('unbillable_weekly_overtime_hours',r.message[1][10]);
 }
