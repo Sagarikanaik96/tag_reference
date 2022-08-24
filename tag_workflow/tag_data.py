@@ -1334,13 +1334,13 @@ def update_order_status(job_order_name):
 @frappe.whitelist()
 def update_section_status(company, jo):
     doc=frappe.get_doc(jobOrder,jo)
-    sql1 = """ select docstatus from `tabSales Invoice` where job_order = '{0}' and company= '{1}' """.format(jo, company)
+    sql1 = """ select docstatus from `tabSales Invoice` where job_order = '{0}' and company= "{1}" """.format(jo, company)
     jo_state = frappe.db.sql(sql1, as_dict=1)
     for i in jo_state:
         if(i["docstatus"]==1 and doc.order_status=='Completed'):
             return "Complete"
 
-    sql = """ select workflow_state from `tabTimesheet` where job_order_detail = '{0}' and employee_company= '{1}' """.format(jo, company)
+    sql = """ select workflow_state from `tabTimesheet` where job_order_detail = '{0}' and employee_company= "{1}" """.format(jo, company)
     timesheet_state = frappe.db.sql(sql, as_dict=1)
     timesheet_state_data=[]
     for i in timesheet_state:
