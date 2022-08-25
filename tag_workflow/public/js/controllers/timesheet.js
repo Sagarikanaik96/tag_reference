@@ -169,9 +169,11 @@ function job_order_details(frm){
 					<p><b>Job Title: </b> ${r['select_job']}</p>
 					<p><b>Job Site: </b> ${r['job_site']}</p>
 					<p><b>Job Duration: </b> ${r['job_order_duration']}</p>
-					<p><b>Rate Per Hour: </b> ${r['per_hour']}</p>
-					<p><b>Work Order Status: </b> ${r['order_status']}</p>
-				</div>`;
+					<p><b>Bill Rate Per Hour: </b> ${r['per_hour']}</p>`
+				if(!['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type)){
+					data += `<p><b>Pay Rate Per Hour: </b>${frm.doc.employee_pay_rate}<p/>`
+				}
+				data+=`<p><b>Work Order Status: </b> ${r['order_status']}</p></div>`;
 				frm.set_df_property("job_details", "options", data);
 				if(cur_frm.doc.__islocal == 1){
 					frm.set_value('from_date',(r.from_date).slice(0,10));  //.slice(0,10)
@@ -614,6 +616,9 @@ function fields_label_update(frm){
 		frm.set_df_property("timesheet_billable_overtime_amount",'label',"Timesheet Billable Overtime Amount "+usd)
 		frm.set_df_property("total_job_order_billable_overtime_amount_",'label',"Total Job Order Billable Overtime Amount  "+usd)
 	}
+	let pay_amount = frappe.meta.get_docfield('Timesheet Detail','pay_amount', frm.doc.name);
+	pay_amount.label = 'Pay Amount (USD)'
+	frm.refresh_field('time_logs');
  }
  
 
