@@ -155,13 +155,18 @@ frappe.ui.form.on('Assign Employee', {
 			message=message+"<br>Employee Pay Rate";
 		}
 		message = field_validation(frm, message);
-
+		let is_negative = negative_pay_rate(frm, emp_pay_rate);
+		let final_message = '';
 		if(message!="<b>Please Fill Mandatory Fields:</b>"){
-			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
-			frappe.validated=false;
+			final_message += is_negative ? message+'<hr>Negative Pay Rate not accepted.' : message;
 		}
-		else{
-			negative_pay_rate(frm, emp_pay_rate);
+		else if(is_negative){
+			final_message += 'Negative Pay Rate not accepted.';
+		}
+
+		if (final_message!=''){
+			frappe.msgprint({message: __(final_message), title: __('Error'), indicator: 'orange'});
+			frappe.validated=false;
 		}
 	},
 
@@ -1005,8 +1010,5 @@ function negative_pay_rate(frm, emp_pay_rate){
 			is_negative = true;
 		}
 	}
-	if(emp_pay_rate < 0 || is_negative){
-		frappe.msgprint({message: __('Negative Pay Rate not accepted.'), title: __('Negative Value Error'), indicator: 'orange'})
-		frappe.validated=false;
-	}
+	return (emp_pay_rate < 0 || is_negative) ? true : false;
 }
