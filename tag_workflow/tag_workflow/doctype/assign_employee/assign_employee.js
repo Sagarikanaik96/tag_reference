@@ -160,6 +160,9 @@ frappe.ui.form.on('Assign Employee', {
 			frappe.msgprint({message: __(message), title: __('Error'), indicator: 'orange'});
 			frappe.validated=false;
 		}
+		else{
+			negative_pay_rate(frm, emp_pay_rate);
+		}
 	},
 
 	setup: function(frm){
@@ -806,9 +809,9 @@ function confirm_message(frm){
 		for(let i in emp_details){
 			max_payrate = emp_details[i].pay_rate > max_payrate ? emp_details[i].pay_rate : max_payrate;
 		}
-		if(max_payrate > (r.per_hour + r.flat_rate)){
+		if(frm.doc.employee_pay_rate > (r.per_hour + r.flat_rate) || max_payrate > (r.per_hour + r.flat_rate)){
 			temp['bill_rate'] = r.per_hour + r.flat_rate;
-			temp['max_payrate'] = max_payrate;
+			temp['max_payrate'] = max_payrate > frm.doc.employee_pay_rate ? max_payrate : frm.doc.employee_pay_rate;
 		}
 	});
 	frappe.call({
@@ -1004,4 +1007,18 @@ function field_validation_contd(frm){
 		}
 	}
 	return message;
+}
+
+function negative_pay_rate(frm, emp_pay_rate){
+	let emp_tab=frm.doc.employee_details;
+	let is_negative = false;
+	for(let i in emp_tab){
+		if(emp_tab[i].pay_rate < 0){
+			is_negative = true;
+		}
+	}
+	if(emp_pay_rate < 0 || is_negative){
+		frappe.msgprint({message: __('Negative Pay Rate not accepted.'), title: __('Negative Value Error'), indicator: 'orange'})
+		frappe.validated=false;
+	}
 }
