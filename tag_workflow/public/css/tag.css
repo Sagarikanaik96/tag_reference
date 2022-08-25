@@ -512,7 +512,14 @@ input::-webkit-credentials-auto-fill-button {
 }
 
 [data-route="List/Claim Order/List"] .modal .modal-dialog {
-  max-width: 830px !important;
+  max-width: 650px !important;
+}
+[data-route="List/Claim Order/List"]
+  .modal
+  .modal-dialog
+  .modal-content
+  .modal-body {
+  border-radius: 12px !important;
 }
 [data-route="List/Claim Order/List"] .contract_div h3 {
   color: var(--primary-color);

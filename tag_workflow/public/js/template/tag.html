@@ -162,6 +162,9 @@
       .sub-menu .internal-custom-btn .inner-menu-sec .active a {
         font-weight: 600;
       }
+      .sub-menu img {
+        margin-top: -5px;
+      }
       [data-route="Workspaces/Home"] .sub-menu,
       [data-route=""] .sub-menu {
         top: 61px !important;
@@ -420,6 +423,40 @@
                 </ul>
               </div>
 
+              <a href="#" onclick="employee_page()">
+                <div class="tab-button custom-btn">
+                  <img
+                    src="/assets/tag_workflow/images/ico-employee.svg"
+                    class="pr-3 pl-5"
+                    alt="employee"
+                  />Employees
+                </div>
+              </a>
+              {% endif %}
+
+              <a href="/app/reports">
+                <div class="tab-button custom-btn">
+                  <img
+                    src="/assets/tag_workflow/images/ico-invoice.svg"
+                    class="pr-3 pl-5"
+                    alt="reports"
+                  />Reports
+                </div>
+              </a>
+
+              <a href="/app/sales-invoice">
+                <div class="tab-button custom-btn">
+                  <img
+                    src="/assets/tag_workflow/images/ico-invoices.svg"
+                    class="pr-3 pl-5"
+                    alt="invoice"
+                  />Invoices
+                </div>
+              </a>
+
+              {% if frappe.boot.tag.tag_user_info.company_type != "Hiring" &&
+              frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"
+              %}
               <div class="tab-button custom-btn internal-custom-btn">
                 <ul class="nav crm">
                   <li>
@@ -433,7 +470,7 @@
                       <span class="pl-3 ml-3"
                         ><img
                           src="/assets/tag_workflow/images/payroll.svg"
-                          class="pr-3 pl-3"
+                          class="pr-2 pl-3"
                           alt="crm"
                       /></span>
                       <span class="slide-text"> Payroll </span>
@@ -501,37 +538,7 @@
                   </li>
                 </ul>
               </div>
-
-              <a href="#" onclick="employee_page()">
-                <div class="tab-button custom-btn">
-                  <img
-                    src="/assets/tag_workflow/images/ico-employee.svg"
-                    class="pr-3 pl-5"
-                    alt="employee"
-                  />Employees
-                </div>
-              </a>
               {% endif %}
-
-              <a href="/app/reports">
-                <div class="tab-button custom-btn">
-                  <img
-                    src="/assets/tag_workflow/images/ico-invoice.svg"
-                    class="pr-3 pl-5"
-                    alt="reports"
-                  />Reports
-                </div>
-              </a>
-
-              <a href="/app/sales-invoice">
-                <div class="tab-button custom-btn">
-                  <img
-                    src="/assets/tag_workflow/images/ico-invoices.svg"
-                    class="pr-3 pl-5"
-                    alt="invoice"
-                  />Invoices
-                </div>
-              </a>
 
               <!-- user info -->
               <div class="row footer-admin border-top pl-4 py-4">
