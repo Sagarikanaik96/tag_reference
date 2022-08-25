@@ -6,10 +6,10 @@ frappe.listview_settings['Sales Invoice'] = {
 		$('input[data-fieldname="name"]')[0].value = '';
 		$('h3[title = "Invoice"]').html('Invoices');
 		if(frappe.session.user!='Administrator'){
-			// $('.custom-actions.hidden-xs.hidden-md').hide()
 			$('[data-original-title="Refresh"]').hide()
 			$('.menu-btn-group').hide()
         }
+		$('[data-original-title="Job Order ID"]>div>div>input').attr('placeholder','Job Order');
 		$('[data-original-title="Grand Total"]>input').val(null)
 		if (frappe.boot.tag.tag_user_info.company_type == 'TAG'){
 			listview.page.add_button(__("Create monthly Invoice"), function() {
@@ -37,7 +37,56 @@ frappe.listview_settings['Sales Invoice'] = {
 		doc_filter.options.add(new Option(), 0);
 		doc_filter.options[1].innerHTML = 'Draft';
 		doc_filter.options[2].innerHTML = 'Submitted';
-		$('[data-original-title = "Status"][data-fieldname = "status"]').hide();
+
+		const filter_job_order = {
+            condition: "=",
+            default: null,
+            fieldname: "job_order",
+            fieldtype: "Link",
+            input_class: "input-xs",
+            label: "Job Order",
+            is_filter: 1,
+            onchange: function() {
+                listview.refresh();
+            },
+            options: "Job Order",
+            placeholder: "Job Order"
+        };
+		let standard_filters_wrapper_job_order = listview.page.page_form.find('.standard-filter-section');
+		listview.page.add_field(filter_job_order, standard_filters_wrapper_job_order);
+
+		const filter_date = {
+            condition: "=",
+            default: null,
+            fieldname: "posting_date",
+            fieldtype: "Date",
+            input_class: "input-xs",
+            label: "Date",
+            is_filter: 1,
+            onchange: function() {
+                listview.refresh();
+            },
+            placeholder: "Date"
+        };
+		let standard_filters_wrapper_date = listview.page.page_form.find('.standard-filter-section');
+		listview.page.add_field(filter_date, standard_filters_wrapper_date);
+		$('[data-original-title = "Date"][data-fieldname = "posting_date"]>input').hover(function(){ /* this function is empty */ },function(){listview.refresh();})
+	
+		const filter_total = {
+            condition: "=",
+            default: null,
+            fieldname: "grand_total",
+            fieldtype: "Currency",
+            input_class: "input-xs",
+            label: "Grand Total",
+            is_filter: 1,
+            onchange: function() {
+                listview.refresh();
+            },
+            placeholder: "Grand Total"
+        };
+		let standard_filters_wrapper_total = listview.page.page_form.find('.standard-filter-section');
+		listview.page.add_field(filter_total, standard_filters_wrapper_total);
 
 		const filters = {
             condition: "=",
@@ -51,7 +100,7 @@ frappe.listview_settings['Sales Invoice'] = {
                 listview.refresh();
             },
             options: [0,1],
-            placeholder: "Paid Status"
+            placeholder: "Paid"
         };
 		let standard_filters_wrappers= listview.page.page_form.find('.standard-filter-section');
 		listview.page.add_field(filters, standard_filters_wrappers);
@@ -59,7 +108,6 @@ frappe.listview_settings['Sales Invoice'] = {
 		doc_filters.options.add(new Option(), "*");
 		doc_filters.options[1].innerHTML = 'Unpaid';
 		doc_filters.options[2].innerHTML = 'Paid';
-		$('[data-original-title = "Status"][data-fieldname = "is_pos"]').hide();
 	},
 
 	formatters: {
