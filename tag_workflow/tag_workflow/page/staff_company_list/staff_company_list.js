@@ -30,6 +30,7 @@ frappe.FaceRecognition = Class.extend({
 			},
 			callback: async function (r) {
 				let data = r.message;
+				data.sort((a, b) => a.name.localeCompare(b.name))
 				let sorted_data =[];
 				let non_fav = [];
 				let profile_html = ``;
@@ -47,7 +48,7 @@ frappe.FaceRecognition = Class.extend({
 				}
 				sorted_data.push(... non_fav)
 				for(let p in sorted_data){
-					profile_html = await sorted_favourite_companies(sorted_data[p], profile_html);
+					profile_html = await sorted_favourite_companies(sorted_data[p], profile_html,frappe.boot.tag.tag_user_info.company_type);
 				}
 				$("#myTable").html(profile_html);
 			}
@@ -56,14 +57,20 @@ frappe.FaceRecognition = Class.extend({
 })
 
 
-async function sorted_favourite_companies(data, profile_html) {
+async function sorted_favourite_companies(data, profile_html,company_type) {
 		let link = data.name.split(' ').join('%');
+		let Likebtnexclusice = `<td>
+		<svg class="icon icon-sm">
+			<use class="like-icon" href="#icon-heart" style="stroke: var(--gray-500);"></use>
+			</svg>
+		</td>`
+		let Likebtnnonexclusice = `<td>
+		<svg ${data.LikeStatus ? "class='icon icon-sm liked'" : "class='icon icon-sm not-liked'"}cursor:pointer" onClick = setLike(this,"${link}")>
+		<use class="like-icon" href="#icon-heart"></use>
+		</svg>
+		</td>`
 		profile_html += `<tr>
-					<td>
-					<svg ${data.LikeStatus ? "class='icon icon-sm liked'" : "class='icon icon-sm not-liked'"}cursor:pointer" onClick = setLike(this,"${link}")>
-					<use class="like-icon" href="#icon-heart"></use>
-					</svg>
-					</td>
+					${company_type === "Exclusive Hiring" ?Likebtnexclusice:Likebtnnonexclusice}
 					<td ><a onclick=dynamic_route("${link}")>${data.name}</a></td>
 					<td>${data.address || ''}</td>	
 					<td>${data.city || ''}</td>
