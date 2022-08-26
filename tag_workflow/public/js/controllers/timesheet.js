@@ -169,9 +169,9 @@ function job_order_details(frm){
 					<p><b>Job Title: </b> ${r['select_job']}</p>
 					<p><b>Job Site: </b> ${r['job_site']}</p>
 					<p><b>Job Duration: </b> ${r['job_order_duration']}</p>
-					<p><b>Bill Rate Per Hour: </b> ${r['per_hour']}</p>`
+					<p><b>Bill Rate Per Hour: </b>$${r['per_hour'].toFixed(2)}</p>`
 				if(!['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type)){
-					data += `<p><b>Pay Rate Per Hour: </b>${frm.doc.employee_pay_rate}<p/>`
+					data += `<p><b>Pay Rate Per Hour: </b>$${(frm.doc.employee_pay_rate).toFixed(2)}</p>`
 				}
 				data+=`<p><b>Work Order Status: </b> ${r['order_status']}</p></div>`;
 				frm.set_df_property("job_details", "options", data);
