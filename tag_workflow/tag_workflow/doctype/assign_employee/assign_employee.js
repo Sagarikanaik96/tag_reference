@@ -802,18 +802,6 @@ function pop_up_message(r,frm){
 	}
 }
 function confirm_message(frm){
-	let temp={};
-	frappe.db.get_value('Job Order', {'name': frm.doc.job_order}, ['per_hour', 'flat_rate'], function(r){
-		let emp_details = frm.doc.employee_details;
-		let max_payrate=0;
-		for(let i in emp_details){
-			max_payrate = emp_details[i].pay_rate > max_payrate ? emp_details[i].pay_rate : max_payrate;
-		}
-		if(frm.doc.employee_pay_rate > (r.per_hour + r.flat_rate) || max_payrate > (r.per_hour + r.flat_rate)){
-			temp['bill_rate'] = r.per_hour + r.flat_rate;
-			temp['max_payrate'] = max_payrate > frm.doc.employee_pay_rate ? max_payrate : frm.doc.employee_pay_rate;
-		}
-	});
 	frappe.call({
 		'method':'tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.check_emp_available',
 		'args':{
@@ -821,19 +809,19 @@ function confirm_message(frm){
 		},
 		async: 1,
 		callback:function(r){
-			if(r.message.length==0 || r.message==1){
-				check_pay_rate(frm, temp);
+			if(r.message[0].length==0 || r.message[0]==1){
+				check_pay_rate(frm, r.message[1]);
 			}
 			else{
 				return new Promise(function(resolve) {
 					let pop_up1;
 					let msg1=''
-					for(let i=0;i<=r.message.length-1;i++){
-						let new_msg='Warning: '+r.message[i]["employee"]+' is scheduled for '+r.message[i]["job_order"] +' within this Job Order’s timeframe.'
+					for(let i=0;i<=r.message[0].length-1;i++){
+						let new_msg='Warning: '+r.message[0][i]["employee"]+' is scheduled for '+r.message[0][i]["job_order"] +' within this Job Order’s timeframe.'
 						msg1= msg1+"<br>"+new_msg
 					}
-					if(Object.keys(temp).length == 2){
-						msg1 += "<hr>Pay Rate of $" + temp.max_payrate + " is greater than the bill rate of $" + temp.bill_rate + " for " + frm.doc.job_order + ". Please confirm.";
+					if(Object.keys(r.message[1]).length == 2){
+						msg1 += "<hr>Pay Rate of $" + r.message[1].max_payrate + " is greater than the bill rate of $" + r.message[1].bill_rate + " for " + frm.doc.job_order + ". Please confirm.";
 						let emp_details = frm.doc.employee_details;
 						msg1 += "<br><table style='width:50%'><tr><td><b>Employee Name</b></td><td><b>Pay Rate</b></td></tr>";
 						for(let i in emp_details){

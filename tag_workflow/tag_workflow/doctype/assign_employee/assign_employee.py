@@ -156,6 +156,7 @@ def check_emp_available(frm):
         my_job=frappe.get_doc('Job Order',job_order)
         job_start_date=my_job.from_date
         job_end_date=my_job.to_date
+        pay_rate = check_pay_rate(my_job.per_hour+my_job.flat_rate, data);
         data=f'select name,job_order from `tabAssign Employee` where company="{company}" and tag_status="Approved" and job_order in (select name from `tabJob Order` where order_status!="Completed" and ((from_date between "{job_start_date}" and "{job_end_date}") or (to_date between "{job_start_date}" and "{job_end_date}")  ))'
         my_dta=frappe.db.sql(data,as_dict=1)
         if my_dta:
@@ -173,9 +174,9 @@ def check_emp_available(frm):
                 d1['job_order']=y.job_order
                 d1['employee']=i[0]
                 z.append(d1)
-            return z
+            return z, pay_rate
         else:
-            return 1
+            return 1, pay_rate
     except Exception as e:
         frappe.error_log(e,'Check same order')
 def my_emp_work(emps,my_emp_data):
@@ -211,4 +212,19 @@ def payrate_change(docname):
         return 'failure'
     except Exception as e:
         frappe.log_error(e, 'Pay Rate Change Error')
+        print(e, frappe.get_traceback())
+
+def check_pay_rate(total_bill_rate, data):
+    try:
+        emp_details = data['employee_details']
+        max_payrate=0
+        temp = dict()
+        for i in emp_details:
+            max_payrate = i['pay_rate'] if i['pay_rate'] > max_payrate else max_payrate
+        if data['employee_pay_rate'] > total_bill_rate or max_payrate > total_bill_rate:
+            temp['bill_rate'] = total_bill_rate
+            temp['max_payrate'] = max_payrate if max_payrate > data['employee_pay_rate'] else data['employee_pay_rate']
+        return temp
+    except Exception as e:
+        frappe.log_error(e, 'Check Pay Rate Pop Up Error')
         print(e, frappe.get_traceback())
