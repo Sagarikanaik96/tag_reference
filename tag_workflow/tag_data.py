@@ -406,19 +406,16 @@ def job_site_contact(doctype, txt, searchfield, page_len, start, filters):
     sql = ''' select name, full_name, email, mobile_no from `tabUser` where company='{0}' and name like '%%{1}%%' '''.format(company, '%s' % txt)
     return frappe.db.sql(sql)
 
-sql_cmd = ''' select industry_type from `tabIndustry Types` where parent='{0}' '''
-
 @frappe.whitelist(allow_guest=True)
 def hiring_category(doctype,txt,searchfield,page_len,start,filters):
     company=filters.get('hiring_company')
-    sql=sql_cmd.format(company)
-    print(sql)
+    sql= '''select industry_type from `tabIndustry Types` where parent='{0}' and industry_type like "%%{1}%%"'''.format(company, '%s' % txt)
     return frappe.db.sql(sql)
 
 
 @frappe.whitelist(allow_guest=False)
 def org_industy_type(company=None):
-    sql=sql_cmd.format(company)
+    sql='''select industry_type from `tabIndustry Types` where parent='{0}' '''.format(company)
     return frappe.db.sql(sql)
 
 
