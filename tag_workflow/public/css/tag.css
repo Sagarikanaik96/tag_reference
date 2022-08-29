@@ -548,7 +548,8 @@ textarea:focus-visible {
 
 /* Responsive css start */
 
-#page-Company textarea.form-control {
+#page-Company textarea.form-control,
+textarea.form-control {
   height: 120px !important;
 }
 
