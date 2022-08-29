@@ -615,6 +615,7 @@ function fields_label_update(frm){
 		frm.set_df_property("total_job_order_amount",'label',"Total Job Order Amount "+usd)
 		frm.set_df_property("timesheet_billable_overtime_amount",'label',"Timesheet Billable Overtime Amount "+usd)
 		frm.set_df_property("total_job_order_billable_overtime_amount_",'label',"Total Job Order Billable Overtime Amount  "+usd)
+		frm.set_df_property("timesheet_billable_overtime_amount_staffing", "label", "Timesheet Billable Overtime Amount "+usd)
 	}
 	let pay_amount = frappe.meta.get_docfield('Timesheet Detail','pay_amount', frm.doc.name);
 	pay_amount.label = 'Pay Amount (USD)'

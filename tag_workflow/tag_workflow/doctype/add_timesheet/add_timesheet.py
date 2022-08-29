@@ -429,11 +429,11 @@ def set_payroll_fields(pay_rate, hiring_company, employee, timesheet, timesheet_
     total_weekly_hours_unbillable = weekly_hours_unbillable[0].total_working_hours if weekly_hours_unbillable[0].total_working_hours is not None else 0.0
     timesheet_unbillable_ot = 1.5*pay_rate*today_hours if total_weekly_hours_unbillable > 40 and worked_time < 40 else 0.0
     
-    total_job_order = frappe.db.sql(f"select sum(timesheet_payable_amount) as job_order_payable , sum(timesheet_billable_overtime_amount) as job_order_ot from `tabTimesheet` where employee='{employee}' and job_order_detail='{job_order}'", as_dict=1)
+    total_job_order = frappe.db.sql(f"select sum(timesheet_payable_amount) as job_order_payable , sum(timesheet_billable_overtime_amount_staffing) as job_order_ot from `tabTimesheet` where employee='{employee}' and job_order_detail='{job_order}' and date_of_timesheet <= '{timesheet_date}' and name!='{timesheet}'", as_dict=1)
     total_job_payable = (total_job_order[0]['job_order_payable'] if total_job_order[0]['job_order_ot'] is not None else 0.00) + timesheet_payable_amount
     total_job_billable_ot = (total_job_order[0]['job_order_ot']  if total_job_order[0]['job_order_ot'] is not None else 0.00) + timesheet_ot_billable
     
-    unbillable_ot = frappe.db.sql(f"select sum(total_job_order_unbillable_overtime_amount) as unbillable_ot from tabTimesheet where employee='{employee}' and company != '{hiring_company}' and name!='{timesheet}'", as_dict=1)
+    unbillable_ot = frappe.db.sql(f"select sum(timesheet_unbillable_overtime_amount) as unbillable_ot from tabTimesheet where employee='{employee}' and company != '{hiring_company}' and date_of_timesheet <= '{timesheet_date}' and name!='{timesheet}'", as_dict=1)
     total_unbillable_ot = (unbillable_ot[0]['unbillable_ot'] if unbillable_ot[0]['unbillable_ot'] is not None else 0.00)
 
     return timesheet_payable_amount, timesheet_ot_billable, timesheet_unbillable_ot, total_job_payable, total_job_billable_ot, total_unbillable_ot
