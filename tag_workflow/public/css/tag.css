@@ -1259,6 +1259,83 @@ select.input-with-feedback.form-control.ellipsis {
   flex: 0 0 3.5% !important;
   height: auto;
 }
+
+[data-page-route="Timesheet"]
+  .form-grid
+  .grid-heading-row
+  .data-row
+  .sortable-handle,
+[data-page-route="Timesheet"] .form-grid .grid-body .data-row .sortable-handle,
+[data-page-route="Sales Invoice"]
+  .form-page
+  .form-section:nth-child(11)
+  .form-grid
+  .grid-heading-row
+  .data-row
+  .sortable-handle,
+[data-page-route="Sales Invoice"]
+  .form-page
+  .form-section:nth-child(11)
+  .form-grid
+  .grid-body
+  .data-row
+  .sortable-handle {
+  max-width: 4% !important;
+  flex: 0 0 4% !important;
+  height: auto;
+}
+[data-page-route="Timesheet"]
+  .form-grid
+  .grid-heading-row
+  .data-row
+  div.grid-static-col:nth-child(6),
+[data-page-route="Timesheet"]
+  .form-grid
+  .grid-body
+  .data-row
+  div.grid-static-col:nth-child(6),
+[data-page-route="Timesheet"]
+  .form-grid
+  .grid-heading-row
+  .data-row
+  div.grid-static-col:nth-child(7),
+[data-page-route="Timesheet"]
+  .form-grid
+  .grid-body
+  .data-row
+  div.grid-static-col:nth-child(7),
+[data-page-route="Sales Invoice"]
+  .form-page
+  .form-section:nth-child(11)
+  .form-grid
+  .grid-heading-row
+  .data-row
+  div.grid-static-col:nth-child(6),
+[data-page-route="Sales Invoice"]
+  .form-page
+  .form-section:nth-child(11)
+  .form-grid
+  .grid-body
+  .data-row
+  div.grid-static-col:nth-child(6),
+[data-page-route="Sales Invoice"]
+  .form-page
+  .form-section:nth-child(11)
+  .form-grid
+  .grid-heading-row
+  .data-row
+  div.grid-static-col:nth-child(7),
+[data-page-route="Sales Invoice"]
+  .form-page
+  .form-section:nth-child(11)
+  .form-grid
+  .grid-body
+  .data-row
+  div.grid-static-col:nth-child(7) {
+  max-width: 10.5% !important;
+  flex: 0 0 10.5% !important;
+}
+
 [data-page-route="Add Timesheet"]
   .form-grid
   .grid-heading-row
