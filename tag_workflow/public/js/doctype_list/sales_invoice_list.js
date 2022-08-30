@@ -2,7 +2,9 @@ frappe.listview_settings['Sales Invoice'] = {
 	onload:function(listview){
 		document.getElementsByClassName('list-row-col ellipsis')[6].style.textAlign = "right";
 		document.getElementsByClassName('list-row-col ellipsis')[6].innerHTML	 = "Paid";
+		document.getElementsByClassName('list-row-col ellipsis')[6].style.color	 = "#8d9cbc";
 		document.getElementsByClassName('list-row-col ellipsis')[3].innerHTML	 = "Job Order";
+		document.getElementsByClassName('list-row-col ellipsis')[3].style.color	 = "#8d9cbc";
 		$('input[data-fieldname="name"]')[0].value = '';
 		$('h3[title = "Invoice"]').html('Invoices');
 		if(frappe.session.user!='Administrator'){
@@ -39,17 +41,16 @@ frappe.listview_settings['Sales Invoice'] = {
 		doc_filter.options[2].innerHTML = 'Submitted';
 
 		const filter_job_order = {
-            condition: "=",
+            condition: "like",
             default: null,
             fieldname: "job_order",
-            fieldtype: "Link",
+            fieldtype: "Data",
             input_class: "input-xs",
             label: "Job Order",
             is_filter: 1,
             onchange: function() {
                 listview.refresh();
             },
-            options: "Job Order",
             placeholder: "Job Order"
         };
 		let standard_filters_wrapper_job_order = listview.page.page_form.find('.standard-filter-section');
@@ -109,9 +110,8 @@ frappe.listview_settings['Sales Invoice'] = {
 		doc_filters.options[1].innerHTML = 'Unpaid';
 		doc_filters.options[2].innerHTML = 'Paid';
 	},
-
 	formatters: {
-		grand_total(val,d,f){
+		grand_total(val,_d,f){
 			let finalAmount = 0.00;
 			if(typeof(val)=="number" && val>0){
 				finalAmount=((val).toFixed(2));
@@ -119,7 +119,7 @@ frappe.listview_settings['Sales Invoice'] = {
 			else{
 				finalAmount=finalAmount.toFixed(2);
 			}
-			return `<span class="filterable ellipsis" title="" id="${val}-${f.name}" ><a class="filterable ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >$ ${finalAmount}</a></span>`;
+			return `<span class="filterable ellipsis" title="" id="${val}-${f.name}" ><a class="filterable ellipsis" data-fieldname="${val}-${f.name}" >$ ${finalAmount}</a></span>`;
 		},
 		is_pos(val,d,f){
 			if(val==1){
@@ -134,7 +134,18 @@ frappe.listview_settings['Sales Invoice'] = {
 						<a data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}"> </a>
 					</span>`
 			},
-		
+			job_order(val,_d,_f){
+				return `<span class="level-item  ellipsis" title="${val}">  <a href=${'/app/job-order/'+ val } class="ellipsis"
+				data-doctype= "Sales Invoice" data-name=${val} title="${val}" id="${val} data-jobname="name">
+				${val}
+				</a></span>`;
+				},
+			posting_date(val,_d,_f){
+				return `<span class="level-item  ellipsis" title="${val}">  <a class="ellipsis"
+				data-doctype= "Sales Invoice" data-name=${val} title="${val}" id="${val} data-jobname="name">
+				${val}
+				</a></span>`
+			},		
 	},
 	refresh:function(){
 		$('[data-fieldname="name"]').hide()
@@ -146,6 +157,11 @@ frappe.listview_settings['Sales Invoice'] = {
 		if(a == 0.00){
 			$('[data-original-title="Grand Total"]>input').val("") 	
 		}
+		document.getElementsByClassName('list-row-col ellipsis')[118].style.textAlign = "right";
+		document.getElementsByClassName('list-row-col ellipsis')[118].innerHTML	 = "Paid";
+		document.getElementsByClassName('list-row-col ellipsis')[118].style.color	 = "#8d9cbc";
+		document.getElementsByClassName('list-row-col ellipsis')[115].innerHTML	 = "Job Order";
+		document.getElementsByClassName('list-row-col ellipsis')[115].style.color	 = "#8d9cbc";
 	},
 	hide_name_column: true,
 	// add_fields: ['type', 'reference_doctype', 'reference_name'],
