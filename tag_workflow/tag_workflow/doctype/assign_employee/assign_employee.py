@@ -217,13 +217,15 @@ def payrate_change(docname):
 def check_pay_rate(total_bill_rate, data):
     try:
         emp_details = data['employee_details']
-        max_payrate=0
-        temp = dict()
+        temp = {'bill_rate': total_bill_rate}
+        employees = {}
+        if data['employee_pay_rate'] > total_bill_rate:
+            temp['emp_pay_rate'] = data['employee_pay_rate']
         for i in emp_details:
-            max_payrate = i['pay_rate'] if i['pay_rate'] > max_payrate else max_payrate
-        if data['employee_pay_rate'] > total_bill_rate or max_payrate > total_bill_rate:
-            temp['bill_rate'] = total_bill_rate
-            temp['max_payrate'] = max_payrate if max_payrate > data['employee_pay_rate'] else data['employee_pay_rate']
+            if i['pay_rate'] > total_bill_rate:
+                employees[i['employee_name']] = i['pay_rate']
+        if len(employees)>0:
+            temp['employees'] = employees
         return temp
     except Exception as e:
         frappe.log_error(e, 'Check Pay Rate Pop Up Error')

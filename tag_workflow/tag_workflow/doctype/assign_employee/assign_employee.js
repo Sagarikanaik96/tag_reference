@@ -836,16 +836,8 @@ function confirm_message(frm){
 						let new_msg='Warning: '+r.message[0][i]["employee"]+' is scheduled for '+r.message[0][i]["job_order"] +' within this Job Order’s timeframe.'
 						msg1= msg1+"<br>"+new_msg
 					}
-					if(Object.keys(r.message[1]).length == 2){
-						msg1 += "<hr>Pay Rate of $" + r.message[1].max_payrate + " is greater than the bill rate of $" + r.message[1].bill_rate + " for " + frm.doc.job_order + ". Please confirm.";
-						let emp_details = frm.doc.employee_details;
-						msg1 += "<br><table style='width:50%'><tr><td><b>Employee Name</b></td><td><b>Pay Rate</b></td></tr>";
-						for(let i in emp_details){
-							msg1 += "<tr><td>"+emp_details[i].employee_name+"</td><td>$"+emp_details[i].pay_rate+"</td></tr>";
-						}
-						msg1 += "</table>";
-					}
-					pop_up1=msg1
+					let pay_msg = pay_rate_message(frm, r.message[1]);
+					pop_up1 = pay_msg == '' ? msg1 : msg1+'<hr>'+pay_msg;
 					let confirm_assign = new frappe.ui.Dialog({
 						title: __('Warning'),
 						fields: [{fieldname: "save_joborder", fieldtype: "HTML", options: pop_up1},]
@@ -929,21 +921,15 @@ function set_pay_rate(frm){
 	});
 }
 
-function check_pay_rate(frm, temp){
+function check_pay_rate(frm, pay_rate_details){
+	let msg = pay_rate_message(frm, pay_rate_details);
 	return new Promise(function(resolve) {
-		if(Object.keys(temp).length==2){
-			frappe.validated = false
-			let profile_html = "Pay Rate of $" + temp.max_payrate + " is greater than the bill rate of $" + temp.bill_rate + " for " + frm.doc.job_order + ". Please confirm.";
-			let emp_details = frm.doc.employee_details;
-			profile_html += "<br><table style='width:50%'><tr><td><b>Employee Name</b></td><td><b>Pay Rate</b></td></tr>";
-			for(let i in emp_details){
-				profile_html += "<tr><td>"+emp_details[i].employee_name+"</td><td>$"+emp_details[i].pay_rate+"</td></tr>";
-			}
-			profile_html += "</table>";
+		if(msg!=''){
+			frappe.validated = false;
 			let resp;
 			let dialog = new frappe.ui.Dialog({
 				title: __('Warning!'),
-				fields: [{fieldname: "check_pay_rate", fieldtype: "HTML", options: profile_html}]
+				fields: [{fieldname: "check_pay_rate", fieldtype: "HTML", options: msg}]
 			});
 			dialog.no_cancel();
 			dialog.set_primary_action(__('Yes'), function(){
@@ -1022,4 +1008,22 @@ function negative_pay_rate(frm, emp_pay_rate){
 		}
 	}
 	return (emp_pay_rate < 0 || is_negative) ? true : false;
+}
+
+function pay_rate_message(frm, pay_rate_details){
+	let msg = '';
+	if(Object.keys(pay_rate_details).includes('emp_pay_rate')){
+		msg += "Employee Pay Rate of $" + pay_rate_details.emp_pay_rate + " is greater than the bill rate of $" + pay_rate_details.bill_rate + " for " + frm.doc.job_order + ". Please confirm.";
+	}
+	if(Object.keys(pay_rate_details).includes('employees')){
+		msg += msg!='' ? '<hr>' : '';
+		msg += "Pay Rate is greater than the bill rate of $" + pay_rate_details.bill_rate + " for " + frm.doc.job_order + " for the below employees. Please confirm."
+		msg += "<br><table style='width:50%'><tr><td><b>Employee Name</b></td><td><b>Pay Rate</b></td></tr>";
+		let keys = Object.keys(pay_rate_details.employees);
+		keys.forEach((key) => {
+			msg += "<tr><td>"+key+"</td><td>$"+pay_rate_details.employees[key]+"</td></tr>";
+		});
+		msg += "</table>";
+	}
+	return msg;
 }
