@@ -54,6 +54,7 @@ def setup_data():
         update_permissions()
         update_old_data_import()
         update_old_direct_order()
+        update_old_company_type()
         set_workspace()
         setup_company_permission()
         check_if_user_exists()
@@ -324,3 +325,19 @@ def update_old_data_import():
                 frappe.db.sql(sql)
     except Exception as e:
         frappe.log_error(e, 'Update OLd Data Import')
+#-----Update Company Type--------
+def update_old_company_type():
+    try:
+        jobs=frappe.get_all('Job Order',fields=['name','company'],filters={'company_type':['is','not set']})
+        if(len(jobs)>0):
+            for i in jobs:
+                company_type=frappe.get_doc('Company',i['company'])
+                job_order=frappe.get_doc(Job_Label,i['name'])
+                if(company_type.organization_type=='Hiring'):
+                    job_order.company_type='Non Exclusive'
+                else:
+                    job_order.company_type='Exclusive'
+                job_order.save()
+        
+    except Exception as e:
+        frappe.log_error(e,'Old Job Order Updates')

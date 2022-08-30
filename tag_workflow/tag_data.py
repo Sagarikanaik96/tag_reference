@@ -17,6 +17,7 @@ jobOrder = "Job Order"
 assignEmployees = "Assign Employee"
 NOASS = "No Access"
 exclusive_hiring = "Exclusive Hiring"
+non_exlusive='Non Exclusive'
 site= frappe.utils.get_url().split('/')
 sitename=site[0]+'//'+site[2]
 response='Not Found'
@@ -277,7 +278,7 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
         sql = '''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org)
         org_type=frappe.db.sql(sql, as_list=1)
         if(org_type[0][0]=='Hiring'):
-            doc.company_type = 'Non Exclusive'
+            doc.company_type = non_exlusive
             doc.save(ignore_permissions = True)
 
             sql = f''' select email from `tabUser` where organization_type='staffing' and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}") '''
@@ -1304,7 +1305,7 @@ def emp_location_data(address_dt):
         return '', ''
 def save_job_order_value(job_order,staff_company):
     doc=frappe.get_doc(jobOrder,job_order)
-    doc.company_type = 'Non Exclusive'
+    doc.company_type = non_exlusive
     doc.is_single_share = 1
     if(',' in staff_company):
         doc.claim=staff_company
@@ -1325,6 +1326,7 @@ def update_order_status(job_order_name):
                     frappe.db.set_value(jobOrder, each.name, "order_status", "Upcoming")
                 elif current_date > end:
                     frappe.db.set_value(jobOrder, each.name, "order_status", "Completed")
+        update_company_type(job_order_name)
     except Exception as e:
         frappe.msgprint(e)
 
@@ -1468,3 +1470,15 @@ def job_title_list():
     except Exception as e:
         frappe.log_error(e, "Staffing Company Filter Error on Timesheet")
         print(e)
+def update_company_type(job_order_name):
+    try:
+        job_order=frappe.get_doc(jobOrder,job_order_name)
+        if(job_order.company_type==''):
+            company_type=frappe.get_doc('Company',job_order.company)
+            if(company_type.organization_type=='Hiring'):
+                job_order.company_type=non_exlusive
+            else:
+                job_order.company_type='Exclusive'
+            job_order.save()
+    except Exception as e:
+        frappe.log_error(e,'Company Type update error')
