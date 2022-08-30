@@ -194,6 +194,7 @@ def update_cost(self):
                 data.billing_amount = self.timesheet_billable_amount
                 data.costing_amount = data.costing_rate * costing_hours
                 data.base_billing_amount = data.billing_amount
+                data.extra_hours=self.overtime_timesheet_hours1
             else:
                 data.billing_amount = 0.00
                 data.base_billing_amount = 0.00

@@ -218,7 +218,7 @@ def get_jobtitle_list(doctype, txt, searchfield, page_len, start, filters):
     if company is None:
         return None
     else:
-        sql = ''' select job_titles from `tabJob Titles` where parent = '{0}' and  industry_type='{1}' '''.format(company,category)
+        sql = ''' select job_titles from `tabJob Titles` where parent = '{0}' and  industry_type='{1}' and job_titles like "%%{2}%%"'''.format(company, category, '%s' % txt)
         return frappe.db.sql(sql)
 
 @frappe.whitelist()
@@ -544,7 +544,7 @@ def get_industry_type_list(doctype, txt, searchfield, page_len, start, filters):
     if company is None:
         return None
     else:
-        sql = ''' select industry_type from `tabIndustry Types` where parent = '{0}' '''.format(company)
+        sql = ''' select industry_type from `tabIndustry Types` where parent = '{0}' and industry_type like "%%{1}%%"'''.format(company, '%s' % txt)
         return frappe.db.sql(sql)
 
 

@@ -59,11 +59,7 @@ frappe.FaceRecognition = Class.extend({
 
 async function sorted_favourite_companies(data, profile_html,company_type) {
 		let link = data.name.split(' ').join('%');
-		let Likebtnexclusice = `<td>
-		<svg class="icon icon-sm">
-			<use class="like-icon" href="#icon-heart" style="stroke: var(--gray-500);"></use>
-			</svg>
-		</td>`
+		let Likebtnexclusice = `<td></td>`
 		let Likebtnnonexclusice = `<td>
 		<svg ${data.LikeStatus ? "class='icon icon-sm liked'" : "class='icon icon-sm not-liked'"}cursor:pointer" onClick = setLike(this,"${link}")>
 		<use class="like-icon" href="#icon-heart"></use>

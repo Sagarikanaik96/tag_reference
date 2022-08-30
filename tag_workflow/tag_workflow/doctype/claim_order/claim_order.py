@@ -83,7 +83,7 @@ def save_claims(my_data,doc_name):
 				value1 += (str(claimed)+", "+str(i))
 			sql=f'select name from `tabClaim Order` where job_order="{doc_name}" and staffing_organization="{i}"'
 			claim_order_name=frappe.db.sql(sql,as_dict=1)
-			doc=frappe.get_doc('Claim Order',claim_order_name[0].name)
+			doc=frappe.get_doc(claimOrder,claim_order_name[0].name)
 			doc.approved_no_of_workers=my_data[i]['approve_count']
 			doc.notes = my_data[i]['notes']
 			doc.save(ignore_permissions=True)
@@ -290,3 +290,39 @@ def create_pay_rate(hiring_company, job_title, job_site, employee_pay_rate, staf
 	except Exception as e:
 		frappe.log_error(e, 'Set Pay Rate Error')
 		print(e, frappe.get_traceback())
+
+@frappe.whitelist()
+def auto_claims_approve(my_data,doc_name):
+	try:
+		companies=[]
+		my_data=json.loads(my_data)
+		for key in my_data:
+			companies.append(key)
+
+		for i in companies:
+			job = frappe.get_doc(jobOrder, doc_name)
+			claimed = job.staff_org_claimed if job.staff_org_claimed else ""
+			value1=""
+			if(len(claimed)==0):
+				value1 += (str(claimed)+str(i))
+			elif(str(i) not in claimed):
+				value1 += (str(claimed)+", "+str(i))
+			sql=f'select name from `tabClaim Order` where job_order="{doc_name}" and staffing_organization="{i}"'
+			claim_order_name=frappe.db.sql(sql,as_dict=1)
+			doc=frappe.get_doc(claimOrder,claim_order_name[0].name)
+			doc.approved_no_of_workers=my_data[i]
+			doc.save(ignore_permissions=True)
+
+			frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", value1)
+			user_data = ''' select user_id from `tabEmployee` where user_id IS NOT NULL and company = "{}" '''.format(i)
+			user_list = frappe.db.sql(user_data, as_list=1)
+			l = [l[0] for l in user_list]
+			sub="Approve Claim Orders"
+			msg = f"{doc.hiring_organization} has approved {my_data[i]} employees for {doc_name} - {job.select_job}. Don't forget to assign employees to this order."
+			make_system_notification(l,msg,claimOrder,doc.name,sub)
+			link =  f'  href="{sitename}/app/claim-order/{doc.name}" '
+			joborder_email_template(sub,msg,l,link)
+		return 1
+	except Exception as e:
+		print(e, frappe.get_traceback())
+		frappe.db.rollback()

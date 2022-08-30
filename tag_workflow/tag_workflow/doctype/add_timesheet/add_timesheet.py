@@ -243,20 +243,20 @@ def check_tip(item):
         tip_amount=0
     return tip_amount
 
-def timesheet_biiling_hours(jo, timesheet_date, employee, user):
+def timesheet_biiling_hours(jo, timesheet_date, employee, user,timesheet=None):
     last_sat= check_day(timesheet_date)
     next_fri= timesheet_date + datetime.timedelta( (4-timesheet_date.weekday()) % 7 )
    
-    sql1= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and date_of_timesheet between '{last_sat}' and '{next_fri}' and job_order_detail='{jo}' "
+    sql1= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and date_of_timesheet between '{last_sat}' and '{next_fri}' and job_order_detail='{jo}'  and name !='{timesheet}'"
     data1= frappe.db.sql(sql1, as_dict=1)
 
-    sql2= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and date_of_timesheet between '{last_sat}' and '{timesheet_date}' "
+    sql2= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and date_of_timesheet between '{last_sat}' and '{timesheet_date}' and name !='{timesheet}' "
     data2= frappe.db.sql(sql2, as_dict=1)
 
-    sql3= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and job_order_detail='{jo}'"
+    sql3= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and job_order_detail='{jo}' and name !='{timesheet}'"
     data3= frappe.db.sql(sql3, as_dict=1)
 
-    sql4= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and date_of_timesheet between '{last_sat}' and '{timesheet_date}' and company in (select company from `tabEmployee` where email= '{user}') "
+    sql4= f" select sum(total_hours) as total_hours from `tabTimesheet` where employee='{employee}' and date_of_timesheet between '{last_sat}' and '{timesheet_date}'  and name !='{timesheet}' and company in (select company from `tabEmployee` where email= '{user}') "
     data4= frappe.db.sql(sql4, as_dict=1)
 
     week_job_hours= data1[0]['total_hours'] or 0
@@ -379,7 +379,7 @@ def billing_details_data(timesheet,jo, timesheet_date, employee,working_hours,to
     else:
         timesheet_billed_amount=(1.5*per_rate*working_hours)+flat_rate
         timesheet_overtime_bill=(1.5*per_rate*working_hours)
-    total_job_bill=f" select sum(timesheet_billable_amount) as job_bill , sum(timesheet_billable_overtime_amount) as overtime from `tabTimesheet` where employee='{employee}' and job_order_detail='{jo}' "
+    total_job_bill=f" select sum(timesheet_billable_amount) as job_bill , sum(timesheet_billable_overtime_amount) as overtime from `tabTimesheet` where employee='{employee}' and job_order_detail='{jo}' and name !='{timesheet}'"
     total_rate=frappe.db.sql(total_job_bill,as_dict=1)
     total_job_amount=(total_rate[0]['job_bill'] if total_rate[0]['job_bill'] is not None else 0.00 )+timesheet_billed_amount
     total_overtime_job_amount=(total_rate[0]['overtime']  if total_rate[0]['overtime'] is not None else 0.00 )+timesheet_overtime_bill
@@ -429,11 +429,11 @@ def set_payroll_fields(pay_rate, hiring_company, employee, timesheet, timesheet_
     total_weekly_hours_unbillable = weekly_hours_unbillable[0].total_working_hours if weekly_hours_unbillable[0].total_working_hours is not None else 0.0
     timesheet_unbillable_ot = 1.5*pay_rate*today_hours if total_weekly_hours_unbillable > 40 and worked_time < 40 else 0.0
     
-    total_job_order = frappe.db.sql(f"select sum(timesheet_payable_amount) as job_order_payable , sum(timesheet_billable_overtime_amount) as job_order_ot from `tabTimesheet` where employee='{employee}' and job_order_detail='{job_order}'", as_dict=1)
+    total_job_order = frappe.db.sql(f"select sum(timesheet_payable_amount) as job_order_payable , sum(timesheet_billable_overtime_amount_staffing) as job_order_ot from `tabTimesheet` where employee='{employee}' and job_order_detail='{job_order}' and date_of_timesheet <= '{timesheet_date}' and name!='{timesheet}'", as_dict=1)
     total_job_payable = (total_job_order[0]['job_order_payable'] if total_job_order[0]['job_order_ot'] is not None else 0.00) + timesheet_payable_amount
     total_job_billable_ot = (total_job_order[0]['job_order_ot']  if total_job_order[0]['job_order_ot'] is not None else 0.00) + timesheet_ot_billable
     
-    unbillable_ot = frappe.db.sql(f"select sum(total_job_order_unbillable_overtime_amount) as unbillable_ot from tabTimesheet where employee='{employee}' and company != '{hiring_company}' and name!='{timesheet}'", as_dict=1)
+    unbillable_ot = frappe.db.sql(f"select sum(timesheet_unbillable_overtime_amount) as unbillable_ot from tabTimesheet where employee='{employee}' and company != '{hiring_company}' and date_of_timesheet <= '{timesheet_date}' and name!='{timesheet}'", as_dict=1)
     total_unbillable_ot = (unbillable_ot[0]['unbillable_ot'] if unbillable_ot[0]['unbillable_ot'] is not None else 0.00)
 
     return timesheet_payable_amount, timesheet_ot_billable, timesheet_unbillable_ot, total_job_payable, total_job_billable_ot, total_unbillable_ot
@@ -455,7 +455,7 @@ def update_billing_calculation(timesheet,jo, timesheet_date, employee,working_ho
         per_hour_rate=float(per_hour_rate)
         working_hours=float(working_hours)
         data=billing_details_data(timesheet,jo, timesheet_date, employee,working_hours,total_flat_rate,per_hour_rate)
-        week_job_hours, week_all_hours, all_job_hours, week_hiring_hours = timesheet_biiling_hours(jo=jo, timesheet_date=timesheet_date, employee=employee, user= frappe.session.user)
+        week_job_hours, week_all_hours, all_job_hours, week_hiring_hours = timesheet_biiling_hours(jo=jo, timesheet_date=timesheet_date, employee=employee, user= frappe.session.user,timesheet=timesheet)
         cur_timesheet_hours=working_hours
         w1= all_week_jo(employee=employee, jo=jo)
 
