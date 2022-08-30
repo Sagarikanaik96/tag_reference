@@ -36,6 +36,10 @@ frappe.ui.form.on('Assign Employee', {
 		back_job_order_form(frm);
 		document_download()
 
+		if(frappe.boot.tag.tag_user_info.company_type=="Staffing"){
+			frm.set_df_property('notes', 'read_only',1);
+		}
+
 		$('[data-fieldname="company"]').css('display','block');
 
 		$(document).on('click', '[data-fieldname="company"]', function(){
@@ -740,7 +744,10 @@ function pop_up(){
 	for(let d in cur_frm.doc.employee_details){
 		let resume= (cur_frm.doc.employee_details[d].resume).split('/');
 		let resume1= resume[resume.length-1] 
-		html += `<tr><td><input type="checkbox" id="${cur_frm.doc.employee_details[d].employee}" </td><td>${cur_frm.doc.employee_details[d].employee}</td><td>${cur_frm.doc.employee_details[d].employee_name}</td><td>${resume1}</td></tr>`;
+		html += `<tr><td><input type="checkbox" id="${cur_frm.doc.employee_details[d].employee}" </td>
+		<td>${cur_frm.doc.employee_details[d].employee}</td>
+		<td>${cur_frm.doc.employee_details[d].employee_name}</td><td>${resume1}</td>
+		</tr>`;
 	}
 	let body;
 	if(html){
@@ -748,7 +755,10 @@ function pop_up(){
 	}else{
 		body = head + `<tr><td></td><td></td><td>No Data Found</td><td></td><td></td><td></td></tbody></table>`;
 	}
-
+	let assign_emp_id = cur_frm.doc.name;
+	
+	let notes_field = `<p><label for="w3review">Notes:</label></p><textarea label="Notes" id="_${assign_emp_id}_notes" class="head_count_tittle" maxlength="1000"> </textarea>`
+	body = body + notes_field
 	let fields = [{"fieldname": "", "fieldtype": "HTML", "options": body}];
 	let dialog = new frappe.ui.Dialog({title: "Select Employees",	fields: fields});
 	dialog.show();
@@ -774,6 +784,7 @@ window.select_all1 = function(){
 }
 
 function update_table(dialog){
+	let notes=document.getElementById("_"+cur_frm.doc.name+"_notes").value
 	let data=[];
 	for(let d in cur_frm.doc.employee_details){
 		let id1=cur_frm.doc.employee_details[d].employee
@@ -784,7 +795,7 @@ function update_table(dialog){
 	}
 	frappe.call({
 		method:"tag_workflow.tag_data.approved_employee",
-		args: {id: data,name:cur_frm.doc.name,job_order:cur_frm.doc.job_order},
+		args: {id: data,name:cur_frm.doc.name,job_order:cur_frm.doc.job_order,assign_note:notes},
 		callback:function(r){
 			if(r.message== "error"){
 				frappe.msgprint("No. of selected employees is greater than no. of employees required")
