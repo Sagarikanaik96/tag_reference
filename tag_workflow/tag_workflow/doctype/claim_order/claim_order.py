@@ -292,7 +292,7 @@ def create_pay_rate(hiring_company, job_title, job_site, employee_pay_rate, staf
 		print(e, frappe.get_traceback())
 
 @frappe.whitelist()
-def auto_claims_approve(my_data,doc_name):
+def auto_claims_approves(my_data,doc_name):
 	try:
 		companies=[]
 		my_data=json.loads(my_data)

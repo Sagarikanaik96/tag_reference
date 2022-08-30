@@ -254,7 +254,7 @@ function claim_order_save(frm) {
 			let dict = {}
 			dict[frm.doc.staffing_organization] = frm.doc.staff_claims_no
 			frappe.call({
-				method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.auto_claims_approve",
+				method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.auto_claims_approves",
 				args: {
 					'my_data': dict,
 					'doc_name': frm.doc.job_order
