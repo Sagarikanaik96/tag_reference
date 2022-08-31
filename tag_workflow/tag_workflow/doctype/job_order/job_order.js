@@ -216,6 +216,7 @@ frappe.ui.form.on("Job Order", {
 		$('[data-fieldname = "phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 		set_exc_industry_company(frm);
 		order_claimed(frm);
+		single_share_job(frm);
 	},
 
 	select_job: function(frm) {
@@ -2342,3 +2343,8 @@ function reclaim_button(frm){
 	})
 }
 	
+function single_share_job(frm){
+	if(frm.doc.__islocal!=1 && frm.doc.is_single_share==0){
+		cur_frm.set_df_property('staff_company','hidden',1)
+	}
+}

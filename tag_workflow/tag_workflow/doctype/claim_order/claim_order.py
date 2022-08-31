@@ -171,8 +171,9 @@ def save_modified_claims(my_data,doc_name):
 def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_org,doc_name):
 	try:
 		job_order_data=frappe.get_doc(jobOrder,job_order)
+		is_single_share = 1
 		if no_assigned< no_required:
-			job_order_data.is_single_share = '0'
+			is_single_share = 0
 		bid=1+int(job_order_data.bid)
 		claimed = job_order_data.claim if job_order_data.claim else ""
 		value1=""
@@ -183,7 +184,7 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 		elif(staffing_org not in claimed):
 			value1 += (str(claimed)+", "+str(staffing_org))
 			chat_room_created(hiring_org,staffing_org,job_order)
-		frappe.db.sql('update `tabJob Order` set claim="{0}",bid="{1}"  where name="{2}"'.format(value1,bid,job_order))
+		frappe.db.sql('update `tabJob Order` set claim="{0}",bid="{1}",is_single_share={3} where name="{2}"'.format(value1,bid,job_order,is_single_share))
 		frappe.db.commit()
 
 
