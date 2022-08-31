@@ -173,17 +173,19 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 		job_order_data=frappe.get_doc(jobOrder,job_order)
 		if no_assigned< no_required:
 			job_order_data.is_single_share = '0'
-		job_order_data.bid=1+int(job_order_data.bid)
-		if(job_order_data.claim is None):
-			job_order_data.claim=staffing_org
+		bid=1+int(job_order_data.bid)
+		claimed = job_order_data.claim if job_order_data.claim else ""
+		value1=""
+		if(len(claimed)==0):
+			value1 += str(staffing_org)
 			chat_room_created(hiring_org,staffing_org,job_order)
 
-		else:
-			if(staffing_org not in job_order_data.claim):
-				job_order_data.claim=str(job_order_data.claim)+str(",")+staffing_org
-				chat_room_created(hiring_org,staffing_org,job_order)
+		elif(staffing_org not in claimed):
+			value1 += (str(claimed)+", "+str(staffing_org))
+			chat_room_created(hiring_org,staffing_org,job_order)
+		frappe.db.sql('update `tabJob Order` set claim="{0}",bid="{1}"  where name="{2}"'.format(value1,bid,job_order))
+		frappe.db.commit()
 
-		job_order_data.save(ignore_permissions=True)
 
 		sql1 = '''select email from `tabUser` where organization_type='hiring' and company = "{}"'''.format(hiring_org)
 		hiring_list = frappe.db.sql(sql1,as_list=True)
@@ -313,7 +315,8 @@ def auto_claims_approves(my_data,doc_name):
 			doc.approved_no_of_workers=my_data[i]
 			doc.save(ignore_permissions=True)
 
-			frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", value1)
+			frappe.db.sql('update `tabJob Order` set staff_org_claimed="{0}" where name="{1}"'.format(value1,doc_name))
+			frappe.db.commit()
 			user_data = ''' select user_id from `tabEmployee` where user_id IS NOT NULL and company = "{}" '''.format(i)
 			user_list = frappe.db.sql(user_data, as_list=1)
 			l = [l[0] for l in user_list]
