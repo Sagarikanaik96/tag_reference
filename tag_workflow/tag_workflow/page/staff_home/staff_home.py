@@ -10,10 +10,8 @@ def get_order_info(company1):
         claim = frappe.db.sql("""select distinct job_order from `tabClaim Order` where staffing_organization = "{}" and approved_no_of_workers != 0 order by creation desc""".format(company1), as_dict=1)
 
         order_detail=check_claims_order(claim,order_detail)
-        assign = frappe.db.sql(""" select distinct job_order from `tabAssign Employee` where company = "{}" and tag_status = "Approved" """.format(company1), as_dict=1)
-        for a in assign:
-            order_detail.append(a.job_order)
-        order_details=tuple(order_detail)
+        order_detail=check_assign(company1, order_detail)
+        order_details = f"('{order_detail[0]}')" if len(order_detail) == 1 else tuple(order_detail)
         if(len(order_details)>0):
             sql  = f'select name from `tabJob Order`  where "{frappe.utils.nowdate()}"  between from_date and to_date and name in {order_details} order by creation desc'
             job_order = frappe.db.sql(sql, as_dict=1)
@@ -123,10 +121,17 @@ def check_claims(j,company1):
             for j in range(len(doc.employee_details)):
                 if(doc.employee_details[j].approved):
                     emp_approved+=1
-        data[0]['approved_no_of_workers']=emp_approved
+        if len(data)>0:
+            data[0]['approved_no_of_workers']=emp_approved
     return data
 
 def check_claims_order(claim,order_detail):
     for c in claim:
         order_detail.append(c.job_order)
+    return order_detail
+
+def check_assign(company, order_detail):
+    assign = frappe.db.sql(""" select distinct job_order from `tabAssign Employee` where company = "{}" and tag_status = "Approved" """.format(company), as_dict=1)
+    for a in assign:
+        order_detail.append(a.job_order)
     return order_detail
