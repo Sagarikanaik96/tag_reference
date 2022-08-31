@@ -1326,6 +1326,13 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-col:nth-child(8) {
   flex: 1;
 }
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  .frappe-list
+  .list-row-container
+  .level-item {
+  justify-content: start !important;
+}
 
 /*------ Media query start ----*/
 @media (max-width: 1300px) {
