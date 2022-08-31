@@ -157,11 +157,11 @@ frappe.listview_settings['Sales Invoice'] = {
 		if(a == 0.00){
 			$('[data-original-title="Grand Total"]>input').val("") 	
 		}
-		document.getElementsByClassName('list-row-col ellipsis')[118].style.textAlign = "right";
-		document.getElementsByClassName('list-row-col ellipsis')[118].innerHTML	 = "Paid";
-		document.getElementsByClassName('list-row-col ellipsis')[118].style.color	 = "#8d9cbc";
-		document.getElementsByClassName('list-row-col ellipsis')[115].innerHTML	 = "Job Order";
-		document.getElementsByClassName('list-row-col ellipsis')[115].style.color	 = "#8d9cbc";
+		document.getElementsByClassName('list-row-col ellipsis')[6].style.textAlign = "right";
+		document.getElementsByClassName('list-row-col ellipsis')[6].innerHTML	 = "Paid";
+		document.getElementsByClassName('list-row-col ellipsis')[6].style.color	 = "#8d9cbc";
+		document.getElementsByClassName('list-row-col ellipsis')[3].innerHTML	 = "Job Order";
+		document.getElementsByClassName('list-row-col ellipsis')[3].style.color	 = "#8d9cbc";
 	},
 	hide_name_column: true,
 	// add_fields: ['type', 'reference_doctype', 'reference_name'],
