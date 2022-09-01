@@ -769,3 +769,49 @@ def claim_order_updated_by(docname,staff_company):
     except Exception as e:
         frappe.log_error(e, 'Claim order Error')
         print(e, frappe.get_traceback())
+
+
+@frappe.whitelist()
+def workers_required_order_update(doc_name):
+    try:
+        claim_data=f''' select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{doc_name}" and staffing_organization in (select company from `tabAssign Employee` where job_order="{doc_name}" and tag_status="Approved")'''
+        claims=frappe.db.sql(claim_data,as_dict=True)
+        return claims
+    except Exception as e:
+        print(e,frappe.get_traceback())
+        frappe.db.rollback()
+@frappe.whitelist()
+def update_new_claims(my_data,doc_name):
+    try:
+        claims_id=[]
+        my_data=json.loads(my_data)
+        for key in my_data:
+            claims_id.append(key)
+        if claims_id:
+            for i in claims_id:
+                if type(my_data[i]['approve_count'])== int:
+                    doc=frappe.get_doc('Claim Order',i)
+                    data=claim_comp_assigned(doc_name,doc,my_data[i]['approve_count'])
+                    if(data==0):
+                        return 0
+                    else:                           
+                        doc.approved_no_of_workers=my_data[i]["approve_count"]
+                        doc.save(ignore_permissions=True)
+            return 1
+    except Exception as e:
+        print(e, frappe.get_traceback())
+        frappe.db.rollback()
+
+def claim_comp_assigned(doc_name,doc,claimed_approved):
+    assined_emp=frappe.db.sql('select name from `tabAssign Employee` where job_order="{0}" and company="{1}"'.format(doc_name,doc.staffing_organization),as_dict=1)
+    if(len(assined_emp)>0):
+        assigned_emp_comp=frappe.get_doc(ASN,assined_emp[0]['name'])
+        if doc.approved_no_of_workers==len(assigned_emp_comp.employee_details):
+            frappe.msgprint(doc.staffing_organization+'has assigned all of their claims. An employee must be removed from this job order to by '+doc.staffing_organization+' before their claim can be modified.')
+            return 0
+        elif(int(claimed_approved)!=len(assigned_emp_comp.employee_details)):
+            frappe.msgprint("The number of assigned claims does not match the new required head count of "+str(claimed_approved))
+            return 0
+        else:
+            return 1
+    

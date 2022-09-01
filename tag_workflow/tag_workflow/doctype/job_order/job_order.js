@@ -385,22 +385,8 @@ frappe.ui.form.on("Job Order", {
 		let field = "No Of Workers";
 		let name = "no_of_workers";
 		let value = frm.doc.no_of_workers;
-		if(frm.doc.resumes_required==0){
-			frappe.call({
-				method: "tag_workflow.tag_workflow.doctype.job_order.job_order.claim_headcount",
-				args: {
-					job_order: frm.doc.name
-				},
-				callback: function(r){
-					if(r.message.length > 0 && value < r.message.reduce((a, b) => a + b, 0)){
-						frappe.msgprint({message: __("You cannot decrease the number of workers than the number of selected headcounts."), title: __("Error"),indicator: "red"})
-						frappe.validated = false;
-						frappe.db.get_value("Job Order", {name: frm.doc.name}, [name], function (res) {
-							frm.set_value(name, res[name])
-						})
-					}
-				}
-			})
+		if(frm.doc.__islocal!=1 && frm.doc.no_of_workers && frm.doc.no_of_workers>0){
+			decreasing_employee(frm)
 		}
 		check_value(field, name, value);
 	},
@@ -2346,3 +2332,221 @@ function job_profile_data(data){
 	profile_html += `</div></table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`;
 	return profile_html
 }
+function decreasing_employee(frm){
+		if(frm.doc.resumes_required==1){
+			if(frm.doc.worker_filled>frm.doc.no_of_workers){
+				frappe.msgprint(frm.doc.worker_filled +" Employees are assigned to this order. Number of required workers must be greater than or equal to number of assigned employees. Please modify the number of workers required or work with the staffing companies to remove an assigned employee. ")
+				frappe.validated = false;
+				frm.set_value('no_of_workers','')
+			}
+		}
+		else{
+			check_emp_claims(frm)
+		}
+}
+function check_emp_claims(frm){
+	frappe.call({
+		method: "tag_workflow.tag_workflow.doctype.job_order.job_order.claim_headcount",
+		args: {
+			job_order: frm.doc.name
+		},
+		callback: function(r){
+			if(r.message.length > 0 ){
+				if(frm.doc.worker_filled == r.message.reduce((a, b) => a + b, 0) && frm.doc.no_of_workers < r.message.reduce((a, b) => a + b, 0)){
+					frappe.msgprint(frm.doc.worker_filled +" Employees are assigned to this order. Number of required workers must be greater than or equal to number of assigned employees. Please modify the number of workers required or work with the staffing companies to remove an assigned employee. ")
+					frappe.validated = false;
+					frm.set_value('no_of_workers','')
+				}
+				else if(frm.doc.worker_filled != r.message.reduce((a, b) => a + b, 0) && frm.doc.no_of_workers < r.message.reduce((a, b) => a + b, 0)){
+					workers_claimed_change()
+				}
+				
+			}
+		}
+	})	
+}
+function workers_claimed_change(){
+	frappe.call({
+		method:
+		  "tag_workflow.tag_workflow.doctype.job_order.job_order.workers_required_order_update",
+		args: {
+		  doc_name: cur_frm.doc.name,
+		},
+		callback: function (rm) {
+		  frappe.db.get_value(
+			"Job Order",
+			{ name:  cur_frm.doc.name},
+			[
+			  "company",
+			  "select_job",
+			  "from_date",
+			  "to_date",
+			  "no_of_workers",
+			  "per_hour",
+			  "worker_filled",
+			],
+			function (r) {
+			  let job_data = rm.message;
+			  let profile_html = `<table class="table-responsive"><th>Claim No.</th><th>Staffing Company</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th>`;
+			  for (let p in job_data) {
+				profile_html += `<tr>
+				<td>${job_data[p].name}</td>
+				<td style="margin-right:20px;" id="${job_data[p].claims}">${job_data[p].staffing_organization}</td>
+				<td>${job_data[p].staff_claims_no}</td>
+				<td>${job_data[p].approved_no_of_workers}</td>
+				<td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no}></td>
+				</tr>`;
+			  }
+			  profile_html += `</table><style>th, td {
+					padding: 10px;
+					} input{width:100%;}
+				</style>`;
+	
+			  let modified_pop_up = new frappe.ui.Dialog({
+				title: "Update Wokers",
+				fields: [
+				  {
+					fieldname: "html_workers1",
+					fieldtype: "HTML",
+					options:
+					  "<label>No. Of Workers Required:</label>" +
+					  (cur_frm.doc.no_of_workers),
+				  },
+				  { fieldname: "inputdata2", fieldtype: "Section Break" },
+				  {
+					fieldname: "staff_companies1",
+					fieldtype: "HTML",
+					options: profile_html,
+				  },
+				],
+				primary_action: function () {
+				  modified_pop_up.hide();
+				  let data_len = job_data.length;
+				  let l = 0;
+				  let dict = {};
+	
+				  dict = update_claims(data_len, l, dict, job_data, r);
+				  if (Object.keys(dict.dict).length > 0 && dict.valid1 != "False") {
+					frappe.call({
+					  method:
+						"tag_workflow.tag_workflow.doctype.job_order.job_order.update_new_claims",
+					  args: {
+						my_data: dict.dict,
+						doc_name: cur_frm.doc.name,
+					  },
+					  callback: function (r2) {
+						if (r2.message == 1) {
+							cur_frm.save()
+						  setTimeout(function () {
+							window.location.href =
+							  "/app/job-order/" + listview.data[0].job_order;
+						  }, 10000);
+						}
+						else if(r2.message == 0){
+							setTimeout(function () {
+							window.location.href =
+							  "/app/job-order/" + cur_frm.doc.name;
+						  }, 1000);
+
+						}
+					  },
+					});
+				  }
+				},
+			  });
+			  modified_pop_up.show();
+			}
+		  );
+		},
+	  });
+
+}
+
+function update_claims(data_len, l, dict, job_data, r) {
+	let valid1 = "";
+	let total_count = 0;
+	for (let i = 0; i < data_len; i++) {
+	  let y = document.getElementById(job_data[i].name).value;
+	  if (y.length == 0) {
+		total_count += job_data[i].approved_no_of_workers;
+		continue;
+	  }
+	  y = parseInt(y);
+	  l = parseInt(l) + parseInt(y);
+	  if (y == job_data[i].approved_no_of_workers) {
+		frappe.msgprint({
+		  message: __(
+			"No Of Workers Are Same that previously assigned For:" +
+			  job_data[i].name
+		  ),
+		  title: __("Error"),
+		  indicator: "red",
+		});
+		valid1 = "False";
+  
+		setTimeout(function () {
+		  location.reload();
+		}, 5000);
+	  } else if (y < 0) {
+		frappe.msgprint({
+		  message: __(
+			"No Of Workers Can't Be less than 0 for:" +
+			  job_data[i].staffing_organization
+		  ),
+		  title: __("Error"),
+		  indicator: "red",
+		});
+		valid1 = "False";
+  
+		setTimeout(function () {
+		  location.reload();
+		}, 5000);
+	  } else if (y > job_data[i].name) {
+		frappe.msgprint({
+		  message: __("No Of Workers Exceed For:" + job_data[i].name),
+		  title: __("Error"),
+		  indicator: "red",
+		});
+		valid1 = "False";
+  
+		setTimeout(function () {
+		  location.reload();
+		}, 5000);
+	  } else if (l > cur_frm.doc.no_of_workers) {
+		frappe.msgprint({
+		  message: __("No Of Workers Exceed For Than required "),
+		  title: __("Error"),
+		  indicator: "red",
+		});
+		valid1 = "False";
+  
+		setTimeout(function () {
+		  location.reload();
+		}, 5000);
+	  } else {
+		total_count += y;
+		y = { approve_count: y};
+		dict[job_data[i].name] = y;
+	  }
+	}
+	if (total_count > r["no_of_workers"]) {
+	  frappe.msgprint({
+		message: __(
+		  "No Of Workers Exceed For Than required",
+		  total_count,
+		  r["no_of_workers"],
+		  r["worker_filled"],
+		  r["no_of_workers"] - r["worker_filled"]
+		),
+		title: __("Error"),
+		indicator: "red",
+	  });
+	  valid1 = "False";
+  
+	  setTimeout(function () {
+		location.reload();
+	  }, 5000);
+	}
+	return { dict, valid1 };
+  }
+  
