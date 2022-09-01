@@ -1,0 +1,44 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-08-24 00:22:24.819199",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_id",
+  "employee_name",
+  "order_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Id"
+  },
+  {
+   "fieldname": "order_status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Order Status"
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Name"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-08-24 02:27:43.389085",
+ "modified_by": "Administrator",
+ "module": "Tag Workflow",
+ "name": "Removed Employee List",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

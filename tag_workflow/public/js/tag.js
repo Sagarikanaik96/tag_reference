@@ -373,3 +373,35 @@ function redirect_job(name, child_name){
 	console.log(name, child_name);
 	window.location.href = '/app/assign-employee/'+name;
 }
+
+function remove_job(name, job,employee_id,removed){
+	$('.modal-content').hide()
+	frappe.call({
+		method:'tag_workflow.tag_data.remove_emp_from_order',
+		'args':{
+			'assign_emp':name,
+			'employee_name':employee_id,
+			'job_order':job,
+			'removed':removed
+		},
+		callback:function(r){
+			if(r.message){
+				if(r.message=='removed'){
+					frappe.msgprint('Employee removed successfully')
+				}
+				else if(r.message=='unremoved'){
+					frappe.msgprint('Employee unremoved successfully')
+				}
+				else if(r.message=='emp_not_required'){
+					frappe.msgprint('No Employee is required for this job order')
+				}
+				else{
+					frappe.msgprint('Something went wrong. Please try again')
+				}
+			}
+			setTimeout(function(){
+				window.location.reload()
+			},4000)
+		}
+	})
+}

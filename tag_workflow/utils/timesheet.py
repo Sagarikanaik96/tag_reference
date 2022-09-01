@@ -51,24 +51,28 @@ def get_timesheet_data(job_order, user, company_type):
         comp_detail=frappe.get_doc("User",comp)
         comp_type= comp_detail.organization_type
 
-        result, rep_result = [], []
+        result, rep_result,removed_emp_data = [], [],[]
         if(company_type == 'Staffing'):
             company_type = 'Exclusive Hiring'
 
         if(company_type in ["Hiring", "Exclusive Hiring"]):
             if jo.resumes_required==1 and comp_type != 'Staffing':
-                sql = """ select employee, employee_name,approved from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") and approved=1 """.format(job_order)
+                sql = """ select employee, employee_name,approved from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") and approved=1 and remove_employee=0 """.format(job_order)
             
             else:
-                sql = """ select employee, employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
+                sql = """ select employee, employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") and remove_employee=0 """.format(job_order)
 
             data = frappe.db.sql(sql, as_dict=1)
             result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company"), "status": ""} for d in data]
             res_sql = """ select DISTINCT employee, employee_name from `tabReplaced Employee` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
             rep_data = frappe.db.sql(res_sql, as_dict=1)
             rep_result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company"), "status": "Replaced"} for d in rep_data]
-
-            return result+rep_result
+            removed_employees=""" select DISTINCT employee_id, employee_name from `tabRemoved Employee List` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") and order_status='Ongoing'""".format(job_order)
+            removed_emp=frappe.db.sql(removed_employees,as_dict=1)
+            for d in removed_emp:
+                print(d['employee_id'],d['employee_name'])
+            removed_emp_data=[{"employee": d['employee_id'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee_id'], "company"), "status": "Removed"} for d in removed_emp]
+            return result+rep_result+removed_emp_data
         return []
     except Exception as e:
         frappe.msgprint(e)

@@ -172,7 +172,7 @@ def user_exclusive_perm(user, company, organization_type=None):
             for ex in exclusive:
                 update_exclusive_perm([{"name": user}], ex.name)
 
-        sql = """ delete from `tabUser Permission` where user = '{0}' and allow = "Employee" """.format(user)
+        sql = """ delete from `tabUser Permission` where user = "{0}" and allow = "Employee" """.format(user)
         frappe.db.sql(sql)
     except Exception as e:
         frappe.log_error(e, "user_exclusive_permission")

@@ -82,7 +82,7 @@ def raise_no_permission_to(self,perm_type):
 
 #validate_duplicate_user_id
 def validate_duplicate_user_id(self):
-    sql = """select name from `tabEmployee` where user_id = '{0}' and status = 'Active' and name != '{1}' """.format(self.user_id, self.name)
+    sql = """select name from `tabEmployee` where user_id = "{0}" and status = 'Active' and name != '{1}' """.format(self.user_id, self.name)
     employee = frappe.db.sql_list(sql)
     print(employee)
 

@@ -1413,41 +1413,11 @@ function assigned_emp(){
 		args: {'job_order': cur_frm.doc.name},
 		callback: function(rm) {
 			let data = rm.message || [];
-			let profile_html = `<div class="table-responsive pb-2 pb-sm-0"><table style="width: 100%;"><th>Employee Name</th><th>Marked As</th><th>Actions</th>`;
-			for (let p in data) {
-
-				let marked_as = '';
-				if (data[p].no_show){
-					marked_as  += ' '+ data[p].no_show;
-				}
-				if (data[p].non_satisfactory){
-					marked_as += ' '+ data[p].non_satisfactory;
-				}
-				if (data[p].dnr){
-					marked_as += ' '+ data[p].dnr;
-				}
-
-				if(data[p].replaced){
-					marked_as += " Replaced";
-				}
-
-				profile_html += `<tr><td>${data[p].employee}</td><td>${marked_as}</td>`;
-
-				if(marked_as != " Replaced" && cur_frm.doc.order_status != "Completed"){
-					profile_html += `
-						<td class="replace" data-fieldname="replace">
-							<button class="btn btn-primary btn-sm mt-2" onclick=redirect_job('${data[p].assign_name}','${data[p].child_name}')>Replace</button>
-						</td>`;
-				}
-
-				profile_html += `</tr>`;
-			}
-			
-			profile_html += `</div></table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`;
-
+			let profile_html_data= ''
+			profile_html_data+=job_profile_data(data)
 			let dialog1 = new frappe.ui.Dialog({
 				title: __('Assigned Employees'),
-				fields: [{fieldname: "staff_companies",	fieldtype: "HTML", options: profile_html},
+				fields: [{fieldname: "staff_companies",	fieldtype: "HTML", options: profile_html_data},
 				{"fieldtype": "Button", "label": __("Go to Assign Employee Form"), "fieldname": "assign_new_emp"}
 			]
 			});
@@ -2338,4 +2308,41 @@ function single_share_job(frm){
 	if(frm.doc.__islocal!=1 && frm.doc.is_single_share==0){
 		cur_frm.set_df_property('staff_company','hidden',1)
 	}
+}
+function job_profile_data(data){
+	let profile_html = `<div class="table-responsive pb-2 pb-sm-0"><table style="width: 100%;"><th>Employee Name</th><th>Marked As</th><th>Actions</th><th></th>`;
+	for (let p in data) {
+		let marked_as = '';
+		if (data[p].no_show){
+			marked_as  += ' '+ data[p].no_show;
+		}
+		if (data[p].non_satisfactory){
+			marked_as += ' '+ data[p].non_satisfactory;
+		}
+		if (data[p].dnr){
+			marked_as += ' '+ data[p].dnr;
+		}
+
+		if(data[p].replaced){
+			marked_as += " Replaced";
+		}
+
+		profile_html += `<tr><td>${data[p].employee}</td><td>${marked_as}</td>`;
+
+		if(marked_as != " Replaced" && cur_frm.doc.order_status != "Completed"){
+			profile_html += `
+				<td class="replace" data-fieldname="replace">
+					<button class="btn btn-primary btn-sm mt-2" onclick=redirect_job('${data[p].assign_name}','${data[p].child_name}')>Replace</button>
+				</td>
+				<td class="remove_employee" data-fieldname="remove_employee">
+					<button class="btn btn-primary btn-sm mt-2" onclick=remove_job('${data[p].assign_name}','${cur_frm.doc.name}','${data[p].employee_id}','${data[p].removed}')>
+					${data[p].removed=="0" ? "Remove" : "Unremove"}
+					</button>
+				</td>`;
+		}
+		profile_html += `</tr>`;
+	}
+	
+	profile_html += `</div></table><style>th, td {padding-left: 50px;padding-right:50px;} input{width:100%;}</style>`;
+	return profile_html
 }

@@ -396,7 +396,10 @@ def update_billing_details(timesheet,jo, timesheet_date, employee,working_hours,
 @frappe.whitelist()
 def get_emp_pay_rate(job_order, hiring_company, staffing_company, employee):
     assign_emp = frappe.db.get_value('Assign Employee', {"job_order": job_order, "hiring_organization": hiring_company, "company": staffing_company, "tag_status": "Approved"})
-    return frappe.db.get_value('Assign Employee Details', {'parent': assign_emp, 'employee': employee}, ['pay_rate'])
+    pay_rate=frappe.db.get_value('Assign Employee Details', {'parent': assign_emp, 'employee': employee}, ['pay_rate'])
+    assign_emp_doc=frappe.get_doc('Assign Employee',assign_emp)
+    pay_rate= pay_rate if(frappe.db.get_value('Assign Employee Details', {'parent': assign_emp, 'employee': employee}, ['pay_rate']) is not None) else assign_emp_doc.employee_pay_rate 
+    return pay_rate
 
 def get_week(timesheet_date):
     day_name= timesheet_date.strftime("%A")
