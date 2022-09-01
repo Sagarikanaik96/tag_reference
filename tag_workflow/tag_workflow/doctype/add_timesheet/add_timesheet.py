@@ -74,14 +74,20 @@ def get_datetime(date, from_time, to_time):
     except Exception as e:
         frappe.msgprint(e)
 
+def check_cur_selected(cur_selected):
+        cur_selected = json.loads(cur_selected)
+        if len(cur_selected) == 0:
+            frappe.msgprint(_("Please select atleast one timesheet to submit."))
+        return cur_selected
 #---------------------------------------------------#
 
 @frappe.whitelist()
-def update_timesheet(user, company_type, items, job_order, date, from_time, to_time, break_from_time=None, break_to_time=None,save=None):
+def update_timesheet(user, company_type, items, cur_selected, job_order, date, from_time, to_time, break_from_time=None, break_to_time=None,save=None):
     try:
         added = 0
         timesheets = []
         items = json.loads(items)
+        cur_selected = check_cur_selected(cur_selected)
         is_employee = check_if_employee_assign(items, job_order)
         if(is_employee == 0):
             return False
@@ -91,7 +97,8 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
     
         if(posting_date >= job.from_date and posting_date <= job.to_date):
             from_time, to_time = get_datetime(date, from_time, to_time)
-            for item in items:
+            selected_items = (selected_item for selected_item in items if selected_item["name"] in cur_selected['items'])
+            for item in selected_items:
                 tip_amount=check_tip(item)
                 child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, item['from_time'], item['to_time'], item['break_from'], item['break_to'])
                 is_ok = check_old_timesheet(child_from, child_to, item['employee'])
@@ -117,7 +124,7 @@ def update_timesheet(user, company_type, items, job_order, date, from_time, to_t
                     timesheet = add_status(timesheet, item['status'], item['employee'], job.company, job_order)
                     timesheet.save(ignore_permissions=True)
                     staffing_own_timesheet(save,timesheet,company_type)
-                    timesheets.append({"employee": item['employee'], "docname": timesheet.name, "company": job.company, "job_title": job.select_job})
+                    timesheets.append({"employee": item['employee'], "docname": timesheet.name, "company": job.company, "job_title": job.select_job,  "employee_name": item['employee_name']})
                     added = 1
                 else:
                     frappe.msgprint(_("Timesheet is already available for employee <b>{0}</b>(<b>{1}</b>) on the given datetime.").format(item["employee_name"],item['employee']))
@@ -160,8 +167,10 @@ def add_status(timesheet, status, employee, company, job_order):
 
 #-------------------------------------------------------#
 def send_timesheet_for_approval(timesheets):
+    timesheet_count = 0
     try:
         for time in timesheets:
+            timesheet_count += 1
             sql = """ select parent from `tabHas Role` where role in ("Staffing Admin", "Staffing User") and parent in(select user_id from `tabEmployee` where user_id != '' and company = (select company from `tabEmployee` where name = '{0}')) """.format(time['employee'])
             user_list = frappe.db.sql(sql, as_dict=1)
             staffing_user = []
@@ -175,13 +184,18 @@ def send_timesheet_for_approval(timesheets):
                     staffing_user.append(user.parent)
 
             today = datetime.date.today()
+            company = time["company"]
+            job_title = time["job_title"]
+            employee_name = time["employee_name"]
             msg = f'{time["company"]} has submitted a timesheet on {today} for {time["job_title"]} for approval.'
             subject = 'Timesheet For Approval'
-            make_system_notification(staffing_user, msg, 'Timesheet', time['docname'], subject)
             dnr_notification(time,staffing_user)
             subject = 'Timesheet For Approval'
 
             enqueue("tag_workflow.tag_workflow.utils.notification.sendmail", emails=staffing_user, msg=msg, subject=subject, doctype='Timesheet', docname=time['docname'])
+        if timesheet_count == 1:
+                msg = f'{company} has submitted a timesheet for {employee_name} on {today} for {job_title} for approval.'
+        make_system_notification(staffing_user, msg, 'Timesheet', time['docname'], subject)
     except Exception as e:
         frappe.log_error(e, "Timesheet Approval")
 
