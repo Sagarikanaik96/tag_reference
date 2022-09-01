@@ -980,8 +980,12 @@ input.input-with-feedback.form-control,
   stroke: #e24c4c;
 }
 [data-route="staff_company_list"] table thead tr th .icon,
-[data-route="List/Job Order/List"] .result header use.like-icon {
+[data-route="List/Job Order/List"] .result header use.like-icon,
+[data-route="List/Sales Invoice/List"] .result header use.like-icon {
   display: none;
+}
+.list-row-container {
+  border-bottom: none;
 }
 
 [data-page-route="Claim Order"] #emp_pay_rate:after {
@@ -1410,6 +1414,9 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-container
   .level-item {
   justify-content: start !important;
+}
+.employee_popup table tr th {
+  border-top: none;
 }
 
 /*------ Media query start ----*/
