@@ -56,6 +56,8 @@ frappe.FaceRecognition = Class.extend({
 					txt += text[i].full_name + "<br>";
 				}
 
+				let company_logo = r.message[3];
+
 				let industry = "";
 				for(let j in my_val.industry_type){
 					industry += my_val.industry_type[j].industry_type + "<br>";
@@ -84,12 +86,17 @@ frappe.FaceRecognition = Class.extend({
 					<div id="listdata">
 					 <div class="user_list border rounded pt-4">
 						<div class="w-100 px-3 d-flex flex-wrap">
-							<div class="col-md-6 col-sm-12 company_list">
+							<div class="col-md-6 col-sm-12 company_list d-flex">
+								<div class="company_logo">
+									<img src="${company_logo}" class="img-fluid">
+								</div>
+								<div style="margin-left:2vw; padding-top:2vh;">
 								<h5 class="col-md-4 px-0" id="comp_name">${my_val.name}</h5> 
 								<div id="jobsite">
 									<div id="address"> ${jobsite_address}</div>
 								</div>
 								<p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#">  <u> ${count} </u> </a> </span> </p>
+							</div>
 							</div>
 							<div class="col-md-6 col-sm-12 order text-left text-md-right ">
                                 <div>

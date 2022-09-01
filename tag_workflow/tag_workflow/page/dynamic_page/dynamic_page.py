@@ -26,7 +26,9 @@ def get_link1(name, userid):
    for i in data1:
       users.append(i['full_name'])
 
-   return company, review, data1
+   company_logo = create_link(company)
+
+   return company, review, data1, company_logo
 
 @frappe.whitelist()
 def get_link2(name,comp, comp_type, user_id):
@@ -197,3 +199,10 @@ def share_job_order(my_job_order,company_blocked):
    except Exception as e:
       frappe.log_error(e, "company unblock order sharing")
       frappe.msgprint("company unblock order sharing")
+
+def create_link(company):
+   if company.company_logo:
+      logo = frappe.get_site_config().env_url + company.company_logo
+      return logo
+   else:
+      return "/assets/tag_workflow/images/default_logo.png"
