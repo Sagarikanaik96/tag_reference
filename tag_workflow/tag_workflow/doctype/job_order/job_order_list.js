@@ -9,11 +9,21 @@ frappe.listview_settings['Job Order'] = {
 		$('[data-fieldname="order_status"]').hide();
 		cur_list.columns[6].df.label = 'Head Count Available';
 		cur_list.render_header(cur_list.columns)
-		if(frappe.boot.tag.tag_user_info.company_type != "Staffing"){
+		if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring" ){
             cur_list.columns.splice(6,1)
-			cur_list.columns[6].df.label = 'Category';
+			cur_list.columns[8].df.label = 'Workers / Claims';
 			cur_list.render_header(cur_list.columns)
         }
+		if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+            cur_list.columns.splice(7,1)
+			cur_list.columns.splice(8,1)
+			cur_list.render_header(cur_list.columns)
+        }
+		if(frappe.boot.tag.tag_user_info.company_type != "Staffing" && frappe.boot.tag.tag_user_info.company_type != "Hiring" && frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"){
+			cur_list.columns.splice(9,1)
+			cur_list.columns.splice(6,2)
+			cur_list.render_header(cur_list.columns)
+		}
 		if(frappe.session.user!='Administrator'){
 			$('.custom-actions.hidden-xs.hidden-md').hide();
 			$('[data-original-title="Refresh"]').hide();
@@ -259,6 +269,10 @@ frappe.listview_settings['Job Order'] = {
 			}else{
                 return `<span class=" ellipsis" title="" id="${val}-${f.name}" ><a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a></span>`
 			}
+		},
+		no_of_workers(val, d, f){
+			let claimed_w = f.worker_filled
+			return `<div class = "list-row-col ellipsis hidden-xs text-center" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${val}/${claimed_w}</span></div>`
 		}
 	},
 }
