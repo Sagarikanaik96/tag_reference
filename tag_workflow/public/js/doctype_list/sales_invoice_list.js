@@ -1,10 +1,12 @@
 frappe.listview_settings['Sales Invoice'] = {
 	onload:function(listview){
 		document.getElementsByClassName('list-row-col ellipsis')[6].style.textAlign = "right";
-		document.getElementsByClassName('list-row-col ellipsis')[6].innerHTML	 = "Paid";
 		document.getElementsByClassName('list-row-col ellipsis')[6].style.color	 = "#8d9cbc";
-		document.getElementsByClassName('list-row-col ellipsis')[3].innerHTML	 = "Job Order";
 		document.getElementsByClassName('list-row-col ellipsis')[3].style.color	 = "#8d9cbc";
+		listview.columns[3].df.label = 'Job Order';
+		listview.render_header(listview.columns[3]);
+		listview.columns[6].df.label = 'Paid';
+		listview.render_header(listview.columns[6]);
 		$('input[data-fieldname="name"]')[0].value = '';
 		$('h3[title = "Invoice"]').html('Invoices');
 		if(frappe.session.user!='Administrator'){
@@ -53,8 +55,7 @@ frappe.listview_settings['Sales Invoice'] = {
             },
             placeholder: "Job Order"
         };
-		let standard_filters_wrapper_job_order = listview.page.page_form.find('.standard-filter-section');
-		listview.page.add_field(filter_job_order, standard_filters_wrapper_job_order);
+		listview.page.add_field(filter_job_order, standard_filters_wrapper);
 
 		const filter_date = {
             condition: "=",
@@ -69,8 +70,7 @@ frappe.listview_settings['Sales Invoice'] = {
             },
             placeholder: "Date"
         };
-		let standard_filters_wrapper_date = listview.page.page_form.find('.standard-filter-section');
-		listview.page.add_field(filter_date, standard_filters_wrapper_date);
+		listview.page.add_field(filter_date, standard_filters_wrapper);
 		$('[data-original-title = "Date"][data-fieldname = "posting_date"]>input').hover(function(){ /* this function is empty */ },function(){listview.refresh();})
 	
 		const filter_total = {
@@ -86,8 +86,7 @@ frappe.listview_settings['Sales Invoice'] = {
             },
             placeholder: "Grand Total"
         };
-		let standard_filters_wrapper_total = listview.page.page_form.find('.standard-filter-section');
-		listview.page.add_field(filter_total, standard_filters_wrapper_total);
+		listview.page.add_field(filter_total, standard_filters_wrapper);
 
 		const filters = {
             condition: "=",
@@ -103,8 +102,7 @@ frappe.listview_settings['Sales Invoice'] = {
             options: [0,1],
             placeholder: "Paid"
         };
-		let standard_filters_wrappers= listview.page.page_form.find('.standard-filter-section');
-		listview.page.add_field(filters, standard_filters_wrappers);
+		listview.page.add_field(filters, standard_filters_wrapper);
 		let doc_filters = document.querySelector('select[data-fieldname = "is_pos"]')
 		doc_filters.options.add(new Option(), "*");
 		doc_filters.options[1].innerHTML = 'Unpaid';
@@ -158,9 +156,7 @@ frappe.listview_settings['Sales Invoice'] = {
 			$('[data-original-title="Grand Total"]>input').val("") 	
 		}
 		document.getElementsByClassName('list-row-col ellipsis')[6].style.textAlign = "right";
-		document.getElementsByClassName('list-row-col ellipsis')[6].innerHTML	 = "Paid";
 		document.getElementsByClassName('list-row-col ellipsis')[6].style.color	 = "#8d9cbc";
-		document.getElementsByClassName('list-row-col ellipsis')[3].innerHTML	 = "Job Order";
 		document.getElementsByClassName('list-row-col ellipsis')[3].style.color	 = "#8d9cbc";
 	},
 	hide_name_column: true,
