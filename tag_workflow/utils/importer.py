@@ -146,7 +146,7 @@ class Importer:
                 import_log.append(frappe._dict(success=True, docname=doc, row_indexes=row_indexes))
             else:
                 message_log = ['{"title": "Error", "message": "Data Error"}']
-                msg_exc = """<b>First Name* and Last Name*</b>: accepts alphanumeric values.\n<b>Email*</b>: accepts the alphanumeric value in format abc@xyz.com.\n<b>Status*</b>: Active/Inactive/Suspended/Left.\n<b>Company*</b>: You can add data in your company. if kept empty it takes the value of your own company.\n<b>Military Veteran</b>: Please type only 0 or 1, and Yes or NO in Military Veteran.\n<b>Gender</b>: Male, Female or Decline to answer.\n<b>SSN</b>: accepts the 9 digits.\n<b>Contact No.</b>: accepts the 10 to 12 digit. """
+                msg_exc = """<b>First Name* and Last Name*</b>: cannot be empty\n<b>Email*</b>: accepts the alphanumeric value in format abc@xyz.com.\n<b>Status*</b>: Active/Inactive/Suspended/Left.\n<b>Company*</b>: You can add data in your company. if kept empty it takes the value of your own company.\n<b>Military Veteran</b>: Please type only 0 or 1, and Yes or NO in Military Veteran.\n<b>Gender</b>: Male, Female or Decline to answer.\n<b>SSN</b>: accepts the 9 digits.\n<b>Contact No.</b>: accepts the 10 to 12 digit. """
                 import_log.append(frappe._dict(success=False, exception=msg_exc, messages=message_log, docname=doc, row_indexes=row_indexes))
 
             frappe.db.commit()
@@ -159,28 +159,43 @@ class Importer:
 
     def check_emp_error(self, doc):
         try:
-            special_chars = string.punctuation
             if(doc.first_name):
-                bools = list(map(lambda char: char in special_chars, doc.first_name))
-                if any(bools):
-                    doc.first_name = ''
+                doc.first_name = doc.first_name.title()
 
             if(doc.last_name):
-                bools = list(map(lambda char: char in special_chars, doc.last_name))
-                if any(bools):
-                    doc.last_name = ''
+                doc.last_name = doc.last_name.title()
 
             if(doc.email):
                 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
                 if(not re.fullmatch(regex, doc.email)):
                     doc.email = ''
+                else :
+                    doc.email = doc.email.lower()
 
             if((doc.sssn and (not doc.sssn.isdigit() or len(doc.sssn) != 9)) or doc.sssn is None):
                 doc.sssn = ''
 
+            self.check_ext_fields(doc)
             self.check_rem_emp(doc)
         except Exception as e:
             print(e)
+
+    def check_ext_fields(self, doc):
+
+        if(doc.street_address):
+            doc.street_address = doc.street_address.title()
+
+        if(doc.suite_or_apartment_no):
+            doc.suite_or_apartment_no = doc.suite_or_apartment_no.title()
+
+        if(doc.city):
+            doc.city = doc.city.title()
+
+        if(doc.state):
+            doc.state = doc.state.title()
+
+        if(doc.company):
+            doc.company = doc.company.title()
 
     def check_rem_emp(self, doc):
         try:
