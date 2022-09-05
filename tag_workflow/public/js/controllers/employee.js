@@ -1,4 +1,5 @@
 frappe.require('/assets/tag_workflow/js/twilio_utils.js');
+frappe.require('/assets/tag_workflow/js/emp_functions.js');
 frappe.ui.form.on("Employee", {
 	refresh: function(frm){
 		$('.form-footer').hide();
@@ -191,6 +192,8 @@ frappe.ui.form.on("Employee", {
 	},
 
 	validate:function(frm){
+		let reqd_fields = { "First Name": frm.doc.first_name, "Last Name": frm.doc.last_name, "Company": frm.doc.company, "Date of Birth": cur_frm.doc.date_of_birth, "Email": cur_frm.doc.email, "Status": frm.doc.status};
+		mandatory_fields(reqd_fields);
 		validate_phone_zip(frm);
 		if (frm.doc.sssn && frm.doc.sssn.toString().length != 9) {
 			frm.set_value("ssn", "");
@@ -200,7 +203,7 @@ frappe.ui.form.on("Employee", {
 		}
 
 		let email = frm.doc.email
-		if(email.length > 120 || !frappe.utils.validate_type(email, "email")){
+		if(email && email!=undefined && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
 			frappe.msgprint({message: __('Not A Valid Email'), indicator: 'red'});
 			frappe.validated = false
 		}
@@ -547,12 +550,6 @@ function hide_field(frm){
 	frm.set_df_property('zip','hidden',frm.doc.zip && frm.doc.enter_manually ==1 ? 0:1);
 }
 
-function show_fields(frm){
-	frm.set_df_property('city','hidden',0);
-	frm.set_df_property('state','hidden',0);
-	frm.set_df_property('zip','hidden',0);
-}
-
 function update_employees_data(frm){
 	let roles = frappe.user_roles;
 	if (roles.includes("Staffing Admin") || roles.includes("Staffing User") && frm.doc.employee_number) {
@@ -579,21 +576,6 @@ function update_existing_employees(frm){
 		cur_frm.scroll_to_field("jazzhr_api_key");
 		frappe.msgprint("<b>JazzHR API Key</b> is required");
 	}
-}
-function show_addr(frm){
-	if(frm.doc.search_on_maps){
-		frm.get_docfield('street_address').label ='Complete Address';
-	}else if(frm.doc.enter_manually){
-		frm.get_docfield('street_address').label ='Street Address';
-	}
-
-    if(frm.doc.enter_manually == 1){
-        cur_frm.toggle_display("complete_address", 0);
-    }else{
-        cur_frm.toggle_display("complete_address", 1);
-    }
-
-	frm.refresh_field('street_address');
 }
 
 const html=`<!doctype html>
@@ -629,28 +611,6 @@ function get_ssn_value(frm){
 		localStorage.setItem("tag", "");
 	}
 }
-
-function validate_phone_zip(frm){
-	let contact_number = frm.doc.contact_number;
-	let zip = frm.doc.zip;
-	if(contact_number){
-		if(!validate_phone(contact_number)){
-			frappe.msgprint({message: __("Invalid Contact Number!"),indicator: "red"});
-			frappe.validated = false;
-		}
-		else{
-			frm.set_value('contact_number', validate_phone(contact_number));
-		}
-	}
-	if (zip){
-		frm.set_value('zip', zip.toUpperCase());
-		if(!validate_zip(zip)){
-			frappe.msgprint({message: __("Invalid Zip!"),indicator: "red"});
-			frappe.validated = false;
-		}
-	}
-}
-
 
 function employee_work_history(frm){
 	if(frm.doc.__islocal!=1 && (frappe.boot.tag.tag_user_info.company_type=='Staffing' || frappe.boot.tag.tag_user_info.company_type=='TAG')){
@@ -721,30 +681,6 @@ function append_job_category(frm){
 	    refresh_field("job_categories");
 	}
 }
-function remove_lat_lng(frm){
-	if((frm.doc.enter_manually) && (!frm.doc.zip && !frm.doc.city && !frm.doc.state)  && (frm.doc.lat || frm.doc.lng)){
-		frm.set_value('complete_address',undefined)
-		set_lat_lng_undefined(frm)
-
-	}
-	else if((frm.doc.search_on_maps) && (!cur_frm.doc.complete_address) && (frm.doc.lat || frm.doc.lng)){
-		frm.set_value('state',undefined)
-		frm.set_value('city',undefined)
-		frm.set_value('zip',undefined)
-		set_lat_lng_undefined(frm)
-	}
-}
-function update_lat_lng(frm){
-	if((frm.doc.enter_manually) && (frm.doc.zip && frm.doc.city && frm.doc.state)){
-		frappe.call({
-			method:"tag_workflow.tag_data.update_lat_lng_required",
-			args:{
-				'employee_id':frm.doc.name,
-				'company':frm.doc.company
-			}
-		})
-	}
-}
 
 /*--------------------download---------------------*/
 function download_emp_resume(file){
@@ -763,50 +699,6 @@ function download_emp_resume(file){
 			}
 		});
 	}
-}
-
-/*--------------------Update Complete Address---------------------*/
-function update_complete_address(frm){
-	if(frm.doc.zip && frm.doc.state && frm.doc.city){
-	    let data = {
-	        street_number: frm.doc.street_address ? frm.doc.street_address:'',
-	        route: frm.doc.suite_or_apartment_no ? frm.doc.suite_or_apartment_no    :'',
-	        locality:frm.doc.city,
-	        administrative_area_level_1: frm.doc.state,
-	        postal_code: frm.doc.zip ? frm.doc.zip:0,
-	    };
-		update_comp_address(frm,data)
-	}
-	else{
-	    frm.set_value('complete_address','')
-    }
-}
-
-function update_comp_address(frm,data){
-	frappe.call({
-	    method:'tag_workflow.tag_data.update_complete_address',
-	    args:{
-	        data:data
-	    },
-	    callback:function(r){
-	        if(r.message!='No Data')
-	        {
-	            if(r.message!=frm.doc.complete_address){
-	                frm.set_value('complete_address',r.message)
-	            }
-	        }
-	        else{
-	            frm.set_value('complete_address','')
-	        }
-	    }
-	})
-}
-	
-function set_lat_lng_undefined(frm){
-	frm.set_value('suite_or_apartment_no',undefined)
-	frm.set_value('street_address',undefined)
-	frm.set_value('lat',undefined)
-	frm.set_value('lng',undefined)
 }
 
 function job_title_filter(frm){

@@ -73,7 +73,8 @@ app_include_js = [
         "/assets/tag_workflow/js/frappe/form/controls/attach.js",
         "/assets/tag_workflow/js/frappe/form/controls/link.js",
         "/assets/tag_workflow/js/twilio_utils.js",
-        "/assets/tag_workflow/js/list.js"
+        "/assets/tag_workflow/js/list.js",
+        "/assets/tag_workflow/js/emp_functions.js"
 ]
 
 web_include_css = [
@@ -114,7 +115,8 @@ doctype_list_js = {
         "Contract": "public/js/doctype_list/contract_list.js",
         "Role Profile": "public/js/doctype_list/role_profile.js",
         "Item": "public/js/doctype_list/item_list.js",
-        "Employee Onboarding Template": "public/js/doctype_list/employee_onboarding_template_list.js"
+        "Employee Onboarding Template": "public/js/doctype_list/employee_onboarding_template_list.js",
+        "Employee Onboarding": ["public/js/controllers/employee_onboarding.js", map]
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]

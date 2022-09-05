@@ -1485,6 +1485,7 @@ def update_company_type(job_order_name):
             job_order.save()
     except Exception as e:
         frappe.log_error(e,'Company Type update error')
+
 @frappe.whitelist()
 def remove_emp_from_order(assign_emp,employee_name,job_order,removed):
     try:
@@ -1531,10 +1532,10 @@ def remove_assign_employee(employee_name,job_order_name,assign_doc):
             if i.employee_id == employee_name.name:
                 return   
         remove_assigned_emp(employee_name,job_order_name,assign_doc)
+
 def remove_assigned_emp(employee_name,job_order_name,assign_doc):
     assign_doc.append('employee_removed',{'employee_id':employee_name.name,'employee_name':employee_name,'order_status':job_order_name.order_status})
     assign_doc.save(ignore_permissions = True)
-
 
 def unremove_assign_emp(employee_name,assign_doc):
     if len(assign_doc.employee_removed)!=0:
@@ -1543,3 +1544,42 @@ def unremove_assign_emp(employee_name,assign_doc):
                 remove_row = i
         assign_doc.remove(remove_row)
         assign_doc.save(ignore_permissions=True)
+
+@frappe.whitelist()
+def create_job_applicant_and_offer(applicant_name, email, company, contact_number = None):
+    try:
+        job_applicant = frappe.get_doc(dict(doctype = 'Job Applicant', applicant_name = applicant_name, email_id = email, status = 'Accepted'))
+        job_applicant.insert(ignore_permissions = True)
+        if contact_number:
+            job_applicant.phone_number = contact_number
+            job_applicant.save(ignore_permissions=True)
+
+        job_offer = frappe.get_doc(dict(doctype = 'Job Offer', job_applicant = job_applicant.name, applicant_name = applicant_name, applicant_email = email, status = 'Accepted', offer_date = datetime.date.today(), designation = 'Temp Employee', company = company))
+        job_offer.insert(ignore_permissions = True)
+        return job_applicant.name, job_offer.name
+    except Exception as e:
+        frappe.log_error(e, "Error in creating job applicant and offer")
+        print(e)
+
+@frappe.whitelist()
+def set_lat_lng(form_name):
+    try:
+        data = frappe.db.sql("""select state, city, zip from `tabEmployee Onboarding` where  name ='{0}'  """.format(form_name), as_dict=1)
+        address = data[0].city + ", " + data[0].state + ", " + (data[0].zip if data[0].zip != 0 and data[0].zip is not None else "")
+        google_location_data_url = GOOGLE_API_URL + address
+        google_response = requests.get(google_location_data_url)
+        location_data = google_response.json()
+        if(google_response.status_code == 200 and len(location_data)>0 and len(location_data['results'])>0):
+            lat, lng = emp_location_data(location_data)
+            frappe.db.set_value('Employee Onboarding', form_name, 'lat', lat)
+            frappe.db.set_value('Employee Onboarding', form_name, 'lng', lng)
+    except Exception as e:
+        frappe.log_error(e, "Longitude Latitude Error on Employee Onboarding")
+        print(e)
+
+@frappe.whitelist()
+def set_emp_activity(template):
+    return frappe.get_all("Employee Boarding Activity",
+		fields=["activity_name", "role", "user", "required_for_employee_creation", "description", "task_weight", "document_required", "document", "attach"],
+		filters={"parent": template, "parenttype": "Employee Onboarding Template"},
+		order_by= "idx")

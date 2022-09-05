@@ -24,6 +24,7 @@ Custom_Label = "Custom Field"
 WEB_MAN = "Website Manager"
 USR, EMP, COM = "User", "Employee", "Company"
 Global_defaults="Global Defaults"
+Temp_Emp = "Temp Employee"
 
 ALL_ROLES = [role.name for role in frappe.db.get_list("Role", {"name": ["!=", "Employee"]}, ignore_permissions=True) or []]
 
@@ -55,6 +56,7 @@ def setup_data():
         update_old_data_import()
         update_old_direct_order()
         update_old_company_type()
+        create_job_applicant()
         set_workspace()
         setup_company_permission()
         check_if_user_exists()
@@ -341,3 +343,15 @@ def update_old_company_type():
         
     except Exception as e:
         frappe.log_error(e,'Old Job Order Updates')
+
+#------Create Industry Type and Designation for Job Applicant------
+def create_job_applicant():
+    try:
+        if not frappe.db.exists('Industry Type', {'name': 'Other'}):
+            industry_type = frappe.get_doc(dict(doctype='Industry Type', industry="Other", name="Other"))
+            industry_type.insert(ignore_permissions = True)
+        if not frappe.db.exists('Designation', {'name': Temp_Emp}):
+            designation = frappe.get_doc(dict(doctype = 'Designation', description= "Used for Onboarding Purposes", designation= Temp_Emp, designation_name= Temp_Emp,industry_type= "Other", name= Temp_Emp, price= 0.0, skills= []))
+            designation.insert(ignore_permissions = True)
+    except Exception as e:
+        frappe.log_error(e,'Create Industry Type and Designation')

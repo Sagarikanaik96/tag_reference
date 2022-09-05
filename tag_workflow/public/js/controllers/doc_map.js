@@ -112,7 +112,7 @@ function make(value, _key, componentForm, data) {
 }
 function update_address(data){
     let street = data.street_number ? (data.street_number + " " + data.route) : data.route;
-    if (cur_frm.doc.doctype == 'Employee') {
+    if (cur_frm.doc.doctype == 'Employee' || cur_frm.doc.doctype == 'Employee Onboarding') {
         update_basic_value(data)
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "street_address", data.route);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state", data["administrative_area_level_1"]);
