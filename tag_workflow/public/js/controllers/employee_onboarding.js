@@ -1,6 +1,16 @@
 frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.require('/assets/tag_workflow/js/emp_functions.js');
 frappe.ui.form.on('Employee Onboarding', {
+	setup: (frm)=>{
+		frm.set_query("company", function(){
+			return {
+				filters: [
+					['Company', 'organization_type', '=', 'Staffing'],
+					['Company','make_organization_inactive','=',0]
+				]
+			}
+		});
+	},
     onload: (frm)=>{
         trigger_hide(frm);
 		if(frm.is_new()){
@@ -44,7 +54,7 @@ frappe.ui.form.on('Employee Onboarding', {
 			frm.set_value('employee_name',(frm.doc.first_name).trim()+' '+(frm.doc.last_name).trim());
 		}
 
-		if(frm.doc.__islocal == 1 && frappe.validate){
+		if(frm.doc.__islocal == 1 && frappe.validated){
 			create_job_applicant_and_offer(frm);
 		}
 	},
