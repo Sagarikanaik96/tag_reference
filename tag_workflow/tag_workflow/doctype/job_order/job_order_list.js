@@ -9,9 +9,12 @@ frappe.listview_settings['Job Order'] = {
 		$('[data-fieldname="order_status"]').hide();
 		cur_list.columns[6].df.label = 'Head Count Available';
 		cur_list.render_header(cur_list.columns)
-		if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring" ){
+		if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ){
             cur_list.columns.splice(6,1)
-			cur_list.columns[8].df.label = 'Workers / Claims';
+			cur_list.columns[8].df.label = 'Claims/Workers';
+			let swap  = cur_list.columns[5]
+			cur_list.columns[5] = cur_list.columns[6]
+			cur_list.columns[6] = swap
 			cur_list.render_header(cur_list.columns)
         }
 		if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
@@ -272,7 +275,7 @@ frappe.listview_settings['Job Order'] = {
 		},
 		no_of_workers(val, d, f){
 			let claimed_w = f.worker_filled
-			return `<div class = "list-row-col ellipsis hidden-xs text-center" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${val}/${claimed_w}</span></div>`
+			return `<div class = "list-row-col ellipsis hidden-xs text-center" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${claimed_w}/${val}</span></div>`
 		}
 	},
 }
