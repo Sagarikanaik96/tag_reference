@@ -1103,6 +1103,14 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-col:nth-child(3) {
   flex: 2;
 }
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  .frappe-list
+  header
+  .level-left
+  .list-row-col:nth-child(6) {
+  text-align: left !important;
+}
 .frappe-card .list-row-container .ellipsis {
   text-align: center;
   white-space: unset;
@@ -1236,6 +1244,71 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-col:nth-child(1) {
   flex: 1.5;
 }
+
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(2),
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(2),
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(3),
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(3),
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(4),
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(4),
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(5),
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(5),
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(6),
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(6) {
+  flex: 1.5;
+}
+[data-page-route="List/Sales Invoice/List"] .list-row-head .level-left,
+[data-page-route="List/Sales Invoice/List"] .list-row .level-left {
+  min-width: 86% !important;
+}
+[data-page-route="List/Sales Invoice/List"]
+  .frappe-card
+  header
+  .level-left
+  .list-row-col:nth-child(5) {
+  margin-right: -2px;
+}
+
 .block-company-btn {
   margin-right: 50px;
 }
@@ -1418,10 +1491,10 @@ select.input-with-feedback.form-control.ellipsis {
 .employee_popup table tr th {
   border-top: none;
 }
-.company_logo{
-  width:100px;
-  height:100px;
-  display:inherit;
+.company_logo {
+  width: 100px;
+  height: 100px;
+  display: inherit;
 }
 
 /*------ Media query start ----*/
