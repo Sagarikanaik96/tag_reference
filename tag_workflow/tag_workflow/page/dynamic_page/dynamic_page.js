@@ -45,6 +45,7 @@ frappe.FaceRecognition = Class.extend({
 					if(r.message[0].organization_type!= 'Staffing'){
 						$("#coi").hide();
 						$("#safety_manual").hide();
+						$("#w_nine").hide();
 					}
 					get_blocked_list(page)
 				}
