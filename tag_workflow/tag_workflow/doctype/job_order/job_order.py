@@ -178,6 +178,13 @@ class JobOrder(Document):
 
 @frappe.whitelist()
 def joborder_notification(organizaton,doc_name,company,job_title,posting_date,job_site=None):
+    jo_doc=frappe.get_doc(ORD,doc_name)
+    if not jo_doc.has_permission("read"):
+        frappe.local.response['http_status_code'] = 500
+        frappe.throw('Insufficient Permission for Job Order ' + doc_name)
+    elif jo_doc.company!=company or jo_doc.select_job!=job_title or jo_doc.staff_org_claimed!=organizaton:
+        frappe.local.response['http_status_code'] = 500
+        frappe.throw('Invalid Parameter')
     sql = '''select data from `tabVersion` where docname = "{}" '''.format(doc_name)
     change = frappe.db.sql(sql, as_dict= True)
     if len(change) > 2:
@@ -457,10 +464,15 @@ def make_notes(company):
 @frappe.whitelist()
 def get_company_details(comp_name):
     try:
-        sql = ''' select name ,organization_type, address,state ,city ,phone_no from `tabCompany` where name = "{0}"'''.format(comp_name)
-        company_value = frappe.db.sql(sql,as_dict=True)
-        if company_value:
-            return company_value[0]
+        company_doc=frappe.get_doc('Company',comp_name)
+        if not company_doc.has_permission("read"):
+            user_details=frappe.db.get_all('User Permission', filters={'user': frappe.session.user,'allow':'Company','for_value':comp_name,'applicable_for':ORD}, fields={'name'})
+            if user_details==[]:
+                frappe.local.response['http_status_code'] = 500
+                frappe.throw('Insufficient Permission for Company ' + comp_name)
+        company_details=frappe.db.get_all('Company', filters={'name': comp_name}, fields={'name','organization_type','address','state' ,'city' ,'phone_no'})
+        if company_details!=[]:
+            return company_details[0]
     except Exception as e:
         frappe.log_error(e, 'Job order list')
         return []
