@@ -467,7 +467,7 @@ frappe.ui.form.on("Job Order", {
 		}
 
 		if (frm.doc.no_of_workers < frm.doc.worker_filled) {
-			message = "Number of workers cannot be less than worker filled.";
+			message =frm.doc.worker_filled +" Employees are assigned to this order. Number of required workers must be greater than or equal to number of assigned employees. Please modify the number of workers required or work with the staffing companies to remove an assigned employee. ";
 			frappe.db.get_value("Job Order", frm.doc.name, "no_of_workers", function(r) {
 				frm.set_value("no_of_workers", r["no_of_workers"]);
 			});
@@ -714,11 +714,6 @@ function check_value(field, name, value){
 	if(value && value < 0){
 		frappe.msgprint({message: __("<b>" + field + "</b> Cannot be Less Than Zero"),	title: __("Error"),indicator: "orange",});
 		cur_frm.set_value(name, (cur_frm.doc.repeat_old_worker && name == "no_of_workers" ? cur_frm.doc.repeat_old_worker : 0));
-	}else if(cur_frm.doc.no_of_workers >= 0 && cur_frm.doc.is_repeat && cur_frm.doc.repeat_from && cur_frm.doc.repeat_old_worker > 0){
-		if(cur_frm.doc.no_of_workers < cur_frm.doc.repeat_old_worker){
-			frappe.msgprint("For Repeat Order, <b>No. of workers</b> cannot be less than the original order.");
-			cur_frm.set_value("no_of_workers", cur_frm.doc.repeat_old_worker);
-		}
 	}
 }
 
