@@ -826,4 +826,12 @@ def claim_comp_assigned(doc_name,doc,claimed_approved):
             return 0
         else:
             return 1
+
+@frappe.whitelist()
+def validate_company(doc,method):
+    user_doc = frappe.get_doc('User', frappe.session.user)
+    if doc.is_new() and user_doc.organization_type == 'Staffing' and doc.company:
+        company_doc = frappe.get_doc('Company', doc.company)
+        if company_doc.organization_type!='Exclusive Hiring':
+            frappe.throw('Insufficient Permission to create Job Order')
     

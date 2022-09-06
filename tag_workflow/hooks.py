@@ -150,6 +150,9 @@ doc_events = {
        },
        'Assign Employee':{
                "before_save":'tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.validate_employee'
+       },
+       'Job Order':{
+               "before_save":'tag_workflow.tag_workflow.doctype.job_order.job_order.validate_company'
 	}
 }
 
