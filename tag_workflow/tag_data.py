@@ -131,12 +131,12 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
             frappe.db.set_value(assignEmployees, name, "approve_employee_notification", 0)
             job = frappe.get_doc(jobOrder, job_name)
             claimed = job.staff_org_claimed if job.staff_org_claimed else ""
-            frappe.db.set_value(jobOrder, job_name, "worker_filled", (int(employee_filled)+int(job.worker_filled)))
+            job.db_set('worker_filled',(int(employee_filled)+int(job.worker_filled)))
             if(len(claimed)==0):
-                frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+str(staffing_org)))
+                job.db_set('staff_org_claimed',(str(claimed)+str(staffing_org)))
             else:
-                frappe.db.set_value(jobOrder, job_name, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
-
+                job.db_set('staff_org_claimed',(str(claimed)+", "+str(staffing_org)))
+            frappe.db.commit()
             sub = f'New Message regarding {job_name} from {hiringorg} is available'
             msg = f'Your Employees has been approved for Work Order {job_name}'
             lst_sql = """ select user_id from `tabEmployee` where company = '{0}' and user_id IS NOT NULL""".format(staffing_org)
