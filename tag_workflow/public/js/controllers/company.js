@@ -62,6 +62,7 @@ frappe.ui.form.on("Company", {
 		$('[data-fieldname = "phone_no"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 		$('[data-fieldname = "accounts_payable_phone_number"]>div>div>div>input').attr("placeholder", 'Example: +XX XXX-XXX-XXXX');
 		$('[data-fieldname = "accounts_receivable_phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
+		frm.set_df_property('company_logo','hidden',0);
 	},
 
 	decrypt_jazzhr_api_key: function(frm) {
