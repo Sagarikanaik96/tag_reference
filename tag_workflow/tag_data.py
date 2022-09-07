@@ -558,9 +558,10 @@ def email_recipient(doctype, txt, searchfield, page_len, start, filters):
 def single_job_order_notification(job_order_title,hiring_org,job_order,subject,l,staff_company):
     try:
         is_repeat, no_of_workers, worker_filled = frappe.db.get_value(jobOrder, {"name": job_order}, ["is_repeat", "no_of_workers", "worker_filled"])
+        msg = None
         if(is_repeat):
             emp_reqd = no_of_workers - worker_filled
-            msg = f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}.'+" "+f'{emp_reqd} employees require replacing. Please assign additional employees.'
+            msg = f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond.' if emp_reqd == 0 else f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}.'+" "+f'{emp_reqd} employees require replacing. Please assign additional employees.'
         else:
             msg=f'{hiring_org} is requesting a fulfilment of a work order for {job_order_title} specifically with {staff_company}. Please respond.'
 
