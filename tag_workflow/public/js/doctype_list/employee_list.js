@@ -72,6 +72,10 @@ frappe.listview_settings['Employee'] = {
 	onload: function(listview){
 		$('input[data-fieldname="name"]')[0].value="";
 		$('h3[title="Employee"]').html('Employees');
+		if(frappe.boot.tag.tag_user_info.company_type=="Hiring"){
+			frappe.msgprint("You don't have enough permissions.");
+			frappe.set_route("app");
+		}
 		if(frappe.session.user!='Administrator'){
 			$('.custom-actions.hidden-xs.hidden-md').hide();
 			$('[data-original-title="Refresh"]').hide();
@@ -98,7 +102,8 @@ frappe.listview_settings['Employee'] = {
 		}
 		let standard_filters_wrapper = listview.page.page_form.find(".standard-filter-section");
 		listview.page.add_field(job_title_filter, standard_filters_wrapper)
-	}
+	},
+	
 };
 
 frappe.confirm = function(_message, confirm_action, reject_action) {
