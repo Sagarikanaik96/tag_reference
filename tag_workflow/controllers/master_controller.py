@@ -189,6 +189,9 @@ def remove_tag_permission(user, emp, company):
 @frappe.whitelist()
 def check_employee(name, first_name, company, last_name=None, gender=None, date_of_birth=None, date_of_joining=None, organization_type=None):
     try:
+        if not date_of_birth:
+            date_of_birth = "1970-01-01"
+
         if(name in STANDARD): return
 
         users = [{"name": name, "company": company}]
