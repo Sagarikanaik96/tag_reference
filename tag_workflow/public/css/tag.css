@@ -1496,6 +1496,37 @@ select.input-with-feedback.form-control.ellipsis {
   height: 100px;
   display: inherit;
 }
+[data-page-route="List/Job Order/List"]
+  .order-list-hiring
+  header
+  .level-left
+  .list-row-col:nth-child(5),
+[data-page-route="List/Job Order/List"]
+  .order-list-hiring
+  header
+  .level-left
+  .list-row-col:nth-child(7),
+[data-page-route="List/Job Order/List"]
+  .order-list-staffing
+  header
+  .level-left
+  .list-row-col:nth-child(5) {
+  margin-left: 10px;
+}
+[data-page-route="List/Job Order/List"]
+  .order-list-staffing
+  header
+  .level-left
+  .list-row-col:nth-child(5) {
+  margin-left: 20px;
+}
+[data-page-route="List/Job Order/List"]
+  .order-list-tag
+  header
+  .level-left
+  .list-row-col:nth-child(5) {
+  margin-left: 20px;
+}
 
 /*------ Media query start ----*/
 @media (max-width: 1300px) {

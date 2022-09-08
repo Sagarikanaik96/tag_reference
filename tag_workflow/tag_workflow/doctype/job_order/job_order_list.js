@@ -1,170 +1,214 @@
-frappe.listview_settings['Job Order'] = {
-	add_fields:['no_of_workers',"worker_filled","category"],
-	onload:function(){
-		$('h3[title = "Job Order"]').html('Job Orders');
-		cur_list.columns[0].df.label = 'Order ID';
-		cur_list.render_header(cur_list.columns)
-		$('.list-header-subject > div:nth-child(7) > span:nth-child(1)').html('Industry');
-		$('[data-fieldname="name"]').attr('placeholder','Order ID');
-		$('[data-fieldname="order_status"]').hide();
-		cur_list.columns[6].df.label = 'Head Count Available';
-		cur_list.render_header(cur_list.columns)
-		if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ){
-            cur_list.columns.splice(6,1)
-			cur_list.columns[8].df.label = "Approved/Required";
-			let swap  = cur_list.columns[5]
-			cur_list.columns[5] = cur_list.columns[6]
-			cur_list.columns[6] = swap
-			cur_list.render_header(cur_list.columns)
-        }
-		if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
-            cur_list.columns.splice(7,1)
-			let swap_col = cur_list.columns[7];
-			cur_list.columns[7] = cur_list.columns[8]
-			cur_list.columns[8] = swap_col
-			cur_list.columns[7].df.label = "Category"
-			cur_list.render_header(cur_list.columns)
-        }
-		if(frappe.boot.tag.tag_user_info.company_type != "Staffing" && frappe.boot.tag.tag_user_info.company_type != "Hiring" && frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"){
-			cur_list.columns.splice(6,2)
-			let swap_col = cur_list.columns[6];
-			cur_list.columns[6] = cur_list.columns[7];
-			cur_list.columns[7] = swap_col;
-			cur_list.columns[6].df.label = "Category"
-			cur_list.render_header(cur_list.columns)
-			
-		}
-		if(frappe.session.user!='Administrator'){
-			$('.custom-actions.hidden-xs.hidden-md').hide();
-			$('[data-original-title="Refresh"]').hide();
-			$('.menu-btn-group').hide();
-        }
-		
-		if (window.location.search){
-	        $("button.btn.btn-sm.filter-button.btn-primary-light").hide();
-        	frappe.route_options = {
-				"order_status": "",
-				"is_single_share":1,
-			};
-		}else{
-			frappe.route_options = {
-			"order_status": "",
-			};
-		}
-		
-		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-			frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
-				if(r.name===undefined){
-					$('.btn-primary').hide();
-				}
-			});
-		}
-		if(frappe.session.user=='Administrator' || frappe.boot.tag.tag_user_info.company_type=="TAG"){
-			$('.btn-primary').hide();
-		}
-		document.body.addEventListener('click', function(){
-				$('[role = "tooltip"]').popover('dispose');
-			}
-		, true);
-	},
-	refresh:function(listview){
-		$('.custom-actions.hidden-xs.hidden-md').hide();
-		$('#navbar-breadcrumbs > li:nth-child(2) > a').html('Job Orders');
-		$('[data-original-title="Menu"]').hide();
-        $('[data-fieldname="order_status"]').hide();
-		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-			frappe.db.get_value("Company", {"parent_staffing": frappe.boot.tag.tag_user_info.company},['name'], function(r){
-				if(r.name===undefined){
-					$('button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs').hide();
-				}
-			});
-		}
+frappe.listview_settings["Job Order"] = {
+  add_fields: ["no_of_workers", "worker_filled", "category"],
+  onload: function () {
+    $('h3[title = "Job Order"]').html("Job Orders");
+    cur_list.columns[0].df.label = "Order ID";
+    cur_list.render_header(cur_list.columns);
+    $(".list-header-subject > div:nth-child(7) > span:nth-child(1)").html(
+      "Industry"
+    );
+    $('[data-fieldname="name"]').attr("placeholder", "Order ID");
+    $('[data-fieldname="order_status"]').hide();
+    cur_list.columns[6].df.label = "Head Count Available";
+    cur_list.render_header(cur_list.columns);
+    if (
+      frappe.boot.tag.tag_user_info.company_type == "Hiring" ||
+      frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"
+    ) {
+      cur_list.columns.splice(6, 1);
+      cur_list.columns[8].df.label = "Approved/Required";
+      let swap = cur_list.columns[5];
+      cur_list.columns[5] = cur_list.columns[6];
+      cur_list.columns[6] = swap;
+      cur_list.render_header(cur_list.columns);
+    }
+    if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
+      cur_list.columns.splice(7, 1);
+      let swap_col = cur_list.columns[7];
+      cur_list.columns[7] = cur_list.columns[8];
+      cur_list.columns[8] = swap_col;
+      cur_list.columns[7].df.label = "Category";
+      cur_list.render_header(cur_list.columns);
+    }
+    if (
+      frappe.boot.tag.tag_user_info.company_type != "Staffing" &&
+      frappe.boot.tag.tag_user_info.company_type != "Hiring" &&
+      frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"
+    ) {
+      cur_list.columns.splice(6, 2);
+      let swap_col = cur_list.columns[6];
+      cur_list.columns[6] = cur_list.columns[7];
+      cur_list.columns[7] = swap_col;
+      cur_list.columns[6].df.label = "Category";
+      cur_list.render_header(cur_list.columns);
+    }
+    if (frappe.session.user != "Administrator") {
+      $(".custom-actions.hidden-xs.hidden-md").hide();
+      $('[data-original-title="Refresh"]').hide();
+      $(".menu-btn-group").hide();
+    }
 
-		$('[role = "tooltip"]').popover('dispose');
-        const df = {
-            condition: "=",
-            default: null,
-            fieldname: "company",
-            fieldtype: "Select",
-            input_class: "input-xs",
-            is_filter: 1,
-            onchange: function() {
-                cur_list.refresh();
-            },
-            options: get_company_job_order(),
-            placeholder: "Company"
-        };
-        if(cur_list.page.fields_dict.company === undefined){
-            listview.page.add_field(df, '.standard-filter-section');
+    if (window.location.search) {
+      $("button.btn.btn-sm.filter-button.btn-primary-light").hide();
+      frappe.route_options = {
+        order_status: "",
+        is_single_share: 1,
+      };
+    } else {
+      frappe.route_options = {
+        order_status: "",
+      };
+    }
+
+    if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
+      frappe.db.get_value(
+        "Company",
+        { parent_staffing: frappe.boot.tag.tag_user_info.company },
+        ["name"],
+        function (r) {
+          if (r.name === undefined) {
+            $(".btn-primary").hide();
+          }
         }
-		if(frappe.boot.tag.tag_user_info.company_type != "Staffing" && frappe.boot.tag.tag_user_info.company_type != "Hiring" && frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"){
-			document.getElementsByClassName("list-row-col")[7].classList.remove("text-right");
-			document.getElementsByClassName("list-row-col")[6].classList.remove("text-right");
-			
-		}
-		if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
-			document.getElementsByClassName("list-row-col")[8].classList.remove("text-right");
-			document.getElementsByClassName("list-row-col")[8].style.textAlign = "left"
-			document.getElementsByClassName("list-row-col")[7].classList.remove("text-right");
-			document.getElementsByClassName("list-row-col")[7].style.textAlign = "left"
+      );
+    }
+    if (
+      frappe.session.user == "Administrator" ||
+      frappe.boot.tag.tag_user_info.company_type == "TAG"
+    ) {
+      $(".btn-primary").hide();
+    }
+    document.body.addEventListener(
+      "click",
+      function () {
+        $('[role = "tooltip"]').popover("dispose");
+      },
+      true
+    );
+  },
+  refresh: function (listview) {
+    $(".custom-actions.hidden-xs.hidden-md").hide();
+    $("#navbar-breadcrumbs > li:nth-child(2) > a").html("Job Orders");
+    $('[data-original-title="Menu"]').hide();
+    $('[data-fieldname="order_status"]').hide();
+    if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
+      frappe.db.get_value(
+        "Company",
+        { parent_staffing: frappe.boot.tag.tag_user_info.company },
+        ["name"],
+        function (r) {
+          if (r.name === undefined) {
+            $("button.btn.btn-primary.btn-sm.btn-new-doc.hidden-xs").hide();
+          }
+        }
+      );
+    }
 
+    $('[role = "tooltip"]').popover("dispose");
+    const df = {
+      condition: "=",
+      default: null,
+      fieldname: "company",
+      fieldtype: "Select",
+      input_class: "input-xs",
+      is_filter: 1,
+      onchange: function () {
+        cur_list.refresh();
+      },
+      options: get_company_job_order(),
+      placeholder: "Company",
+    };
+    if (cur_list.page.fields_dict.company === undefined) {
+      listview.page.add_field(df, ".standard-filter-section");
+    }
+    if (
+      frappe.boot.tag.tag_user_info.company_type != "Staffing" &&
+      frappe.boot.tag.tag_user_info.company_type != "Hiring" &&
+      frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"
+    ) {
+      document
+        .getElementsByClassName("frappe-list")[0]
+        .classList.add("order-list-tag");
+      document
+        .getElementsByClassName("list-row-col")[7]
+        .classList.remove("text-right");
+      document
+        .getElementsByClassName("list-row-col")[6]
+        .classList.remove("text-right");
+    }
+    if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
+      document
+        .getElementsByClassName("frappe-list")[0]
+        .classList.add("order-list-staffing");
+      document
+        .getElementsByClassName("list-row-col")[8]
+        .classList.remove("text-right");
+      document.getElementsByClassName("list-row-col")[8].style.textAlign =
+        "left";
+      document
+        .getElementsByClassName("list-row-col")[7]
+        .classList.remove("text-right");
+      document.getElementsByClassName("list-row-col")[7].style.textAlign =
+        "left";
+    }
+    if (
+      frappe.boot.tag.tag_user_info.company_type == "Hiring" ||
+      frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"
+    ) {
+      document
+        .getElementsByClassName("frappe-list")[0]
+        .classList.add("order-list-hiring");
+      document
+        .getElementsByClassName("list-row-col")[8]
+        .classList.remove("text-right");
+    }
+  },
 
-		}
-	},	
-
-	formatters: {
-		order_status(val, d, f) {
-			if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && val!='Completed' && (f.no_of_workers!=f.worker_filled)){
-				let y
-				frappe.call({
-					method:'tag_workflow.tag_data.vals',
-					args:{
-						'name':f.name,
-						'comp':frappe.boot.tag.tag_user_info.company,
-					},
-					async:0,
-					callback:function(r)
-					{
-						if(r.message=='success')
-						{
-							y=val
-						}
-						else{
-							y='Available'
-						}
-	
-					}
-				})
-				if(y=="Available")
-				{
-					return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
+  formatters: {
+    order_status(val, d, f) {
+      if (
+        frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
+        val != "Completed" &&
+        f.no_of_workers != f.worker_filled
+      ) {
+        let y;
+        frappe.call({
+          method: "tag_workflow.tag_data.vals",
+          args: {
+            name: f.name,
+            comp: frappe.boot.tag.tag_user_info.company,
+          },
+          async: 0,
+          callback: function (r) {
+            if (r.message == "success") {
+              y = val;
+            } else {
+              y = "Available";
+            }
+          },
+        });
+        if (y == "Available") {
+          return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
 								<a class=" indicator-pill gray ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >Available</a>
-							</span>`
-	
-				}
-				else{
-					return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
+							</span>`;
+        } else {
+          return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
 								<a class=" indicator-pill gray ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a>
-							</span>`
-				}
-			
-	
-			}
-			else if(val == 'Completed'){
-				return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
+							</span>`;
+        }
+      } else if (val == "Completed") {
+        return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
 						<a class=" indicator-pill green ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a>
-					</span>`
-			}
-			else { 
-				return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
+					</span>`;
+      } else {
+        return `<span class=" ellipsis" title="" id="${val}-${f.name}" >
 						<a class=" indicator-pill gray ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a>
-					</span>`
-			}
-	
-		},
-		company(val, d, f) {
-			if (val) {
-				return `<span class=" ellipsis" title="" id="Hiring-${f.name}" >
+					</span>`;
+      }
+    },
+    company(val, d, f) {
+      if (val) {
+        return `<span class=" ellipsis" title="" id="Hiring-${f.name}" >
 						<a class="ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" onmouseover="showCasePopover('${val}','${f.name}')" onmouseout = "hideCasePopover('${val}','${f.name}')"  onclick = "myfunction('${val}')" data-company = "company" >${val}</a>
 						
 					</span>
@@ -219,13 +263,13 @@ frappe.listview_settings['Job Order'] = {
 							$("#Hiring-"+dname).popover('hide');
 						}
 					</script>`;
-			} else {
-				return `<span class="ellipsis" title=""><a class="ellipsis" data-filter="${d.fieldname},=,''"></a></span>`;
-			}
-		},
-		name(val, d, f) {
-			if (val) {
-				return `<span class="level-item select-like">
+      } else {
+        return `<span class="ellipsis" title=""><a class="ellipsis" data-filter="${d.fieldname},=,''"></a></span>`;
+      }
+    },
+    name(val, d, f) {
+      if (val) {
+        return `<span class="level-item select-like">
 						<input class="list-row-checkbox" type="checkbox" data-name="${f.name}">
 						<span class="list-row-like hidden-xs style=" margin-bottom:="" 1px;"="">
 							<span class="like-action not-liked" data-name="${f.name}" data-doctype="Job Order" data-liked-by="null" title="">
@@ -282,92 +326,94 @@ frappe.listview_settings['Job Order'] = {
 							$("#"+dname).popover('hide');
 						}
 					</script>`;
-			} else {
-				return  `<span class="ellipsis" title=""><a class="ellipsis" data-filter="${d.fieldname},=,''"></a></span>`;
-			}
-		},
-		head_count_available(val, d, f){
-            if(val == "success"){
-                return `<span class=" ellipsis" title="" id="${val}-${f.name}" ><a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">0</a></span>`
-			}else{
-                return `<span class=" ellipsis" title="" id="${val}-${f.name}" ><a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a></span>`
-			}
-		},
-		no_of_workers(val, d, f){
-			if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ){
-				let claimed_w = f.worker_filled
-				return `<div class = "list-row-col ellipsis hidden-xs text-center" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${claimed_w}/${val}</span></div>`
-			}
-			else if(frappe.boot.tag.tag_user_info.company_type != "Staffing" && frappe.boot.tag.tag_user_info.company_type != "Hiring" && frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"){
-				let category_tag= f.category
-				return `<div class = "list-row-col ellipsis hidden-xs text-left" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${category_tag}</span></div>`
-			}
-			else if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
-				let category = f.category
-				return `<div class = "list-row-col ellipsis hidden-xs text-left" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${category}</span></div>`
-			
-		
-		}
-	}
-	},
-}
-function format_column(val,d,f){
-	let category = f.category
-	return `<div class = "list-row-col ellipsis hidden-xs text-center" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${category}</span></div>`
-
-}
-
-function get_company_job_order(){
-	let text='\n'
-
-	frappe.call({
-		"method": "tag_workflow.utils.whitelisted.get_company_job_order",
-		args: {
-			"user_type":frappe.boot.tag.tag_user_info.company_type
-		},
-		"async": 0,
-		"callback": function(r){
-			if(r.message){
-				text +=r.message
-			}
-		}
-	});
-	return text
+      } else {
+        return `<span class="ellipsis" title=""><a class="ellipsis" data-filter="${d.fieldname},=,''"></a></span>`;
+      }
+    },
+    head_count_available(val, d, f) {
+      if (val == "success") {
+        return `<span class=" ellipsis" title="" id="${val}-${f.name}" ><a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">0</a></span>`;
+      } else {
+        return `<span class=" ellipsis" title="" id="${val}-${f.name}" ><a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a></span>`;
+      }
+    },
+    no_of_workers(val, d, f) {
+      if (
+        frappe.boot.tag.tag_user_info.company_type == "Hiring" ||
+        frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"
+      ) {
+        let claimed_w = f.worker_filled;
+        return `<div class = "list-row-col ellipsis hidden-xs text-left" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${claimed_w}/${val}</span></div>`;
+      } else if (
+        frappe.boot.tag.tag_user_info.company_type != "Staffing" &&
+        frappe.boot.tag.tag_user_info.company_type != "Hiring" &&
+        frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"
+      ) {
+        let category_tag = f.category;
+        return `<div class = "list-row-col ellipsis hidden-xs text-left" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${category_tag}</span></div>`;
+      } else if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
+        let category = f.category;
+        return `<div class = "list-row-col ellipsis hidden-xs text-left" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${category}</span></div>`;
+      }
+    },
+  },
+};
+function format_column(val, d, f) {
+  let category = f.category;
+  return `<div class = "list-row-col ellipsis hidden-xs text-center" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${category}</span></div>`;
 }
 
-setTimeout(function(){
-    const btn = document.getElementById('staff_filter_button1');
-    btn.addEventListener('click',function(){
-        cur_list.order_status = "Available";
-        cur_list.start = 0;
-        cur_list.refresh();
-    });
+function get_company_job_order() {
+  let text = "\n";
 
-    const btn2=document.getElementById('staff_filter_button2');
-    btn2.addEventListener('click',function(){
-        cur_list.order_status = 'Ongoing';
-        cur_list.start = 0;
-        cur_list.refresh();
-    });
+  frappe.call({
+    method: "tag_workflow.utils.whitelisted.get_company_job_order",
+    args: {
+      user_type: frappe.boot.tag.tag_user_info.company_type,
+    },
+    async: 0,
+    callback: function (r) {
+      if (r.message) {
+        text += r.message;
+      }
+    },
+  });
+  return text;
+}
 
-	const btn3=document.getElementById('staff_filter_button3');
-	btn3.addEventListener('click',function(){
-        cur_list.order_status = 'Upcoming';
-        cur_list.start = 0;
-        cur_list.refresh();
-	});
+setTimeout(function () {
+  const btn = document.getElementById("staff_filter_button1");
+  btn.addEventListener("click", function () {
+    cur_list.order_status = "Available";
+    cur_list.start = 0;
+    cur_list.refresh();
+  });
 
-	const btn4=document.getElementById('staff_filter_button4');
-	btn4.addEventListener('click',function(){
-        cur_list.order_status = 'Completed';
-        cur_list.start = 0;
-        cur_list.refresh();
-	});
+  const btn2 = document.getElementById("staff_filter_button2");
+  btn2.addEventListener("click", function () {
+    cur_list.order_status = "Ongoing";
+    cur_list.start = 0;
+    cur_list.refresh();
+  });
 
-	const btn5=document.getElementById('staff_filter_button5');
-	btn5.addEventListener('click',function(){
-        cur_list.order_status = 'All';
-        cur_list.start = 0;
-        cur_list.refresh();
-	});
+  const btn3 = document.getElementById("staff_filter_button3");
+  btn3.addEventListener("click", function () {
+    cur_list.order_status = "Upcoming";
+    cur_list.start = 0;
+    cur_list.refresh();
+  });
+
+  const btn4 = document.getElementById("staff_filter_button4");
+  btn4.addEventListener("click", function () {
+    cur_list.order_status = "Completed";
+    cur_list.start = 0;
+    cur_list.refresh();
+  });
+
+  const btn5 = document.getElementById("staff_filter_button5");
+  btn5.addEventListener("click", function () {
+    cur_list.order_status = "All";
+    cur_list.start = 0;
+    cur_list.refresh();
+  });
 }, 2000);
