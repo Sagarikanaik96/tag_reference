@@ -156,7 +156,69 @@ frappe.ui.form.on("Company", {
 			}
 		}
 	},
-	
+	decrypt_subdomain: function(frm) {
+		if(frm.doc.decrypt_subdomain==1){
+			console.log(frm.doc.name)
+			if(frm.doc.workbright_subdomain){
+				frappe.call({
+					method: "tag_workflow.tag_data.workbright_subdomain_sec",
+					args: {
+						'frm': frm.doc.name,
+					},
+					callback: function(r) {
+						if(r.message!='Not Found'){
+							frm.set_value('decrypted_subdomain', r.message);
+							frm.set_df_property('decrypted_subdomain','hidden',0)
+							refresh_field('decrypted_subdomain');
+						}
+						else{
+							frm.set_df_property('decrypted_subdomain','hidden',1)
+							frm.set_value('decrypt_subdomain',0)
+							frappe.msgprint('Please save to proceed further')
+						}	
+					}
+				})
+			}
+			else{
+				frm.set_df_property('decrypted_subdomain','hidden',1)
+				frm.set_value('decrypted_subdomain', '');
+				frm.set_value('decrypt_subdomain',0)
+				frappe.msgprint('Nothing to decrypt')
+			}
+		}
+	},
+
+	decrypt_subdomain_api_key: function(frm) {
+		if(frm.doc.decrypt_subdomain_api_key==1){
+			console.log(frm.doc.name)
+			if(frm.doc.workbright_api_key){
+				frappe.call({
+					method: "tag_workflow.tag_data.workbright_api_key_sec",
+					args: {
+						'frm': frm.doc.name,
+					},
+					callback: function(r) {
+						if(r.message!='Not Found'){
+							frm.set_value('decrypted_subdomain_api_key', r.message);
+							frm.set_df_property('decrypted_subdomain_api_key','hidden',0)
+							refresh_field('decrypted_subdomain_api_key');
+						}
+						else{
+							frm.set_df_property('decrypted_subdomain_api_key','hidden',1)
+							frm.set_value('decrypt_subdomain_api_key',0)
+							frappe.msgprint('Please save to proceed further')
+						}	
+					}
+				})
+			}
+			else{
+				frm.set_df_property('decrypted_subdomain_api_key','hidden',1)
+				frm.set_value('decrypted_subdomain_api_key', '');
+				frm.set_value('decrypt_subdomain_api_key',0)
+				frappe.msgprint('Nothing to decrypt')
+			}
+		}
+	},
 	update_employee_records: function (frm){
 		if(cur_frm.is_dirty()){
 			frappe.msgprint('Please save to proceed further')

@@ -1577,3 +1577,27 @@ def set_lat_lng(form_name):
     except Exception as e:
         frappe.log_error(e, "Longitude Latitude Error on Employee Onboarding")
         print(e)
+
+@frappe.whitelist(allow_guest=False)
+def workbright_subdomain_sec(frm=None):
+    try:
+        comp = frappe.get_doc("Company",frm)
+        if(comp.workbright_subdomain):
+            workbright_subdomain_decrypt = comp.get_password('workbright_subdomain')
+            return workbright_subdomain_decrypt
+        else:
+            return response
+    except Exception:
+        frappe.log_error("No Workbright Subdomain in Database", "Warning")
+
+@frappe.whitelist(allow_guest=False)
+def workbright_api_key_sec(frm=None):
+    try:
+        comp = frappe.get_doc("Company",frm)
+        if(comp.workbright_api_key):
+            workbright_api_key_decrypt = comp.get_password('workbright_api_key')
+            return workbright_api_key_decrypt
+        else:
+            return response
+    except Exception:
+        frappe.log_error("No Workbright API Key in Database", "Warning")
