@@ -74,11 +74,6 @@ def get_datetime(date, from_time, to_time):
     except Exception as e:
         frappe.msgprint(e)
 
-def check_cur_selected(cur_selected):
-        cur_selected = json.loads(cur_selected)
-        if len(cur_selected) == 0:
-            frappe.msgprint(_("Please select atleast one timesheet to submit."))
-        return cur_selected
 #---------------------------------------------------#
 
 @frappe.whitelist()
@@ -87,7 +82,11 @@ def update_timesheet(user, company_type, items, cur_selected, job_order, date, f
         added = 0
         timesheets = []
         items = json.loads(items)
-        cur_selected = check_cur_selected(cur_selected)
+        cur_selected = json.loads(cur_selected)
+        if cur_selected:
+            selected_items = (selected_item for selected_item in items if selected_item["name"] in cur_selected['items'])
+        else:
+            selected_items = items
         is_employee = check_if_employee_assign(items, job_order)
         if(is_employee == 0):
             return False
@@ -97,7 +96,7 @@ def update_timesheet(user, company_type, items, cur_selected, job_order, date, f
     
         if(posting_date >= job.from_date and posting_date <= job.to_date):
             from_time, to_time = get_datetime(date, from_time, to_time)
-            selected_items = (selected_item for selected_item in items if selected_item["name"] in cur_selected['items'])
+            
             for item in selected_items:
                 tip_amount=check_tip(item)
                 child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, item['from_time'], item['to_time'], item['break_from'], item['break_to'])

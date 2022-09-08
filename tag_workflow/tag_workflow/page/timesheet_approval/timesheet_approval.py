@@ -84,8 +84,8 @@ def approve_timesheets(timesheet, action):
             frappe.db.set_value('Timesheet',t,'workflow_state',action)
             frappe.db.set_value('Timesheet',t,'status',"Submitted")
             frappe.db.set_value('Timesheet',t,'docstatus',1)
-            approval_notification(job_order=doc.job_order_detail,staffing_company=doc.employee_company,date=None, hiring_company=doc.company, timesheet_name=doc.name, timesheet_approved_time=doc.modified, current_time=frappe.utils.now())
             data.append({"date": doc.date_of_timesheet, "timesheet": t})
+        approval_notification(job_order=doc.job_order_detail,staffing_company=doc.employee_company,date=None, hiring_company=doc.company, timesheet_name=doc.name, timesheet_approved_time=doc.modified, current_time=frappe.utils.now())
         return data[0] if(len(data) > 0) else {"date": "", "timesheet": ""}
     except Exception as e:
         frappe.throw(e)
@@ -107,7 +107,7 @@ def deny_timesheet(data, count):
                 if(res in data.keys()):
                     frappe.db.set_value('Timesheet',data[tm],'dispute',data[res])
                 result.append({"date": doc.date_of_timesheet, "timesheet": doc.name})
-                denied_notification(job_order=doc.job_order_detail,staffing_company=doc.employee_company, hiring_company=doc.company, timesheet_name=doc.name)
+        denied_notification(job_order=doc.job_order_detail,staffing_company=doc.employee_company, hiring_company=doc.company, timesheet_name=doc.name)
         return result[0] if(len(result) > 0) else {"date": "", "timesheet": ""}
     except Exception as e:
         frappe.msgprint(e)
