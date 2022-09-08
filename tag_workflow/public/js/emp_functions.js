@@ -116,17 +116,83 @@ function validate_phone_zip(frm){
 	}
 }
 
+function check_ssn(frm){
+	let validate = true;
+	frm.doc.decrypt_ssn = 0;
+	if(frm.doc.sssn){
+		if(frm.doc.sssn=='•••••••••'){
+			frm.set_value('sssn','•••••••••');
+		}
+		else if(!$.isNumeric(frm.doc.sssn)){
+			frappe.msgprint(__('Only numbers are allowed in SSN.'));
+			frm.set_value('ssn', '');
+			frm.set_value('sssn', '');
+			frm.doc.decrypt_ssn = 0;
+			validate = false;
+		}
+		else{
+			frm.set_value('ssn', frm.doc.sssn)
+			frm.set_value('sssn', '•••••••••');
+		}
+	}else{
+		frm.set_value('ssn', '');
+		frm.set_value('sssn', '');
+	}
+	return validate;
+}
+
 function mandatory_fields(fields){
-	let message = "<b>Please Fill Mandatory Fields:</b>";
+	let message = '<b>Please Fill Mandatory Fields:</b>';
 	for (let key in fields) {
-		if (fields[key] === undefined || !fields[key]) {
-			message = message + "<br>" + "<span>&bull;</span>" + key;
+		if(key == 'Activities'){
+			let table_data = fields[key];
+			table_data.forEach((x) => {
+				if(!x.activity_name || (x.activity_name && !x.activity_name.trim()) || (x.document_required && (!x.document || !x.attach))){
+					message = message + '<br>' + '<span>&bull;</span> ' + key;
+				}
+			});
+		}
+		else if(fields[key] === undefined || !fields[key]){
+			message = message + '<br>' + '<span>&bull;</span> ' + key;
 		}
 	}
-	if (message != "<b>Please Fill Mandatory Fields:</b>") {
-		frappe.msgprint({ message: __(message), title: __("Missing Fields"), indicator: "orange", });
+	if (message != '<b>Please Fill Mandatory Fields:</b>') {
+		frappe.msgprint({ message: __(message), title: __('Missing Fields'), indicator: 'orange'});
 		frappe.validated = false;
 	}
+}
+
+function hide_decrpt_ssn(frm){
+	if(frm.doc.__islocal != 1 ){
+		frappe.call({
+			method: 'tag_workflow.tag_data.hide_decrypt_ssn',
+			args: {
+				'frm': frm.doc.name,
+				'doctype': frm.doc.doctype
+			},
+			async:0,
+			callback: function(r) {
+				if (frm.doc.__islocal != 0) {
+					frm.set_df_property('decrypt_ssn','hidden',r.message);
+					refresh_field('decrypted_ssn');
+				}
+			}
+		});
+	}
+}
+
+function decrypted_ssn(frm){
+	frappe.call({
+		method: 'tag_workflow.tag_data.api_sec',
+		args: {
+			'frm': frm.doc.name,
+			'doctype': frm.doc.doctype
+		},
+		callback: function(r) {
+			frm.set_value('decrypted_ssn', r.message);
+			refresh_field('decrypted_ssn');
+		}
+	})
 }
 
 /*----For Employee Onboarding and Employee Onboarding Template Forms----*/
@@ -175,4 +241,47 @@ function count_doc(frm){
 		}
 	});
 	return doc_counts;
+}
+
+function set_company(frm, fieldname){
+    if(frm.doc.__islocal == 1){
+		if(frappe.boot.tag.tag_user_info.company_type == 'Staffing'){
+			frappe.call({
+				method: 'tag_workflow.tag_data.emp_onboarding_comp',
+				args: {
+					user: frappe.session.user
+				},
+				callback: (r)=>{
+					if(r.message.length > 1){
+						frm.set_value(fieldname,'');
+					}
+					else{
+						frm.set_value(fieldname, frappe.boot.tag.tag_user_info.company);
+					}
+				}
+			});
+		}
+		else{
+			frm.set_value(fieldname,'');
+		}
+    }
+}
+
+function get_user(frm){
+	frm.fields_dict.activities.grid.get_field('user').get_query = ()=>{
+		let user_data = frm.doc.activities, user_list = [];
+		for (let x in user_data){
+			if(user_data[x]['user']){
+				user_list.push(user_data[x]['user']);
+			}
+		}
+		let company = frm.doc.doctype == 'Employee Onboarding' ? frm.doc.staffing_company : frm.doc.company;
+		return {
+			query: 'tag_workflow.tag_data.filter_user',
+			filters: {
+				'company': company,
+				'user_list': user_list
+			}
+		}
+	}
 }

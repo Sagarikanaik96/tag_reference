@@ -1,5 +1,5 @@
 frappe.require('/assets/tag_workflow/js/emp_functions.js');
-frappe.ui.form.on('Employee Onboarding Template', {
+frappe.ui.form.on('Job Offer', {
     setup: (frm) => {
         frm.set_query('company', function(){
             return {
@@ -10,10 +10,8 @@ frappe.ui.form.on('Employee Onboarding Template', {
             }
         });
         set_company(frm, 'company');
-        get_user(frm, frm.doc.company);
 	},
-    refresh: (frm) => {
-        frm.dashboard.hide();
+    refresh: () => {
         $('.form-footer').hide();
 
         $(document).on('click', '[data-fieldname="company"]', function(){
@@ -27,26 +25,7 @@ frappe.ui.form.on('Employee Onboarding Template', {
         document.addEventListener("keydown", function(){
             companyhide(1000);
         });
-    },
-    validate: (frm)=>{
-        let reqd_fields = {'Activities': frm.doc.activities};
-        mandatory_fields(reqd_fields);
-    },
-    company: (frm)=>{
-        get_user(frm);
     }
-});
-
-frappe.ui.form.on('Employee Boarding Activity', {
-	form_render: (frm, cdt, cdn)=>{
-		check_count(frm, cdt, cdn);
-	},
-	document_required: (frm, cdt, cdn)=>{
-		document_required(frm, cdt, cdn);
-	},
-	document: (frm, cdt, cdn)=>{
-		document_field(frm, cdt, cdn);
-	}
 });
 
 function companyhide(time) {

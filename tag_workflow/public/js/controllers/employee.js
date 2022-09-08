@@ -164,16 +164,7 @@ frappe.ui.form.on("Employee", {
 
 
 	decrypt_ssn: function(frm) {
-		frappe.call({
-			method: "tag_workflow.tag_data.api_sec",
-			args: {
-				'frm': frm.doc.name,
-			},
-			callback: function(r) {
-				frm.set_value('decrypted_ssn', r.message);
-				refresh_field('decrypted_ssn');
-			}
-		})
+		decrypted_ssn(frm);
 	},
 
 	resume:function(frm){
@@ -201,6 +192,7 @@ frappe.ui.form.on("Employee", {
 			frappe.msgprint(__("Minimum and Maximum Characters allowed for SSN are 9."));
 			frappe.validated = false;
 		}
+		frappe.validated = !check_ssn(frm) ? false : frappe.validated;
 
 		let email = frm.doc.email
 		if(email && email!=undefined && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
@@ -225,34 +217,6 @@ frappe.ui.form.on("Employee", {
 
 	before_save:function (frm) {
 		frm.doc.decrypt_ssn = 0;
-		if(frm.doc.sssn){
-			if(frm.doc.sssn=='•••••••••'){
-				frm.set_value('sssn','•••••••••')
-			}
-			else if(isNaN(parseInt(frm.doc.sssn))){
-				frappe.msgprint(__("Only numbers are allowed in SSN."));
-				frm.set_value("ssn", "");
-				frm.set_value("sssn", "");
-				frm.doc.decrypt_ssn = 0;
-
-				frappe.validated = false
-			}
-			else{
-				frm.set_value('ssn',cur_frm.doc.sssn)
-				frm.set_value('sssn','•••••••••')
-			}
-		}
-		else if (frm.doc.sssn && frm.doc.sssn.toString().length != 9) {
-			frm.set_value("ssn", "");
-			frm.set_value("sssn", "");
-			frappe.msgprint(__("Minimum and Maximum Characters allowed for SSN are 9."));
-			frappe.validated = false;
-		}
-		else{
-			frm.set_value("ssn", "");
-			frm.set_value("sssn", "");
-
-		}
 		remove_lat_lng(frm)
 		job_title_filter(frm);
 	},
@@ -526,22 +490,6 @@ function filerestriction(){
 	setTimeout(() => {
 		document.getElementsByClassName("modal-title")[0].innerHTML='Upload <h6>(Accepted File Type : pdf, txt or docx  file size 10mb) </h6>';
 	}, 300);
-}
-
-function hide_decrpt_ssn(frm){
-	if(frm.doc.__islocal != 1 ){
-		frappe.call({
-			method: "tag_workflow.tag_data.hide_decrypt_ssn",
-			args: {'frm': frm.doc.name,},
-			async:0,
-			callback: function(r) {
-				if (frm.doc.__islocal != 0) {
-					frm.set_df_property("decrypt_ssn","hidden",r.message);
-					refresh_field('decrypted_ssn');
-				}
-			}
-		});
-	}
 }
 
 function hide_field(frm){

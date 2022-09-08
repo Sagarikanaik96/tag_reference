@@ -2,7 +2,7 @@ frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.require('/assets/tag_workflow/js/emp_functions.js');
 frappe.ui.form.on('Employee Onboarding', {
 	setup: (frm)=>{
-		frm.set_query("company", function(){
+		frm.set_query("staffing_company", function(){
 			return {
 				filters: [
 					['Company', 'organization_type', '=', 'Staffing'],
@@ -10,6 +10,15 @@ frappe.ui.form.on('Employee Onboarding', {
 				]
 			}
 		});
+		set_company(frm, "staffing_company");
+		frm.set_query("employee_onboarding_template", function(){
+			return {
+				filters: [
+					['Employee Onboarding Template', 'company', '=', frm.doc.staffing_company],
+				]
+			}
+		});
+		get_user(frm, frm.doc.staffing_company);
 	},
     onload: (frm)=>{
         trigger_hide(frm);
@@ -18,19 +27,34 @@ frappe.ui.form.on('Employee Onboarding', {
 		}
 		setTimeout(()=>{
 			$('[data-label = "View"]').hide();
+			$('[data-label = "Cancel"]').hide();
 		},250);
     },
     refresh: (frm)=>{
 		$('.form-footer').hide();
         setTimeout(()=>{
 			$('[data-label = "View"]').hide();
+			$('[data-label = "Cancel"]').hide();
 		},250);
         set_map(frm);
 		show_addr(frm);
 		hide_field(frm);
-        $('.form-control[data-fieldname="ssn"]').css('-webkit-text-security', 'disc');
-        $('[data-fieldname= "ssn"]').attr('title', '');
+        $('.form-control[data-fieldname="sssn"]').css('-webkit-text-security', 'disc');
+        $('[data-fieldname= "sssn"]').attr('title', '');
 		$('[data-fieldname = "contact_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
+		hide_decrpt_ssn(frm);
+
+		$(document).on('click', '[data-fieldname="staffing_company"]', function(){
+			companyhide(1250);
+		});
+
+		$('[data-fieldname="staffing_company"]').mouseover(function(){
+			companyhide(1000);
+		});
+
+		document.addEventListener("keydown", function(){
+			companyhide(1000);
+		});
     },
 	onload_post_render: (frm)=>{
 		if(frm.doc.search_on_maps){
@@ -40,14 +64,16 @@ frappe.ui.form.on('Employee Onboarding', {
 		}
 	},
 	validate: (frm)=>{
-		let reqd_fields = {"First Name": frm.doc.first_name, "Last Name": frm.doc.last_name, "Email": frm.doc.email, "Date Of Birth": frm.doc.date_of_birth};
+		let reqd_fields = {"First Name": frm.doc.first_name, "Last Name": frm.doc.last_name, "Email": frm.doc.email, "Company": frm.doc.staffing_company, "Employee Onboarding Template": frm.doc.employee_onboarding_template, "Activities": frm.doc.activities};
 		mandatory_fields(reqd_fields);
 		validate_phone_zip(frm);
-		if(frm.doc.ssn && frm.doc.ssn.toString().length != 9) {
+		if(frm.doc.sssn && frm.doc.sssn.toString().length != 9) {
 			frm.set_value("ssn", "");
+			frm.set_value("sssn", "");
 			frappe.msgprint(__("Minimum and Maximum Characters allowed for SSN are 9."));
 			frappe.validated = false;
 		}
+		frappe.validated = !check_ssn(frm) ? false : frappe.validated;
 
 		let email = frm.doc.email;
 		if(email && email!=undefined && (email.length > 120 || !frappe.utils.validate_type(email, "email"))){
@@ -67,31 +93,16 @@ frappe.ui.form.on('Employee Onboarding', {
 		if(frm.doc.status){
 			frm.set_value('boarding_status', frm.doc.status)
 		}
-		if(frm.doc.ssn){
-			if(frm.doc.ssn=='•••••••••'){
-				frm.set_value('ssn','•••••••••');
-			}
-			else if(isNaN(parseInt(frm.doc.ssn))){
-				frappe.msgprint(__("Only numbers are allowed in SSN."));
-				frm.set_value("ssn", "");
-				frappe.validated = false;
-			}
-			else{
-				frm.set_value('ssn','•••••••••');
-			}
-		}
-		else if (frm.doc.ssn && frm.doc.ssn.toString().length != 9) {
-			frm.set_value("ssn", "");
-			frappe.msgprint(__("Minimum and Maximum Characters allowed for SSN are 9."));
-			frappe.validated = false;
-		}
-		else{
-			frm.set_value("ssn", "");
-		}
 		remove_lat_lng(frm);
 	},
     after_save: (frm)=>{
 		update_lat_lng(frm);
+	},
+	before_submit: (frm)=>{
+		if(!frm.doc.date_of_birth){
+			frappe.msgprint(__('Please fill Date of Birth before submitting the form.'));
+			frappe.validated = false;
+		}
 	},
 	first_name: (frm)=>{
 		if(frm.doc.first_name){
@@ -107,6 +118,9 @@ frappe.ui.form.on('Employee Onboarding', {
 			frm.set_value("last_name",last_name);
 		}
 	},
+	staffing_company: (frm)=>{
+		get_user(frm);
+	},
 	contact_number: (frm)=>{
 		let contact = frm.doc.contact_number;
 		if(contact){
@@ -119,6 +133,9 @@ frappe.ui.form.on('Employee Onboarding', {
 			frappe.msgprint({message: __("<b>Date of Birth</b> cannot be Today's date or Future date."), title: __('Error'), indicator: 'orange'});
 			frm.set_value('date_of_birth', '');
 		}
+	},
+	decrypt_ssn: function(frm) {
+		decrypted_ssn(frm);
 	},
 	search_on_maps: (frm)=>{
 		if(frm.doc.search_on_maps == 1){
@@ -193,13 +210,23 @@ frappe.ui.form.on('Employee Onboarding', {
 					}
 				}
 			});
-	}
+		}
 	},
 });
 
+function companyhide(time) {
+	setTimeout(() => {
+		let txt  = $('[data-fieldname="staffing_company"]')[1].getAttribute('aria-owns');
+		let txt2 = 'ul[id="'+txt+'"]';
+		let  arry = document.querySelectorAll(txt2)[0].children;
+		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none';
+		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'	;
+	}, time);
+}
+
 function trigger_hide(frm){
 	$('.form-footer').hide();
-	let fields = ['job_applicant','job_offer','employee_name','project', 'department', 'designation', 'employee_grade'];
+	let fields = ['job_applicant','job_offer','employee_name', 'company', 'project', 'department', 'designation', 'employee_grade'];
 	for(let i in fields){
 		frm.set_df_property(fields[i], 'hidden', 1);
 	}

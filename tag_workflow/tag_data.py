@@ -369,9 +369,9 @@ def check_assign_employee(total_employee_required,employee_detail = None):
         return 0
 
 @frappe.whitelist(allow_guest=False)
-def api_sec(frm=None):
+def api_sec(doctype, frm=None):
     try:
-        emp = frappe.get_doc("Employee",frm)
+        emp = frappe.get_doc(doctype,frm)
         ssn_decrypt = emp.get_password('ssn')
         return ssn_decrypt
     except Exception:
@@ -988,9 +988,9 @@ def send_email1(user, company_type, sid, name, doctype, recepients, subject=None
 	}).insert(ignore_permissions=True)
     
 @frappe.whitelist(allow_guest=False)
-def hide_decrypt_ssn(frm=None):
+def hide_decrypt_ssn(doctype, frm=None):
     try:
-        emp = frappe.get_doc("Employee",frm)
+        emp = frappe.get_doc(doctype,frm)
         return (not(bool(emp.ssn)))
     except Exception:
         frappe.log_error("No Employee in Database", "Warning")
@@ -1601,3 +1601,21 @@ def workbright_api_key_sec(frm=None):
             return response
     except Exception:
         frappe.log_error("No Workbright API Key in Database", "Warning")
+
+@frappe.whitelist(allow_guest=False)
+def filter_user(doctype, txt, searchfield, page_len, start, filters):
+    try:
+        company=filters.get('company')
+        user_list = filters.get('user_list')
+        value = ''
+        for index ,i in enumerate(user_list):
+            if index >= 1:
+                value = value+"'"+","+"'"+i
+            else:
+                value =value+i
+        sql = """select name, full_name from `tabUser` where company='{0}' and (name NOT IN ('{1}') and name like '%%{2}%%')""".format(company, value, '%s' % txt)
+        return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.log_error(e, 'Employee Boarding Activity Error')
+        frappe.throw(e)
