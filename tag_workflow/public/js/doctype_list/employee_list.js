@@ -72,7 +72,7 @@ frappe.listview_settings['Employee'] = {
 	onload: function(listview){
 		$('input[data-fieldname="name"]')[0].value="";
 		$('h3[title="Employee"]').html('Employees');
-		if(frappe.boot.tag.tag_user_info.company_type=="Hiring"){
+		if(frappe.boot.tag.tag_user_info.company_type=="Hiring"|| frappe.boot.tag.tag_user_info.company_type=="Exclusive Hiring"){
 			frappe.msgprint("You don't have enough permissions.");
 			frappe.set_route("app");
 		}
