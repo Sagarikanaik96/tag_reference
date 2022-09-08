@@ -156,6 +156,16 @@ frappe.ui.form.on("Timesheet", {
 
 	before_load: (frm)=>{
 		hide_pay_rate(frm);
+	},
+	after_save:function(frm){
+		if(frm.doc.update_other_timesheet==1){
+			frappe.call({
+				'method':'tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.edit_update_record',
+				'args':{
+					'timesheet':frm.doc.name
+				}
+			})
+		}
 	}
 
 });
@@ -567,6 +577,7 @@ function update_time(frm, cdt, cdn){
 				cur_frm.set_value('total_job_order_amount',r.message[0][2]);
 				cur_frm.set_value('total_job_order_billable_overtime_amount_',r.message[0][3])
 				update_hourly_data(r)
+				cur_frm.set_value('update_other_timesheet',1)
 			}, 10);
 
 		}
