@@ -802,3 +802,10 @@ def save(doc):
 	doc.save()
 
 	return doc.as_dict()
+
+@frappe.whitelist()
+def get_onboarding_details(parent, parenttype):
+    return frappe.get_all("Employee Boarding Activity",
+		fields=["activity_name", "role", "user", "required_for_employee_creation", "description", "task_weight", "document_required", "document", "attach"],
+		filters={"parent": parent, "parenttype": parenttype},
+		order_by= "idx")

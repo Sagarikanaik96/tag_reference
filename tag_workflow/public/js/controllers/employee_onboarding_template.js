@@ -37,21 +37,13 @@ function set_company(frm){
 }
 
 frappe.ui.form.on('Employee Boarding Activity', {
-    form_render: (frm)=>{
-        let table_data = frm.doc.activities, doc_attached = [];
-        for(let i in table_data){
-            if(table_data[i].document && ['Resume','W4','E verify', 'New Hire Paperwork', 'I9'].includes(table_data[i].document)){
-                doc_attached.push(table_data[i].document);
-            }
-        }
-        let options = ['Resume', 'W4', 'E verify','New Hire Paperwork','I9','ID Requirements','Background Check/Drug Screen','Direct Deposit Letter','Miscellaneous'];
-        let final_list = [''];
-        for(let i in options){
-            if(!doc_attached.includes(options[i])){
-                final_list.push(options[i]);
-            }
-        }
-        frm.fields_dict.activities.grid.update_docfield_property('document', 'options', final_list);
-		frm.refresh_fields();
-    }
+	form_render: (frm, cdt, cdn)=>{
+		check_count(frm, cdt, cdn);
+	},
+	document_required: (frm, cdt, cdn)=>{
+		document_required(frm, cdt, cdn);
+	},
+	document: (frm, cdt, cdn)=>{
+		document_field(frm, cdt, cdn);
+	}
 });

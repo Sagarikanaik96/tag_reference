@@ -99,6 +99,7 @@ doctype_js = {
         "Data Import":"public/js/controllers/data_import.js",
         "Notification Log": "public/js/controllers/notification_log.js",
         "Employee Onboarding Template": "public/js/controllers/employee_onboarding_template.js",
+        "Employee Onboarding": ["public/js/controllers/employee_onboarding.js", map]
 }
 
 # doctype list
@@ -115,8 +116,7 @@ doctype_list_js = {
         "Contract": "public/js/doctype_list/contract_list.js",
         "Role Profile": "public/js/doctype_list/role_profile.js",
         "Item": "public/js/doctype_list/item_list.js",
-        "Employee Onboarding Template": "public/js/doctype_list/employee_onboarding_template_list.js",
-        "Employee Onboarding": ["public/js/controllers/employee_onboarding.js", map]
+        "Employee Onboarding Template": "public/js/doctype_list/employee_onboarding_template_list.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]
@@ -187,7 +187,8 @@ override_whitelisted_methods = {
         "frappe.desk.form.save.savedocs": "tag_workflow.utils.whitelisted.savedocs",
         "frappe.client.save": "tag_workflow.utils.whitelisted.save",
         "erpnext.accounts.party.get_due_date": "tag_workflow.utils.invoice.get_due_date",
-        "frappe.model.workflow.bulk_workflow_approval":"tag_workflow.utils.workflow.bulk_workflow_approval"
+        "frappe.model.workflow.bulk_workflow_approval":"tag_workflow.utils.workflow.bulk_workflow_approval",
+        "erpnext.hr.utils.get_onboarding_details": "tag_workflow.utils.whitelisted.get_onboarding_details"
 }
 
 

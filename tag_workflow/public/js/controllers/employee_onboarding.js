@@ -16,10 +16,15 @@ frappe.ui.form.on('Employee Onboarding', {
 		if(frm.is_new()){
 			frm.set_value('status', 'Pending');
 		}
+		setTimeout(()=>{
+			$('[data-label = "View"]').hide();
+		},250);
     },
     refresh: (frm)=>{
 		$('.form-footer').hide();
-        $('[data-label = "View"]').hide();
+        setTimeout(()=>{
+			$('[data-label = "View"]').hide();
+		},250);
         set_map(frm);
 		show_addr(frm);
 		hide_field(frm);
@@ -101,26 +106,6 @@ frappe.ui.form.on('Employee Onboarding', {
 			last_name = name_update(last_name);
 			frm.set_value("last_name",last_name);
 		}
-	},
-	employee_onboarding_template: (frm)=>{
-		if(frm.doc.employee_onboarding_template){
-			frappe.call({
-				method: "tag_workflow.tag_data.set_emp_activity",
-				args: {
-					template: frm.doc.employee_onboarding_template
-				},
-				callback: (r)=>{
-					if (r.message) {
-						frm.clear_table("activities")
-						refresh_field("activities")
-						r.message.forEach((d) => {
-							frm.add_child("activities", d);
-						});
-						refresh_field("activities");
-					}
-				}
-			});
-		}	
 	},
 	contact_number: (frm)=>{
 		let contact = frm.doc.contact_number;
@@ -226,21 +211,13 @@ function create_job_applicant_and_offer(frm){
 }
 
 frappe.ui.form.on('Employee Boarding Activity', {
-    form_render: (frm)=>{
-        let table_data = frm.doc.activities, doc_attached = [];
-        for(let i in table_data){
-            if(table_data[i].document && ['Resume','W4','E verify', 'New Hire Paperwork', 'I9'].includes(table_data[i].document)){
-                doc_attached.push(table_data[i].document);
-            }
-        }
-        let options = ['Resume', 'W4', 'E verify','New Hire Paperwork','I9','ID Requirements','Background Check/Drug Screen','Direct Deposit Letter','Miscellaneous'];
-        let final_list = [''];
-        for(let i in options){
-            if(!doc_attached.includes(options[i])){
-                final_list.push(options[i]);
-            }
-        }
-        frm.fields_dict.activities.grid.update_docfield_property('document', 'options', final_list);
-		frm.refresh_fields();
-    }
+	form_render: (frm, cdt, cdn)=>{
+		check_count(frm, cdt, cdn);
+	},
+	document_required: (frm, cdt, cdn)=>{
+		document_required(frm, cdt, cdn);
+	},
+	document: (frm, cdt, cdn)=>{
+		document_field(frm, cdt, cdn);
+	}
 });

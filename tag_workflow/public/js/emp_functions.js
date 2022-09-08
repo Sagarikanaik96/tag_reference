@@ -128,3 +128,51 @@ function mandatory_fields(fields){
 		frappe.validated = false;
 	}
 }
+
+/*----For Employee Onboarding and Employee Onboarding Template Forms----*/
+function check_count(frm, cdt, cdn){
+	let row = locals[cdt][cdn];
+	if(row.document){
+		let doc_count = count_doc(frm);
+		if(doc_count[row.document]>1){
+			frappe.msgprint(__('You can attach ' + row.document + ' only once.'));
+			frappe.model.set_value(cdt, cdn, 'document', '');
+			frm.refresh_field('activities');
+		}
+	}
+}
+
+function document_required(frm, cdt, cdn){
+	let row = locals[cdt][cdn];
+	if(row.document_required == 0){
+		frappe.model.set_value(cdt, cdn, 'document', '');
+		frappe.model.set_value(cdt, cdn, 'attach', '');
+		frm.refresh_field('activities');
+	}
+}
+
+function document_field(frm, cdt, cdn){
+	frappe.model.set_value(cdt, cdn, 'attach', '');
+	frm.refresh_field('activities');
+
+	let row = locals[cdt][cdn];
+	if(row.document){
+		let doc_count = count_doc(frm);
+		if(doc_count[row.document]>1){
+			frappe.msgprint(__('You can attach ' + row.document + ' only once.'));
+			frappe.model.set_value(cdt, cdn, 'document', '');
+			frm.refresh_field('activities');
+		}
+	}
+}
+
+function count_doc(frm){
+	let table_data = frm.doc.activities;
+	let doc_counts = {};
+	table_data.forEach((x) => {
+		if(x.document && ['Resume','W4','E verify', 'New Hire Paperwork', 'I9'].includes(x.document)){
+			doc_counts[x.document] = (doc_counts[x.document] || 0) + 1; 
+		}
+	});
+	return doc_counts;
+}

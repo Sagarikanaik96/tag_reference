@@ -1577,10 +1577,3 @@ def set_lat_lng(form_name):
     except Exception as e:
         frappe.log_error(e, "Longitude Latitude Error on Employee Onboarding")
         print(e)
-
-@frappe.whitelist()
-def set_emp_activity(template):
-    return frappe.get_all("Employee Boarding Activity",
-		fields=["activity_name", "role", "user", "required_for_employee_creation", "description", "task_weight", "document_required", "document", "attach"],
-		filters={"parent": template, "parenttype": "Employee Onboarding Template"},
-		order_by= "idx")
