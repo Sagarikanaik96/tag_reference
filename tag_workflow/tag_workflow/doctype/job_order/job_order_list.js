@@ -1,5 +1,5 @@
 frappe.listview_settings['Job Order'] = {
-	add_fields:['no_of_workers',"worker_filled"],
+	add_fields:['no_of_workers',"worker_filled","category"],
 	onload:function(){
 		$('h3[title = "Job Order"]').html('Job Orders');
 		cur_list.columns[0].df.label = 'Order ID';
@@ -11,7 +11,7 @@ frappe.listview_settings['Job Order'] = {
 		cur_list.render_header(cur_list.columns)
 		if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ){
             cur_list.columns.splice(6,1)
-			cur_list.columns[8].df.label = 'Claims/Workers';
+			cur_list.columns[8].df.label = "Approved/Required";
 			let swap  = cur_list.columns[5]
 			cur_list.columns[5] = cur_list.columns[6]
 			cur_list.columns[6] = swap
@@ -19,13 +19,20 @@ frappe.listview_settings['Job Order'] = {
         }
 		if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
             cur_list.columns.splice(7,1)
-			cur_list.columns.splice(8,1)
+			let swap_col = cur_list.columns[7];
+			cur_list.columns[7] = cur_list.columns[8]
+			cur_list.columns[8] = swap_col
+			cur_list.columns[7].df.label = "Category"
 			cur_list.render_header(cur_list.columns)
         }
 		if(frappe.boot.tag.tag_user_info.company_type != "Staffing" && frappe.boot.tag.tag_user_info.company_type != "Hiring" && frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"){
-			cur_list.columns.splice(9,1)
 			cur_list.columns.splice(6,2)
+			let swap_col = cur_list.columns[6];
+			cur_list.columns[6] = cur_list.columns[7];
+			cur_list.columns[7] = swap_col;
+			cur_list.columns[6].df.label = "Category"
 			cur_list.render_header(cur_list.columns)
+			
 		}
 		if(frappe.session.user!='Administrator'){
 			$('.custom-actions.hidden-xs.hidden-md').hide();
@@ -90,6 +97,19 @@ frappe.listview_settings['Job Order'] = {
         if(cur_list.page.fields_dict.company === undefined){
             listview.page.add_field(df, '.standard-filter-section');
         }
+		if(frappe.boot.tag.tag_user_info.company_type != "Staffing" && frappe.boot.tag.tag_user_info.company_type != "Hiring" && frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"){
+			document.getElementsByClassName("list-row-col")[7].classList.remove("text-right");
+			document.getElementsByClassName("list-row-col")[6].classList.remove("text-right");
+			
+		}
+		if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+			document.getElementsByClassName("list-row-col")[8].classList.remove("text-right");
+			document.getElementsByClassName("list-row-col")[8].style.textAlign = "left"
+			document.getElementsByClassName("list-row-col")[7].classList.remove("text-right");
+			document.getElementsByClassName("list-row-col")[7].style.textAlign = "left"
+
+
+		}
 	},	
 
 	formatters: {
@@ -274,10 +294,27 @@ frappe.listview_settings['Job Order'] = {
 			}
 		},
 		no_of_workers(val, d, f){
-			let claimed_w = f.worker_filled
-			return `<div class = "list-row-col ellipsis hidden-xs text-center" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${claimed_w}/${val}</span></div>`
+			if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ){
+				let claimed_w = f.worker_filled
+				return `<div class = "list-row-col ellipsis hidden-xs text-center" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${claimed_w}/${val}</span></div>`
+			}
+			else if(frappe.boot.tag.tag_user_info.company_type != "Staffing" && frappe.boot.tag.tag_user_info.company_type != "Hiring" && frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"){
+				let category_tag= f.category
+				return `<div class = "list-row-col ellipsis hidden-xs text-left" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${category_tag}</span></div>`
+			}
+			else if(frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+				let category = f.category
+				return `<div class = "list-row-col ellipsis hidden-xs text-left" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${category}</span></div>`
+			
+		
 		}
+	}
 	},
+}
+function format_column(val,d,f){
+	let category = f.category
+	return `<div class = "list-row-col ellipsis hidden-xs text-center" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${category}</span></div>`
+
 }
 
 function get_company_job_order(){
