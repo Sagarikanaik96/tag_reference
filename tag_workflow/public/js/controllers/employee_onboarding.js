@@ -145,7 +145,56 @@ frappe.ui.form.on('Employee Onboarding', {
 	zip: (frm)=>{
 		let zip = frm.doc.zip;
 		frm.set_value('zip', zip ? zip.toUpperCase() : zip);
+	},
+	on_submit : function(frm) {
+		if(frappe.boot.tag.tag_user_info.company_type== 'Staffing' || frappe.boot.tag.tag_user_info.company_type=="TAG"){
+			let company_name = frappe.boot.tag.tag_user_info.company
+			let first_name = frm.doc.first_name
+			let last_name = frm.doc.last_name
+			let job_applicant = frm.doc.job_applicant
+			let contact_number = frm.doc.contact_number
+			let complete_address = frm.doc.complete_address
+			let employee_gender = frm.doc.gender
+			let date_of_birth = frm.doc.date_of_birth
+			let ssn = frm.doc.ssn
+			frappe.call({
+				method: "tag_workflow.utils.workbright_integration.workbright_create_employee",
+				args: {
+					"frm": frm.doc.name,
+					"company_name": company_name,
+					"first_name": first_name,
+					"last_name": last_name,
+					"job_applicant": job_applicant,
+					"contact_number": contact_number,
+					"complete_address":complete_address,
+					"employee_gender": employee_gender,
+					"date_of_birth": date_of_birth,
+					"decrypted_ssn": ssn
+
+				},
+				callback: function(reponse) {
+					if (reponse['message']['status'] == 200) {
+						frappe.call({
+							method: "tag_workflow.utils.workbright_integration.save_workbright_employee_id",
+							args: {
+								"job_applicant": job_applicant,
+								"workbright_emp_id": reponse['message']['workbright_emp_id']
+							},
+							callback: function(db_response){
+								if (db_response){
+									frappe.msgprint({message: __("Employee successfully created in Workbright!")});
+								}
+								
+							}
+						})
+					}
+					else{
+						frappe.msgprint({message: __("Employee cannoot be created in Workbright!")});
+					}
+				}
+			});
 	}
+	},
 });
 
 function trigger_hide(frm){
