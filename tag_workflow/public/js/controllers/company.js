@@ -62,7 +62,7 @@ frappe.ui.form.on("Company", {
 		$('[data-fieldname = "phone_no"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 		$('[data-fieldname = "accounts_payable_phone_number"]>div>div>div>input').attr("placeholder", 'Example: +XX XXX-XXX-XXXX');
 		$('[data-fieldname = "accounts_receivable_phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
-		frm.set_df_property('company_logo','hidden',0);
+		
 	},
 
 	decrypt_jazzhr_api_key: function(frm) {
@@ -492,10 +492,7 @@ frappe.ui.form.on("Company", {
 			}
 			
 		}
-		if(frm.doc.company_logo){
-			validate_logo(frm);
 
-		}
 	},
 	phone_no: function(frm){
 		set_field(frm, frm.doc.phone_no, "phone_no");
@@ -509,7 +506,19 @@ frappe.ui.form.on("Company", {
 	zip: function(frm){
 		let zip = frm.doc.zip;
 		frm.set_value('zip', zip?zip.toUpperCase():zip);
+	},
+	upload_company_logo: (frm)=>{
+        if(frm.doc.upload_company_logo){
+            frappe.db.get_value('File', {'file_url': frm.doc.upload_company_logo, 'attached_to_name': frm.doc.name, 'attached_to_field': 'upload_company_logo'}, ['file_size'], (r)=>{
+                if(r.file_size && r.file_size > 2097152){
+                    frappe.msgprint({message:__('File size exceeded the maximum allowed size of 2.0 MB'), title: __('Message'), indicator: 'red'})
+                    frm.set_value('upload_company_logo', '');
+                }
+            })
+        }
 	}
+
+    
 });
 
 /*---------hide details----------*/
@@ -662,6 +671,11 @@ function uploaded_file_format(frm){
 	frm.get_field('upload_docs').df.options = {
 		restrictions: {
 			allowed_file_types: ['.pdf','.txt','.docx']
+		}
+	};
+	frm.get_field('upload_company_logo').df.options = {
+		restrictions: {
+			allowed_file_types: ['.jpg','.jpeg','.png','.svg']
 		}
 	};
 }
@@ -969,14 +983,4 @@ function update_comp_address(frm,data){
 	        }
 	    }
 	})
-}
-/*------------------validate logo-------------------*/
-function validate_logo(frm){
-	let company_logo = frm.doc.company_logo;
-	let file = String(company_logo);
-	let allowedExtension = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
-	if(!allowedExtension.exec(file)){
-		frappe.throw("Invalid image format (file should be in jpg,jpeg,png or .gif format)")
-	}
-
 }
