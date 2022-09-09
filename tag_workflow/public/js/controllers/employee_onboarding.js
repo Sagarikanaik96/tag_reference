@@ -43,18 +43,6 @@ frappe.ui.form.on('Employee Onboarding', {
         $('[data-fieldname= "sssn"]').attr('title', '');
 		$('[data-fieldname = "contact_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 		hide_decrpt_ssn(frm);
-
-		$(document).on('click', '[data-fieldname="staffing_company"]', function(){
-			companyhide(1250);
-		});
-
-		$('[data-fieldname="staffing_company"]').mouseover(function(){
-			companyhide(1000);
-		});
-
-		document.addEventListener("keydown", function(){
-			companyhide(1000);
-		});
     },
 	onload_post_render: (frm)=>{
 		if(frm.doc.search_on_maps){
@@ -129,8 +117,8 @@ frappe.ui.form.on('Employee Onboarding', {
 	},
 	date_of_birth: (frm)=>{
 		let dob = frm.doc.date_of_birth || "";
-		if(dob && dob >= frappe.datetime.now_date()){
-			frappe.msgprint({message: __("<b>Date of Birth</b> cannot be Today's date or Future date."), title: __('Error'), indicator: 'orange'});
+		if(dob && dob >= frappe.datetime.year_start()){
+			frappe.msgprint({message: __("<b>Birth Year</b> must be earlier than this year."), title: __('Error'), indicator: 'orange'});
 			frm.set_value('date_of_birth', '');
 		}
 	},
@@ -164,65 +152,56 @@ frappe.ui.form.on('Employee Onboarding', {
 		frm.set_value('zip', zip ? zip.toUpperCase() : zip);
 	},
 	on_submit : function(frm) {
-		if(frappe.boot.tag.tag_user_info.company_type== 'Staffing' || frappe.boot.tag.tag_user_info.company_type=="TAG"){
-			let company_name = frappe.boot.tag.tag_user_info.company
-			let first_name = frm.doc.first_name
-			let last_name = frm.doc.last_name
-			let job_applicant = frm.doc.job_applicant
-			let contact_number = frm.doc.contact_number
-			let complete_address = frm.doc.complete_address
-			let employee_gender = frm.doc.gender
-			let date_of_birth = frm.doc.date_of_birth
-			let ssn = frm.doc.ssn
-			frappe.call({
-				method: "tag_workflow.utils.workbright_integration.workbright_create_employee",
-				args: {
-					"frm": frm.doc.name,
-					"company_name": company_name,
-					"first_name": first_name,
-					"last_name": last_name,
-					"job_applicant": job_applicant,
-					"contact_number": contact_number,
-					"complete_address":complete_address,
-					"employee_gender": employee_gender,
-					"date_of_birth": date_of_birth,
-					"decrypted_ssn": ssn
+		frappe.db.get_value('Company', {'name': frm.doc.staffing_company}, ['workbright_subdomain', 'workbright_api_key'], (r)=>{
+			if(r.workbright_subdomain && r.workbright_api_key){
+				let company_name = frappe.boot.tag.tag_user_info.company
+				let first_name = frm.doc.first_name
+				let last_name = frm.doc.last_name
+				let job_applicant = frm.doc.job_applicant
+				let contact_number = frm.doc.contact_number
+				let complete_address = frm.doc.complete_address
+				let employee_gender = frm.doc.gender
+				let date_of_birth = frm.doc.date_of_birth
+				let ssn = frm.doc.sssn
+				frappe.call({
+					method: "tag_workflow.utils.workbright_integration.workbright_create_employee",
+					args: {
+						"frm": frm.doc.name,
+						"company_name": company_name,
+						"first_name": first_name,
+						"last_name": last_name,
+						"job_applicant": job_applicant,
+						"contact_number": contact_number,
+						"complete_address":complete_address,
+						"employee_gender": employee_gender,
+						"date_of_birth": date_of_birth,
+						"decrypted_ssn": ssn
 
-				},
-				callback: function(reponse) {
-					if (reponse['message']['status'] == 200) {
-						frappe.call({
-							method: "tag_workflow.utils.workbright_integration.save_workbright_employee_id",
-							args: {
-								"job_applicant": job_applicant,
-								"workbright_emp_id": reponse['message']['workbright_emp_id']
-							},
-							callback: function(db_response){
-								if (db_response){
-									frappe.msgprint({message: __("Employee successfully created in Workbright!")});
+					},
+					callback: function(reponse) {
+						if (reponse['message']['status'] == 200) {
+							frappe.call({
+								method: "tag_workflow.utils.workbright_integration.save_workbright_employee_id",
+								args: {
+									"job_applicant": job_applicant,
+									"workbright_emp_id": reponse['message']['workbright_emp_id']
+								},
+								callback: function(db_response){
+									if (db_response){
+										frappe.msgprint({message: __("Employee successfully created in Workbright!")});
+									}
 								}
-								
-							}
-						})
+							})
+						}
+						else{
+							frappe.msgprint({message: __("Employee cannot be created in Workbright!")});
+						}
 					}
-					else{
-						frappe.msgprint({message: __("Employee cannoot be created in Workbright!")});
-					}
-				}
-			});
-		}
+				});
+			}
+		})
 	},
 });
-
-function companyhide(time) {
-	setTimeout(() => {
-		let txt  = $('[data-fieldname="staffing_company"]')[1].getAttribute('aria-owns');
-		let txt2 = 'ul[id="'+txt+'"]';
-		let  arry = document.querySelectorAll(txt2)[0].children;
-		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none';
-		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'	;
-	}, time);
-}
 
 function trigger_hide(frm){
 	$('.form-footer').hide();

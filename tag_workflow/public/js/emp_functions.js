@@ -145,12 +145,9 @@ function mandatory_fields(fields){
 	let message = '<b>Please Fill Mandatory Fields:</b>';
 	for (let key in fields) {
 		if(key == 'Activities'){
-			let table_data = fields[key];
-			table_data.forEach((x) => {
-				if(!x.activity_name || (x.activity_name && !x.activity_name.trim()) || (x.document_required && (!x.document || !x.attach))){
-					message = message + '<br>' + '<span>&bull;</span> ' + key;
-				}
-			});
+			if(table_reqd(fields[key])){
+				message = message + '<br>' + '<span>&bull;</span> Activities';
+			}
 		}
 		else if(fields[key] === undefined || !fields[key]){
 			message = message + '<br>' + '<span>&bull;</span> ' + key;
@@ -160,6 +157,18 @@ function mandatory_fields(fields){
 		frappe.msgprint({ message: __(message), title: __('Missing Fields'), indicator: 'orange'});
 		frappe.validated = false;
 	}
+}
+
+function table_reqd(table_data){
+	let check = false;
+	if(table_data){
+		table_data.forEach((x) => {
+			if(!x.activity_name || (x.activity_name && !x.activity_name.trim()) || (x.document_required && (!x.document || !x.attach))){
+				check = true;
+			}
+		});
+	}
+	return check;
 }
 
 function hide_decrpt_ssn(frm){

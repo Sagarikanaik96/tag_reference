@@ -24,7 +24,7 @@ def workbright_create_employee(frm, company_name, first_name, last_name, job_app
     decrypted_subdomain = comp.get_password('workbright_subdomain')
     decrypted_api_key = comp.get_password('workbright_api_key')
     emp = frappe.get_doc("Employee Onboarding",frm)
-    ssn_decrypt = emp.get_password('ssn')
+    ssn_decrypt = emp.get_password('ssn') if emp.sssn else ''
     if employee_gender == 'Male':
         employee_gender = 'M'
     elif employee_gender == 'Female':
@@ -46,7 +46,7 @@ def workbright_create_employee(frm, company_name, first_name, last_name, job_app
             state = ''
             zip_code = ''
             country = ''
-        employee_email = job_applicant.split(" - ")[1]
+        employee_email = emp.email
 
         headers = {
             'api-key': decrypted_api_key,
