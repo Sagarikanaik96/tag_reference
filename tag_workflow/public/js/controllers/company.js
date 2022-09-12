@@ -41,6 +41,8 @@ frappe.ui.form.on("Company", {
 			frm.set_df_property('job_title', 'hidden', 1);
 		}
 		if (frappe.boot.tag.tag_user_info.user_type == "Staffing User" || frappe.boot.tag.tag_user_info.user_type == "Hiring User" || frappe.boot.tag.tag_user_info.user_type == "Hiring Admin"){
+			frm.set_df_property('decrypted_subdomain', 'hidden', 1);
+			frm.set_df_property('decrypted_subdomain_api_key', 'hidden', 1);
 			frm.set_df_property('decrypted_jazzhr_api_key', 'fieldtype', 'Password');
 			frm.set_df_property('decrypted_client_id', 'fieldtype', 'Password');
 			frm.set_df_property('decrypted_client_secret', 'fieldtype', 'Password');

@@ -83,9 +83,6 @@ frappe.ui.form.on('Employee Onboarding', {
 		}
 		remove_lat_lng(frm);
 	},
-    after_save: (frm)=>{
-		update_lat_lng(frm);
-	},
 	before_submit: (frm)=>{
 		if(!frm.doc.date_of_birth){
 			frappe.msgprint(__('Please fill Date of Birth before submitting the form.'));

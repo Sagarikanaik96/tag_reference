@@ -30,22 +30,10 @@ def workbright_create_employee(frm, company_name, first_name, last_name, job_app
     elif employee_gender == 'Female':
         employee_gender = 'F'
     else:
-        employee_gender = 'X'
+        employee_gender = ''
     if authenticate_response == 200:
         WORKBRIGHT_API_URL = "https://" + decrypted_subdomain + ".workbright.com/api/employees"
-        if complete_address:
-            complete_address = complete_address.split(', ')
-            city = complete_address[0]
-            state_zip = complete_address[1]
-            state_li = state_zip.split(' ')
-            state = state_li[0]
-            zip_code = state_li[1]
-            country = complete_address[2]
-        else:
-            city = ''
-            state = ''
-            zip_code = ''
-            country = ''
+        street,apt,city,state,zip_code,country=emp_address_details(emp,complete_address)
         employee_email = emp.email
 
         headers = {
@@ -62,6 +50,8 @@ def workbright_create_employee(frm, company_name, first_name, last_name, job_app
                 'gender': employee_gender,
                 'ssn': ssn_decrypt,
                 'address':{
+                    "street":street,
+                    "apt":apt,
                     "city":city,
                     "state":state,
                     "zip":zip_code,
@@ -69,7 +59,6 @@ def workbright_create_employee(frm, company_name, first_name, last_name, job_app
                 }
             }
         }
-
         response = requests.post(WORKBRIGHT_API_URL, headers=headers, json=json_data)
         content = response.content.decode("utf-8") 
         content_dict = json.loads(content)
@@ -92,3 +81,14 @@ def save_workbright_employee_id(job_applicant, workbright_emp_id):
         return 1
     except Exception as e:
         print(e, frappe.get_traceback())  
+def emp_address_details(emp,complete_address):
+    country=''
+    if complete_address:
+        complete_address = complete_address.split(', ')
+        country = complete_address[-1]
+    street=emp.street_address if emp.street_address else ''
+    apt=emp.suite_or_apartment_no if emp.suite_or_apartment_no else ''
+    city = emp.city if emp.city else ''
+    state = emp.state if emp.state else ''
+    zip_code = emp.zip if emp.zip else ''
+    return street,apt,city,state,zip_code,country
