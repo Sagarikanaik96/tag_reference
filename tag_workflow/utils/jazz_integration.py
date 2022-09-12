@@ -454,3 +454,19 @@ def get_user_list(company):
     except Exception as e:
         frappe.log_error(e,'sql_error')
         return []
+
+def schedule_job():
+    sql  ="""select name from `tabCompany` where jazzhr_api_key is not null and organization_type='Staffing' and make_organization_inactive='0'"""
+    try:
+        companies = frappe.db.sql(sql,as_dict=1)
+        if len(companies)>0:
+            for c in companies:
+                doc = frappe.get_doc('Company',c['name'])
+                api_key = doc.get_password('jazzhr_api_key')
+                #----------------------------------Jazzhr_Grab_Record--------------------------------------------------------------------------#
+                frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_fetch_applicants",api_key=api_key,company=doc.name)
+                #----------------------------------Jazzhr_Insert_Record-------------------------------------------------------------------------------------------#
+                frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_update_applicants",api_key=api_key,company=doc.name)
+    except Exception as e:
+        frappe.log_error(e,'cron_job_error')
+    

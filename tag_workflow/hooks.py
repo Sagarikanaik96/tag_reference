@@ -176,7 +176,10 @@ scheduler_events={
 	],
         "daily": [
 	        "tag_workflow.tag_data.lead_follow_up"
-	]
+	],
+        "weekly":[
+                "tag_workflow.utils.jazz_integration.schedule_job"
+        ]
 }
 
 override_whitelisted_methods = {
