@@ -4,8 +4,9 @@
 sudo chown -R erpuser:erpuser /app/frappe-bench/apps/tag_workflow/
 
 # Copy code to SSD
+cp -r /app/frappe-bench/apps/ /home/erpuser/frappe-bench/apps/
 #cp -r /home/erpuser/frappe-bench/apps/tag_workflow/ /app/frappe-bench/apps/
-rsync -avu --delete /home/erpuser/frappe-bench/apps/tag_workflow/ /app/frappe-bench/apps/tag_workflow/
+#rsync -avu --delete /home/erpuser/frappe-bench/apps/tag_workflow/ /app/frappe-bench/apps/tag_workflow/
 
 # Ensure proper permission for code on SSD
 sudo chown -R erpuser:erpuser /app/
