@@ -229,10 +229,11 @@ def jazzhr_make_sql(api_key, company):
             frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-EMP-" """, emp_last_number)
             frappe.db.sql(sql[0:-1])
             frappe.db.commit()
-            frappe.enqueue(NOTIFY_METHOD,company=company,msg=SUCCESS_INSERT_RECORD_MSG,action=2)
             insert = redis.get('Insert'+str(company)) if redis.get('Insert'+str(company)) is not None else None
             if insert is not None and int(insert)>0:
                 frappe.enqueue(NOTIFY_METHOD,company=company,msg=ERROR_INSERT_RECORD_MSG,action=2)
+            else:
+                frappe.enqueue(NOTIFY_METHOD,company=company,msg=SUCCESS_INSERT_RECORD_MSG,action=2)
             free_redis(company,2,redis)
     except Exception as e:
         frappe.db.rollback()
@@ -308,11 +309,12 @@ def jazz_make_emp_update_queue(api_key, company, start, end, emp_list):
                 count -= 1
                 if(exce <= 3):
                     continue
-        frappe.enqueue(NOTIFY_METHOD,company=company,msg=SUCCESS_UPDATE_RECORD_MSG,action=1)
         redis = frappe.cache()
         update = redis.get('Update'+str(company)) if redis.get('Update'+str(company)) is not None else None
         if update is not None and int(update)>0:
             frappe.enqueue(NOTIFY_METHOD,company=company,msg=ERROR_UPDATE_RECORD_MSG,action=1)
+        else:
+            frappe.enqueue(NOTIFY_METHOD,company=company,msg=SUCCESS_UPDATE_RECORD_MSG,action=1)
         free_redis(company,1,redis)
     except Exception as e:
         frappe.log_error(e, "jazz_make_emp_update_queue")
