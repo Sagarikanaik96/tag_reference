@@ -86,7 +86,8 @@ def joborder_email_template(subject = None,content = None,recipients = None,link
 @frappe.whitelist(allow_guest=False)
 def send_email_staffing_user(user, company_type, email_list=None,subject = None,body=None,additional_email = None):
     try:
-        if(company_type == "Staffing" and user == frappe.session.user):
+        org_type=frappe.db.get_value('User', {"name": frappe.session.user}, ['organization_type'])
+        if((org_type == "Staffing" or frappe.session.user=="Administrator") and user == frappe.session.user) :
             email = json.loads(email_list)
             emails = [i['email'] for i in email]
             if additional_email:
