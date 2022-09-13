@@ -330,14 +330,11 @@ function get_remaining_employee(name,frm,joborder) {
 				'doc_name': name,
 			},
 			callback: function (r) {
-				if(r.message.length != 0){
-					let total = r.message[0].no_of_workers_joborder
+				if(r.message){
+					let total = r.message[1]
 					frm.set_value('no_of_workers_joborder', total)
 					let remaining_emp = 0;
-					for(let i in r.message){
-						remaining_emp += parseInt(r.message[i].approved_no_of_workers)
-					}
-					remaining_emp = total - remaining_emp
+					remaining_emp = total - r.message[0]
 					frm.set_value('no_of_remaining_employee', remaining_emp)
 				}else{
 					frm.set_value('no_of_remaining_employee', joborder)

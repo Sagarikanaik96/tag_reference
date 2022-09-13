@@ -116,8 +116,15 @@ def order_details(doc_name):
 @frappe.whitelist()
 def remaining_emp(doc_name):
 	try:
-		datas=''' select * from `tabClaim Order` where job_order = "{}"  '''.format(doc_name)
-		return frappe.db.sql(datas,as_dict=True)
+		datas=''' select sum(approved_no_of_workers) as approved_no_of_workers  from `tabClaim Order` where job_order = "{}"  '''.format(doc_name)
+		data=frappe.db.sql(datas,as_dict=True)
+		if(len(data)):
+			approved_claims=data[0]['approved_no_of_workers']
+		else:
+			approved_claims=0
+		job_order=frappe.get_doc(jobOrder,doc_name)
+		worker_required=job_order.no_of_workers
+		return int(approved_claims),worker_required
 	except Exception as e:
 		print(e, frappe.get_traceback())
 		frappe.db.rollback()
