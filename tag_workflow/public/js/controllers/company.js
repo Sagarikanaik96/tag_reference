@@ -64,7 +64,7 @@ frappe.ui.form.on("Company", {
 		$('[data-fieldname = "phone_no"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 		$('[data-fieldname = "accounts_payable_phone_number"]>div>div>div>input').attr("placeholder", 'Example: +XX XXX-XXX-XXXX');
 		$('[data-fieldname = "accounts_receivable_phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
-		
+		hide_workbright(frm)
 	},
 
 	decrypt_jazzhr_api_key: function(frm) {
@@ -188,6 +188,9 @@ frappe.ui.form.on("Company", {
 				frappe.msgprint('Nothing to decrypt')
 			}
 		}
+		else{
+			frm.set_df_property('decrypted_subdomain','hidden',1)
+		}
 	},
 
 	decrypt_subdomain_api_key: function(frm) {
@@ -219,6 +222,9 @@ frappe.ui.form.on("Company", {
 				frm.set_value('decrypt_subdomain_api_key',0)
 				frappe.msgprint('Nothing to decrypt')
 			}
+		}
+		else{
+			frm.set_df_property('decrypted_subdomain_api_key','hidden',1)
 		}
 	},
 	update_employee_records: function (frm){
@@ -985,4 +991,12 @@ function update_comp_address(frm,data){
 	        }
 	    }
 	})
+}
+function hide_workbright(frm){
+	if(frm.doc.decrypt_subdomain==0){
+		frm.set_df_property('decrypted_subdomain','hidden',1)
+	}
+	if(frm.doc.decrypt_subdomain_api_key==0){
+		frm.set_df_property('decrypted_subdomain_api_key','hidden',1)
+	}
 }
