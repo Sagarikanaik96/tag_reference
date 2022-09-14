@@ -654,4 +654,11 @@ function update_hourly_data(r){
 	cur_frm.set_value('overtime_timesheet_hours1',r.message[1][8][0]);
 	cur_frm.set_value('billable_weekly_overtime_hours',r.message[1][9][0]);
 	cur_frm.set_value('unbillable_weekly_overtime_hours',r.message[1][10]);
+	cur_frm.set_value('todays_overtime_hours',r.message[1][11]);
+	cur_frm.set_value('timesheet_payable_amount',r.message[2][0]);
+	cur_frm.set_value('timesheet_billable_overtime_amount_staffing',r.message[2][1]);
+	cur_frm.set_value('timesheet_unbillable_overtime_amount',r.message[2][2]);
+	cur_frm.set_value('total_job_order_payable_amount',r.message[2][3]);
+	cur_frm.set_value('total_job_order_billable_overtime_amount',r.message[2][4]);
+	cur_frm.set_value('total_job_order_unbillable_overtime_amount',r.message[2][5]);
 }
