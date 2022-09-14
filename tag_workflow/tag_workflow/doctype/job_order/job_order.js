@@ -2291,6 +2291,11 @@ function single_share_job(frm){
 	if(frm.doc.__islocal!=1 && frm.doc.is_single_share==0){
 		cur_frm.set_df_property('staff_company','hidden',1)
 	}
+	if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		if(cur_frm.doc.staff_company && !cur_frm.doc.staff_company.includes(frappe.boot.tag.tag_user_info.company)){
+			cur_frm.set_df_property('staff_company','hidden',1)
+		}
+	}
 }
 function job_profile_data(data){
 	let profile_html = `<div class="table-responsive pb-2 pb-sm-0"><table style="width: 100%;"><th>Employee Name</th><th>Marked As</th><th>Actions</th><th></th>`;

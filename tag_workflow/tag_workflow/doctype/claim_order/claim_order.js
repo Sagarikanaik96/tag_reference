@@ -249,15 +249,16 @@ function org_info(frm) {
 
 
 function claim_order_save(frm) {
-	frappe.db.get_value("Job Order", { name: frm.doc.job_order }, "is_repeat", function (r1) {
-		if (r1.is_repeat != 1) {
+	frappe.db.get_value("Job Order", { name: frm.doc.job_order }, ["is_repeat","staff_company"], function (r1) {
+		if (r1.is_repeat != 1 || ( r1.staff_company && r1.staff_company.includes(frappe.boot.tag.tag_user_info.company))) {
 			let dict = {}
 			dict[frm.doc.staffing_organization] = frm.doc.staff_claims_no
 			frappe.call({
 				method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.auto_claims_approves",
 				args: {
 					'my_data': dict,
-					'doc_name': frm.doc.job_order
+					'doc_name': frm.doc.job_order,
+					'doc_claim':frm.doc.name
 				},
 				callback: function () {
 					setTimeout(function () {
