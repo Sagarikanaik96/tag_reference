@@ -66,7 +66,7 @@ class Importer:
 
     def upload_record(self):
         try:
-            self.column = 'insert into `tabEmployee` (name, employee_name, first_name, last_name, email, company, status, contact_number, employee_gender, sssn, military_veteran, street_address, suite_or_apartment_no, city, state, zip, lat, lng, naming_series, lft, rgt, creation) values ' + self.sql
+            self.column = 'insert into `tabEmployee` (name, employee_name, first_name, last_name, email, company, status,date_of_birth, contact_number, employee_gender, sssn, military_veteran, street_address, suite_or_apartment_no, city, state, zip, lat, lng, naming_series, lft, rgt, creation) values ' + self.sql
             frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-EMP-" """, self.emp_series)
             frappe.db.sql(self.column[0:-1])
             frappe.db.commit()
@@ -146,7 +146,7 @@ class Importer:
                 import_log.append(frappe._dict(success=True, docname=doc, row_indexes=row_indexes))
             else:
                 message_log = ['{"title": "Error", "message": "Data Error"}']
-                msg_exc = """<b>First Name* and Last Name*</b>: cannot be empty\n<b>Email*</b>: accepts the alphanumeric value in format abc@xyz.com.\n<b>Status*</b>: Active/Inactive/Suspended/Left.\n<b>Company*</b>: You can add data in your company. if kept empty it takes the value of your own company.\n<b>Military Veteran</b>: Please type only 0 or 1, and Yes or NO in Military Veteran.\n<b>Gender</b>: Male, Female or Decline to answer.\n<b>SSN</b>: accepts the 9 digits.\n<b>Contact No.</b>: accepts the 10 to 12 digit. """
+                msg_exc = """<b>First Name* and Last Name*</b>: cannot be empty\n<b>Email*</b>: accepts the alphanumeric value in format abc@xyz.com.\n<b>Status*</b>: Active/Inactive/Suspended/Left.\n<b>Company*</b>: You can add data in your company. if kept empty it takes the value of your own company.\n<b>Military Veteran</b>: Please type only 0 or 1, and Yes or NO in Military Veteran.\n<b>Gender</b>: Male, Female or Decline to answer.\n<b>SSN</b>: accepts the 9 digits.\n<b>Contact No.</b>: accepts the 10 to 12 digit.\n<b>Date of birth</b>: is mandatory\n """
                 import_log.append(frappe._dict(success=False, exception=msg_exc, messages=message_log, docname=doc, row_indexes=row_indexes))
 
             frappe.db.commit()
@@ -174,7 +174,9 @@ class Importer:
 
             if((doc.sssn and (not doc.sssn.isdigit() or len(doc.sssn) != 9)) or doc.sssn is None):
                 doc.sssn = ''
-
+            if(doc.date_of_birth):
+                doc.date_of_birth=str((doc.date_of_birth).strftime('%Y-%m-%d'))
+                   
             self.check_ext_fields(doc)
             self.check_rem_emp(doc)
         except Exception as e:
@@ -242,11 +244,11 @@ class Importer:
             name = 'No Name'
             keys = docs.keys()
             if(frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) == True and frappe.db.exists("Company", docs.company) and "first_name" in keys and "last_name" in keys and "email" in keys and "status" in keys):
-                if(docs.first_name and docs.last_name and docs.email and docs.status):
+                if(docs.first_name and docs.last_name and docs.email and docs.status and docs.date_of_birth):
                     name = "HR-EMP-"+str(self.emp_series)
                     lat, lng = self.update_emp_lat_lng(docs)
 
-                    self.sql += str(tuple([name, (docs.first_name + " " + docs.last_name), docs.first_name, docs.last_name, docs.email, docs.company, docs.status, docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
+                    self.sql += str(tuple([name, (docs.first_name + " " + docs.last_name), docs.first_name, docs.last_name, docs.email, docs.company, docs.status,str(docs.date_of_birth), docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
 
                     self.emp_series += 1
                     time.sleep(0.1)
@@ -291,11 +293,10 @@ class Importer:
             self.check_emp_error(docs)
             keys = docs.keys()
             if(frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) == True and "name" in keys and frappe.db.exists("Company", docs.company) and "first_name" in keys and "last_name" in keys and "email" in keys and "status" in keys):
-                if(docs.name and docs.first_name and docs.last_name and docs.email and docs.status):
+                if(docs.name and docs.first_name and docs.last_name and docs.email and docs.status and docs.date_of_birth):
                     full_name = (docs.first_name + " " + docs.last_name)
                     lat, lng = self.update_emp_lat_lng(docs)
-                    self.sql = """employee_name = '{0}', first_name = '{1}', last_name = '{2}', email = '{3}', company = '{4}', status = '{5}', contact_number = '{6}', employee_gender = '{7}', sssn = '{8}', military_veteran = {9}, street_address = '{10}', suite_or_apartment_no = '{11}', city = '{12}', state = '{13}', zip = '{14}', lat = '{15}', lng = '{16}', creation = '{17}' """.format(full_name, docs.first_name, docs.last_name, docs.email, docs.company, docs.status, docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, frappe.utils.now())
-
+                    self.sql = """employee_name = '{0}', first_name = '{1}', last_name = '{2}', email = '{3}', company = '{4}', status = '{5}',date_of_birth = '{18}', contact_number = '{6}', employee_gender = '{7}', sssn = '{8}', military_veteran = {9}, street_address = '{10}', suite_or_apartment_no = '{11}', city = '{12}', state = '{13}', zip = '{14}', lat = '{15}', lng = '{16}', creation = '{17}' """.format(full_name, docs.first_name, docs.last_name, docs.email, docs.company, docs.status, docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, frappe.utils.now(),(docs.date_of_birth or ''))
                     sql = """update `tabEmployee` set {0} where name = '{1}'""".format(self.sql, docs.name)
                     frappe.db.sql(sql)
                     frappe.db.commit()

@@ -17,5 +17,6 @@
 		"public/js/frappe/page.js",
 		"public/js/frappe/navbar.html",
 		"public/js/frappe/page.html"
-	]
+	],
+	"js/data_import_tools.min.js": "public/js/frappe/data_import/index.js"
 }
