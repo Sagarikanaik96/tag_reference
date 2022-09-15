@@ -146,7 +146,9 @@ class Importer:
                 import_log.append(frappe._dict(success=True, docname=doc, row_indexes=row_indexes))
             else:
                 message_log = ['{"title": "Error", "message": "Data Error"}']
-                msg_exc = """<b>First Name* and Last Name*</b>: cannot be empty\n<b>Email*</b>: accepts the alphanumeric value in format abc@xyz.com.\n<b>Status*</b>: Active/Inactive/Suspended/Left.\n<b>Company*</b>: You can add data in your company. if kept empty it takes the value of your own company.\n<b>Military Veteran</b>: Please type only 0 or 1, and Yes or NO in Military Veteran.\n<b>Gender</b>: Male, Female or Decline to answer.\n<b>SSN</b>: accepts the 9 digits.\n<b>Contact No.</b>: accepts the 10 to 12 digit.\n<b>Date of birth</b>: is mandatory\n """
+
+                msg_exc = """<b>First Name* and Last Name*</b>: cannot be empty and < , > is not allowed\n<b>Email*</b>: accepts the alphanumeric value in format abc@xyz.com.\n<b>Status*</b>: Active/Inactive/Suspended/Left.\n<b>Company*</b>: You can add data in your company. if kept empty it takes the value of your own company.\n<b>Military Veteran</b>: Please type only 0 or 1, and Yes or NO in Military Veteran.\n<b>Gender</b>: Male, Female or Decline to answer.\n<b>SSN</b>: accepts the 9 digits.\n<b>Contact No.</b>: accepts the 10 to 12 digit. """
+
                 import_log.append(frappe._dict(success=False, exception=msg_exc, messages=message_log, docname=doc, row_indexes=row_indexes))
 
             frappe.db.commit()
@@ -165,22 +167,29 @@ class Importer:
             if(doc.last_name):
                 doc.last_name = doc.last_name.title()
 
-            if(doc.email):
-                regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-                if(not re.fullmatch(regex, doc.email)):
-                    doc.email = ''
-                else :
-                    doc.email = doc.email.lower()
 
-            if((doc.sssn and (not doc.sssn.isdigit() or len(doc.sssn) != 9)) or doc.sssn is None):
-                doc.sssn = ''
-            if(doc.date_of_birth):
-                doc.date_of_birth=str((doc.date_of_birth).strftime('%Y-%m-%d'))
-                   
+            if(doc.first_name or doc.last_name):
+                if "<" in doc.first_name or ">" in doc.first_name or "<" in doc.last_name or ">" in last_name:
+                    doc.first_name = ''
+
+
+
+            self.check_email_sssn(doc)
             self.check_ext_fields(doc)
             self.check_rem_emp(doc)
         except Exception as e:
             print(e)
+
+    def check_email_sssn(self,doc):
+        if(doc.email):
+            regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+            if(not re.fullmatch(regex, doc.email)):
+                doc.email = ''
+            else :
+                doc.email = doc.email.lower()
+
+            if((doc.sssn and (not doc.sssn.isdigit() or len(doc.sssn) != 9)) or doc.sssn is None):
+                doc.sssn = ''
 
     def check_ext_fields(self, doc):
 
