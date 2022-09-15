@@ -257,6 +257,7 @@ function update_no(data_len, l, dict, data, r) {
 }
 
 function modify_claims(listview) {
+  
   frappe.call({
     method:
       "tag_workflow.tag_workflow.doctype.claim_order.claim_order.modify_heads",
@@ -285,7 +286,7 @@ function modify_claims(listview) {
                                 <td style="margin-right:20px;" id="${job_data[p].claims}">${job_data[p].staffing_organization}</td>
                                 <td>${job_data[p].staff_claims_no}</td>
                                 <td>${job_data[p].approved_no_of_workers}</td>
-                                <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no}></td>
+                                <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no} ${job_data[p].hide==1?"disabled":""}></td>
                                 <td><textarea id="_${job_data[p].staffing_organization}_notes" class="head_count_tittle" maxlength="1000"> </textarea> </td>
                                 </tr>`;
           }
@@ -427,7 +428,19 @@ function update_claims(data_len, l, dict, job_data, r) {
       setTimeout(function () {
         location.reload();
       }, 5000);
-    } else {
+    }
+    else if (job_data[i].assigned_wroker && y< job_data[i].assigned_wroker) {
+      frappe.msgprint({
+        message: __(`${r["worker_filled"]} Employees are assigned to this order. Number of required workers must be greater than or equal to number of assigned employees. Please modify the number of workers required or work with the staffing companies to remove an assigned employee.`),
+        title: __("Error"),
+        indicator: "red",
+      });
+      valid1 = "False";
+
+      setTimeout(function () {
+        location.reload();
+      }, 5000);
+    }else {
       total_count += y;
       y = { approve_count: y, notes: notes };
       dict[job_data[i].name] = y;

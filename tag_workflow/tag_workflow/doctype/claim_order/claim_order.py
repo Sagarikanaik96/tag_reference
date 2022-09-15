@@ -138,11 +138,18 @@ def modify_heads(doc_name):
 			claim_data= """ select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{0}" and staffing_organization not in (select company from `tabAssign Employee` where job_order="{0}" and tag_status="Approved") """.format(doc_name)
 		else:
 			claim_data= """
-			select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{0}" and approved_no_of_workers=0 and staffing_organization in (select company from `tabAssign Employee` where job_order='{0}' and tag_status='Approved')
+			select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{0}" and approved_no_of_workers >=0 and staffing_organization in (select company from `tabAssign Employee` where job_order='{0}' and tag_status='Approved')
 			UNION
-			select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{0}" and approved_no_of_workers=0 and staffing_organization  not in (select company from `tabAssign Employee` where job_order='{0}' and tag_status='Approved')
+			select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{0}" and approved_no_of_workers >=0 and staffing_organization  not in (select company from `tabAssign Employee` where job_order='{0}' and tag_status='Approved')
 			""".format(doc_name)
 		claims=frappe.db.sql(claim_data,as_dict=True)
+		for c in claims:
+			assigned_worker= frappe.db.get_value('Assign Employee',{'job_order':doc_name,'tag_status':'Approved','company':c['staffing_organization']},['previous_worker'])
+			if (assigned_worker is not None and assigned_worker<c['approved_no_of_workers']) or c['approved_no_of_workers']==0:
+				c['hide'] =0
+				c['assigned_worker'] = assigned_worker
+			elif assigned_worker is not None and assigned_worker>=c['approved_no_of_workers']:
+				c['hide'] = 1
 		return claims
 	except Exception as e:
 		print(e,frappe.get_traceback())
