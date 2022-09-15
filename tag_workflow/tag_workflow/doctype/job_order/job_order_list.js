@@ -331,11 +331,10 @@ frappe.listview_settings["Job Order"] = {
       }
     },
     head_count_available(val, d, f) {
-      let value = f.no_of_workers-f.worker_filled
-      if(f.order_status != 'Completed'){
-        return `<span class=" ellipsis" title="" id="${val}-${f.name}" ><a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${value}</a></span>`;
-      }else{
+      if (val == "success") {
         return `<span class=" ellipsis" title="" id="${val}-${f.name}" ><a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">0</a></span>`;
+      } else {
+        return `<span class=" ellipsis" title="" id="${val}-${f.name}" ><a  data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a></span>`;
       }
     },
     no_of_workers(val, d, f) {

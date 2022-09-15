@@ -75,7 +75,7 @@ def staffing_data(data, radius, page_length):
             data = get_data(user_company, radius, data, page_length)
         elif(radius != 'All'):
             for d in data['values']:
-                if(len(d) > 3 and radius == d[-4]):
+                if(len(d) > 3 and radius == d[-5]):
                     result.append(d)
             data["values"] = result
         else:
@@ -110,7 +110,7 @@ def claim_left(data):
         company = frappe.db.get_value("User", frappe.session.user, "company")
         if(data):
             for d in data['values']:
-                d[-6] = claims_left(d[0], company)
+                d[-7] = claims_left(d[0], company)
         return data
     except Exception as e:
         print(e)
@@ -157,7 +157,7 @@ def check_distance(company_address, data, radius):
             for d in data['values']:
                 try:
                     lat, lng = frappe.db.get_value(
-                        "Job Site", d[-4], ["IFNULL(lat, '')", "IFNULL(lng, '')"])
+                        "Job Site", d[-5], ["IFNULL(lat, '')", "IFNULL(lng, '')"])
                     rds = haversine(add, tuple(
                         [float(lat), float(lng)]), unit='mi')
                     if(rds <= distance_value[radius] and d[0] not in orders):
