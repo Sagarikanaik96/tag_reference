@@ -572,6 +572,7 @@ function update_time(frm, cdt, cdn){
 			setTimeout(() => {
 				frappe.model.set_value(cdt, cdn, "base_billing_amount", r.message[0][0]);
 				frappe.model.set_value(cdt, cdn, "billing_amount", r.message[0][0]);
+				frappe.model.set_value(cdt, cdn, "pay_amount", r.message[2][0]);
 				cur_frm.set_value('timesheet_billable_amount',r.message[0][0]);
 				cur_frm.set_value('timesheet_billable_overtime_amount',r.message[0][1]);
 				cur_frm.set_value('total_job_order_amount',r.message[0][2]);
