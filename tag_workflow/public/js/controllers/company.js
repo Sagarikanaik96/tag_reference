@@ -375,6 +375,7 @@ frappe.ui.form.on("Company", {
 		});
 	},
 	validate: function (frm){
+		mandatory_fields(frm);
 		validate_phone_zip(frm);
 		let account_phone_no=frm.doc.accounts_receivable_phone_number || "";
 		let receive_email = frm.doc.accounts_receivable_rep_email;
@@ -998,5 +999,22 @@ function hide_workbright(frm){
 	}
 	if(frm.doc.decrypt_subdomain_api_key==0){
 		frm.set_df_property('decrypted_subdomain_api_key','hidden',1)
+	}
+}
+
+function mandatory_fields(frm){
+	let reqd_fields = {"Company Type": frm.doc.organization_type, "Company Name": frm.doc.company_name};
+	if (frm.doc.organization_type == 'Exclusive Hiring'){
+		reqd_fields['Parent Staffing'] = frm.doc.parent_staffing;
+	}
+	let message = '<b>Please Fill Mandatory Fields:</b>';
+	for (let key in reqd_fields) {
+		if(reqd_fields[key] === undefined || !reqd_fields[key] || (reqd_fields[key] && !reqd_fields[key].trim())){
+			message = message + '<br>' + '<span>&bull;</span> ' + key;
+		}
+	}
+	if (message != '<b>Please Fill Mandatory Fields:</b>') {
+		frappe.msgprint({ message: __(message), title: __('Missing Fields'), indicator: 'orange'});
+		frappe.validated = false;
 	}
 }
