@@ -208,8 +208,6 @@ class Importer:
         if(doc.state):
             doc.state = doc.state.title()
 
-        if(doc.company):
-            doc.company = doc.company.title()
 
     def check_rem_emp(self, doc):
         try:
