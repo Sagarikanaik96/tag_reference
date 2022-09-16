@@ -66,7 +66,7 @@ class Importer:
 
     def upload_record(self):
         try:
-            self.column = 'insert into `tabEmployee` (name, employee_name, first_name, last_name, email, company, status,date_of_birth, contact_number, employee_gender, sssn, military_veteran, street_address, suite_or_apartment_no, city, state, zip, lat, lng, naming_series, lft, rgt, creation) values ' + self.sql
+            self.column = 'insert into `tabEmployee` (name, employee_name, first_name, last_name, email, company, status, date_of_birth, contact_number, employee_gender, sssn, military_veteran, street_address, suite_or_apartment_no, city, state, zip, lat, lng, naming_series, lft, rgt, creation) values ' + self.sql
             frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-EMP-" """, self.emp_series)
             frappe.db.sql(self.column[0:-1])
             frappe.db.commit()
@@ -258,7 +258,7 @@ class Importer:
                     name = "HR-EMP-"+str(self.emp_series)
                     lat, lng = self.update_emp_lat_lng(docs)
 
-                    self.sql += str(tuple([name, (docs.first_name + " " + docs.last_name), docs.first_name, docs.last_name, docs.email, docs.company, docs.status,str(docs.date_of_birth), docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
+                    self.sql += str(tuple([name, (docs.first_name + " " + docs.last_name), docs.first_name, docs.last_name, docs.email, docs.company, docs.status, str(docs.date_of_birth), docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
 
                     self.emp_series += 1
                     time.sleep(0.1)
