@@ -103,7 +103,8 @@ doctype_js = {
         "Notification Log": "public/js/controllers/notification_log.js",
         "Employee Onboarding Template": "public/js/controllers/employee_onboarding_template.js",
         "Employee Onboarding": ["public/js/controllers/employee_onboarding.js", map],
-        "Job Offer": "public/js/controllers/job_offer.js"
+        "Job Offer": "public/js/controllers/job_offer.js",
+        "Salary Component":"public/js/controllers/salary_component.js",
 }
 
 # doctype list

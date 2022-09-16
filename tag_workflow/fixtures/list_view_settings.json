@@ -82,5 +82,19 @@
   "parentfield": null,
   "parenttype": null,
   "total_fields": "8"
+ },
+ {
+  "disable_auto_refresh": 0,
+  "disable_count": 0,
+  "disable_sidebar_stats": 0,
+  "docstatus": 0,
+  "doctype": "List View Settings",
+  "fields": null,
+  "modified": "2022-08-30 05:53:52.620370",
+  "name": "Salary Component",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "total_fields": "8"
  }
 ]
