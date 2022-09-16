@@ -23,16 +23,20 @@ frappe.ui.form.on('Add Timesheet', {
 		frm.set_value("to_time", "");
 		frm.set_value("break_from_time", "");
 		frm.set_value("break_to_time", "");
-		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-			frm.add_custom_button(__('Save Timesheet'), function() {
-				let save=1
+		frm.add_custom_button(__('Save'), function() {
+			let save=1
+			if(frm.doc.job_order && frm.doc.date && frm.doc.from_time && frm.doc.to_time && frm.doc.items){
 				update_timesheet(frm,save);
-			}).addClass("btn-primary");
-		}
+			}
+			else{
+				update_time_data(frm)
+				update_save_timesheet(frm,save)
+			}
+		}).addClass("btn-primary");
 		frm.add_custom_button(__('Submit Timesheet'), function() {
 			let save=0
 			update_timesheet(frm,save);
-		}).addClass("btn-primary");
+		}).addClass("btn-primary btn-submit");
 
 		let jo=localStorage.getItem("order")
 		if(localStorage){
@@ -67,18 +71,22 @@ frappe.ui.form.on('Add Timesheet', {
 
 	from_time: function(frm){
 		update_time(frm);
+		check_submittable(frm)
 	},
 
 	to_time: function(frm){
 		update_time(frm);
+		check_submittable(frm)
 	},
 
 	break_from_time: function(frm){
 		update_time(frm);
+		check_btn_submittable(frm)
 	},
 
 	break_to_time: function(frm){
 		update_time(frm);
+		check_btn_submittable(frm)
 	},
 	onload_post_render: function(frm){
 		sort_employees(frm);
@@ -469,4 +477,89 @@ function sort_employees(frm){
 		item.idx = idx++;
 	});
 	frm.refresh_field('items');
+}
+function check_submittable(frm){
+	if(frm.doc.from_time && frm.doc.to_time){
+		$('button.btn.btn-default.ellipsis.btn-primary.btn-submit').prop('disabled', false);
+	}
+	else{
+		$('button.btn.btn-default.ellipsis.btn-primary.btn-submit').prop('disabled', true);
+
+	}
+}
+function check_btn_submittable(frm){
+	if(frm.doc.break_from_time && frm.doc.break_to_time){
+		$('button.btn.btn-default.ellipsis.btn-primary.btn-submit').prop('disabled', false);
+	}
+	else{
+		$('button.btn.btn-default.ellipsis.btn-primary.btn-submit').prop('disabled', true);
+
+	}
+}
+
+/*--------------------------------------------------*/
+function update_save_timesheet(frm,save){
+	if(frm.doc.job_order && frm.doc.items && frm.doc.date &&(frm.doc.from_time || frm.doc.to_time || frm.doc.break_from_time || frm.doc.break_to_time )){
+		let items = frm.doc.items || [];
+		let cur_selected = cur_frm.get_selected();
+		let job_order = frm.doc.job_order;
+		let date = frm.doc.date;
+		let from_time = frm.doc.from_time ? frm.doc.from_time:frm.doc.to_time  ;
+		let to_time = frm.doc.to_time ? frm.doc.to_time:frm.doc.from_time;
+		update_timesheet_save(items,cur_selected,job_order,date,from_time,to_time,save)
+	}else{
+		frappe.msgprint({message: __("(*) fields are required"), title: __('Mandatory'), indicator: 'red'});
+	}
+}
+function update_timesheet_save(items,cur_selected,job_order,date,from_time,to_time,save){
+	let break_from_time = cur_frm.doc.break_from_time ? cur_frm.doc.break_from_time:'';
+	let break_to_time = cur_frm.doc.break_to_time ? cur_frm.doc.break_to_time:'';
+	if((!from_time && !to_time) || (from_time.length==0 && to_time.length==0)){
+		from_time='0:00:00'
+		to_time='0:00:00'
+	}
+	frappe.call({
+		method: "tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_timesheet",
+		args: {"user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type, "items": items,"cur_selected":cur_selected, "job_order": job_order, "date": date, "from_time": from_time, "to_time": to_time, "break_from_time": break_from_time, "break_to_time": break_to_time,"save":save},
+		async: 1,
+		freeze: true,
+		freeze_message: "Please wait while we are adding timesheet(s)...",
+		callback: function(r){
+			if(r){
+				if(r.message == 1){
+					frappe.msgprint({message: __("Timesheet(s) has been added successfully"), title: __('Successful'), indicator: 'green'});
+					cur_frm.reload_doc();
+				}
+			}
+		}
+	});
+}
+
+/*------------------------------------------*/
+function update_time_data(frm){
+	let item = frm.doc.items || [];
+	for(let i in item){
+		time_update(frm,item,i)
+	}
+}
+function time_update(frm,item,i)
+{
+	if(frm.doc.break_from_time || frm.doc.break_to_time){
+		let new_from_breaktime=cur_frm.doc.break_from_time ? cur_frm.doc.break_from_time:cur_frm.doc.break_to_time;
+		let new_to_breaktime=cur_frm.doc.break_to_time ? cur_frm.doc.break_to_time:cur_frm.doc.break_from_time;
+		frappe.model.set_value(item[i].doctype, item[i].name, "break_from", new_from_breaktime);
+		frappe.model.set_value(item[i].doctype, item[i].name, "break_to", new_to_breaktime);
+	}
+	if(frm.doc.from_time || frm.doc.to_time){
+		let new_fromtime=frm.doc.from_time ? frm.doc.from_time:frm.doc.to_time 
+		let new_totime=frm.doc.to_time ? frm.doc.to_time:frm.doc.from_time
+		frappe.model.set_value(item[i].doctype, item[i].name, "from_time", new_fromtime);
+		frappe.model.set_value(item[i].doctype, item[i].name, "to_time", new_totime);
+	}
+	else{
+		frappe.model.set_value(item[i].doctype, item[i].name, "from_time",frm.doc.break_from_time || frm.doc.break_to_time);
+		frappe.model.set_value(item[i].doctype, item[i].name, "to_time",frm.doc.break_from_time || frm.doc.break_to_time );
+
+	}
+	
 }

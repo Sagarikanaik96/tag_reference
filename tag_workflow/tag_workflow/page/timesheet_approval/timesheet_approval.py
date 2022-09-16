@@ -49,11 +49,19 @@ def get_child_data(order, timesheet, date=None):
     try:
         result = []
         company = frappe.db.get_value("Timesheet", {"name": timesheet}, "employee_company")
-
-        if(date != "null"):
-            sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.date_of_timesheet = '{1}' and t.employee_company = '{2}' order by t.creation asc""".format(order, date, company)
+        job_order_owner=frappe.db.get_value("Job Order", order, "order_status")
+        user_company=frappe.db.get_value('User',{'name':job_order_owner},'organization_type')
+        if user_company=='Staffing':
+            if(date != "null"):
+                sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.date_of_timesheet = '{1}' and t.employee_company = '{2}' order by t.creation asc""".format(order, date, company)
+            else:
+                sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.employee_company = '{1}' order by t.creation asc""".format(order, company)
         else:
-            sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.employee_company = '{1}' order by t.creation asc""".format(order, company)
+            if(date != "null"):
+                sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.date_of_timesheet = '{1}' and t.employee_company = '{2}' and t.workflow_state!='Open' order by t.creation asc""".format(order, date, company)
+            else:
+                sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.employee_company = '{1}' and t.workflow_state!='Open' order by t.creation asc""".format(order, company)
+        
 
         data = frappe.db.sql(sql, as_dict=1)
         for d in data:

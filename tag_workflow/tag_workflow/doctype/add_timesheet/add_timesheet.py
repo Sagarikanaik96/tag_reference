@@ -130,8 +130,7 @@ def update_timesheet(user, company_type, items, cur_selected, job_order, date, f
                     frappe.msgprint(_("Timesheet is already available for employee <b>{0}</b>(<b>{1}</b>) on the given datetime.").format(item["employee_name"],item['employee']))
         else:
             frappe.msgprint(_("Date must be in between Job Order start date and end date for timesheets"))
-
-        enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.send_timesheet_for_approval", timesheets=timesheets)
+        enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.send_timesheet_for_approval", timesheets=timesheets,save=save)
         return True if added == 1 else False
     except Exception as e:
         frappe.msgprint(e)
@@ -166,36 +165,11 @@ def add_status(timesheet, status, employee, company, job_order):
         return timesheet
 
 #-------------------------------------------------------#
-def send_timesheet_for_approval(timesheets):
+def send_timesheet_for_approval(timesheets,save):
     timesheet_count = 0
     try:
-        for time in timesheets:
-            timesheet_count += 1
-            sql = """ select parent from `tabHas Role` where role in ("Staffing Admin", "Staffing User") and parent in(select user_id from `tabEmployee` where user_id != '' and company = (select company from `tabEmployee` where name = '{0}')) """.format(time['employee'])
-            user_list = frappe.db.sql(sql, as_dict=1)
-            staffing_user = []
-
-            for user in user_list:
-                if not frappe.db.exists("User Permission",{"user": user.parent,"allow": "Timesheet","apply_to_all_doctypes":1, "for_value": time['docname']}):
-                    add("Timesheet", time['docname'], user=user.parent, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
-                    perm_doc = frappe.get_doc(dict(doctype="User Permission", user=user.parent, allow="Timesheet", for_value=time['docname'], apply_to_all_doctypes=1))
-                    perm_doc.save(ignore_permissions=True)
-                if user.parent not in staffing_user:
-                    staffing_user.append(user.parent)
-
-            today = datetime.date.today()
-            company = time["company"]
-            job_title = time["job_title"]
-            employee_name = time["employee_name"]
-            msg = f'{time["company"]} has submitted a timesheet on {today} for {time["job_title"]} for approval.'
-            subject = 'Timesheet For Approval'
-            dnr_notification(time,staffing_user)
-            subject = 'Timesheet For Approval'
-
-            enqueue("tag_workflow.tag_workflow.utils.notification.sendmail", emails=staffing_user, msg=msg, subject=subject, doctype='Timesheet', docname=time['docname'])
-        if timesheet_count == 1:
-                msg = f'{company} has submitted a timesheet for {employee_name} on {today} for {job_title} for approval.'
-        make_system_notification(staffing_user, msg, 'Timesheet', time['docname'], subject)
+        if(save!='1'):
+            timesheet_send_for_approval(timesheets,timesheet_count)
     except Exception as e:
         frappe.log_error(e, "Timesheet Approval")
 
@@ -585,3 +559,30 @@ def overall_overtime(jo, timesheet_date, employee,working_hours,from_time,timesh
     current_timesheet_overtime_hours=overall_week_overtime[0].total_overtime_hours if overall_week_overtime[0].total_overtime_hours is not None else 0.00
     current_timesheet_overtime_hours=current_timesheet_overtime_hours+current_week_overtime
     return current_timesheet_overtime_hours,current_week_overtime
+def timesheet_send_for_approval(timesheets,timesheet_count):
+    for time in timesheets:
+        timesheet_count += 1
+        sql = """ select parent from `tabHas Role` where role in ("Staffing Admin", "Staffing User") and parent in(select user_id from `tabEmployee` where user_id != '' and company = (select company from `tabEmployee` where name = '{0}')) """.format(time['employee'])
+        user_list = frappe.db.sql(sql, as_dict=1)
+        staffing_user = []
+
+        for user in user_list:
+            if not frappe.db.exists("User Permission",{"user": user.parent,"allow": "Timesheet","apply_to_all_doctypes":1, "for_value": time['docname']}):
+                add("Timesheet", time['docname'], user=user.parent, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
+                perm_doc = frappe.get_doc(dict(doctype="User Permission", user=user.parent, allow="Timesheet", for_value=time['docname'], apply_to_all_doctypes=1))
+                perm_doc.save(ignore_permissions=True)
+            if user.parent not in staffing_user:
+                staffing_user.append(user.parent)
+
+        today = datetime.date.today()
+        company = time["company"]
+        job_title = time["job_title"]
+        employee_name = time["employee_name"]
+        msg = f'{time["company"]} has submitted a timesheet on {today} for {time["job_title"]} for approval.'
+        dnr_notification(time,staffing_user)
+        subject = 'Timesheet For Approval'
+
+        enqueue("tag_workflow.tag_workflow.utils.notification.sendmail", emails=staffing_user, msg=msg, subject=subject, doctype='Timesheet', docname=time['docname'])
+    if timesheet_count == 1:
+            msg = f'{company} has submitted a timesheet for {employee_name} on {today} for {job_title} for approval.'
+    make_system_notification(staffing_user, msg, 'Timesheet', time['docname'], subject)
