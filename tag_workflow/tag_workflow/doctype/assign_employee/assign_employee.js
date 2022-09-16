@@ -5,6 +5,7 @@ window.conf = 0;
 
 frappe.ui.form.on("Assign Employee", {
   refresh: function (frm) {
+    frm.set_df_property('notes','read_only',1)
     setTimeout(add_dynamic, 500);
     select_employees(frm);
     setTimeout(function () {
@@ -1290,3 +1291,7 @@ function pay_rate_message(frm, pay_rate_details) {
   }
   return msg;
 }
+
+frappe.realtime.on('update_record',()=>{
+  cur_frm.reload_doc();
+})

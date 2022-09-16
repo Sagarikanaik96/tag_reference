@@ -1,6 +1,7 @@
 # Copyright (c) 2022, SourceFuse and contributors
 # For license information, please see license.txt
 
+
 import frappe
 from frappe.model.document import Document
 from tag_workflow.tag_data import chat_room_created
@@ -107,7 +108,7 @@ def save_claims(my_data,doc_name):
 @frappe.whitelist()
 def order_details(doc_name):
 	try:
-		datas=''' select staffing_organization,no_of_workers_joborder,staff_claims_no from `tabClaim Order` where job_order = "{}"  '''.format(doc_name)
+		datas=''' select name,staffing_organization,no_of_workers_joborder,staff_claims_no from `tabClaim Order` where job_order = "{}"  '''.format(doc_name)
 		return frappe.db.sql(datas,as_dict=True)
 	except Exception as e:
 		print(e, frappe.get_traceback())
@@ -135,12 +136,12 @@ def modify_heads(doc_name):
 		job= frappe.get_doc(jobOrder, doc_name)
 		claim_data = None
 		if job.worker_filled== 0:
-			claim_data= """ select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{0}" and staffing_organization not in (select company from `tabAssign Employee` where job_order="{0}" and tag_status="Approved") """.format(doc_name)
+			claim_data= """ select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers,notes from `tabClaim Order` where job_order="{0}" and staffing_organization not in (select company from `tabAssign Employee` where job_order="{0}" and tag_status="Approved") """.format(doc_name)
 		else:
 			claim_data= """
-			select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{0}" and approved_no_of_workers >=0 and staffing_organization in (select company from `tabAssign Employee` where job_order='{0}' and tag_status='Approved')
+			select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers,notes from `tabClaim Order` where job_order="{0}" and approved_no_of_workers >=0 and staffing_organization in (select company from `tabAssign Employee` where job_order='{0}' and tag_status='Approved')
 			UNION
-			select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers from `tabClaim Order` where job_order="{0}" and approved_no_of_workers >=0 and staffing_organization  not in (select company from `tabAssign Employee` where job_order='{0}' and tag_status='Approved')
+			select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers,notes from `tabClaim Order` where job_order="{0}" and approved_no_of_workers >=0 and staffing_organization  not in (select company from `tabAssign Employee` where job_order='{0}' and tag_status='Approved')
 			""".format(doc_name)
 		claims=frappe.db.sql(claim_data,as_dict=True)
 		for c in claims:
@@ -178,6 +179,7 @@ def save_modified_claims(my_data,doc_name):
 					user_list = frappe.db.sql(user_data, as_list=1)
 					l = [l[0] for l in user_list]
 					sub="Approve Claim Order"
+					update_assign_employee(doc.staffing_organization,doc_name)
 					make_system_notification(l,msg,claimOrder,doc.name,sub)
 					link =  f'  href="{sitename}/app/claim-order/{doc.name}" '
 					joborder_email_template(sub,msg,l,link)
@@ -355,3 +357,26 @@ def auto_claims_approves(my_data,doc_name,doc_claim):
 	except Exception as e:
 		print(e, frappe.get_traceback())
 		frappe.db.rollback()
+
+@frappe.whitelist()
+def update_notes(data,doc_name):
+	try:
+		data= json.loads(data)
+		for k,v in data.items():
+			notes,org = frappe.db.get_value('Claim Order',{'name':k},['notes','staffing_organization'])
+			if str(notes).strip() == str(v).strip():
+				continue
+			frappe.db.set_value('Claim Order',k,'notes',v)
+			update_assign_employee(org,doc_name)
+	except Exception as e:
+		print(e,frappe.utils.get_traceback())
+
+def update_assign_employee(org,job_name):
+	try:
+		claim = frappe.db.sql(""" select notes from `tabClaim Order` where staffing_organization="{0}" and job_order="{1}" and notes !=''  order by modified desc """.format(org,job_name),as_dict=1)
+		emp= frappe.db.get_value('Assign Employee',{'job_order':job_name,'tag_status':'Approved','company':org},'name') or None
+		if emp is not None:
+			frappe.db.set_value('Assign Employee',emp,'notes',claim[0]['notes'])
+			frappe.publish_realtime(doctype="Assign Employee",docname=emp,event="update_record")
+	except Exception as e:
+		print(e,frappe.get_traceback())
