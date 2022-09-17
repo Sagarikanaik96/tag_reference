@@ -462,6 +462,7 @@ def update_job_order_status():
                     frappe.db.set_value(jobOrder, job.name, "order_status", "Upcoming")
                 elif now_date > end_date:
                     frappe.db.set_value(jobOrder, job.name, "order_status", "Completed")
+                    free_redis(job.name)
     except Exception as e:
         frappe.msgprint(e)
 
@@ -1619,3 +1620,12 @@ def filter_user(doctype, txt, searchfield, page_len, start, filters):
         frappe.db.rollback()
         frappe.log_error(e, 'Employee Boarding Activity Error')
         frappe.throw(e)
+
+def free_redis(job_name):
+    try:
+        redis = frappe.cache()
+        if(redis.hgetall(job_name)):
+            for k in redis.hgetall(job_name):
+                redis.hdel(job_name,k)
+    except Exception as e:
+        print(e,frappe.utils.get_traceback())

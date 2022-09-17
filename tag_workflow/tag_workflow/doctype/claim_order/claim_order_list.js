@@ -339,31 +339,7 @@ function modify_claims(listview) {
               let dict = {};
 
               dict = update_claims(data_len, l, dict, job_data, r);
-              if (Object.keys(dict.dict).length > 0 && dict.valid1 != "False") {
-                frappe.call({
-                  method:
-                    "tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_modified_claims",
-                  args: {
-                    my_data: dict.dict,
-                    doc_name: listview.data[0].job_order,
-                  },
-                  callback: function (r2) {
-                    if (r2.message == 1) {
-                      frappe.msgprint("Email Sent Successfully");
-                      setTimeout(function () {
-                        window.location.href =
-                          "/app/job-order/" + listview.data[0].job_order;
-                      }, 3000);
-                    }
-                  },
-                });
-              }else if(dict.valid!="False"){
-                 update_notes(dict,listview.data[0].job_order);
-                 setTimeout(function () {
-                  window.location.href =
-                    "/app/job-order/" + listview.data[0].job_order;
-                }, 3000);
-              }
+              update_db(dict,listview);
             },
           });
           modified_pop_up.show();
@@ -379,7 +355,6 @@ function update_claims(data_len, l, dict, job_data, r) {
   for (let i = 0; i < data_len; i++) {
     let y = document.getElementById(job_data[i].name).value;
     let notes=document.getElementById("_"+job_data[i].name+"_notes").value
-    console.log(notes)
     notes_dict[job_data[i].name]=notes.trim();
     if (y.length == 0) {
       total_count += job_data[i].approved_no_of_workers;
@@ -481,4 +456,33 @@ function update_notes(dict,doc_name){
     method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.update_notes",
     args:{data:dict.notes_dict,doc_name:doc_name}
    })
+}
+
+function update_db(dict,listview){
+  if (Object.keys(dict.dict).length > 0 && dict.valid1 != "False") {
+    frappe.call({
+      method:
+        "tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_modified_claims",
+      args: {
+        my_data: dict.dict,
+        doc_name: listview.data[0].job_order,
+        notes_dict:dict.notes_dict
+      },
+      callback: function (r2) {
+        if (r2.message == 1) {
+          frappe.msgprint("Email Sent Successfully");
+          setTimeout(function () {
+            window.location.href =
+              "/app/job-order/" + listview.data[0].job_order;
+          }, 3000);
+        }
+      },
+    });
+  }else if(dict.valid!="False"){
+     update_notes(dict,listview.data[0].job_order);
+     setTimeout(function () {
+      window.location.href =
+        "/app/job-order/" + listview.data[0].job_order;
+    }, 3000);
+  }
 }
