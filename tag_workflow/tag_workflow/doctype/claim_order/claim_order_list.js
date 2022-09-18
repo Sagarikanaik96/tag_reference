@@ -284,7 +284,7 @@ function modify_claims(listview) {
             profile_html += `<tr>
                                 <td>${job_data[p].name}</td>
                                 <td style="margin-right:20px;" id="${job_data[p].claims}">${job_data[p].staffing_organization}</td>
-                                <td>${job_data[p].staff_claims_no}</td>
+                                <td id="${job_data[p].name}_claim">${job_data[p].staff_claims_no}</td>
                                 <td>${job_data[p].approved_no_of_workers}</td>
                                 <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no} ${job_data[p].hide==1?"disabled":""}></td>
                                 <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" maxlength="1000" > ${job_data[p].notes?job_data[p].notes:""}</textarea> </td>
@@ -352,10 +352,26 @@ function update_claims(data_len, l, dict, job_data, r) {
   let valid1 = "";
   let total_count = 0;
   const notes_dict = {};
+
   for (let i = 0; i < data_len; i++) {
+    if (parseInt(document.getElementById(job_data[i].name).value) > parseInt(document.getElementById(job_data[i].name+"_claim").innerHTML)) {
+      console.log( 4);
+      frappe.msgprint({
+        message: __("Claims approved cannot be greater than the no. of workers claimed by Staffing Company:"),
+        title: __("Warning"),
+        indicator: "red",
+      });
+      valid1 = "False";
+      console.log(valid1);
+  
+      setTimeout(function () {
+        location.reload();
+      }, 5000);
+    }
     let y = document.getElementById(job_data[i].name).value;
     let notes=document.getElementById("_"+job_data[i].name+"_notes").value
     notes_dict[job_data[i].name]=notes.trim();
+    console.log(373);
     if (y.length == 0) {
       total_count += job_data[i].approved_no_of_workers;
       continue;
@@ -363,6 +379,7 @@ function update_claims(data_len, l, dict, job_data, r) {
     y = parseInt(y);
     l = parseInt(l) + parseInt(y);
     if (y == job_data[i].approved_no_of_workers) {
+      console.log(1)
       frappe.msgprint({
         message: __(
           "No Of Workers Are Same that previously assigned For:" +
@@ -377,6 +394,7 @@ function update_claims(data_len, l, dict, job_data, r) {
         location.reload();
       }, 5000);
     } else if (y < 0) {
+      console.log(2)
       frappe.msgprint({
         message: __(
           "No Of Workers Can't Be less than 0 for:" +
@@ -391,6 +409,7 @@ function update_claims(data_len, l, dict, job_data, r) {
         location.reload();
       }, 5000);
     } else if (y > job_data[i].name) {
+      console.log(3)
       frappe.msgprint({
         message: __("No Of Workers Exceed For:" + job_data[i].name),
         title: __("Error"),
@@ -413,7 +432,7 @@ function update_claims(data_len, l, dict, job_data, r) {
         location.reload();
       }, 5000);
     }
-    else if (job_data[i].assigned_wroker && y< job_data[i].assigned_wroker) {
+    else if (r["worker_filled"] && y< r["worker_filled"]) {
       frappe.msgprint({
         message: __(`${r["worker_filled"]} Employees are assigned to this order. Number of required workers must be greater than or equal to number of assigned employees. Please modify the number of workers required or work with the staffing companies to remove an assigned employee.`),
         title: __("Error"),
@@ -424,11 +443,14 @@ function update_claims(data_len, l, dict, job_data, r) {
       setTimeout(function () {
         location.reload();
       }, 5000);
-    }else {
+    } 
+    else {
       total_count += y;
       y = { approve_count: y, notes: notes };
       dict[job_data[i].name] = y;
     }
+
+    
   }
   if (total_count > r["no_of_workers"]) {
     frappe.msgprint({

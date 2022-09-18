@@ -130,7 +130,7 @@ def worker_data(job_order):
 
 @frappe.whitelist()
 def approved_workers(job_order,user_email):
-    sql=f"select name, staffing_organization, notes, sum(approved_no_of_workers) as approved_no_of_workers from `tabClaim Order` where job_order='{job_order}' and staffing_organization in (select company from `tabEmployee` where user_id='{user_email}') group by staffing_organization "
+    sql=f"select name, staffing_organization, notes, sum(approved_no_of_workers) as approved_no_of_workers from `tabClaim Order` where job_order='{job_order}' and staffing_organization in (select company from `tabEmployee` where user_id='{user_email}')  group by staffing_organization"
     data=frappe.db.sql(sql,as_dict=True)
     sql=""" select name from `tabAssign Employee` where job_order="{0}" and company= "{1}" """.format(job_order,data[0]['staffing_organization'])
     my_assign_emp=frappe.db.sql(sql,as_list=1)
@@ -138,6 +138,11 @@ def approved_workers(job_order,user_email):
         doc=frappe.get_doc('Assign Employee',my_assign_emp[0][0])
         if int(doc.claims_approved)!=int(data[0]['approved_no_of_workers']):
             frappe.db.set_value("Assign Employee", str(my_assign_emp[0][0]), "claims_approved", int(data[0]['approved_no_of_workers']))
+
+    claim = frappe.db.sql(""" select notes from `tabClaim Order` where staffing_organization="{0}" and job_order="{1}" and notes !=''  order by modified desc """.format(data[0]['staffing_organization'],job_order),as_dict=1)
+    data[0]["notes"]= claim[0]['notes']
+
+
     return data
 
 @frappe.whitelist()

@@ -148,18 +148,23 @@ def modify_heads(doc_name):
 			""".format(doc_name)
 		claims=frappe.db.sql(claim_data,as_dict=True)
 		exists = []
+		print(claims)
 		for c in claims:
 			assigned_worker= frappe.db.get_value(AssignEmp,{'job_order':doc_name,'tag_status':'Approved','company':c['staffing_organization']},['previous_worker'])
-			if (c['staffing_organization'] in exists and redis.hget(key,c['name']) is not None  and int(redis.hget(key,c['name']))!=1) or redis.hget(key,c['name']) is None:
+			if (assigned_worker is not None and c['staffing_organization'] in exists and redis.hget(key,c['name']) is not None  and int(redis.hget(key,c['name']))!=1) :
 				hide_and_show(c,doc_name,assigned_worker)
 			elif (assigned_worker is not None and assigned_worker<c['approved_no_of_workers']) or c['approved_no_of_workers']==0:
 				c['hide'] =0
 				c['assigned_worker'] = assigned_worker
 			elif assigned_worker is not None and assigned_worker>=c['approved_no_of_workers']:
 				c['hide'] = 1
+			else:
+				c['hide'] = 0
+		
 			exists.append(c['staffing_organization'])
 			redis.hset(key,c['name'],c['hide'])
-
+			
+		print(claims)
 		return claims
 	except Exception as e:
 		print(e,frappe.get_traceback())
@@ -170,7 +175,6 @@ def save_modified_claims(my_data,doc_name,notes_dict):
 	try:
 		claims_id=[]
 		my_data=json.loads(my_data)
-		update_notes(notes_dict,doc_name)
 		for key in my_data:
 			claims_id.append(key)
 		if claims_id:
@@ -183,7 +187,6 @@ def save_modified_claims(my_data,doc_name,notes_dict):
 					msg = f"{doc.hiring_organization} has update the approved no. of employees needed for {doc_name} - {job.select_job} from {doc.approved_no_of_workers} to {my_data[i]['approve_count']}"
 					
 					doc.approved_no_of_workers=my_data[i]["approve_count"]
-					doc.notes = my_data[i]["notes"]
 					doc.save(ignore_permissions=True)
 					user_data = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(doc.staffing_organization)
 					user_list = frappe.db.sql(user_data, as_list=1)
@@ -192,6 +195,7 @@ def save_modified_claims(my_data,doc_name,notes_dict):
 					make_system_notification(l,msg,claimOrder,doc.name,sub)
 					link =  f'  href="{sitename}/app/claim-order/{doc.name}" '
 					joborder_email_template(sub,msg,l,link)
+			update_notes(notes_dict,doc_name)
 			return 1
 	except Exception as e:
 		print(e, frappe.get_traceback())
@@ -376,20 +380,9 @@ def update_notes(data,doc_name):
 			if str(notes).strip() == str(v).strip():
 				continue
 			frappe.db.set_value(claimOrder,k,'notes',v)
-			update_assign_employee(org,doc_name)
 	except Exception as e:
 		print(e,frappe.utils.get_traceback())
 
-def update_assign_employee(org,job_name):
-	try:
-		claim = frappe.db.sql(""" select notes from `tabClaim Order` where staffing_organization="{0}" and job_order="{1}" and notes !=''  order by modified desc """.format(org,job_name),as_dict=1)
-		emp= frappe.db.get_value('Assign Employee',{'job_order':job_name,'tag_status':'Approved','company':org},'name') or None
-		if emp is not None:
-			frappe.db.set_value(AssignEmp,emp,'notes',claim[0]['notes'])
-			frappe.db.commit()
-			frappe.publish_realtime(doctype=AssignEmp,docname=emp,event="update_record")
-	except Exception as e:
-		print(e,frappe.get_traceback())
 
 def hide_and_show(c,doc_name,assigned_worker):
 	try:
@@ -401,3 +394,4 @@ def hide_and_show(c,doc_name,assigned_worker):
 			c['hide'] = 1
 	except Exception as e:
 		print(e,frappe.utils.get_traceback())
+
