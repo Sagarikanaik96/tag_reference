@@ -225,7 +225,7 @@ function update_no(data_len, l, dict, data, r) {
     } else if (y > data[i].staff_claims_no) {
       frappe.msgprint({
         message: __(
-          "No Of Workers Exceed For:" + data[i].staffing_organization
+          "Claims approved cannot be greater than the no. of workers claimed by Staffing Company:"
         ),
         title: __("Error"),
         indicator: "red",
@@ -339,7 +339,11 @@ function modify_claims(listview) {
               let dict = {};
 
               dict = update_claims(data_len, l, dict, job_data, r);
+
+              if(dict.valid1 != 'False')
+              {
               update_db(dict,listview);
+              }
             },
           });
           modified_pop_up.show();
@@ -355,14 +359,12 @@ function update_claims(data_len, l, dict, job_data, r) {
 
   for (let i = 0; i < data_len; i++) {
     if (parseInt(document.getElementById(job_data[i].name).value) > parseInt(document.getElementById(job_data[i].name+"_claim").innerHTML)) {
-      console.log( 4);
       frappe.msgprint({
         message: __("Claims approved cannot be greater than the no. of workers claimed by Staffing Company:"),
         title: __("Warning"),
         indicator: "red",
       });
       valid1 = "False";
-      console.log(valid1);
   
       setTimeout(function () {
         location.reload();
@@ -371,7 +373,6 @@ function update_claims(data_len, l, dict, job_data, r) {
     let y = document.getElementById(job_data[i].name).value;
     let notes=document.getElementById("_"+job_data[i].name+"_notes").value
     notes_dict[job_data[i].name]=notes.trim();
-    console.log(373);
     if (y.length == 0) {
       total_count += job_data[i].approved_no_of_workers;
       continue;
@@ -379,7 +380,6 @@ function update_claims(data_len, l, dict, job_data, r) {
     y = parseInt(y);
     l = parseInt(l) + parseInt(y);
     if (y == job_data[i].approved_no_of_workers) {
-      console.log(1)
       frappe.msgprint({
         message: __(
           "No Of Workers Are Same that previously assigned For:" +
@@ -394,7 +394,6 @@ function update_claims(data_len, l, dict, job_data, r) {
         location.reload();
       }, 5000);
     } else if (y < 0) {
-      console.log(2)
       frappe.msgprint({
         message: __(
           "No Of Workers Can't Be less than 0 for:" +
@@ -409,7 +408,6 @@ function update_claims(data_len, l, dict, job_data, r) {
         location.reload();
       }, 5000);
     } else if (y > job_data[i].name) {
-      console.log(3)
       frappe.msgprint({
         message: __("No Of Workers Exceed For:" + job_data[i].name),
         title: __("Error"),
