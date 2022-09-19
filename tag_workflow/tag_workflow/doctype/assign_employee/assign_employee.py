@@ -140,8 +140,8 @@ def approved_workers(job_order,user_email):
             frappe.db.set_value("Assign Employee", str(my_assign_emp[0][0]), "claims_approved", int(data[0]['approved_no_of_workers']))
 
     claim = frappe.db.sql(""" select notes from `tabClaim Order` where staffing_organization="{0}" and job_order="{1}" and notes !=''  order by modified desc """.format(data[0]['staffing_organization'],job_order),as_dict=1)
-    data[0]["notes"]= claim[0]['notes']
-
+    if claim:
+        data[0]["notes"]= claim[0]['notes']
 
     return data
 
