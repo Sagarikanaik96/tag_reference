@@ -160,6 +160,8 @@ frappe.ui.form.on("Assign Employee", {
       },
     });
     create_pay_rate(frm);
+    update_workers_filled(frm);
+
   },
   validate: function (frm) {
     let emp_pay_rate = frm.doc.employee_pay_rate;
@@ -1298,4 +1300,15 @@ function update_value(frm,r){
   });
   frm.set_df_property("claims_approved", "hidden", 0);
   
+}
+function update_workers_filled(frm){
+  if(frm.doc.__islocal!=1){
+    frappe.call({
+      method:'tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.update_workers_filled',
+      args:
+      {
+        job_order_name:frm.doc.job_order
+      }
+    })
+  }
 }

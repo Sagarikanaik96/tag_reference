@@ -651,7 +651,7 @@ def submit_headcount(job_order, staff_company):
         approved= int(data.no_of_workers)
     sql = '''SELECT approved_no_of_workers from `tabClaim Order` where job_order = "{0}"'''.format(job_order)
     res = frappe.db.sql(sql, as_list = True)
-    sql1= '''SELECT sum(staff_claims_no) from `tabClaim Order` where job_order = "{0}" and staffing_organization="{1}" '''.format(job_order, staff_company)
+    sql1= '''SELECT sum(approved_no_of_workers) from `tabClaim Order` where job_order = "{0}" and staffing_organization="{1}" '''.format(job_order, staff_company)
     res1 = frappe.db.sql(sql1, as_list = True)
     return [element for innerList in res for element in innerList],res1,approved
 

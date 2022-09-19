@@ -131,7 +131,6 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
             frappe.db.set_value(assignEmployees, name, "approve_employee_notification", 0)
             job = frappe.get_doc(jobOrder, job_name)
             claimed = job.staff_org_claimed if job.staff_org_claimed else ""
-            job.db_set('worker_filled',(int(employee_filled)+int(job.worker_filled)))
             if(len(claimed)==0):
                 job.db_set('staff_org_claimed',(str(claimed)+str(staffing_org)))
             else:
@@ -829,8 +828,7 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
             frappe.db.sql(dat)
             frappe.db.commit()
             job = frappe.get_doc(jobOrder, job_order)
-            frappe.db.set_value(jobOrder, job_order, "worker_filled", (int(worker_fill)+int(job.worker_filled)))
-            
+            print(job)
             job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
             job_detail = frappe.db.sql(job_sql, as_dict=1)
             lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)

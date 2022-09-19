@@ -5,7 +5,7 @@ from frappe import _
 import requests, json
 import googlemaps
 from frappe.model.document import Document
-
+jobOrder='Job Order'
 class AssignEmployee(Document):
     pass
 
@@ -158,7 +158,7 @@ def check_emp_available(frm):
         company=data['company']
         job_order=data['job_order']
         emps=data['employee_details']
-        my_job=frappe.get_doc('Job Order',job_order)
+        my_job=frappe.get_doc(jobOrder,job_order)
         job_start_date=my_job.from_date
         job_end_date=my_job.to_date
         pay_rate = check_pay_rate(my_job.per_hour+my_job.flat_rate, data);
@@ -195,7 +195,7 @@ def my_emp_work(emps,my_emp_data):
 
 @frappe.whitelist()
 def validate_employee(doc,method):
-	job_order=frappe.get_doc('Job Order',doc.job_order)
+	job_order=frappe.get_doc(jobOrder,doc.job_order)
 	if job_order.is_repeat!=1:
 		for employee in doc.employee_details:
 			employee_doc=frappe.get_doc('Employee',employee.employee)
@@ -235,3 +235,23 @@ def check_pay_rate(total_bill_rate, data):
     except Exception as e:
         frappe.log_error(e, 'Check Pay Rate Pop Up Error')
         print(e, frappe.get_traceback())
+@frappe.whitelist()
+def update_workers_filled(job_order_name):
+    try:
+        worker_filled=0
+        job=frappe.get_doc(jobOrder,job_order_name)
+        if(job.resumes_required==0):
+            emp_assigned=frappe.db.sql('select count(employee_name) as total_emp_assigned from `tabAssign Employee Details` where parent in (select name from `tabAssign Employee` where job_order="{0}") and remove_employee=0;'.format(job_order_name),as_dict=1)
+            if(len(emp_assigned)):
+                worker_filled=emp_assigned[0]['total_emp_assigned']
+        else:
+            emp_assigned=frappe.db.sql('select count(employee_name) as total_emp_assigned from `tabAssign Employee Details` where parent in (select name from `tabAssign Employee` where job_order="{0}") and remove_employee=0 and approved=1;'.format(job_order_name),as_dict=1)
+            if(len(emp_assigned)):
+                worker_filled=emp_assigned[0]['total_emp_assigned']
+        if(int(worker_filled)!=int(job.worker_filled)):
+            frappe.db.sql('update `tabJob Order` set worker_filled={0} where name="{1}"'.format(int(worker_filled),job_order_name))
+            frappe.db.commit()
+
+    except Exception as e:
+        frappe.log_error(e,'Workers Update')
+        
