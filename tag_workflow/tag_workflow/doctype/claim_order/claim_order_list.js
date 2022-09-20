@@ -113,7 +113,7 @@ function refresh(listview) {
                                 <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
                                 <td>${data[p].staff_claims_no}</td>
                                 <td><input type="number" id="_${data[p].staffing_organization}" min="0" max=${data[p].staff_claims_no}></td>
-                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle" maxlength="1000" ${data[p].notes?data[p].notes:""}> </textarea> </td>
+                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle" maxlength="160" ${data[p].notes?data[p].notes:""}> </textarea> </td>
                                 </tr>`;
           }
           profile_html += `</table>`;
@@ -203,6 +203,7 @@ function update_no(data_len, l, dict, data, r) {
   for (let i = 0; i < data_len; i++) {
     let y = document.getElementById("_" + data[i].staffing_organization).value;
     let notes=document.getElementById("_"+data[i].name+"_notes").value
+    valid=check_notes_length(notes,data[i].staffing_organization)
     if (y.length == 0) {
       y = 0;
     }
@@ -287,7 +288,7 @@ function modify_claims(listview) {
                                 <td id="${job_data[p].name}_claim">${job_data[p].staff_claims_no}</td>
                                 <td>${job_data[p].approved_no_of_workers}</td>
                                 <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no} ${job_data[p].hide==1?"disabled":""}></td>
-                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" maxlength="1000" > ${job_data[p].notes?job_data[p].notes:""}</textarea> </td>
+                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" maxlength="160" > ${job_data[p].notes?job_data[p].notes:""}</textarea> </td>
                                 </tr>`;
           }
           profile_html += `</table><style>th, td {
@@ -375,6 +376,7 @@ function update_claims(data_len, l, dict, job_data, r) {
     let y = document.getElementById(job_data[i].name).value;
     let notes=document.getElementById("_"+job_data[i].name+"_notes").value
     notes_dict[job_data[i].name]=notes.trim();
+    valid1=check_notes_length(notes,job_data[i].staffing_organization)
     if (y.length == 0) {
       total_count += job_data[i].approved_no_of_workers;
       continue;
@@ -590,4 +592,23 @@ function check_count_comp_list(comp_list,job_data,data_len){
   }
   //success
   return 1
+}
+function check_notes_length(notes,staffing_org){
+  let valid1
+  if(notes && notes.length>160){
+    frappe.msgprint({
+      message: __(
+        "Only 160 characters are allowed in Notes for "+ staffing_org 
+      ),
+      title: __("Error"),
+      indicator: "red",
+    });
+    valid1 = "False";
+
+    setTimeout(function () {
+      location.reload();
+    }, 4000);
+  }
+  return valid1
+
 }
