@@ -666,12 +666,15 @@ def timesheet_detail(job_order):
 
 
 @frappe.whitelist(allow_guest=False)
-def update_timesheet_is_check_in_sales_invoice(time_list):
+def update_timesheet_is_check_in_sales_invoice(time_list,timesheet_used):
     try:
+        timesheet_used=timesheet_used[1:-1]
+        l=timesheet_used.split(',')
         time_list = json.loads(time_list)
-
-        for i in time_list:
-            sql = """ UPDATE `tabTimesheet` SET `tabTimesheet`.is_check_in_sales_invoice = 1 where name = "{}" """.format(i['time_sheet'])
+        for i in l:
+            time=i.strip()
+            timesheet_name=time[1:-1]
+            sql = """ UPDATE `tabTimesheet` SET `tabTimesheet`.is_check_in_sales_invoice = 1 where name = "{0}" """.format(timesheet_name.strip())
             frappe.db.sql(sql)
             frappe.db.commit()
     except Exception as e:

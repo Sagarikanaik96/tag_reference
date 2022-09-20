@@ -84,7 +84,8 @@ frappe.ui.form.on("Sales Invoice", {
 				frappe.call({
 					"method":"tag_workflow.tag_data.update_timesheet_is_check_in_sales_invoice",
 					"args":{
-						"time_list":table
+						"time_list":table,
+						"timesheet_used":frm.doc.timesheet_used
 					}
 				});
 			}

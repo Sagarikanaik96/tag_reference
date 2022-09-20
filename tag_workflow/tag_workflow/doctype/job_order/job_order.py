@@ -301,7 +301,9 @@ def make_sales_invoice(source_name, company, emp_sql,invoice_exist,target_doc=No
         timesheet = frappe.db.sql(sql, as_dict=1)
         doclist.items=[]
         doclist.timesheets=[]
+        timesheet_used=[]
         for time in timesheet:
+            timesheet_used.append(time.name)            
             try:
                 add("Timesheet", time.name, user=frappe.session.user, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
             except Exception:
@@ -316,6 +318,7 @@ def make_sales_invoice(source_name, company, emp_sql,invoice_exist,target_doc=No
                 total_hours += sheet.total_billable_hours
 
             doclist = update_time_timelogs(sheet,doclist,time)
+        doclist.timesheet_used=str(timesheet_used)
         doclist.total_billing_amount = total_amount
         doclist.total_billing_hours = total_hours
         # for company detail
