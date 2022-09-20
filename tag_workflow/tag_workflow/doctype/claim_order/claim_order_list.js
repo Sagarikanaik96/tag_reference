@@ -365,10 +365,12 @@ function update_claims(data_len, l, dict, job_data, r) {
         indicator: "red",
       });
       valid1 = "False";
+      console.log(valid1);
   
       setTimeout(function () {
         location.reload();
       }, 5000);
+      break;
     }
     let y = document.getElementById(job_data[i].name).value;
     let notes=document.getElementById("_"+job_data[i].name+"_notes").value
@@ -425,23 +427,11 @@ function update_claims(data_len, l, dict, job_data, r) {
         indicator: "red",
       });
       valid1 = "False";
-
+      
       setTimeout(function () {
         location.reload();
       }, 5000);
     }
-    else if (r["worker_filled"] && y< r["worker_filled"]) {
-      frappe.msgprint({
-        message: __(`${r["worker_filled"]} Employees are assigned to this order. Number of required workers must be greater than or equal to number of assigned employees. Please modify the number of workers required or work with the staffing companies to remove an assigned employee.`),
-        title: __("Error"),
-        indicator: "red",
-      });
-      valid1 = "False";
-
-      setTimeout(function () {
-        location.reload();
-      }, 5000);
-    } 
     else {
       total_count += y;
       y = { approve_count: y, notes: notes };
@@ -463,12 +453,15 @@ function update_claims(data_len, l, dict, job_data, r) {
       indicator: "red",
     });
     valid1 = "False";
-
+    console.log(valid1)
     setTimeout(function () {
       location.reload();
     }, 5000);
   }
-  return { dict, valid1, notes_dict };
+  let a = check_multi_staffcomp(job_data,data_len,valid1);
+  if(a==1){
+    return { dict, valid1, notes_dict };
+  }
 }
 
 function update_notes(dict,doc_name){
@@ -505,4 +498,96 @@ function update_db(dict,listview){
         "/app/job-order/" + listview.data[0].job_order;
     }, 3000);
   }
+}
+
+function check_multi_staffcomp(job_data, data_len,valid1){
+  if (valid1!="False"){
+  let comp_list = [];
+  let second_list = [];
+  for (let i = 0; i < data_len; i++){
+    if(!comp_list.includes(job_data[i].staffing_organization)){
+      comp_list.push(job_data[i].staffing_organization);
+    }
+    else{
+      if(!second_list.includes(job_data[i].staffing_organization)){
+      second_list.push(job_data[i].staffing_organization)
+      }
+    }
+  }
+  if(comp_list.length == second_list.length){
+    return check_count(second_list,job_data,data_len);
+  }else{
+    return check_count_comp_list(comp_list,job_data,data_len);
+    
+  }
+}
+}
+
+function check_count(second_list,job_data,data_len){
+  for (let i in  second_list){
+      let counter = 0 ;
+      let assign_worker = 0;
+      for(let j=0 ;j<data_len; j++){
+        if(second_list[i]==job_data[j].staffing_organization){
+          let y = document.getElementById(job_data[j].name).value;
+          if (y.length == 0) {
+            console.log(y)
+            counter += job_data[j].approved_no_of_workers;
+          }
+          else{
+            counter+= parseInt(y);
+            assign_worker = parseInt(job_data[j].assigned_worker);
+          }
+        }
+      }
+      // check errror
+      if (assign_worker!= 0 &&  counter<assign_worker) {
+        frappe.msgprint({
+          message: __(`${assign_worker} Employees are assigned to this order. Number of required workers must be greater than or equal to number of assigned employees. Please modify the number of workers required or work with the staffing companies to remove an assigned employee.`),
+          title: __("Error"),
+          indicator: "red",
+        });
+        setTimeout(function () {
+          location.reload();
+        }, 3000);
+        return 0
+      }
+      
+    }
+    //Success
+    return 1;
+}
+
+function check_count_comp_list(comp_list,job_data,data_len){
+  for (let i in comp_list) {
+    let counter = 0;
+    let assign_worker = 0;
+    for (let j = 0; j < data_len; j++) {
+        if (comp_list[i] == job_data[j].staffing_organization) {
+            let y = document.getElementById(job_data[j].name).value;
+            if (y.length == 0) {
+                console.log(y)
+                counter += job_data[j].approved_no_of_workers;
+            } else {
+                counter += parseInt(y);
+                assign_worker = parseInt(job_data[j].assigned_worker);
+            }
+        }
+    }
+    //check error
+    if (assign_worker != 0 && counter < assign_worker) {
+        console.log(assign_worker, "++ais", counter)
+        frappe.msgprint({
+            message: __(`${assign_worker} Employees are assigned to this order. Number of required workers must be greater than or equal to number of assigned employees. Please modify the number of workers required or work with the staffing companies to remove an assigned employee.`),
+            title: __("Error"),
+            indicator: "red",
+        });
+        setTimeout(function() {
+            location.reload();
+        }, 3000);
+        return 0
+    }
+  }
+  //success
+  return 1
 }
