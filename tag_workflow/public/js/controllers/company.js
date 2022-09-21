@@ -541,6 +541,10 @@ function hide_details(){
 /*----------init values-----------*/
 function init_values(){
 	if(cur_frm.doc.__islocal == 1){
+		let fields=['decrypted_subdomain','decrypted_subdomain_api_key']
+		for (let data in fields) {
+			cur_frm.toggle_display(fields[data], 0);
+		}
 		$(".page-title .title-area .title-text").css("cursor", "auto");
 		let company_data = {
 			default_currency: "USD",

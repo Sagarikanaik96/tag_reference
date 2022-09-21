@@ -729,10 +729,8 @@ def claims_left(name,comp):
         else:
             claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{name}"'
             data1=frappe.db.sql(claims,as_list=1)
-            if(data1[0][0]!=None):
-                return str(int(data.no_of_workers)-int(data1[0][0]))
-            else:
-                return int(data.no_of_workers) 
+            d=data_receive(data1,data)
+            return d
 def all_orders_data(company_name):
     my_aval_claims=[]
     unclaimed_noresume_by_company=[]
@@ -751,7 +749,7 @@ def check_avail(company_name,unclaimed_noresume_by_company):
         claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{data.name}"'
         data1=frappe.db.sql(claims,as_list=1)
         if(data1[0][0]!=None):
-            if int(data.no_of_workers)-int(data1[0][0])!=0:
+            if int(data.no_of_workers)-int(data1[0][0])>0:
                 unclaimed_noresume_by_company.append(data.name)
         else:
             unclaimed_noresume_by_company.append(data.name)
@@ -824,11 +822,11 @@ def update_new_claims(my_data,doc_name):
 def claim_comp_assigned(doc_name,doc,claimed_approved):
     assined_emp=frappe.db.sql('select name from `tabAssign Employee` where job_order="{0}" and company="{1}"'.format(doc_name,doc.staffing_organization),as_dict=1)
     if(len(assined_emp)>0):
-        assigned_emp_comp=frappe.get_doc(ASN,assined_emp[0]['name'])
-        if doc.approved_no_of_workers==len(assigned_emp_comp.employee_details):
+        count=frappe.db.sql('select count(name) from `tabAssign Employee Details` where parent="{0}" and remove_employee=0'.format(assined_emp[0]['name']),as_list=1)
+        if doc.approved_no_of_workers<count[0][0]:
             frappe.msgprint(doc.staffing_organization+' has assigned all of their claims. An employee must be removed from this job order to by '+doc.staffing_organization+' before their claim can be modified.')
             return 0
-        elif(int(claimed_approved)!=len(assigned_emp_comp.employee_details)):
+        elif(int(claimed_approved)!=count[0][0]):
             frappe.msgprint("The number of assigned claims does not match the new required head count of "+str(claimed_approved))
             return 0
         else:
@@ -842,3 +840,11 @@ def validate_company(doc,method):
         if company_doc.organization_type!='Exclusive Hiring':
             frappe.throw('Insufficient Permission to create Job Order')
     
+def data_receive(data1,data):
+    if(data1[0][0]!=None):
+        if(int(data.no_of_workers)-int(data1[0][0])>0):
+            return str(int(data.no_of_workers)-int(data1[0][0]))
+        else:
+            return str(0)
+    else:
+        return int(data.no_of_workers) 

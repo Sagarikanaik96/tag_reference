@@ -2368,6 +2368,8 @@ function check_emp_claims(frm){
 	})	
 }
 function workers_claimed_change(){
+	let new_no=cur_frm.doc.no_of_workers
+	cur_frm.set_value('no_of_workers','')
 	frappe.call({
 		method:
 		  "tag_workflow.tag_workflow.doctype.job_order.job_order.workers_required_order_update",
@@ -2427,7 +2429,7 @@ function workers_claimed_change(){
 				  let l = 0;
 				  let dict = {};
 	
-				  dict = update_claims(data_len, l, dict, job_data, r);
+				  dict = update_claims(data_len, l, dict, job_data, r,new_no);
 				  if (Object.keys(dict.dict).length > 0 && dict.valid1 != "False") {
 					frappe.call({
 					  method:
@@ -2438,6 +2440,7 @@ function workers_claimed_change(){
 					  },
 					  callback: function (r2) {
 						if (r2.message == 1) {
+							cur_frm.set_value('no_of_workers',new_no)
 							cur_frm.save()
 						  setTimeout(function () {
 							window.location.href =
@@ -2464,7 +2467,7 @@ function workers_claimed_change(){
 
 }
 
-function update_claims(data_len, l, dict, job_data, r) {
+function update_claims(data_len, l, dict, job_data, r,new_no) {
 	let valid1 = "";
 	let total_count = 0;
 	for (let i = 0; i < data_len; i++) {
@@ -2514,7 +2517,7 @@ function update_claims(data_len, l, dict, job_data, r) {
 		setTimeout(function () {
 		  location.reload();
 		}, 5000);
-	  } else if (l > cur_frm.doc.no_of_workers) {
+	  } else if (l > new_no) {
 		frappe.msgprint({
 		  message: __("No Of Workers Exceed For Than required "),
 		  title: __("Error"),
