@@ -370,20 +370,8 @@ def merge_employee_data(doclist):
             employees, dates = get_timesheet_employees(doclist.timesheets)
             dates.sort()
             for e in employees:
-                bill_amount, bill_hours, overtime_rate, overtime_hours, per_hr_rate, flat_rate = 0, 0 ,0, 0, 0, 0
-                timesheet, employee_name, activity_type = "", "", ""
-                for item in doclist.timesheets:
-                    if(e == item.description):
-                        bill_amount += item.billing_amount
-                        bill_hours += item.billing_hours
-                        overtime_hours += item.overtime_hours
-                        overtime_rate = item.overtime_rate
-                        per_hr_rate = item.per_hour_rate1
-                        flat_rate = item.flat_rate
-                        timesheet = item.time_sheet
-                        employee_name = item.employee_name
-                        activity_type = item.activity_type
-                items.append({"activity_type": activity_type, "billing_amount": bill_amount, "billing_hours": bill_hours, "time_sheet": timesheet, "from_time": dates[0], "to_time": dates[-1], "description": e, "employee_name": employee_name, 'status': "-", "overtime_rate": overtime_rate, "overtime_hours": overtime_hours,"per_hour_rate1": per_hr_rate,'flat_rate': flat_rate})
+                ts_details = get_ts_details(doclist, e, dates)
+                items.append(ts_details)
 
         if(items):
             doclist.timesheets = []
@@ -392,6 +380,26 @@ def merge_employee_data(doclist):
         return doclist
     except Exception as e:
         frappe.msgprint(e)
+
+def get_ts_details(doclist, e, dates):
+    bill_amount, bill_hours, overtime_rate, overtime_hours, per_hr_rate, flat_rate = 0, 0 ,0, 0, 0, 0
+    timesheet, employee_name, activity_type, status = "", "", "", []
+    for item in doclist.timesheets:
+        if(e == item.description):
+            bill_amount += item.billing_amount
+            bill_hours += item.billing_hours
+            overtime_hours += item.overtime_hours
+            overtime_rate = item.overtime_rate
+            per_hr_rate = item.per_hour_rate1
+            flat_rate = item.flat_rate
+            timesheet = item.time_sheet
+            employee_name = item.employee_name
+            activity_type = item.activity_type
+            if item.status:
+                status.append(item.status)
+    if len(status)==0:
+        status.append('-')
+    return {"activity_type": activity_type, "billing_amount": bill_amount, "billing_hours": bill_hours, "time_sheet": timesheet, "from_time": dates[0], "to_time": dates[-1], "description": e, "employee_name": employee_name, 'status': ", ".join(list(set(status))), "overtime_rate": overtime_rate, "overtime_hours": overtime_hours,"per_hour_rate1": per_hr_rate,'flat_rate': flat_rate}
 
 def get_timesheet_employees(items):
     try:
@@ -409,21 +417,20 @@ def get_timesheet_employees(items):
 
 def update_time_timelogs(sheet,doclist,time):
     for logs in sheet.time_logs:
-        status = '-'
+        status = []
         if sheet.no_show:
-            status = 'No Show'
-        elif sheet.non_satisfactory:
-            status = 'Non Satisfactory'
-        elif sheet.dnr:
-            status = 'DNR'
-        elif sheet.replaced:
-            status = 'Replaced'
-
+            status.append('No Show')
+        if sheet.non_satisfactory:
+            status.append('Non Satisfactory')
+        if sheet.dnr:
+            status.append('DNR')
+        if sheet.replaced:
+            status.append('Replaced')
         if time.no_show == 1:
             # add zero all value in time sheet in invoice
-            activity = {"activity_type": logs.activity_type, "billing_amount": 0, "billing_hours": 0, "time_sheet": logs.parent, "from_time": 0, "to_time": 0, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":0,"overtime_hours":0,"per_hour_rate1":0,'flat_rate':0}
+            activity = {"activity_type": logs.activity_type, "billing_amount": 0, "billing_hours": 0, "time_sheet": logs.parent, "from_time": 0, "to_time": 0, "description": sheet.employee,"employee_name":sheet.employee_name,'status':", ".join(status),"overtime_rate":0,"overtime_hours":0,"per_hour_rate1":0,'flat_rate':0}
         else:
-            activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours,"per_hour_rate1":logs.billing_rate,'flat_rate':logs.flat_rate}
+            activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'status':", ".join(status),"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours,"per_hour_rate1":logs.billing_rate,'flat_rate':logs.flat_rate}
         doclist.append("timesheets", activity)
     return doclist
 
