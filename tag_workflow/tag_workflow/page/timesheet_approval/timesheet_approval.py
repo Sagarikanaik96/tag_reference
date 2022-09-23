@@ -3,7 +3,7 @@ from frappe import _
 import json, ast
 from frappe.share import add
 from tag_workflow.utils.timesheet import approval_notification, denied_notification
-
+jobOrder='Job Order'
 #-----------------------------#
 def get_status(order, company, date):
     sheets = frappe.db.get_list("Timesheet", {"job_order_detail": order, "employee_company": company, "date_of_timesheet": date}, "workflow_state")
@@ -27,8 +27,13 @@ def get_data(company, order):
             frappe.msgprint(_("Company and Job Order info doesn't match with you"))
             return []
 
-        job_order_status = frappe.db.get_value("Job Order", order, "order_status")
-        data = frappe.db.get_list("Timesheet", {"job_order_detail": order, "employee_company": company}, ["date_of_timesheet", "workflow_state", "job_order_detail", "name"], group_by="date_of_timesheet", order_by="creation asc")
+        job_order_status = frappe.db.get_value(jobOrder, order, "order_status")
+        job_order_owner=frappe.db.get_value(jobOrder, order, "owner")
+        user_company=frappe.db.get_value('User',{'name':job_order_owner},'organization_type')
+        if user_company=='Staffing':
+            data = frappe.db.get_list("Timesheet", {"job_order_detail": order, "employee_company": company}, ["date_of_timesheet", "workflow_state", "job_order_detail", "name"], group_by="date_of_timesheet", order_by="creation asc")
+        else:
+            data = frappe.db.get_list("Timesheet", {"job_order_detail": order, "employee_company": company,"workflow_state":['not like', '%Open%']}, ["date_of_timesheet", "workflow_state", "job_order_detail", "name"], group_by="date_of_timesheet", order_by="creation asc")
 
         for d in data:
             d.update({"order_status": job_order_status})
@@ -49,7 +54,7 @@ def get_child_data(order, timesheet, date=None):
     try:
         result = []
         company = frappe.db.get_value("Timesheet", {"name": timesheet}, "employee_company")
-        job_order_owner=frappe.db.get_value("Job Order", order, "order_status")
+        job_order_owner=frappe.db.get_value(jobOrder, order, "owner")
         user_company=frappe.db.get_value('User',{'name':job_order_owner},'organization_type')
         if user_company=='Staffing':
             if(date != "null"):

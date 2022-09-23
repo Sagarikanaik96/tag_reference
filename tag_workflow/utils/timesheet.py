@@ -12,6 +12,7 @@ from frappe import enqueue
 JOB = "Job Order"
 assignEmployee="Assign Employee"
 TM_FT = "%Y-%m-%d %H:%M:%S"
+timesheet_time= 'select to_time,from_time from `tabTimesheet Detail` where parent= '
 
 
 #----------------#
@@ -599,8 +600,13 @@ def removing_no_show(company,emp_doc,job_order):
         assign_doc.save(ignore_permissions=True)
     
 @frappe.whitelist()
-def submit_staff_timesheet(timesheet_name):
-    timesheet_status_data=f'update `tabTimesheet` set docstatus="1",workflow_state="Approved",status="Submitted" where name="{timesheet_name}"'                       
+def submit_staff_timesheet(jo, timesheet_date, employee,timesheet):
+    timesheet_exist=[{'name':timesheet}]
+    enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_timesheet_exist", now=True,jo=jo, timesheet_date=timesheet_date, employee=employee,timesheet=timesheet,timesheet_exist=timesheet_exist)
+    t_time=frappe.db.sql(timesheet_time+"'"+timesheet+"'",as_dict=1)
+    to_time=t_time[0].to_time
+    timesheet_status_data=f'update `tabTimesheet` set docstatus="1",workflow_state="Approved",status="Submitted" where name="{timesheet}"'                       
     frappe.db.sql(timesheet_status_data)
     frappe.db.commit()
+    enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_previous_timesheet", now=True,jo=jo, timesheet_date=timesheet_date, employee=employee,timesheet=timesheet,to_time=to_time,save=0)
     return "success"

@@ -482,14 +482,22 @@ function check_submittable(frm){
 	if(frm.doc.from_time && frm.doc.to_time){
 		$('button.btn.btn-default.ellipsis.btn-primary.btn-submit').prop('disabled', false);
 	}
+	else if(!(frm.doc.from_time || frm.doc.to_time ) && frm.doc.break_from_time && frm.doc.break_to_time ){
+		$('button.btn.btn-default.ellipsis.btn-primary.btn-submit').prop('disabled', false);
+
+	}
 	else{
 		$('button.btn.btn-default.ellipsis.btn-primary.btn-submit').prop('disabled', true);
 
 	}
 }
 function check_btn_submittable(frm){
-	if(frm.doc.break_from_time && frm.doc.break_to_time){
+	if(frm.doc.break_from_time && frm.doc.break_to_time ){
 		$('button.btn.btn-default.ellipsis.btn-primary.btn-submit').prop('disabled', false);
+	}
+	else if(!(frm.doc.break_from_time || frm.doc.break_to_time ) && frm.doc.from_time && frm.doc.to_time ){
+		$('button.btn.btn-default.ellipsis.btn-primary.btn-submit').prop('disabled', false);
+
 	}
 	else{
 		$('button.btn.btn-default.ellipsis.btn-primary.btn-submit').prop('disabled', true);
