@@ -2,7 +2,7 @@
 // // For license information, please see license.txt
 let condition = localStorage.getItem("exclusive_case");
 window.conf = 0;
-
+let note = '';
 frappe.ui.form.on("Assign Employee", {
   refresh: function (frm) {
     setTimeout(add_dynamic, 500);
@@ -917,6 +917,7 @@ function select_employees(frm) {
 }
 
 function pop_up() {
+  note='';
   let head = `<div class="table-responsive employee_popup"><table class="col-md-12 my-2 basic-table table-headers table table-hover"><thead><tr><th><input type="checkbox" class="grid-row-check pull-left" onclick="select_all1()" id="all"></th><th>Employee ID</th><th>Employee Name</th><th>Resume</th><th></th></tr></thead><tbody>`;
   let html = ``;
 
@@ -938,7 +939,7 @@ function pop_up() {
   }
   let assign_emp_id = cur_frm.doc.name;
 
-  let notes_field = `<div class="px-3"><p class="mb-1"><label for="w3review">Notes:</label></p><textarea class="w-100" rows="3" label="Notes" id="_${assign_emp_id}_notes" class="head_count_tittle" maxlength="1000"> </textarea> </div>`;
+  let notes_field = `<div class="px-3"><p class="mb-1"><label for="w3review">Notes:</label></p><textarea class="w-100" rows="3" label="Notes" id="_${assign_emp_id}_notes" class="head_count_tittle" maxlength="160" onblur=update_notes($(this).val())></textarea><small>Character limit: 160</small> </div>`;
   body = body + notes_field;
   let fields = [{ fieldname: "", fieldtype: "HTML", options: body }];
   let dialog = new frappe.ui.Dialog({
@@ -966,8 +967,11 @@ window.select_all1 = function () {
   }
 };
 
+window.update_notes=(notes)=>{
+  note = notes;
+}
+
 function update_table(dialog) {
-  let notes = document.getElementById("_" + cur_frm.doc.name + "_notes").value;
   let data = [];
   for (let d in cur_frm.doc.employee_details) {
     let id1 = cur_frm.doc.employee_details[d].employee;
@@ -982,7 +986,7 @@ function update_table(dialog) {
       id: data,
       name: cur_frm.doc.name,
       job_order: cur_frm.doc.job_order,
-      assign_note: notes,
+      assign_note: note,
     },
     callback: function (r) {
       if (r.message == "error") {
