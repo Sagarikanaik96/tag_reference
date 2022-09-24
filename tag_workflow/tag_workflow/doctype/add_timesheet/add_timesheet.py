@@ -38,11 +38,11 @@ def get_child_time(posting_date, fromtime=None, totime=None, child_from=None, ch
     except Exception:
         return fromtime, totime, '', ''
 
-def check_old_timesheet(child_from, child_to, employee):
+def check_old_timesheet(child_from, child_to, employee,timesheet):
     try:
         data = []
         if(child_from and child_to):
-            sql = """select c.name, c.parent from `tabTimesheet Detail` c where (('{1}' >= c.from_time and '{1}' <= c.to_time) or ('{2}' >= c.from_time and '{2}' <= c.to_time) or ('{1}' <= c.from_time and '{2}' >= c.to_time)) and parent in (select name from `tabTimesheet` where employee = '{0}') """.format(employee, child_from, child_to)
+            sql = """select c.name, c.parent from `tabTimesheet Detail` c where (('{1}' >= c.from_time and '{1}' <= c.to_time) or ('{2}' >= c.from_time and '{2}' <= c.to_time) or ('{1}' <= c.from_time and '{2}' >= c.to_time)) and parent in (select name from `tabTimesheet` where employee = '{0}' and name!='{3}') """.format(employee, child_from, child_to,timesheet)
             data = frappe.db.sql(sql, as_dict=1)
         return 1 if(len(data) > 0) else 0
     except Exception as e:
@@ -84,10 +84,7 @@ def update_timesheet(user, company_type, items, cur_selected, job_order, date, f
         timesheets = []
         items = json.loads(items)
         cur_selected = json.loads(cur_selected)
-        if cur_selected:
-            selected_items = (selected_item for selected_item in items if selected_item["name"] in cur_selected['items'])
-        else:
-            selected_items = items
+        selected_items = items
         is_employee = check_if_employee_assign(items, job_order)
         if(is_employee == 0):
             return False
@@ -101,31 +98,13 @@ def update_timesheet(user, company_type, items, cur_selected, job_order, date, f
             for item in selected_items:
                 tip_amount=check_tip(item)
                 child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, item['from_time'], item['to_time'], item['break_from'], item['break_to'])
-                is_ok = check_old_timesheet(child_from, child_to, item['employee'])
-                if(is_ok == 0):
-                    week_job_hours, week_all_hours, all_job_hours, week_hiring_hours = timesheet_biiling_hours(jo=job_order, timesheet_date=posting_date, employee=item['employee'], user= frappe.session.user,from_time=child_from)
-                    cur_timesheet_hours=item['hours']
-                    w1= all_week_jo(employee=item['employee'], jo=job_order,timesheet_date=posting_date,from_time=child_from)
-                    overtime_current_job_hours_val,todays_overtime_hours=overall_overtime(jo=job_order, timesheet_date=posting_date, working_hours=cur_timesheet_hours,employee=item['employee'],from_time=child_from)
-                    w1, overtime_hours, overtime_all_hours, overtime_hiring_hours, hiring_timesheet_oh= sub_update_timesheet(week_job_hours, w1, cur_timesheet_hours, week_all_hours,week_hiring_hours)
-                    emp_pay_rate = get_emp_pay_rate(job_order, job.company, item['company'], item['employee'])
-                    timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=job.company, job_order_detail=job_order, employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate, status_of_work_order=job.order_status, date_of_timesheet=date, timesheet_hours=cur_timesheet_hours,total_weekly_hours= week_all_hours+cur_timesheet_hours, current_job_order_hours=all_job_hours+cur_timesheet_hours, overtime_timesheet_hours= overtime_hours, total_weekly_overtime_hours= overtime_all_hours, cuurent_job_order_overtime_hours= float(overtime_current_job_hours_val), total_weekly_hiring_hours= week_hiring_hours + cur_timesheet_hours, total_weekly_overtime_hiring_hours= overtime_hiring_hours, overtime_timesheet_hours1= hiring_timesheet_oh, billable_weekly_overtime_hours= overtime_hiring_hours, unbillable_weekly_overtime_hours= overtime_all_hours- overtime_hiring_hours, employee_pay_rate = emp_pay_rate,todays_overtime_hours=todays_overtime_hours))
-                    flat_rate = job.flat_rate + tip_amount
-                    timesheet= update_billing_details(timesheet,jo=job_order, timesheet_date=posting_date, employee=item['employee'], working_hours=float(item['hours']),total_flat_rate=flat_rate,per_hour_rate=job.per_hour,from_time=child_from)
-                    timesheet = update_payroll_details(timesheet, emp_pay_rate, job.company, item['employee'], timesheet, posting_date, job_order, today_hours=float(item['hours']),to_time=child_to,from_time=child_from)
-                    timesheet.append("time_logs", {
-                        "activity_type": job.select_job, "from_time": child_from, "to_time": child_to, "hrs": str(item['hours'])+" hrs",
-                        "hours": float(item['hours']), "is_billable": 1, "billing_rate": job.per_hour,"tip":tip_amount, "flat_rate": flat_rate, "break_start_time": break_from,
-                        "break_end_time": break_to, "extra_hours": float(item['overtime_hours']), "extra_rate": float(item['overtime_rate']), "pay_amount":timesheet.timesheet_payable_amount
-                    })
-
-                    timesheet.insert(ignore_permissions=True)
-                    timesheet = add_status(timesheet, item['status'], item['employee'], job.company, job_order)
-                    timesheet.save(ignore_permissions=True)
+                is_ok = check_old_timesheet(child_from, child_to, item['employee'],item['timesheet_value'])
+                if(is_ok == 0):                   
+                    timesheet=timesheet_data(item,job_order,job,tip_amount,break_from,break_to,posting_date,child_from,child_to,date)
                     staffing_own_timesheet(save,timesheet,company_type)
                     timesheets.append({"employee": item['employee'], "docname": timesheet.name, "company": job.company, "job_title": job.select_job,  "employee_name": item['employee_name']})
                     added = 1
-                    update_previous_timesheet(jo=job_order, timesheet_date=posting_date, employee=item['employee'],timesheet=timesheet,to_time=child_to,save=save)
+                    update_previous_timesheet(jo=job_order, timesheet_date=posting_date, employee=item['employee'],timesheet=timesheet,to_time=child_to,save=save,timesheet_already_exist=item['timesheet_value'])
                 else:
                     frappe.msgprint(_("Timesheet is already available for employee <b>{0}</b>(<b>{1}</b>) on the given datetime.").format(item["employee_name"],item['employee']))
         else:
@@ -179,8 +158,11 @@ def job_order_name(doctype,txt,searchfield,page_len,start,filters):
         company=filters.get('company')
         company_type=filters.get('company_type')
         if(company_type=='Staffing'):
-            sql=f'''select name from `tabJob Order` where company_type="Exclusive" and bid>0 and company in (select name from `tabCompany` where parent_staffing="{company}") '''
-            return frappe.db.sql(sql)
+            sql=frappe.db.sql('''select name from `tabJob Order` where company_type="Exclusive" and bid>0 and company in (select name from `tabCompany` where parent_staffing="{0}") and name like "%%{1}%%"  '''.format(company,'%s' % txt))
+            return sql
+        else:
+            sql=frappe.db.sql('''select name from `tabJob Order` where bid>0 and company="{0}" and name like "%%{1}%%" and name in (select job_order from `tabAssign Employee` where hiring_organization="{0}")'''.format(company,'%s' % txt))
+            return sql
     except Exception as e:
         frappe.log_error(e, "Job Order For Timesheet")
         frappe.throw(e)
@@ -208,6 +190,8 @@ def staffing_own_timesheet(save,timesheet,company_type):
         frappe.db.sql(timesheet_status_data)
         frappe.db.commit()
         if(company_type=='Staffing'):
+            timesheet_exist=[{'name':timesheet.name}]
+            update_timesheet_exist(timesheet.job_order_detail, timesheet.date_of_timesheet, timesheet.employee,timesheet,timesheet_exist)
             timesheet_status_data=f'update `tabTimesheet` set docstatus="1",workflow_state="Approved",status="Submitted" where name="{timesheet.name}"'                       
             frappe.db.sql(timesheet_status_data)
             frappe.db.commit()
@@ -473,8 +457,16 @@ def update_billing_calculation(timesheet,jo, timesheet_date, employee,working_ho
         frappe.log_error(e, "Timesheet Denied Change case")
         frappe.throw(e)
 
-def update_previous_timesheet(jo, timesheet_date, employee,timesheet,to_time,save):
+def update_previous_timesheet(jo, timesheet_date, employee,timesheet,to_time,save,timesheet_already_exist=None):
     if(int(save)!=1):
+        if(timesheet_already_exist is not None and len(timesheet_already_exist)>0):
+            timesheet_status=frappe.get_doc('Timesheet',timesheet_already_exist)
+            if(timesheet_status.workflow_state!='Approved'):
+                timesheet_status_data=f'update `tabTimesheet` set docstatus="0",workflow_state="Approval Request",status="Draft" where name="{timesheet_already_exist}"'                       
+                frappe.db.sql(timesheet_status_data)
+                frappe.db.commit()
+                timesheet_exist=[{'name':timesheet_already_exist}]
+                update_timesheet_exist(jo, timesheet_date, employee,timesheet,timesheet_exist)
         job_order_last_dat = (frappe.get_doc(jobOrder,jo)).to_date
         all_timesheet=f'select TS.name as name from `tabTimesheet` as TS , `tabTimesheet Detail` as TD where TS.name=TD.parent and employee="{employee}" and date_of_timesheet between "{timesheet_date}" and "{job_order_last_dat}" and TS.name !="{timesheet}" and TD.from_time>"{to_time}" and TS.workflow_state="Approval Request" order by TD.from_time'
         timesheet_exist=frappe.db.sql(all_timesheet,as_dict=True)
@@ -532,7 +524,7 @@ def edit_update_record(timesheet):
         timeshet_date=timesheet_data.date_of_timesheet
         t_time=frappe.db.sql(timesheet_time+"'"+timesheet+"'",as_dict=1)
         to_time=t_time[0].to_time
-        enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_previous_timesheet", jo=job, timesheet_date=timeshet_date, employee=timesheet_data.employee,timesheet=timesheet_data.name,to_time=to_time,save=0)
+        enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_previous_timesheet", jo=job, timesheet_date=timeshet_date, employee=timesheet_data.employee,timesheet=timesheet_data.name,to_time=to_time,save=0,timesheet_already_exist='')
         frappe.db.sql('update `tabTimesheet` set update_other_timesheet="0" where name="{0}"'.format(timesheet))
         frappe.db.commit()
     except Exception as e:
@@ -598,9 +590,36 @@ def update_todays_timesheet(jo, timesheet_date, employee,timesheet,company):
         update_timesheet_exist(jo, timesheet_date, employee,timesheet,timesheet_exist)
         t_time=frappe.db.sql(timesheet_time+"'"+timesheet+"'",as_dict=1)
         to_time=t_time[0].to_time
-        update_previous_timesheet(jo, timesheet_date, employee,timesheet,to_time,save=0)
+        update_previous_timesheet(jo, timesheet_date, employee,timesheet,to_time,save=0,timesheet_already_exist='')
         enqueue("tag_workflow.utils.timesheet.send_timesheet_for_approval", now=True,	employee=employee, docname= timesheet,company=company,job_order=jo )
         return 1
     except Exception as e:
         frappe.log_error(e,'open to approval error')
    
+def timesheet_data(item,job_order,job,tip_amount,break_from,break_to,posting_date,child_from,child_to,date):
+    week_job_hours, week_all_hours, all_job_hours, week_hiring_hours = timesheet_biiling_hours(jo=job_order, timesheet_date=posting_date, employee=item['employee'], user= frappe.session.user,from_time=child_from)
+    cur_timesheet_hours=item['hours']
+    w1= all_week_jo(employee=item['employee'], jo=job_order,timesheet_date=posting_date,from_time=child_from)
+    overtime_current_job_hours_val,todays_overtime_hours=overall_overtime(jo=job_order, timesheet_date=posting_date, working_hours=cur_timesheet_hours,employee=item['employee'],from_time=child_from)
+    w1, overtime_hours, overtime_all_hours, overtime_hiring_hours, hiring_timesheet_oh= sub_update_timesheet(week_job_hours, w1, cur_timesheet_hours, week_all_hours,week_hiring_hours)
+    emp_pay_rate = get_emp_pay_rate(job_order, job.company, item['company'], item['employee'])
+    if(item['timesheet_value'] and len(item['timesheet_value'])>0):
+        timesheet=frappe.get_doc('Timesheet',item['timesheet_value'])                        
+        timesheet.time_logs=''
+    else:
+        timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=job.company, job_order_detail=job_order, employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate, status_of_work_order=job.order_status, date_of_timesheet=date, timesheet_hours=cur_timesheet_hours,total_weekly_hours= week_all_hours+cur_timesheet_hours, current_job_order_hours=all_job_hours+cur_timesheet_hours, overtime_timesheet_hours= overtime_hours, total_weekly_overtime_hours= overtime_all_hours, cuurent_job_order_overtime_hours= float(overtime_current_job_hours_val), total_weekly_hiring_hours= week_hiring_hours + cur_timesheet_hours, total_weekly_overtime_hiring_hours= overtime_hiring_hours, overtime_timesheet_hours1= hiring_timesheet_oh, billable_weekly_overtime_hours= overtime_hiring_hours, unbillable_weekly_overtime_hours= overtime_all_hours- overtime_hiring_hours, employee_pay_rate = emp_pay_rate,todays_overtime_hours=todays_overtime_hours))
+    flat_rate = job.flat_rate + tip_amount
+    timesheet= update_billing_details(timesheet,jo=job_order, timesheet_date=posting_date, employee=item['employee'], working_hours=float(item['hours']),total_flat_rate=flat_rate,per_hour_rate=job.per_hour,from_time=child_from)
+    timesheet = update_payroll_details(timesheet, emp_pay_rate, job.company, item['employee'], timesheet, posting_date, job_order, today_hours=float(item['hours']),to_time=child_to,from_time=child_from)
+    timesheet.append("time_logs", {
+        "activity_type": job.select_job, "from_time": child_from, "to_time": child_to, "hrs": str(item['hours'])+" hrs",
+        "hours": float(item['hours']), "is_billable": 1, "billing_rate": job.per_hour,"tip":tip_amount, "flat_rate": flat_rate, "break_start_time": break_from,
+        "break_end_time": break_to, "extra_hours": float(item['overtime_hours']), "extra_rate": float(item['overtime_rate']), "pay_amount":timesheet.timesheet_payable_amount
+    })
+    if(item['timesheet_value'] and len(item['timesheet_value'])>0):
+        timesheet.save(ignore_permissions=True)
+    else:
+        timesheet.insert(ignore_permissions=True)
+    timesheet = add_status(timesheet, item['status'], item['employee'], job.company, job_order)
+    timesheet.save(ignore_permissions=True)
+    return timesheet

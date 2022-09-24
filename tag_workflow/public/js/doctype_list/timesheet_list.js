@@ -90,7 +90,7 @@ frappe.listview_settings["Timesheet"] = {
     ) {
       listview.page
         .set_secondary_action(
-          '<svg class="icon icon-xs" style=""><use class="" href="#icon-add"></use></svg>Add Timesheet',
+          '<svg class="icon icon-xs" style=""><use class="" href="#icon-add"></use></svg>Add/Edit Timesheet',
           function () {
             update_job_order(listview);
           }
