@@ -158,10 +158,10 @@ def job_order_name(doctype,txt,searchfield,page_len,start,filters):
         company=filters.get('company')
         company_type=filters.get('company_type')
         if(company_type=='Staffing'):
-            sql=frappe.db.sql('''select name from `tabJob Order` where company_type="Exclusive" and bid>0 and company in (select name from `tabCompany` where parent_staffing="{0}") and name like "%%{1}%%"  '''.format(company,'%s' % txt))
+            sql=frappe.db.sql('''select name from `tabJob Order` where company_type="Exclusive" and bid>0 and order_status!='Upcoming' and  company in (select name from `tabCompany` where parent_staffing="{0}") and name like "%%{1}%%"  '''.format(company,'%s' % txt))
             return sql
         else:
-            sql=frappe.db.sql('''select name from `tabJob Order` where bid>0 and company="{0}" and name like "%%{1}%%" and name in (select job_order from `tabAssign Employee` where hiring_organization="{0}")'''.format(company,'%s' % txt))
+            sql=frappe.db.sql('''select name from `tabJob Order` where bid>0 and company="{0}" and order_status!='Upcoming' and name like "%%{1}%%" and name in (select job_order from `tabAssign Employee` where hiring_organization="{0}")'''.format(company,'%s' % txt))
             return sql
     except Exception as e:
         frappe.log_error(e, "Job Order For Timesheet")
@@ -623,3 +623,15 @@ def timesheet_data(item,job_order,job,tip_amount,break_from,break_to,posting_dat
     timesheet = add_status(timesheet, item['status'], item['employee'], job.company, job_order)
     timesheet.save(ignore_permissions=True)
     return timesheet
+
+@frappe.whitelist()
+def update_list_page_calculation(timesheet,jo, timesheet_date, employee,working_hours,total_flat_rate,per_hour_rate,from_time):
+    try:
+        timesheet_date1 = datetime.datetime.strptime(timesheet_date, '%Y-%m-%d').date()
+        from_time= datetime.datetime.strptime((timesheet_date+" "+str(from_time)), TM_FT)
+        data=billing_details_data(timesheet,jo, timesheet_date1, employee,float(working_hours),float(total_flat_rate),float(per_hour_rate),from_time)
+        amount=data[0]
+        overtime_hours=(data[1]/(1.5*float(per_hour_rate))-float(total_flat_rate)) if data[1]>0 else 0
+        return amount,overtime_hours,data[1]
+    except Exception as e:
+        frappe.log_error(e,'listing page error')
