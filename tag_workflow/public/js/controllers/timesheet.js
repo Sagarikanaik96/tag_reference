@@ -132,6 +132,9 @@ frappe.ui.form.on("Timesheet", {
 						}
 					});
 					pop_up.show();
+					pop_up.$wrapper.find('.btn.btn-primary').click(function(){
+						pop_up.hide();
+					});
 				}
 				reject();
 			});
