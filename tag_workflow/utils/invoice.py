@@ -85,7 +85,7 @@ def make_month_invoice(frm):
     tag_company = frappe.db.get_value("User", frappe.session.user, "company") or "TAG"
     import json
     frm_value = json.loads(frm)
-    months = {"January": 1, "February": 2, "March": 3, "April": 4, "May": 5, "June": 6,"July": 7, "August": 8, "September": 10, "October": 10, "November": 11, "December": 12}
+    months = {"January": 1, "February": 2, "March": 3, "April": 4, "May": 5, "June": 6,"July": 7, "August": 8, "September": 9, "October": 10, "November": 11, "December": 12}
     
     date = frm_value['month']
     year = frm_value['year']
