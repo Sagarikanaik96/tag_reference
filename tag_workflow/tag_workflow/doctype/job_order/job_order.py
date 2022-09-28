@@ -428,7 +428,7 @@ def update_time_timelogs(sheet,doclist,time):
             status.append('Replaced')
         if time.no_show == 1:
             # add zero all value in time sheet in invoice
-            activity = {"activity_type": logs.activity_type, "billing_amount": 0, "billing_hours": 0, "time_sheet": logs.parent, "from_time": 0, "to_time": 0, "description": sheet.employee,"employee_name":sheet.employee_name,'status':", ".join(status),"overtime_rate":0,"overtime_hours":0,"per_hour_rate1":0,'flat_rate':0}
+            activity = {"activity_type": logs.activity_type, "billing_amount": 0, "billing_hours": 0, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.from_time, "description": sheet.employee,"employee_name":sheet.employee_name,'status':", ".join(status),"overtime_rate":0,"overtime_hours":0,"per_hour_rate1":0,'flat_rate':0}
         else:
             activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'status':", ".join(status),"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours,"per_hour_rate1":logs.billing_rate,'flat_rate':logs.flat_rate}
         doclist.append("timesheets", activity)
