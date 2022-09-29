@@ -82,7 +82,7 @@ def make_company(exclusive, staffing, org_type,contract_number):
         if(contract):
 
             for c in contract.job_titles:
-                company.append("job_titles", {"job_titles": c.job_titles, "wages": c.wages,"description":c.description})
+                company.append("job_titles", {"job_titles": c.job_titles, "wages": c.wages,"description":c.description,"industry_type":c.industry_type})
 
             for c in contract._industry_types:
                 company.append("industry_type",{"industry_type":c.industry_type})

@@ -1,5 +1,6 @@
 frappe.ui.form.on("Contract", {
 	refresh: function(frm){
+		hide_and_show_tables(frm);
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
@@ -85,23 +86,10 @@ frappe.ui.form.on("Contract", {
 		if(frm.doc.addendums=='<div class="ql-editor read-mode"><p><br></p></div>'){
 			frm.set_value('addendums', '')
 		}
-		if(frm.doc._industry_types && frm.doc.job_titles){
-			let industries=[]
-			let titles_industry=[]
-			for(let i in frm.doc._industry_types){
-				industries.push(frm.doc._industry_types[i].industry_type)
-			}
-			for(let i in frm.doc.job_titles){
-				titles_industry.push(frm.doc.job_titles[i].industry_type)
-			}
-			for(let i in titles_industry){
-				if(industries.indexOf(titles_industry[i]) == -1)  {
-					frappe.msgprint('"'+frm.doc.job_titles[i].job_titles+'" Job Titles Industry Type "'+titles_industry[i]+'" is not present in '+cur_frm.doc.name)
-					frappe.validated=false
-					break
-				}
-			}		
-		}
+		let roles = frappe.user_roles;
+		if(roles.includes('Staffing Admin')|| roles.includes('Tag Admin')){
+			update_table(frm)
+	} 
 	},
 	signe_company:function(frm){
 		$('[data-label = "Save"]').css('display', 'block');
@@ -128,28 +116,7 @@ frappe.ui.form.on("Contract", {
 	},
 
 	onload:function(frm) {
-		frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
-			let industrytype = frm.doc._industry_types, industrytype_list = [];
-			for (let x in industrytype) {
-				if(industrytype[x]['industry_type']){
-					industrytype_list.push(industrytype[x]['industry_type']);
-				}
-			}
-			let jobtitle = frm.doc.job_titles, title_list = [];
-			for (let y in jobtitle){
-				if(jobtitle[y]['job_titles']){
-					title_list.push(jobtitle[y]['job_titles']);
-				}
-			}
-			return {
-				query: "tag_workflow.tag_data.get_jobtitle_list_page",
-				filters: {
-					data: industrytype_list,
-					company: doc.staffing_company,
-					title_list: title_list
-				},
-			};
-		}
+		filter_row(frm);
 	},
 	addendums: function(){
 		$('[data-label = "Save"]').css('display', 'block');

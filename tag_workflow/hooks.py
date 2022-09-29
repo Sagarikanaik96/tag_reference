@@ -98,7 +98,7 @@ doctype_js = {
         sales_invoice: "public/js/controllers/sales_invoice.js",
         "Contact": ["public/js/controllers/contact.js",map],
         "Lead": ["public/js/controllers/lead.js",map],
-        "Contract": "public/js/controllers/contract.js",
+        "Contract": ["public/js/controllers/contract.js","public/js/controllers/filter.js"],
         "Job Site": "public/js/controllers/job_sites.js",
         "Data Import":"public/js/controllers/data_import.js",
         "Notification Log": "public/js/controllers/notification_log.js",
