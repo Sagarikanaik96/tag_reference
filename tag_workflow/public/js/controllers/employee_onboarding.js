@@ -1,5 +1,6 @@
 frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.require('/assets/tag_workflow/js/emp_functions.js');
+frappe.ui.form.off('Employee Onboarding', 'refresh');
 frappe.ui.form.on('Employee Onboarding', {
 	setup: (frm)=>{
 		frm.set_query("staffing_company", function(){
@@ -31,9 +32,9 @@ frappe.ui.form.on('Employee Onboarding', {
 		},250);
     },
     refresh: (frm)=>{
+		core_functions(frm);
 		$('.form-footer').hide();
         setTimeout(()=>{
-			$('[data-label = "View"]').hide();
 			$('[data-label = "Cancel"]').hide();
 		},250);
         set_map(frm);
@@ -84,10 +85,29 @@ frappe.ui.form.on('Employee Onboarding', {
 		remove_lat_lng(frm);
 	},
 	before_submit: (frm)=>{
-		if(!frm.doc.date_of_birth){
-			frappe.msgprint(__('Please fill Date of Birth before submitting the form.'));
-			frappe.validated = false;
-		}
+		frappe.call({
+			'method': 'tag_workflow.tag_data.check_employee',
+			'args':{
+				'onb_email': frm.doc.email
+			},
+			'callback': (r)=>{
+				let msg = '';
+				if(r.message){
+					if(!frm.doc.date_of_birth){
+						msg+='Please fill Date of Birth before submitting the form.<hr>An Employee already exists with the same email. Please modify the email address.'
+					}
+					else{
+						msg+='An Employee already exists with the same email. Please modify the email address.'
+					}
+				}else if(!frm.doc.date_of_birth){
+					msg+='Please fill Date of Birth before submitting the form.'
+				}
+				if(msg!=''){
+					frappe.msgprint({message: __(msg), title: __('Warning!'), indicator: 'orange'})
+					frappe.validated=false;
+				}
+			}
+		});
 	},
 	first_name: (frm)=>{
 		if(frm.doc.first_name){
@@ -105,6 +125,9 @@ frappe.ui.form.on('Employee Onboarding', {
 	},
 	staffing_company: (frm)=>{
 		get_user(frm);
+	},
+	status: (frm)=>{
+		frm.set_value('boarding_status', frm.doc.status)
 	},
 	contact_number: (frm)=>{
 		let contact = frm.doc.contact_number;
@@ -273,3 +296,71 @@ frappe.ui.form.on('Employee Boarding Activity', {
 		document_field(frm, cdt, cdn);
 	}
 });
+
+function core_functions(frm){
+	if ((!frm.doc.employee) && (frm.doc.docstatus === 1)) {
+		frm.add_custom_button(__('Employee'), function () {
+			validate_employee(frm);
+		}, __('Create'));
+		frm.page.set_inner_btn_group_as_primary(__('Create'));
+	}
+	if (frm.doc.docstatus === 1 && frm.doc.project) {
+		frappe.call({
+			method: "erpnext.hr.utils.get_boarding_status",
+			args: {
+				"project": frm.doc.project
+			},
+			callback: function(r) {
+				if (r.message) {
+					frm.set_value('status', r.message);
+				}
+				refresh_field("status");
+			}
+		});
+	}
+}
+
+function validate_employee(frm){
+	let activities = frm.doc.activities;
+	if(frm.doc.docstatus != 1){
+		frappe.msgprint(__('Submit this to create the Employee record.'))
+	}else if(activities){
+		frappe.call({
+			'method': 'tag_workflow.tag_data.validate_employee_creation',
+			'args':{
+				'emp_onb': frm.doc.name
+			},
+			'callback': (r)=>{
+				if(!r.message){
+					confirmation(frm);
+				}else{
+					frappe.model.open_mapped_doc({
+						method: "tag_workflow.tag_data.make_employee",
+						frm: frm
+					});
+				}
+			}
+		})
+	}
+	else{
+		frappe.model.open_mapped_doc({
+			method: "tag_workflow.tag_data.make_employee",
+			frm: frm
+		});
+	}
+}
+
+function confirmation(frm){
+	return new Promise(function(resolve){
+		frappe.confirm(
+			'Onboard Employee Tasks are not all set to complete. Do you wish to create the employee record? Please confirm!',
+			()=>{
+				frappe.model.open_mapped_doc({
+					method: "tag_workflow.tag_data.make_employee",
+					frm: frm
+				});
+				resolve();
+			}
+		)
+	})
+}

@@ -9,6 +9,7 @@ import json
 import datetime
 import requests, time
 from frappe.utils.data import getdate
+from frappe.model.mapper import get_mapped_doc
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
@@ -18,6 +19,7 @@ assignEmployees = "Assign Employee"
 NOASS = "No Access"
 exclusive_hiring = "Exclusive Hiring"
 non_exlusive='Non Exclusive'
+emp_onb = 'Employee Onboarding'
 site= frappe.utils.get_url().split('/')
 sitename=site[0]+'//'+site[2]
 response='Not Found'
@@ -1575,8 +1577,8 @@ def set_lat_lng(form_name):
         location_data = google_response.json()
         if(google_response.status_code == 200 and len(location_data)>0 and len(location_data['results'])>0):
             lat, lng = emp_location_data(location_data)
-            frappe.db.set_value('Employee Onboarding', form_name, 'lat', lat)
-            frappe.db.set_value('Employee Onboarding', form_name, 'lng', lng)
+            frappe.db.set_value(emp_onb, form_name, 'lat', lat)
+            frappe.db.set_value(emp_onb, form_name, 'lng', lng)
     except Exception as e:
         frappe.log_error(e, "Longitude Latitude Error on Employee Onboarding")
         print(e)
@@ -1622,6 +1624,56 @@ def filter_user(doctype, txt, searchfield, page_len, start, filters):
         frappe.db.rollback()
         frappe.log_error(e, 'Employee Boarding Activity Error')
         frappe.throw(e)
+
+@frappe.whitelist()
+def check_employee(onb_email):
+    emp = frappe.get_all('Employee', {'email': onb_email}, ['name'])
+    return True if len(emp)>0 else False
+
+@frappe.whitelist()
+def validate_employee_creation(emp_onb):
+    emp_onb = frappe.get_doc(emp_onb, emp_onb)
+    for activity in emp_onb.activities:
+        task_status = frappe.db.get_value("Task", activity.task, "status")
+        if task_status != "Completed":
+            return False
+    return True
+
+@frappe.whitelist()
+def make_employee(source_name, target_doc=None):
+    doc = frappe.get_doc(emp_onb, source_name)
+    def set_missing_values(source, target):
+        target.personal_email = frappe.db.get_value("Job Applicant", source.job_applicant, "email_id")
+        target.status = "Active"
+    emp = get_mapped_doc(emp_onb, source_name, {
+			emp_onb: {
+				"doctype": "Employee",
+				"field_map": {
+					"first_name": "employee_name",
+					"employee_grade": "grade",
+                    "gender": "employee_gender",
+				}}
+		}, target_doc, set_missing_values)
+    for i in doc.activities:
+        if i.document == 'Resume':
+            emp.resume = i.attach
+        elif i.document == 'W4':
+            emp.w4 = i.attach
+        elif i.document == 'E verify':
+            emp.e_verify = i.attach
+        elif i.document == 'New Hire Paperwork':
+            emp.hire_paperwork = i.attach
+        elif i.document == 'I9':
+            emp.i_9 = i.attach
+        elif i.document == 'ID Requirements':
+            emp.append('id_requirements', {'id_requirements': i.attach})
+        elif i.document == 'Background Check/Drug Screen':
+            emp.append('background_check_or_drug_screen', {'drug_screen':i.attach})
+        elif i.document == 'Direct Deposit Letter':
+            emp.append('direct_deposit_letter', {'direct_deposit_letter': i.attach})
+        elif i.document == 'Miscellaneous':
+            emp.append('miscellaneous', {'attachments': i.attach})
+    return emp
 
 def free_redis(job_name):
     try:
