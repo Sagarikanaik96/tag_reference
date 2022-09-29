@@ -414,7 +414,20 @@ frappe.ui.form.on("Company", {
 	},
 	click_here: function (frm) {
 		if (frm.doc.organization_type == "Hiring") {
-			frappe.set_route("Form", "Hiring Company Review");
+			frappe.call({
+				method: "tag_workflow.tag_workflow.doctype.company.company.check_ratings",
+				args: {
+					'company_name': frm.doc.company_name,
+				},
+				callback: function(r) {
+					if(r.message){
+						frappe.set_route("Form", "Hiring Company Review");
+					}
+					else{
+						frappe.msgprint('There are no reviews for this company yet')
+					}	
+				}
+			})			
 		} else {
 			frappe.set_route("Form", "Company Review");
 		}

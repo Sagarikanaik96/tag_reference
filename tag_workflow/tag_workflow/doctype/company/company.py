@@ -47,3 +47,9 @@ class CustomCompany(Company):
 			frappe.local.enable_perpetual_inventory[self.name] = self.enable_perpetual_inventory
 
 		frappe.clear_cache()
+
+@frappe.whitelist()
+def check_ratings(company_name):
+	sql = ''' select COUNT(*) from `tabHiring Company Review` where hiring_company='{}' '''.format(company_name)
+	row_count = frappe.db.sql(sql)
+	return row_count[0][0]>0
