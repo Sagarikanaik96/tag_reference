@@ -34,6 +34,8 @@ def get():
         # If virtual doctype get data from controller het_list method
         radius = args.radius or ''
         order_status = args.order_status or ''
+        filter_loc = filter_data(args)
+
         if 'radius' in args.keys():
             del args["radius"]
 
@@ -57,7 +59,7 @@ def get():
                     data['order_length'] = 0
                     based_list = compare_order(order_status)
                     data = get_actual_number(data, based_list)
-                    data = staffing_data(data, radius, page_length)
+                    data = staffing_data(data, radius, page_length,filter_loc)
                     data = claim_left(data)
             else:
                 data = compress(execute(**args), args=args)
@@ -66,23 +68,22 @@ def get():
         frappe.msgprint(e)
 
 
-def staffing_data(data, radius, page_length):
+def staffing_data(data, radius, page_length,filter_loc):
     try:
         result = []
+        l = len(filter_loc)
         user_company = frappe.db.get_list(
             "Employee", {"user_id": frappe.session.user}, "company")
-        if(radius in distance):
+        if(radius in distance and l==0):
             data = get_data(user_company, radius, data, page_length)
-        elif(radius != 'All'):
-            for d in data['values']:
-                if(len(d) > 3 and radius == d[-5]):
-                    result.append(d)
-            data["values"] = result
+        elif(radius and l>0):
+            data = filter_location_with_radius(user_company, radius, data, page_length,filter_loc,result)
         else:
             for d in data['values']:
                 if(len(result) < page_length):
                     result.append(d)
             data["values"] = result
+       
         return data
     except Exception as e:
         frappe.msgprint(e)
@@ -173,7 +174,7 @@ def check_distance(company_address, data, radius):
 def get_loc(data):
     doc_args = set()
     for j in data:
-        doc_args.add(j[-1])
+        doc_args.update([j[-2]+'#'+j[-1]])
     doc_args =  sorted(doc_args)
     return doc_args
 
@@ -186,6 +187,7 @@ def get_location():
             'fields': [
                 '`tabJob Order`.`name`',
                 '`tabJob Order`.`job_site`',
+                '`tabJob Order`.`company`'
             ],
             'filters': [],
             'order_by': '`tabJob Order`.`modified` desc',
@@ -210,7 +212,6 @@ def get_location():
                     data['order_length'] = 0
                     based_list = compare_order(order_status)
                     data = get_actual_number(data, based_list)
-                    print(data)
                     data = get_loc(data['values'])
             else:
                 data = []
@@ -260,3 +261,28 @@ def get_lat_lng(address):
     except Exception as e:
         frappe.msgprint(e)
         return 0, 0
+
+def filter_location_with_radius(user_company, radius, data, page_length,filter_loc,result):
+    try:
+        for d in data['values']:
+            if(len(d) > 3 and d[-5] in filter_loc):
+                result.append(d)
+        data["values"] = result
+        if radius not in ['All','Custom Address']:
+            data = get_data(user_company, radius, data, page_length)
+        return data
+    except Exception as e:
+        frappe.msgprint(e)
+        return data
+
+def filter_data(args):
+    try: 
+        filter_loc = args.filter_loc
+        filter_loc = json.loads(filter_loc)
+        filter_loc = list(set(filter_loc))
+        if 'filter_loc' in args.keys():
+            del args['filter_loc']
+        return filter_loc
+    except Exception as e:
+        print(e)
+        return []

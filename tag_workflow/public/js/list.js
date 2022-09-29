@@ -29,6 +29,7 @@ frappe.views.BaseList.prototype.get_call_args = function() {
     this.method = "tag_workflow.utils.reportview.get";
     let args = this.get_args();
     args.radius = this.radius;
+    args.filter_loc = this.filter_loc;
     args.order_status = this.order_status;
     
     return {
@@ -49,30 +50,9 @@ frappe.views.BaseList.prototype.setup_paging_area = function() {
     this.order_status = 'All'
     this.selected_page_count = 20;
     this.order_length = 0;
+    this.filter_loc = [];
 
-    this.$paging_area = $(`
-        <div class="list-paging-area level">
-            <div class="level-left">
-                <div class="btn-group">${paging_values.map((value) => `<button type="button" class="btn btn-default btn-sm btn-paging" data-value="${value}">${value}</button>`).join("")}</div>
-            </div>
-            <div class="level-right"><button class="btn btn-default btn-more btn-sm">${__("Load More")}</button></div>
-        </div>`).hide();
-
-    if(this.doctype == "Job Order" && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
-        this.$paging_area = $(`
-            <div class="list-paging-area level">
-                <div class="level-left">
-                    <div class="btn-group">${paging_values.map((value) => `<button type="button" class="btn btn-default btn-sm btn-paging" data-value="${value}">${value}</button>`).join("")}</div>
-                </div>
-                <div class="level-right">${radius.map((value) => `
-                    <button class="btn btn-default btn-radius btn-sm" data-value="${value}" style="margin-right: 5px;">${value} Miles</button>`).join("")}
-                    <button class="btn btn-default btn-radius btn-sm" data-value="Custom Address" style="margin-right: 5px;">Custom Address</button>
-                    <button class="btn btn-default btn-radius btn-sm" data-value="Clear" style="margin-right: 5px;">Clear</button>
-                    <button class="btn btn-default btn-more btn-sm">${__("Load More")}</button>
-                </div>
-            </div>`).hide();
-    }
-
+    this.update_paging_area(paging_values,radius);
     this.$frappe_list.append(this.$paging_area);
 
     // set default paging btn active
@@ -102,37 +82,8 @@ frappe.views.BaseList.prototype.setup_paging_area = function() {
             $(".btn.btn-default.btn-radius.btn-sm.active").removeClass("active");
             $(".btn.btn-default.btn-more.btn-sm.active").removeClass("active");
             $this.addClass("active");
-            
-            if(!["Custom Address", "Clear"].includes(val)){
-                this.radius = $this.data().value;
-                this.start = 0;
-                this.page_length = 20;
-                this.refresh();
-            }else if(val == "Custom Address"){
-                this.order_location = get_order_location();
-                this.add_fields = [{label: 'Address', fieldname: 'address', fieldtype: 'Select', options: this.order_location, 'reqd': 1}];
-                let dialog = new frappe.ui.Dialog({
-                    title: 'Please Select an Address',
-                    fields: this.add_fields,
-                });
-                dialog.show();
-                dialog.set_primary_action(__('Submit'), function() {
-                    let values = dialog.get_values();
-                    cur_list.start = 0;
-                    cur_list.page_length = 20;
-                    cur_list.radius = values.address;
-                    cur_list.refresh();
-                    dialog.hide();
-                });
-            }else{
-                if(this.radius != "All"){
-                    this.len = 0;
-                    this.start = 0;
-                    this.page_length = 20;
-                    this.radius = "All";
-                    this.refresh();
-                }
-            }
+            /*----------------Display-Modal----------------------------------------------------*/
+            this.display_modal(val);
         }
     });
  }
@@ -146,15 +97,14 @@ frappe.views.BaseList.prototype.remove_data = function() {
 
 /*-----------------------order location(s)-------------------------*/
 function get_order_location(){
-    let order_location = "";
+    let order_location = null;
     frappe.call({
         "method": "tag_workflow.utils.reportview.get_location",
         "async": 0,
         "freeze": true,
         "freeze_message":  __("<b>Loading Job Site(s)") + "...</b>",
         "callback": function(r){
-            let data = r.message;
-            order_location = data.join("\n");
+            order_location = r.message;
         }
     });
     return order_location;
@@ -183,4 +133,170 @@ frappe.views.ListView.prototype.get_count_str = function(){
             return str;
         }
     });
+}
+/*----------------------------------------------------------------*/
+frappe.views.ListView.prototype.display_modal=function(val){
+    if(!["Custom Address", "Clear"].includes(val)){
+        localStorage.setItem('radius',parseInt(val));
+        this.filter_loc.length>0 || localStorage.getItem('location')==1 ?$('.btn-location').addClass('active'):$('.btn-location').removeClass('active');
+        this.radius = val;
+        this.start = 0;
+        this.page_length = 20;
+        this.refresh();
+    }else if(val == "Custom Address"){
+        this.filter_loc.length>0 || localStorage.getItem('location')==1 && this.radius!='All'?document.querySelector(`.btn-loc-rad[data-value="${this.radius}"]`).classList.add('active'):console.log(1);
+        this.order_location = get_order_location();
+        this.create_table(this.order_location);
+        this.add_fields = [{label: '', fieldname: 'location', fieldtype: 'HTML',options:this.html}];
+        let dialog = new frappe.ui.Dialog({
+            title: 'Please select one or more addresses',
+            fields: this.add_fields,
+        });
+        dialog.show();
+        dialog.set_primary_action(__('Submit'), function() {
+            localStorage.setItem('location',1);
+            update_radius();
+            cur_list.start = 0;
+            cur_list.page_length = 20;
+            cur_list.refresh();
+            dialog.hide();
+        });
+        setTimeout(()=>{select_deselect_row()},600)    
+    }else{
+        if(this.radius != "All"){
+            localStorage.removeItem('location');
+            localStorage.removeItem('radius')
+            this.len = 0;
+            this.start = 0;
+            this.page_length = 20;
+            this.radius = "All";
+            this.filter_loc = [];
+            this.refresh();
+        }
+    }
+}
+/*----------------------Generate table in Modal--------------------*/
+frappe.views.ListView.prototype.create_table =function(location){
+  location = location.map(l=>l.split('#'))
+  let new_location = [];
+  if([5, 10, 25, 50, 100].includes(this.radius)){
+    location.filter(loc=>{
+    this.data.map(d=>{
+        if(d.job_site==loc[0] && !new_location.includes(loc))
+            new_location.push(loc);
+        })
+    })
+    }else{
+        new_location = location;
+    }
+  this.html = `<div class="container">
+  <div class="table-responsive">
+      <table class="table table-bordered   table-hover">
+          <thead>
+              <tr>
+                  <th class="text-center"><input id="main" type="checkbox"></th>
+                  <th>Location</th>
+                  <th>Company</th>
+              </tr>
+          </thead>
+          <tbody>${new_location.map((l)=>`
+              <tr>
+                <td class="text-center"><input class="location" value="${l[0]}" type="checkbox"></td>
+                <td>${l[0]}</td>
+                <td>${l[1]}</td>
+              </tr>`).join("")}
+  
+               
+          </tbody>
+      </table>
+  </div>
+  </div>
+  `
+  
+}
+/*----------------------add_remove_row--------------------*/
+frappe.views.ListView.prototype.single_row_event=function(items){
+    items.forEach(i => i.addEventListener(
+        "change",
+        e => {
+           if (i.checked){
+            add_rows(e.currentTarget.value);
+           }else if(!i.checked){
+            remove_rows(e.currentTarget.value);
+           }
+        }));
+}
+/*----------------------create paging area--------------------*/
+frappe.views.ListView.prototype.update_paging_area=function(paging_values,radius){
+    this.$paging_area = $(`
+        <div class="list-paging-area level">
+            <div class="level-left">
+                <div class="btn-group">${paging_values.map((value) => `<button type="button" class="btn btn-default btn-sm btn-paging" data-value="${value}">${value}</button>`).join("")}</div>
+            </div>
+            <div class="level-right"><button class="btn btn-default btn-more btn-sm">${__("Load More")}</button></div>
+        </div>`).hide();
+
+    if(this.doctype == "Job Order" && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+        this.$paging_area = $(`
+            <div class="list-paging-area level">
+                <div class="level-left">
+                    <div class="btn-group">${paging_values.map((value) => `<button type="button" class="btn btn-default btn-sm btn-paging" data-value="${value}">${value}</button>`).join("")}</div>
+                </div>
+                <div class="level-right">${radius.map((value) => `
+                    <button class="btn btn-default btn-radius btn-sm btn-loc-rad" data-value="${value}" style="margin-right: 5px;">${value} Miles</button>`).join("")}
+                    <button class="btn btn-default btn-radius btn-location btn-sm" data-value="Custom Address" style="margin-right: 5px;">Locations</button>
+                    <button class="btn btn-default btn-radius btn-sm" data-value="Clear" style="margin-right: 5px;">Clear</button>
+                    <button class="btn btn-default btn-more btn-sm">${__("Load More")}</button>
+                </div>
+            </div>`).hide();
+    }
+}
+const select_deselect_row =function(){
+    const items = document.querySelectorAll('.location');
+    document.getElementById('main').addEventListener('change',()=>{
+        if(document.getElementById('main').checked){
+            for (let i in items) {
+                if (items[i].type == 'checkbox'){
+                    items[i].checked = true;
+                    add_rows(items[i].value)
+                }
+            }
+        }else{
+            for (let i in items) {
+                if (items[i].type == 'checkbox'){
+                    items[i].checked = false;
+                    remove_rows(items[i].value)
+                }
+            }
+        }
+    });
+   frappe.views.ListView.prototype.single_row_event(items);
+    
+}
+
+
+function remove_rows(val){
+    const index = cur_list.filter_loc.indexOf(val)
+    index !== -1 ? cur_list.filter_loc.splice(index,1):console.log(index);
+}
+function add_rows(val){
+    if (localStorage.getItem('location')==1){
+        cur_list.filter_loc = [];
+        cur_list.filter_loc.push(val);
+    }else{
+        cur_list.filter_loc.push(val);
+    }
+}
+
+window.onload = function(){
+    if (localStorage.getItem('location'))
+        localStorage.removeItem('location')
+    if (localStorage.getItem('radius'))
+        localStorage.removeItem('radius')
+}
+function update_radius(){
+    if([5, 10, 25, 50, 100].includes(parseInt(localStorage.getItem('radius'))))
+        cur_list.radius = parseInt(localStorage.getItem('radius'));
+    else
+        cur_list.radius='All'; 
 }
