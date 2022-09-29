@@ -5,7 +5,8 @@ frappe.ui.form.on('Job Site', {
 		$('.form-footer').hide()
 		$('[data-original-title="Menu"]').hide()
 		maps();
-		hide_field(frm)
+		hide_fields(frm)
+		show_addr(frm)
 		frm.get_docfield('address').label ='Complete Address';
 		frm.refresh_field('address')
 		if(frm.doc.__islocal==1){
@@ -40,21 +41,21 @@ frappe.ui.form.on('Job Site', {
 	search_on_maps: function(frm){
 		if(cur_frm.doc.search_on_maps == 1){
 			update_field(frm, "map");
+			hide_fields(frm)
 			show_addr(frm)
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.manually_enter==0){
 			cur_frm.set_df_property('lat','hidden',1);
 			cur_frm.set_df_property('lng','hidden',1);
-			cur_frm.set_df_property('address','hidden',0)
+			show_addr(frm);
 		}
 	},
 
 	manually_enter: function(frm){
 		if(cur_frm.doc.manually_enter == 1){
 			update_field(frm, "manually");
-			show_addr(frm)
-		}else{
-			cur_frm.set_df_property('address','hidden',0)
+			show_fields(frm);
 		}
+		show_addr(frm);
 	},
 	validate: function (frm) {
 		if(frm.doc.__islocal==1){	
@@ -189,15 +190,6 @@ function get_users(frm){
 	});
 
 }
-function show_addr(frm){
-	if(frm.doc.search_on_maps){
-		frm.set_df_property('address','hidden',0)
-    frm.get_docfield('address').label ='Complete Address';
-    frm.refresh_field('address');
-  }else if(frm.doc.manually_enter){
-  	frm.set_df_property('address','hidden',1)
-  }
-}
 function siteMap() {
     let autocomplete;
     let place;
@@ -326,4 +318,22 @@ function update_data(data) {
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "lat", data["lat"]);
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "lng", data["lng"]);
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
+}
+function hide_fields(frm){
+	frm.set_df_property('city','hidden',frm.doc.city && frm.doc.enter_manually ==1 ?0:1);
+	frm.set_df_property('state','hidden',frm.doc.state && frm.doc.enter_manually ==1?0:1);
+	frm.set_df_property('zip','hidden',frm.doc.zip && frm.doc.enter_manually ==1?0:1);
+}
+function show_fields(frm){
+	frm.set_df_property('city','hidden',0);
+	frm.set_df_property('state','hidden',0);
+	frm.set_df_property('zip','hidden',0);
+}
+function show_addr(frm){
+    if(frm.doc.search_on_maps){
+        frm.get_docfield('address').label ='Complete Address';
+    }else if(frm.doc.manually_enter){
+        frm.get_docfield('address').label ='Address';
+    }
+    frm.refresh_field('address');
 }
