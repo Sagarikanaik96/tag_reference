@@ -3,6 +3,8 @@ from frappe import _, msgprint, throw
 import json, requests, time
 from rq import Queue, Worker
 from frappe.utils.background_jobs import get_redis_conn
+from frappe.utils import now
+from tag_workflow.utils.notification import make_system_notification
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 
@@ -14,14 +16,25 @@ JAZZHR_RATE_LIMIT_CALLS = 80
 JAZZHR_RATE_LIMIT_SECONDS = 40
 JAZZHR_MAX_ITR = 1500
 
+NOTIFY_METHOD ="tag_workflow.utils.jazz_integration.notify_user"
+INITIATED_MSG = f'Request to Grab New Records from JazzHR started at {now()}. This process will run in the background. A notification will be received when the job completes.'
+UPDATE_MSG = f'Request to Update Existing Records from JazzHR started at {now()}. This process will run in the background. A notification will be received when the job completes.'
+ERROR_UPDATE_RECORD_MSG = f'Update Existing Records from JazzHR has completed with errors at {now()}. Please reach out to customer support for troubleshooting.'
+ERROR_INSERT_RECORD_MSG = f'Grab New Records from JazzHR has completed with errors at {now()}. Please reach out to customer support for troubleshooting.'
+SUCCESS_UPDATE_RECORD_MSG = f'Update Existing Records from JazzHR has completed successfully at {now()}.'
+SUCCESS_INSERT_RECORD_MSG = f'Grab New Records from JazzHR has completed successfully at {now()}.'
+
 @frappe.whitelist()
 def jazzhr_fetch_applicants(api_key, company):
     comp = frappe.get_doc("Company",company)
     decrypted_api_key = comp.get_password('jazzhr_api_key')
+    frappe.cache().set('Insert'+str(company),0)
     try:
+        notify_user(company,INITIATED_MSG)
         frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_fetch_applicants_data", queue='default', is_async=True, job_name=company, timeout=25000, api_key=decrypted_api_key, company=company)
     except Exception as e:
         frappe.log_error(e, "JazzHR - jazzhr_fetch_applicants fail long")
+        check_sent_notification(company,2)
 
 #------------JAZZHR applicants----------------------#
 def jazzhr_fetch_applicants_data(api_key, company):
@@ -51,6 +64,7 @@ def jazzhr_fetch_applicants_data(api_key, company):
         jazzhr_applicant_data(api_key, company)
     except Exception as e:
         frappe.log_error(e, "JazzHR - jazzhr_fetch_applicants data fail")
+        check_sent_notification(company,2)
 
 
 #---------------long queue------------------#
@@ -72,6 +86,7 @@ def jazzhr_applicant_data(api_key, company):
         frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_make_sql", queue='long', job_name="JazzHR SQL", is_async=True, api_key=api_key, company=company)
     except Exception as e:
         frappe.log_error(e, "JazzHR - start_log_queue")
+        check_sent_notification(company,2)
 
 #--------------applicant info----------------#
 def jazzhr_fetch_applicant_other_info(api_key, company, start, end):
@@ -97,6 +112,7 @@ def jazzhr_fetch_applicant_other_info(api_key, company, start, end):
                     continue
     except Exception as e:
         frappe.log_error(e, "JazzHR - jazzhr_fetch_applicant_other_info")
+        check_sent_notification(company,2)
 
 
 #--------------------------------------#
@@ -108,6 +124,7 @@ def jazzhr_fetch_applicant_details(api_key, applicant_id, company, action):
         update_redis(applicant_id, company, response, action)
     except Exception as e:
         frappe.log_error(e, "JazzHR applicant detail")
+        check_sent_notification(company,action)
 
 def update_redis(applicant_id, company, response, action):
     try:
@@ -137,6 +154,7 @@ def update_redis(applicant_id, company, response, action):
                 update_emp_to_db(applicant_id, company)
     except Exception as e:
         frappe.log_error(e, "JazzHR redis update")
+        check_sent_notification(company,action)
 
 #-------------------google data------------#
 def fetch_google_location_data(applicant_details, applicant_key, redis):
@@ -211,10 +229,16 @@ def jazzhr_make_sql(api_key, company):
             frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-EMP-" """, emp_last_number)
             frappe.db.sql(sql[0:-1])
             frappe.db.commit()
+            insert = redis.get('Insert'+str(company)) if redis.get('Insert'+str(company)) is not None else None
+            if insert is not None and int(insert)>0:
+                frappe.enqueue(NOTIFY_METHOD,company=company,msg=ERROR_INSERT_RECORD_MSG,action=2)
+            else:
+                frappe.enqueue(NOTIFY_METHOD,company=company,msg=SUCCESS_INSERT_RECORD_MSG,action=2)
+            free_redis(company,2,redis)
     except Exception as e:
         frappe.db.rollback()
         frappe.log_error(e, "JazzHR sql query")
-
+        check_sent_notification(company,1)
 
 def get_frm_redis_cache(applicant_id):
     try:
@@ -247,10 +271,13 @@ def get_frm_redis_cache(applicant_id):
 @frappe.whitelist()
 def jazzhr_update_applicants(api_key, company):
     try:
+        frappe.cache().set('Update'+str(company),0)
+        notify_user(company,UPDATE_MSG)
         emp_list = frappe.db.sql(""" select name, employee_number from `tabEmployee` where company = %s and employee_number IS NOT NULL and (first_name IN(NULL, "undefined", "None", "") or last_name IN(NULL, "unavailable", "None", "") or employee_gender IN(NULL, "undefined", "None", "") or contact_number IN(NULL, "undefined", "None", "") or employee_gender IN(NULL, "undefined", "None", "") or street_address IN(NULL, "undefined", "None", "") or email IN(NULL, "undefined", "None", "") or city IN(NULL, "undefined", "None", "") or state IN(NULL, "undefined", "None", "") or zip = 0 or lat IN(NULL, "undefined", "None", "") or lng IN(NULL, "undefined", "None", "")) """,company, as_dict=1)
         frappe.enqueue("tag_workflow.utils.jazz_integration.jazz_emp_update", queue='default', job_name=company, timeout=1200, api_key=api_key, company=company, emp_list=emp_list)
     except Exception as e:
         frappe.log_error(e, "JazzHR emp fetching")
+        check_sent_notification(company,1)
 
 def jazz_emp_update(api_key, company, emp_list):
     try:
@@ -264,6 +291,7 @@ def jazz_emp_update(api_key, company, emp_list):
             end += JAZZHR_MAX_ITR
     except Exception as e:
         frappe.log_error(e, "jazz_emp_update")
+        check_sent_notification(company,1)
 
 def jazz_make_emp_update_queue(api_key, company, start, end, emp_list):
     try:
@@ -281,8 +309,16 @@ def jazz_make_emp_update_queue(api_key, company, start, end, emp_list):
                 count -= 1
                 if(exce <= 3):
                     continue
+        redis = frappe.cache()
+        update = redis.get('Update'+str(company)) if redis.get('Update'+str(company)) is not None else None
+        if update is not None and int(update)>0:
+            frappe.enqueue(NOTIFY_METHOD,company=company,msg=ERROR_UPDATE_RECORD_MSG,action=1)
+        else:
+            frappe.enqueue(NOTIFY_METHOD,company=company,msg=SUCCESS_UPDATE_RECORD_MSG,action=1)
+        free_redis(company,1,redis)
     except Exception as e:
         frappe.log_error(e, "jazz_make_emp_update_queue")
+        check_sent_notification(company,1)
 
 def update_emp_to_db(applicant_id, company):
     try:
@@ -296,6 +332,7 @@ def update_emp_to_db(applicant_id, company):
         redis.delete(applicant_id)
     except Exception as e:
         frappe.log_error(e, "JazzHR emp update")
+        check_sent_notification(company,1)
 
 
 #----------------------update single applicant---------------------#
@@ -361,3 +398,77 @@ def terminate_job(company):
     except Exception as e:
         frappe.log_error(e, "JazzHR terminate_job")
         return 0
+
+def notify_user(company,msg,action=None):
+    sub = "Jazz Hr Notification"
+    rds = frappe.cache()
+    try:
+        #----------allowed_user------------------#
+        users = get_user_list(company)
+        #-------------------Initial Notification------------------------------------------#
+        if len(users)>0 and action is None:make_system_notification(users,msg,'Company',company,sub)
+        #------------------Success Notification----------------------#
+        elif len(users)>0 and  action is not None:
+            update = rds.get('Update'+str(company)) if rds.get('Update'+str(company)) is not None else None
+            insert = rds.get('Insert'+str(company)) if rds.get('Insert'+str(company)) is not None else None
+            if (action == 1 and update is not None) or (action == 2 and insert is not None):
+                make_system_notification(users,msg,'Company',company,sub)
+    except Exception as e:
+        frappe.log_error(e,'user notification error')
+
+def check_sent_notification(company, action):
+    try:
+        rds = frappe.cache()
+        if action == 2 and  int(rds.get('Insert'+str(company))) == 0:
+            rds.set('Insert'+str(company),1)
+        elif action ==1 and  int(rds.get('Update'+str(company))) == 0:
+            rds.set('Update'+str(company),1)
+    except Exception as e:
+        frappe.log_error(e,'check_sent_notifiy_error')
+
+def free_redis(company,action,redis):
+   redis.delete('Update'+str(company)) if action ==1 else redis.delete('Insert'+str(company)) 
+
+def get_user_list(company):
+    try:
+        sql = None
+        if 'Tag Admin' in frappe.get_roles(frappe.session.user): 
+            sql = """ select parent from `tabHas Role`
+            where role ="Staffing Admin"
+            and parent in(select name from `tabUser`
+            where company = '{0}' and enabled= '1') 
+            UNION
+            select parent from `tabHas Role`
+            where role ="Tag Admin"
+            and parent in(select name from `tabUser`
+            where company = 'TAG' and enabled= '1')  
+            """.format(company)
+        else:
+            sql = """ select parent from `tabHas Role`
+            where role ="Staffing Admin"
+            and parent in(select name from `tabUser`
+            where company = '{0}' and enabled= '1' ) """.format(company)
+        user_list = frappe.db.sql(sql, as_dict=1)
+        if user_list is not None:
+            users = [usr['parent'] for usr in user_list]
+            return users
+        return []
+    except Exception as e:
+        frappe.log_error(e,'sql_error')
+        return []
+
+def schedule_job():
+    sql  ="""select name from `tabCompany` where jazzhr_api_key is not null and organization_type='Staffing' and make_organization_inactive='0'"""
+    try:
+        companies = frappe.db.sql(sql,as_dict=1)
+        if len(companies)>0:
+            for c in companies:
+                doc = frappe.get_doc('Company',c['name'])
+                api_key = doc.get_password('jazzhr_api_key')
+                #----------------------------------Jazzhr_Grab_Record--------------------------------------------------------------------------#
+                frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_fetch_applicants",api_key=api_key,company=doc.name)
+                #----------------------------------Jazzhr_Insert_Record-------------------------------------------------------------------------------------------#
+                frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_update_applicants",api_key=api_key,company=doc.name)
+    except Exception as e:
+        frappe.log_error(e,'cron_job_error')
+    
