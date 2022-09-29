@@ -1541,6 +1541,12 @@ select.input-with-feedback.form-control.ellipsis {
 }
 
 @media (max-width: 768px) {
+  [data-page-route="List/Sales Invoice/List"]
+    .frappe-card
+    .frappe-list
+    .list-subject {
+    flex-basis: 60px;
+  }
   [data-page-route="Employee"]
     .editable-form
     .layout-main-section-wrapper
@@ -1669,7 +1675,7 @@ select.input-with-feedback.form-control.ellipsis {
     .frappe-list
     .result
     .list-row-container {
-    width: 650px;
+    width: 800px;
   }
 }
 
