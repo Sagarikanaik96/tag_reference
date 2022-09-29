@@ -105,7 +105,7 @@ doctype_js = {
         "Employee Onboarding Template": "public/js/controllers/employee_onboarding_template.js",
         "Employee Onboarding": ["public/js/controllers/employee_onboarding.js", map],
         "Job Offer": "public/js/controllers/job_offer.js",
-        "Holiday List": "public/js/controllers/holiday_list.js"
+        "Holiday List": "public/js/controllers/holiday_list.js",
         "Salary Component":"public/js/controllers/salary_component.js",
 
 }

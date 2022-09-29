@@ -1685,6 +1685,41 @@ def free_redis(job_name):
         print(e,frappe.utils.get_traceback())
 
 @frappe.whitelist()
+def get_jobtitle_based_on_industry(doctype, txt, searchfield, page_len, start, filters):
+    try:
+        company = filters.get('company')
+        industry=filters.get('industry')
+        title_list = filters.get('title_list')
+        value = ''
+        for index ,i in enumerate(title_list):
+            if index >= 1:
+                value = value+"'"+","+"'"+i
+            else:
+                value =value+i
+        sql = ''' select name,industry from `tabItem` where company = '{0}' and industry="{1}" and (name NOT IN ('{2}') and name like '%%{3}%%')'''.format(company, industry,value,'%s' % txt)
+        return frappe.db.sql(sql)
+
+    except Exception as e:
+        frappe.msgprint(e)
+        return tuple()
+
+@frappe.whitelist()
+def get_jobtitle_based_on_company(doctype, txt, searchfield, page_len, start, filters):
+    try:
+        company = filters.get('company')
+        title_list = filters.get('title_list')
+        value = ''
+        for index ,i in enumerate(title_list):
+            if index >= 1:
+                value = value+"'"+","+"'"+i
+            else:
+                value =value+i
+        sql = ''' select name,industry from `tabItem` where  company ="{0}" and (name NOT IN ('{1}') and name like '%%{2}%%') '''.format(company,value,'%s' % txt)
+        return frappe.db.sql(sql)
+
+    except Exception as e:
+        frappe.msgprint(e)
+        return tuple()
 def validate_user(doc,method):
     error_message=_('Insufficient Permission for  {0}').format(frappe.bold('User' + ' ' + doc.email))
     if not doc.is_new() and frappe.session.user!="Administrator":
@@ -1697,3 +1732,4 @@ def validate_user(doc,method):
         elif doc_user_role and (user_role=="Staffing Admin" or user_role=="Hiring Admin") and doc_user_role=="TAG Admin":
             frappe.flags.error_message = error_message
             raise frappe.PermissionError(("read", "User", doc.email))
+    print(method)

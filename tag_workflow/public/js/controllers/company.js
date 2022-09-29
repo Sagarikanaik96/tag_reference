@@ -8,6 +8,7 @@ frappe.ui.form.on("Company", {
         update_auth_url(frm);
     },
 	refresh: function (frm){
+		hide_and_show_tables(frm)
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
@@ -436,41 +437,7 @@ frappe.ui.form.on("Company", {
 		if(frappe.session.user != 'Administrator'){
 			$('.menu-btn-group').hide();
 		}
-		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
-			const li = [];
-			document.querySelectorAll('a[data-doctype="Industry Type"]').forEach(element=>{
-				li.push(element.getAttribute("data-name"));
-			});
-			return {
-				query: "tag_workflow.tag_data.get_jobtitle_list_page",
-				filters: {
-					data: li,
-					company:doc.name
-				},
-			};
-		}
-		frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
-			let industrytype = frm.doc.industry_type, industrytype_list = [];
-			for (let x in industrytype) {
-				if(industrytype[x]['industry_type']){
-					industrytype_list.push(industrytype[x]['industry_type']);
-				}
-			}
-			let jobtitle = frm.doc.job_titles, title_list = [];
-			for (let y in jobtitle){
-				if(jobtitle[y]['job_titles']){
-					title_list.push(jobtitle[y]['job_titles']);
-				}
-			}
-			return {
-				query: "tag_workflow.tag_data.get_jobtitle_list_page",
-				filters: {
-					data: industrytype_list,
-					company:doc.name,
-					title_list: title_list
-				},
-			};
-		}
+		filter_row(frm);
 		
 		
 	},
@@ -500,19 +467,8 @@ frappe.ui.form.on("Company", {
 	before_save: function(frm){
 		cur_frm.doc.employees=[];
 		cur_frm.doc.enable_perpetual_inventory=0;
-		if(frm.doc.industry_type && frm.doc.job_titles){
-			let industries=[]
-			for(let i in frm.doc.industry_type){
-				industries.push(frm.doc.industry_type[i].industry_type)
-			}
-			for(let i in frm.doc.job_titles){
-				if(industries.indexOf(frm.doc.job_titles[i].industry_type) == -1) {
-					frappe.msgprint(frm.doc.job_titles[i].job_titles+" is not mapped to an Industry. Please update accordingly.")
-					frappe.validated=false
-					break
-				}
-			}
-			
+		if(frappe.boot.tag.tag_user_info.company_type =='Hiring' || frappe.boot.tag.tag_user_info.company_type =='Exclusive Hiring'){
+			update_table(frm)
 		}
 
 	},
@@ -1035,3 +991,71 @@ function mandatory_fields(frm){
 		frappe.validated = false;
 	}
 }
+
+function hide_and_show_tables(frm){
+	const comp =frappe.boot.tag.tag_user_info.company_type;
+	if(comp){
+		frm.set_df_property('other_details','options', comp == 'Hiring'|| comp =='Exclusive Hiring'?update_inner_html('Job Titles'):update_inner_html('Job Industry(ies)'));
+		frm.set_df_property('industry_type','hidden',comp =='Hiring'||comp == 'Exclusive Hiring'? 1:0)
+		frm.set_df_property('job_titles','hidden',comp == 'Hiring' || comp == 'Exclusive Hiring'? 0:1)
+	} 
+}
+function update_inner_html(phrase){
+	const inner_html= `\n\t\t\t${phrase}\n\t\t\t<span class="ml-2 collapse-indicator mb-1 tip-top" style="display: inline;"><svg class="icon  icon-sm" style="">\n\t\t\t<use class="mb-1" id="up-down" href="#icon-down"></use>\n\t\t</svg></span>\n\t\t`;
+	$(".frappe-control[data-fieldname='job_titles']").parent().parent().parent('.section-body').siblings('.section-head').html(inner_html)
+}
+
+if (frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type =='Exclusive Hiring'){
+jQuery(document).on("click",`.tip-top,.${$(".frappe-control[data-fieldname='job_titles']").parent().parent().parent('.section-body').siblings('.section-head').attr('class')}`,function(){
+	const cls = $(".frappe-control[data-fieldname='job_titles']").parent().parent().parent('.section-body').siblings('.section-head').hasClass('collapsed')
+	cls ? $('#up-down').attr('href',"#icon-down") : $('#up-down').attr('href',"#icon-up-line")
+	});
+}
+	
+function filter_row(frm){
+	frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc,cdt,cdn) {
+		const row = locals[cdt][cdn];
+		let jobtitle = frm.doc.job_titles, title_list = [];
+			for (let t in jobtitle){
+				if(jobtitle[t]['job_titles']){
+					title_list.push(jobtitle[t]['job_titles']);
+				}
+			}	
+		if (row.industry_type){
+			return {
+				query: "tag_workflow.tag_data.get_jobtitle_based_on_industry",
+				filters: {
+					industry:row.industry_type,
+					company:doc.name,
+					title_list:title_list
+				},
+			};
+		}else{
+			return{
+				query: "tag_workflow.tag_data.get_jobtitle_based_on_company",
+				filters: {
+					company:doc.name,
+					title_list:title_list
+				},
+			}
+		}
+		
+	}
+}
+function update_table(frm){
+		frappe.run_serially([
+			()=>frm.clear_table('industry_type'),
+			()=>{
+				const industries = frm.doc.job_titles.map(title=>title.industry_type).
+				filter((value, index, self) => self.indexOf(value) === index)
+				if (industries.length>0){
+				industries.map(i=>{
+					let row = frm.add_child('industry_type');
+					row.industry_type = i;
+				})
+			}
+				frm.refresh_field('industry_type')
+			},
+		])
+}
+
