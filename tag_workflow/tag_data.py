@@ -1683,3 +1683,17 @@ def free_redis(job_name):
                 redis.hdel(job_name,k)
     except Exception as e:
         print(e,frappe.utils.get_traceback())
+
+@frappe.whitelist()
+def validate_user(doc,method):
+    error_message=_('Insufficient Permission for  {0}').format(frappe.bold('User' + ' ' + doc.email))
+    if not doc.is_new() and frappe.session.user!="Administrator":
+        user_role=frappe.db.get_value("User", {"name": frappe.session.user}, "tag_user_type")
+        doc_user_role=frappe.db.get_value("User", {"name": doc.name}, "tag_user_type")
+        if doc_user_role and (user_role=="Staffing User" or user_role=="Hiring User"):
+            if doc_user_role=="Staffing Admin" or doc_user_role=="Hiring Admin" or doc_user_role=="TAG Admin":
+                frappe.flags.error_message = error_message
+                raise frappe.PermissionError(("read", "User", doc.email)) 
+        elif doc_user_role and (user_role=="Staffing Admin" or user_role=="Hiring Admin") and doc_user_role=="TAG Admin":
+            frappe.flags.error_message = error_message
+            raise frappe.PermissionError(("read", "User", doc.email))

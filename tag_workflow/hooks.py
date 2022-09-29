@@ -136,7 +136,8 @@ doc_events = {
             "on_trash": validate
         },
         "User": {
-            "on_update": validate
+            "on_update": validate,
+            "before_save": 'tag_workflow.tag_data.validate_user'
         },
         "Designation":{
                 "after_insert":'tag_workflow.tag_data.designation_activity_data'
