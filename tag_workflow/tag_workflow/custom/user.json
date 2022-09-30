@@ -95,7 +95,7 @@
     "insert_after": "user_type_detail",
     "label": "Organization Type",
     "length": 0,
-    "mandatory_depends_on": null,
+    "mandatory_depends_on": "eval:frappe.session.user!='Administrator'",
     "modified": "2021-11-12 20:12:36.798791",
     "modified_by": "Administrator",
     "name": "User-organization_type",
@@ -114,7 +114,7 @@
     "read_only": 0,
     "read_only_depends_on": null,
     "report_hide": 0,
-    "reqd": 1,
+    "reqd": 0,
     "search_index": 0,
     "translatable": 0,
     "unique": 0,
@@ -1259,10 +1259,10 @@
   "parent": null,
   "parentfield": null,
   "parenttype": null,
-  "property": "reqd",
-  "property_type": "Check",
+  "property": "mandatory_depends_on",
+  "property_type": "Data",
   "row_name": null,
-  "value": 1
+  "value": "eval:frappe.session.user!='Administrator'"
  }
 ],
   "sync_on_migrate": 1
