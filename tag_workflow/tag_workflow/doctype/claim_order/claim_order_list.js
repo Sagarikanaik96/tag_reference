@@ -113,7 +113,7 @@ function refresh(listview) {
                                 <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
                                 <td>${data[p].staff_claims_no}</td>
                                 <td><input type="number" id="_${data[p].staffing_organization}" min="0" max=${data[p].staff_claims_no}></td>
-                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle" maxlength="160" ${data[p].notes?data[p].notes:""}> </textarea> </td>
+                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle" maxlength="160" ${(data[p].notes).trim()?data[p].notes:""}> </textarea> </td>
                                 </tr>`;
           }
           profile_html += `</table>`;
@@ -288,7 +288,7 @@ function modify_claims(listview) {
                                 <td id="${job_data[p].name}_claim">${job_data[p].staff_claims_no}</td>
                                 <td>${job_data[p].approved_no_of_workers}</td>
                                 <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no} ${job_data[p].hide==1?"disabled":""}></td>
-                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" maxlength="160" > ${job_data[p].notes?job_data[p].notes:""}</textarea> </td>
+                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" maxlength="160" > ${(job_data[p].notes).trim()?job_data[p].notes:""}</textarea> </td>
                                 </tr>`;
           }
           profile_html += `</table><style>th, td {
@@ -595,7 +595,7 @@ function check_count_comp_list(comp_list,job_data,data_len){
 }
 function check_notes_length(notes,staffing_org){
   let valid1
-  if(notes && notes.length>160){
+  if(notes && ((notes).trim()).length>160){
     frappe.msgprint({
       message: __(
         "Only 160 characters are allowed in Notes for "+ staffing_org 
