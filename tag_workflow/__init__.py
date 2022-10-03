@@ -8,7 +8,7 @@ from erpnext.hr.doctype.employee.employee import Employee
 from erpnext.setup.doctype.company.company import Company
 from erpnext.crm.doctype.lead.lead import Lead
 from erpnext.projects.doctype.timesheet.timesheet import Timesheet
-from tag_workflow.utils.doctype_method import validate_username, suggest_username, send_login_mail, raise_no_permission_to, validate_duplicate_user_id, validate_abbr, validate_standard_navbar_items, create_contact, update_cost, validate_mandatory_fields, run_post_save_methods, check_if_latest
+from tag_workflow.utils.doctype_method import send_password_notification,validate_username, suggest_username, send_login_mail, raise_no_permission_to, validate_duplicate_user_id, validate_abbr, validate_standard_navbar_items, create_contact, update_cost, validate_mandatory_fields, run_post_save_methods, check_if_latest
 import requests, json
 
 __version__ = '0.0.1'
@@ -26,7 +26,7 @@ NavbarSettings.validate_standard_navbar_items =validate_standard_navbar_items
 Lead.create_contact = create_contact
 Timesheet.update_cost = update_cost
 Timesheet.validate_mandatory_fields = validate_mandatory_fields
-
+User.send_password_notification=send_password_notification
 def get_key(key):
     try:
         if(frappe.cache().get_value("aws")):

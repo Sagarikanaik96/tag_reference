@@ -1,11 +1,12 @@
 import frappe
 from frappe import _
 import re
+from frappe import enqueue, msgprint
 from frappe.utils import (cint, flt, has_gravatar, escape_html, format_datetime, now_datetime, get_formatted_email, today)
 from frappe.utils import flt, cstr, now, get_datetime_str, file_lock, date_diff
 from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
 from frappe.utils.global_search import update_global_search
-
+from frappe.utils.password import update_password as _update_password
 # user method update
 STANDARD_USERS = ("Guest", "Administrator")
 Abbr = "Abbreviation is mandatory"
@@ -303,4 +304,25 @@ def checkingjobtitle_name(job_titless):
     sql = "select job_titless from `tabItem` where job_titless = '{0}' ".format(job_titless)
     if frappe.db.sql(sql):
         return append_number_if_name_exists("Item", job_titless, fieldname="job_titless", separator="-", filters=None)
-    return job_titless 
+    return job_titless
+
+@frappe.whitelist()
+def send_password_notification(self, new_password):
+		try:
+			if self.flags.in_insert and self.name not in STANDARD_USERS:
+					if new_password:
+						# new password given, no email required
+						_update_password(user=self.name, pwd=new_password,
+							logout_all_sessions=self.logout_all_sessions)
+
+					if not self.flags.no_welcome_mail and cint(self.send_welcome_email):
+						enqueue(self.send_welcome_mail_to_user,now=False)
+						self.flags.email_sent = 1
+						if frappe.session.user != 'Guest':
+							msgprint(_("Welcome email sent"))
+						return
+			if not self.flags.in_insert:
+				self.email_new_password(new_password)
+
+		except frappe.OutgoingEmailError:
+			print(frappe.get_traceback())
