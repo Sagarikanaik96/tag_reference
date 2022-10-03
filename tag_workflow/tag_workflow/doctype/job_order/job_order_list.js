@@ -9,24 +9,28 @@ frappe.listview_settings["Job Order"] = {
     );
     $('[data-fieldname="name"]').attr("placeholder", "Order ID");
     $('[data-fieldname="order_status"]').hide();
-    cur_list.columns[6].df.label = "Head Count Available";
     cur_list.render_header(cur_list.columns);
     if (
       frappe.boot.tag.tag_user_info.company_type == "Hiring" ||
       frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"
     ) {
-      cur_list.columns.splice(6, 1);
+      [cur_list.columns[3], cur_list.columns[8]] = [cur_list.columns[8], cur_list.columns[3],];
+      [cur_list.columns[4], cur_list.columns[8]] = [cur_list.columns[8], cur_list.columns[4],];
+      [cur_list.columns[5], cur_list.columns[6]] = [cur_list.columns[6], cur_list.columns[5],];
+      [cur_list.columns[6], cur_list.columns[8]] = [cur_list.columns[8], cur_list.columns[6],];
+      [cur_list.columns[8], cur_list.columns[9]] = [cur_list.columns[9], cur_list.columns[8],];
       cur_list.columns[8].df.label = "Approved/Required";
-      let swap = cur_list.columns[5];
-      cur_list.columns[5] = cur_list.columns[6];
-      cur_list.columns[6] = swap;
+      cur_list.columns.splice(9, 1);
       cur_list.render_header(cur_list.columns);
     }
     if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
-      cur_list.columns.splice(7, 1);
-      let swap_col = cur_list.columns[7];
-      cur_list.columns[7] = cur_list.columns[8];
-      cur_list.columns[8] = swap_col;
+      [cur_list.columns[3], cur_list.columns[8]] = [cur_list.columns[8], cur_list.columns[3],];
+      [cur_list.columns[4], cur_list.columns[8]] = [cur_list.columns[8], cur_list.columns[4],];
+      [cur_list.columns[5], cur_list.columns[8]] = [cur_list.columns[8], cur_list.columns[5],];
+      [cur_list.columns[6], cur_list.columns[8]] = [cur_list.columns[8], cur_list.columns[6],];
+      [cur_list.columns[7], cur_list.columns[9]] = [cur_list.columns[9], cur_list.columns[7],];
+      [cur_list.columns[8], cur_list.columns[9]] = [cur_list.columns[9], cur_list.columns[8],];   
+      cur_list.columns.splice(9, 1);
       cur_list.columns[7].df.label = "Category";
       cur_list.render_header(cur_list.columns);
     }
@@ -35,10 +39,11 @@ frappe.listview_settings["Job Order"] = {
       frappe.boot.tag.tag_user_info.company_type != "Hiring" &&
       frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"
     ) {
-      cur_list.columns.splice(6, 2);
-      let swap_col = cur_list.columns[6];
-      cur_list.columns[6] = cur_list.columns[7];
-      cur_list.columns[7] = swap_col;
+      [cur_list.columns[3], cur_list.columns[8]] = [cur_list.columns[8], cur_list.columns[3],];
+      [cur_list.columns[4], cur_list.columns[8]] = [cur_list.columns[8], cur_list.columns[4],];
+      [cur_list.columns[5], cur_list.columns[8]] = [cur_list.columns[8], cur_list.columns[5],];
+      [cur_list.columns[6], cur_list.columns[9]] = [cur_list.columns[9], cur_list.columns[6],];
+      cur_list.columns.splice(8, 2);
       cur_list.columns[6].df.label = "Category";
       cur_list.render_header(cur_list.columns);
     }

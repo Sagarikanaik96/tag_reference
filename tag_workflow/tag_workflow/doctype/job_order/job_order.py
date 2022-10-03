@@ -220,13 +220,17 @@ def is_send_mail_required(organizaton,doc_name,msg):
 
 @frappe.whitelist()
 def get_jobtitle_list(doctype, txt, searchfield, page_len, start, filters):
-    company=filters.get('job_order_company')
-    category=filters.get('job_category')
-    if company is None:
-        return None
-    else:
-        sql = ''' select job_titles from `tabJob Titles` where parent = '{0}' and  industry_type='{1}' and job_titles like "%%{2}%%"'''.format(company, category, '%s' % txt)
-        return frappe.db.sql(sql)
+    try:
+        company=filters.get('job_order_company')
+        site=filters.get('job_site')
+        if company is None:
+            return None
+        else:
+            sql = ''' select job_titles from `tabIndustry Types Job Titles` where parent = '{0}' and job_titles like "%%{1}%%"'''.format(site,'%s' % txt)
+            return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.log_error(e,'Getting Job Title Error')
+
 
 @frappe.whitelist()
 def get_jobtitle_list_page(doctype, txt, searchfield, page_len, start, filters):
@@ -239,16 +243,13 @@ def get_jobtitle_list_page(doctype, txt, searchfield, page_len, start, filters):
 
 
 @frappe.whitelist()
-def update_joborder_rate_desc(company = None,job = None):
-    if job is None or company is None:
-        return None
-    if frappe.db.exists("Company",company):
-        company = frappe.get_doc("Company", {"name": company})
-    
-    for i in company.job_titles:
-        if i.job_titles == job:
-            return {"description":i.description,"rate":i.wages}
-    return None
+def update_joborder_rate_desc(job_site,job_title):  
+    try:
+        sql=frappe.db.sql(''' select industry_type,bill_rate,comp_code,description from `tabIndustry Types Job Titles` where parent='{0}' and job_titles='{1}' '''.format(job_site,job_title),as_dict=1)
+        return sql
+    except Exception as e:
+        frappe.log_error(e,'Getting job order rate description value error')
+
    
 
 @frappe.whitelist()

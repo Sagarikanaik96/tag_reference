@@ -115,8 +115,73 @@ frappe.ui.form.on('Job Site', {
 			frm.set_value('phone_number', '');
 			frm.set_df_property('job_site_contact','hidden', 1);
 		}
-	},
+	}, 
+	onload:function(frm){
+		frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc,cdt,cdn) {
+			const row = locals[cdt][cdn];
+			let jobtitle = frm.doc.job_titles, title_list = [];
+			for (let t in jobtitle){
+				if(jobtitle[t]['job_titles']){
+				title_list.push(jobtitle[t]['job_titles']);
+				}
+			}       
+			if (row.industry_type){
+				return {
+					query: "tag_workflow.tag_workflow.doctype.job_site.job_site.get_jobtitle_based_on_industry",
+					filters: {
+					industry:row.industry_type,
+					company:frm.doc.company,
+					title_list:title_list
+					},
+				};
+			}else{
+				return{
+					query: "tag_workflow.tag_workflow.doctype.job_site.job_site.get_jobtitle_based_on_company",
+					filters: {
+					company:frm.doc.company,
+					title_list:title_list
+					},
+				}
+			}
+		}
 
+		frm.fields_dict['job_titles'].grid.get_field('industry_type').get_query = function(doc,cdt,cdn) {
+			const row = locals[cdt][cdn];
+			let jobtitle = frm.doc.job_titles, industry_list = [];
+			for (let t in jobtitle){
+				if(jobtitle[t]['industry_type']){
+				industry_list.push(jobtitle[t]['industry_type']);
+				}
+			}       
+			if (row.job_titles){
+				return {
+				query: "tag_workflow.tag_workflow.doctype.job_site.job_site.get_industry_based_on_jobtitle",
+				filters: {
+				title:row.job_titles,
+				company:frm.doc.company,
+				industry_list:industry_list
+				},
+				};
+			}else{
+				return{
+				query: "tag_workflow.tag_workflow.doctype.job_site.job_site.get_industry_based_on_company",
+				filters: {
+				company:frm.doc.company,
+				industry_list:industry_list
+				},
+				}
+			}
+		}
+	},
+    after_save:function(frm){
+        frappe.call({
+            'method':'tag_workflow.tag_workflow.doctype.job_site.job_site.update_changes',
+            'args':{
+                'doc_name':frm.doc.name
+            }
+        })
+    }
+		
 });
 
 /*----------fields-----------*/
@@ -337,3 +402,43 @@ function show_addr(frm){
     }
     frm.refresh_field('address');
 }
+
+frappe.ui.form.on("Industry Types Job Titles", {
+	job_titles:function(frm,cdt,cdn){
+		let child_val=locals[cdt][cdn]
+		if(child_val['job_titles']){
+			update_industry_rate(frm,cdt,cdn)
+		}
+		
+	},
+	comp_code:function(frm,cdt,cdn){
+		let child1=locals[cdt][cdn]
+		let value=child1['comp_code']
+		if((value.length)>10){
+			frappe.msgprint({
+			message: __("Maximum Characters allowed for Class Code are 10."),
+			title: __("Error"),
+			indicator: "orange",
+			});
+			frappe.model.set_value(cdt,cdn,"comp_code",'');
+			frappe.validated = false        
+		}
+	}
+});
+function update_industry_rate(frm,cdt,cdn){
+	let child=locals[cdt][cdn]
+	frappe.call({
+		'method':'tag_workflow.tag_workflow.doctype.job_site.job_site.get_industry_title_rate',
+		'args':
+		{ 'job_title':child['job_titles'],'company':frm.doc.company
+		},
+		callback:function(r){
+				if(r.message!=1){
+						frappe.model.set_value(cdt,cdn,"industry_type",r.message[0]);
+						frappe.model.set_value(cdt, cdn, "bill_rate", r.message[1]);
+						frappe.model.set_value(cdt, cdn, "description", r.message[2]);  
+				}
+		}
+	})
+}
+	

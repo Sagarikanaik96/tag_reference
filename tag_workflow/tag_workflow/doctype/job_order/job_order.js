@@ -39,27 +39,6 @@ frappe.ui.form.on("Job Order", {
 
 			frm.set_value("from_date", "");
 			frm.set_df_property("time_remaining_for_make_edits", "options", " ");
-			if(frappe.boot.tag.tag_user_info.company_type!='Staffing'){
-				frappe.call({
-					method: "tag_workflow.tag_data.org_industy_type",
-					args: {company: cur_frm.doc.company,},
-					callback: function(r) {
-						if (r.message.length == 1) {
-							cur_frm.set_df_property("category", "read_only", 1);
-							cur_frm.set_value("category", r.message[0][0]);
-						} else {
-							frm.set_query("category", function(doc) {
-								return {
-									query: "tag_workflow.tag_data.hiring_category",
-									filters: {
-										hiring_company: doc.company,
-									},
-								};
-							});
-						}
-					},
-				});
-			}
 		}
 		if (frappe.boot.tag.tag_user_info.company_type != "Staffing") {
 			fields_setup();
@@ -96,15 +75,7 @@ frappe.ui.form.on("Job Order", {
 				query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_jobtitle_list",
 				filters: {
 					job_order_company: doc.company,
-					job_category: doc.category,
-				},
-			};
-		});
-		frm.set_query("category", function(doc) {
-			return {
-				query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_industry_type_list",
-				filters: {
-					job_order_company: doc.company,
+					job_site: doc.job_site,
 				},
 			};
 		});
@@ -222,21 +193,30 @@ frappe.ui.form.on("Job Order", {
 	},
 
 	select_job: function(frm) {
-		frappe.call({
-			method: "tag_workflow.tag_workflow.doctype.job_order.job_order.update_joborder_rate_desc",
-			args: {
-				company: frm.doc.company,
-				job: frm.doc.select_job,
-			},
-			callback: function(r) {
-				if (r.message) {
-					frm.set_value("description", r.message.description);
-					frm.set_value("rate", r.message.rate);
-					refresh_field("rate");
-					refresh_field("description");
-				}
-			},
-		});
+		if(frm.doc.select_job){
+			frappe.call({
+				method: "tag_workflow.tag_workflow.doctype.job_order.job_order.update_joborder_rate_desc",
+				args: {
+					job_site:frm.doc.job_site,
+					job_title: frm.doc.select_job,
+				},
+				callback: function(r) {
+					if (r.message) {
+						frm.set_df_property('category','read_only',1)
+						frm.set_df_property('worker_comp_code','read_only',1)
+						frm.set_value("description", r.message[0].description);
+						frm.set_value("rate", r.message[0].bill_rate);
+						frm.set_value("category", r.message[0].industry_type);
+						frm.set_value("worker_comp_code", r.message[0].comp_code);
+						refresh_field("rate");
+						refresh_field("description");
+						refresh_field("category");
+						refresh_field("worker_comp_code");
+					}
+				},
+			});
+		}
+			
 	},
 
 	before_save: function(frm) {
@@ -436,21 +416,6 @@ frappe.ui.form.on("Job Order", {
 		}
 	},
 
-	category: function(frm) {
-		frm.set_value('shovel', "");
-		frm.set_value('select_job', "");
-		if(frm.doc.category && frm.doc.company){
-			frappe.call({
-				'method':'tag_workflow.tag_data.job_industry_type_add',
-				'args':{
-					'company':frm.doc.company,
-					'user_industry':frm.doc.category
-				}
-			})
-		}
-
-	},
-
 	validate: function(frm) {
 		rate_calculation(frm);
 		time_validation(frm)
@@ -518,7 +483,13 @@ frappe.ui.form.on("Job Order", {
 		if(phone){
 			frm.set_value('phone_number', validate_phone(phone)?validate_phone(phone):phone);
 		}
+	},
+	job_site: function(frm){
+	    if(!frm.doc.job_site){
+	        frm.set_value('select_job','');
+	    }
 	}
+	
 });
 
 /*-------check company details---------*/
@@ -595,7 +566,7 @@ function staff_company_direct_or_general(frm){
 
 function set_read_fields(frm){
 	if(frm.doc.__islocal!=1){
-		let myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description","category","availability",'select_days','selected_days'];
+		let myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description","category","availability",'select_days','selected_days','worker_comp_code'];
 		let arrayLength = myStringArray.length;
 		for(let i = 0; i < arrayLength; i++){
 			frm.set_df_property(myStringArray[i], "read_only", 1);

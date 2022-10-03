@@ -111,7 +111,7 @@ def claim_left(data):
         company = frappe.db.get_value("User", frappe.session.user, "company")
         if(data):
             for d in data['values']:
-                d[-7] = claims_left(d[0], company)
+                d[-8] = claims_left(d[0], company)
         return data
     except Exception as e:
         print(e)
@@ -158,7 +158,7 @@ def check_distance(company_address, data, radius):
             for d in data['values']:
                 try:
                     lat, lng = frappe.db.get_value(
-                        "Job Site", d[-5], ["IFNULL(lat, '')", "IFNULL(lng, '')"])
+                        "Job Site", d[-6], ["IFNULL(lat, '')", "IFNULL(lng, '')"])
                     rds = haversine(add, tuple(
                         [float(lat), float(lng)]), unit='mi')
                     if(rds <= distance_value[radius] and d[0] not in orders):
@@ -265,7 +265,7 @@ def get_lat_lng(address):
 def filter_location_with_radius(user_company, radius, data, page_length,filter_loc,result):
     try:
         for d in data['values']:
-            if(len(d) > 3 and d[-5] in filter_loc):
+            if(len(d) > 3 and d[-6] in filter_loc):
                 result.append(d)
         data["values"] = result
         if radius not in ['All','Custom Address']:

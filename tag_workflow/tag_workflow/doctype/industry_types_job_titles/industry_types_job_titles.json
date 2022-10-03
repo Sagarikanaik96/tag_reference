@@ -7,7 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "industry_type",
-  "job_titles"
+  "job_titles",
+  "bill_rate",
+  "comp_code",
+  "description"
  ],
  "fields": [
   {
@@ -15,7 +18,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Industry Type",
+   "label": "Job Industry",
    "options": "Industry Type",
    "reqd": 1
   },
@@ -23,15 +26,34 @@
    "fieldname": "job_titles",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Job Titles",
+   "label": "Job Title",
    "options": "Designation",
    "reqd": 1
+  },
+  {
+   "fieldname": "bill_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Bill Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "comp_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Class Code"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Description"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-03-30 03:40:46.094882",
+ "modified": "2022-09-30 00:52:45.110063",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Industry Types Job Titles",

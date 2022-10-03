@@ -25,26 +25,22 @@
   "section_break_3",
   "company",
   "naming_series",
-  "select_job",
   "from_date",
   "order_status",
   "head_count_available",
   "job_start_time",
-  "availability",
-  "select_days",
-  "selected_days",
+  "job_order_duration",
   "column_break_13",
   "staff_company",
-  "category",
-  "rate",
-  "to_date",
   "posting_date_time",
   "company_type",
   "amended_from",
   "estimated_hours_per_day",
-  "description",
+  "to_date",
+  "availability",
+  "select_days",
+  "selected_days",
   "job_duration",
-  "job_order_duration",
   "job_title",
   "section_break_7",
   "column_break_34",
@@ -53,13 +49,18 @@
   "require_staff_to_wear_face_mask",
   "section_break_40",
   "job_site",
+  "select_job",
+  "category",
+  "rate",
+  "worker_comp_code",
   "contact_name",
-  "contact_email",
   "contact_number",
-  "no_of_workers",
   "column_break_45",
+  "no_of_workers",
   "worker_filled",
+  "description",
   "extra_notes",
+  "contact_email",
   "additional_addons_section",
   "drug_screen",
   "background_check",
@@ -146,7 +147,7 @@
    "label": "Require staff to wear face mask"
   },
   {
-   "depends_on": "eval:doc.category",
+   "depends_on": "eval:doc.job_site",
    "fieldname": "select_job",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -374,6 +375,7 @@
    "label": "Contract Add On"
   },
   {
+   "depends_on": "eval:doc.select_job",
    "fieldname": "category",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -409,6 +411,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.select_job",
    "fetch_from": "select_job.rate",
    "fetch_if_empty": 1,
    "fieldname": "rate",
@@ -417,6 +420,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.select_job",
    "fetch_from": "select_job.descriptions",
    "fetch_if_empty": 1,
    "fieldname": "description",
@@ -544,6 +548,7 @@
    "hidden": 1
   },
   {
+   "depends_on": "eval:doc.__islocal!=1",
    "fetch_from": "job_site.contact_name",
    "fetch_if_empty": 1,
    "fieldname": "contact_name",
@@ -552,6 +557,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.__islocal!=1",
    "fetch_from": "job_site.contact_email",
    "fetch_if_empty": 1,
    "fieldname": "contact_email",
@@ -560,6 +566,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.__islocal!=1",
    "fetch_from": "job_site.phone_number",
    "fetch_if_empty": 1,
    "fieldname": "contact_number",
@@ -683,11 +690,17 @@
    "hidden": 1,
    "in_list_view": 1,
    "label": "Head Count Available"
+  },
+  {
+   "depends_on": "eval:doc.select_job",
+   "fieldname": "worker_comp_code",
+   "fieldtype": "Data",
+   "label": "Worker Comp Code"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-09 02:54:08.333671",
+ "modified": "2022-09-30 01:50:59.549643",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

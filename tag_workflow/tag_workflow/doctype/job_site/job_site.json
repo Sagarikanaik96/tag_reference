@@ -30,7 +30,9 @@
   "lng",
   "job_site_name",
   "section_break_4",
-  "html"
+  "html",
+  "job_titles_section",
+  "job_titles"
  ],
  "fields": [
   {
@@ -171,11 +173,23 @@
    "fieldname": "suite_or_apartment_no",
    "fieldtype": "Data",
    "label": "Suite or Apartment No"
+  },
+  {
+   "fieldname": "job_titles_section",
+   "fieldtype": "Section Break",
+   "label": "Job Titles"
+  },
+  {
+   "fieldname": "job_titles",
+   "fieldtype": "Table",
+   "label": "Job Titles",
+   "options": "Industry Types Job Titles",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-24 03:37:31.041564",
+ "modified": "2022-09-30 00:59:52.923663",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Site",
