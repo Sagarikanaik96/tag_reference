@@ -353,7 +353,7 @@ function validate_employee(frm){
 function confirmation(frm){
 	return new Promise(function(resolve){
 		frappe.confirm(
-			'Onboard Employee Tasks are not all set to complete. Do you wish to create the employee record? Please confirm!',
+			'All Onboard Employee Tasks or Status not set to "Completed". Do you wish to create the employee record? Please confirm.',
 			()=>{
 				frappe.model.open_mapped_doc({
 					method: "tag_workflow.tag_data.make_employee",

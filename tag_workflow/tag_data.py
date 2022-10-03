@@ -1633,6 +1633,8 @@ def check_employee(onb_email):
 @frappe.whitelist()
 def validate_employee_creation(emp_onb_name):
     emp_onb_details = frappe.get_doc(emp_onb, emp_onb_name)
+    if emp_onb_details.status != "Completed":
+        return False
     for activity in emp_onb_details.activities:
         task_status = frappe.db.get_value("Task", activity.task, "status")
         if task_status != "Completed":
@@ -1673,6 +1675,8 @@ def make_employee(source_name, target_doc=None):
             emp.append('direct_deposit_letter', {'direct_deposit_letter': i.attach})
         elif i.document == 'Miscellaneous':
             emp.append('miscellaneous', {'attachments': i.attach})
+    if doc.sssn and doc.ssn:
+        emp.ssn = doc.get_password('ssn')
     return emp
 
 def free_redis(job_name):
