@@ -355,3 +355,15 @@ def create_job_applicant():
             designation.insert(ignore_permissions = True)
     except Exception as e:
         frappe.log_error(e,'Create Industry Type and Designation')
+
+#---------------Remove job site custom field------------------------------------------------------------
+def remove_field():
+    try:
+        fields = ['column_break_13','suite_or_apartment_no']
+        for f in fields:
+            if frappe.db.exists('Custom field',{'dt':'Job site','fieldname':f}):
+                frappe.db.sql(""" delete from `tabCustom Field` where dt="Job Site" and fieldname="{0}" """.format(f))
+                print("*************************Field Removed Successfully************************************")
+            print("*******************************"f'{f}'   "not found********************************************************")
+    except Exception as e:
+        print(e)
