@@ -328,7 +328,7 @@ function validate_employee(frm){
 		frappe.call({
 			'method': 'tag_workflow.tag_data.validate_employee_creation',
 			'args':{
-				'emp_onb': frm.doc.name
+				'emp_onb_name': frm.doc.name
 			},
 			'callback': (r)=>{
 				if(!r.message){

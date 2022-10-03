@@ -1631,9 +1631,9 @@ def check_employee(onb_email):
     return True if len(emp)>0 else False
 
 @frappe.whitelist()
-def validate_employee_creation(emp_onb):
-    emp_onb = frappe.get_doc(emp_onb, emp_onb)
-    for activity in emp_onb.activities:
+def validate_employee_creation(emp_onb_name):
+    emp_onb_details = frappe.get_doc(emp_onb, emp_onb_name)
+    for activity in emp_onb_details.activities:
         task_status = frappe.db.get_value("Task", activity.task, "status")
         if task_status != "Completed":
             return False
