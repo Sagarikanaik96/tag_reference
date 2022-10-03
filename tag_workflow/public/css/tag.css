@@ -1678,6 +1678,22 @@ select.input-with-feedback.form-control.ellipsis {
     width: 800px;
   }
 }
+[data-fieldname="location"] table thead th {
+  font-weight: 500;
+}
+[data-fieldname="location"] .table-responsive {
+  max-height: 250px;
+  margin-bottom: 5px;
+}
+[data-fieldname="location"] .table-responsive table {
+  margin: 0;
+}
+[data-fieldname="location"] .table-responsive table thead {
+  position: sticky;
+  top: 1px;
+  background: #fff;
+  z-index: 9999;
+}
 
 @media (min-width: 768px) {
   .layout-main .form-column.col-sm-12 > form > .input-max-width {
