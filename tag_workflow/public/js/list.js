@@ -77,6 +77,7 @@ frappe.views.BaseList.prototype.setup_paging_area = function() {
             $(".btn.btn-default.btn-radius.btn-sm.active").removeClass("active");
             $this.addClass("active");
             this.refresh();
+            this.update_button();
         }else if($this.is(".btn-radius")){
             let val = $this.data().value;
             $(".btn.btn-default.btn-radius.btn-sm.active").removeClass("active");
@@ -144,7 +145,8 @@ frappe.views.ListView.prototype.display_modal=function(val){
         this.page_length = 20;
         this.refresh();
     }else if(val == "Custom Address"){
-        this.filter_loc.length>0 || localStorage.getItem('location')==1 && this.radius!='All'?document.querySelector(`.btn-loc-rad[data-value="${this.radius}"]`).classList.add('active'):console.log(1);
+        if([5,10,25,50,100].includes(this.radius))
+            document.querySelector(`.btn-loc-rad[data-value="${this.radius}"]`).classList.add('active');
         this.order_location = get_order_location();
         this.create_table(this.order_location);
         this.add_fields = [{label: '', fieldname: 'location', fieldtype: 'HTML',options:this.html}];
@@ -163,7 +165,7 @@ frappe.views.ListView.prototype.display_modal=function(val){
         });
         setTimeout(()=>{select_deselect_row()},600)    
     }else{
-        if(this.radius != "All"){
+        if(val == "Clear"){
             localStorage.removeItem('location');
             localStorage.removeItem('radius')
             this.len = 0;
@@ -250,6 +252,12 @@ frappe.views.ListView.prototype.update_paging_area=function(paging_values,radius
                 </div>
             </div>`).hide();
     }
+}
+/*---------------------------Updating button-----------------------------------------------------------*/
+frappe.views.ListView.prototype.update_button = function(){
+    this.filter_loc.length>0 || localStorage.getItem('location')==1 ?$('.btn-location').addClass('active'):$('.btn-location').removeClass('active');
+    if ([5,10,25,50,100].includes(this.radius))
+            document.querySelector(`.btn-loc-rad[data-value="${this.radius}"]`).classList.add('active');
 }
 const select_deselect_row =function(){
     const items = document.querySelectorAll('.location');
