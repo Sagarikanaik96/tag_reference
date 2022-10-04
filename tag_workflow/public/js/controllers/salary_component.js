@@ -30,7 +30,39 @@ frappe.ui.form.on('Salary Component',{
 		if(frm.doc.__islocal!=1){
 			cur_frm.set_df_property('company','read_only',1)
 		}
+		cur_frm.set_df_property('salary_component','unique',0)
 
+		if(frm.doc.salary_component_abbr){
+			let abbr = frm.doc.salary_component_abbr.split("_");
+			frm.set_value('salary_component_abbr',abbr[0]);
+		}
+        $(".btn-translation").hide();
+		$("#navbar-breadcrumbs > li.disabled > a").html(frm.doc.salary_component_name) 
+		$('h3[title = "'+frm.doc.name+'"]').html(frm.doc.salary_component_name) 
+	},
+	salary_component_name: function(frm){
+        frm.doc.salary_component = frm.doc.salary_component_name + "_"+ frappe.boot.tag.tag_user_info.company
+		let name = frm.doc.salary_component_name.split(" ");
+		let abbr = ""
+		name.forEach(element => {
+			if(element != ""){
+				abbr += element[0];
+			}
+
+		});
+		if(abbr === "undefined"){
+			abbr = "";
+		}
+		frm.set_value('salary_component_abbr',abbr.toUpperCase());
+	},
+	before_save: function(frm){
+		if(frm.doc.salary_component_abbr){
+		frm.doc.salary_component_abbr +=   "_"+  frappe.boot.tag.tag_user_info.company
+
+		}
 	}
 
-})
+
+
+});
+
