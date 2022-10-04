@@ -147,19 +147,12 @@ frappe.ui.form.on('Job Site', {
 
 		frm.fields_dict['job_titles'].grid.get_field('industry_type').get_query = function(doc,cdt,cdn) {
 			const row = locals[cdt][cdn];
-			let jobtitle = frm.doc.job_titles, industry_list = [];
-			for (let t in jobtitle){
-				if(jobtitle[t]['industry_type']){
-				industry_list.push(jobtitle[t]['industry_type']);
-				}
-			}       
 			if (row.job_titles){
 				return {
 				query: "tag_workflow.tag_workflow.doctype.job_site.job_site.get_industry_based_on_jobtitle",
 				filters: {
 				title:row.job_titles,
 				company:frm.doc.company,
-				industry_list:industry_list
 				},
 				};
 			}else{
@@ -167,7 +160,6 @@ frappe.ui.form.on('Job Site', {
 				query: "tag_workflow.tag_workflow.doctype.job_site.job_site.get_industry_based_on_company",
 				filters: {
 				company:frm.doc.company,
-				industry_list:industry_list
 				},
 				}
 			}

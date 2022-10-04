@@ -113,7 +113,7 @@ function refresh(listview) {
                                 <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
                                 <td>${data[p].staff_claims_no}</td>
                                 <td><input type="number" id="_${data[p].staffing_organization}" min="0" max=${data[p].staff_claims_no}></td>
-                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle" maxlength="160" ${(data[p].notes).trim()?data[p].notes:""}> </textarea> </td>
+                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle" maxlength="160" ${(data[p].notes)?data[p].notes:""}> </textarea> </td>
                                 </tr>`;
           }
           profile_html += `</table>`;

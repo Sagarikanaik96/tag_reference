@@ -125,7 +125,9 @@ doctype_list_js = {
         "Role Profile": "public/js/doctype_list/role_profile.js",
         "Item": "public/js/doctype_list/item_list.js",
         "Employee Onboarding Template": "public/js/doctype_list/employee_onboarding_template_list.js",
-        "Holiday List": "public/js/doctype_list/holiday_list_view.js"
+        "Holiday List": "public/js/doctype_list/holiday_list_view.js",
+        "Salary Component":"public/js/doctype_list/salary_component_list.js"
+
 
 }
 
