@@ -640,6 +640,7 @@ def approved_employee(id,name,job_order, assign_note):
         sql=""" UPDATE `tabAssign Employee Details` SET approved = 1 where employee = "{0}" and parent="{1}" """.format(i,name)
         frappe.db.sql(sql)
         frappe.db.commit()
+    assign_note = assign_note.replace('"', '""')
     sql=""" UPDATE `tabAssign Employee` SET notes = "{0}" where name = "{1}" """.format(assign_note,name)
     frappe.db.sql(sql)
     frappe.db.commit()
