@@ -1694,6 +1694,13 @@ select.input-with-feedback.form-control.ellipsis {
   background: #fff;
   z-index: 9999;
 }
+[data-route="List/Salary Component/List"]
+  .frappe-card
+  .list-row-container
+  .list-row-col:nth-child(7) {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 
 @media (min-width: 768px) {
   .layout-main .form-column.col-sm-12 > form > .input-max-width {
