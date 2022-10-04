@@ -49,7 +49,7 @@ def get_industry_based_on_jobtitle(doctype, txt, searchfield, page_len, start, f
 	try:
 		company = filters.get('company')
 		title=filters.get('title')
-		sql = ''' select industry_type from `tabJob Titles` where parent = "{0}" and job_titles="{1}" and industry_type like "%%{2}%%" '''.format(company, title,'%s' % txt)
+		sql = ''' select distinct industry_type from `tabJob Titles` where parent = "{0}" and job_titles="{1}" and industry_type like "%%{2}%%" '''.format(company, title,'%s' % txt)
 		return frappe.db.sql(sql)
 	except Exception as e:
 		frappe.msgprint(e)
@@ -59,7 +59,7 @@ def get_industry_based_on_jobtitle(doctype, txt, searchfield, page_len, start, f
 def get_industry_based_on_company(doctype, txt, searchfield, page_len, start, filters):
 	try:
 		company = filters.get('company')
-		sql = ''' select industry_type from `tabJob Titles` where  parent ="{0}" and industry_type like "%%{1}%%" '''.format(company,'%s' % txt)
+		sql = ''' select distinct industry_type from `tabJob Titles` where  parent ="{0}" and industry_type like "%%{1}%%" '''.format(company,'%s' % txt)
 		return frappe.db.sql(sql)
 	except Exception as e:
 		frappe.msgprint(e)
