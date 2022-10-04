@@ -67,14 +67,14 @@ def check_blocked_staffing(user_name, data):
     return data
 
 @frappe.whitelist()
-def favourite_company(company_to_favourite,user_name):
+def favorite_company(company_to_favorite,user_name):
     try:
         comp_doc=frappe.get_doc('Company',user_name)
-        if len(comp_doc.favourite_staffing_company_list)!=0:
-            companies = comp_doc.favourite_staffing_company_list
-            if company_to_favourite in companies:
+        if len(comp_doc.favorite_staffing_company_list)!=0:
+            companies = comp_doc.favorite_staffing_company_list
+            if company_to_favorite in companies:
                 return "True"           
-        comp_doc.append('favourite_staffing_company_list',{'favourite_staffing_company':company_to_favourite})
+        comp_doc.append('favorite_staffing_company_list',{'favorite_staffing_company':company_to_favorite})
         comp_doc.save(ignore_permissions = True)
         return "True"
     except Exception as e:
@@ -82,43 +82,44 @@ def favourite_company(company_to_favourite,user_name):
         return "False" 
 
 @frappe.whitelist()
-def sorted_favourite_companies(user_name):
+def sorted_favorite_companies(user_name):
     try:
         comp_doc=frappe.get_doc('Company',user_name)
         comp=[]
-        for i in comp_doc.favourite_staffing_company_list:
-            comp.append(i.favourite_staffing_company)
+        for i in comp_doc.favorite_staffing_company_list:
+            comp.append(i.favorite_staffing_company)
         comp.sort()
+        print(comp)
         return comp          
 
     except Exception as e:
         frappe.log_error(e, "company sorting")
-        frappe.msgprint("Company favourites checking")
+        frappe.msgprint("Company favorites checking")
         return "False"  
 
 
 @frappe.whitelist()
-def unfavourite_company(company_to_favourite,user_name):
+def unfavorite_company(company_to_favorite,user_name):
     comp_doc=frappe.get_doc('Company',user_name)
-    if len(comp_doc.favourite_staffing_company_list)!=0:
-        for i in comp_doc.favourite_staffing_company_list:
-            if i.favourite_staffing_company==company_to_favourite:
+    if len(comp_doc.favorite_staffing_company_list)!=0:
+        for i in comp_doc.favorite_staffing_company_list:
+            if i.favorite_staffing_company==company_to_favorite:
                 remove_row = i
                 comp_doc.remove(remove_row)
                 comp_doc.save(ignore_permissions=True) 
         return "False"
 
 @frappe.whitelist()
-def checking_favourites_list(company_to_favourite,user_name):
+def checking_favorites_list(company_to_favorite,user_name):
    try:
         comp_doc=frappe.get_doc('Company',user_name)
-        if len(comp_doc.favourite_staffing_company_list)!=0:
-            for i in comp_doc.favourite_staffing_company_list:
-                if i.favourite_staffing_company==company_to_favourite:
+        if len(comp_doc.favorite_staffing_company_list)!=0:
+            for i in comp_doc.favorite_staffing_company_list:
+                if i.favorite_staffing_company==company_to_favorite:
                     return "True"
         return "False"
 
    except Exception as e:
       frappe.log_error(e, "company checkig")
-      frappe.msgprint("Company favourites checking")
+      frappe.msgprint("Company favorites checking")
       return "False" 

@@ -4,5 +4,5 @@
 # this file for TG-2607
 from frappe.model.document import Document
 
-class FavouriteStaffingCompany(Document):
+class FavoriteStaffingCompany(Document):
 	pass

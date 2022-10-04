@@ -34,9 +34,9 @@ frappe.FaceRecognition = Class.extend({
 				let sorted_data =[];
 				let non_fav = [];
 				let profile_html = ``;
-				let favourite_companies = await sorted_favourite_company()
+				let favorite_companies = await sorted_favorite_company()
 				for(let p in data){
-					let check = favourite_companies.message.includes(data[p].name);
+					let check = favorite_companies.message.includes(data[p].name);
 					if(check){
 						data[p]['LikeStatus'] = true;
 						sorted_data.push(data[p]);
@@ -48,7 +48,7 @@ frappe.FaceRecognition = Class.extend({
 				}
 				sorted_data.push(... non_fav)
 				for(let p in sorted_data){
-					profile_html = await sorted_favourite_companies(sorted_data[p], profile_html,frappe.boot.tag.tag_user_info.company_type);
+					profile_html = await sorted_favorite_companies(sorted_data[p], profile_html,frappe.boot.tag.tag_user_info.company_type);
 				}
 				$("#myTable").html(profile_html);
 			}
@@ -57,7 +57,7 @@ frappe.FaceRecognition = Class.extend({
 })
 
 
-async function sorted_favourite_companies(data, profile_html,company_type) {
+async function sorted_favorite_companies(data, profile_html,company_type) {
 		let link = data.name.split(' ').join('%');
 		let Likebtnexclusice = `<td></td>`
 		let Likebtnnonexclusice = `<td>
@@ -90,13 +90,13 @@ function setLike(event, company) {
 		event.style.stroke = 'white'
 		event.classList.remove('not-liked')
 		event.classList.add('liked')
-		favourite_company(company)
+		favorite_company(company)
 	} else {
 		event.classList.remove('liked')
 		event.classList.add('not-liked')
 		event.style.fill = 'white'
 		event.style.stroke = 'var(--gray-500)'
-		unfavourite_company(company)
+		unfavorite_company(company)
 	}
 }
 
@@ -108,31 +108,31 @@ function trigger_direct_order(staff_name) {
 	doc.posting_date_time = frappe.datetime.now_date();
 	frappe.set_route("Form", doc.doctype, doc.name);
 }
-function favourite_company(company) {
+function favorite_company(company) {
 	let company_name = company.replaceAll("%", " ")
 	frappe.call({
-		method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.favourite_company',
+		method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.favorite_company',
 		"freeze": true,
-		"freeze_message": "<p><b>Adding Company into Favourites</b></p>",
+		"freeze_message": "<p><b>Adding Company into Favorite</b></p>",
 		args: {
-			'company_to_favourite': company_name,
+			'company_to_favorite': company_name,
 			'user_name': frappe.boot.tag.tag_user_info.company
 		},
 		callback: function (r) {
 			if (r.message == "True") {
-				frappe.msgprint("The " + company_name + " is added into Favourite successfully.")
+				frappe.msgprint("The " + company_name + " is added into Favorite successfully.")
 			}
 		}
 	})
 	return "True"
 }
 
-async function sorted_favourite_company() {
+async function sorted_favorite_company() {
 	let a = '';
 	a = frappe.call({
-		method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.sorted_favourite_companies',
+		method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.sorted_favorite_companies',
 		"freeze": true,
-		"freeze_message": "<p><b>Adding Company into Favourites</b></p>",
+		"freeze_message": "<p><b>Adding Company into Favorites</b></p>",
 		args: {
 			'user_name': frappe.boot.tag.tag_user_info.company
 		},
@@ -140,19 +140,19 @@ async function sorted_favourite_company() {
 	return a
 }
 
-function unfavourite_company(company) {
+function unfavorite_company(company) {
 	let company_name = company.replaceAll("%", " ")
 	frappe.call({
-		method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.unfavourite_company',
+		method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.unfavorite_company',
 		"freeze": true,
-		"freeze_message": "<p><b>Removing Company from Favourites</b></p>",
+		"freeze_message": "<p><b>Removing Company from Favorites</b></p>",
 		args: {
-			'company_to_favourite': company_name,
+			'company_to_favorite': company_name,
 			'user_name': frappe.boot.tag.tag_user_info.company
 		},
 		callback: async function (r) {
 			if (r.message == "False") {
-				frappe.msgprint("The " + company_name + " is removed successfully from favourites.")
+				frappe.msgprint("The " + company_name + " is removed successfully from favorites.")
 				return "False"
 			}
 		}
@@ -161,13 +161,13 @@ function unfavourite_company(company) {
 }
 
 
-async function get_favourites_list(company) {
+async function get_favorites_list(company) {
 	let a = '';
 	if (frappe.boot.tag.tag_user_info.company_type == 'Hiring') {
 		a = frappe.call({
-			method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.checking_favourites_list',
+			method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.checking_favorites_list',
 			args: {
-				'company_to_favourite': company,
+				'company_to_favorite': company,
 				'user_name': frappe.boot.tag.tag_user_info.company
 			}
 		})
