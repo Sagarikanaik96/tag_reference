@@ -1701,6 +1701,9 @@ select.input-with-feedback.form-control.ellipsis {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+[data-fieldtype="Currency"] {
+  text-align: left !important;
+}
 
 @media (min-width: 768px) {
   .layout-main .form-column.col-sm-12 > form > .input-max-width {
