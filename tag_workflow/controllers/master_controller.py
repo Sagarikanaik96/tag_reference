@@ -42,7 +42,7 @@ class MasterController(base_controller.BaseController):
 
         elif(self.dt == "User"):
             if(frappe.session.user not in STANDARD and (not self.doc.tag_user_type or not self.doc.organization_type)):
-                frappe.msgprint(_("Please select <b>Organization Type</b> and <b>TAG User Type</b> before saving the User."))
+                frappe.msgprint(_("Please select <b>Company Type</b> and <b>TAG User Type</b> before saving the User."))
             self.check_profile()
         elif(self.dt == "Item"):
             self.check_activity_type()

@@ -259,8 +259,14 @@ frappe.listview_settings["Job Order"] = {
 								for (var i = 0; i < arr.length; i++) {
 									arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
 								}
-								const final_key = arr.join(" ");
-								cont+= "<b>"+final_key+":</b> "+value+" <br />";
+                if (key=="organization_type"){
+                  const final_key = "Company Type";
+                  cont+= "<b>"+final_key+":</b> "+value+" <br />";
+                }
+                else{
+                  const final_key = arr.join(" ");
+                  cont+= "<b>"+final_key+":</b> "+value+" <br />";
+                }
 							}
 							return cont;
 						}
