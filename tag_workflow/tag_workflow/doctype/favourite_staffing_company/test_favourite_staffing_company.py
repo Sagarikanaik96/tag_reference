@@ -4,5 +4,5 @@
 # this file for TG-2607
 import unittest
 
-class TestFavoriteStaffingCompany(unittest.TestCase):
+class TestFavouriteStaffingCompany(unittest.TestCase):
 	pass
