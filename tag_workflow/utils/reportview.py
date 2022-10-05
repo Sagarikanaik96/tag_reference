@@ -52,8 +52,8 @@ def get():
                 page_length = int(args['page_length']) + int(args['start'])
                 args['start'] = '0'
                 args['page_length'] = str(
-                    10*(int(args['page_length']) + int(args['page_length'])))
-
+                    page_length*(int(args['page_length']) + int(args['page_length'])))
+                    
                 data = compress(execute(**args), args=args)
                 if(data):
                     data['order_length'] = 0
