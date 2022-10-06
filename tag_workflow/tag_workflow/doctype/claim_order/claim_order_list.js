@@ -93,6 +93,7 @@ function refresh(listview) {
     args: {
       doc_name: listview.data[0].job_order,
     },
+    freeze:true,
     callback: function (rm) {
       frappe.db.get_value(
         "Job Order",
@@ -265,6 +266,7 @@ function modify_claims(listview) {
     args: {
       doc_name: listview.data[0].job_order,
     },
+    freeze:true,
     callback: function (rm) {
       frappe.db.get_value(
         "Job Order",
