@@ -11,7 +11,6 @@ frappe.ui.form.on('Job Site', {
 		frm.refresh_field('address')
 		if(frm.doc.__islocal==1){
 			cancel_jobsite(frm);
-			frm.set_df_property('job_site_contact','hidden', 1);
 			let len_history = frappe.route_history.length;
 			if(frappe.route_history.length>1 && frappe.route_history[len_history-2][1]=='Job Order'){
 				frm.set_value('company',sessionStorage.getItem('joborder_company'));
@@ -164,6 +163,7 @@ frappe.ui.form.on('Job Site', {
 				}
 			}
 		}
+		
 	},
     after_save:function(frm){
         frappe.call({
@@ -172,6 +172,7 @@ frappe.ui.form.on('Job Site', {
                 'doc_name':frm.doc.name
             }
         })
+
     }
 		
 });
