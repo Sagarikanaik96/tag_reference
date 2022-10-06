@@ -1682,17 +1682,38 @@ select.input-with-feedback.form-control.ellipsis {
   font-weight: 500;
 }
 [data-fieldname="location"] .table-responsive {
-  max-height: 250px;
+  max-height: 500px;
   margin-bottom: 5px;
 }
 [data-fieldname="location"] .table-responsive table {
   margin: 0;
+  position: relative;
 }
 [data-fieldname="location"] .table-responsive table thead {
   position: sticky;
-  top: 1px;
+  top: -1px;
   background: #fff;
   z-index: 9999;
+}
+[data-fieldname="location"] .table-responsive table thead th {
+  border-bottom-width: 1px;
+}
+[data-fieldname="location"] .table-responsive table thead:after {
+  content: "";
+  height: 1px;
+  width: 100%;
+  background: #f4f5f6;
+  position: absolute;
+  display: block;
+  bottom: 0;
+}
+[data-fieldname="location"] .table-responsive table thead:before {
+  content: "";
+  height: 2px;
+  width: 100%;
+  background: #f4f5f6;
+  position: absolute;
+  display: block;
 }
 [data-route="List/Salary Component/List"]
   .frappe-card
@@ -1703,6 +1724,13 @@ select.input-with-feedback.form-control.ellipsis {
 }
 [data-fieldtype="Currency"] {
   text-align: left !important;
+}
+#div_rate .control-input-wrapper input {
+  padding-left: 21px;
+}
+#div_rate:after {
+  left: 11px !important;
+  top: 55% !important;
 }
 
 @media (min-width: 768px) {

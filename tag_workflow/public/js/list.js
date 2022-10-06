@@ -191,7 +191,7 @@ frappe.views.ListView.prototype.create_table =function(location){
     }else{
         new_location = location;
     }
-  this.html = `<div class="container">
+  this.html = `<div class="container-fluid">
   <div class="table-responsive">
       <table class="table table-bordered   table-hover">
           <thead>
