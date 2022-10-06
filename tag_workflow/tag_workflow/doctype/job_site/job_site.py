@@ -87,7 +87,7 @@ def exist_values(items):
 @frappe.whitelist()
 def update_changes(doc_name):
 	try:
-		d=f'select JO.name,IT.comp_code,JO.worker_comp_code from `tabJob Order` as JO,`tabIndustry Types Job Titles` as IT where IT.parent="{doc_name}" and JO.order_status!="Completed" and JO.job_site="{doc_name}" and JO.select_job=IT.job_titles  and JO.worker_comp_code!=IT.comp_code;'
+		d=f'select JO.name,IT.comp_code,JO.worker_comp_code from `tabJob Order` as JO inner join `tabIndustry Types Job Titles` as IT on JO.select_job=IT.job_titles where IT.parent="{doc_name}" and JO.job_site="{doc_name}" and (IT.comp_code!="" and IT.comp_code is not null);'
 		job_order=frappe.db.sql(d,as_dict=1)
 		if len(job_order)>0:
 			for i in job_order:

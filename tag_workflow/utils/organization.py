@@ -56,6 +56,7 @@ def setup_data():
         update_old_data_import()
         update_old_direct_order()
         update_old_company_type()
+        update_old_job_sites()
         create_job_applicant()
         set_workspace()
         setup_company_permission()
@@ -363,7 +364,28 @@ def remove_field():
         for f in fields:
             if frappe.db.exists('Custom Field',{'dt':'Job Site','fieldname':f}):
                 frappe.db.sql(""" delete from `tabCustom Field` where dt="Job Site" and fieldname="{0}" """.format(f))
-                print("*************************Field Removed Successfully************************************")
-            print("*******************************"f'{f}'   "not found**********************************************************")
+                frappe.db.commit()
+                print("*************************"f'{f}'   "Field Removed Successfully************************************")
+            else:
+                print("*******************************"f'{f}'   "not found**********************************************************")
+    except Exception as e:
+        print(e)
+def update_old_job_sites():
+    try:
+        sites=f'select name,company from `tabJob Site` where name not in (select `tabJob Site`.name from `tabJob Site` inner join `tabIndustry Types Job Titles` on `tabIndustry Types Job Titles`.parent=`tabJob Site`.name) and company!="";'
+        data=frappe.db.sql(sites,as_dict=1)
+        if(len(data)>0):
+            print("*------updating old job sites---------*\n")
+
+            for i in data:
+                dicts_val=frappe.db.sql('''select industry_type,job_titles,wages as bill_rate,description from `tabJob Titles` where parent="{0}"'''.format(i.company),as_dict=1)
+                if len(dicts_val):
+                    doc=frappe.get_doc('Job Site',i.name)
+                    try:
+                        for j in dicts_val:
+                            doc.append('job_titles',{'industry_type': j['industry_type'], 'job_titles': j['job_titles'], 'bill_rate': j['bill_rate'], 'description': j['description']})
+                        doc.save(ignore_permissions=True)
+                    except Exception as e:
+                        continue
     except Exception as e:
         print(e)
