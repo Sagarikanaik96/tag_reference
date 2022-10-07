@@ -836,7 +836,7 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
             frappe.db.commit()
             job = frappe.get_doc(jobOrder, job_order)
             print(job)
-            job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
+            job_sql = '''select select_job,job_site,posting_date_time,name from `tabJob Order` where name = "{}"'''.format(job_order)
             job_detail = frappe.db.sql(job_sql, as_dict=1)
             lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)
             user_list = frappe.db.sql(lst_sql, as_list=1)
@@ -844,9 +844,9 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
             for user in l:
                 add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)
             sub="Employee Assigned"
-            msg = f'{staffing_org} has assigned the Employees to the {job_detail[0]["select_job"]}'
+            msg = f'{staffing_org} has assigned employees to {job_detail[0]["select_job"]} for {job_detail[0]["name"]}'
             make_system_notification(l,msg,'Assign Employee',doc_name,sub)
-            msg = f'{staffing_org} has assigned the Employees to the {job_detail[0]["select_job"]}'
+            msg = f'{staffing_org} has assigned employees to {job_detail[0]["select_job"]} for {job_detail[0]["name"]}'
             link =  f'  href="{sitename}/app/assign-employee/{doc_name}" '
             joborder_email_template(sub, msg, l, link)
             return 1
