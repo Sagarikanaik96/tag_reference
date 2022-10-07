@@ -8,13 +8,13 @@ def get_link1(name, userid):
    company = frappe.get_doc("Company", name)
    review=[]
    if company.organization_type == 'Staffing':
-      sql= """select * from `tabCompany Review`"""
+      sql= """select * from `tabCompany Review` order by creation desc"""
       data = frappe.db.sql(sql, as_dict=True)
       for i in data:
          if i['staffing_company']== name:
             review.append((i['rating'],i['comments'],i['hiring_company']))
    elif company.organization_type == 'Hiring' or company.organization_type == 'Exclusive Hiring':
-      sql= """select * from `tabHiring Company Review`"""
+      sql= """select * from `tabHiring Company Review` order by creation desc"""
       data= frappe.db.sql(sql, as_dict=True)
       for i in data:
          if i['hiring_company']== name:

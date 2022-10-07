@@ -50,7 +50,6 @@ frappe.FaceRecognition = Class.extend({
 					},
 			callback: function (r) {
 				setTimeout(hide,10);
-
 				let my_val= r.message[0];
 				let txt = "";
 				let text = r.message[2];
@@ -69,7 +68,22 @@ frappe.FaceRecognition = Class.extend({
 				let rate = "";
 				for(let k in r.message[1]){
 					count += 1;
-					rate+= '★'.repeat(r.message[1][k][0]) + "<br>"  + r.message[1][k][1] + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
+					if (r.message[1][k][1]){
+						rate+= '★'.repeat(r.message[1][k][0]) + "<br>"  + r.message[1][k][1] + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
+					}
+					else{
+						rate+= '★'.repeat(r.message[1][k][0]) + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
+					}
+				}
+
+				let rev = "";
+				for(let k in r.message[1].slice(0,10)){
+					if (r.message[1][k][1]){
+						rev+= '★'.repeat(r.message[1][k][0]) + "<br>"  + r.message[1][k][1] + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
+					}
+					else{
+						rev+= '★'.repeat(r.message[1][k][0]) + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
+					}
 				}
 
 				let arr1= add_ress(my_val)
@@ -99,7 +113,7 @@ frappe.FaceRecognition = Class.extend({
 								<div id="jobsite">
 									<div id="address"> ${jobsite_address}</div>
 								</div>
-								${count_val>=10 ? ` <p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#"> <u> ${count} </u> </a> </span> </p>`:'<div></div>'}</div>
+								${count_val>=10 ? ` <p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#" href="#" onclick="return theReviewsFunction('${rate}');"> <u> ${count} </u> </a> </span> </p>`:'<div></div>'}</div>
 							</div>
 							<div class="col-md-6 col-sm-12 order text-left text-md-right ">
                                 <div>
@@ -149,7 +163,7 @@ frappe.FaceRecognition = Class.extend({
 								</div>
 							</div>
 
-							${count_val >=10 ? `<div class="card">
+							<div class="card">
 								<div class="card-body">
 									<div class="card-header">
 										<button class="card-title btn-block text-left " data-toggle="collapse" data-target="#collapse1" aria-expanded="false" aria-controls="collapse">
@@ -162,7 +176,7 @@ frappe.FaceRecognition = Class.extend({
 										</div>
 								</div>
 								</div>
-							</div>`: "<div></div>"}
+							</div>
 
 							<div class="card">
 								<div class="card-body">
@@ -179,7 +193,7 @@ frappe.FaceRecognition = Class.extend({
 								</div>
 							</div>
 
-							 <div class="card">
+							${count_val >=10 ? `<div class="card">
 								<div class="card-body">
 									<div class="card-header">
 										<button class="card-title btn-block text-left " data-toggle="collapse" data-target="#collapse3" aria-expanded="false" aria-controls="collapse">
@@ -188,11 +202,11 @@ frappe.FaceRecognition = Class.extend({
 									</div>
 									<div class="card-text collapse pb-2 show" id="collapse3">
 										<div id="employee"> 
-										${rate} 
+										${rev} 
 										</div>
 									</div>
 								</div>
-							</div>
+							</div>`: "<div></div>"}
 							
 						</div>
 					</div>`;
@@ -405,6 +419,14 @@ function block_company(){
 	})
 }
 
+function theReviewsFunction (rate) {
+	rate = `<div style = "overflow: auto;max-height:500px">${rate}</div>`
+	let pop_up = new frappe.ui.Dialog({
+		title: __('Ratings & Reviews'),
+		fields:[{fieldname: "rate", fieldtype: "HTML", options: rate}]
+	});
+	pop_up.show();
+}
 function unblock_company(){
 	frappe.call({
 		method:'tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.unblock_company',
