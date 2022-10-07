@@ -113,14 +113,14 @@ function favourite_company(company) {
 	frappe.call({
 		method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.favourite_company',
 		"freeze": true,
-		"freeze_message": "<p><b>Adding Company into favorite</b></p>",
+		"freeze_message": "<p><b>Adding Company to favorites</b></p>",
 		args: {
 			'company_to_favourite': company_name,
 			'user_name': frappe.boot.tag.tag_user_info.company
 		},
 		callback: function (r) {
 			if (r.message == "True") {
-				frappe.msgprint("The " + company_name + " is added into favorite successfully.")
+				frappe.msgprint("The " + company_name + " is added to favorites successfully.")
 			}
 		}
 	})
@@ -132,7 +132,7 @@ async function sorted_favourite_company() {
 	a = frappe.call({
 		method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.sorted_favourite_companies',
 		"freeze": true,
-		"freeze_message": "<p><b>Adding Company into Favorites</b></p>",
+		"freeze_message": "<p><b>Adding Company to Favorites</b></p>",
 		args: {
 			'user_name': frappe.boot.tag.tag_user_info.company
 		},

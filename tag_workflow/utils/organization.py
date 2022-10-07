@@ -360,14 +360,22 @@ def create_job_applicant():
 #---------------Remove job site custom field------------------------------------------------------------
 def remove_field():
     try:
-        fields = ['column_break_13','suite_or_apartment_no']
+        fields = ['column_break_13','suite_or_apartment_no','favorite_staffing_company_list']
         for f in fields:
-            if frappe.db.exists('Custom Field',{'dt':'Job Site','fieldname':f}):
-                frappe.db.sql(""" delete from `tabCustom Field` where dt="Job Site" and fieldname="{0}" """.format(f))
-                frappe.db.commit()
-                print("*************************"f'{f}'   "Field Removed Successfully************************************")
+            if f=="favorite_staffing_company_list":
+                if frappe.db.exists('Custom Field',{'dt':'Company','fieldname':f}):
+                    frappe.db.sql(""" delete from `tabCustom Field` where dt="Company" and fieldname="{0}" """.format(f))
+                    frappe.db.commit()
+                    print("*************************"f'{f}'   " Field Removed Successfully************************************")
+                else:
+                    print("*******************************"f'{f}'   " not found**********************************************************")
             else:
-                print("*******************************"f'{f}'   "not found**********************************************************")
+                if frappe.db.exists('Custom Field',{'dt':'Job Site','fieldname':f}):
+                    frappe.db.sql(""" delete from `tabCustom Field` where dt="Job Site" and fieldname="{0}" """.format(f))
+                    frappe.db.commit()
+                    print("*************************"f'{f}'   " Field Removed Successfully************************************")
+                else:
+                    print("*******************************"f'{f}'   " not found**********************************************************")
     except Exception as e:
         print(e)
 def update_old_job_sites():
