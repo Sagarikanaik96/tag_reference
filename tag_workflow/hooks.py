@@ -126,9 +126,9 @@ doctype_list_js = {
         "Item": "public/js/doctype_list/item_list.js",
         "Employee Onboarding Template": "public/js/doctype_list/employee_onboarding_template_list.js",
         "Holiday List": "public/js/doctype_list/holiday_list_view.js",
-        "Salary Component":"public/js/doctype_list/salary_component_list.js"
-
-
+        "Salary Component":"public/js/doctype_list/salary_component_list.js",
+        "Salary Slip": "public/js/doctype_list/salary_slip_list.js",
+        "Payroll Entry": "public/js/doctype_list/payroll_entry_list.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]

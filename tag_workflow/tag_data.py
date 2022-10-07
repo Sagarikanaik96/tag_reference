@@ -1738,3 +1738,23 @@ def validate_user(doc,method):
             frappe.flags.error_message = error_message
             raise frappe.PermissionError(("read", "User", doc.email))
     print(method)
+
+@frappe.whitelist(allow_guest=False)
+def branch_orgid_decrypt(frm_name):
+    try:
+        comp = frappe.get_doc('Company', frm_name)
+        if comp.branch_org_id:
+            return comp.get_password('branch_org_id')
+        return response
+    except Exception:
+        frappe.log_error("No Organization ID in Company", "Warning")
+
+@frappe.whitelist(allow_guest=False)
+def branch_apikey_decrypt(frm_name):
+    try:
+        comp = frappe.get_doc('Company', frm_name)
+        if comp.branch_api_key:
+            return comp.get_password('branch_api_key')
+        return response
+    except Exception:
+        frappe.log_error("No API Key in Company", "Warning")

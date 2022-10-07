@@ -294,3 +294,33 @@ function get_user(frm){
 		}
 	}
 }
+
+function branch_banner(doctype){
+	if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		frappe.db.get_value('Company', {'name': frappe.boot.tag.tag_user_info.company}, ['branch_enabled'], (res)=>{
+			frappe.db.get_value('User', {'name': frappe.session.user}, ['branch_banner'], (r)=>{
+				if(res && r && res.branch_enabled==0 && r.branch_banner==1){
+					let banner_html = `
+					<div class = 'banner-container'>
+						<button id= "close_banner" onclick = close_banner()>
+							<span>&times;</span>
+						</button>
+						<img id = "banner" src= "/assets/tag_workflow/images/branch.jpg">
+						<button id="sign_up" onclick="location.href='https://www.branchapp.com/'">Sign Up</button>
+						<button id="more_info" onclick="location.href='https://get.branchapp.com/demo'">Request More Information</button>
+					</div>
+					<script>
+					function close_banner(){
+						$('#close_banner').hide();
+						$('#banner').hide();
+						$('#sign_up').hide();
+						$('#more_info').hide();
+						frappe.db.set_value('User', frappe.session.user, 'branch_banner', 0);
+					}</script>
+					`
+					$('[data-page-route="List/'+doctype+'/List"] .layout-main-section.frappe-card').prepend(banner_html);
+				}
+			});
+		});
+	}
+}

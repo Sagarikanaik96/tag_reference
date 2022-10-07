@@ -1,3 +1,4 @@
+frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("User", {
 	refresh: function(frm){
 		$('.form-footer').hide();
@@ -34,7 +35,6 @@ frappe.ui.form.on("User", {
 				event.preventDefault();
 			}
 		});
-	frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 	},
 	setup: function(frm){
 		let roles = frappe.user_roles;
