@@ -1722,7 +1722,8 @@ select.input-with-feedback.form-control.ellipsis {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-[data-fieldtype="Currency"] {
+[data-fieldtype="Currency"],
+[data-fieldtype="Currency"] .ellipsis div {
   text-align: left !important;
 }
 #div_rate .control-input-wrapper input {
