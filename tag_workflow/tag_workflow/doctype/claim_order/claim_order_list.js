@@ -290,7 +290,7 @@ function modify_claims(listview) {
                                 <td id="${job_data[p].name}_claim">${job_data[p].staff_claims_no}</td>
                                 <td>${job_data[p].approved_no_of_workers}</td>
                                 <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no} ${job_data[p].hide==1?"disabled":""}></td>
-                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" maxlength="160" > ${(job_data[p].notes).trim()?job_data[p].notes:""}</textarea> </td>
+                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" maxlength="160" > ${(job_data[p].notes)?(job_data[p].notes).trim():""}</textarea> </td>
                                 </tr>`;
           }
           profile_html += `</table><style>th, td {
