@@ -76,15 +76,7 @@ frappe.FaceRecognition = Class.extend({
 					}
 				}
 
-				let rev = "";
-				for(let k in r.message[1].slice(0,10)){
-					if (r.message[1][k][1]){
-						rev+= '★'.repeat(r.message[1][k][0]) + "<br>"  + r.message[1][k][1] + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
-					}
-					else{
-						rev+= '★'.repeat(r.message[1][k][0]) + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
-					}
-				}
+				let rev = get_reviews(r);
 
 				let arr1= add_ress(my_val)
 				let jobsite_address= arr1.join(", ");
@@ -216,6 +208,19 @@ frappe.FaceRecognition = Class.extend({
 		
 	},
 });
+
+function get_reviews(r) {
+	let rev = "";
+	for (let k in r.message[1].slice(0, 10)) {
+		if (r.message[1][k][1]) {
+			rev += '★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][1] + "<br>" + r.message[1][k][2] + "<br>" + "<br>";
+		}
+		else {
+			rev += '★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][2] + "<br>" + "<br>";
+		}
+	}
+	return rev;
+}
 
 function new_order(){
 	let b = document.getElementById('comp_name').innerHTML;
