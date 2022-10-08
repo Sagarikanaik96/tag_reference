@@ -87,7 +87,7 @@ frappe.ui.form.on("Contract", {
 			frm.set_value('addendums', '')
 		}
 		let roles = frappe.user_roles;
-		if(roles.includes('Staffing Admin')|| roles.includes('Tag Admin')){
+		if(roles.includes('Staffing Admin')|| roles.includes('Staffing User') || roles.includes('Tag Admin')){
 			update_table(frm)
 	} 
 	},

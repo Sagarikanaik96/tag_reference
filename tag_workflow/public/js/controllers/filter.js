@@ -1,6 +1,6 @@
 function hide_and_show_tables(frm){
 	let roles = frappe.user_roles;
-	if(roles.includes('Staffing Admin')|| roles.includes('Tag Admin')){
+	if(roles.includes('Staffing Admin')|| roles.includes('Staffing User') || roles.includes('Tag Admin')){
 		frm.set_df_property('_industry_types','hidden',1)
 	} 
 }
