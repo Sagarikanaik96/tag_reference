@@ -26,7 +26,6 @@ NavbarSettings.validate_standard_navbar_items =validate_standard_navbar_items
 Lead.create_contact = create_contact
 Timesheet.update_cost = update_cost
 Timesheet.validate_mandatory_fields = validate_mandatory_fields
-User.send_password_notification=send_password_notification
 def get_key(key):
     try:
         if(frappe.cache().get_value("aws")):
