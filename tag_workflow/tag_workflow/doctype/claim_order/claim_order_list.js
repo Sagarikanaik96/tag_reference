@@ -14,11 +14,15 @@ frappe.listview_settings["Claim Order"] = {
       listview.filters.length == 1 &&
       frappe.boot.tag.tag_user_info.company_type != "Staffing"
     ) {
-      listview.page.set_secondary_action(
-        "Select Head Count",
-        () => refresh(listview),
-        "octicon octicon-sync"
-      );
+      listview.page.set_secondary_action("Select Head Count", () => {
+        refresh(listview);
+      },"octicon octicon-sync");
+      $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_inactive');
+      $('.btn.btn-secondary.btn-default.btn-sm').click(() => {
+        if($('.btn.btn-secondary.btn-default.btn-sm').attr('id')=='popup_inactive'){
+          refresh(listview);
+        }
+      });
     } else if (
       listview.filters.length == 2 &&
       frappe.boot.tag.tag_user_info.company_type != "Staffing"
@@ -186,18 +190,33 @@ function refresh(listview) {
               }
             },
           });
-          new_pop_up.show();
+          show_popup(new_pop_up);
         }
       );
     },
   });
 }
+
+function show_popup(new_pop_up){
+  new_pop_up.$wrapper.on('hidden.bs.modal', () => {
+    $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_inactive');
+  });
+  if($('.btn.btn-secondary.btn-default.btn-sm').attr('id')=='popup_inactive'){
+    $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_active');
+    new_pop_up.show();
+  }
+}
+
 function modify_head_count(listview) {
-  listview.page.set_secondary_action(
-    "Modify Head Count",
-    () => modify_claims(listview),
-    "octicon octicon-sync"
-  );
+  listview.page.set_secondary_action("Modify Head Count",() => {
+    modify_claims(listview);
+  },"octicon octicon-sync");
+  $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_inactive');
+  $('.btn.btn-secondary.btn-default.btn-sm').click(function() {
+    if($('.btn.btn-secondary.btn-default.btn-sm').attr('id')=='popup_inactive'){
+      modify_claims(listview);
+    }
+  });
 }
 function update_no(data_len, l, dict, data, r) {
   let valid = "";
@@ -349,7 +368,13 @@ function modify_claims(listview) {
               }
             },
           });
-          modified_pop_up.show();
+          modified_pop_up.$wrapper.on('hidden.bs.modal', () => {
+            $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_inactive');
+          });
+          if($('.btn.btn-secondary.btn-default.btn-sm').attr('id')=='popup_inactive'){
+            $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_active');
+            modified_pop_up.show();
+          }
         }
       );
     },
