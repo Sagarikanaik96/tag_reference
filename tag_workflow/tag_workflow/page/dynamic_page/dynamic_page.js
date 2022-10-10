@@ -193,7 +193,7 @@ frappe.FaceRecognition = Class.extend({
 										</button>
 									</div>
 									<div class="card-text collapse pb-2 show" id="collapse3">
-										<div id="employee"> 
+										<div id="employee" class="d-block"> 
 										${rev} 
 										</div>
 									</div>
@@ -213,10 +213,10 @@ function get_reviews(r) {
 	let rev = "";
 	for (let k in r.message[1].slice(0, 10)) {
 		if (r.message[1][k][1]) {
-			rev += '★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][1] + "<br>" + r.message[1][k][2] + "<br>" + "<br>";
+			rev += "<div class= 'my-3'>"+'★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][1] + "<br>" + r.message[1][k][2] + "<br>" +"</div>";
 		}
 		else {
-			rev += '★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][2] + "<br>" + "<br>";
+			rev += "<div class= 'my-3'>"+'★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][2] + "<br>"+"</div>";
 		}
 	}
 	return rev;
