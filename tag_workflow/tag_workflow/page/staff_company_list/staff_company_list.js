@@ -120,7 +120,7 @@ function favourite_company(company) {
 		},
 		callback: function (r) {
 			if (r.message == "True") {
-				frappe.msgprint("The " + company_name + " is added to favorites successfully.")
+				frappe.msgprint(company_name + " has been added to favorites.")
 			}
 		}
 	})
@@ -152,7 +152,7 @@ function unfavourite_company(company) {
 		},
 		callback: async function (r) {
 			if (r.message == "False") {
-				frappe.msgprint("The " + company_name + " is removed successfully from favorites.")
+				frappe.msgprint(company_name + " has been removed from favorites.")
 				return "False"
 			}
 		}
