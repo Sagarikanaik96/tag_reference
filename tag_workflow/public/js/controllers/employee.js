@@ -160,6 +160,7 @@ frappe.ui.form.on("Employee", {
 		}
 		$('[data-fieldname= "ssn"]').attr('title', '');
 		$('[data-fieldname = "contact_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
+		branch_card(frm);
 	},
 
 
@@ -272,6 +273,25 @@ frappe.ui.form.on("Employee", {
 	zip: function(frm){
 		let zip = frm.doc.zip;
 		frm.set_value('zip', zip?zip.toUpperCase():zip);
+	},
+	company: (frm)=>{
+		branch_card(frm);
+	},
+	opt_in: (frm)=>{
+		let message = "<b>Please fill the below fields to Opt In for Branch:</b>";
+		if(frm.doc.opt_in==1){
+			let fields = {"First Name": frm.doc.first_name, "Last Name": frm.doc.last_name, "Street Address": frm.doc.street_address, "City": frm.doc.city, "State": frm.doc.state, "Zip": frm.doc.zip, "Date of Birth": frm.doc.date_of_birth, "SSN": frm.doc.sssn, "Contact Number": frm.doc.contact_number, "Email": frm.doc.email};
+			for(let key in fields){
+				if(!fields[key] || fields[key]==undefined || !fields[key].trim()){
+					message = message + '<br>' + '<span>&bull;</span> ' + key;
+				}
+			}
+		}
+		if(message!="<b>Please fill the below fields to Opt In for Branch:</b>"){
+			frappe.msgprint({ message: __(message), title: __('Missing Fields'), indicator: 'orange'});
+			frappe.validated = false;
+			frm.set_value("opt_in", "");
+		}
 	}
 });
 
@@ -657,5 +677,19 @@ function job_title_filter(frm){
 	    })
 	    frm.set_value("job_title_filter",job_categories.join(','));
 	    refresh_field("job_title_filter");
+	}
+}
+
+function branch_card(frm){
+	if(frm.doc.company){
+		frappe.db.get_value("Company", {"name": frm.doc.company}, ["branch_enabled"],(res)=>{
+			if(res.branch_enabled==1){
+				frm.set_df_property("branch_integration", "hidden", 0);
+			}else{
+				frm.set_df_property("branch_integration", "hidden", 1);
+			}
+		});
+	}else{
+		frm.set_df_property("branch_integration", "hidden", 1);
 	}
 }
