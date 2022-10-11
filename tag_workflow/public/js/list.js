@@ -155,6 +155,7 @@ frappe.views.ListView.prototype.display_modal=function(val){
             fields: this.add_fields,
         });
         dialog.show();
+        dialog.fields_dict['location'].disp_area.querySelector('#main').addEventListener('change',(e)=>check_cells(e))
         dialog.set_primary_action(__('Submit'), function() {
             localStorage.setItem('location',1);
             update_radius();
@@ -162,12 +163,15 @@ frappe.views.ListView.prototype.display_modal=function(val){
             cur_list.page_length = 20;
             cur_list.refresh();
             dialog.hide();
+            localStorage.setItem(frappe.session.user+'loc',JSON.stringify(cur_list.filter_loc));
+            
         });
-        setTimeout(()=>{select_deselect_row()},600)    
+        setTimeout(()=>{select_deselect_row()},500)    
     }else{
         if(val == "Clear"){
             localStorage.removeItem('location');
             localStorage.removeItem('radius')
+            localStorage.removeItem(frappe.session.user+'loc');
             this.len = 0;
             this.start = 0;
             this.page_length = 20;
@@ -196,14 +200,15 @@ frappe.views.ListView.prototype.create_table =function(location){
       <table class="table table-bordered   table-hover">
           <thead>
               <tr>
-                  <th class="text-center"><input id="main" type="checkbox"></th>
+                  <th class="text-center"><input id="main" data-val="parent" type="checkbox" ></th>
                   <th>Location</th>
                   <th>Company</th>
               </tr>
           </thead>
-          <tbody>${new_location.map((l)=>`
+          <tbody>${location.map((l)=>`
               <tr>
-                <td class="text-center"><input class="location" value="${l[0]}" type="checkbox"></td>
+                <td class="text-center"><input class="location" data-val="${l[0]}" value="${l[0]}" type="checkbox">
+                </td>
                 <td>${l[0]}</td>
                 <td>${l[1]}</td>
               </tr>`).join("")}
@@ -213,7 +218,28 @@ frappe.views.ListView.prototype.create_table =function(location){
       </table>
   </div>
   </div>
-  `
+  `;
+  let counter = 0;
+  frappe.run_serially([
+    ()=>{
+        location.map((l)=>{
+            if(localStorage.getItem('location')==1 && JSON.parse(localStorage.getItem(frappe.session.user+'loc')).includes(l[0])){
+                counter++;
+                setTimeout(()=>{
+                    $(`.location[data-val="${l[0]}"]`).prop('checked',true);  
+                },400)
+              } 
+          })
+    },
+    ()=>{
+        if(location.length==counter && localStorage.getItem('location')==1){
+            setTimeout(()=>{
+                $('#main[data-val="parent"]').prop('checked',true);
+            },300)
+        }  
+    }]
+  )
+  
   
 }
 /*----------------------add_remove_row--------------------*/
@@ -259,10 +285,15 @@ frappe.views.ListView.prototype.update_button = function(){
     if ([5,10,25,50,100].includes(this.radius))
             document.querySelector(`.btn-loc-rad[data-value="${this.radius}"]`).classList.add('active');
 }
-const select_deselect_row =function(){
+const select_deselect_row =function(e){
     const items = document.querySelectorAll('.location');
-    document.getElementById('main').addEventListener('change',()=>{
-        if(document.getElementById('main').checked){
+    frappe.views.ListView.prototype.single_row_event(items);
+    
+}
+/*----------------------------------check-uncheck cells----------------------------------------------------------------*/
+const check_cells = function(e){
+    const items = document.querySelectorAll('.location');
+        if(e.currentTarget.checked){
             for (let i in items) {
                 if (items[i].type == 'checkbox'){
                     items[i].checked = true;
@@ -277,30 +308,26 @@ const select_deselect_row =function(){
                 }
             }
         }
-    });
-   frappe.views.ListView.prototype.single_row_event(items);
-    
 }
-
-
 function remove_rows(val){
     const index = cur_list.filter_loc.indexOf(val)
     index !== -1 ? cur_list.filter_loc.splice(index,1):console.log(index);
-}
-function add_rows(val){
-    if (localStorage.getItem('location')==1){
-        cur_list.filter_loc = [];
-        cur_list.filter_loc.push(val);
-    }else{
-        cur_list.filter_loc.push(val);
+    if (parseInt(localStorage.getItem('location'))===1){
+        localStorage.setItem(frappe.session.user+'loc',JSON.stringify(cur_list.filter_loc))
     }
 }
-
+function add_rows(val){
+        if(!cur_list.filter_loc.includes(val))
+            cur_list.filter_loc.push(val);
+}
+/*---------------Clear-Storage---------------------*/
 window.onload = function(){
     if (localStorage.getItem('location'))
         localStorage.removeItem('location')
     if (localStorage.getItem('radius'))
         localStorage.removeItem('radius')
+    if (localStorage.getItem(frappe.session.user+'loc'))
+        localStorage.removeItem(frappe.session.user+'loc')
 }
 function update_radius(){
     if([5, 10, 25, 50, 100].includes(parseInt(localStorage.getItem('radius'))))
