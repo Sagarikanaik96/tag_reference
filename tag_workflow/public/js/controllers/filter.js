@@ -1,8 +1,21 @@
+const u_type = frappe.boot.tag.tag_user_info.user_type.toLowerCase();
+const comp =frappe.boot.tag.tag_user_info.company_type;
+const u_roles = ['staffing admin','tag admin']
 function hide_and_show_tables(frm){
-	let roles = frappe.user_roles;
-	if(roles.includes('Staffing Admin')|| roles.includes('Staffing User') || roles.includes('Tag Admin')){
-		frm.set_df_property('_industry_types','hidden',1)
-	} 
+	setTimeout(()=>{
+	if((u_type=='tag admin' && frm.get_docfield('hiring_company').label !='Staffing Company') || (u_type=='staffing admin' && frm.get_docfield('hiring_company').label !='Staffing Company')){
+		
+			frm.set_df_property('job_order_detail','options',update_inner_html('Job Titles'));
+			frm.set_df_property('_industry_types','hidden',1)
+			frm.set_df_property('job_titles','hidden',0)
+			console.log(frm.get_docfield('hiring_company').label)
+		}	
+		else{
+			frm.set_df_property('job_order_detail','options',update_inner_html('Job Industry(ies)'))
+			frm.set_df_property('_industry_types','hidden',0)
+			frm.set_df_property('job_titles','hidden',1)
+		}
+	},3000) 
 }
 
 function filter_row(frm){
@@ -52,3 +65,15 @@ function update_table(frm){
 		])
 }
 
+function update_inner_html(phrase){
+	const inner_html= `\n\t\t\t${phrase}\n\t\t\t<span class="ml-2 collapse-indicator mb-1 tip-top" style="display: inline;"><svg class="icon  icon-sm" style="">\n\t\t\t<use class="mb-1" id="up-down" href="#icon-down"></use>\n\t\t</svg></span>\n\t\t`;
+	$(".frappe-control[data-fieldname='job_titles']").parent().parent().parent('.section-body').siblings('.section-head').html(inner_html)
+	return 1
+}	
+
+if (frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type =='Exclusive Hiring' || u_roles.includes(u_type)){
+jQuery(document).on("click",`.tip-top,.${$(".frappe-control[data-fieldname='job_titles']").parent().parent().parent('.section-body').siblings('.section-head').attr('class')}`,function(){
+	const cls = $(".frappe-control[data-fieldname='job_titles']").parent().parent().parent('.section-body').siblings('.section-head').hasClass('collapsed')
+	cls ? $('#up-down').attr('href',"#icon-down") : $('#up-down').attr('href',"#icon-up-line")
+	});
+}

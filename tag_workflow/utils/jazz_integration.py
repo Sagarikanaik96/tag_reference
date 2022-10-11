@@ -3,7 +3,7 @@ from frappe import _, msgprint, throw
 import json, requests, time
 from rq import Queue, Worker
 from frappe.utils.background_jobs import get_redis_conn
-from frappe.utils import now
+from frappe.utils import now_datetime
 from tag_workflow.utils.notification import make_system_notification
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
@@ -16,13 +16,18 @@ JAZZHR_RATE_LIMIT_CALLS = 80
 JAZZHR_RATE_LIMIT_SECONDS = 40
 JAZZHR_MAX_ITR = 1500
 
+DATE_FORMAT = "%m-%d-%Y"
+TIME_FORMAT = "%H:%M"
+DATETIME_FORMAT = DATE_FORMAT + " " + TIME_FORMAT
+now = now_datetime().strftime(DATETIME_FORMAT)
+
 NOTIFY_METHOD ="tag_workflow.utils.jazz_integration.notify_user"
-INITIATED_MSG = f'Request to Grab New Records from JazzHR started at {now()}. This process will run in the background. A notification will be received when the job completes.'
-UPDATE_MSG = f'Request to Update Existing Records from JazzHR started at {now()}. This process will run in the background. A notification will be received when the job completes.'
-ERROR_UPDATE_RECORD_MSG = f'Update Existing Records from JazzHR has completed with errors at {now()}. Please reach out to customer support for troubleshooting.'
-ERROR_INSERT_RECORD_MSG = f'Grab New Records from JazzHR has completed with errors at {now()}. Please reach out to customer support for troubleshooting.'
-SUCCESS_UPDATE_RECORD_MSG = f'Update Existing Records from JazzHR has completed successfully at {now()}.'
-SUCCESS_INSERT_RECORD_MSG = f'Grab New Records from JazzHR has completed successfully at {now()}.'
+INITIATED_MSG = f'Request to Grab New Records from JazzHR started at {now}. This process will run in the background. A notification will be received when the job completes.'
+UPDATE_MSG = f'Request to Update Existing Records from JazzHR started at {now}. This process will run in the background. A notification will be received when the job completes.'
+ERROR_UPDATE_RECORD_MSG = f'Update Existing Records from JazzHR has completed with errors at {now}. Please reach out to customer support for troubleshooting.'
+ERROR_INSERT_RECORD_MSG = f'Grab New Records from JazzHR has completed with errors at {now}. Please reach out to customer support for troubleshooting.'
+SUCCESS_UPDATE_RECORD_MSG = f'Update Existing Records from JazzHR has completed successfully at {now}.'
+SUCCESS_INSERT_RECORD_MSG = f'Grab New Records from JazzHR has completed successfully at {now}.'
 
 @frappe.whitelist()
 def jazzhr_fetch_applicants(api_key, company):
@@ -234,7 +239,6 @@ def jazzhr_make_sql(api_key, company):
                 frappe.enqueue(NOTIFY_METHOD,company=company,msg=ERROR_INSERT_RECORD_MSG,action=2)
             else:
                 frappe.enqueue(NOTIFY_METHOD,company=company,msg=SUCCESS_INSERT_RECORD_MSG,action=2)
-            free_redis(company,2,redis)
     except Exception as e:
         frappe.db.rollback()
         frappe.log_error(e, "JazzHR sql query")
@@ -315,7 +319,6 @@ def jazz_make_emp_update_queue(api_key, company, start, end, emp_list):
             frappe.enqueue(NOTIFY_METHOD,company=company,msg=ERROR_UPDATE_RECORD_MSG,action=1)
         else:
             frappe.enqueue(NOTIFY_METHOD,company=company,msg=SUCCESS_UPDATE_RECORD_MSG,action=1)
-        free_redis(company,1,redis)
     except Exception as e:
         frappe.log_error(e, "jazz_make_emp_update_queue")
         check_sent_notification(company,1)
@@ -413,6 +416,7 @@ def notify_user(company,msg,action=None):
             insert = rds.get('Insert'+str(company)) if rds.get('Insert'+str(company)) is not None else None
             if (action == 1 and update is not None) or (action == 2 and insert is not None):
                 make_system_notification(users,msg,'Company',company,sub)
+                free_redis(company,action,rds)
     except Exception as e:
         frappe.log_error(e,'user notification error')
 
@@ -427,7 +431,13 @@ def check_sent_notification(company, action):
         frappe.log_error(e,'check_sent_notifiy_error')
 
 def free_redis(company,action,redis):
-   redis.delete('Update'+str(company)) if action ==1 else redis.delete('Insert'+str(company)) 
+    try:
+        if action ==1: 
+            redis.delete('Update'+str(company)) 
+        else:
+            redis.delete('Insert'+str(company))
+    except Exception as e:
+        frappe.log_error(e,'redis_error') 
 
 def get_user_list(company):
     try:

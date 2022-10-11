@@ -468,7 +468,8 @@ frappe.ui.form.on("Company", {
 	before_save: function(frm){
 		cur_frm.doc.employees=[];
 		cur_frm.doc.enable_perpetual_inventory=0;
-		if(frappe.boot.tag.tag_user_info.company_type =='Hiring' || frappe.boot.tag.tag_user_info.company_type =='Exclusive Hiring'){
+		const u_type = frappe.boot.tag.tag_user_info.user_type.toLowerCase();
+		if(frappe.boot.tag.tag_user_info.company_type =='Hiring' || frappe.boot.tag.tag_user_info.company_type =='Exclusive Hiring' || u_type=='tag admin' || u_type=='staffing admin'){
 			update_table(frm)
 		}
 		if(frm.doc.branch_enabled==0){
@@ -1071,21 +1072,34 @@ function mandatory_fields(frm){
 		frappe.validated = false;
 	}
 }
+const u_type = frappe.boot.tag.tag_user_info.user_type.toLowerCase();
+const u_roles = ['staffing admin','tag admin']
+const comp =frappe.boot.tag.tag_user_info.company_type;
 
 function hide_and_show_tables(frm){
-	const comp =frappe.boot.tag.tag_user_info.company_type;
-	if(comp){
-		frm.set_df_property('other_details','options', comp == 'Hiring'|| comp =='Exclusive Hiring'?update_inner_html('Job Titles'):update_inner_html('Job Industry(ies)'));
-		frm.set_df_property('industry_type','hidden',comp =='Hiring'||comp == 'Exclusive Hiring'? 1:0)
-		frm.set_df_property('job_titles','hidden',comp == 'Hiring' || comp == 'Exclusive Hiring'? 0:1)
+	if(comp == 'Hiring'|| comp =='Exclusive Hiring' || (u_type=='tag admin' && !['Staffing','TAG'].includes(frm.doc.organization_type) || (u_type=='staffing admin' && frm.doc.organization_type=='Exclusive Hiring'))){
+		frm.set_df_property('other_details','options',update_inner_html('Job Titles'));
+		frm.set_df_property('industry_type','hidden',1)
+		frm.set_df_property('job_titles','hidden', 0)
+	}
+	else if(u_type=='tag admin' && comp.toLowerCase=='tag'){
+		frm.set_df_property('other_details','options',update_inner_html('Job Industry(ies)'))
+		frm.set_df_property('industry_type','hidden',0)
+		frm.set_df_property('job_titles','hidden', 0)	
+	}
+	else{
+		frm.set_df_property('other_details','options',update_inner_html('Job Industry(ies)'))
+		frm.set_df_property('industry_type','hidden',0)
+		frm.set_df_property('job_titles','hidden', 1)	
 	} 
 }
 function update_inner_html(phrase){
 	const inner_html= `\n\t\t\t${phrase}\n\t\t\t<span class="ml-2 collapse-indicator mb-1 tip-top" style="display: inline;"><svg class="icon  icon-sm" style="">\n\t\t\t<use class="mb-1" id="up-down" href="#icon-down"></use>\n\t\t</svg></span>\n\t\t`;
 	$(".frappe-control[data-fieldname='job_titles']").parent().parent().parent('.section-body').siblings('.section-head').html(inner_html)
+	return 1
 }
 
-if (frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type =='Exclusive Hiring'){
+if (frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type =='Exclusive Hiring' || u_roles.includes(u_type)){
 jQuery(document).on("click",`.tip-top,.${$(".frappe-control[data-fieldname='job_titles']").parent().parent().parent('.section-body').siblings('.section-head').attr('class')}`,function(){
 	const cls = $(".frappe-control[data-fieldname='job_titles']").parent().parent().parent('.section-body').siblings('.section-head').hasClass('collapsed')
 	cls ? $('#up-down').attr('href',"#icon-down") : $('#up-down').attr('href',"#icon-up-line")
