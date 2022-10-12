@@ -38,10 +38,6 @@ frappe.ui.form.on("Assign Employee", {
     back_job_order_form(frm);
     document_download();
 
-    if (frappe.boot.tag.tag_user_info.company_type == "Staffing" && frm.doc.notes) {
-      frm.set_df_property("notes", "read_only", 1);
-    }
-
     $('[data-fieldname="company"]').css("display", "block");
 
     $(document).on("click", '[data-fieldname="company"]', function () {
@@ -1297,9 +1293,6 @@ function update_value(frm,r){
   frm.set_value("claims_approved", r.message[0].approved_no_of_workers);
   frm.set_value("company", r.message[0].staffing_organization);
   frm.set_value('notes',r.message[0].notes);
-  if(frm.doc.notes){
-    frm.set_df_property("notes", "read_only", 1);
-  }
 
   frm.set_query("company", function () {
     return {
