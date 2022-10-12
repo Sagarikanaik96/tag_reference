@@ -438,7 +438,7 @@ def get_user_list(company):
         sql = None
         if 'Tag Admin' in frappe.get_roles(frappe.session.user): 
             sql = """ select parent from `tabHas Role`
-            where role ="Staffing Admin"
+            where role in ("Staffing Admin","Staffing User")
             and parent in(select name from `tabUser`
             where company = '{0}' and enabled= '1') 
             UNION
@@ -449,7 +449,7 @@ def get_user_list(company):
             """.format(company)
         else:
             sql = """ select parent from `tabHas Role`
-            where role ="Staffing Admin"
+            where role in ("Staffing Admin","Staffing User")
             and parent in(select name from `tabUser`
             where company = '{0}' and enabled= '1' ) """.format(company)
         user_list = frappe.db.sql(sql, as_dict=1)
