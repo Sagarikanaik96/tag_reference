@@ -469,7 +469,7 @@ frappe.ui.form.on("Company", {
 		cur_frm.doc.employees=[];
 		cur_frm.doc.enable_perpetual_inventory=0;
 		const u_type = frappe.boot.tag.tag_user_info.user_type.toLowerCase();
-		if(frappe.boot.tag.tag_user_info.company_type =='Hiring' || frappe.boot.tag.tag_user_info.company_type =='Exclusive Hiring' || u_type=='tag admin' || u_type=='staffing admin'){
+		if(frappe.boot.tag.tag_user_info.company_type =='Hiring' || frappe.boot.tag.tag_user_info.company_type =='Exclusive Hiring' || u_type=='tag admin'){
 			update_table(frm)
 		}
 		if(frm.doc.branch_enabled==0){
