@@ -269,6 +269,7 @@ frappe.ui.form.on("Job Order", {
 			if (frappe.validated) {
 				frm.set_df_property('select_days','reqd',0)
 			}
+			check_increase_headcount(frm)
 
 		}
 	},
@@ -1172,6 +1173,18 @@ function sales_invoice_data(frm){
 function set_custom_base_price(frm){
 	frm.set_value("base_price",frm.doc.rate);
 	frm.set_value("rate_increase",frm.doc.per_hour-frm.doc.rate);
+}
+
+function check_increase_headcount(frm){
+	frappe.call({
+		'method':'tag_workflow.tag_workflow.doctype.job_order.job_order.check_increase_headcounts',
+		'args':{
+			'no_of_workers_updated':frm.doc.no_of_workers,
+			'name':frm.doc.name,
+			'company':frm.doc.company,
+			'select_job':frm.doc.select_job
+		}
+	})
 }
 
 function hide_unnecessary_data(frm){

@@ -20,6 +20,8 @@ taxes= "Sales Taxes and Charges"
 team = "Sales Team"
 ASN = "Assign Employee"
 CLM = "Claim Order"
+jobOrder = 'Job Order Notification'
+doc_name_job_order = 'Job Order'
 
 site = frappe.utils.get_url().split('/')
 sitename = site[0]+'//'+site[2]
@@ -209,7 +211,7 @@ def is_send_mail_required(organizaton,doc_name,msg):
             staffing_name = frappe.db.sql(sql, as_list = True) 
             for value in staffing_name:
                 staffing_list.append(value[0])
-                subject = 'Job Order Notification'
+                subject = jobOrder
         if staffing_list:
             make_system_notification(staffing_list, message = msg, doctype = ORD, docname =  doc_name, subject = subject)
             sendmail(emails = staffing_list, message = msg, subject = subject, doctype = ORD, docname = doc_name)
@@ -269,7 +271,7 @@ def after_denied_joborder(staff_company,joborder_name,job_title,hiring_name):
         jb_ord = frappe.get_doc(ORD,joborder_name)
         jb_ord.is_single_share = 0
         jb_ord.save(ignore_permissions = True)
-        subject = 'Job Order Notification'
+        subject = jobOrder
         msg=f'{staff_company} unable to fulfill claim on your work order: {job_title}.'
         make_system_notification(hiring_user_list,msg,ORD,joborder_name,subject)   
         sendmail(emails = hiring_user_list, message = msg, subject = subject, doctype = ORD, docname = joborder_name)
@@ -602,7 +604,7 @@ def claim_data_list(job_order_name=None,exist_comp=None):
 
 @frappe.whitelist()
 def hiring_diff_status(job_order_name):
-    doc=frappe.get_doc('Job Order',job_order_name)
+    doc=frappe.get_doc(doc_name_job_order,job_order_name)
     sql=f'select docstatus from `tabSales Invoice` where job_order="{job_order_name}"'
     invoice_comp_data=frappe.db.sql(sql,as_list=1)
     if(len(invoice_comp_data)>0 and doc.order_status=='Completed'):
@@ -653,7 +655,7 @@ def change_assigned_emp(doc_name, new_data=None):
 # for claculating headcount and submit
 @frappe.whitelist()
 def submit_headcount(job_order, staff_company):
-    data=frappe.get_doc('Job Order',job_order)
+    data=frappe.get_doc(doc_name_job_order,job_order)
     claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{job_order}"'
     data1=frappe.db.sql(claims,as_list=1)
     if(data1[0][0]!=None):
@@ -791,6 +793,20 @@ def claim_order_updated_by(docname,staff_company):
     except Exception as e:
         frappe.log_error(e, 'Claim order Error')
         print(e, frappe.get_traceback())
+
+@frappe.whitelist()
+def check_increase_headcounts(no_of_workers_updated,name,company,select_job):
+    sql = f'select no_of_workers from `tabJob Order` where name="{name}"'
+    old_headcounts = frappe.db.sql(sql, as_list=1)
+    if int(no_of_workers_updated)>(old_headcounts[0][0]):
+        sql = '''select email from `tabUser` where organization_type="staffing"'''
+        share_list = frappe.db.sql(sql, as_list = True)
+        share_user_list = [user[0] for user in share_list]
+        subject = jobOrder
+        link =  f'  href="{sitename}/app/job-order/{name}" '
+        msg=f'{company} has increased the number of requested employees to {no_of_workers_updated} on {name} for {select_job}.'
+        make_system_notification(share_user_list,msg,doc_name_job_order,name,subject)
+        joborder_email_template(subject,msg,share_user_list,link)
 
 
 @frappe.whitelist()
