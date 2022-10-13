@@ -87,17 +87,6 @@ frappe.ui.form.on('Claim Order', {
 		}
 		update_claim_by_staffing(frm)
 
-		$(document).on('click', '[data-fieldname="staffing_organization"]', function () {
-			companyhide(1250)
-		});
-
-		$('[data-fieldname="staffing_organization"]').mouseover(function () {
-			companyhide(300)
-		})
-
-		document.addEventListener("keydown", function () {
-			companyhide(300)
-		});
 		setTimeout(hr, 1000);
 		frm.set_df_property('agree_to_contract', 'label', 'Agree To Contract <span style="color: red;">&#42;</span>');
 		frm.set_df_property('staff_claims_no', 'label', 'No. of Employees to Claim <span style="color: red;">&#42;</span>');
@@ -297,18 +286,6 @@ function update_claim_by_staffing(frm) {
 			}
 		})
 	}
-}
-
-function companyhide(time) {
-	setTimeout(() => {
-		let txt = $('[data-fieldname="staffing_organization"]')[1].getAttribute('aria-owns')
-		let txt2 = 'ul[id="' + txt + '"]'
-		let arry = document.querySelectorAll(txt2)[0].children
-		document.querySelectorAll(txt2)[0].children[arry.length - 2].style.display = 'none'
-		document.querySelectorAll(txt2)[0].children[arry.length - 1].style.display = 'none'
-
-
-	}, time)
 }
 
 function hr() {
