@@ -20,6 +20,7 @@ jobOrder = 'Job Order'
 claimOrder = "Claim Order"
 EPR = 'Employee Pay Rate'
 AssignEmp= 'Assign Employee'
+SCC="Staffing Comp Code"
 
 @frappe.whitelist()
 def staffing_claim_joborder(job_order,hiring_org, staffing_org, doc_name,single_share,no_required,no_assigned):
@@ -399,3 +400,55 @@ def hide_and_show(c,doc_name,assigned_worker):
 	except Exception as e:
 		print(e,frappe.utils.get_traceback())
 
+
+@frappe.whitelist()
+def create_staff_comp_code(job_title,job_site,industry_type, staff_class_code, staffing_company,staff_class_code_rate):
+	try:
+		if(len(staff_class_code)>0):
+			job_titlename=job_title_value(job_title)
+			state=frappe.db.get_value('Job Site',job_site,['state'])
+			comp_code=frappe.db.sql('select name from `tabStaffing Comp Code` where job_industry="{0}" and state="{1}" and staffing_company="{2}" and job_title like "{3}%"'.format(industry_type,state,staffing_company,job_titlename),as_dict=1)
+			if len(comp_code)>0:
+				code_rate,class_code = frappe.db.get_value(SCC, {"name": comp_code[0].name}, ['rate','class_code'])
+				if code_rate != staff_class_code_rate or class_code!=staff_class_code:
+					frappe.db.set_value(SCC, comp_code[0].name,"rate", staff_class_code_rate)
+					frappe.db.set_value(SCC, comp_code[0].name,"class_code", staff_class_code)
+			else:
+				doc = frappe.new_doc(SCC)
+				doc.job_industry = industry_type
+				doc.job_title = job_titlename
+				doc.state = state
+				doc.staffing_company = staffing_company
+				doc.rate=staff_class_code_rate
+				doc.class_code=staff_class_code
+				doc.insert()
+	except Exception as e:
+		frappe.log_error(e, 'Set Class Code Error')
+		print(e, frappe.get_traceback())
+def job_title_value(job_title):
+	job_title_name=job_title.split('-')
+	if(len(job_title_name)==1):
+		job_titlename=job_title
+	else:
+		job_names=job_title_name[-1]
+		if((job_names).isnumeric()):
+			last_occurence=job_title.rfind("-")
+			job_titlename=job_title[0:last_occurence]
+		else:
+			job_titlename=job_title
+	return job_titlename
+@frappe.whitelist()
+def check_already_exist_class_code(job_order,staffing_company):
+	try:
+		job_title,job_site,industry_type=frappe.db.get_value(jobOrder,job_order,['select_job', 'job_site','category'])
+		job_titlename=job_title_value(job_title)
+		state=frappe.db.get_value('Job Site',job_site,['state'])
+		comp_code=frappe.db.sql('select name from `tabStaffing Comp Code` where job_industry="{0}" and state="{1}" and staffing_company="{2}" and job_title like "{3}%"'.format(industry_type,state,staffing_company,job_titlename),as_dict=1)
+		if len(comp_code)>0:
+			class_code,rate=frappe.db.get_value('Staffing Comp Code',comp_code[0].name,['class_code','rate'])
+			return class_code,rate
+		else:
+			return ['Exist']
+	except Exception as e:
+		frappe.log_error(e, 'Set Class Code Error')
+		print(e, frappe.get_traceback())

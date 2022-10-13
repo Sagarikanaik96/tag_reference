@@ -6,6 +6,7 @@ let note = '';
 frappe.ui.form.on("Assign Employee", {
   refresh: function (frm) {
     setTimeout(add_dynamic, 500);
+    hide_class_code_rate(frm);
     select_employees(frm);
     setTimeout(function () {
       staffing_company(frm);
@@ -126,6 +127,7 @@ frappe.ui.form.on("Assign Employee", {
     cur_frm.refresh_fields();
     if (frm.doc.company && frm.doc.__islocal == 1) {
       set_pay_rate(frm);
+      check_class_code(frm)
     }
   },
 
@@ -161,7 +163,7 @@ frappe.ui.form.on("Assign Employee", {
     });
     create_pay_rate(frm);
     update_workers_filled(frm);
-
+    create_staff_comp_code(frm)
   },
   validate: function (frm) {
     let emp_pay_rate = frm.doc.employee_pay_rate;
@@ -1130,12 +1132,16 @@ function set_payrate_field(frm) {
     (r) => {
       if (r.order_status == "Completed") {
         frm.set_df_property("employee_pay_rate", "read_only", 1);
+        frm.set_df_property('staff_class_code', 'read_only', 1);
+				frm.set_df_property('staff_class_code_rate', 'read_only', 1);
       } else if (
         !["Hiring", "Exclusive Hiring"].includes(
           frappe.boot.tag.tag_user_info.company_type
         )
       ) {
         $('[data-fieldname = "employee_pay_rate"]').attr("id", "emp_pay_rate");
+        $('[data-fieldname = "staff_class_code_rate"]').attr('id', 'staff_pay_rate');
+
       }
     }
   );
@@ -1314,5 +1320,43 @@ function update_workers_filled(frm){
         job_order_name:frm.doc.job_order
       }
     })
+  }
+}
+function create_staff_comp_code(frm){
+	frappe.db.get_value('Job Order',{'name':frm.doc.job_order},['select_job', 'job_site','category'], function(r){
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.create_staff_comp_code",
+			args:{
+				"job_title": r.select_job,
+				"job_site": r.job_site,
+				"industry_type":r.category,
+				"staff_class_code": frm.doc.staff_class_code?frm.doc.staff_class_code:'' ,
+				"staffing_company": frm.doc.company,
+				"staff_class_code_rate":frm.doc.staff_class_code_rate
+			}
+		})
+	})
+}
+function check_class_code(frm){
+	if(frm.doc.__islocal==1){
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.check_already_exist_class_code",
+			args:{
+				"job_order":frm.doc.job_order,
+				"staffing_company": frm.doc.company,
+			},
+			callback:function(r){
+				if(r.message[0]!='Exist'){
+					frm.set_value('staff_class_code',r.message[0]);
+					frm.set_value('staff_class_code_rate',r.message[1]);
+				}				
+			}
+		})
+	}
+}
+function hide_class_code_rate(frm){
+  if(frm.doc.__islocal==1 && frm.doc.resume_required==0){
+    frm.set_df_property('staff_class_code','hidden',1)
+    frm.set_df_property('staff_class_code_rate','hidden',1)
   }
 }

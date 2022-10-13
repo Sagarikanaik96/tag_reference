@@ -14,6 +14,8 @@
   "job_category",
   "claims_approved",
   "employee_pay_rate",
+  "staff_class_code",
+  "staff_class_code_rate",
   "column_break_3",
   "tag_status",
   "hiring_organization",
@@ -254,12 +256,24 @@
    "hidden": 1,
    "label": "Employee Removed",
    "options": "Removed Employee List"
+  },
+  {
+   "depends_on": "eval:frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring' && frappe.boot.tag.tag_user_info.company_type!='Hiring'",
+   "fieldname": "staff_class_code",
+   "fieldtype": "Data",
+   "label": "Class Code"
+  },
+  {
+   "depends_on": "eval:frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring' && frappe.boot.tag.tag_user_info.company_type!='Hiring'",
+   "fieldname": "staff_class_code_rate",
+   "fieldtype": "Currency",
+   "label": "Rate"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-24 02:18:16.841230",
+ "modified": "2022-10-07 08:10:52.701466",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",

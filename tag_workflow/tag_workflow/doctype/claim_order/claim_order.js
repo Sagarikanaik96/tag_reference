@@ -9,6 +9,7 @@ frappe.ui.form.on('Claim Order', {
 			claim_order_save(frm)
 		}
 		create_pay_rate(frm);
+		create_staff_comp_code(frm);
 	},
 	before_save: function (frm) {
 		if (!frm.doc.hiring_organization) {
@@ -136,6 +137,7 @@ frappe.ui.form.on('Claim Order', {
 					else {
 						frm.refresh_fields();
 					}
+					check_class_code(frm)
 				}
 			});
 		}
@@ -376,9 +378,12 @@ function set_payrate_field(frm){
 		frappe.db.get_value('Job Order', {'name': frm.doc.job_order}, ['order_status'], (r)=>{
 			if(r.order_status == 'Completed'){
 				frm.set_df_property('employee_pay_rate', 'read_only', 1);
+				frm.set_df_property('staff_class_code', 'read_only', 1);
+				frm.set_df_property('staff_class_code_rate', 'read_only', 1);
 			}
 			else if(!['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type)){
 				$('[data-fieldname = "employee_pay_rate"]').attr('id', 'emp_pay_rate');
+				$('[data-fieldname = "staff_class_code_rate"]').attr('id', 'staff_pay_rate');
 				set_pay_rate(frm);
 				submit_claim(frm);
 			}
@@ -450,4 +455,37 @@ function check_pay_rate(frm){
 			}
 		});
 	});
+}
+
+function create_staff_comp_code(frm){
+	frappe.db.get_value('Job Order',{'name':frm.doc.job_order},['select_job', 'job_site','category'], function(r){
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.create_staff_comp_code",
+			args:{
+				"job_title": r.select_job,
+				"job_site": r.job_site,
+				"industry_type":r.category,
+				"staff_class_code": frm.doc.staff_class_code?frm.doc.staff_class_code:'' ,
+				"staffing_company": frm.doc.staffing_organization,
+				"staff_class_code_rate":frm.doc.staff_class_code_rate
+			}
+		})
+	})
+}
+function check_class_code(frm){
+	if(frm.doc.__islocal==1){
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.check_already_exist_class_code",
+			args:{
+				"job_order":frm.doc.job_order,
+				"staffing_company": frm.doc.staffing_organization,
+			},
+			callback:function(r){
+				if(r.message[0]!='Exist'){
+					frm.set_value('staff_class_code',r.message[0]);
+					frm.set_value('staff_class_code_rate',r.message[1]);
+				}				
+			}
+		})
+	}
 }
