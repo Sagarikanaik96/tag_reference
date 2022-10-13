@@ -40,7 +40,7 @@ frappe.ui.form.on('Add Timesheet', {
 
 		let jo=localStorage.getItem("order")
 		let len_history = frappe.route_history.length;
-		if(frappe.route_history.length>=3 && (frappe.route_history[len_history-1][1]=='Add Timesheet' || frappe.route_history[len_history-3][1]=='Job Order' )){
+		if((frappe.route_history.length>=3 && (frappe.route_history[len_history-1][1]=='Add Timesheet') && frappe.boot.tag.tag_user_info.company_type!='Staffing' ) ||  frappe.boot.tag.tag_user_info.company_type=='Staffing' ){
 			if(localStorage){
 				cur_frm.set_value("job_order", jo);
 			}
@@ -49,6 +49,7 @@ frappe.ui.form.on('Add Timesheet', {
 			cur_frm.set_value("job_order", '');
 		}
 		setTimeout(status_field,1000);
+		setTimeout(checking_selected_values,2000);
 		if(frm.doc.job_order){
 			update_title(frm);
 		}
@@ -58,7 +59,6 @@ frappe.ui.form.on('Add Timesheet', {
 	job_order: function(frm){
 		if(frm.doc.job_order){
 			set_def_time()
-			cur_frm.set_value('date','')
 			show_desc(frm);
 			update_title(frm);
 		}
@@ -160,14 +160,16 @@ function check_date(frm){
 /*------------------------------------*/
 function get_employee_data(frm){
 	cur_frm.clear_table("items");
+	let timesheet_list=localStorage.getItem("timesheet_to_update")
 	frappe.call({
 		method: "tag_workflow.utils.timesheet.get_timesheet_data",
-		args: {"job_order": frm.doc.job_order, "user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,'date':frm.doc.date},
+		args: {"job_order": frm.doc.job_order, "user": frappe.session.user, "company_type": frappe.boot.tag.tag_user_info.company_type,'date':frm.doc.date,'timesheets_to_update':timesheet_list},
 		async: 1,
 		freeze: true,
 		freeze_message: "Please wait while we are fetching data...",
 		callback: function(r){
 			if(r){
+				localStorage.setItem("timesheet_to_update", '');
 				cur_frm.clear_table("items");
 				let data = r.message || [];
 				for(let d in data){
@@ -340,6 +342,7 @@ function get_amount(frm, hours, breaks, child){
 	let per_hour_rate=cur_frm.doc.total_per_hour_rate
 	let emp=child.employee
 	if(total_hour>0 && frm.doc.from_time && frm.doc.to_time){
+		frappe.model.set_value(child.doctype, child.name, "hours", Math.round(total_hour * 100) / 100);
 		frappe.call({
 			method:'tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_list_page_calculation',
 			args:{timesheet:"None",jo:job_order, timesheet_date:timesheet_date, employee:emp,working_hours:total_hour,total_flat_rate:additional_rate,per_hour_rate:per_hour_rate,from_time:child.from_time},
@@ -353,13 +356,19 @@ function get_amount(frm, hours, breaks, child){
 				if(r.message[1]>0){
 					overtime_rate = (cur_frm.doc.total_per_hour_rate*1.5)+cur_frm.doc.additional_flat_rate;
 				}
-				frappe.model.set_value(child.doctype, child.name, "hours", Math.round(total_hour * 100) / 100);
 				frappe.model.set_value(child.doctype, child.name, "working_hours", Math.round(normal_hours * 100) / 100);
 				frappe.model.set_value(child.doctype, child.name, "overtime_hours", Math.round(overtime_hours * 100) / 100);
 				frappe.model.set_value(child.doctype, child.name, "overtime_rate", Math.round(overtime_rate * 100) / 100);
 				frappe.model.set_value(child.doctype, child.name, "amount", r.message[0]);
 			}
 		})
+	}
+	else{
+		frappe.model.set_value(child.doctype, child.name, "hours", Math.round(total_hour * 100) / 100);
+		frappe.model.set_value(child.doctype, child.name, "working_hours", Math.round(normal_hours * 100) / 100);
+		frappe.model.set_value(child.doctype, child.name, "overtime_hours", 0);
+		frappe.model.set_value(child.doctype, child.name, "overtime_rate", 0);
+		frappe.model.set_value(child.doctype, child.name, "amount", 0);
 	}
 }
 
@@ -636,4 +645,15 @@ function set_def_time(){
 	cur_frm.set_value("to_time", "");
 	cur_frm.set_value("break_from_time", "");
 	cur_frm.set_value("break_to_time", "");
+}
+function checking_selected_values(){
+	cur_frm.set_value('date','')
+	if(localStorage.getItem('date')!=''){
+		let jo=localStorage.getItem("job_order")
+		let date=localStorage.getItem("date")
+		cur_frm.set_value('job_order',jo)
+		cur_frm.set_value('date',date)
+		localStorage.setItem("job_order", '');
+        localStorage.setItem("date", '');
+	}
 }

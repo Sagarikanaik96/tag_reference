@@ -45,7 +45,7 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
 
 #----------timesheet------------------#
 @frappe.whitelist()
-def get_timesheet_data(job_order, user, company_type,date):
+def get_timesheet_data(job_order, user, company_type,date,timesheets_to_update=None):
     try:
         jo= frappe.get_doc(JOB, job_order)
         comp= jo.owner
@@ -74,9 +74,9 @@ def get_timesheet_data(job_order, user, company_type,date):
                 print(d['employee_id'],d['employee_name'])
             removed_emp_data=[{"employee": d['employee_id'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee_id'], "company"), "status": "Removed","timesheet_name":"","break_from":"","break_to":"","billing_amount":0.00,"tip":0.00,"overtime_hours":0.00,"overtime_rate":0.00} for d in removed_emp]
             data1=result+rep_result+removed_emp_data
-            open_exist=frappe.db.sql('select TS.name as name,employee,from_time,to_time,TD.break_start_time as break_from,TD.break_end_time as break_to,TD.hours as hours,tip,billing_amount,TD.extra_hours as extra_hours,TD.extra_rate as extra_rate,TS.no_show,TS.non_satisfactory,TS.dnr from `tabTimesheet` as TS,`tabTimesheet Detail` as TD where job_order_detail="{0}" and date_of_timesheet="{1}" and TS.name=TD.parent and workflow_state="Open" order by TS.name desc'.format(job_order,date),as_dict=True)
+            open_exist=frappe.db.sql('select TS.name as name,employee,from_time,to_time,TD.break_start_time as break_from,TD.break_end_time as break_to,TD.hours as hours,tip,billing_amount,TD.extra_hours as extra_hours,TD.extra_rate as extra_rate,TS.no_show,TS.non_satisfactory,TS.dnr from `tabTimesheet` as TS INNER JOIN `tabTimesheet Detail` as TD on TS.name=TD.parent where job_order_detail="{0}" and date_of_timesheet="{1}" and workflow_state="Open" order by TS.name desc'.format(job_order,date),as_dict=True)
             if(len(open_exist)):
-                data1=exist_data(open_exist,data1)
+                data1=exist_data(open_exist,data1,timesheets_to_update)
                 return data1
             else: 
                 return data1
@@ -616,7 +616,7 @@ def submit_staff_timesheet(jo, timesheet_date, employee,timesheet):
     frappe.db.commit()
     enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_previous_timesheet", now=True,jo=jo, timesheet_date=timesheet_date, employee=employee,timesheet=timesheet,to_time=to_time,save=0)
     return "success"
-def exist_data(open_exist,data1):
+def exist_data(open_exist,data1,timesheets_to_update):
     for i in open_exist:
         for j in range(len(data1)):
             if i['employee']==data1[j]['employee']:
@@ -632,7 +632,7 @@ def exist_data(open_exist,data1):
                 data1[j]["overtime_rate"]=i['extra_rate']
                 status=emp_status(i,data1,j)
                 data1[j]["status"]=status
-
+    data1=check_selected_values(data1,timesheets_to_update)
     return data1
 def emp_status(i,data1,j):
     if(data1[j]['status']!='Removed'):
@@ -647,3 +647,36 @@ def emp_status(i,data1,j):
     else:
         status='Removed'
         return status
+@frappe.whitelist()
+def checking_same_values_timesheet(user_selected_timesheet):
+    try:
+        new_timesheet_list=json.loads(user_selected_timesheet)
+        new_timesheet_list_data=tuple(new_timesheet_list)
+        if(len(new_timesheet_list_data)>1):
+            timeseheets_status=frappe.db.sql('select workflow_state,job_order_detail,date_of_timesheet from `tabTimesheet` where name in {0} '.format(new_timesheet_list_data),as_dict=1)
+        else:
+            timeseheets_status=frappe.db.sql('select workflow_state,job_order_detail,date_of_timesheet from `tabTimesheet` where name="{0}"'.format(new_timesheet_list_data[0]),as_dict=1)
+        job_order=timeseheets_status[0]['job_order_detail']
+        timesheet_date=timeseheets_status[0]['date_of_timesheet']
+        for i in timeseheets_status:
+            if i['workflow_state']!='Open':
+                return 'Different Status'
+            elif i['job_order_detail']!=job_order:
+                return 'Different Job Order'
+            elif i['date_of_timesheet']!=timesheet_date:
+                return 'Different Job Order Dates'
+        return new_timesheet_list,job_order,timesheet_date
+    except Exception as e:
+        frappe.log_error(e,'Cheching Same timesheets details')
+
+def check_selected_values(data1,timesheets_to_update):
+    if(timesheets_to_update):
+        timesheet_exi=timesheets_to_update.split(',')
+        data2=[]
+        for i in range(len(timesheet_exi)):
+            for j in range(len(data1)):
+                if(data1[j]['timesheet_name']==timesheet_exi[i]):
+                    data2.append(data1[j])
+        return data2
+    else:
+        return data1
