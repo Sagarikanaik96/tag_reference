@@ -230,16 +230,21 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 		sql1 = '''select email from `tabUser` where organization_type='hiring' and company = "{}"'''.format(hiring_org)
 		hiring_list = frappe.db.sql(sql1,as_list=True)
 		hiring_user_list = [user[0] for user in hiring_list]
-
 		if int(no_required) > int(no_assigned):
 			sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org)
 			share_list = frappe.db.sql(sql, as_list = True)
+			staffing_user_list = [user[0] for user in share_list]
 			assign_notification(share_list,hiring_user_list,doc_name,job_order)
 			subject = 'Job Order Notification'
 			msg=f'{staffing_org} placed partial claim on your work order: {job_order_data.select_job}. Please review.'
 			make_system_notification(hiring_user_list,msg,claimOrder,doc_name,subject)
 			link =  f'  href="{sitename}/app/claim-order/{doc_name}" '
 			joborder_email_template(subject,msg,hiring_user_list,link)
+			count = int(no_required)-int(no_assigned)
+			newmsg=f'{hiring_org} has an order for {job_order_data.select_job} available with {count} headcount remaining.'
+			make_system_notification(staffing_user_list,newmsg,jobOrder,job_order,subject)
+			link_job_order =  f'  href="{sitename}/app/job-order/{job_order}"'
+			joborder_email_template(subject,msg,staffing_user_list,link_job_order)
 			return 1
 		else:
 			if hiring_user_list:
