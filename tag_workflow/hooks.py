@@ -107,6 +107,9 @@ doctype_js = {
         "Job Offer": "public/js/controllers/job_offer.js",
         "Holiday List": "public/js/controllers/holiday_list.js",
         "Salary Component":"public/js/controllers/salary_component.js",
+        "Salary Structure":"public/js/controllers/salary_structure.js",
+        "Salary Slip":"public/js/controllers/salary_slip.js",
+
 
 }
 
@@ -128,7 +131,8 @@ doctype_list_js = {
         "Holiday List": "public/js/doctype_list/holiday_list_view.js",
         "Salary Component":"public/js/doctype_list/salary_component_list.js",
         "Salary Slip": "public/js/doctype_list/salary_slip_list.js",
-        "Payroll Entry": "public/js/doctype_list/payroll_entry_list.js"
+        "Payroll Entry": "public/js/doctype_list/payroll_entry_list.js",
+        "Salary Structure": "public/js/doctype_list/salary_structure_list.js"
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]

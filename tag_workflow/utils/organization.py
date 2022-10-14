@@ -65,6 +65,7 @@ def setup_data():
         update_old_lead_status()
         share_company_with_user()
         emp_job_title()
+        update_salary_structure()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -395,5 +396,17 @@ def update_old_job_sites():
                         doc.save(ignore_permissions=True)
                     except Exception as e:
                         continue
+    except Exception as e:
+        print(e)
+
+def update_salary_structure():
+    try:
+        company_names = frappe.db.sql("""select name from `tabCompany` where  organization_type = 'Staffing' OR organization_type = 'TAG'""",as_dict=1)
+        for company_name in company_names:
+            check = frappe.db.exists("Salary Structure",{"name":"Temporary Employees_"+company_name.name,"company":company_name.name})
+            if not check:
+                frappe.db.sql("""INSERT INTO `tabSalary Structure` (name,docstatus,company,is_active,payroll_frequency,salary_slip_based_on_timesheet,salary_component) VALUES ('{0}',1,'{1}',"Yes","Weekly",1,"Basic Temp Pay")""".format("Temporary Employees_"+company_name.name,company_name.name))
+                frappe.db.sql("""INSERT INTO `tabSalary Component` (name,salary_component,salary_component_abbr,type,company,salary_component_name) VALUES('{0}','{1}','{2}',"Earning",'{3}',"Basic Temp Pay")""".format("Basic Temp Pay_"+ company_name.name,"Basic Temp Pay_"+ company_name.name,"BTP_" + company_name.name,company_name.name))
+        
     except Exception as e:
         print(e)

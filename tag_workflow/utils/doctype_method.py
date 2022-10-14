@@ -7,6 +7,7 @@ from frappe.utils import flt, cstr, now, get_datetime_str, file_lock, date_diff
 from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
 from frappe.utils.global_search import update_global_search
 from frappe.utils.password import update_password as _update_password
+from erpnext.hr.utils import validate_active_employee
 # user method update
 STANDARD_USERS = ("Guest", "Administrator")
 Abbr = "Abbreviation is mandatory"
@@ -326,3 +327,75 @@ def send_password_notification(self, new_password):
 
 		except frappe.OutgoingEmailError:
 			print(frappe.get_traceback())
+
+#------------------------------------------SalarySlip-----------------------------------------#
+
+def calculate_total_for_salary_slip_based_on_timesheet(self):
+    ttl_amount = 0
+    if self.timesheets:
+        self.total_working_hours = 0
+        for timesheet in self.timesheets:
+            if timesheet.working_hours:
+                self.total_working_hours += timesheet.working_hours
+                ttl_amount += timesheet.pay_amounts
+
+    wages_amount = self.total_working_hours * self.hour_rate
+    self.base_hour_rate = flt(self.hour_rate) * flt(self.exchange_rate)
+    salary_component = frappe.db.get_value('Salary Structure', {'name': self.salary_structure}, 'salary_component')
+    if self.earnings:
+        for i, earning in enumerate(self.earnings):
+            if earning.salary_component == salary_component:
+                self.earnings[i].amount = wages_amount
+            self.gross_pay += self.earnings[i].amount
+    self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
+    if(self.salary_structure == "Temporary Employees_"+self.company):
+        self.net_pay = ttl_amount
+        self.gross_pay = ttl_amount
+    
+    
+
+
+def set_time_sheet(self):
+    if self.salary_slip_based_on_timesheet:
+        self.set("timesheets", [])
+        timesheets = frappe.db.sql(""" select * from `tabTimesheet` where employee = %(employee)s and start_date BETWEEN %(start_date)s AND %(end_date)s and (status = 'Submitted' or
+            status = 'Billed')""", {'employee': self.employee, 'start_date': self.start_date, 'end_date': self.end_date}, as_dict=1)
+
+        for data in timesheets:
+            self.append('timesheets', {
+                'time_sheet': data.name,
+                'working_hours': data.total_hours,
+                'pay_rate': data.employee_pay_rate,
+                'job_order': data.job_order_detail,
+                'pay_amounts':data.total_job_order_payable_amount
+
+            })
+
+def salary_slip_validate(self):
+    self.status = self.get_status()
+    validate_active_employee(self.employee)
+    self.validate_dates()
+    self.check_existing()
+    if not self.salary_slip_based_on_timesheet:
+        self.get_date_details()
+
+    if not (len(self.get("earnings")) or len(self.get("deductions"))):
+        # get details from salary structure
+        self.get_emp_and_working_day_details()
+    else:
+        self.get_working_days_details(lwp = self.leave_without_pay)
+
+    self.calculate_net_pay()
+    self.compute_year_to_date()
+    self.compute_month_to_date()
+    self.compute_component_wise_year_to_date()
+    self.add_leave_balances()
+    if self.salary_structure == "Temporary Employees_"+self.company:
+        self.set_totals()
+    
+
+    if frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet"):
+        max_working_hours = frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet")
+        if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
+            frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
+                            format(max_working_hours), alert=True)

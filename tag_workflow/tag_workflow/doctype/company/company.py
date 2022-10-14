@@ -53,3 +53,13 @@ def check_ratings(company_name):
 	sql = ''' select COUNT(*) from `tabHiring Company Review` where hiring_company='{}' '''.format(company_name)
 	row_count = frappe.db.sql(sql)
 	return row_count[0][0]>0
+
+
+@frappe.whitelist()
+def add_temp_salary_struc(owner,company,time):
+	name = "Temporary Employees_"+company
+	salary_com1_name = "Basic Temp Pay_"+ company
+	abbr_for_basic = "BTP_" + company
+	frappe.db.sql("""INSERT INTO `tabSalary Structure` (name,creation,owner,docstatus,company,is_active,payroll_frequency,salary_slip_based_on_timesheet,salary_component) VALUES ('{0}','{1}','{2}',1,'{3}',"Yes","Weekly",1,"Basic Temp Pay")""".format(name,time,owner,company))
+	frappe.db.sql("""INSERT INTO `tabSalary Component` (name,creation,owner,salary_component,salary_component_abbr,type,company,salary_component_name) VALUES('{0}','{1}','{2}','{3}','{4}',"Earning",'{5}',"Basic Temp Pay")""".format(salary_com1_name,time,owner,salary_com1_name,abbr_for_basic,company))
+

@@ -8,8 +8,10 @@ from erpnext.hr.doctype.employee.employee import Employee
 from erpnext.setup.doctype.company.company import Company
 from erpnext.crm.doctype.lead.lead import Lead
 from erpnext.projects.doctype.timesheet.timesheet import Timesheet
-from tag_workflow.utils.doctype_method import send_password_notification,validate_username, suggest_username, send_login_mail, raise_no_permission_to, validate_duplicate_user_id, validate_abbr, validate_standard_navbar_items, create_contact, update_cost, validate_mandatory_fields, run_post_save_methods, check_if_latest
+from erpnext.payroll.doctype.salary_slip.salary_slip import SalarySlip
+from tag_workflow.utils.doctype_method import send_password_notification,validate_username, suggest_username, send_login_mail, raise_no_permission_to, validate_duplicate_user_id, validate_abbr, validate_standard_navbar_items, create_contact, update_cost, validate_mandatory_fields, run_post_save_methods, check_if_latest,calculate_total_for_salary_slip_based_on_timesheet,set_time_sheet,salary_slip_validate
 import requests, json
+
 
 __version__ = '0.0.1'
 
@@ -26,6 +28,9 @@ NavbarSettings.validate_standard_navbar_items =validate_standard_navbar_items
 Lead.create_contact = create_contact
 Timesheet.update_cost = update_cost
 Timesheet.validate_mandatory_fields = validate_mandatory_fields
+SalarySlip.calculate_total_for_salary_slip_based_on_timesheet = calculate_total_for_salary_slip_based_on_timesheet
+SalarySlip.set_time_sheet = set_time_sheet
+SalarySlip.validate = salary_slip_validate
 def get_key(key):
     try:
         if(frappe.cache().get_value("aws")):
