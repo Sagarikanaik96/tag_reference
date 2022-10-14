@@ -154,6 +154,17 @@ frappe.ui.form.on('Claim Order', {
 		if(frm.doc.staffing_organization){
 			set_pay_rate(frm);
 		}
+	},
+	staff_class_code:function(frm){
+		if(frm.doc.staff_class_code && frm.doc.staff_class_code.length>10){
+			frappe.msgprint({
+			message: __("Maximum Characters allowed for Class Code are 10."),
+			title: __("Error"),
+			indicator: "orange",
+			});
+			frm.set_value("staff_class_code",'');
+			frappe.validated = false        
+		}
 	}
 });
 
