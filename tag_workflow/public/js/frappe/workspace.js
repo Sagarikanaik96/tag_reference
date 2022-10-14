@@ -241,6 +241,8 @@ class DesktopPage {
 		this.in_customize_mode = false;
 		this.page && this.page.remove();
 		this.make();
+		if (frappe.session.user=='Administrator')
+			cur_page.page.page.set_primary_action('Scheduler Settings',this.display_dialog)
 	}
 
 	make() {
@@ -554,6 +556,31 @@ class DesktopPage {
 		});
 
 		this.sections["cards"] = cards;
+	}
+	
+	display_dialog(){
+		let d = new frappe.ui.Dialog({
+			title: 'Enter details',
+			fields: [
+				{
+					label: 'Enable Scheduler',
+					fieldname: 'enable',
+					fieldtype: 'Check',
+					default:true
+				},
+			],
+			primary_action_label: 'Submit',
+			primary_action(values) {
+				console.log(values);
+				frappe.call({
+					method:"tag_workflow.utils.jazz_integration.enable_disable_job",
+					args:{enable:values.enable}
+				})
+				d.hide();
+			}
+		});
+		
+		d.show();
 	}
 }
 

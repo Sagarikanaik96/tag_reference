@@ -462,6 +462,9 @@ def get_user_list(company):
         return []
 
 def schedule_job():
+    redis = frappe.cahce()
+    if redis.hget('Administrator','enable')==0:
+        return
     sql  ="""select name from `tabCompany` where jazzhr_api_key is not null and organization_type='Staffing' and make_organization_inactive='0'"""
     try:
         companies = frappe.db.sql(sql,as_dict=1)
@@ -475,4 +478,11 @@ def schedule_job():
                 frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_update_applicants",api_key=api_key,company=doc.name)
     except Exception as e:
         frappe.log_error(e,'cron_job_error')
-    
+
+@frappe.whitelist()
+def enable_disable_job(enable):
+    try:
+        redis = frappe.cache()
+        redis.hset(frappe.session.user,'enable',int(enable))
+    except Exception as e:
+        print(e)
