@@ -524,7 +524,7 @@ if (Awesomplete) {
 }
 
 function remove_options(doctype, fieldname, result){
-	if(['Employee Onboarding', 'Employee Onboarding Template', 'Job Offer'].includes(doctype) && ['staffing_company', 'company'].includes(fieldname)){
+	if(['Employee Onboarding', 'Employee Onboarding Template', 'Job Offer','Salary Structure'].includes(doctype) && ['staffing_company', 'company'].includes(fieldname)){
 		result.splice(result.length - 2, 2);
 		return result
 	}else{
