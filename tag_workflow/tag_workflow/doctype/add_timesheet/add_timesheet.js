@@ -94,21 +94,25 @@ frappe.ui.form.on('Add Timesheet', {
 	},
 
 	from_time: function(frm){
+		check_break_time(frm)
 		update_time(frm);
 		check_submittable(frm)
 	},
 
 	to_time: function(frm){
+		check_break_time(frm)
 		update_time(frm);
 		check_submittable(frm)
 	},
 
 	break_from_time: function(frm){
+		check_break_time(frm)
 		update_time(frm);
 		check_btn_submittable(frm)
 	},
 
 	break_to_time: function(frm){
+		check_break_time(frm)
 		update_time(frm);
 		check_btn_submittable(frm)
 	},
@@ -655,5 +659,19 @@ function checking_selected_values(){
 		cur_frm.set_value('date',date)
 		localStorage.setItem("job_order", '');
         localStorage.setItem("date", '');
+	}
+}
+function check_break_time(frm){
+	if(frm.doc.from_time && frm.doc.to_time){
+		if(frm.doc.break_from_time && (frm.doc.break_from_time<frm.doc.from_time || frm.doc.break_from_time>frm.doc.to_time) ){
+			frm.set_value('break_from_time','')
+			frappe.msgprint({message: __("Break Start Time should be between Start time and End time"), title: __('Break Time Error'), indicator: 'red'});
+			frappe.validated=false;
+		}
+		if(frm.doc.break_to_time && (frm.doc.break_to_time<frm.doc.from_time || frm.doc.break_to_time>frm.doc.to_time) ){
+			frm.set_value('break_to_time','')
+			frappe.msgprint({message: __("Break End Time should be between Start time and End time"), title: __('Break Time Error'), indicator: 'red'});
+			frappe.validated=false;
+		}
 	}
 }
