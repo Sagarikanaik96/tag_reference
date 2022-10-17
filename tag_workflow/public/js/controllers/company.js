@@ -478,7 +478,7 @@ frappe.ui.form.on("Company", {
 				frm.set_value(fields[i], '');
 			}
 		}
-		if(frappe.boot.tag.tag_user_info.company_type == null || frappe.boot.tag.tag_user_info.company_type == "Staffing" || frappe.boot.tag.tag_user_info.company_type == "TAG"){
+		if(frappe.boot.tag.tag_user_info.company_type == "Staffing" || frappe.boot.tag.tag_user_info.company_type == "TAG"){
 			if(cur_frm.doc.__islocal == 1 && frm.doc.organization_type == "Staffing" || frm.doc.organization_type == "TAG"){
 				let company_name = frm.doc.company_name
 				frm.call({
@@ -1149,13 +1149,15 @@ function update_table(frm){
 		frappe.run_serially([
 			()=>frm.clear_table('industry_type'),
 			()=>{
-				const industries = frm.doc.job_titles.map(title=>title.industry_type).
-				filter((value, index, self) => self.indexOf(value) === index)
-				if (industries.length>0){
-				industries.map(i=>{
-					let row = frm.add_child('industry_type');
-					row.industry_type = i;
-				})
+				if(frm.doc.job_titles){
+					const industries = frm.doc.job_titles.map(title=>title.industry_type).
+					filter((value, index, self) => self.indexOf(value) === index)
+					if (industries.length>0){
+					industries.map(i=>{
+						let row = frm.add_child('industry_type');
+						row.industry_type = i;
+					})
+				}	
 			}
 				frm.refresh_field('industry_type')
 			},
@@ -1178,4 +1180,10 @@ function hide_decrypt_branch(frm){
 	if(frm.doc.decrypt_api==0){
 		frm.set_df_property('decrypted_api','hidden',1);
 	}
+}
+
+function get_date_time(){
+    let today = new Date();
+    let date_time = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}  ${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
+    return date_time.toString();
 }

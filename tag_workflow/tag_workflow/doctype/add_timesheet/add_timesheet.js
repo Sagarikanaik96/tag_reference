@@ -54,6 +54,12 @@ frappe.ui.form.on('Add Timesheet', {
 			update_title(frm);
 		}
 		sort_employees(frm);
+		$(document).on('click', '[data-fieldname="break_from_time"]', function(){
+			$('.datepicker').show()
+		});
+		$(document).on('click', '[data-fieldname="break_to_time"]', function(){
+			$('.datepicker').show()
+		});
 	},
 
 	job_order: function(frm){
@@ -664,11 +670,13 @@ function checking_selected_values(){
 function check_break_time(frm){
 	if(frm.doc.from_time && frm.doc.to_time){
 		if(frm.doc.break_from_time && (frm.doc.break_from_time<frm.doc.from_time || frm.doc.break_from_time>frm.doc.to_time) ){
+			$('.datepicker.active').hide();
 			frm.set_value('break_from_time','')
 			frappe.msgprint({message: __("Break Start Time should be between Start time and End time"), title: __('Break Time Error'), indicator: 'red'});
 			frappe.validated=false;
 		}
 		if(frm.doc.break_to_time && (frm.doc.break_to_time<frm.doc.from_time || frm.doc.break_to_time>frm.doc.to_time) ){
+			$('.datepicker.active').hide();
 			frm.set_value('break_to_time','')
 			frappe.msgprint({message: __("Break End Time should be between Start time and End time"), title: __('Break Time Error'), indicator: 'red'});
 			frappe.validated=false;
