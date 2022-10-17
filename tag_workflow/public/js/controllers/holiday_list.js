@@ -68,6 +68,15 @@ frappe.ui.form.on("Holiday List", {
 		
 		})
 	}
+	},
+	to_date:function(frm){
+		if(frm.doc.weekly_off){
+			frappe.call({
+				method:"get_weekly_off_dates",
+				doc:frm.doc
+			})
+		}
+		
 	}
 });
 
