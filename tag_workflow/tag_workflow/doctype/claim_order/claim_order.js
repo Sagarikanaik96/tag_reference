@@ -126,7 +126,6 @@ frappe.ui.form.on('Claim Order', {
 					else {
 						frm.refresh_fields();
 					}
-					check_class_code(frm)
 				}
 			});
 		}
@@ -153,6 +152,7 @@ frappe.ui.form.on('Claim Order', {
 	staffing_organization: function(frm){
 		if(frm.doc.staffing_organization){
 			set_pay_rate(frm);
+			check_class_code(frm)
 		}
 	},
 	staff_class_code:function(frm){
