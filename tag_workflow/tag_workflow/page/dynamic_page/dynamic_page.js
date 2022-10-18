@@ -9,7 +9,7 @@ frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 	wrapper.face_recognition = new frappe.FaceRecognition(wrapper, page);
 }
 
-function hide(){
+function hide(r,page){
 	if(frappe.boot.tag.tag_user_info.company_type=== "Staffing"){
 		$("#place_order").hide();
 	}
@@ -49,7 +49,10 @@ frappe.FaceRecognition = Class.extend({
 					"userid": frappe.user_info().email
 					},
 			callback: function (r) {
-				setTimeout(hide,10);
+				setTimeout(function(){
+					hide(r,page)
+				},10);
+
 				let my_val= r.message[0];
 				let txt = "";
 				let text = r.message[2];
