@@ -478,15 +478,6 @@ frappe.ui.form.on("Company", {
 				frm.set_value(fields[i], '');
 			}
 		}
-		if(frappe.boot.tag.tag_user_info.company_type == "Staffing" || frappe.boot.tag.tag_user_info.company_type == "TAG"){
-			if(cur_frm.doc.__islocal == 1 && frm.doc.organization_type == "Staffing" || frm.doc.organization_type == "TAG"){
-				let company_name = frm.doc.company_name
-				frm.call({
-					method:"tag_workflow.tag_workflow.doctype.company.company.add_temp_salary_struc",
-					args: {owner:frappe.session.user,company:company_name,time:get_date_time()},
-				})
-			}
-		}
 	},
 	phone_no: function(frm){
 		set_field(frm, frm.doc.phone_no, "phone_no");

@@ -1,5 +1,6 @@
 from . import __version__ as app_version
 
+
 app_name = "tag_workflow"
 app_title = "Tag Workflow"
 app_publisher = "SourceFuse"
@@ -144,7 +145,8 @@ doc_events = {
             "validate": validate
         },
         "Company": {
-            "on_trash": validate
+            "on_trash": validate,
+             "after_insert": 'tag_workflow.tag_workflow.doctype.company.company.create_salary_structure'
         },
         "User": {
             "on_update": validate,
@@ -170,7 +172,9 @@ doc_events = {
        },
        'Job Order':{
                "before_save":'tag_workflow.tag_workflow.doctype.job_order.job_order.validate_company'
-	}
+	},
+        
+
 }
 
 # logo

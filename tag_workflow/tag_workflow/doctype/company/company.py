@@ -8,6 +8,7 @@ from erpnext.setup.doctype.company.company import Company,install_country_fixtur
 from frappe import enqueue
 from frappe.utils.nestedset import NestedSet
 create_default_accounts=Company.create_default_accounts
+from datetime import datetime
 class CustomCompany(Company):
 	def on_update(self):
 		NestedSet.on_update(self)
@@ -56,10 +57,39 @@ def check_ratings(company_name):
 
 
 @frappe.whitelist()
-def add_temp_salary_struc(owner,company,time):
-	name = "Temporary Employees_"+company
-	salary_com1_name = "Basic Temp Pay_"+ company
-	abbr_for_basic = "BTP_" + company
-	frappe.db.sql("""INSERT INTO `tabSalary Structure` (name,creation,owner,docstatus,company,is_active,payroll_frequency,salary_slip_based_on_timesheet,salary_component) VALUES ('{0}','{1}','{2}',1,'{3}',"Yes","Weekly",1,"Basic Temp Pay")""".format(name,time,owner,company))
-	frappe.db.sql("""INSERT INTO `tabSalary Component` (name,creation,owner,salary_component,salary_component_abbr,type,company,salary_component_name) VALUES('{0}','{1}','{2}','{3}','{4}',"Earning",'{5}',"Basic Temp Pay")""".format(salary_com1_name,time,owner,salary_com1_name,abbr_for_basic,company))
+def create_salary_structure(doc,method):
+	company_type = frappe.db.get_value("User", {"name": frappe.session.user}, ["organization_type"])
+	if company_type == "Staffing" or company_type == "TAG":
+		if doc.organization_type == "Staffing" or doc.organization_type =="TAG":
+			comp_name = "Basic Temp Pay_"
+			if not frappe.db.exists("Salary Component", {"name":comp_name+doc.company_name}):
+				doc_sal_comp = frappe.new_doc('Salary Component')
+				doc_sal_comp.creation = datetime.now()
+				doc_sal_comp.name = comp_name+ doc.company_name
+				doc_sal_comp.owner = frappe.session.user
+				doc_sal_comp.salary_component =comp_name+ doc.company_name
+				doc_sal_comp.salary_component_abbr = "BTP_" + doc.company_name
+				doc_sal_comp.type = "Earning"
+				doc_sal_comp.company = doc.company_name
+				doc_sal_comp.salary_component_name = comp_name+ doc.company_name
+				doc_sal_comp.insert()
+
+			if not frappe.db.exists("Salary Structure", {"name":"Temporary Employees_"+doc.company_name}):
+				doc_sal_struct=frappe.new_doc('Salary Structure')
+				doc_sal_struct.name = "Temporary Employees_"+doc.company_name
+				doc_sal_struct.creation = datetime.now()
+				doc_sal_struct.owner = frappe.session.user
+				doc_sal_struct.docstatus = 1
+				doc_sal_struct.company = doc.company_name
+				doc_sal_struct.is_active = "Yes"
+				doc_sal_struct.payroll_frequency = "Weekly"
+				doc_sal_struct.salary_slip_based_on_timesheet = 1
+				doc_sal_struct.salary_component = comp_name +doc.company_name
+				doc_sal_struct.insert()
+
+				
+
+
+
+
 
