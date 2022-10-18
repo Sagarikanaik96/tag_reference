@@ -7,6 +7,10 @@ frappe.views.BaseList.prototype.prepare_data = function(r){
 
     if(data && this.doctype == "Job Order" && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
         this.order_length = data.order_length;
+        if (cur_list.radius==25){
+            document.querySelector(`.btn-loc-rad[data-value="${cur_list.radius}"]`).classList.add('active');
+            localStorage.setItem('radius',cur_list.radius)
+        }
     }
 
     data = !Array.isArray(data) ? frappe.utils.dict(data.keys, data.values) : data;
@@ -21,6 +25,8 @@ frappe.views.BaseList.prototype.prepare_data = function(r){
             this.len = this.start;
         }
     }
+    
+    
 }
 
 
@@ -45,7 +51,7 @@ frappe.views.BaseList.prototype.setup_paging_area = function() {
     const paging_values = [20, 100, 500];
     const radius = [5, 10, 25, 50, 100];
     this.order_location = [];
-    this.radius = 'All';
+    this.radius = 25;
     this.len = 0;
     this.order_status = 'All'
     this.selected_page_count = 20;
@@ -177,6 +183,7 @@ frappe.views.ListView.prototype.display_modal=function(val){
             this.page_length = 20;
             this.radius = "All";
             this.filter_loc = [];
+            document.querySelector(`.btn-radius[data-value="Clear"]`).classList.remove('active');
             this.refresh();
         }
     }
