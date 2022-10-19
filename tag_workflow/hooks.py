@@ -110,6 +110,7 @@ doctype_js = {
         "Salary Component":"public/js/controllers/salary_component.js",
         "Salary Structure":"public/js/controllers/salary_structure.js",
         "Salary Slip":"public/js/controllers/salary_slip.js",
+        "Salary Structure Assignment":"public/js/controllers/salary_structure_assignment.js"
 
 
 }
