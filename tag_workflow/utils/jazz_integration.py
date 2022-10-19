@@ -5,7 +5,7 @@ from rq import Queue, Worker
 from frappe.utils.background_jobs import get_redis_conn
 from frappe.utils import now_datetime
 from tag_workflow.utils.notification import make_system_notification
-
+SYS_SETTING = 'System Settings'
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 
 JAZZHR_API_URL="https://api.resumatorapi.com/v1/applicants/"
@@ -462,8 +462,7 @@ def get_user_list(company):
         return []
 
 def schedule_job():
-    redis = frappe.cahce()
-    if redis.hget('Administrator','enable')==0:
+    if int(frappe.db.get_value(SYS_SETTING,SYS_SETTING,'job_disable'))==1:
         return
     sql  ="""select name from `tabCompany` where jazzhr_api_key is not null and organization_type='Staffing' and make_organization_inactive='0'"""
     try:
@@ -481,8 +480,23 @@ def schedule_job():
 
 @frappe.whitelist()
 def enable_disable_job(enable):
+    sql  ="""select name from `tabCompany` where jazzhr_api_key is not null and organization_type='Staffing' and make_organization_inactive='0'"""
     try:
-        redis = frappe.cache()
-        redis.hset(frappe.session.user,'enable',int(enable))
+        if int(enable)==0:
+            frappe.db.set_value(SYS_SETTING,SYS_SETTING,'job_disable',1,update_modified=False)
+            result = frappe.db.sql(sql,as_dict=1)
+            if len(result)>0:
+                for c in result:
+                    terminate_job(c['name'])
+                    time.sleep(1)
+        else:
+            frappe.db.set_value(SYS_SETTING,SYS_SETTING,'job_disable',0,update_modified=False)
+    except Exception as e:
+        frappe.log_error(e,"terminating_job")
+
+@frappe.whitelist()
+def check_status():
+    try:
+        return frappe.db.get_value(SYS_SETTING,SYS_SETTING,'job_disable')
     except Exception as e:
         print(e)

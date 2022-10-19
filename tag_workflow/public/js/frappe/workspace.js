@@ -242,7 +242,7 @@ class DesktopPage {
 		this.page && this.page.remove();
 		this.make();
 		if (frappe.session.user=='Administrator')
-			cur_page.page.page.set_primary_action('Scheduler Settings',this.display_dialog)
+			cur_page.page.page.set_primary_action('Scheduler Setting',this.display_dialog)
 	}
 
 	make() {
@@ -559,28 +559,49 @@ class DesktopPage {
 	}
 	
 	display_dialog(){
-		let d = new frappe.ui.Dialog({
-			title: 'Enter details',
-			fields: [
-				{
-					label: 'Enable Scheduler',
-					fieldname: 'enable',
-					fieldtype: 'Check',
-					default:true
-				},
-			],
-			primary_action_label: 'Submit',
-			primary_action(values) {
-				console.log(values);
+		frappe.run_serially([
+			()=>{
 				frappe.call({
-					method:"tag_workflow.utils.jazz_integration.enable_disable_job",
-					args:{enable:values.enable}
+					method:"tag_workflow.utils.jazz_integration.check_status",
+					callback:(r)=>{
+						if(r.message==1)
+							window.check_status = 0;
+						else
+							window.check_status  = 1;
+					}
 				})
-				d.hide();
+			},
+			()=>frappe.timeout(0.5),
+			()=>{
+				let d = new frappe.ui.Dialog({
+					title: 'Scheduler Setting',
+					fields: [
+						{
+							label: 'Enable Scheduler',
+							fieldname: 'enable',
+							fieldtype: 'Check',
+							default:window.check_status
+						},
+					],
+					primary_action_label: 'Submit',
+					primary_action(values) {
+						frappe.call({
+							method:"tag_workflow.utils.jazz_integration.enable_disable_job",
+							args:{enable:values.enable}
+						})
+						frappe.msgprint({
+							title: __('Notification'),
+							indicator: 'green',
+							message: __('The Schedular Settings are Updated')
+						});
+						d.hide();
+					}
+				});
+				
+				d.show();
 			}
-		});
+		])
 		
-		d.show();
 	}
 }
 
