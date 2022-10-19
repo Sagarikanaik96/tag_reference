@@ -571,12 +571,6 @@ frappe.ui.form.on("Company", {
 			frm.set_value('decrypt_org_id','');
 			frm.set_value('decrypt_api', '')
 		}
-	},
-	branch_org_id: (frm)=>{
-		if(frm.doc.branch_org_id && !Number(frm.doc.branch_org_id)){
-			frappe.msgprint('Only numbers allowed!');
-			frm.set_value('branch_org_id', '');
-		}
 	}
 });
 
@@ -1156,6 +1150,17 @@ function update_table(frm){
 }
 
 function hide_decrypt_branch(frm){
+	function integer_input(event){
+		let keyCode = event.keyCode;
+		let excludedKeys = [8, 37, 39, 46];
+		if (!((keyCode >= 48 && keyCode <= 57) ||(keyCode >= 96 && keyCode <= 105) || (excludedKeys.includes(keyCode)))) {
+			event.preventDefault();
+		}
+	}
+	$('input[data-fieldname="branch_org_id"]').on("keydown keyup input change paste", (event)=>{
+		integer_input(event);
+	});
+
 	if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
 		$('[data-fieldname="branch_org_id"]').attr('readonly', 'readonly');
 		$('[data-fieldname="branch_api_key"]').attr('readonly', 'readonly');
