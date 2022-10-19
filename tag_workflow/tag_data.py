@@ -260,8 +260,8 @@ def stff_email_with_resume_required(job_order, emp_detail, no_of_worker_req, hir
         newmsg=f'{hiring_org} has an order for {job_order.select_job} available with {count} opening available.'
     else:
         newmsg=f'{hiring_org} has an order for {job_order.select_job} available with {count} openings available.'
-    make_system_notification(staffing_user_list,newmsg,jobOrder,job_order,subject)
-    link_job_order =  f'  href="{sitename}/app/job-order/{job_order}"'
+    make_system_notification(staffing_user_list,newmsg,jobOrder,job_order.name,subject)
+    link_job_order =  f'  href="{sitename}/app/job-order/{job_order.name}"'
     joborder_email_template(subject,newmsg,staffing_user_list,link_job_order)
                 
    
