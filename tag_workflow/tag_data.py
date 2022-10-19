@@ -229,10 +229,12 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
         if int(no_of_worker_req) > len(emp_detail):
             sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org)
             share_list = frappe.db.sql(sql, as_list = True)
+            staffing_user_list = [user[0] for user in share_list]
             assign_notification(share_list,hiring_user_list,doc_name,job_order) 
             subject = 'Job Order Notification' 
             msg=f'{staffing_org} placed partial claim on your work order: {job_title}. Please review & approve the candidates matched with this work order.'
             make_system_notification(hiring_user_list,msg,assignEmployees,doc_name,subject)
+            stff_email_with_resume_required(job_order, emp_detail, no_of_worker_req, hiring_org, staffing_user_list, subject)
             return send_email(subject,msg,hiring_user_list)
         else:
             if hiring_user_list:
@@ -246,6 +248,21 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
             
     except Exception as e:
         frappe.log_error(e, "Partial Job order Failed ")
+
+def stff_email_with_resume_required(job_order, emp_detail, no_of_worker_req, hiring_org, staffing_user_list, subject):
+    query = '''select sum(approved_no_of_workers) from `tabClaim Order` where job_order = "{}" '''.format(job_order.name)
+    rem_emp = frappe.db.sql(query)
+    if rem_emp[0][0]:
+        count = int(no_of_worker_req)- int(rem_emp[0][0]) - len(emp_detail)
+    else:
+        count = int(no_of_worker_req)-len(emp_detail)
+    if count==1:
+        newmsg=f'{hiring_org} has an order for {job_order.select_job} available with {count} opening available.'
+    else:
+        newmsg=f'{hiring_org} has an order for {job_order.select_job} available with {count} openings available.'
+    make_system_notification(staffing_user_list,newmsg,jobOrder,job_order,subject)
+    link_job_order =  f'  href="{sitename}/app/job-order/{job_order}"'
+    joborder_email_template(subject,newmsg,staffing_user_list,link_job_order)
                 
    
 @frappe.whitelist(allow_guest=False)
@@ -608,18 +625,6 @@ def chat_room_created(hiring_org,staffing_org,job_order):
     except Exception as e:
         frappe.log_error(e, "chat room creation error")
 
-@frappe.whitelist(allow_guest=False)
-def assign_employee_resume_update(employee, name):
-    if(company_type == "Staffing" and user == frappe.session.user):
-        sql = """ select resume from `tabEmployee` where name='{}' """.format(employee)
-        data = frappe.db.sql(sql,as_dict=1)
-        if(len(data) > 0 and data[0]["resume"]):
-            sql =""" UPDATE `tabAssign Employee Details` SET resume='{0}' WHERE name='{1}'; """.format(data[0]["resume"],name)
-            frappe.db.sql(sql)
-            frappe.db.commit()
-        return True
-    else:
-        return NOASS
 @frappe.whitelist(allow_guest=False)
 def joborder_resume(name):
     sql = """ select resume from `tabEmployee` where name='{}' """.format(name)
