@@ -587,13 +587,20 @@ class DesktopPage {
 					primary_action(values) {
 						frappe.call({
 							method:"tag_workflow.utils.jazz_integration.enable_disable_job",
-							args:{enable:values.enable}
+							args:{enable:values.enable},
+							callback:(r)=>{
+								if(r.message=="OK"){
+									setTimeout(()=>{
+										frappe.msgprint({
+											title: __('Notification'),
+											indicator: 'green',
+											message: __('The Schedular Setting are Updated')
+										},3000);
+									})
+								}
+							}
 						})
-						frappe.msgprint({
-							title: __('Notification'),
-							indicator: 'green',
-							message: __('The Schedular Settings are Updated')
-						});
+						
 						d.hide();
 					}
 				});

@@ -134,7 +134,8 @@ doctype_list_js = {
         "Salary Component":"public/js/doctype_list/salary_component_list.js",
         "Salary Slip": "public/js/doctype_list/salary_slip_list.js",
         "Payroll Entry": "public/js/doctype_list/payroll_entry_list.js",
-        "Salary Structure": "public/js/doctype_list/salary_structure_list.js"
+        "Salary Structure": "public/js/doctype_list/salary_structure_list.js",
+        "System Setting": "public/js/doctype_list/system_setting.js",
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]

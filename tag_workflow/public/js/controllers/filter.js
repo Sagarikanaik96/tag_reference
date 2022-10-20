@@ -1,4 +1,4 @@
-const u_type = frappe.boot.tag.tag_user_info.user_type.toLowerCase();
+const u_type = frappe.boot.tag.tag_user_info.user_type ? frappe.boot.tag.tag_user_info.user_type.toLowerCase():null
 const comp =frappe.boot.tag.tag_user_info.company_type;
 const u_roles = ['staffing admin','tag admin']
 function hide_and_show_tables(frm){

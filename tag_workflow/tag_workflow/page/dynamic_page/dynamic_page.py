@@ -21,7 +21,7 @@ def get_link1(name, userid):
             review.append((i['rating'],i['comments'],i['staffing_company']))
 
    users=[]
-   sql1= f"select full_name, enabled from `tabUser` where company='{name}' and enabled=1"
+   sql1= f'select full_name, enabled from `tabUser` where company="{name}" and enabled=1'
    data1 = frappe.db.sql(sql1, as_dict=True)
    for i in data1:
       users.append(i['full_name'])

@@ -423,7 +423,7 @@ def get_org_site(doctype, txt, searchfield, page_len, start, filters):
 @frappe.whitelist(allow_guest=False)
 def job_site_contact(doctype, txt, searchfield, page_len, start, filters):
     company=filters.get('job_order_company')
-    sql = ''' select name, full_name, email, mobile_no from `tabUser` where company='{0}' and name like '%%{1}%%' '''.format(company, '%s' % txt)
+    sql = ''' select name, full_name, email, mobile_no from `tabUser` where company="{0}" and name like '%%{1}%%' '''.format(company, '%s' % txt)
     return frappe.db.sql(sql)
 
 @frappe.whitelist(allow_guest=True)

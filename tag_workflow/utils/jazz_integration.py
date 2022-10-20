@@ -488,11 +488,14 @@ def enable_disable_job(enable):
             if len(result)>0:
                 for c in result:
                     terminate_job(c['name'])
-                    time.sleep(1)
+                    
         else:
             frappe.db.set_value(SYS_SETTING,SYS_SETTING,'job_disable',0,update_modified=False)
+        frappe.publish_realtime(event='sync_doc',doctype= SYS_SETTING, docname = SYS_SETTING)
+        return "OK"
     except Exception as e:
         frappe.log_error(e,"terminating_job")
+        return "error"
 
 @frappe.whitelist()
 def check_status():
