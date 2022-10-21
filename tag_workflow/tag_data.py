@@ -70,14 +70,14 @@ def send_email(subject = None,content = None,recipients = None):
         frappe.msgprint("Could Not Send")
         return False
 
-def joborder_email_template(subject = None,content = None,recipients = None,link=None):
+def joborder_email_template(subject = None,content = None,recipients = None,link=None, sender_full_name=None):
     try:
         from frappe.core.doctype.communication.email import make
         site= frappe.utils.get_url().split('/')
         sitename=site[0]+'//'+site[2]
         make(subject = subject, content=frappe.render_template("templates/emails/email_template_custom.html",
             {"sitename": sitename, "content":content,"subject":subject,"link":link}),
-            recipients= recipients,send_email=True)
+            recipients= recipients,send_email=True,sender_full_name=sender_full_name)
         return True
     except Exception as e:
         frappe.log_error(e, "Doc Share Error")
@@ -252,18 +252,22 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
 def stff_email_with_resume_required(job_order, emp_detail, no_of_worker_req, hiring_org, staffing_user_list, subject):
     query = '''select sum(approved_no_of_workers) from `tabClaim Order` where job_order = "{}" '''.format(job_order.name)
     rem_emp = frappe.db.sql(query)
-    if rem_emp[0][0]:
+    notification_func(job_order, emp_detail, no_of_worker_req, hiring_org, staffing_user_list, subject, rem_emp)
+
+def notification_func(job_order, emp_detail, no_of_worker_req, hiring_org, staffing_user_list, subject, rem_emp):
+    if rem_emp[0][0] and job_order.is_repeat:
         count = int(no_of_worker_req)- int(rem_emp[0][0]) - len(emp_detail)
     else:
         count = int(no_of_worker_req)-len(emp_detail)
-    if count==1:
-        newmsg=f'{hiring_org} has an order for {job_order.select_job} available with {count} opening available.'
-    else:
-        newmsg=f'{hiring_org} has an order for {job_order.select_job} available with {count} openings available.'
-    make_system_notification(staffing_user_list,newmsg,jobOrder,job_order.name,subject)
-    link_job_order =  f'  href="{sitename}/app/job-order/{job_order.name}"'
-    joborder_email_template(subject,newmsg,staffing_user_list,link_job_order)
-                
+
+    if count>0:
+        if count==1:
+            newmsg=f'{hiring_org} has an order for {job_order.select_job} available with {count} opening available.'
+        else:
+            newmsg=f'{hiring_org} has an order for {job_order.select_job} available with {count} openings available.'
+        make_system_notification(staffing_user_list,newmsg,jobOrder,job_order.name,subject)
+        link_job_order =  f'  href="{sitename}/app/job-order/{job_order.name}"'
+        joborder_email_template(subject,newmsg,staffing_user_list,link_job_order,sender_full_name = job_order.company)   
    
 @frappe.whitelist(allow_guest=False)
 def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None,staff_company=None):

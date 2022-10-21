@@ -259,17 +259,22 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 def staff_email_sending_without_resume(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject):
     query = '''select sum(approved_no_of_workers) from `tabClaim Order` where job_order = "{}" '''.format(job_order)
     rem_emp = frappe.db.sql(query)
-    if rem_emp[0][0]:
-     count = int(no_required)- int(rem_emp[0][0]) - int(no_assigned)
-    else:
-     count = int(no_required)-int(no_assigned)
-    if count==1: 
-     newmsg=f'{hiring_org} has an order for {job_order_data.select_job} available with {count} opening available.'
-    else:
-     newmsg=f'{hiring_org} has an order for {job_order_data.select_job} available with {count} openings available.'
-    make_system_notification(staffing_user_list,newmsg,jobOrder,job_order,subject)
-    link_job_order =  f'  href="{sitename}/app/job-order/{job_order}"'
-    joborder_email_template(subject,newmsg,staffing_user_list,link_job_order)
+    notification_func(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject, rem_emp)
+
+def notification_func(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject, rem_emp):
+	if rem_emp[0][0] and job_order_data.is_repeat:
+		count = int(no_required) - int(rem_emp[0][0]) - int(no_assigned)
+	else:
+		count = int(no_required)-int(no_assigned)
+	if count>0:
+		if count==1:
+			newmsg = f'{hiring_org} has an order for {job_order_data.select_job} available with {count} opening available.'
+		else:
+			newmsg = f'{hiring_org} has an order for {job_order_data.select_job} available with {count} openings available.'
+		make_system_notification(staffing_user_list, newmsg, jobOrder, job_order, subject)
+		link_job_order = f'  href="{sitename}/app/job-order/{job_order}"'
+		joborder_email_template(subject, newmsg, staffing_user_list, link_job_order,sender_full_name = job_order_data.company)
+
 	
 def assign_notification(share_list,hiring_user_list,doc_name,job_order):
 	if share_list:
