@@ -272,6 +272,7 @@ frappe.ui.form.on("Job Order", {
 			check_increase_headcount(frm)
 
 		}
+		change_is_single_share(frm)
 	},
 
 	after_save: function(frm) {
@@ -1579,6 +1580,19 @@ function advance_hide(time){
 			}
 		}, time);
 	}
+}
+
+function change_is_single_share(frm){
+	frappe.call({
+		'method':'tag_workflow.tag_workflow.doctype.job_order.job_order.change_is_single_share',
+		'args':{
+			'bid':frm.doc.bid,
+			'name':frm.doc.name,	
+		},
+		callback: function(resp){
+			cur_frm.doc.is_single_share=resp.message
+		}}
+		)
 }
 
 function staff_company_asterisks(frm){

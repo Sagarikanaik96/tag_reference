@@ -796,15 +796,14 @@ def claim_order_updated_by(docname,staff_company):
 
 @frappe.whitelist()
 def check_increase_headcounts(no_of_workers_updated,name,company,select_job):
-    sql = f'select no_of_workers from `tabJob Order` where name="{name}"'
+    sql = f'select is_single_share,staff_company,no_of_workers from `tabJob Order` where name="{name}"'
     old_headcounts = frappe.db.sql(sql, as_list=1)
-    if int(no_of_workers_updated)>(old_headcounts[0][0]):
-        data = frappe.db.sql(f'select is_single_share,staff_company from `tabJob Order` where name="{name}"')
+    if int(no_of_workers_updated)>(old_headcounts[0][2]):
         subject = jobOrder
         link =  f'  href="{sitename}/app/job-order/{name}" '
         msg=f'{company} has increased the number of requested employees to {no_of_workers_updated} on {name} for {select_job}.'
-        if data[0][0]:
-            sql = f'''select email from `tabUser` where organization_type="staffing" and company="{data[0][1]}"'''
+        if old_headcounts[0][0]:
+            sql = f'''select email from `tabUser` where organization_type="staffing" and company="{old_headcounts[0][1]}"'''
             share_list = frappe.db.sql(sql, as_list = True)
             share_user_list = [user[0] for user in share_list]
             make_system_notification(share_user_list,msg,doc_name_job_order,name,subject)
@@ -817,6 +816,13 @@ def check_increase_headcounts(no_of_workers_updated,name,company,select_job):
             joborder_email_template(subject,msg,share_user_list,link)
 
 
+@frappe.whitelist()
+def change_is_single_share(bid,name):
+    sql = f'''select is_single_share from `tabJob Order` where name="{name}"'''
+    iss = frappe.db.sql(sql, as_list=1)
+    is_single_share = iss[0][0]
+    return is_single_share
+      
 @frappe.whitelist()
 def workers_required_order_update(doc_name):
     try:

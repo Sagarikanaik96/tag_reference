@@ -207,7 +207,7 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 	try:
 		job_order_data=frappe.get_doc(jobOrder,job_order)
 		is_single_share = 1
-		if no_assigned< no_required:
+		if int(no_assigned)< int(no_required):
 			is_single_share = 0
 		bid=1+int(job_order_data.bid)
 		claimed = job_order_data.claim if job_order_data.claim else ""
@@ -263,7 +263,7 @@ def staff_email_sending_without_resume(job_order, no_required, no_assigned, hiri
 
 def notification_func(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject, rem_emp):
 	if rem_emp[0][0] and job_order_data.is_repeat:
-		count = int(no_required) - int(rem_emp[0][0]) - int(no_assigned)
+		count = int(no_required) - int(rem_emp[0][0]) -int(no_assigned)
 	else:
 		count = int(no_required)-int(no_assigned)
 	if count>0:
