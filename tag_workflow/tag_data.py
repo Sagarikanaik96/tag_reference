@@ -256,7 +256,7 @@ def stff_email_with_resume_required(job_order, emp_detail, no_of_worker_req, hir
 
 def notification_func(job_order, emp_detail, no_of_worker_req, hiring_org, staffing_user_list, subject, rem_emp):
     if rem_emp[0][0] and job_order.is_repeat:
-        count = int(no_of_worker_req)- int(rem_emp[0][0]) - len(emp_detail)
+        count = int(no_of_worker_req)- int(rem_emp[0][0])
     else:
         count = int(no_of_worker_req)-len(emp_detail)
 

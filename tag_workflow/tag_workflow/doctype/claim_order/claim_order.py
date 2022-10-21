@@ -263,7 +263,7 @@ def staff_email_sending_without_resume(job_order, no_required, no_assigned, hiri
 
 def notification_func(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject, rem_emp):
 	if rem_emp[0][0] and job_order_data.is_repeat:
-		count = int(no_required) - int(rem_emp[0][0]) -int(no_assigned)
+		count = int(no_required) - int(rem_emp[0][0])
 	else:
 		count = int(no_required)-int(no_assigned)
 	if count>0:
