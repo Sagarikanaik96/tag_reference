@@ -9,46 +9,55 @@
  "field_order": [
   "job_industry",
   "job_title",
-  "state",
-  "class_code",
-  "rate",
-  "staffing_company"
+  "column_break_3",
+  "staffing_company",
+  "class_codes_section",
+  "class_codes"
  ],
  "fields": [
   {
    "fieldname": "job_industry",
-   "fieldtype": "Data",
-   "label": "Job Industry"
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Job Industry",
+   "options": "Industry Type",
+   "reqd": 1
   },
   {
    "fieldname": "job_title",
-   "fieldtype": "Data",
-   "label": "Job Title"
-  },
-  {
-   "fieldname": "state",
-   "fieldtype": "Data",
-   "label": "State"
-  },
-  {
-   "fieldname": "class_code",
-   "fieldtype": "Data",
-   "label": "Class Code"
-  },
-  {
-   "fieldname": "rate",
-   "fieldtype": "Currency",
-   "label": "Rate"
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Job Title",
+   "options": "Item",
+   "reqd": 1
   },
   {
    "fieldname": "staffing_company",
-   "fieldtype": "Data",
-   "label": "Staffing Company"
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Staffing Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "class_codes_section",
+   "fieldtype": "Section Break",
+   "label": "Class Codes"
+  },
+  {
+   "fieldname": "class_codes",
+   "fieldtype": "Table",
+   "label": "Class Codes",
+   "options": "Class Code"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-07 01:58:25.982964",
+ "modified": "2022-10-20 08:23:23.175381",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Staffing Comp Code",
@@ -105,5 +114,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "job_industry",
  "track_changes": 1
 }

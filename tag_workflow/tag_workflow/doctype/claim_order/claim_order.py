@@ -429,20 +429,25 @@ def create_staff_comp_code(job_title,job_site,industry_type, staff_class_code, s
 		if(len(staff_class_code)>0):
 			job_titlename=job_title_value(job_title)
 			state=frappe.db.get_value('Job Site',job_site,['state'])
-			comp_code=frappe.db.sql('select name from `tabStaffing Comp Code` where job_industry="{0}" and state="{1}" and staffing_company="{2}" and job_title like "{3}%"'.format(industry_type,state,staffing_company,job_titlename),as_dict=1)
-			if len(comp_code)>0:
-				code_rate,class_code = frappe.db.get_value(SCC, {"name": comp_code[0].name}, ['rate','class_code'])
-				if code_rate != staff_class_code_rate or class_code!=staff_class_code:
-					frappe.db.set_value(SCC, comp_code[0].name,"rate", staff_class_code_rate)
-					frappe.db.set_value(SCC, comp_code[0].name,"class_code", staff_class_code)
+			check_industry_vals=frappe.db.sql('select name from `tabStaffing Comp Code` where job_industry="{0}" and staffing_company="{1}" and job_title like "{2}%" '.format(industry_type,staffing_company,job_titlename),as_dict=1)
+			if(len(check_industry_vals)>0):
+				check_staff_comp_code_existence(state,staff_class_code_rate,staff_class_code,industry_type,staffing_company,job_titlename,check_industry_vals)
 			else:
-				doc = frappe.new_doc(SCC)
-				doc.job_industry = industry_type
-				doc.job_title = job_titlename
-				doc.state = state
-				doc.staffing_company = staffing_company
-				doc.rate=staff_class_code_rate
-				doc.class_code=staff_class_code
+				doc = frappe.get_doc({
+					'doctype':SCC,
+					'job_industry':industry_type,
+					'job_title':job_titlename,
+					'staffing_company':staffing_company,
+					'class_codes':[{
+						'class_code':staff_class_code,
+						'rate':staff_class_code_rate,
+						'state':state
+					}]
+				})
+				meta = frappe.get_meta(SCC)
+				for field in meta.get_link_fields():
+					field.ignore_user_permissions = 1
+				doc.flags.ignore_permissions = True
 				doc.insert()
 	except Exception as e:
 		frappe.log_error(e, 'Set Class Code Error')
@@ -465,12 +470,30 @@ def check_already_exist_class_code(job_order,staffing_company):
 		job_title,job_site,industry_type=frappe.db.get_value(jobOrder,job_order,['select_job', 'job_site','category'])
 		job_titlename=job_title_value(job_title)
 		state=frappe.db.get_value('Job Site',job_site,['state'])
-		comp_code=frappe.db.sql('select name from `tabStaffing Comp Code` where job_industry="{0}" and state="{1}" and staffing_company="{2}" and job_title like "{3}%"'.format(industry_type,state,staffing_company,job_titlename),as_dict=1)
+		comp_code=frappe.db.sql('select SCC.name from `tabStaffing Comp Code` as SCC inner join `tabClass Code` as CC on SCC.name=CC.parent where job_industry="{0}" and CC.state="{1}" and staffing_company="{2}" and job_title like "{3}%"'.format(industry_type,state,staffing_company,job_titlename),as_dict=1)
 		if len(comp_code)>0:
-			class_code,rate=frappe.db.get_value('Staffing Comp Code',comp_code[0].name,['class_code','rate'])
+			data=frappe.db.sql(''' select class_code,rate from `tabClass Code` where parent="{0}" and state="{1}" '''.format(comp_code[0].name,state),as_dict=1)
+			class_code=data[0].class_code
+			rate=data[0].rate
 			return class_code,rate
 		else:
 			return ['Exist']
 	except Exception as e:
 		frappe.log_error(e, 'Set Class Code Error')
 		print(e, frappe.get_traceback())
+def check_staff_comp_code_existence(state,staff_class_code_rate,staff_class_code,industry_type,staffing_company,job_titlename,check_industry_vals):
+	comp_code=frappe.db.sql('select SCC.name from `tabStaffing Comp Code` as SCC inner join `tabClass Code` as CC on SCC.name=CC.parent where job_industry="{0}" and CC.state="{1}" and staffing_company="{2}" and job_title like "{3}%" '.format(industry_type,state,staffing_company,job_titlename),as_dict=1)
+	if len(comp_code)>0:
+		data=frappe.db.sql(''' select class_code,rate from `tabClass Code` where parent="{0}" and state="{1}" '''.format(comp_code[0].name,state),as_dict=1)
+		class_code=data[0].class_code
+		code_rate=data[0].rate
+		if code_rate != staff_class_code_rate or class_code!=staff_class_code:
+			frappe.db.sql('''update `tabClass Code` set class_code="{0}", rate="{1}" where parent="{2}" and state="{3}"'''.format(staff_class_code,staff_class_code_rate,comp_code[0].name,state))
+			frappe.db.commit()
+	else:
+		doc=frappe.get_doc(SCC,check_industry_vals[0].name)
+		adding_values(doc,staff_class_code,staff_class_code_rate,state)
+
+def adding_values(doc,staff_class_code,staff_class_code_rate,state):
+    doc.append('class_codes',{'class_code':staff_class_code,'rate':staff_class_code_rate,'state':state})
+    doc.save(ignore_permissions = True)	
