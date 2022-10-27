@@ -395,8 +395,9 @@ def check_assign_employee(total_employee_required,employee_detail = None):
 def api_sec(doctype, frm=None):
     try:
         emp = frappe.get_doc(doctype,frm)
-        ssn_decrypt = emp.get_password('ssn')
-        return ssn_decrypt
+        if emp.ssn:
+            return emp.get_password('ssn')
+        return response
     except Exception:
         frappe.log_error("No Employee in Database", "Warning")
     
@@ -1375,42 +1376,6 @@ def update_lat_lng_required(company,employee_id):
     except Exception as e:
         frappe.error_log(e,'Employee Lat Lng error')
 
-@frappe.whitelist(allow_guest=False)
-def jazz_api_sec(frm=None):
-    try:
-        comp = frappe.get_doc("Company",frm)
-        if(comp.jazzhr_api_key):
-            jazzhr_decrypt = comp.get_password('jazzhr_api_key')
-            return jazzhr_decrypt
-        else:
-            return response
-    except Exception:
-        frappe.log_error("No JazzHR API Key in Database", "Warning")
-
-@frappe.whitelist(allow_guest=False)
-def client_id_sec(frm=None):
-    try:
-        comp = frappe.get_doc("Company",frm)
-        if(comp.client_id):
-            client_id_decrypt = comp.get_password('client_id')
-            return client_id_decrypt
-        else:
-            return response
-    except Exception:
-        frappe.log_error("No Client ID in Database", "Warning")
-
-@frappe.whitelist(allow_guest=False)
-def client_secret_sec(frm=None):
-    try:
-        comp = frappe.get_doc("Company",frm)
-        if(comp.client_secret):
-            client_secret_decrypt = comp.get_password('client_secret')
-            return client_secret_decrypt
-        else:
-            return response
-    except Exception:
-        frappe.log_error("No Client Secret in Database", "Warning")
-
 def no_contact_by(company):
     try:
         sql = """select name from `tabUser` where company = '{0}'""".format(company)
@@ -1594,30 +1559,6 @@ def set_lat_lng(form_name):
         print(e)
 
 @frappe.whitelist(allow_guest=False)
-def workbright_subdomain_sec(frm=None):
-    try:
-        comp = frappe.get_doc("Company",frm)
-        if(comp.workbright_subdomain):
-            workbright_subdomain_decrypt = comp.get_password('workbright_subdomain')
-            return workbright_subdomain_decrypt
-        else:
-            return response
-    except Exception:
-        frappe.log_error("No Workbright Subdomain in Database", "Warning")
-
-@frappe.whitelist(allow_guest=False)
-def workbright_api_key_sec(frm=None):
-    try:
-        comp = frappe.get_doc("Company",frm)
-        if(comp.workbright_api_key):
-            workbright_api_key_decrypt = comp.get_password('workbright_api_key')
-            return workbright_api_key_decrypt
-        else:
-            return response
-    except Exception:
-        frappe.log_error("No Workbright API Key in Database", "Warning")
-
-@frappe.whitelist(allow_guest=False)
 def filter_user(doctype, txt, searchfield, page_len, start, filters):
     try:
         company=filters.get('company')
@@ -1748,22 +1689,25 @@ def validate_user(doc,method):
             raise frappe.PermissionError(("read", "User", doc.email))
     print(method)
 
-@frappe.whitelist(allow_guest=False)
-def branch_orgid_decrypt(frm_name):
+@frappe.whitelist()
+def get_password(fieldname, comp_name):
     try:
-        comp = frappe.get_doc('Company', frm_name)
-        if comp.branch_org_id:
-            return comp.get_password('branch_org_id')
-        return response
-    except Exception:
-        frappe.log_error("No Organization ID in Company", "Warning")
+        comp = frappe.get_doc('Company', comp_name)
 
-@frappe.whitelist(allow_guest=False)
-def branch_apikey_decrypt(frm_name):
-    try:
-        comp = frappe.get_doc('Company', frm_name)
-        if comp.branch_api_key:
+        if fieldname == 'jazzhr_api_key' and comp.jazzhr_api_key:
+            return comp.get_password('jazzhr_api_key')
+        elif fieldname == 'client_id' and comp.client_id:
+            return comp.get_password('client_id')
+        elif fieldname == 'client_secret' and comp.client_secret:
+            return comp.get_password('client_secret')
+        elif fieldname == 'workbright_subdomain' and comp.workbright_subdomain:
+            return comp.get_password('workbright_subdomain')
+        elif fieldname == 'workbright_api_key' and comp.workbright_api_key:
+            return comp.get_password('workbright_api_key')
+        elif fieldname == 'branch_org_id' and comp.branch_org_id:
+            return comp.get_password('branch_org_id')
+        elif fieldname == 'branch_api_key' and comp.branch_api_key:
             return comp.get_password('branch_api_key')
         return response
-    except Exception:
-        frappe.log_error("No API Key in Company", "Warning")
+    except Exception as e:
+        frappe.log_error('Password Not Found', e)

@@ -21,7 +21,6 @@ frappe.ui.form.on("Employee", {
 		set_map(frm);
 		hide_field(frm);
 		show_addr(frm);
-		$('.form-control[data-fieldname="sssn"]').css('-webkit-text-security', 'disc');
 		$('*[data-fieldname="block_from"]').find('.grid-add-row')[0].addEventListener("click",function(){
 			const li = []
 			frm.doc.block_from.forEach(element=>{
@@ -161,11 +160,7 @@ frappe.ui.form.on("Employee", {
 		$('[data-fieldname= "ssn"]').attr('title', '');
 		$('[data-fieldname = "contact_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 		branch_card(frm);
-	},
-
-
-	decrypt_ssn: function(frm) {
-		decrypted_ssn(frm);
+		password_fields(frm);
 	},
 
 	resume:function(frm){
@@ -217,7 +212,6 @@ frappe.ui.form.on("Employee", {
 	},
 
 	before_save:function (frm) {
-		frm.doc.decrypt_ssn = 0;
 		remove_lat_lng(frm)
 		job_title_filter(frm);
 	},
@@ -570,15 +564,6 @@ function set_map (frm) {
 	}
 }
 
-/*------------------------------------*/
-function get_ssn_value(frm){
-	if(frm.doc.ssn){
-		frappe.call({method: "tag_workflow.tag_data.api_sec", args: {'frm': frm.doc.name}, callback: function(r) {localStorage.setItem("tag", String(r.message));}});	
-		$('[data-fieldname="ssn"]')[1].onfocus = function(){if(localStorage.getItem("tag")){cur_frm.set_value("ssn", localStorage.getItem("tag")); localStorage.setItem("tag", "");}}
-	}else{
-		localStorage.setItem("tag", "");
-	}
-}
 
 function employee_work_history(frm){
 	if(frm.doc.__islocal!=1 && (frappe.boot.tag.tag_user_info.company_type=='Staffing' || frappe.boot.tag.tag_user_info.company_type=='TAG')){
@@ -691,5 +676,73 @@ function branch_card(frm){
 		});
 	}else{
 		frm.set_df_property("branch_integration", "hidden", 1);
+	}
+}
+
+function password_fields(frm){
+	$('[data-fieldname="sssn"]').attr('readonly', 'readonly');
+	$('[data-fieldname="sssn"]').attr('type', 'password');
+	$('[data-fieldname="sssn"]').attr('title', '');
+	let button_html = `<button class="btn btn-default btn-more btn-sm" id="decrypt" onclick="show_decrypt(this.id)" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>
+	<button class="btn btn-default btn-more btn-sm" id="edit_off" onclick="edit_pass(this.id)" style="width: 45px;height: 25px;padding: 3px;float: right;">Edit</button>`;
+	frm.set_df_property('ssn_html', 'options',button_html);
+}
+
+window.edit_pass = (id)=>{
+	if(id=='edit_off'){
+		$('[data-fieldname="sssn"]').removeAttr('readonly');
+		$('[data-fieldname="sssn"]').attr('type', 'text');
+		$('#decrypt').hide();
+		$('#encrypt').hide();
+		$('#edit_off').hide();
+		$('#edit_off').attr('id', 'edit_on');
+		show_pass();
+	}
+}
+
+window.show_decrypt = (id)=>{
+	if(id=='decrypt'){
+		$('[data-fieldname="sssn"]').attr('type', 'text');
+		$('#decrypt').text('Encrypt');
+		$('#decrypt').attr('id', 'encrypt');
+		show_pass();
+	}else{
+		hide_pass();
+		$('[data-fieldname="sssn"]').attr('type', 'password');
+		$('#encrypt').text('Decrypt');
+		$('#encrypt').attr('id', 'decrypt');
+	}
+}
+
+function show_pass(){
+	frappe.call({
+		"method": "tag_workflow.tag_data.api_sec",
+		"args": {
+			"doctype": 'Employee',
+			"frm": cur_frm.doc.name
+		},
+		"callback": (res)=>{
+			if(res.message!='Not Found'){
+				cur_frm.set_value('sssn', res.message);
+			}else if(cur_frm.doc.sssn){
+				cur_frm.set_value('sssn', '•'.repeat(cur_frm.doc.sssn.length));
+			}else{
+				cur_frm.set_value('sssn', '');
+			}
+		}
+	})
+}
+
+function hide_pass(){
+	if(cur_frm.doc.sssn){
+		cur_frm.set_value('sssn', '•'.repeat(cur_frm.doc.sssn.length));
+	}
+}
+
+function save_password_data(frm){
+	if(frm.doc.sssn){
+		frm.set_value('ssn', frm.doc.sssn);
+	}else{
+		frm.set_value('ssn', undefined);
 	}
 }

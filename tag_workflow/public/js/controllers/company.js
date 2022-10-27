@@ -1,10 +1,10 @@
 frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("Company", {
-    client_id: function(frm){
+    client_id_data: function(frm){
         update_auth_url(frm);
     },
 
-    client_secret: function(frm){
+    client_secret_data: function(frm){
         update_auth_url(frm);
     },
 	refresh: function (frm){
@@ -41,17 +41,6 @@ frappe.ui.form.on("Company", {
 		if(frm.doc.organization_type=='Staffing'){
 			frm.set_df_property('job_title', 'hidden', 1);
 		}
-		if (frappe.boot.tag.tag_user_info.user_type == "Staffing User" || frappe.boot.tag.tag_user_info.user_type == "Hiring User" || frappe.boot.tag.tag_user_info.user_type == "Hiring Admin"){
-			frm.set_df_property('decrypted_subdomain', 'hidden', 1);
-			frm.set_df_property('decrypted_subdomain_api_key', 'hidden', 1);
-			frm.set_df_property('decrypted_jazzhr_api_key', 'fieldtype', 'Password');
-			frm.set_df_property('decrypted_client_id', 'fieldtype', 'Password');
-			frm.set_df_property('decrypted_client_secret', 'fieldtype', 'Password');
-			frm.set_df_property('decrypted_jazzhr_api_key', 'hidden', 1);
-			frm.set_df_property('decrypted_client_id', 'hidden', 1);
-			frm.set_df_property('decrypted_client_secret', 'hidden', 1);
-
-		}
 		set_map(frm);
 		hide_fields(frm);
 		show_addr(frm)
@@ -65,169 +54,7 @@ frappe.ui.form.on("Company", {
 		$('[data-fieldname = "phone_no"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 		$('[data-fieldname = "accounts_payable_phone_number"]>div>div>div>input').attr("placeholder", 'Example: +XX XXX-XXX-XXXX');
 		$('[data-fieldname = "accounts_receivable_phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
-		hide_workbright(frm)
-		hide_decrypt_branch(frm);
-	},
-
-	decrypt_jazzhr_api_key: function(frm) {
-		if(frm.doc.decrypt_jazzhr_api_key==1){
-			if(frm.doc.jazzhr_api_key){
-				frappe.call({
-					method: "tag_workflow.tag_data.jazz_api_sec",
-					args: {
-						'frm': frm.doc.name,
-					},
-					callback: function(r) {
-						if(r.message!='Not Found'){
-							frm.set_value('decrypted_jazzhr_api_key', r.message);
-							frm.set_df_property('decrypted_jazzhr_api_key','hidden',0)
-							refresh_field('decrypted_jazzhr_api_key');
-						}
-						else{
-							frm.set_df_property('decrypted_jazzhr_api_key','hidden',1)
-							frm.set_value('decrypt_jazzhr_api_key',0)
-							frappe.msgprint('Please save to proceed further')
-						}	
-					}
-				})
-			}
-			else{
-				frm.set_df_property('decrypted_jazzhr_api_key','hidden',1)
-				frm.set_value('decrypted_jazzhr_api_key', '');
-				frm.set_value('decrypt_jazzhr_api_key',0)
-				frappe.msgprint('Nothing to decrypt')
-			}
-		}
-	},
-
-	decrypt_client_id: function(frm) {
-		if(frm.doc.decrypt_client_id==1){
-			if(frm.doc.client_id){
-				frappe.call({
-					method: "tag_workflow.tag_data.client_id_sec",
-					args: {
-						'frm': frm.doc.name,
-					},
-					callback: function(r) {
-						if(r.message!='Not Found'){
-							frm.set_value('decrypted_client_id', r.message);
-							frm.set_df_property('decrypted_client_id','hidden',0)
-							refresh_field('decrypted_client_id');
-						}
-						else{
-							frm.set_df_property('decrypted_client_id','hidden',1)
-							frm.set_value('decrypt_client_id',0)
-							frappe.msgprint('Please save to proceed further')
-						}
-					}
-				})
-			}
-			else{
-				frm.set_df_property('decrypted_client_id','hidden',1)
-				frm.set_value('decrypted_client_id', '');
-				frm.set_value('decrypt_client_id',0)
-				frappe.msgprint('Nothing to decrypt')
-			}
-		}
-	},
-	decrypt_client_secret: function(frm) {
-		if(frm.doc.decrypt_client_secret==1){
-			if(frm.doc.client_secret){
-				frappe.call({
-					method: "tag_workflow.tag_data.client_secret_sec",
-					args: {
-						'frm': frm.doc.name,
-					},
-					callback: function(r) {
-						if(r.message!='Not Found'){
-							frm.set_value('decrypted_client_secret', r.message);
-							frm.set_df_property('decrypted_client_secret','hidden',0)
-							refresh_field('decrypted_client_secret');
-						}
-						else{
-							frm.set_df_property('decrypted_client_secret','hidden',1)
-							frm.set_value('decrypt_client_secret',0)
-							frappe.msgprint('Please save to proceed further')
-						}	
-					}
-				})
-			}
-			else{
-				frm.set_df_property('decrypted_client_secret','hidden',1)
-				frm.set_value('decrypted_client_secret', '');
-				frm.set_value('decrypt_client_secret',0)
-				frappe.msgprint('Nothing to decrypt')
-			}
-		}
-	},
-	decrypt_subdomain: function(frm) {
-		if(frm.doc.decrypt_subdomain==1){
-			console.log(frm.doc.name)
-			if(frm.doc.workbright_subdomain){
-				frappe.call({
-					method: "tag_workflow.tag_data.workbright_subdomain_sec",
-					args: {
-						'frm': frm.doc.name,
-					},
-					callback: function(r) {
-						if(r.message!='Not Found'){
-							frm.set_value('decrypted_subdomain', r.message);
-							frm.set_df_property('decrypted_subdomain','hidden',0)
-							refresh_field('decrypted_subdomain');
-						}
-						else{
-							frm.set_df_property('decrypted_subdomain','hidden',1)
-							frm.set_value('decrypt_subdomain',0)
-							frappe.msgprint('Please save to proceed further')
-						}	
-					}
-				})
-			}
-			else{
-				frm.set_df_property('decrypted_subdomain','hidden',1)
-				frm.set_value('decrypted_subdomain', '');
-				frm.set_value('decrypt_subdomain',0)
-				frappe.msgprint('Nothing to decrypt')
-			}
-		}
-		else{
-			frm.set_df_property('decrypted_subdomain','hidden',1)
-		}
-	},
-
-	decrypt_subdomain_api_key: function(frm) {
-		if(frm.doc.decrypt_subdomain_api_key==1){
-			console.log(frm.doc.name)
-			if(frm.doc.workbright_api_key){
-				frappe.call({
-					method: "tag_workflow.tag_data.workbright_api_key_sec",
-					args: {
-						'frm': frm.doc.name,
-					},
-					callback: function(r) {
-						if(r.message!='Not Found'){
-							frm.set_value('decrypted_subdomain_api_key', r.message);
-							frm.set_df_property('decrypted_subdomain_api_key','hidden',0)
-							refresh_field('decrypted_subdomain_api_key');
-						}
-						else{
-							frm.set_df_property('decrypted_subdomain_api_key','hidden',1)
-							frm.set_value('decrypt_subdomain_api_key',0)
-							frappe.msgprint('Please save to proceed further')
-						}	
-					}
-				})
-			}
-			else{
-				frm.set_df_property('decrypted_subdomain_api_key','hidden',1)
-				frm.set_value('decrypted_subdomain_api_key', '');
-				frm.set_value('decrypt_subdomain_api_key',0)
-				frappe.msgprint('Nothing to decrypt')
-			}
-		}
-		else{
-			frm.set_df_property('decrypted_subdomain_api_key','hidden',1)
-		}
+		password_fields(frm);
 	},
 	update_employee_records: function (frm){
 		if(cur_frm.is_dirty()){
@@ -472,12 +299,7 @@ frappe.ui.form.on("Company", {
 		if(frappe.boot.tag.tag_user_info.company_type =='Hiring' || frappe.boot.tag.tag_user_info.company_type =='Exclusive Hiring' || u_type=='tag admin'){
 			update_table(frm)
 		}
-		if(frm.doc.branch_enabled==0){
-			let fields = ['branch_org_id', 'branch_api_key', 'decrypt_org_id', 'decrypted_org_id', 'decrypt_api', 'decrypted_api'];
-			for(let i in fields){
-				frm.set_value(fields[i], '');
-			}
-		}
+		save_password_data(frm);
 	},
 	phone_no: function(frm){
 		set_field(frm, frm.doc.phone_no, "phone_no");
@@ -502,74 +324,10 @@ frappe.ui.form.on("Company", {
             })
         }
 	},
-	decrypt_org_id: (frm)=>{
-		if(frm.doc.decrypt_org_id==1){
-			if(frm.doc.branch_org_id){
-				frappe.call({
-					method: 'tag_workflow.tag_data.branch_orgid_decrypt',
-					args: {
-						'frm_name': frm.doc.name,
-					},
-					callback: function(r) {
-						if(r.message!='Not Found'){
-							frm.set_value('decrypted_org_id', r.message);
-							frm.set_df_property('decrypted_org_id','hidden',0);
-							refresh_field('decrypted_org_id');
-						}
-						else{
-							frm.set_df_property('decrypted_org_id','hidden',1);
-							frm.set_value('decrypted_org_id',0);
-							frappe.msgprint('Please save to proceed further');
-						}
-					}
-				});
-			}
-			else{
-				frm.set_df_property('decrypted_org_id','hidden',1);
-				frm.set_value('decrypted_org_id', '');
-				frm.set_value('decrypt_org_id',0);
-				frappe.msgprint('Nothing to decrypt');
-			}
-		}else{
-			frm.set_df_property('decrypted_org_id','hidden',1);
-		}
-	},
-	decrypt_api: (frm)=>{
-		if(frm.doc.decrypt_api==1){
-			if(frm.doc.branch_api_key){
-				frappe.call({
-					method: 'tag_workflow.tag_data.branch_apikey_decrypt',
-					args: {
-						'frm_name': frm.doc.name,
-					},
-					callback: function(r) {
-						if(r.message!='Not Found'){
-							frm.set_value('decrypted_api', r.message);
-							frm.set_df_property('decrypted_api','hidden',0);
-							refresh_field('decrypted_api');
-						}
-						else{
-							frm.set_df_property('decrypted_api','hidden',1);
-							frm.set_value('decrypted_api',0);
-							frappe.msgprint('Please save to proceed further');
-						}
-					}
-				});
-			}
-			else{
-				frm.set_df_property('decrypted_api','hidden',1);
-				frm.set_value('decrypted_api', '');
-				frm.set_value('decrypt_api',0);
-				frappe.msgprint('Nothing to decrypt');
-			}
-		}else{
-			frm.set_df_property('decrypted_api','hidden',1);
-		}
-	},
-	branch_enabled: (frm)=>{
-		if(frm.doc.branch_enabled==0){
-			frm.set_value('decrypt_org_id','');
-			frm.set_value('decrypt_api', '')
+	branch_org_id_data: (frm)=>{
+		if(frm.doc.branch_org_id_data && !Number(frm.doc.branch_org_id_data)){
+			frappe.msgprint(__('Only numbers allowed.'))
+			frm.set_value('branch_org_id_data', '');
 		}
 	}
 });
@@ -585,10 +343,6 @@ function hide_details(){
 /*----------init values-----------*/
 function init_values(){
 	if(cur_frm.doc.__islocal == 1){
-		let fields=['decrypted_subdomain','decrypted_subdomain_api_key']
-		for (let data in fields) {
-			cur_frm.toggle_display(fields[data], 0);
-		}
 		$(".page-title .title-area .title-text").css("cursor", "auto");
 		let company_data = {
 			default_currency: "USD",
@@ -1041,14 +795,6 @@ function update_comp_address(frm,data){
 	    }
 	})
 }
-function hide_workbright(frm){
-	if(frm.doc.decrypt_subdomain==0){
-		frm.set_df_property('decrypted_subdomain','hidden',1)
-	}
-	if(frm.doc.decrypt_subdomain_api_key==0){
-		frm.set_df_property('decrypted_subdomain_api_key','hidden',1)
-	}
-}
 
 function mandatory_fields(frm){
 	let reqd_fields = {"Company Type": frm.doc.organization_type, "Company Name": frm.doc.company_name};
@@ -1149,37 +895,85 @@ function update_table(frm){
 		])
 }
 
-function hide_decrypt_branch(frm){
-	function integer_input(event){
-		let keyCode = event.keyCode;
-		let excludedKeys = [8, 37, 39, 46];
-		if (!((keyCode >= 48 && keyCode <= 57) ||(keyCode >= 96 && keyCode <= 105) || (excludedKeys.includes(keyCode)))) {
-			event.preventDefault();
-		}
-	}
-	$('input[data-fieldname="branch_org_id"]').on("keydown keyup input change paste", (event)=>{
-		integer_input(event);
-	});
-
-	if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-		$('[data-fieldname="branch_org_id"]').attr('readonly', 'readonly');
-		$('[data-fieldname="branch_api_key"]').attr('readonly', 'readonly');
-	}
-
-	$('[data-fieldname="decrypted_org_id"]').attr('readonly', 'readonly');
-	$('[data-fieldname="decrypted_api"]').attr('readonly', 'readonly');
-
-	if(frm.doc.decrypt_org_id==0){
-		frm.set_df_property('decrypted_org_id','hidden',1);
-	}
-
-	if(frm.doc.decrypt_api==0){
-		frm.set_df_property('decrypted_api','hidden',1);
-	}
-}
-
 function get_date_time(){
     let today = new Date();
     let date_time = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}  ${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
     return date_time.toString();
+}
+
+function password_fields(frm){
+	let fields = {'jazzhr_api_key': 'jazzhr_api_key_html', 'client_id': 'client_id_html', 'client_secret': 'client_secret_html', 'workbright_subdomain': 'workbright_subdomain_html', 'workbright_api_key': 'workbright_api_key_html', 'branch_org_id': 'branch_org_id_html', 'branch_api_key': 'branch_api_key_html'}
+	for(let field in fields){
+		$('[data-fieldname="'+field+'_data"]').attr('readonly', 'readonly');
+		$('[data-fieldname="'+field+'_data"]').attr('type', 'password');
+		$('[data-fieldname="'+field+'_data"]').attr('title', '');
+		let button_html = '';
+		button_html +=	`<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>`
+		if(!(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && ['branch_org_id', 'branch_api_key'].includes(field))){
+			button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-edit_off" onclick="edit_pass(this.id, '${field}')" style="width: 45px;height: 25px;padding: 3px;float: right;">Edit</button>`;
+		}
+		frm.set_df_property(fields[field], 'options',button_html)
+	}
+}
+
+window.edit_pass = (id, field)=>{
+	if(id.split('-')[1]=='edit_off'){
+		$('[data-fieldname="'+field+'_data"]').removeAttr('readonly');
+		$('[data-fieldname="'+field+'_data"]').attr('type', 'text');
+		$('#'+field+'-decrypt').hide();
+		$('#'+field+'-encrypt').hide();
+		$('#'+id).hide();
+		$('#'+id).attr('id', field+'-edit_on');
+		show_pass(field);
+	}
+}
+
+window.show_decrypt = (id, field)=>{
+	if(id.split('-')[1]=='decrypt'){
+		$('[data-fieldname="'+field+'_data"]').attr('type', 'text');
+		$('#'+field+'-decrypt').text('Encrypt');
+		$('#'+field+'-decrypt').attr('id', field+'-encrypt');
+		show_pass(field);
+	}else{
+		hide_pass(field);
+		$('[data-fieldname="'+field+'_data"]').attr('type', 'password');
+		$('#'+field+'-encrypt').text('Decrypt');
+		$('#'+field+'-encrypt').attr('id', field+'-decrypt');
+	}
+}
+
+function show_pass(fieldname){
+	frappe.call({
+		"method": "tag_workflow.tag_data.get_password",
+		"args": {
+			"fieldname": fieldname,
+			"comp_name": cur_frm.doc.name
+		},
+		"callback": (res)=>{
+			if(res.message!='Not Found'){
+				cur_frm.set_value(fieldname+'_data', res.message);
+			}else if(cur_frm.doc[fieldname]){
+				cur_frm.set_value(fieldname+'_data', '•'.repeat(cur_frm.doc[fieldname]));
+			}else{
+				cur_frm.set_value(fieldname+'_data', '');
+			}
+		}
+	})
+}
+
+function hide_pass(fieldname){
+	if(cur_frm.doc[fieldname]){
+		cur_frm.set_value(fieldname, '•'.repeat(cur_frm.doc[fieldname].length));
+	}
+}
+
+function save_password_data(frm){
+	let fields = {'jazzhr_api_key_data': 'jazzhr_api_key', 'client_id_data': 'client_id', 'client_secret_data': 'client_secret', 'workbright_subdomain_data': 'workbright_subdomain', 'workbright_api_key_data': 'workbright_api_key', 'branch_org_id_data': 'branch_org_id', 'branch_api_key_data': 'branch_api_key'}
+	for(let field in fields){
+		if(frm.doc[field]){
+			frm.set_value(fields[field], frm.doc[field]);
+		}else{
+			frm.set_value(fields[field], undefined);
+		}
+	}
 }

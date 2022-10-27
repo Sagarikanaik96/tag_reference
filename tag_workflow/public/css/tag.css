@@ -1770,10 +1770,14 @@ select.input-with-feedback.form-control.ellipsis {
   border-radius: 6px !important;
 }
 
-.frappe-control.input-max-width[data-fieldname="branch_api_key"],
-.frappe-control.input-max-width[data-fieldname="decrypt_api"],
-.frappe-control.input-max-width[data-fieldname="decrypted_api"]{
-  top:36px;
+.frappe-control.input-max-width[data-fieldname="branch_api_key_data"]{
+  padding-top:38px;
+}
+
+.frappe-control.input-max-width[data-fieldname="quickbooks_company_id"],
+.frappe-control.input-max-width[data-fieldname="redirect_url"],
+.frappe-control.input-max-width[data-fieldname="military_veteran"]{
+  top:12px;
 }
 
 @media (min-width: 768px) {
