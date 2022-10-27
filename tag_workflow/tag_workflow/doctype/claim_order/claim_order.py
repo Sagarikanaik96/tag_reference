@@ -273,7 +273,7 @@ def notification_func(job_order, no_required, no_assigned, hiring_org, job_order
 			newmsg = f'{hiring_org} has an order for {job_order_data.select_job} available with {count} openings available.'
 		make_system_notification(staffing_user_list, newmsg, jobOrder, job_order, subject)
 		link_job_order = f'  href="{sitename}/app/job-order/{job_order}"'
-		joborder_email_template(subject, newmsg, staffing_user_list, link_job_order,sender_full_name = job_order_data.company)
+		joborder_email_template(subject, newmsg, staffing_user_list, link_job_order,sender_full_name = job_order_data.company,sender = job_order_data.owner)
 
 	
 def assign_notification(share_list,hiring_user_list,doc_name,job_order):

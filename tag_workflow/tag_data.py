@@ -70,14 +70,14 @@ def send_email(subject = None,content = None,recipients = None):
         frappe.msgprint("Could Not Send")
         return False
 
-def joborder_email_template(subject = None,content = None,recipients = None,link=None, sender_full_name=None):
+def joborder_email_template(subject = None,content = None,recipients = None,link=None, sender_full_name=None,sender = None):
     try:
         from frappe.core.doctype.communication.email import make
         site= frappe.utils.get_url().split('/')
         sitename=site[0]+'//'+site[2]
         make(subject = subject, content=frappe.render_template("templates/emails/email_template_custom.html",
             {"sitename": sitename, "content":content,"subject":subject,"link":link}),
-            recipients= recipients,send_email=True,sender_full_name=sender_full_name)
+            recipients= recipients,send_email=True,sender_full_name=sender_full_name,sender=sender)
         return True
     except Exception as e:
         frappe.log_error(e, "Doc Share Error")
@@ -267,7 +267,7 @@ def notification_func(job_order, emp_detail, no_of_worker_req, hiring_org, staff
             newmsg=f'{hiring_org} has an order for {job_order.select_job} available with {count} openings available.'
         make_system_notification(staffing_user_list,newmsg,jobOrder,job_order.name,subject)
         link_job_order =  f'  href="{sitename}/app/job-order/{job_order.name}"'
-        joborder_email_template(subject,newmsg,staffing_user_list,link_job_order,sender_full_name = job_order.company)   
+        joborder_email_template(subject,newmsg,staffing_user_list,link_job_order,sender_full_name = job_order.company,sender = job_order.owner)   
    
 @frappe.whitelist(allow_guest=False)
 def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None,staff_company=None):
