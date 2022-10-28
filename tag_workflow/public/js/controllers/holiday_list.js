@@ -12,21 +12,8 @@ frappe.ui.form.on("Holiday List", {
 	refresh:function(frm){
 		$("div.form-dashboard").hide();
 		if (frm.doc.__islocal==1 && frappe.boot.tag.tag_user_info.company_type == "Staffing") {
-			frappe.call({
-				'method': "tag_workflow.tag_data.lead_org",
-				'args': { 'current_user': frappe.session.user },
-				'callback': function (r) {
-					if (r.message == 'success') {
-						frm.set_value('company', frappe.boot.tag.tag_user_info.company)
-						frm.refresh_fields();
-					}
-					else {
-						frm.set_value('company','')
-						frm.refresh_fields();
-					}
-				}
-			});
-		}
+            frm.set_value('company',(frappe.boot.tag.tag_user_info.comps.length==1) ? frappe.boot.tag.tag_user_info.company : '')
+        }
 		if (frm.doc.__islocal==1 && frappe.boot.tag.tag_user_info.company_type == "TAG") {
 			frm.set_value('company','')
 			frm.refresh_fields();
