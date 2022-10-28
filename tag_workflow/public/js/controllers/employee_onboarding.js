@@ -361,7 +361,7 @@ function confirmation(frm){
 }
 
 function password_fields(frm){
-	if(frm.doc.__islocal!=1){
+	if(frm.doc.__islocal!=1 && frm.doc.docstatus==0){
 		$('[data-fieldname="sssn"]').attr('readonly', 'readonly');
 		$('[data-fieldname="sssn"]').attr('type', 'password');
 		$('[data-fieldname="sssn"]').attr('title', '');
@@ -405,7 +405,6 @@ function show_pass(){
 			"frm": cur_frm.doc.name
 		},
 		"callback": (res)=>{
-			console.log(res)
 			if(res.message!='Not Found'){
 				cur_frm.set_value('sssn', res.message);
 			}else if(cur_frm.doc.sssn){
