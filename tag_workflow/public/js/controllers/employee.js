@@ -45,8 +45,6 @@ frappe.ui.form.on("Employee", {
 			});
 		});
 
-		hide_decrpt_ssn(frm);
-
 		window.onclick = function() {
 			attachrefresh();
 		}
@@ -202,13 +200,6 @@ frappe.ui.form.on("Employee", {
 			frm.set_value("job_category",null);
 		} 
 		append_job_category(frm)
-	},
-
-	ssn: function(frm){
-		if(frm.doc.ssn && isNaN(frm.doc.ssn)){
-			frappe.msgprint(__("Only numbers are allowed in SSN."));
-			frm.set_value("ssn", "");
-		}
 	},
 
 	before_save:function (frm) {
@@ -680,12 +671,14 @@ function branch_card(frm){
 }
 
 function password_fields(frm){
-	$('[data-fieldname="sssn"]').attr('readonly', 'readonly');
-	$('[data-fieldname="sssn"]').attr('type', 'password');
-	$('[data-fieldname="sssn"]').attr('title', '');
-	let button_html = `<button class="btn btn-default btn-more btn-sm" id="decrypt" onclick="show_decrypt(this.id)" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>
-	<button class="btn btn-default btn-more btn-sm" id="edit_off" onclick="edit_pass(this.id)" style="width: 45px;height: 25px;padding: 3px;float: right;">Edit</button>`;
-	frm.set_df_property('ssn_html', 'options',button_html);
+	if(frm.doc.__islocal!=1){
+		$('[data-fieldname="sssn"]').attr('readonly', 'readonly');
+		$('[data-fieldname="sssn"]').attr('type', 'password');
+		$('[data-fieldname="sssn"]').attr('title', '');
+		let button_html = `<button class="btn btn-default btn-more btn-sm" id="decrypt" onclick="show_decrypt(this.id)" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>
+		<button class="btn btn-default btn-more btn-sm" id="edit_off" onclick="edit_pass(this.id)" style="width: 45px;height: 25px;padding: 3px;float: right;">Edit</button>`;
+		frm.set_df_property('ssn_html', 'options',button_html);
+	}
 }
 
 window.edit_pass = (id)=>{
@@ -718,7 +711,7 @@ function show_pass(){
 	frappe.call({
 		"method": "tag_workflow.tag_data.api_sec",
 		"args": {
-			"doctype": 'Employee',
+			"doctype": cur_frm.doc.doctype,
 			"frm": cur_frm.doc.name
 		},
 		"callback": (res)=>{
@@ -736,13 +729,5 @@ function show_pass(){
 function hide_pass(){
 	if(cur_frm.doc.sssn){
 		cur_frm.set_value('sssn', '•'.repeat(cur_frm.doc.sssn.length));
-	}
-}
-
-function save_password_data(frm){
-	if(frm.doc.sssn){
-		frm.set_value('ssn', frm.doc.sssn);
-	}else{
-		frm.set_value('ssn', undefined);
 	}
 }

@@ -118,7 +118,6 @@ function validate_phone_zip(frm){
 
 function check_ssn(frm){
 	let validate = true;
-	frm.doc.decrypt_ssn = 0;
 	if(frm.doc.sssn){
 		if(frm.doc.sssn=='•••••••••'){
 			frm.set_value('sssn','•••••••••');
@@ -169,39 +168,6 @@ function table_reqd(table_data){
 		});
 	}
 	return check;
-}
-
-function hide_decrpt_ssn(frm){
-	if(frm.doc.__islocal != 1 ){
-		frappe.call({
-			method: 'tag_workflow.tag_data.hide_decrypt_ssn',
-			args: {
-				'frm': frm.doc.name,
-				'doctype': frm.doc.doctype
-			},
-			async:0,
-			callback: function(r) {
-				if (frm.doc.__islocal != 0) {
-					frm.set_df_property('decrypt_ssn','hidden',r.message);
-					refresh_field('decrypted_ssn');
-				}
-			}
-		});
-	}
-}
-
-function decrypted_ssn(frm){
-	frappe.call({
-		method: 'tag_workflow.tag_data.api_sec',
-		args: {
-			'frm': frm.doc.name,
-			'doctype': frm.doc.doctype
-		},
-		callback: function(r) {
-			frm.set_value('decrypted_ssn', r.message);
-			refresh_field('decrypted_ssn');
-		}
-	})
 }
 
 /*----For Employee Onboarding and Employee Onboarding Template Forms----*/
