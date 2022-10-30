@@ -6,6 +6,7 @@ import requests, json
 import googlemaps
 from frappe.model.document import Document
 jobOrder='Job Order'
+AEMP ='Assign Employee'
 class AssignEmployee(Document):
     pass
 
@@ -175,7 +176,7 @@ def check_emp_available(frm):
             z=[]
             for i in l:
                 d1={}
-                y=frappe.get_doc('Assign Employee',i[1])
+                y=frappe.get_doc(AEMP,i[1])
                 d1['job_order']=y.job_order
                 d1['employee']=i[0]
                 z.append(d1)
@@ -207,7 +208,7 @@ def payrate_change(docname):
     try:
         sql = '''select data from `tabVersion` where docname="{0}" order by modified DESC'''.format(docname)
         data = frappe.db.sql(sql, as_list=1)
-        new_data = json.loads(data[0][0])
+        new_data = json.loads(data[0][0]) 
         if ('changed' not in new_data and 'row_changed' not in new_data) or len(new_data['added']) > 0 or len(new_data['removed']) > 0:
             return 'success'
         elif 'row_changed' in new_data:
@@ -254,4 +255,11 @@ def update_workers_filled(job_order_name):
 
     except Exception as e:
         frappe.log_error(e,'Workers Update')
-        
+
+@frappe.whitelist()
+def update_notes(name,notes):
+    try:
+        frappe.db.sql("""update `tabAssign Employee` set notes="{1}" where name="{0}" """.format(name,notes))
+        frappe.publish_realtime(event='sync_data',doctype=AEMP,docname=name)
+    except Exception as e:
+        print(e)

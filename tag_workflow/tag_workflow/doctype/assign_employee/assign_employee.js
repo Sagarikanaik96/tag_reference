@@ -55,6 +55,7 @@ frappe.ui.form.on("Assign Employee", {
     render_tab(frm);
     set_payrate_field(frm);
     window.conf = 0;
+    add_notes_button(frm);
   },
   e_signature_full_name: function (frm) {
     if (frm.doc.e_signature_full_name) {
@@ -1364,3 +1365,41 @@ function hide_class_code_rate(frm){
     frm.set_df_property('staff_class_code_rate','hidden',1)
   }
 }
+
+function add_notes_button(frm){
+  const role = frappe.boot.tag.tag_user_info.user_type;
+  if(frm.doc.tag_status=="Approved" && frm.doc.resume_required==1 && (role=='Hiring Admin'|| role=='Hiring User')){
+    frm.add_custom_button('Update Notes',()=>{
+      let d = new frappe.ui.Dialog({
+        title: 'Update Notes',
+        fields: [
+            {
+                label: 'Notes',
+                fieldname: 'modal_notes',
+                fieldtype: 'Small Text',
+                reqd:1,
+            },
+        ],
+        primary_action_label: 'Submit',
+        primary_action(values) {
+            frappe.call({
+              method:"tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.update_notes",
+              args:{name:cur_frm.doc.name,notes:values.modal_notes}
+            })
+            d.hide();
+
+        }
+    })
+    d.show();
+    d.fields_dict['modal_notes'].$wrapper.find('textarea').attr('maxlength',160);
+
+    
+    })
+  }
+
+}
+frappe.realtime.on('sync_data',()=>{
+  setTimeout(()=>{
+    cur_frm.reload_doc();
+  },200)
+ })
