@@ -29,8 +29,7 @@ frappe.ui.form.on('Add Timesheet', {
 				update_timesheet(frm,save);
 			}
 			else{
-				update_time_data(frm)
-				update_save_timesheet(frm,save)
+				update_time_data(frm,save)
 			}
 		}).addClass("btn-primary");
 		frm.add_custom_button(__('Submit Timesheet'), function() {
@@ -135,8 +134,8 @@ function update_title(frm){
 					<p><b>Job Title: </b> ${r['select_job']}</p>&nbsp;&nbsp;
 					<p><b>Job Site: </b> ${r['job_site']}</p>&nbsp;&nbsp;
 					<p><b>Job Duration: </b> ${r['job_order_duration']}</p>&nbsp;&nbsp;
-					<p><b>Daily Hour: </b> ${r['estimated_hours_per_day'].toFixed(2)} hrs</p>&nbsp;&nbsp;
-					<p><b>Rate Per Hour: </b>$${r['per_hour'].toFixed(2)}</p>&nbsp;&nbsp;
+					<p><b>Daily Hours: </b> ${r['estimated_hours_per_day'].toFixed(2)} hrs</p>&nbsp;&nbsp;
+					<p><b>Bill Rate: </b>$${r['per_hour'].toFixed(2)}</p>&nbsp;&nbsp;
 					<p><b>Flat Rate: </b>$${r['flat_rate'].toFixed(2)}</p>&nbsp;&nbsp;
 					<p><b>From Date: </b> ${r['from_date']}</p>&nbsp;&nbsp;
 					<p><b>To Date: </b> ${r['to_date']}</p>
@@ -609,32 +608,29 @@ function update_timesheet_save(items,cur_selected,job_order,date,from_time,to_ti
 }
 
 /*------------------------------------------*/
-function update_time_data(frm){
+function update_time_data(frm,save){
+	let err
+	err=check_from_to_timesheet_hour_value(frm)
+	check_break_from_to_timesheet_value(frm)
+	let employees=[]
 	let item = frm.doc.items || [];
-	for(let i in item){
-		time_update(frm,item,i)
+	if(item.length>0){
+		for(let i in item){
+			employees.push(item[i].employee_name)
+		}
+	}	
+	let current_date=moment(frm.doc.date)
+	if(err==1 && frm.doc.date<frm.doc.to_date){
+		let next_date=current_date.add(1, 'days')
+		frappe.msgprint({message: __("Timesheet values has crossed midnight. Please create a separate timesheet for "+next_date.date()+"-"+current_date.format('MMMM')+"-"+next_date.year() +" for "+employees), title: __('Midnight Timesheet'), indicator: 'red'});
 	}
-}
-function time_update(frm,item,i)
-{
-	if(frm.doc.break_from_time || frm.doc.break_to_time){
-		let new_from_breaktime=cur_frm.doc.break_from_time ? cur_frm.doc.break_from_time:cur_frm.doc.break_to_time;
-		let new_to_breaktime=cur_frm.doc.break_to_time ? cur_frm.doc.break_to_time:cur_frm.doc.break_from_time;
-		frappe.model.set_value(item[i].doctype, item[i].name, "break_from", new_from_breaktime);
-		frappe.model.set_value(item[i].doctype, item[i].name, "break_to", new_to_breaktime);
+	else if(err==2 && frm.doc.date>frm.doc.from_date){
+		let past_date=current_date.subtract(1, 'days')
+		frappe.msgprint({message: __("Timesheet values has crossed midnight. Please create a separate timesheet for "+past_date.date()+"-"+past_date.format('MMMM')+"-"+past_date.year() +" for "+employees), title: __('Midnight Timesheet'), indicator: 'red'});
 	}
-	if(frm.doc.from_time || frm.doc.to_time){
-		let new_fromtime=frm.doc.from_time ? frm.doc.from_time:frm.doc.to_time 
-		let new_totime=frm.doc.to_time ? frm.doc.to_time:frm.doc.from_time
-		frappe.model.set_value(item[i].doctype, item[i].name, "from_time", new_fromtime);
-		frappe.model.set_value(item[i].doctype, item[i].name, "to_time", new_totime);
-	}
-	else{
-		frappe.model.set_value(item[i].doctype, item[i].name, "from_time",frm.doc.break_from_time || frm.doc.break_to_time);
-		frappe.model.set_value(item[i].doctype, item[i].name, "to_time",frm.doc.break_from_time || frm.doc.break_to_time );
-
-	}
-	
+	setTimeout(function(){
+		update_save_timesheet(frm,save)
+	},1000)
 }
 function update_time_values(data,d){
 	if(!(cur_frm.doc.from_time)){
@@ -682,4 +678,69 @@ function check_break_time(frm){
 			frappe.validated=false;
 		}
 	}
+}
+function check_from_to_timesheet_hour_value(frm){
+	let est_hours=frm.doc.estimated_daily_hours
+	let daily_hrs
+	if(Number.isInteger(est_hours)){
+		daily_hrs=(est_hours).toString()+'.00'
+	}
+	else{
+		daily_hrs=est_hours.toFixed(2)
+	}
+	let dat=(daily_hrs.toString()).split('.')
+	let my_hours=parseInt(dat[0]*60)
+	let my_minutes=parseFloat(dat[1])*.60
+	let minutes_value=my_hours+my_minutes
+	let midnight
+	if(frm.doc.from_time && !frm.doc.to_time){
+		let new_end_time=moment(frm.doc.from_time, 'HH:mm').add(minutes_value, 'minutes').format('HH:mm:ss')
+		if(new_end_time<frm.doc.from_time){
+			frm.set_value('to_time','23:59:00');
+			midnight=1
+		}
+		else{
+			frm.set_value('to_time',new_end_time);
+
+		}
+	}
+	else if(frm.doc.to_time && !frm.doc.from_time){
+		let new_from_time=moment(frm.doc.to_time, 'HH:mm').subtract(minutes_value, 'minutes').format('HH:mm:ss')
+		if(new_from_time>frm.doc.to_time){
+			frm.set_value('from_time','00:00:00');
+			midnight=2
+		}
+		else{
+			frm.set_value('from_time',new_from_time);
+
+		}
+	}
+	return midnight
+
+}
+function check_break_from_to_timesheet_value(frm){
+	let extra_break_time=15
+	if(frm.doc.break_from_time && !frm.doc.break_to_time){
+		let new_break_end_time=moment(frm.doc.break_from_time, 'HH:mm').add(extra_break_time, 'minutes').format('HH:mm:ss')
+		if(new_break_end_time<frm.doc.break_from_time){
+			frm.set_value('break_to_time','23:59:00');
+		}
+		else{
+			frm.set_value('break_to_time',new_break_end_time);
+		}
+	}
+	else if(frm.doc.break_to_time && !frm.doc.break_from_time){
+		let new_break_from_time=moment(frm.doc.break_to_time, 'HH:mm').subtract(extra_break_time, 'minutes').format('HH:mm:ss')
+		if(new_break_from_time>frm.doc.break_to_time){
+			frm.set_value('break_from_time','00:00:00');
+		}
+		else{
+			frm.set_value('break_from_time',new_break_from_time);
+		}
+	}
+	if(frm.doc.break_from_time && frm.doc.break_to_time && !(frm.doc.from_time && frm.doc.to_time)){
+		frm.set_value('from_time',frm.doc.break_from_time);
+		frm.set_value('to_time',frm.doc.break_to_time);
+	}	
+
 }
