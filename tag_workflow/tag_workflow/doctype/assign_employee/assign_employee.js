@@ -3,6 +3,7 @@
 let condition = localStorage.getItem("exclusive_case");
 window.conf = 0;
 let note = '';
+let company_branch = 0;
 frappe.ui.form.on("Assign Employee", {
   refresh: function (frm) {
     setTimeout(add_dynamic, 500);
@@ -56,6 +57,7 @@ frappe.ui.form.on("Assign Employee", {
     set_payrate_field(frm);
     window.conf = 0;
     add_notes_button(frm);
+    check_company_branch(frm);
   },
   e_signature_full_name: function (frm) {
     if (frm.doc.e_signature_full_name) {
@@ -125,6 +127,7 @@ frappe.ui.form.on("Assign Employee", {
     if (frm.doc.company && frm.doc.__islocal == 1) {
       set_pay_rate(frm);
       check_class_code(frm)
+      check_company_branch(frm);
     }
   },
 
@@ -436,6 +439,7 @@ frappe.ui.form.on("Assign Employee Details", {
       if (child.__islocal != 1) {
         check_old_value(child);
       }
+      branch_wallet(frm.doc.company, child.employee, child.employee_name, cdt, cdn);
     }
   },
   employee_details_add: function (frm, cdt, cdn) {
@@ -1402,4 +1406,48 @@ frappe.realtime.on('sync_data',()=>{
   setTimeout(()=>{
     cur_frm.reload_doc();
   },200)
- })
+})
+
+function check_company_branch(frm){
+  frappe.db.get_value('Company', {'name': frm.doc.company}, ['branch_enabled', 'branch_org_id', 'branch_api_key'], (res)=>{
+    if(res.branch_enabled && res.branch_org_id && res.branch_api_key){
+      company_branch = 1;
+    }else{
+      company_branch = 0;
+    }
+  });
+}
+
+function branch_wallet(company, emp_id, emp_name, cdt, cdn){
+  if(company_branch == 1){
+    frappe.call({
+      method: "tag_workflow.utils.branch_integration.get_employee_data",
+      args:{
+        "emp_id": emp_id,
+        "company": company
+      },
+      freeze:true,
+      callback: (res)=>{
+        if(res.message){
+          if(res.message.includes('Please') || res.message.includes('Branch')){
+            remove_row(res.message, emp_name, cdt, cdn);
+            frappe.msgprint(res.message);
+            frappe.validated = false;
+          }else if(Number(res.message)){
+            frappe.db.set_value('Employee', emp_id, "account_number", res.message)
+          }
+        }
+      }
+    });
+  }
+}
+
+function remove_row(message, emp_name, cdt, cdn){
+  if(message != 'Enable Branch for '+emp_name+'.'){
+    let fields = ['employee', 'employee_name', 'resume', 'pay_rate', 'remove_employee', 'job_category', 'company'];
+    for(let field in fields){
+      frappe.model.set_value(cdt, cdn, fields[field], '');
+    }
+    cur_frm.refresh_field('employee_details');
+  }
+}

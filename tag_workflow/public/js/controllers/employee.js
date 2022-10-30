@@ -263,22 +263,68 @@ frappe.ui.form.on("Employee", {
 		branch_card(frm);
 	},
 	opt_in: (frm)=>{
-		let message = "<b>Please fill the below fields to Opt In for Branch:</b>";
+		let message = "<b>Please fill the below fields to Opt In for Branch:</b>", message2 = '', error=0;
 		if(frm.doc.opt_in==1){
 			let fields = {"First Name": frm.doc.first_name, "Last Name": frm.doc.last_name, "Street Address": frm.doc.street_address, "City": frm.doc.city, "State": frm.doc.state, "Zip": frm.doc.zip, "Date of Birth": frm.doc.date_of_birth, "SSN": frm.doc.sssn, "Contact Number": frm.doc.contact_number, "Email": frm.doc.email};
 			for(let key in fields){
 				if(!fields[key] || fields[key]==undefined || !fields[key].trim()){
 					message = message + '<br>' + '<span>&bull;</span> ' + key;
+					error=1;
 				}
 			}
+			frappe.call({
+				'method': 'tag_workflow.utils.branch_integration.check_dob_ssn',
+				'args': get_args(frm),
+				'async':0,
+				'callback': (res)=>{
+					if(res.message){
+						message2+=res.message
+						error = 1;
+					}
+				}
+			});
+			if(error==0){
+				frm.set_df_property('branch_details', 'hidden', 0);
+				fetch_branch_data();
+			}
 		}
-		if(message!="<b>Please fill the below fields to Opt In for Branch:</b>"){
-			frappe.msgprint({ message: __(message), title: __('Missing Fields'), indicator: 'orange'});
-			frappe.validated = false;
-			frm.set_value("opt_in", "");
+		else{
+			frm.set_df_property('branch_details', 'hidden', 1);
 		}
+		warning_message(frm, message, message2);
 	}
 });
+
+function get_args(frm){
+	let args={}
+	if(frm.doc.__islocal==1){
+		if(frm.doc.sssn && !frm.doc.ssn){
+			args['ssn'] = frm.doc.sssn;
+		}
+		if(frm.doc.date_of_birth){
+			args['dob'] = frm.doc.date_of_birth;
+		}
+	}else{
+		args['emp_id'] = frm.doc.name;
+		args['doctype'] = 'Employee';
+	}
+	return args
+}
+
+function warning_message(frm, message, message2){
+	if(message!="<b>Please fill the below fields to Opt In for Branch:</b>"){
+		if(message2){
+			message+='<hr>'+message2;
+		}
+		frappe.msgprint({ message: __(message), title: __('Missing Fields'), indicator: 'orange'});
+		frappe.validated = false;
+		frm.set_value("opt_in", "");
+	}else if(message2){
+		frappe.msgprint({ message: __(message2), title: __('Warning'), indicator: 'orange'});
+		frappe.validated = false;
+		frm.set_value("opt_in", "");
+	}
+}
 
 frappe.ui.form.on('Job Category', {
 	job_category(frm) {
@@ -661,12 +707,168 @@ function branch_card(frm){
 		frappe.db.get_value("Company", {"name": frm.doc.company}, ["branch_enabled"],(res)=>{
 			if(res.branch_enabled==1){
 				frm.set_df_property("branch_integration", "hidden", 0);
+				if(frm.doc.opt_in == 1){
+					fetch_branch_data();
+				}
 			}else{
 				frm.set_df_property("branch_integration", "hidden", 1);
 			}
 		});
 	}else{
 		frm.set_df_property("branch_integration", "hidden", 1);
+	}
+}
+
+function fetch_branch_data(){
+	frappe.call({
+		'method': 'tag_workflow.utils.branch_integration.get_wallet_data',
+		'args': {
+			'emp_id': cur_frm.doc.name
+		},
+		async: 0,
+		freeze: true,
+		callback: (res)=>{
+			if(typeof(res.message) == 'string'){
+				if(res.message.includes('Error')){
+					frm.set_df_property("branch_details", "options", res.message);
+				}else{
+					branch_details(cur_frm, 'No Data');
+				}
+			}else{
+				branch_details(cur_frm, res.message);
+			}
+		}
+	})
+}
+
+function branch_details(frm, data){
+	if(frm.doc.opt_in==1){
+		let profile_html=`
+		<label class="control-label">Account Status</label>
+		<p class="text-muted small grid-description" style="display: none"></p>
+		<div class="grid-custom-buttons grid-field"></div>
+		<div class="form-grid">
+			<div class="grid-heading-row">
+				<div class="grid-row">
+					<div class="data-row row">
+						<div class="col grid-static-col col-xs-2" data-fieldname="account_number" data-fieldtype="Password" title="Account Number">
+							<div class="field-area" style="display: none"></div>
+							<div class="static-area ellipsis">Account Number</div>
+						</div>
+						<div class="col grid-static-col col-xs-2" data-fieldname="account_status" data-fieldtype="Data" title="Account Status">
+							<div class="field-area" style="display: none"></div>
+							<div class="static-area ellipsis">Account Status</div>
+						</div>
+						<div class="col grid-static-col col-xs-2" data-fieldname="card_status" data-fieldtype="Data" title="Card Status">
+							<div class="field-area" style="display: none"></div>
+							<div class="static-area ellipsis">Card Status</div>
+						</div>
+						<div class="col grid-static-col col-xs-2" data-fieldname="reason_code" data-fieldtype="Data" title="Reason Code">
+							<div class="field-area" style="display: none"></div>
+							<div class="static-area ellipsis">Reason Code</div>
+						</div>
+						<div class="col grid-static-col col-xs-2" data-fieldname="reason" data-fieldtype="Data" title="Reason">
+							<div class="field-area" style="display: none"></div>
+							<div class="static-area ellipsis">Reason</div>
+						</div>
+						<div class="col grid-static-col col-xs-2" data-fieldname="time_created" data-fieldtype="Datetime" title="Time Created">
+							<div class="field-area" style="display: none"></div>
+							<div class="static-area ellipsis">Time Created</div>
+						</div>
+					</div>
+				</div>
+			</div>`
+			
+		if(data == 'No Data'){
+			profile_html += `<div class="grid-body">
+				<div class="grid-empty text-center">
+					<img src="/assets/frappe/images/ui-states/grid-empty-state.svg" alt="Grid Empty State" class="grid-empty-illustration"/>
+					No Data
+				</div>
+			</div>`;
+		}else{
+			let account_no = '•'.repeat(cur_frm.doc.account_number.length);
+			profile_html += `
+			<div class="grid-body">
+				<div class="rows">
+					<div class="grid-row">
+						<div class="data-row row" style="display: flex;">
+								<div class="col grid-static-col col-xs-2" id="account_no" data-fieldtype="Password" title="Account Number"><div class="static-area ellipsis" >${account_no}</div></div>
+								<div class="col grid-static-col col-xs-2 " id="account_status" title = '${data.acc_status_label || ''}'><div class="static-area ellipsis"><span id="acc_status_color">${data.acc_status || ''}</span></div></div>
+								<div class="col grid-static-col col-xs-2 " id="card_status"><div class="static-area ellipsis"><span id="card_status_color">${data.card_status || ''}</span></div></div>
+								<div class="col grid-static-col col-xs-2 " id="reason_code" title = '${data.reason_code_label || ''}'><div class="static-area ellipsis"><span id="reason_code">${data.reason_code || ''}</span></div></div>
+								<div class="col grid-static-col col-xs-2 " id="reason"><div class="static-area ellipsis"></div>${data.reason || ''}</div>
+								<div class="col grid-static-col col-xs-2 " id="time_created"><div class="static-area ellipsis">${data.time_created}</div></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>`
+		}
+		profile_html+=`</div>
+		<div class="small form-clickable-section grid-footer">
+			<div class="flex justify-between">
+				<div class="grid-buttons">
+					<button class="btn btn-xs btn-secondary" onclick="fetch_data()">Refresh Status</button>
+					<button class="btn btn-xs btn-secondary" id='decrypt_acc' onclick="show_acc(this.id, '${data.acc_no}')">Decrypt Account Number</button>
+				</div>
+				<div class="grid-pagination"></div>
+			</div>
+		</div>
+		`;
+		frm.set_df_property("branch_details", "options", profile_html);
+		card_status_color(data.card_status);
+		account_status_color(data.acc_status);
+		reason_code_color(data.reason_code);
+	}
+}
+
+window.fetch_data = ()=>{
+	fetch_branch_data();
+}
+
+window.show_acc = (id, acc_no)=>{
+	if(id == "decrypt_acc"){
+		$('#account_no').text(acc_no);
+		$('#decrypt_acc').html('Encrypt Account Number');
+		$('#decrypt_acc').attr('id', 'encrypt_acc');
+	}else{
+		$('#account_no').text('•'.repeat(acc_no.length));
+		$('#encrypt_acc').html('Decrypt Account Number');
+		$('#encrypt_acc').attr('id', 'decrypt_acc');
+	}
+}
+
+function card_status_color(card_status){
+	if(card_status=='False'){
+		$('#card_status_color').addClass("indicator-pill red");
+	}else{
+		$('#card_status_color').addClass("indicator-pill green");
+	}
+}
+
+function account_status_color(acc_status){
+	if(acc_status){
+		if(['NOT CREATED','FAILED', 'CLOSED'].includes(acc_status)){
+			$('#acc_status_color').addClass("indicator-pill red");
+		}
+		else if(['PENDING', 'REVIEW', 'CREATED', 'UNCLAIMED'].includes(acc_status)){
+			$('#acc_status_color').addClass("indicator-pill yellow");
+		}
+		else{
+			$('#acc_status_color').addClass("indicator-pill green");
+		}
+	}
+}
+
+function reason_code_color(reason_code){
+	if(reason_code){
+		if(['CONFIRMED FRAUD', 'DENIED', 'KYC SSN INVALID', 'KYC PII SSN MISMATCH', 'KYC DECEASED','KYC ERROR', 'EMPLOYEE NOT FOUND', 'ERROR'].includes(reason_code)){
+			$('#acc_status_color').addClass("indicator-pill red");
+		}
+		else{
+			$('#acc_status_color').addClass("indicator-pill yellow");
+		}
 	}
 }
 

@@ -16423,7 +16423,7 @@ function validate_phone(phone){
 }
 
 function validate_zip(zip){
-  let regex = /^\w+(\s+\w+)*$/g;
+  let regex = /^\d{5}(-\d{4}){0,1}$/gm;
   if(zip.length < 3 || zip.length > 15 || !regex.test(zip)){
     return 0;
   }
