@@ -1711,3 +1711,15 @@ def get_password(fieldname, comp_name):
         return response
     except Exception as e:
         frappe.log_error('Password Not Found', e)
+
+@frappe.whitelist(allow_guest=True)
+def branch_key(branch_key=None):
+    try:
+        if branch_key:
+            redis = frappe.cache()
+            redis.hset("branch_data", "branch_key", branch_key)
+            return "Success"
+        else:
+            return "Failed"
+    except Exception as e:
+        frappe.log_error('Branch API Call Error', e)
