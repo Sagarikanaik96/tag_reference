@@ -2,7 +2,7 @@
  "cards_label": "Reports",
  "category": "Modules",
  "charts": [],
- "creation": "2022-10-27 00:29:23.358320",
+ "creation": "2022-10-31 00:22:36.259745",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
@@ -134,7 +134,7 @@
    "hidden": 0,
    "is_query_report": 1,
    "label": "Workers Comp Summary",
-   "link_to": "Workers Comp Detail",
+   "link_to": "Workers Comp Summary",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -149,7 +149,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-10-27 00:32:28.110520",
+ "modified": "2022-10-31 00:32:16.991058",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Reports",

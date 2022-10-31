@@ -1515,7 +1515,7 @@
     "icon": null,
     "is_query_report": 1,
     "label": "Workers Comp Summary",
-    "link_to": "Workers Comp Detail",
+    "link_to": "Workers Comp Summary",
     "link_type": "Report",
     "onboard": 0,
     "only_for": null,
@@ -1540,7 +1540,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2022-10-27 00:32:28.110520",
+  "modified": "2022-10-31 00:32:16.991058",
   "module": "Tag Workflow",
   "name": "Reports",
   "onboarding": null,

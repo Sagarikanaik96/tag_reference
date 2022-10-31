@@ -45,7 +45,7 @@ def get_user_info():
 
         sql = ""
         if(user_doc.organization_type == "Hiring"):
-            sql = """select name from `tabCompany` where organization_type = "Staffing" """
+            sql = """select name from `tabCompany` where organization_type = "Hiring" and name in (select company from `tabEmployee` where user_id = '{0}')""".format(user_doc.name)
         elif(user_doc.organization_type == "Staffing"):
             sql = """select name from `tabCompany` where organization_type = "Staffing" and name in (select company from `tabEmployee` where user_id = '{0}')""".format(user_doc.name)
             excs = frappe.db.sql(""" select name from `tabCompany` where organization_type = "Exclusive Hiring" and parent_staffing in (select company from `tabEmployee` where user_id = %s) """,user_doc.name, as_dict=1)

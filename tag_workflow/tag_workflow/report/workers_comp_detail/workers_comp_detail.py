@@ -43,9 +43,10 @@ def fetch_columns():
         },
         {
             'fieldname': 'rate',
-            'fieldtype': 'Currency',
+            'fieldtype': 'float',
             'label': 'Rate',
-            'width': 100
+            'width': 100,
+            'precision':5
         },
         {
             'fieldname': 'reg_hours',
