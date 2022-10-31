@@ -133,6 +133,7 @@ frappe.ui.form.on("Assign Employee", {
 
   after_save: function (frm) {
     localStorage.clear();
+    check_job_title(frm);
     frappe.call({
       method:
         "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.payrate_change",
@@ -299,6 +300,18 @@ function make_hiring_notification(frm) {
       );
     }
   );
+}
+
+function check_job_title(frm){
+  console.log(frm.doc.select_job)
+  frappe.call({
+    method:
+      "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.add_job_title",
+    args: {
+      docname: frm.doc.name,
+      // select_job: frm.doc.select_job
+    },
+  });
 }
 
 /*---------employee data--------------*/

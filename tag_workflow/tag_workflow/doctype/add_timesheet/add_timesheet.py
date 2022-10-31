@@ -9,7 +9,7 @@ import json, datetime
 from tag_workflow.utils.notification import sendmail, make_system_notification
 from frappe import enqueue
 from frappe.share import add
-from tag_workflow.utils.timesheet import unsatisfied_organization, do_not_return, no_show_org
+from tag_workflow.utils.timesheet import remove_job_title, unsatisfied_organization, do_not_return, no_show_org
 
 TM_FT = "%Y-%m-%d %H:%M:%S"
 jobOrder='Job Order'
@@ -121,6 +121,7 @@ def add_status(timesheet, status, employee, company, job_order):
         if(status == "DNR"):
             timesheet.dnr = 1
             do_not_return(emp, company, job_order)
+            remove_job_title(emp,job_order)
         elif(status == "No Show"):
             timesheet.no_show = 1
             for item in timesheet.time_logs:
@@ -130,9 +131,11 @@ def add_status(timesheet, status, employee, company, job_order):
                 item.flat_rate = 0
                 item.billing_amount = 0
             no_show_org(emp, company, job_order)
+            remove_job_title(emp,job_order)
         elif(status == "Non Satisfactory"):
             timesheet.non_satisfactory = 1
             unsatisfied_organization(emp, company, job_order)
+            remove_job_title(emp,job_order)
         elif(status == "Replaced"):
             timesheet.replaced = 1
             if item.hours <= 0:

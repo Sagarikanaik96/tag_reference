@@ -1,7 +1,7 @@
 # Copyright (c) 2021, SourceFuse and contributors
 # For license information, please see license.txt
 import frappe, tag_workflow
-from frappe import _
+from frappe import _, whitelist
 import requests, json
 import googlemaps
 from frappe.model.document import Document
@@ -35,6 +35,58 @@ def get_dest(dest):
         print(e)
         return ''
 
+@frappe.whitelist()
+def add_job_title(docname):
+    sql=f"select employee from `tabAssign Employee Details` where parent='{docname}'"
+    data=frappe.db.sql(sql,as_list=True)
+    sql=f"select job_category,job_order from `tabAssign Employee` where name='{docname}'"
+    new_data=frappe.db.sql(sql,as_list=True)
+    job_title = new_data[0][0]
+    job_order_data = frappe.get_doc('Job Order',new_data[0][1])
+    status = job_order_data.order_status
+    if status !="Completed":
+        for emp in data:
+            try:
+                sql=f"select job_category from `tabJob Category` where parent='{emp[0]}'"
+                categories=frappe.db.sql(sql,as_list=True)
+                categories = [cat[0] for cat in categories]
+                if job_title not in categories:
+                    emp_data = frappe.get_doc('Employee',emp[0])
+                    check_status_sql = f"select COUNT(*) from `tabDNR` where parent='{emp[0]}' and job_order='{new_data[0][1]}' UNION select COUNT(*) from `tabNo Show List` where parent='{emp[0]}' and job_order='{new_data[0][1]}' UNION select COUNT(*) from `tabUnsatisfied Organization` where parent='{emp[0]}' and job_order='{new_data[0][1]}'"
+                    negative_status=frappe.db.sql(check_status_sql,as_list=True)
+                    negative_status = [int(a[0]) for a in negative_status]
+                    add_job_title_to_profile(job_title, emp_data, negative_status)
+            except Exception:
+                pass
+
+def add_job_title_to_profile(job_title, emp_data, negative_status):
+    if not sum(negative_status):
+        if not len(emp_data.employee_job_category):
+            emp_data.job_category = job_title
+        emp_data.append('employee_job_category',{'job_category':job_title})
+        emp_data.save(ignore_permissions=True)
+        adding_job_categories(emp_data)
+
+@frappe.whitelist()
+def adding_job_categories(emp_data):
+    emp_category = emp_data.employee_job_category
+    length = len(emp_category)
+    title = '';	
+    job_categories_list = []
+    for i in range(len(emp_category)):
+        job_categories_list.append(emp_category[i].job_category)
+        if not emp_category[i].job_category:
+            length -= 1
+                    
+        elif title == '':
+            title = emp_category[i].job_category                  
+    if length>1:
+        job_categories = title + ' + ' + str(length-1)
+    else:
+        job_categories = title
+    emp_data.job_categories = job_categories
+    emp_data.job_title_filter = ",".join(job_categories_list)
+    emp_data.save(ignore_permissions=True)
 
 def check_distance(emp, distance, location):
     try:

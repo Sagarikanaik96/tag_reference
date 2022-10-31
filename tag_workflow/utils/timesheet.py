@@ -124,6 +124,53 @@ def check_if_employee_assign(items):
         
 
 @frappe.whitelist()
+def remove_job_title(emp_doc,job_order):
+    try:
+        print("def"*500)
+        sql = f'''select select_job from `tabJob Order` where name="{job_order}"'''
+        data = frappe.db.sql(sql, as_list=1)
+        job_title = data[0][0]
+        print(job_title,emp_doc,"bhg"*500)
+        if len(emp_doc.employee_job_category)!=0:
+            print("ghi"*100)
+            for i in emp_doc.employee_job_category:
+                if i.job_category==job_title:
+                    print("aba"*500)
+                    emp_doc.remove(i)
+                    emp_doc.save(ignore_permissions=True)
+
+        job_category_remove(emp_doc)
+    except Exception:
+        pass
+
+@frappe.whitelist()
+def job_category_remove(emp_doc):
+        if len(emp_doc.employee_job_category):
+            emp_doc.job_category = emp_doc.employee_job_category[0].job_category
+            emp_category = emp_doc.employee_job_category
+            length = len(emp_category)
+            title = '';	
+            job_categories_list = []
+            for i in range(len(emp_category)):
+                job_categories_list.append(emp_category[i].job_category)
+                if not emp_category[i].job_category:
+                    length -= 1
+                    
+                elif title == '':
+                    title = emp_category[i].job_category                  
+            if length>1:
+                job_categories = title + ' + ' + str(length-1)
+            else:
+                job_categories = title
+            emp_doc.job_categories = job_categories
+            emp_doc.job_title_filter = ",".join(job_categories_list)
+            emp_doc.save(ignore_permissions=True)
+        else:
+            emp_doc.job_category = None
+            emp_doc.job_categories = None
+            emp_doc.save(ignore_permissions=True)
+
+@frappe.whitelist()
 def update_timesheet_data(data, company, company_type, user):
     try:
         added = 0
@@ -319,6 +366,7 @@ def dnr_notification(job_order,value,employee_name,subject,date,company,employee
     if int(value) ==1 and subject == 'DNR':
         emp_doc = frappe.get_doc('Employee', employee)
         employee_dnr(company,emp_doc,job_order)
+        remove_job_title(emp_doc,job_order)
     
     elif int(value) == 0 and subject == 'DNR':
          emp_doc = frappe.get_doc('Employee', employee)
@@ -347,6 +395,7 @@ def show_satisfactory_notification(job_order,value,employee_name,subject,date,co
     if(subject==nonSatisfactory and int(value)==1):
         emp_doc = frappe.get_doc('Employee', employee)
         employee_unsatisfactory(company,emp_doc,job_order)
+        remove_job_title(emp_doc,job_order)
 
     elif(subject==nonSatisfactory and int(value)==0):
         emp_doc = frappe.get_doc('Employee', employee)
@@ -555,6 +604,7 @@ def no_show(job_order,value,subject,company,employee):
     if(subject==noShow and int(value)==1):
         emp_doc = frappe.get_doc('Employee', employee)
         employee_no_show(company,emp_doc,job_order)
+        remove_job_title(emp_doc,job_order)
 
     elif(subject==noShow and int(value)==0):
         emp_doc = frappe.get_doc('Employee', employee)
