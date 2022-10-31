@@ -126,16 +126,12 @@ def check_if_employee_assign(items):
 @frappe.whitelist()
 def remove_job_title(emp_doc,job_order):
     try:
-        print("def"*500)
         sql = f'''select select_job from `tabJob Order` where name="{job_order}"'''
         data = frappe.db.sql(sql, as_list=1)
         job_title = data[0][0]
-        print(job_title,emp_doc,"bhg"*500)
         if len(emp_doc.employee_job_category)!=0:
-            print("ghi"*100)
             for i in emp_doc.employee_job_category:
                 if i.job_category==job_title:
-                    print("aba"*500)
                     emp_doc.remove(i)
                     emp_doc.save(ignore_permissions=True)
 
