@@ -205,6 +205,9 @@ frappe.ui.form.on("Employee", {
 	before_save:function (frm) {
 		remove_lat_lng(frm)
 		job_title_filter(frm);
+		frm.doc.date_of_joining = frappe.datetime.get_today();
+
+		
 	},
 	setup:function(frm){
 		frm.set_query("company", function() {

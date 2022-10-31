@@ -77,12 +77,17 @@ frappe.ui.form.on('Employee Onboarding', {
 		}
 	},
 	before_save: (frm) => {
+		let today_date = frm.doc.date_of_joining?frm.doc.date_of_joining:frappe.datetime.get_today()
+		frm.set_value("date_of_joining",today_date)
 		if(frm.doc.status){
 			frm.set_value('boarding_status', frm.doc.status)
 		}
 		remove_lat_lng(frm);
+		
 	},
 	before_submit: (frm)=>{
+		let today_date = frm.doc.date_of_joining?frm.doc.date_of_joining:frappe.datetime.get_today()
+		frm.set_value("date_of_joining",today_date)
 		frappe.call({
 			'method': 'tag_workflow.tag_data.check_employee',
 			'args':{
@@ -106,6 +111,7 @@ frappe.ui.form.on('Employee Onboarding', {
 				}
 			}
 		});
+		
 	},
 	first_name: (frm)=>{
 		if(frm.doc.first_name){
@@ -113,6 +119,7 @@ frappe.ui.form.on('Employee Onboarding', {
 			first_name = name_update(first_name);
 			frm.set_value("first_name",first_name);
 		}
+		
 	},		
 	last_name: (frm)=>{
 		if(frm.doc.last_name){

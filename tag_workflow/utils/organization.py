@@ -66,6 +66,7 @@ def setup_data():
         share_company_with_user()
         emp_job_title()
         update_salary_structure()
+        update_date_of_joining()
         update_password_field()
         frappe.db.commit()
     except Exception as e:
@@ -412,6 +413,20 @@ def update_salary_structure():
     except Exception as e:
         print(e)
 
+
+
+def update_date_of_joining():
+    try:
+        employees = frappe.db.sql("""select name from `tabEmployee` where date_of_joining IS NULL""",as_dict=1)
+        for employee in employees:
+            frappe.db.sql("""Update `tabEmployee` set date_of_joining = '2021-01-01' where name = '{0}'""".format(employee.name))
+        onboarded_employee = frappe.db.sql("""select name from `tabEmployee Onboarding` where date_of_joining IS NULL""",as_dict=1)
+        for employee in onboarded_employee:
+            frappe.db.sql("""Update `tabEmployee Onboarding` set date_of_joining = '2021-01-01' where name = '{0}'""".format(employee.name))
+
+    except Exception as e:
+        print(e)
+
 def update_password_field():
     try:
         all_companies = frappe.get_all('Company', fields=['name'], filters={'organization_type':['=', 'Staffing']})
@@ -450,3 +465,4 @@ def remove_fields():
         elif frappe.db.exists(Custom_Label,{'dt':'Company','fieldname':field}):
             frappe.db.sql(f'''DELETE FROM `tabCustom Field` WHERE dt="Company" and fieldname="{field}"''')
         frappe.db.commit()
+

@@ -7,6 +7,11 @@ frappe.ui.form.on('Salary Structure Assignment', {
 				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]],['Company',"make_organization_inactive","=",0]]
 			}
 		});
+		frm.set_query("employee",function(){
+			return {
+				filters:[ ['Employee', 'company', '=', frm.doc.company]]
+			}
+		})
 	},
 	refresh:function(frm){
         frm.set_df_property('company','read_only',0);
