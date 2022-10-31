@@ -820,8 +820,9 @@ def check_increase_headcounts(no_of_workers_updated,name,company,select_job):
 def change_is_single_share(bid,name):
     sql = f'''select is_single_share from `tabJob Order` where name="{name}"'''
     iss = frappe.db.sql(sql, as_list=1)
-    is_single_share = iss[0][0]
-    return is_single_share
+    if iss:
+        is_single_share = iss[0][0]
+        return is_single_share
       
 @frappe.whitelist()
 def workers_required_order_update(doc_name):
