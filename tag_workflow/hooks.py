@@ -80,7 +80,9 @@ app_include_js = [
         "/assets/tag_workflow/js/frappe/data_import/index.js",
         "/assets/tag_workflow/js/frappe/data_import/import_preview.js",
         "/assets/tag_workflow/js/frappe/data_import/data_exporter.js",
-        "/assets/tag_workflow/js/user_profile_controller.js"
+        "/assets/tag_workflow/js/user_profile_controller.js",
+        "/assets/tag_workflow/js/frappe/form/controls/time.js",
+
 ]
 
 web_include_css = [
