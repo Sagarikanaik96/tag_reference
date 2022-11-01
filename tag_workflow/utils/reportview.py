@@ -24,7 +24,7 @@ GOOGLE_API_URL = f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gm
 distance_value = {"5": 5, "10": 10, "25": 25, "50": 50, "100": 100}
 distance = ['5', '10', '25', '50', '100']
 JOB = "Job Order"
-
+CUSTOM = 'Custom Address'
 
 @frappe.whitelist()
 @frappe.read_only()
@@ -34,14 +34,9 @@ def get():
         # If virtual doctype get data from controller het_list method
         radius = args.radius or ''
         order_status = args.order_status or ''
+        custom_address = args.custom_address or ''
         filter_loc = filter_data(args)
-
-        if 'radius' in args.keys():
-            del args["radius"]
-
-        if 'order_status' in args.keys():
-            del args['order_status']
-
+        
         if frappe.db.get_value("DocType", filters={"name": args.doctype}, fieldname="is_virtual"):
             controller = get_controller(args.doctype)
             data = compress(controller(args.doctype).get_list(args))
@@ -59,7 +54,7 @@ def get():
                     data['order_length'] = 0
                     based_list = compare_order(order_status)
                     data = get_actual_number(data, based_list)
-                    data = staffing_data(data, radius, page_length,filter_loc)
+                    data = staffing_data(data, radius, page_length,filter_loc,custom_address)
                     data = claim_left(data)
             else:
                 data = compress(execute(**args), args=args)
@@ -68,16 +63,18 @@ def get():
         frappe.msgprint(e)
 
 
-def staffing_data(data, radius, page_length,filter_loc):
+def staffing_data(data, radius, page_length,filter_loc,custom_address):
     try:
         result = []
         l = len(filter_loc)
         user_company = frappe.db.get_list(
             "Employee", {"user_id": frappe.session.user}, "company")
-        if(radius in distance and l==0):
+        if(radius in distance and l==0 and custom_address==''):
             data = get_data(user_company, radius, data, page_length)
         elif(radius and l>0):
             data = filter_location_with_radius(user_company, radius, data, page_length,filter_loc,result)
+        elif (custom_address!=''):
+            data = filter_location_with_custom_address(custom_address,radius,data,page_length)
         else:
             for d in data['values']:
                 if(len(result) < page_length):
@@ -280,9 +277,48 @@ def filter_data(args):
         filter_loc = args.filter_loc
         filter_loc = json.loads(filter_loc)
         filter_loc = list(set(filter_loc))
+        if 'radius' in args.keys():
+            del args["radius"]
+
+        if 'order_status' in args.keys():
+            del args['order_status']
+
         if 'filter_loc' in args.keys():
             del args['filter_loc']
+
+        if 'custom_address' in args.keys():
+            del args['custom_address']
+
         return filter_loc
     except Exception as e:
         print(e)
         return []
+
+def filter_location_with_custom_address(custom_address,radius,data,page_length):
+    try:
+        custom_location = get_custom_location(custom_address)
+        result, orders = [], []
+        for d in data['values']:
+            try:
+                lat, lng = frappe.db.get_value(
+                    "Job Site", d[-6], ["IFNULL(lat, '')", "IFNULL(lng, '')"])
+                rad = haversine(custom_location, tuple(
+                        [float(lat), float(lng)]), unit='mi')
+                print(rad,radius,custom_address)
+                if(radius in ['All',CUSTOM] and (rad <=5 or rad<=10 or rad<=25 or rad<=50  or rad<=100 and d[0] not in orders)) or (radius not in['All',CUSTOM] and rad<=distance_value[radius] and d[0] not in orders):
+                    result.append(d)
+                    orders.append(d[0])
+            except Exception:
+                continue
+        if(result):
+            data['values'] = result[0:page_length]
+        else:
+            data['values'] = []
+        return data
+    except Exception as e:
+        frappe.msgprint(e)
+
+def get_custom_location(custom_address):
+    lat, lng = get_lat_lng(custom_address)
+    if lat!=0 and lng!=0:
+        return tuple([lat, lng])

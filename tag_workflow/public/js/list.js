@@ -37,6 +37,7 @@ frappe.views.BaseList.prototype.get_call_args = function() {
     args.radius = this.radius;
     args.filter_loc = this.filter_loc;
     args.order_status = this.order_status;
+    args.custom_address = this.custom_address;
     
     return {
         method: this.method,
@@ -57,6 +58,7 @@ frappe.views.BaseList.prototype.setup_paging_area = function() {
     this.selected_page_count = 20;
     this.order_length = 0;
     this.filter_loc = [];
+    this.custom_address = '';
 
     this.update_paging_area(paging_values,radius);
     this.$frappe_list.append(this.$paging_area);
@@ -149,12 +151,15 @@ frappe.views.ListView.prototype.display_modal=function(val){
         this.radius = val;
         this.start = 0;
         this.page_length = 20;
+        if(localStorage.getItem('custom-address'))
+            this.custom_address = localStorage.getItem('custom-address');
         this.refresh();
     }else if(val == "Custom Address"){
         if([5,10,25,50,100].includes(this.radius))
             document.querySelector(`.btn-loc-rad[data-value="${this.radius}"]`).classList.add('active');
         this.order_location = get_order_location();
         this.create_table(this.order_location);
+        
         this.add_fields = [{label: '', fieldname: 'location', fieldtype: 'HTML',options:this.html}];
         let dialog = new frappe.ui.Dialog({
             title: 'Please select one or more addresses',
@@ -178,11 +183,13 @@ frappe.views.ListView.prototype.display_modal=function(val){
             localStorage.removeItem('location');
             localStorage.removeItem('radius')
             localStorage.removeItem(frappe.session.user+'loc');
+            localStorage.removeItem('custom-address');
             this.len = 0;
             this.start = 0;
             this.page_length = 20;
             this.radius = "All";
             this.filter_loc = [];
+            this.custom_address = '';
             document.querySelector(`.btn-radius[data-value="Clear"]`).classList.remove('active');
             this.refresh();
         }
@@ -191,17 +198,12 @@ frappe.views.ListView.prototype.display_modal=function(val){
 /*----------------------Generate table in Modal--------------------*/
 frappe.views.ListView.prototype.create_table =function(location){
   location = location.map(l=>l.split('#'))
-  let new_location = [];
-  if([5, 10, 25, 50, 100].includes(this.radius)){
-    location.filter(loc=>{
-    this.data.map(d=>{
-        if(d.job_site==loc[0] && !new_location.includes(loc))
-            new_location.push(loc);
-        })
-    })
-    }else{
-        new_location = location;
-    }
+  const middle = location.map((l)=> `<tr>
+            <td class="text-center"><input class="location" data-val="${l[0]}" value="${l[0]}" type="checkbox"></td>
+            <td>${l[0]}</td>
+            <td>${l[1]}</td>
+            </tr>`).join("");
+    
   this.html = `<div class="container-fluid">
   <div class="table-responsive">
       <table class="table table-bordered   table-hover">
@@ -212,20 +214,10 @@ frappe.views.ListView.prototype.create_table =function(location){
                   <th>Company</th>
               </tr>
           </thead>
-          <tbody>${location.map((l)=>`
-              <tr>
-                <td class="text-center"><input class="location" data-val="${l[0]}" value="${l[0]}" type="checkbox">
-                </td>
-                <td>${l[0]}</td>
-                <td>${l[1]}</td>
-              </tr>`).join("")}
-  
-               
-          </tbody>
-      </table>
-  </div>
-  </div>
-  `;
+          <tbody>`+ middle + `<tr> <td class="text-center"> <input id="custom-location" class="location" type="checkbox"></input></td>
+          <td id ="input-custom"><input type="text" id="custom-address" value="${localStorage.getItem('custom-address')?localStorage.getItem('custom-address'):''}" style="width:100%;margin-bottom:10px;"></td> 
+          </tr></tbody></table></div></div>`;
+            
   let counter = 0;
   frappe.run_serially([
     ()=>{
@@ -244,22 +236,31 @@ frappe.views.ListView.prototype.create_table =function(location){
                 $('#main[data-val="parent"]').prop('checked',true);
             },300)
         }  
-    }]
-  )
+    
+    }])
   
   
 }
 /*----------------------add_remove_row--------------------*/
-frappe.views.ListView.prototype.single_row_event=function(items){
+frappe.views.ListView.prototype.single_row_event=function(items,input){
     items.forEach(i => i.addEventListener(
         "change",
         e => {
-           if (i.checked){
+           if (i.checked && i.id!='custom-location'){
             add_rows(e.currentTarget.value);
-           }else if(!i.checked){
+           }else if(!i.checked && i.id!='custom-location'){
             remove_rows(e.currentTarget.value);
            }
+           if(i.checked && i.id=='custom-location')
+            frappe.views.ListView.prototype.custom_address();   
         }));
+    /*----------Input-Event--------------*/
+    
+    input[document.querySelectorAll('#custom-address').length-1].addEventListener('keyup',(e)=>{
+        cur_list.custom_address = e.currentTarget.value;
+        localStorage.setItem('custom-address',e.currentTarget.value)
+        
+    })
 }
 /*----------------------create paging area--------------------*/
 frappe.views.ListView.prototype.update_paging_area=function(paging_values,radius){
@@ -294,26 +295,25 @@ frappe.views.ListView.prototype.update_button = function(){
 }
 const select_deselect_row =function(e){
     const items = document.querySelectorAll('.location');
-    frappe.views.ListView.prototype.single_row_event(items);
+    const input = document.querySelectorAll('#custom-address');
+    frappe.views.ListView.prototype.single_row_event(items,input);
+    
     
 }
-/*----------------------------------check-uncheck cells----------------------------------------------------------------*/
+/*----------------------------------check-cells----------------------------------------------------------------*/
 const check_cells = function(e){
     const items = document.querySelectorAll('.location');
         if(e.currentTarget.checked){
             for (let i in items) {
+                if(items[i].id=='custom-location')
+                    continue;
                 if (items[i].type == 'checkbox'){
                     items[i].checked = true;
                     add_rows(items[i].value)
                 }
             }
         }else{
-            for (let i in items) {
-                if (items[i].type == 'checkbox'){
-                    items[i].checked = false;
-                    remove_rows(items[i].value)
-                }
-            }
+            uncheck_cells(items);
         }
 }
 function remove_rows(val){
@@ -329,16 +329,58 @@ function add_rows(val){
 }
 /*---------------Clear-Storage---------------------*/
 window.onload = function(){
-    if (localStorage.getItem('location'))
-        localStorage.removeItem('location')
-    if (localStorage.getItem('radius'))
-        localStorage.removeItem('radius')
-    if (localStorage.getItem(frappe.session.user+'loc'))
-        localStorage.removeItem(frappe.session.user+'loc')
+    const keys = ['location','radius',frappe.session.user+'loc','custom-address']
+    for (let k in keys){
+        if (localStorage.getItem(keys[k]))
+            localStorage.removeItem(keys[k])
+    }
+   
 }
 function update_radius(){
     if([5, 10, 25, 50, 100].includes(parseInt(localStorage.getItem('radius'))))
         cur_list.radius = parseInt(localStorage.getItem('radius'));
     else
         cur_list.radius='All'; 
+    /*------------------------------------------------------*/
+    const ip_t = document.querySelectorAll('#custom-address');
+    const val = ip_t[document.querySelectorAll('#custom-address').length-1].value;
+    if(!localStorage.getItem('custom-addres')&& val!=''){
+        cur_list.custom_address = val;
+        localStorage.setItem('custom-address',val)
+    }
+
+
+        
+}
+/*------------------Clear-applied-filters--------------------------*/
+frappe.views.ListView.prototype.custom_address = function(){
+    document.querySelector('.btn-radius[data-value="Clear"]').click();
+    if(document.getElementById('main').checked){
+        document.getElementById('main').click();
+        cur_dialog.fields_dict['location'].disp_area.querySelector('#main').checked=false;
+    }
+    else
+        remove_cells();
+}
+function remove_cells(){
+    const items = document.querySelectorAll('.location');
+    for (let i in items) {
+        if(items[i].id=='custom-location')
+            continue;
+        if (items[i].type == 'checkbox')
+            items[i].checked = false;
+        
+    }
+}
+/*---------Uncheck-Cells---------------*/
+function uncheck_cells(items){
+    for (let i in items) {
+        if(items[i].id=='custom-location')
+            continue;
+        if (items[i].type == 'checkbox'){
+            items[i].checked = false;
+            remove_rows(items[i].value)
+            }
+        }
+    
 }
