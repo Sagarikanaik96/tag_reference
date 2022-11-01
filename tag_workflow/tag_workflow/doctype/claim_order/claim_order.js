@@ -2,10 +2,11 @@
 // For license information, please see license.txt
 
 window.conf = 0
+window.claim_share = null;
 frappe.ui.form.on('Claim Order', {
 	after_save: function (frm) {
 		staffing_claim_joborder(frm)
-		if (frm.doc.single_share == 1) {
+		if (frm.doc.single_share == 1 || window.claim_share == 1) {
 			claim_order_save(frm)
 		}
 		create_pay_rate(frm);
@@ -19,6 +20,7 @@ frappe.ui.form.on('Claim Order', {
 				frappe.set_route("Form", "Job Order", frm.doc.job_order)
 			}, 3000);
 		}
+		check_single_share(frm);
 	},
 	validate: function (frm) {
 		mandatory_fn(frm);
@@ -198,7 +200,7 @@ function staffing_claim_joborder_contd(frm) {
 			"job_order": frm.doc.job_order, "hiring_org": frm.doc.hiring_organization, "staffing_org": frm.doc.staffing_organization, "doc_name": frm.doc.name, "single_share": frm.doc.single_share, 'no_assigned': frm.doc.staff_claims_no, 'no_required': frm.doc.no_of_workers_joborder
 		},
 		callback: function (r) {
-			if (r.message == 1) {
+			if (r.message == 1 && window.claim_share==0) {
 				frappe.msgprint('Email Sent Successfully')
 			}
 			if (frm.doc.single_share != 1) {
@@ -476,4 +478,14 @@ function check_class_code(frm){
 			}
 		})
 	}
+}
+
+function check_single_share(frm){
+	frappe.db.get_value("Job Order", { name: frm.doc.job_order }, ["staff_company"], function (r1) {
+		if (r1.staff_company && r1.staff_company.includes(frappe.boot.tag.tag_user_info.company))
+			window.claim_share = 1;
+		else 
+			window.claim_share =0;
+	})
+	
 }

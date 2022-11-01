@@ -43,6 +43,7 @@ frappe.ui.form.on("Job Order", {
 		if (frappe.boot.tag.tag_user_info.company_type != "Staffing") {
 			fields_setup();
 		}
+		
 
 	},
 	
@@ -327,6 +328,7 @@ frappe.ui.form.on("Job Order", {
 			});
 		}
 		no_of_workers_changed(frm);
+		
 	},
 
 	view_contract: function() {
@@ -826,6 +828,7 @@ function claim_job_order_staffing(frm){
 				if(frm.doc.is_single_share == 1){
 					doc.staffing_organization = frm.doc.staff_company;
 					doc.single_share = 1;
+					
 				}else{
 					let staff_company = frappe.boot.tag.tag_user_info.company || [];
 					doc.staffing_organization = staff_company[0];
@@ -1590,7 +1593,7 @@ function change_is_single_share(frm){
 			'name':frm.doc.name,	
 		},
 		callback: function(resp){
-			cur_frm.doc.is_single_share=resp.message
+			cur_frm.doc.is_single_share=resp.message;
 		}}
 		)
 }
@@ -2208,6 +2211,7 @@ function claim_bar_data_hide(frm){
 			},
 			callback: function(s){
 				if(s.message){
+	
 					let total_claims= s.message[1][0][0]
 					let remaining_approved_emp= s.message[2]
 					if (remaining_approved_emp !=0 && frm.doc.order_status!='Completed' && total_claims< frm.doc.no_of_workers){
@@ -2276,7 +2280,7 @@ function reclaim_button(frm){
 			"staff_company":frappe.boot.tag.tag_user_info.company
 		},
 		callback: (r) => {
-			if(r.message == 'headcount_selected'){
+			if(r.message == 'headcount_selected' || frm.doc.staff_company!="" ){
 					frm.add_custom_button(__('Claim Order'), function(){
 							claim_job_order_staffing(frm);
 					});             
@@ -2551,5 +2555,4 @@ function update_claims(data_len, l, dict, job_data, r,new_no) {
 	  }, 5000);
 	}
 	return { dict, valid1 };
-  }
-  
+}
