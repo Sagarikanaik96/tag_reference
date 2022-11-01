@@ -66,7 +66,7 @@ def setup_data():
         share_company_with_user()
         emp_job_title()
         update_salary_structure()
-        update_date_of_joining()
+        updating_date_of_joining()
         update_password_field()
         frappe.db.commit()
     except Exception as e:
@@ -415,15 +415,11 @@ def update_salary_structure():
 
 
 
-def update_date_of_joining():
+def updating_date_of_joining():
     try:
-        employees = frappe.db.sql("""select name from `tabEmployee` where date_of_joining IS NULL""",as_dict=1)
-        for employee in employees:
-            frappe.db.sql("""Update `tabEmployee` set date_of_joining = '2021-01-01' where name = '{0}'""".format(employee.name))
-        onboarded_employee = frappe.db.sql("""select name from `tabEmployee Onboarding` where date_of_joining IS NULL""",as_dict=1)
-        for employee in onboarded_employee:
-            frappe.db.sql("""Update `tabEmployee Onboarding` set date_of_joining = '2021-01-01' where name = '{0}'""".format(employee.name))
-
+        print("*-----------Updating Date of Joining------------*")
+        frappe.db.sql("""update `tabEmployee` set date_of_joining = "2021-01-01" where date_of_joining is null""")
+        frappe.db.sql("""Update `tabEmployee Onboarding` set date_of_joining = '2021-01-01' where date_of_joining is null""")
     except Exception as e:
         print(e)
 
