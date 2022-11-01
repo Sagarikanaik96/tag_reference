@@ -273,7 +273,10 @@ frappe.ui.form.on("Job Order", {
 			check_increase_headcount(frm)
 
 		}
-		change_is_single_share(frm)
+		if(frm.doc.__islocal != 1){
+			change_is_single_share(frm)
+		}
+		
 	},
 
 	after_save: function(frm) {
