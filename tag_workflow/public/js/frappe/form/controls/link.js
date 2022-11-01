@@ -202,8 +202,6 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 					if(!me.df.only_select) {
 						if(frappe.model.can_create(doctype)) {
 							// new item
-							if((frappe.boot.tag.tag_user_info.company_type!='Staffing') ||((frappe.boot.tag.tag_user_info.company_type=='Staffing') && (cur_list && cur_frm== null) || (cur_list && cur_frm &&cur_frm.doc.doctype!='Assign Employee')))
-							{
 								r.results.push({
 									html: "<span class='text-primary link-option'>"
 										+ "<i class='fa fa-plus' style='margin-right: 5px;'></i> "
@@ -213,14 +211,11 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 									value: "create_new__link_option",
 									action: me.new_doc
 								});
-							}
 						}
 						// advanced search
 
 						if (locals && locals['DocType']) {
 							// not applicable in web forms
-							if((frappe.boot.tag.tag_user_info.company_type!='Staffing') ||((frappe.boot.tag.tag_user_info.company_type=='Staffing') && (cur_list && cur_frm== null) || (cur_list && cur_frm &&cur_frm.doc.doctype!='Assign Employee')))
-							{
 								r.results.push({
 									html: "<span class='text-primary link-option'>"
 										+ "<i class='fa fa-search' style='margin-right: 5px;'></i> "
@@ -230,7 +225,6 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 									value: "advanced_search__link_option",
 									action: me.open_advanced_search
 								});
-							}
 							
 						}
 					}
@@ -524,7 +518,7 @@ if (Awesomplete) {
 }
 
 function remove_options(doctype, fieldname, result){
-	if(['Employee Onboarding', 'Employee Onboarding Template', 'Job Offer','Salary Structure'].includes(doctype) && ['staffing_company', 'company'].includes(fieldname)){
+	if((['Employee Onboarding', 'Employee Onboarding Template', 'Job Offer','Salary Structure','Salary Component'].includes(doctype) && ['staffing_company', 'company'].includes(fieldname)) || ['Assign Employee','Assign Employee Details'].includes(doctype)){
 		result.splice(result.length - 2, 2);
 		return result
 	}else{
