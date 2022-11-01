@@ -904,14 +904,23 @@ function get_date_time(){
 function password_fields(frm){
 	let fields = {'jazzhr_api_key': 'jazzhr_api_key_html', 'client_id': 'client_id_html', 'client_secret': 'client_secret_html', 'workbright_subdomain': 'workbright_subdomain_html', 'workbright_api_key': 'workbright_api_key_html', 'branch_org_id': 'branch_org_id_html', 'branch_api_key': 'branch_api_key_html'}
 	for(let field in fields){
+		let button_html = '';
+		if(frappe.boot.tag.tag_user_info.user_type=='Staffing Admin'){
+			button_html +=	`<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>`
+			if(!['branch_org_id', 'branch_api_key'].includes(field)){
+				button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-edit_off" onclick="edit_pass(this.id, '${field}')" style="width: 45px;height: 25px;padding: 3px;float: right;">Edit</button>`;
+			}
+		}else if(frappe.boot.tag.tag_user_info.user_type=='Staffing User'){
+			if(['branch_org_id', 'branch_api_key'].includes(field)){
+				button_html +=	`<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>`
+			}
+		}else{
+			button_html +=	`<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>`
+			button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-edit_off" onclick="edit_pass(this.id, '${field}')" style="width: 45px;height: 25px;padding: 3px;float: right;">Edit</button>`;
+		}
 		$('[data-fieldname="'+field+'_data"]').attr('readonly', 'readonly');
 		$('[data-fieldname="'+field+'_data"]').attr('type', 'password');
 		$('[data-fieldname="'+field+'_data"]').attr('title', '');
-		let button_html = '';
-		button_html +=	`<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>`
-		if(!(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && ['branch_org_id', 'branch_api_key'].includes(field))){
-			button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-edit_off" onclick="edit_pass(this.id, '${field}')" style="width: 45px;height: 25px;padding: 3px;float: right;">Edit</button>`;
-		}
 		frm.set_df_property(fields[field], 'options',button_html)
 	}
 }
