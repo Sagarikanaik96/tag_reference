@@ -189,7 +189,16 @@ frappe.TimesheetApproval = Class.extend({
 				"freeze": true,
 				"freeze_message": "Please wait while we are updating data...",
 				"callback": function(r){
-					frappe.msgprint("Timesheet(s) has been updated.");
+					if(r.message[1].length == 0){
+						frappe.msgprint("Timesheet(s) has been updated.");
+					}
+					else{
+						let msg= "This Employees are missing the below required fields. You will be unable to approve their timesheets unless these fields are populated<br><br>"
+						for (let employee of r.message[1]) {
+							msg += "<span>&#8226;</span> " + employee[0] +" -  " + employee[1] +"<br>"
+						  }
+						frappe.msgprint({message: __(msg), title: __("Warning"), indicator: "yellow",});
+					}
 					let data = r.message || {};
 					page.fields_dict.job_order.set_value(me.order);
 					render_child_data(me.order, data.date, data.timesheet);

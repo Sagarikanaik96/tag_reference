@@ -416,8 +416,9 @@ frappe.ui.form.on("Assign Employee Details", {
   },
   employee: function (frm, cdt, cdn) {
     let child = locals[cdt][cdn];
-
+    
     if (child.employee) {
+      check_mandatory_field(child.employee)
       frappe.call({
         method: "tag_workflow.tag_data.joborder_resume",
         args: { name: child.employee },
@@ -1463,4 +1464,18 @@ function remove_row(message, emp_name, cdt, cdn){
     }
     cur_frm.refresh_field('employee_details');
   }
+}
+function check_mandatory_field(emp_id,){
+  frappe.call({
+    method:"tag_workflow.tag_data.check_mandatory_field",
+    args:{emp_id: emp_id,check: 0},
+    callback: function(r){
+      let msg = emp_id + " is missing the below required fields. You will be unable to approve their timesheets unless these fields are populated.<br><br>"
+      if(r.message != "success"){
+        console.log(r.message)
+        msg += r.message
+        frappe.msgprint({message: __(msg), title: __("Warning"), indicator: "yellow",});
+      }
+    }
+  });
 }

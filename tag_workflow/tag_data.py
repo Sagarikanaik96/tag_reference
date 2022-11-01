@@ -1723,3 +1723,27 @@ def branch_key(branch_key=None):
             return "Failed"
     except Exception as e:
         frappe.log_error('Branch API Call Error', e)
+
+#-------------------checking employees mendatory fields--------------------------------#
+@frappe.whitelist()
+def check_mandatory_field(emp_id,check):
+    try:
+        msg = ""
+        data = frappe.db.sql("""select first_name,last_name,email,company,status,date_of_birth from `tabEmployee` where name = '{0}'""".format(emp_id),as_dict=1)
+        emp_fields = []
+        for field in data[0]:
+            print(field)
+            if data[0][field] == None:
+                display_field_name = field.replace("_"," ")
+                msg +="<span>&#8226;</span> "+display_field_name.title()+"<br>"
+                emp_fields.append(field)
+        
+        if len(msg) == 0:
+            return "success"
+        elif check == 1:
+            return emp_fields
+        else:
+            return msg
+
+    except Exception as e:
+        print(e)
