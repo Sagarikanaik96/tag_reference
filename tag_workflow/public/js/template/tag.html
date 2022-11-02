@@ -307,7 +307,7 @@
                           class="pr-3 pl-3"
                           alt="crm"
                       /></span>
-                      <span class="slide-text"> Orders </span>
+                      <span class="slide-text" name="orders-submenu"> Orders </span>
                       <span
                         ><i class="fa fa-angle-down" aria-hidden="true"></i
                       ></span>
@@ -320,7 +320,7 @@
                       aria-labelledby="btn-1"
                     >
                       <li class="py-2 mt-2">
-                        <a href="#" onclick="job_order_page()">All</a>
+                        <a href="#" onclick="job_order_page()" id="all-order-submenu">All</a>
                       </li>
                       {% if frappe.boot.tag.tag_user_info.company_type ==
                       "Hiring" || frappe.boot.tag.tag_user_info.company_type ==
