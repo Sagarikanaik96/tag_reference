@@ -1166,7 +1166,6 @@ function set_payrate_field(frm) {
         )
       ) {
         $('[data-fieldname = "employee_pay_rate"]').attr("id", "emp_pay_rate");
-        $('[data-fieldname = "staff_class_code_rate"]').attr('id', 'staff_pay_rate');
 
       }
     }

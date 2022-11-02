@@ -19,10 +19,11 @@
   },
   {
    "fieldname": "rate",
-   "fieldtype": "Currency",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Rate",
-   "non_negative": 1
+   "non_negative": 1,
+   "precision": "5"
   },
   {
    "fieldname": "state",
@@ -35,7 +36,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-18 02:48:17.789811",
+ "modified": "2022-11-02 00:29:07.571732",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Class Code",
