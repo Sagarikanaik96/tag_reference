@@ -100,6 +100,7 @@ def approve_timesheets(timesheet, action):
             empty_field_str = ""
             for field in emp_fields:
                 empty_field_str += ", "+field.title()
+                empty_field_str = empty_field_str.replace("_"," ")
             if emp_fields == "success":
                 frappe.db.set_value('Timesheet',t,'workflow_state',action)
                 frappe.db.set_value('Timesheet',t,'status',"Submitted")
