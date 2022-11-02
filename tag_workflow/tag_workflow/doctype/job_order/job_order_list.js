@@ -57,7 +57,7 @@ frappe.listview_settings["Job Order"] = {
       $("button.btn.btn-sm.filter-button.btn-primary-light").hide();
       frappe.route_options = {
         order_status: "",
-        is_single_share: 1,
+        staff_company:['like', frappe.boot.tag.tag_user_info.company]
       };
     } else {
       frappe.route_options = {

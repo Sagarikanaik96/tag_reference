@@ -252,7 +252,11 @@ def update_joborder_rate_desc(job_site,job_title):
     except Exception as e:
         frappe.log_error(e,'Getting job order rate description value error')
 
-   
+@frappe.whitelist()
+def direct_order_count_value(comp_name):
+    sql = f"select COUNT(*) from `tabJob Order` where staff_company = '{comp_name}' and bid=0 and is_repeat= 0 and is_direct = 0 and is_single_share =1 and order_status <>'Completed'"
+    count = frappe.db.sql(sql,as_list=True)
+    return count[0] if count else []
 
 @frappe.whitelist()
 def after_denied_joborder(staff_company,joborder_name,job_title,hiring_name):
@@ -270,6 +274,7 @@ def after_denied_joborder(staff_company,joborder_name,job_title,hiring_name):
     try:
         jb_ord = frappe.get_doc(ORD,joborder_name)
         jb_ord.is_single_share = 0
+        jb_ord.staff_company = None
         jb_ord.save(ignore_permissions = True)
         subject = jobOrder
         msg=f'{staff_company} unable to fulfill claim on your work order: {job_title}.'

@@ -211,6 +211,21 @@
         font-style: italic;
         font-size: 13px;
       }
+      .circle_content{
+        display: table-cell;
+        vertical-align: middle;
+        text-align: center;
+      }
+      .circle{
+        display: inline-table;
+        vertical-align: middle;
+        width: 18px;
+        height: 18px;
+        font-size: 12px;
+        color: white;
+        background-color: transparent;
+        border-radius: 50%;
+      }
 
       @media (max-width: 768px) {
         .sub-menu {
@@ -300,6 +315,7 @@
                       data-toggle="collapse"
                       data-target="#submenu1"
                       aria-expanded="false"
+                      onclick="directOrder()"
                     >
                       <span class="pl-3 ml-3"
                         ><img
@@ -333,6 +349,9 @@
                       %}
                       <li class="py-2">
                         <a href="#" onclick="show_more_menu()">Direct Order</a>
+                        <div class="circle" id="doi">
+                          <span class="circle_content" id="directOrderId"></span>
+                        </div>
                       </li>
 
                       {% endif %}
@@ -576,6 +595,25 @@
 </html>
 
 <script>
+function directOrder() {
+    if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
+        frappe.call({
+            method:
+                "tag_workflow.tag_workflow.doctype.job_order.job_order.direct_order_count_value",
+            args: {
+                comp_name: frappe.boot.tag.tag_user_info.company,
+            },
+            callback: function (r) {
+                if (r.message[0] < 1) {
+                    document.getElementById("doi").style.display = "none";
+                } else {
+                  $("#doi").css("background-color","#E24C4C");
+                  document.getElementById("directOrderId").innerText = r.message[0];
+                }
+            },
+        });
+    }
+}
   function showActive1() {
     $("#first").css("font-weight", "600");
     $("#second").css("font-weight", "normal");
@@ -621,6 +659,7 @@
   });
 
   function show_more_menu() {
+    directOrder();
     location.href = "/app/job-order?data=direct";
   }
 
