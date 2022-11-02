@@ -172,9 +172,14 @@ frappe.ui.form.on('Job Site', {
                 'doc_name':frm.doc.name
             }
         })
-
-    }
-		
+		frappe.call({
+			'method': 'tag_workflow.utils.organization.initiate_background_job',
+			'args':{
+				'message': 'Job Site',
+				'job_site_name': frm.doc.name
+			}
+		});
+    }	
 });
 
 /*----------fields-----------*/

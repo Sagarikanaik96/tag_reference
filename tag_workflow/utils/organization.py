@@ -9,9 +9,11 @@ import json
 from pathlib import Path
 from tag_workflow.utils.trigger_session import share_company_with_user
 from tag_workflow.controllers.master_controller import make_update_comp_perm, user_exclusive_perm
+import googlemaps
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
+migrate_sch = 'Migrate/Scheduler'
 
 #-------setup variables for TAG -------------#
 tag_workflow= "Tag Workflow"
@@ -25,6 +27,7 @@ WEB_MAN = "Website Manager"
 USR, EMP, COM = "User", "Employee", "Company"
 Global_defaults="Global Defaults"
 Temp_Emp = "Temp Employee"
+Job_Site = 'Job Site'
 
 ALL_ROLES = [role.name for role in frappe.db.get_list("Role", {"name": ["!=", "Employee"]}, ignore_permissions=True) or []]
 
@@ -68,6 +71,7 @@ def setup_data():
         update_salary_structure()
         updating_date_of_joining()
         update_password_field()
+        staffing_radius()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -373,7 +377,7 @@ def remove_field():
                 else:
                     print("*******************************"f'{f}'   " not found**********************************************************")
             else:
-                if frappe.db.exists(Custom_Label,{'dt':'Job Site','fieldname':f}):
+                if frappe.db.exists(Custom_Label,{'dt':Job_Site,'fieldname':f}):
                     frappe.db.sql(""" delete from `tabCustom Field` where dt="Job Site" and fieldname="{0}" """.format(f))
                     frappe.db.commit()
                     print("*************************"f'{f}'   " Field Removed Successfully************************************")
@@ -391,7 +395,7 @@ def update_old_job_sites():
             for i in data:
                 dicts_val=frappe.db.sql('''select industry_type,job_titles,wages as bill_rate,description from `tabJob Titles` where parent="{0}"'''.format(i.company),as_dict=1)
                 if len(dicts_val):
-                    doc=frappe.get_doc('Job Site',i.name)
+                    doc=frappe.get_doc(Job_Site,i.name)
                     try:
                         for j in dicts_val:
                             doc.append('job_titles',{'industry_type': j['industry_type'], 'job_titles': j['job_titles'], 'bill_rate': j['bill_rate'], 'description': j['description']})
@@ -462,3 +466,120 @@ def remove_fields():
             frappe.db.sql(f'''DELETE FROM `tabCustom Field` WHERE dt="Company" and fieldname="{field}"''')
         frappe.db.commit()
 
+def staffing_radius():
+    try:
+        check_table = frappe.db.sql('''SELECT * FROM information_schema.tables WHERE table_name = "tabStaffing Radius"''', as_dict=1)
+        if len(check_table) == 0:
+            frappe.db.sql('''CREATE TABLE `tabStaffing Radius` (name varchar(255) not null primary key,job_site varchar(140),hiring_company varchar(140),staffing_company varchar(140),radius varchar(140))''')
+            frappe.enqueue('tag_workflow.utils.organization.staffing_jobsite_mapping', message=migrate_sch, queue='default', is_async=True)
+    except Exception as e:
+        frappe.log_error(e, 'Staffing Radius Error')
+
+@frappe.whitelist()
+def initiate_background_job(message = None, job_site_name = None, staffing_company = None):
+    condition = check_js_update(message, job_site_name, staffing_company) if message and message!=migrate_sch else False
+    if condition == True or message==migrate_sch:
+        frappe.enqueue('tag_workflow.utils.organization.staffing_jobsite_mapping', message=message, job_site_name=job_site_name, staffing_company=staffing_company, queue='default', is_async=True)
+
+@frappe.whitelist()
+def check_js_update(message, job_site_name, staffing_company):
+    if message== Job_Site:
+        js_details = frappe.db.sql(f'''SELECT data FROM `tabVersion` WHERE docname = "{job_site_name}" ORDER BY modified DESC''', as_dict=1)
+        js_changed = json.loads(js_details[0].data) if len(js_details) > 0 else []
+        if 'created_by'in js_changed:
+            js_details = frappe.get_doc(Job_Site, job_site_name)
+            return True if js_details.address or js_details.state or js_details.city or js_details.zip else False
+        elif 'changed' in js_changed:
+            check_js_update_contd(js_changed)
+    else:
+        return check_comp_update(message, staffing_company)
+    return False
+
+def check_js_update_contd(js_changed):
+    for i in js_changed['changed']:
+        if i[0] in ['address', 'state', 'city', 'zip']:
+            return True
+    return False
+
+@frappe.whitelist()
+def check_comp_update(message, staffing_company):
+    if message== 'Company':
+        comp_details = frappe.db.sql(f'''SELECT data FROM `tabVersion` WHERE docname = "{staffing_company}" ORDER BY modified DESC''', as_dict=1)
+        comp_changed = json.loads(comp_details[0].data) if len(comp_details) > 0 else []
+        if 'created_by' in comp_changed:
+            comp_details = frappe.get_doc('Company', staffing_company)
+            return True if comp_details.complete_address or comp_details.address or comp_details.state or comp_details.city or comp_details.zip else False
+        elif 'changed' in comp_changed:
+           return check_comp_update_contd(comp_changed)
+    else:
+        return False
+    return False
+
+def check_comp_update_contd(comp_changed):
+    for i in comp_changed['changed']:
+        if i[0] in ['complete_address', 'address', 'state', 'city', 'zip']:
+            return True
+    return False
+
+@frappe.whitelist()
+def staffing_jobsite_mapping(message = None, job_site_name = None, staffing_company = None):
+    tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
+    if not tag_gmap_key:
+        frappe.msgprint(_("GMAP api key not found!"))
+        return ()
+    gmaps = googlemaps.Client(key=tag_gmap_key)
+
+    company_data, job_site_data = get_data(message, job_site_name,staffing_company)
+    for company in company_data:
+        source = get_source(company)
+        for job_site in job_site_data:
+            dest = get_dest(job_site)
+            try:
+                my_dist = gmaps.distance_matrix(source, dest)
+                km = my_dist['rows'][0]['elements'][0]['distance']['value']/1000 if  my_dist['status'] == 'OK' and my_dist['rows'][0]['elements'][0]['status']=='OK' else None
+                calculate_dist(km, company, job_site)
+            except Exception as e:
+                print(e)
+                continue
+
+@frappe.whitelist()
+def get_data(message, job_site_name, staffing_company):
+    if message == Job_Site:
+        job_site_data = frappe.db.sql(f'''SELECT name, search_on_maps, manually_enter, job_site, address, company, state, zip, suite_or_apartment_no FROM `tabJob Site` where name = "{job_site_name}"''',as_dict=1)
+        company_data = frappe.db.sql('''SELECT name, search_on_maps, enter_manually, complete_address, address, state ,zip, suite_or_apartment_no FROM `tabCompany` where organization_type="Staffing"''',as_dict=1)
+    elif message == 'Company':
+        job_site_data = frappe.db.sql('''SELECT name, search_on_maps, manually_enter, job_site, address, company, state, zip, suite_or_apartment_no FROM `tabJob Site`''',as_dict=1)
+        company_data = frappe.db.sql(f'''SELECT name, search_on_maps, enter_manually, complete_address, address, state, zip, suite_or_apartment_no FROM `tabCompany` where name = "{staffing_company}"''',as_dict=1)
+    else:
+        job_site_data = frappe.db.sql('''SELECT name, search_on_maps, manually_enter, job_site, address, company, state, zip, suite_or_apartment_no FROM `tabJob Site`''',as_dict=1)
+        company_data = frappe.db.sql('''SELECT name, search_on_maps, enter_manually, complete_address, address, state, zip, suite_or_apartment_no FROM `tabCompany` where organization_type="Staffing"''',as_dict=1)
+    return company_data, job_site_data
+
+def get_source(company):
+    try:
+        if company.enter_manually:
+            address = company.street_address if company.street_address else ''
+        else:
+            address = company.complete_address if company.complete_address else ''
+        city = company.city if company.city else ''
+        state = company.state if company.state else ''
+        zip_code = str(company.zip) if company.zip else ''
+        return address+","+city+","+state+","+zip_code
+    except Exception as e:
+        frappe.log_error(e, 'Get Source Error')
+
+def get_dest(job_site):
+    try:
+        address = job_site.address if job_site.address else ''
+        city = job_site.city if job_site.city else ''
+        state = job_site.state if job_site.state else ''
+        zip_code = job_site.zip if job_site.zip else ''
+        return address+","+city+","+state+","+zip_code
+    except Exception as e:
+        frappe.log_error(e, 'Get Destination Error')
+
+@frappe.whitelist()
+def calculate_dist(km, company, job_site):
+    dist = str(km*0.62137) if km!=None else None
+    frappe.db.sql(f'''INSERT INTO `tabStaffing Radius` (name, job_site, hiring_company, staffing_company, radius) VALUES("{company.name}_{job_site.name}", "{job_site.name}", "{job_site.company}", "{company.name}", "{dist}") ON DUPLICATE KEY UPDATE radius = "{dist}"''')
+    frappe.db.commit()

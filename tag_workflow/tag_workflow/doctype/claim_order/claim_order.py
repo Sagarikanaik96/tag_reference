@@ -231,7 +231,7 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 		hiring_list = frappe.db.sql(sql1,as_list=True)
 		hiring_user_list = [user[0] for user in hiring_list]
 		if int(no_required) > int(no_assigned):
-			sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org)
+			sql = '''select email from `tabUser` where organization_type='staffing' and company != "{0}" and company in (select staffing_company from `tabStaffing Radius` where job_site="{1}" and radius != "None" and radius <= 25 and hiring_company="{2}")'''.format(staffing_org, job_order_data.job_site, job_order_data.company)
 			share_list = frappe.db.sql(sql, as_list = True)
 			staffing_user_list = [user[0] for user in share_list]
 			assign_notification(share_list,hiring_user_list,doc_name,job_order)

@@ -202,6 +202,13 @@ frappe.ui.form.on("Company", {
 			method: "tag_workflow.controllers.master_controller.make_update_comp_perm",
 			args: {docname: frm.doc.name},
 		});
+		frappe.call({
+			'method': 'tag_workflow.utils.organization.initiate_background_job',
+			'args':{
+				'message': 'Company',
+				'staffing_company': frm.doc.name
+			}
+		});
 	},
 	validate: function (frm){
 		mandatory_fields(frm);

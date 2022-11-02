@@ -227,7 +227,7 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
         hiring_user_list = [user[0] for user in hiring_list]
 
         if int(no_of_worker_req) > len(emp_detail):
-            sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org)
+            sql = f'''select email from `tabUser` where organization_type='Staffing' and company != "{staffing_org}" and company in (select staffing_company from `tabStaffing Radius` where job_site="{job_order.job_site}" and radius != "None" and radius <= 25 and hiring_company="{job_order.company}")'''
             share_list = frappe.db.sql(sql, as_list = True)
             staffing_user_list = [user[0] for user in share_list]
             assign_notification(share_list,hiring_user_list,doc_name,job_order) 
@@ -304,7 +304,7 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
             doc.company_type = non_exlusive
             doc.save(ignore_permissions = True)
 
-            sql = f''' select email from `tabUser` where organization_type='staffing' and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}") '''
+            sql = f''' select email from `tabUser` where organization_type='staffing' and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}") and company in (select staffing_company from `tabStaffing Radius` where job_site="{doc.job_site}" and radius != "None" and radius <= 25 and hiring_company="{doc.company}")'''
             user_list=frappe.db.sql(sql, as_list=1)
             l = [l[0] for l in user_list]
             for user in l:
