@@ -88,6 +88,8 @@ frappe.ui.form.on('Claim Order', {
 
 		}
 		update_claim_by_staffing(frm)
+		if(frm.doc.staff_claims_no)
+			frm.set_df_property('staff_claims_no', 'read_only', 1);
 
 		setTimeout(hr, 1000);
 		frm.set_df_property('agree_to_contract', 'label', 'Agree To Contract <span style="color: red;">&#42;</span>');
