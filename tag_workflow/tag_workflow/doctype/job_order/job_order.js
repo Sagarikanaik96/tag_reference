@@ -266,8 +266,8 @@ frappe.ui.form.on("Job Order", {
 					});
 					confirm_joborder.show();
 					confirm_joborder.$wrapper.find('.modal-dialog').css('width', '450px');
-					confirm_joborder.standard_actions('.btn-modal-primary').attr('id','joborder-confirm-button')
-					confirm_joborder.standard_actions('.btn-modal-secondary').attr('id','joborder-cancel-button')
+					confirm_joborder.standard_actions.find('.btn-modal-primary').attr('id','joborder-confirm-button')
+					confirm_joborder.standard_actions.find('.btn-modal-secondary').attr('id','joborder-cancel-button')
 				});
 			}
 		}
