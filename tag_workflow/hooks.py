@@ -14,6 +14,7 @@ app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.svg"
 # global
 sales_invoice="Sales Invoice"
 map= "public/js/controllers/doc_map.js"
+dialog ="public/js/controllers/dialog.js"
 # Includes in <head>
 # ------------------
 fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow", "Workflow State", "Workflow Action Master",
@@ -88,7 +89,7 @@ web_include_css = [
 
 # include js in doctype views
 doctype_js = {
-        "User" : "public/js/controllers/user.js",
+        "User" : ["public/js/controllers/user.js",dialog],
         "Company": ["public/js/controllers/company.js",map],
         "Designation":"public/js/controllers/designation.js",
         "Item": "public/js/controllers/item.js",
@@ -110,7 +111,8 @@ doctype_js = {
         "Salary Component":"public/js/controllers/salary_component.js",
         "Salary Structure":"public/js/controllers/salary_structure.js",
         "Salary Slip":"public/js/controllers/salary_slip.js",
-        "Salary Structure Assignment":"public/js/controllers/salary_structure_assignment.js"
+        "Salary Structure Assignment":"public/js/controllers/salary_structure_assignment.js",
+        "Claim Order":dialog
 
 
 }

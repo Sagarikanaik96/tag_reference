@@ -191,6 +191,9 @@ frappe.ui.form.on("Job Order", {
 		set_exc_industry_company(frm);
 		order_claimed(frm);
 		single_share_job(frm);
+		$('.frappe-control[data-fieldname="html_3"]').attr('id','claim-order-submission')
+		$('.frappe-control[data-fieldname="resumes_required"]').attr('id','resume-required')
+		$('#awesomplete_list_4').attr('id','jobsite-dropdown')
 	},
 
 	select_job: function(frm) {
@@ -263,6 +266,8 @@ frappe.ui.form.on("Job Order", {
 					});
 					confirm_joborder.show();
 					confirm_joborder.$wrapper.find('.modal-dialog').css('width', '450px');
+					confirm_joborder.standard_actions('.btn-modal-primary').attr('id','joborder-confirm-button')
+					confirm_joborder.standard_actions('.btn-modal-secondary').attr('id','joborder-cancel-button')
 				});
 			}
 		}
@@ -1441,7 +1446,7 @@ function job_order_cancel_button(frm){
 
 function cancel_job_order(frm){
 	return new Promise(function(resolve, reject) {
-		frappe.confirm("<h4>Are you sure you want to discard this Job Order? </h4><h5>This Process is irreversible. Your whole data related to this order will be deleted.</h5>",
+		const d =frappe.confirm("<h4>Are you sure you want to discard this Job Order? </h4><h5>This Process is irreversible. Your whole data related to this order will be deleted.</h5>",
 			function() {
 				let resp = "frappe.validated = false";
 				resolve(resp);
@@ -1451,6 +1456,8 @@ function cancel_job_order(frm){
 				reject();
 			}
 		);
+		d.standard_actions.find('.btn-modal-primary').attr('id','joborder-confirm-button')
+		d.standard_actions.find('.btn-modal-secondary').attr('is','joborder-discard-button')
 	});
 }
 
@@ -2559,3 +2566,37 @@ function update_claims(data_len, l, dict, job_data, r,new_no) {
 	}
 	return { dict, valid1 };
 }
+
+frappe.get_modal = function(title, content) {
+	return $(`<div class="modal fade" style="overflow: auto;" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<div class="fill-width flex title-section">
+						<span class="indicator hidden"></span>
+						<h4 class="modal-title">${title}</h4>
+					</div>
+					<div class="modal-actions">
+						<button class="btn btn-modal-minimize btn-link hide">
+							${frappe.utils.icon('collapse')}
+						</button>
+						<button class="btn btn-modal-close btn-link" data-dismiss="modal" id="joborder-close-dialog">
+							${frappe.utils.icon('close-alt', 'sm', 'close-alt')}
+						</button>
+					</div>
+				</div>
+				<div class="modal-body ui-front" id="joborder-confirm-popup">${content}</div>
+				<div class="modal-footer hide">
+					<div class="custom-actions"></div>
+					<div class="standard-actions">
+						<button type="button" class="btn btn-secondary btn-sm hide btn-modal-secondary">
+						</button>
+						<button type="button" class="btn btn-primary btn-sm hide btn-modal-primary">
+							${__("Confirm")}
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>`);
+};
