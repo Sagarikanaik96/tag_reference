@@ -33,7 +33,6 @@ frappe.ui.form.on("Assign Employee", {
       assigned_direct(frm);
     }
     staff_comp(frm);
-    worker_notification(frm);
     render_table(frm);
     approved_employee(frm);
     back_job_order_form(frm);
@@ -148,6 +147,7 @@ frappe.ui.form.on("Assign Employee", {
           ) {
             make_hiring_notification(frm);
           } else {
+            worker_notification(frm)
             make_notification_approved(frm);
           }
         }
