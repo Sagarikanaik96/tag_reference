@@ -96,7 +96,7 @@ def approve_timesheets(timesheet, action):
         timesheets=json.loads(timesheet)
         for t in timesheets:
             doc = frappe.get_doc("Timesheet", t)
-            emp_fields = check_mandatory_field(doc.employee,1)
+            emp_fields = check_mandatory_field(doc.employee,1,"1")
             empty_field_str = ""
             for field in emp_fields:
                 empty_field_str += ", "+field.title()
@@ -108,7 +108,7 @@ def approve_timesheets(timesheet, action):
                 data.append({"date": doc.date_of_timesheet, "timesheet": t})
             else:
                 empty_field_str = empty_field_str[1:]
-                emp_with_insuficient_details.append([doc.employee,empty_field_str])
+                emp_with_insuficient_details.append([doc.employee_name.title(),empty_field_str])
 
         approval_notification(job_order=doc.job_order_detail,staffing_company=doc.employee_company,date=None, hiring_company=doc.company, timesheet_name=doc.name, timesheet_approved_time=doc.modified, current_time=frappe.utils.now())
         return data[0] if(len(data) > 0) else {"date": "", "timesheet": ""},emp_with_insuficient_details,len(timesheets)

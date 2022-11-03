@@ -1726,9 +1726,10 @@ def branch_key(branch_key=None):
 
 #-------------------checking employees mendatory fields--------------------------------#
 @frappe.whitelist()
-def check_mandatory_field(emp_id,check):
+def check_mandatory_field(emp_id,check,emp_name):
     try:
         msg = ""
+        emp_name = emp_name.title()
         data = frappe.db.sql("""select first_name,last_name,email,company,status,date_of_birth from `tabEmployee` where name = '{0}'""".format(emp_id),as_dict=1)
         emp_fields = []
         for field in data[0]:
@@ -1742,8 +1743,10 @@ def check_mandatory_field(emp_id,check):
             return "success"
         elif check == 1:
             return emp_fields
+        elif check == 2:
+            return[msg,emp_name,1]
         else:
-            return msg
+            return [msg,emp_name]
 
     except Exception as e:
         print(e)

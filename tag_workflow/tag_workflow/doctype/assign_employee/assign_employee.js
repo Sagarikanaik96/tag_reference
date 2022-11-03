@@ -418,7 +418,7 @@ frappe.ui.form.on("Assign Employee Details", {
     let child = locals[cdt][cdn];
     
     if (child.employee) {
-      check_mandatory_field(child.employee)
+      check_mandatory_field(child.employee,child.employee_name)
       frappe.call({
         method: "tag_workflow.tag_data.joborder_resume",
         args: { name: child.employee },
@@ -1464,15 +1464,14 @@ function remove_row(message, emp_name, cdt, cdn){
     cur_frm.refresh_field('employee_details');
   }
 }
-function check_mandatory_field(emp_id,){
+function check_mandatory_field(emp_id,emp_name){
   frappe.call({
     method:"tag_workflow.tag_data.check_mandatory_field",
-    args:{emp_id: emp_id,check: 0},
+    args:{emp_id: emp_id,check: 0,emp_name:emp_name},
     callback: function(r){
-      let msg = emp_id + " is missing the below required fields. You will be unable to approve their timesheets unless these fields are populated.<br><br>"
+      let msg = r.message[1] + " is missing the below required fields. You will be unable to approve their timesheets unless these fields are populated.<br><br>"
       if(r.message != "success"){
-        console.log(r.message)
-        msg += r.message
+        msg += r.message[0]
         frappe.msgprint({message: __(msg), title: __("Warning"), indicator: "yellow",});
       }
     }
