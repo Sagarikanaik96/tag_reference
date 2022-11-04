@@ -1651,7 +1651,7 @@ def get_jobtitle_based_on_industry(doctype, txt, searchfield, page_len, start, f
                 value = value+"'"+","+"'"+i
             else:
                 value =value+i
-        sql = ''' select name,industry from `tabItem` where company = '{0}' and industry="{1}" and (name NOT IN ('{2}') and name like '%%{3}%%')'''.format(company, industry,value,'%s' % txt)
+        sql = ''' select name,industry,company from `tabItem` where company in ('{0}','') and industry="{1}" and (name NOT IN ('{2}') and name like '%%{3}%%')'''.format(company, industry,value,'%s' % txt)
         return frappe.db.sql(sql)
 
     except Exception as e:
@@ -1669,7 +1669,7 @@ def get_jobtitle_based_on_company(doctype, txt, searchfield, page_len, start, fi
                 value = value+"'"+","+"'"+i
             else:
                 value =value+i
-        sql = ''' select name,industry from `tabItem` where  company ="{0}" and (name NOT IN ('{1}') and name like '%%{2}%%') '''.format(company,value,'%s' % txt)
+        sql = ''' select name,industry,company from `tabItem` where  company in("{0}",'') and (name NOT IN ('{1}') and name like '%%{2}%%') '''.format(company,value,'%s' % txt)
         return frappe.db.sql(sql)
 
     except Exception as e:
