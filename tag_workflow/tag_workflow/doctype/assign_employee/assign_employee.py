@@ -263,7 +263,7 @@ def payrate_change(docname):
         new_data = json.loads(data[0][0]) 
         if ('changed' not in new_data and 'row_changed' not in new_data) or len(new_data['added']) > 0 or len(new_data['removed']) > 0:
             return 'success'
-        elif 'row_changed' in new_data:
+        elif 'row_changed' in new_data and len(new_data['row_changed'])>0:
             for i in new_data['row_changed'][0][3]:
                 if i[0] == 'employee_name':
                     return 'success'

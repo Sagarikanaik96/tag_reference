@@ -227,13 +227,15 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
         hiring_user_list = [user[0] for user in hiring_list]
 
         if int(no_of_worker_req) > len(emp_detail):
-            sql = f'''select email from `tabUser` where organization_type='Staffing' and company != "{staffing_org}" and company in (select staffing_company from `tabStaffing Radius` where job_site="{job_order.job_site}" and radius != "None" and radius <= 25 and hiring_company="{job_order.company}")'''
+            sql = f'''select email from `tabUser` where organization_type='Staffing' and company != "{staffing_org}"'''
             share_list = frappe.db.sql(sql, as_list = True)
-            staffing_user_list = [user[0] for user in share_list]
             assign_notification(share_list,hiring_user_list,doc_name,job_order) 
             subject = 'Job Order Notification' 
             msg=f'{staffing_org} placed partial claim on your work order: {job_title}. Please review & approve the candidates matched with this work order.'
             make_system_notification(hiring_user_list,msg,assignEmployees,doc_name,subject)
+            sql2 = f'''select email from `tabUser` where organization_type='Staffing' and company != "{staffing_org}" and company in (select staffing_company from `tabStaffing Radius` where job_site="{job_order.job_site}" and radius != "None" and radius <= 25 and hiring_company="{job_order.company}")'''
+            share_list2 = frappe.db.sql(sql2, as_list = True)
+            staffing_user_list= [user[0] for user in share_list2]
             stff_email_with_resume_required(job_order, emp_detail, no_of_worker_req, hiring_org, staffing_user_list, subject)
             return send_email(subject,msg,hiring_user_list)
         else:
@@ -274,7 +276,6 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
     try:
         doc = frappe.get_doc(jobOrder,job_order)
         subject="New Work Order"
-
         sql = ''' select data from `tabVersion` where ref_doctype='Job Order' and docname='{}' '''.format(job_order)
         update_values=frappe.db.sql(sql, as_list=1)
         if(len(update_values)<2):
@@ -304,12 +305,15 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
             doc.company_type = non_exlusive
             doc.save(ignore_permissions = True)
 
-            sql = f''' select email from `tabUser` where organization_type='staffing' and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}") and company in (select staffing_company from `tabStaffing Radius` where job_site="{doc.job_site}" and radius != "None" and radius <= 25 and hiring_company="{doc.company}")'''
+            sql = f''' select email from `tabUser` where organization_type='staffing' and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}")'''
             user_list=frappe.db.sql(sql, as_list=1)
             l = [l[0] for l in user_list]
             for user in l:
                 add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
-            job_order_notification(job_order_title,hiring_org,job_order,subject,l)
+            sql2 = f''' select email from `tabUser` where organization_type='staffing' and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}") and company in (select staffing_company from `tabStaffing Radius` where job_site="{doc.job_site}" and radius != "None" and radius <= 25 and hiring_company="{doc.company}")'''
+            staff_user_list=frappe.db.sql(sql2, as_list=1)
+            l2 = [l2[0] for l2 in staff_user_list]
+            job_order_notification(job_order_title,hiring_org,job_order,subject,l2)
         elif org_type[0][0]=="Exclusive Hiring":
             doc.company_type = 'Exclusive'
             doc.save(ignore_permissions = True)
