@@ -90,7 +90,7 @@ frappe.listview_settings["Timesheet"] = {
     ) {
       listview.page
         .set_secondary_action(
-          '<svg class="icon icon-xs" style=""><use class="" href="#icon-add"></use></svg>Add Timesheet',
+          '<svg class="icon icon-xs" style=""><use class="" href="#icon-add"></use></svg>Add/Edit Timesheet',
           function () {
             update_job_order(listview);
           }
@@ -103,17 +103,21 @@ frappe.listview_settings["Timesheet"] = {
 
 /*-------------------------------*/
 function update_job_order(listview) {
-  let flt = listview.filters || [];
-  for (let f in flt) {
-    if (flt[f][1] == "job_order_detail") {
-      frappe.route_options = { job_order_detail: flt[f][3] };
+  if(cur_list.$checks.length==0){
+    let flt = listview.filters || [];
+    for (let f in flt) {
+      if (flt[f][1] == "job_order_detail") {
+        frappe.route_options = { job_order_detail: flt[f][3] };
+      }
+      if (flt[f][1] == "job_order") {
+        frappe.route_options = { job_order_detail: flt[f][3] };
+      }
     }
-
-    if (flt[f][1] == "job_order") {
-      frappe.route_options = { job_order_detail: flt[f][3] };
-    }
+    frappe.set_route("form", "add-timesheet");
   }
-  frappe.set_route("form", "add-timesheet");
+  else{
+    checking_selected_values(listview)
+  }
 }
 
 function add_filters(listview) {
@@ -192,4 +196,29 @@ function get_company(){
 		}
 	});
 	return text;
+}
+
+function checking_selected_values(listview){
+  let selected_values=[]
+  for (const element of cur_list.$checks){
+    selected_values.push(element.dataset.name)
+  }
+  frappe.call({
+    'method':'tag_workflow.utils.timesheet.checking_same_values_timesheet',
+    'args':{'user_selected_timesheet':selected_values},
+    'callback':function(r){
+      if(r.message=='Different Status'){
+        frappe.msgprint("Only Timesheets in an open state can be edited.");
+      }
+      else if(r.message=='Different Job Order' || r.message=='Different Job Order Dates'){
+        frappe.msgprint("Dates and Job Order ID are not consistent with all selected values. Please update your selection and try again.");
+      }
+      else{
+        localStorage.setItem("job_order", r.message[1]);
+        localStorage.setItem("date", r.message[2]);
+        localStorage.setItem("timesheet_to_update", r.message[0]);
+        frappe.set_route("form", "add-timesheet");
+      }
+    }
+  })
 }

@@ -1,5 +1,6 @@
 from . import __version__ as app_version
 
+
 app_name = "tag_workflow"
 app_title = "Tag Workflow"
 app_publisher = "SourceFuse"
@@ -60,7 +61,7 @@ on_session_creation = [
 ]
 
 app_include_css = [
-        "/assets/tag_workflow/css/tag.css"
+        "/assets/tag_workflow/css/tag_customed.css"
 ]
 
 app_include_js = [
@@ -74,7 +75,12 @@ app_include_js = [
         "/assets/tag_workflow/js/frappe/form/controls/link.js",
         "/assets/tag_workflow/js/twilio_utils.js",
         "/assets/tag_workflow/js/list.js",
-        "/assets/tag_workflow/js/emp_functions.js"
+        "/assets/tag_workflow/js/emp_functions.js",
+        "/assets/tag_workflow/js/frappe/data_import/index.js",
+        "/assets/tag_workflow/js/frappe/data_import/import_preview.js",
+        "/assets/tag_workflow/js/frappe/data_import/data_exporter.js",
+        "/assets/tag_workflow/js/user_profile_controller.js"
+
 ]
 
 web_include_css = [
@@ -94,13 +100,20 @@ doctype_js = {
         sales_invoice: "public/js/controllers/sales_invoice.js",
         "Contact": ["public/js/controllers/contact.js",map],
         "Lead": ["public/js/controllers/lead.js",map],
-        "Contract": "public/js/controllers/contract.js",
+        "Contract": ["public/js/controllers/contract.js","public/js/controllers/filter.js"],
         "Job Site": "public/js/controllers/job_sites.js",
         "Data Import":"public/js/controllers/data_import.js",
         "Notification Log": "public/js/controllers/notification_log.js",
         "Employee Onboarding Template": "public/js/controllers/employee_onboarding_template.js",
         "Employee Onboarding": ["public/js/controllers/employee_onboarding.js", map],
-        "Job Offer": "public/js/controllers/job_offer.js"
+        "Job Offer": "public/js/controllers/job_offer.js",
+        "Holiday List": "public/js/controllers/holiday_list.js",
+        "Salary Component":"public/js/controllers/salary_component.js",
+        "Salary Structure":"public/js/controllers/salary_structure.js",
+        "Salary Slip":"public/js/controllers/salary_slip.js",
+        "Salary Structure Assignment":"public/js/controllers/salary_structure_assignment.js"
+
+
 }
 
 # doctype list
@@ -117,11 +130,17 @@ doctype_list_js = {
         "Contract": "public/js/doctype_list/contract_list.js",
         "Role Profile": "public/js/doctype_list/role_profile.js",
         "Item": "public/js/doctype_list/item_list.js",
-        "Employee Onboarding Template": "public/js/doctype_list/employee_onboarding_template_list.js"
+        "Employee Onboarding Template": "public/js/doctype_list/employee_onboarding_template_list.js",
+        "Holiday List": "public/js/doctype_list/holiday_list_view.js",
+        "Salary Component":"public/js/doctype_list/salary_component_list.js",
+        "Salary Slip": "public/js/doctype_list/salary_slip_list.js",
+        "Payroll Entry": "public/js/doctype_list/payroll_entry_list.js",
+        "Salary Structure": "public/js/doctype_list/salary_structure_list.js",
+        "System Setting": "public/js/doctype_list/system_setting.js",
 }
 
 after_migrate = ["tag_workflow.utils.organization.setup_data"]
-
+before_migrate = ["tag_workflow.utils.organization.remove_field"]
 # Hook on document methods and events
 validate = "tag_workflow.controllers.base_controller.validate_controller"
 doc_events = {
@@ -129,10 +148,12 @@ doc_events = {
             "validate": validate
         },
         "Company": {
-            "on_trash": validate
+            "on_trash": validate,
+             "after_insert": 'tag_workflow.tag_workflow.doctype.company.company.create_salary_structure'
         },
         "User": {
-            "on_update": validate
+            "on_update": validate,
+            "before_save": 'tag_workflow.tag_data.validate_user'
         },
         "Designation":{
                 "after_insert":'tag_workflow.tag_data.designation_activity_data'
@@ -154,7 +175,9 @@ doc_events = {
        },
        'Job Order':{
                "before_save":'tag_workflow.tag_workflow.doctype.job_order.job_order.validate_company'
-	}
+	},
+        
+
 }
 
 # logo
@@ -176,7 +199,10 @@ scheduler_events={
 	],
         "daily": [
 	        "tag_workflow.tag_data.lead_follow_up"
-	]
+	],
+        "weekly":[
+                "tag_workflow.utils.jazz_integration.schedule_job"
+        ]
 }
 
 override_whitelisted_methods = {

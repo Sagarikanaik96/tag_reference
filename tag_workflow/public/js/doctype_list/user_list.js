@@ -61,27 +61,13 @@ frappe.listview_settings['User'] = {
     },
 	hide_name_column: true,
 	refresh: function(listview){
-		$('#navbar-breadcrumbs > li > a').html('Company Users');
-		listview.$page.find(`div[data-fieldname="name"]`).addClass("hide");
-		let view = listview;
 
-		for (let i of view.data) {
-			frappe.call({
-				method:"tag_workflow.tag_workflow.doctype.employee_assign_name.employee_assign_name.employee_email_filter",
-				args:{
-					"email":i["name"]
-				},
-				callback:function(r){
-					if (r.message && r.message.length > 1){
-						listview.$page.find(`a[data-filter="company,=,${r.message[0]}"]`).addClass("indicator-pill green");
-					}
-				}
-			});
-		}
+	$('#navbar-breadcrumbs > li > a').html('Company Users');
+	listview.$page.find(`div[data-fieldname="name"]`).addClass("hide");
 	}
 };
 
-frappe.ui.form.ControlPassword = frappe.ui.form.ControlData.extend({
+frappe.ui.form.ControlPassword = class ControlAttach extends frappe.ui.form.ControlData({
 	input_type: "password",
 	make: function() {
 		this._super();

@@ -20,7 +20,7 @@ def validate_controller(doc, method):
                 MasterController(doc, doctype, method).validate_master()
             elif method == "on_trash":
                 MasterController(doc, doctype, method).validate_trash()
-            elif method == "on_update":
+            elif method == "on_update" and frappe.session.user!="Administrator":
                 MasterController(doc, doctype, method).apply_user_permissions()
         elif doctype in CRM:
             from tag_workflow.controllers.crm_controller import CRMController

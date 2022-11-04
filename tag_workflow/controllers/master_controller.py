@@ -42,7 +42,7 @@ class MasterController(base_controller.BaseController):
 
         elif(self.dt == "User"):
             if(frappe.session.user not in STANDARD and (not self.doc.tag_user_type or not self.doc.organization_type)):
-                frappe.msgprint(_("Please select <b>Organization Type</b> and <b>TAG User Type</b> before saving the User."))
+                frappe.msgprint(_("Please select <b>Company Type</b> and <b>TAG User Type</b> before saving the User."))
             self.check_profile()
         elif(self.dt == "Item"):
             self.check_activity_type()
@@ -299,7 +299,7 @@ def new_staff_old_order(data,user):
     for d in data:
         try:
             if not frappe.db.exists("DocShare", {"user": user, "share_name": d[0], "read": 1}) and frappe.db.exists('Job Order', d[0]):
-                add('Job Order', d[0], user=user, share= 1, read=1, write=0, flags={"ignore_share_permission": 1})
+                add('Job Order', d[0], user=user, share= 1, read=1, write=0)
         except Exception as e:
             frappe.error_log(e, "share error")
             continue

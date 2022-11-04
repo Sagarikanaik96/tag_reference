@@ -3,7 +3,7 @@
 import frappe
 from frappe.utils import user
 from frappe.share import add
-from tag_workflow.tag_data import hiring_org_name,joborder_email_template,chat_room_created,job_order_notification
+from tag_workflow.tag_data import hiring_org_name,joborder_email_template,chat_room_created,job_order_notification,free_redis
 from tag_workflow.utils.notification import sendmail
 from tag_workflow.utils.notification import make_system_notification
 from frappe.model.document import Document
@@ -20,6 +20,8 @@ taxes= "Sales Taxes and Charges"
 team = "Sales Team"
 ASN = "Assign Employee"
 CLM = "Claim Order"
+jobOrder = 'Job Order Notification'
+doc_name_job_order = 'Job Order'
 
 site = frappe.utils.get_url().split('/')
 sitename = site[0]+'//'+site[2]
@@ -209,7 +211,7 @@ def is_send_mail_required(organizaton,doc_name,msg):
             staffing_name = frappe.db.sql(sql, as_list = True) 
             for value in staffing_name:
                 staffing_list.append(value[0])
-                subject = 'Job Order Notification'
+                subject = jobOrder
         if staffing_list:
             make_system_notification(staffing_list, message = msg, doctype = ORD, docname =  doc_name, subject = subject)
             sendmail(emails = staffing_list, message = msg, subject = subject, doctype = ORD, docname = doc_name)
@@ -220,13 +222,17 @@ def is_send_mail_required(organizaton,doc_name,msg):
 
 @frappe.whitelist()
 def get_jobtitle_list(doctype, txt, searchfield, page_len, start, filters):
-    company=filters.get('job_order_company')
-    category=filters.get('job_category')
-    if company is None:
-        return None
-    else:
-        sql = ''' select job_titles from `tabJob Titles` where parent = '{0}' and  industry_type='{1}' and job_titles like "%%{2}%%"'''.format(company, category, '%s' % txt)
-        return frappe.db.sql(sql)
+    try:
+        company=filters.get('job_order_company')
+        site=filters.get('job_site')
+        if company is None:
+            return None
+        else:
+            sql = ''' select job_titles from `tabIndustry Types Job Titles` where parent = '{0}' and job_titles like "%%{1}%%"'''.format(site,'%s' % txt)
+            return frappe.db.sql(sql)
+    except Exception as e:
+        frappe.log_error(e,'Getting Job Title Error')
+
 
 @frappe.whitelist()
 def get_jobtitle_list_page(doctype, txt, searchfield, page_len, start, filters):
@@ -239,16 +245,13 @@ def get_jobtitle_list_page(doctype, txt, searchfield, page_len, start, filters):
 
 
 @frappe.whitelist()
-def update_joborder_rate_desc(company = None,job = None):
-    if job is None or company is None:
-        return None
-    if frappe.db.exists("Company",company):
-        company = frappe.get_doc("Company", {"name": company})
-    
-    for i in company.job_titles:
-        if i.job_titles == job:
-            return {"description":i.description,"rate":i.wages}
-    return None
+def update_joborder_rate_desc(job_site,job_title):  
+    try:
+        sql=frappe.db.sql(''' select industry_type,bill_rate,comp_code,description from `tabIndustry Types Job Titles` where parent='{0}' and job_titles='{1}' '''.format(job_site,job_title),as_dict=1)
+        return sql
+    except Exception as e:
+        frappe.log_error(e,'Getting job order rate description value error')
+
    
 
 @frappe.whitelist()
@@ -268,7 +271,7 @@ def after_denied_joborder(staff_company,joborder_name,job_title,hiring_name):
         jb_ord = frappe.get_doc(ORD,joborder_name)
         jb_ord.is_single_share = 0
         jb_ord.save(ignore_permissions = True)
-        subject = 'Job Order Notification'
+        subject = jobOrder
         msg=f'{staff_company} unable to fulfill claim on your work order: {job_title}.'
         make_system_notification(hiring_user_list,msg,ORD,joborder_name,subject)   
         sendmail(emails = hiring_user_list, message = msg, subject = subject, doctype = ORD, docname = joborder_name)
@@ -301,7 +304,9 @@ def make_sales_invoice(source_name, company, emp_sql,invoice_exist,target_doc=No
         timesheet = frappe.db.sql(sql, as_dict=1)
         doclist.items=[]
         doclist.timesheets=[]
+        timesheet_used=[]
         for time in timesheet:
+            timesheet_used.append(time.name)            
             try:
                 add("Timesheet", time.name, user=frappe.session.user, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
             except Exception:
@@ -316,6 +321,7 @@ def make_sales_invoice(source_name, company, emp_sql,invoice_exist,target_doc=No
                 total_hours += sheet.total_billable_hours
 
             doclist = update_time_timelogs(sheet,doclist,time)
+        doclist.timesheet_used=str(timesheet_used)
         doclist.total_billing_amount = total_amount
         doclist.total_billing_hours = total_hours
         # for company detail
@@ -367,20 +373,8 @@ def merge_employee_data(doclist):
             employees, dates = get_timesheet_employees(doclist.timesheets)
             dates.sort()
             for e in employees:
-                bill_amount, bill_hours, overtime_rate, overtime_hours, per_hr_rate, flat_rate = 0, 0 ,0, 0, 0, 0
-                timesheet, employee_name, activity_type = "", "", ""
-                for item in doclist.timesheets:
-                    if(e == item.description):
-                        bill_amount += item.billing_amount
-                        bill_hours += item.billing_hours
-                        overtime_hours += item.overtime_hours
-                        overtime_rate = item.overtime_rate
-                        per_hr_rate = item.per_hour_rate1
-                        flat_rate = item.flat_rate
-                        timesheet = item.time_sheet
-                        employee_name = item.employee_name
-                        activity_type = item.activity_type
-                items.append({"activity_type": activity_type, "billing_amount": bill_amount, "billing_hours": bill_hours, "time_sheet": timesheet, "from_time": dates[0], "to_time": dates[-1], "description": e, "employee_name": employee_name, 'status': "-", "overtime_rate": overtime_rate, "overtime_hours": overtime_hours,"per_hour_rate1": per_hr_rate,'flat_rate': flat_rate})
+                ts_details = get_ts_details(doclist, e, dates)
+                items.append(ts_details)
 
         if(items):
             doclist.timesheets = []
@@ -389,6 +383,26 @@ def merge_employee_data(doclist):
         return doclist
     except Exception as e:
         frappe.msgprint(e)
+
+def get_ts_details(doclist, e, dates):
+    bill_amount, bill_hours, overtime_rate, overtime_hours, per_hr_rate, flat_rate = 0, 0 ,0, 0, 0, 0
+    timesheet, employee_name, activity_type, status = "", "", "", []
+    for item in doclist.timesheets:
+        if(e == item.description):
+            bill_amount += item.billing_amount
+            bill_hours += item.billing_hours
+            overtime_hours += item.overtime_hours
+            overtime_rate = item.overtime_rate
+            per_hr_rate = item.per_hour_rate1
+            flat_rate = item.flat_rate
+            timesheet = item.time_sheet
+            employee_name = item.employee_name
+            activity_type = item.activity_type
+            if item.status:
+                status.append(item.status)
+    if len(status)==0:
+        status.append('-')
+    return {"activity_type": activity_type, "billing_amount": bill_amount, "billing_hours": bill_hours, "time_sheet": timesheet, "from_time": dates[0], "to_time": dates[-1], "description": e, "employee_name": employee_name, 'status': ", ".join(list(set(status))), "overtime_rate": overtime_rate, "overtime_hours": overtime_hours,"per_hour_rate1": per_hr_rate,'flat_rate': flat_rate}
 
 def get_timesheet_employees(items):
     try:
@@ -406,21 +420,20 @@ def get_timesheet_employees(items):
 
 def update_time_timelogs(sheet,doclist,time):
     for logs in sheet.time_logs:
-        status = '-'
+        status = []
         if sheet.no_show:
-            status = 'No Show'
-        elif sheet.non_satisfactory:
-            status = 'Non Satisfactory'
-        elif sheet.dnr:
-            status = 'DNR'
-        elif sheet.replaced:
-            status = 'Replaced'
-
+            status.append('No Show')
+        if sheet.non_satisfactory:
+            status.append('Non Satisfactory')
+        if sheet.dnr:
+            status.append('DNR')
+        if sheet.replaced:
+            status.append('Replaced')
         if time.no_show == 1:
             # add zero all value in time sheet in invoice
-            activity = {"activity_type": logs.activity_type, "billing_amount": 0, "billing_hours": 0, "time_sheet": logs.parent, "from_time": 0, "to_time": 0, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":0,"overtime_hours":0,"per_hour_rate1":0,'flat_rate':0}
+            activity = {"activity_type": logs.activity_type, "billing_amount": 0, "billing_hours": 0, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.from_time, "description": sheet.employee,"employee_name":sheet.employee_name,'status':", ".join(status),"overtime_rate":0,"overtime_hours":0,"per_hour_rate1":0,'flat_rate':0}
         else:
-            activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'status':status,"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours,"per_hour_rate1":logs.billing_rate,'flat_rate':logs.flat_rate}
+            activity = {"activity_type": logs.activity_type, "billing_amount": logs.billing_amount, "billing_hours": logs.billing_hours, "time_sheet": logs.parent, "from_time": logs.from_time, "to_time": logs.to_time, "description": sheet.employee,"employee_name":sheet.employee_name,'status':", ".join(status),"overtime_rate":logs.extra_rate,"overtime_hours":logs.extra_hours,"per_hour_rate1":logs.billing_rate,'flat_rate':logs.flat_rate}
         doclist.append("timesheets", activity)
     return doclist
 
@@ -546,6 +559,7 @@ def data_deletion(job_order):
         del_data=f'''DELETE FROM `tabJob Order` where name="{job_order}" '''
         frappe.db.sql(del_data)
         frappe.db.commit()
+        free_redis(job_order)
         return 'success'
     except Exception as e:
         frappe.log_error(e, 'Some Deletion error')
@@ -590,7 +604,7 @@ def claim_data_list(job_order_name=None,exist_comp=None):
 
 @frappe.whitelist()
 def hiring_diff_status(job_order_name):
-    doc=frappe.get_doc('Job Order',job_order_name)
+    doc=frappe.get_doc(doc_name_job_order,job_order_name)
     sql=f'select docstatus from `tabSales Invoice` where job_order="{job_order_name}"'
     invoice_comp_data=frappe.db.sql(sql,as_list=1)
     if(len(invoice_comp_data)>0 and doc.order_status=='Completed'):
@@ -641,7 +655,7 @@ def change_assigned_emp(doc_name, new_data=None):
 # for claculating headcount and submit
 @frappe.whitelist()
 def submit_headcount(job_order, staff_company):
-    data=frappe.get_doc('Job Order',job_order)
+    data=frappe.get_doc(doc_name_job_order,job_order)
     claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{job_order}"'
     data1=frappe.db.sql(claims,as_list=1)
     if(data1[0][0]!=None):
@@ -650,7 +664,7 @@ def submit_headcount(job_order, staff_company):
         approved= int(data.no_of_workers)
     sql = '''SELECT approved_no_of_workers from `tabClaim Order` where job_order = "{0}"'''.format(job_order)
     res = frappe.db.sql(sql, as_list = True)
-    sql1= '''SELECT sum(staff_claims_no) from `tabClaim Order` where job_order = "{0}" and staffing_organization="{1}" '''.format(job_order, staff_company)
+    sql1= '''SELECT sum(approved_no_of_workers) from `tabClaim Order` where job_order = "{0}" and staffing_organization="{1}" '''.format(job_order, staff_company)
     res1 = frappe.db.sql(sql1, as_list = True)
     return [element for innerList in res for element in innerList],res1,approved
 
@@ -725,10 +739,8 @@ def claims_left(name,comp):
         else:
             claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{name}"'
             data1=frappe.db.sql(claims,as_list=1)
-            if(data1[0][0]!=None):
-                return str(int(data.no_of_workers)-int(data1[0][0]))
-            else:
-                return int(data.no_of_workers) 
+            d=data_receive(data1,data)
+            return d
 def all_orders_data(company_name):
     my_aval_claims=[]
     unclaimed_noresume_by_company=[]
@@ -747,7 +759,7 @@ def check_avail(company_name,unclaimed_noresume_by_company):
         claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{data.name}"'
         data1=frappe.db.sql(claims,as_list=1)
         if(data1[0][0]!=None):
-            if int(data.no_of_workers)-int(data1[0][0])!=0:
+            if int(data.no_of_workers)-int(data1[0][0])>0:
                 unclaimed_noresume_by_company.append(data.name)
         else:
             unclaimed_noresume_by_company.append(data.name)
@@ -782,7 +794,35 @@ def claim_order_updated_by(docname,staff_company):
         frappe.log_error(e, 'Claim order Error')
         print(e, frappe.get_traceback())
 
+@frappe.whitelist()
+def check_increase_headcounts(no_of_workers_updated,name,company,select_job):
+    sql = f'select is_single_share,staff_company,no_of_workers from `tabJob Order` where name="{name}"'
+    old_headcounts = frappe.db.sql(sql, as_list=1)
+    if int(no_of_workers_updated)>(old_headcounts[0][2]):
+        subject = jobOrder
+        link =  f'  href="{sitename}/app/job-order/{name}" '
+        msg=f'{company} has increased the number of requested employees to {no_of_workers_updated} on {name} for {select_job}.'
+        if old_headcounts[0][0]:
+            sql = f'''select email from `tabUser` where organization_type="staffing" and company="{old_headcounts[0][1]}"'''
+            share_list = frappe.db.sql(sql, as_list = True)
+            share_user_list = [user[0] for user in share_list]
+            make_system_notification(share_user_list,msg,doc_name_job_order,name,subject)
+            joborder_email_template(subject,msg,share_user_list,link)
+        else:
+            sql = '''select email from `tabUser` where organization_type="staffing"'''
+            share_list = frappe.db.sql(sql, as_list = True)
+            share_user_list = [user[0] for user in share_list]
+            make_system_notification(share_user_list,msg,doc_name_job_order,name,subject)
+            joborder_email_template(subject,msg,share_user_list,link)
 
+
+@frappe.whitelist()
+def change_is_single_share(bid,name):
+    sql = f'''select is_single_share from `tabJob Order` where name="{name}"'''
+    iss = frappe.db.sql(sql, as_list=1)
+    is_single_share = iss[0][0]
+    return is_single_share
+      
 @frappe.whitelist()
 def workers_required_order_update(doc_name):
     try:
@@ -820,11 +860,11 @@ def update_new_claims(my_data,doc_name):
 def claim_comp_assigned(doc_name,doc,claimed_approved):
     assined_emp=frappe.db.sql('select name from `tabAssign Employee` where job_order="{0}" and company="{1}"'.format(doc_name,doc.staffing_organization),as_dict=1)
     if(len(assined_emp)>0):
-        assigned_emp_comp=frappe.get_doc(ASN,assined_emp[0]['name'])
-        if doc.approved_no_of_workers==len(assigned_emp_comp.employee_details):
+        count=frappe.db.sql('select count(name) from `tabAssign Employee Details` where parent="{0}" and remove_employee=0'.format(assined_emp[0]['name']),as_list=1)
+        if doc.approved_no_of_workers<count[0][0]:
             frappe.msgprint(doc.staffing_organization+' has assigned all of their claims. An employee must be removed from this job order to by '+doc.staffing_organization+' before their claim can be modified.')
             return 0
-        elif(int(claimed_approved)!=len(assigned_emp_comp.employee_details)):
+        elif(int(claimed_approved)!=count[0][0]):
             frappe.msgprint("The number of assigned claims does not match the new required head count of "+str(claimed_approved))
             return 0
         else:
@@ -838,3 +878,11 @@ def validate_company(doc,method):
         if company_doc.organization_type!='Exclusive Hiring':
             frappe.throw('Insufficient Permission to create Job Order')
     
+def data_receive(data1,data):
+    if(data1[0][0]!=None):
+        if(int(data.no_of_workers)-int(data1[0][0])>0):
+            return str(int(data.no_of_workers)-int(data1[0][0]))
+        else:
+            return str(0)
+    else:
+        return int(data.no_of_workers) 

@@ -9,6 +9,22 @@ frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 	wrapper.face_recognition = new frappe.FaceRecognition(wrapper, page);
 }
 
+function hide(r,page){
+	if(frappe.boot.tag.tag_user_info.company_type=== "Staffing"){
+		$("#place_order").hide();
+	}
+	if(frappe.boot.tag.tag_user_info.company_type===r.message[0].organization_type){
+		$("#place_order").hide();
+		$("#work_order").hide();
+	}
+	if(r.message[0].organization_type!= 'Staffing'){
+		$("#coi").hide();
+		$("#safety_manual").hide();
+		$("#w_nine").hide();
+	}
+	get_blocked_list(page)
+}
+
 frappe.FaceRecognition = Class.extend({
 	init: function(wrapper, page) {
 		let me = this;
@@ -33,22 +49,9 @@ frappe.FaceRecognition = Class.extend({
 					"userid": frappe.user_info().email
 					},
 			callback: function (r) {
-				setTimeout(hide,10);
-				function hide(){
-					if(frappe.boot.tag.tag_user_info.company_type=== "Staffing"){
-						$("#place_order").hide();
-					}
-					if(frappe.boot.tag.tag_user_info.company_type===r.message[0].organization_type){
-						$("#place_order").hide();
-						$("#work_order").hide();
-					}
-					if(r.message[0].organization_type!= 'Staffing'){
-						$("#coi").hide();
-						$("#safety_manual").hide();
-						$("#w_nine").hide();
-					}
-					get_blocked_list(page)
-				}
+				setTimeout(function(){
+					hide(r,page)
+				},10);
 
 				let my_val= r.message[0];
 				let txt = "";
@@ -68,12 +71,19 @@ frappe.FaceRecognition = Class.extend({
 				let rate = "";
 				for(let k in r.message[1]){
 					count += 1;
-					rate+= '★'.repeat(r.message[1][k][0]) + "<br>"  + r.message[1][k][1] + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
+					if (r.message[1][k][1]){
+						rate+= '★'.repeat(r.message[1][k][0]) + "<br>"  + r.message[1][k][1] + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
+					}
+					else{
+						rate+= '★'.repeat(r.message[1][k][0]) + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
+					}
 				}
+
+				let rev = get_reviews(r);
 
 				let arr1= add_ress(my_val)
 				let jobsite_address= arr1.join(", ");
-
+				let count_val = count;
 				count = count>1?count + ' Reviews': count + ' Review';
 				let description = my_val.about_organization?my_val.about_organization:"No description added."
 				let link_coi='';
@@ -98,8 +108,7 @@ frappe.FaceRecognition = Class.extend({
 								<div id="jobsite">
 									<div id="address"> ${jobsite_address}</div>
 								</div>
-								<p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#">  <u> ${count} </u> </a> </span> </p>
-							</div>
+								${count_val>=10 ? ` <p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#" href="#" onclick="return theReviewsFunction('${rate}');"> <u> ${count} </u> </a> </span> </p>`:'<div></div>'}</div>
 							</div>
 							<div class="col-md-6 col-sm-12 order text-left text-md-right ">
                                 <div>
@@ -179,7 +188,7 @@ frappe.FaceRecognition = Class.extend({
 								</div>
 							</div>
 
-							 <div class="card">
+							${count_val >=10 ? `<div class="card">
 								<div class="card-body">
 									<div class="card-header">
 										<button class="card-title btn-block text-left " data-toggle="collapse" data-target="#collapse3" aria-expanded="false" aria-controls="collapse">
@@ -187,22 +196,34 @@ frappe.FaceRecognition = Class.extend({
 										</button>
 									</div>
 									<div class="card-text collapse pb-2 show" id="collapse3">
-										<div id="employee"> 
-										${rate} 
+										<div id="employee" class="d-block"> 
+										${rev} 
 										</div>
 									</div>
 								</div>
-							</div>
+							</div>`: "<div></div>"}
 							
 						</div>
 					</div>`;
 				$("#dynamic_company_data1").html(template);
-			
 		}
 		});
 		
 	},
 });
+
+function get_reviews(r) {
+	let rev = "";
+	for (let k in r.message[1].slice(0, 10)) {
+		if (r.message[1][k][1]) {
+			rev += "<div class= 'my-3'>"+'★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][1] + "<br>" + r.message[1][k][2] + "<br>" +"</div>";
+		}
+		else {
+			rev += "<div class= 'my-3'>"+'★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][2] + "<br>"+"</div>";
+		}
+	}
+	return rev;
+}
 
 function new_order(){
 	let b = document.getElementById('comp_name').innerHTML;
@@ -406,6 +427,14 @@ function block_company(){
 	})
 }
 
+function theReviewsFunction (rate) {
+	rate = `<div style = "overflow: auto;max-height:500px">${rate}</div>`
+	let pop_up = new frappe.ui.Dialog({
+		title: __('Ratings & Reviews'),
+		fields:[{fieldname: "rate", fieldtype: "HTML", options: rate}]
+	});
+	pop_up.show();
+}
 function unblock_company(){
 	frappe.call({
 		method:'tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.unblock_company',

@@ -48,13 +48,13 @@
   {
    "fieldname": "from_time",
    "fieldtype": "Time",
-   "label": "From Time",
+   "label": "Start Time",
    "reqd": 1
   },
   {
    "fieldname": "break_from_time",
    "fieldtype": "Time",
-   "label": "Break From Time"
+   "label": "Break Start"
   },
   {
    "bold": 1,
@@ -64,13 +64,13 @@
   {
    "fieldname": "to_time",
    "fieldtype": "Time",
-   "label": "To Time",
+   "label": "End Time",
    "reqd": 1
   },
   {
    "fieldname": "break_to_time",
    "fieldtype": "Time",
-   "label": "Break To Time"
+   "label": "Break End"
   },
   {
    "fieldname": "items",
@@ -141,7 +141,7 @@
  "hide_toolbar": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-03-10 06:13:43.855256",
+ "modified": "2022-10-06 03:24:32.223542",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Add Timesheet",

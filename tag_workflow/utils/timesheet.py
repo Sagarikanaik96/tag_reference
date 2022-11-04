@@ -12,8 +12,9 @@ from frappe import enqueue
 JOB = "Job Order"
 assignEmployee="Assign Employee"
 TM_FT = "%Y-%m-%d %H:%M:%S"
-
-
+timesheet_time= 'select to_time,from_time from `tabTimesheet Detail` where parent= '
+noShow='No Show'
+nonSatisfactory='Non Satisfactory'
 #----------------#
 @frappe.whitelist()
 def send_timesheet_for_approval(employee, docname, company, job_order):
@@ -44,7 +45,7 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
 
 #----------timesheet------------------#
 @frappe.whitelist()
-def get_timesheet_data(job_order, user, company_type):
+def get_timesheet_data(job_order, user, company_type,date,timesheets_to_update=None):
     try:
         jo= frappe.get_doc(JOB, job_order)
         comp= jo.owner
@@ -63,16 +64,22 @@ def get_timesheet_data(job_order, user, company_type):
                 sql = """ select employee, employee_name from `tabAssign Employee Details` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") and remove_employee=0 """.format(job_order)
 
             data = frappe.db.sql(sql, as_dict=1)
-            result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company"), "status": ""} for d in data]
+            result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company"), "status": "","timesheet_name":"","break_from":"","break_to":"","billing_amount":0.00,"tip":0.00,"overtime_hours":0.00,"overtime_rate":0.00} for d in data]
             res_sql = """ select DISTINCT employee, employee_name from `tabReplaced Employee` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
             rep_data = frappe.db.sql(res_sql, as_dict=1)
-            rep_result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company"), "status": "Replaced"} for d in rep_data]
+            rep_result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company"), "status": "Replaced","timesheet_name":"","break_from":"","break_to":"","billing_amount":0.00,"tip":0.00,"overtime_hours":0.00,"overtime_rate":0.00} for d in rep_data]
             removed_employees=""" select DISTINCT employee_id, employee_name from `tabRemoved Employee List` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") and order_status='Ongoing'""".format(job_order)
             removed_emp=frappe.db.sql(removed_employees,as_dict=1)
             for d in removed_emp:
                 print(d['employee_id'],d['employee_name'])
-            removed_emp_data=[{"employee": d['employee_id'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee_id'], "company"), "status": "Removed"} for d in removed_emp]
-            return result+rep_result+removed_emp_data
+            removed_emp_data=[{"employee": d['employee_id'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee_id'], "company"), "status": "Removed","timesheet_name":"","break_from":"","break_to":"","billing_amount":0.00,"tip":0.00,"overtime_hours":0.00,"overtime_rate":0.00} for d in removed_emp]
+            data1=result+rep_result+removed_emp_data
+            open_exist=frappe.db.sql('select TS.name as name,employee,from_time,to_time,TD.break_start_time as break_from,TD.break_end_time as break_to,TD.hours as hours,tip,billing_amount,TD.extra_hours as extra_hours,TD.extra_rate as extra_rate,TS.no_show,TS.non_satisfactory,TS.dnr from `tabTimesheet` as TS INNER JOIN `tabTimesheet Detail` as TD on TS.name=TD.parent where job_order_detail="{0}" and date_of_timesheet="{1}" and workflow_state="Open" order by TS.name desc'.format(job_order,date),as_dict=True)
+            if(len(open_exist)):
+                data1=exist_data(open_exist,data1,timesheets_to_update)
+                return data1
+            else: 
+                return data1
         return []
     except Exception as e:
         frappe.msgprint(e)
@@ -115,6 +122,53 @@ def check_if_employee_assign(items):
         frappe.msgprint(e)
         return False
         
+
+@frappe.whitelist()
+def remove_job_title(emp_doc,job_order):
+    try:
+        print("def"*500)
+        sql = f'''select select_job from `tabJob Order` where name="{job_order}"'''
+        data = frappe.db.sql(sql, as_list=1)
+        job_title = data[0][0]
+        print(job_title,emp_doc,"bhg"*500)
+        if len(emp_doc.employee_job_category)!=0:
+            print("ghi"*100)
+            for i in emp_doc.employee_job_category:
+                if i.job_category==job_title:
+                    print("aba"*500)
+                    emp_doc.remove(i)
+                    emp_doc.save(ignore_permissions=True)
+
+        job_category_remove(emp_doc)
+    except Exception:
+        pass
+
+@frappe.whitelist()
+def job_category_remove(emp_doc):
+        if len(emp_doc.employee_job_category):
+            emp_doc.job_category = emp_doc.employee_job_category[0].job_category
+            emp_category = emp_doc.employee_job_category
+            length = len(emp_category)
+            title = '';	
+            job_categories_list = []
+            for i in range(len(emp_category)):
+                job_categories_list.append(emp_category[i].job_category)
+                if not emp_category[i].job_category:
+                    length -= 1
+                    
+                elif title == '':
+                    title = emp_category[i].job_category                  
+            if length>1:
+                job_categories = title + ' + ' + str(length-1)
+            else:
+                job_categories = title
+            emp_doc.job_categories = job_categories
+            emp_doc.job_title_filter = ",".join(job_categories_list)
+            emp_doc.save(ignore_permissions=True)
+        else:
+            emp_doc.job_category = None
+            emp_doc.job_categories = None
+            emp_doc.save(ignore_permissions=True)
 
 @frappe.whitelist()
 def update_timesheet_data(data, company, company_type, user):
@@ -312,6 +366,7 @@ def dnr_notification(job_order,value,employee_name,subject,date,company,employee
     if int(value) ==1 and subject == 'DNR':
         emp_doc = frappe.get_doc('Employee', employee)
         employee_dnr(company,emp_doc,job_order)
+        remove_job_title(emp_doc,job_order)
     
     elif int(value) == 0 and subject == 'DNR':
          emp_doc = frappe.get_doc('Employee', employee)
@@ -337,11 +392,12 @@ def show_satisfactory_notification(job_order,value,employee_name,subject,date,co
     else:
         message = f'<b>{employee_name}</b> has been unmarked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
     
-    if(subject=='Non Satisfactory' and int(value)==1):
+    if(subject==nonSatisfactory and int(value)==1):
         emp_doc = frappe.get_doc('Employee', employee)
         employee_unsatisfactory(company,emp_doc,job_order)
+        remove_job_title(emp_doc,job_order)
 
-    elif(subject=='Non Satisfactory' and int(value)==0):
+    elif(subject==nonSatisfactory and int(value)==0):
         emp_doc = frappe.get_doc('Employee', employee)
         removing_unsatisfied_employee(company,emp_doc,job_order)
     no_show(job_order,value,subject,company,employee)
@@ -545,11 +601,12 @@ def job_name(doctype,txt,searchfield,page_len,start,filters):
         frappe.log_error(e, "Job Order For Timesheet")
         frappe.throw(e)
 def no_show(job_order,value,subject,company,employee):
-    if(subject=='No Show' and int(value)==1):
+    if(subject==noShow and int(value)==1):
         emp_doc = frappe.get_doc('Employee', employee)
         employee_no_show(company,emp_doc,job_order)
+        remove_job_title(emp_doc,job_order)
 
-    elif(subject=='No Show' and int(value)==0):
+    elif(subject==noShow and int(value)==0):
         emp_doc = frappe.get_doc('Employee', employee)
         removing_no_show(company,emp_doc,job_order)
 
@@ -590,7 +647,7 @@ def removing_no_show(company,emp_doc,job_order):
         data=frappe.db.sql(assign_emp_doc,as_dict=True)
         assign_doc=frappe.get_doc(assignEmployee,data[0].name)
         for y in assign_doc.replaced_employees:
-            if y.employee_name == emp_doc.name and y.employee_status=="No Show":
+            if y.employee_name == emp_doc.name and y.employee_status==noShow:
                 removed_row = y
        
         emp_doc.remove(remove_row)
@@ -599,8 +656,77 @@ def removing_no_show(company,emp_doc,job_order):
         assign_doc.save(ignore_permissions=True)
     
 @frappe.whitelist()
-def submit_staff_timesheet(timesheet_name):
-    timesheet_status_data=f'update `tabTimesheet` set docstatus="1",workflow_state="Approved",status="Submitted" where name="{timesheet_name}"'                       
+def submit_staff_timesheet(jo, timesheet_date, employee,timesheet):
+    timesheet_exist=[{'name':timesheet}]
+    enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_timesheet_exist", now=True,jo=jo, timesheet_date=timesheet_date, employee=employee,timesheet=timesheet,timesheet_exist=timesheet_exist)
+    t_time=frappe.db.sql(timesheet_time+"'"+timesheet+"'",as_dict=1)
+    to_time=t_time[0].to_time
+    timesheet_status_data=f'update `tabTimesheet` set docstatus="1",workflow_state="Approved",status="Submitted" where name="{timesheet}"'                       
     frappe.db.sql(timesheet_status_data)
     frappe.db.commit()
+    enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_previous_timesheet", now=True,jo=jo, timesheet_date=timesheet_date, employee=employee,timesheet=timesheet,to_time=to_time,save=0)
     return "success"
+def exist_data(open_exist,data1,timesheets_to_update):
+    for i in open_exist:
+        for j in range(len(data1)):
+            if i['employee']==data1[j]['employee']:
+                data1[j]["enter_time"]=str(i['from_time']).split(' ')[1]
+                data1[j]["exit_time"]=str(i['to_time']).split(' ')[1]
+                data1[j]["total_hours"]=i['hours']
+                data1[j]["break_from"]=str(i['break_from']).split(' ')[1] if i['break_from'] else ""
+                data1[j]["break_to"]=str(i['break_to']).split(' ')[1] if i['break_to'] else ""
+                data1[j]["billing_amount"]=i['billing_amount']
+                data1[j]["tip"]=i['tip']
+                data1[j]["timesheet_name"]=i['name']
+                data1[j]["overtime_hours"]=i['extra_hours']
+                data1[j]["overtime_rate"]=i['extra_rate']
+                status=emp_status(i,data1,j)
+                data1[j]["status"]=status
+    data1=check_selected_values(data1,timesheets_to_update)
+    return data1
+def emp_status(i,data1,j):
+    if(data1[j]['status']!='Removed'):
+        status=''
+        if i['dnr']==1:
+            status='DNR'
+        if i['no_show']==1:
+            status=noShow
+        if i['non_satisfactory']==1:
+            status=nonSatisfactory
+        return status
+    else:
+        status='Removed'
+        return status
+@frappe.whitelist()
+def checking_same_values_timesheet(user_selected_timesheet):
+    try:
+        new_timesheet_list=json.loads(user_selected_timesheet)
+        new_timesheet_list_data=tuple(new_timesheet_list)
+        if(len(new_timesheet_list_data)>1):
+            timeseheets_status=frappe.db.sql('select workflow_state,job_order_detail,date_of_timesheet from `tabTimesheet` where name in {0} '.format(new_timesheet_list_data),as_dict=1)
+        else:
+            timeseheets_status=frappe.db.sql('select workflow_state,job_order_detail,date_of_timesheet from `tabTimesheet` where name="{0}"'.format(new_timesheet_list_data[0]),as_dict=1)
+        job_order=timeseheets_status[0]['job_order_detail']
+        timesheet_date=timeseheets_status[0]['date_of_timesheet']
+        for i in timeseheets_status:
+            if i['workflow_state']!='Open':
+                return 'Different Status'
+            elif i['job_order_detail']!=job_order:
+                return 'Different Job Order'
+            elif i['date_of_timesheet']!=timesheet_date:
+                return 'Different Job Order Dates'
+        return new_timesheet_list,job_order,timesheet_date
+    except Exception as e:
+        frappe.log_error(e,'Cheching Same timesheets details')
+
+def check_selected_values(data1,timesheets_to_update):
+    if(timesheets_to_update):
+        timesheet_exi=timesheets_to_update.split(',')
+        data2=[]
+        for i in range(len(timesheet_exi)):
+            for j in range(len(data1)):
+                if(data1[j]['timesheet_name']==timesheet_exi[i]):
+                    data2.append(data1[j])
+        return data2
+    else:
+        return data1

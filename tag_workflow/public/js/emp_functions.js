@@ -118,7 +118,6 @@ function validate_phone_zip(frm){
 
 function check_ssn(frm){
 	let validate = true;
-	frm.doc.decrypt_ssn = 0;
 	if(frm.doc.sssn){
 		if(frm.doc.sssn=='•••••••••'){
 			frm.set_value('sssn','•••••••••');
@@ -145,12 +144,9 @@ function mandatory_fields(fields){
 	let message = '<b>Please Fill Mandatory Fields:</b>';
 	for (let key in fields) {
 		if(key == 'Activities'){
-			let table_data = fields[key];
-			table_data.forEach((x) => {
-				if(!x.activity_name || (x.activity_name && !x.activity_name.trim()) || (x.document_required && (!x.document || !x.attach))){
-					message = message + '<br>' + '<span>&bull;</span> ' + key;
-				}
-			});
+			if(table_reqd(fields[key])){
+				message = message + '<br>' + '<span>&bull;</span> Activities';
+			}
 		}
 		else if(fields[key] === undefined || !fields[key]){
 			message = message + '<br>' + '<span>&bull;</span> ' + key;
@@ -162,37 +158,16 @@ function mandatory_fields(fields){
 	}
 }
 
-function hide_decrpt_ssn(frm){
-	if(frm.doc.__islocal != 1 ){
-		frappe.call({
-			method: 'tag_workflow.tag_data.hide_decrypt_ssn',
-			args: {
-				'frm': frm.doc.name,
-				'doctype': frm.doc.doctype
-			},
-			async:0,
-			callback: function(r) {
-				if (frm.doc.__islocal != 0) {
-					frm.set_df_property('decrypt_ssn','hidden',r.message);
-					refresh_field('decrypted_ssn');
-				}
+function table_reqd(table_data){
+	let check = false;
+	if(table_data){
+		table_data.forEach((x) => {
+			if(!x.activity_name || (x.activity_name && !x.activity_name.trim()) || (x.document_required && (!x.document || !x.attach))){
+				check = true;
 			}
 		});
 	}
-}
-
-function decrypted_ssn(frm){
-	frappe.call({
-		method: 'tag_workflow.tag_data.api_sec',
-		args: {
-			'frm': frm.doc.name,
-			'doctype': frm.doc.doctype
-		},
-		callback: function(r) {
-			frm.set_value('decrypted_ssn', r.message);
-			refresh_field('decrypted_ssn');
-		}
-	})
+	return check;
 }
 
 /*----For Employee Onboarding and Employee Onboarding Template Forms----*/
@@ -283,5 +258,35 @@ function get_user(frm){
 				'user_list': user_list
 			}
 		}
+	}
+}
+
+function branch_banner(doctype){
+	if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		frappe.db.get_value('Company', {'name': frappe.boot.tag.tag_user_info.company}, ['branch_enabled'], (res)=>{
+			frappe.db.get_value('User', {'name': frappe.session.user}, ['branch_banner'], (r)=>{
+				if(res && r && res.branch_enabled==0 && r.branch_banner==1){
+					let banner_html = `
+					<div class = 'banner-container'>
+						<button id= "close_banner" onclick = close_banner()>
+							<span>&times;</span>
+						</button>
+						<img id = "banner" src= "/assets/tag_workflow/images/branch.jpg">
+						<button id="sign_up" onclick="location.href='https://www.branchapp.com/'">Sign Up</button>
+						<button id="more_info" onclick="location.href='https://get.branchapp.com/demo'">Request More Information</button>
+					</div>
+					<script>
+					function close_banner(){
+						$('#close_banner').hide();
+						$('#banner').hide();
+						$('#sign_up').hide();
+						$('#more_info').hide();
+						frappe.db.set_value('User', frappe.session.user, 'branch_banner', 0);
+					}</script>
+					`
+					$('[data-page-route="List/'+doctype+'/List"] .layout-main-section.frappe-card').prepend(banner_html);
+				}
+			});
+		});
 	}
 }

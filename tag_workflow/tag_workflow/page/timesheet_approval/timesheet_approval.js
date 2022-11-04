@@ -56,7 +56,7 @@ frappe.TimesheetApproval = Class.extend({
 				frappe.db.get_value('Job Order',{'name':$('[data-fieldname="job_order"]')[0].fieldobj.value},['company_type','owner'],function(rm){
 					frappe.db.get_value('User',{'name':rm.owner},['organization_type'],function(rmm){
 						if(rmm.organization_type=='Staffing'){
-							page.set_primary_action('Add Timesheet', () => me.make_timesheet(wrapper, page));
+							page.set_primary_action('+Add/Edit Timesheet', () => me.make_timesheet(wrapper, page));
 						}
 						else{
 							page.add_action_item('Approve', () => me.make_action(wrapper, page, "Approved"));
@@ -226,7 +226,9 @@ frappe.TimesheetApproval = Class.extend({
 				},
 				{fieldtype:'Section Break', fieldname: 'section'+String(v)},
 			);
+			
 		}
+		
 
 		let dialog = new frappe.ui.Dialog({
 			title: __('Please provide an explanation for the timesheet denial'),
@@ -257,6 +259,9 @@ frappe.TimesheetApproval = Class.extend({
 		dialog.show();
 		dialog.$wrapper.find('.modal-dialog').css('max-width', '880px');
 		dialog.$wrapper.find('textarea.input-with-feedback.form-control').css("height", "108px");
+		dialog.$wrapper.find('.btn.btn-primary').click(function(){
+			dialog.hide();
+		});
 	},
 	make_timesheet(_wrapper, _page){
 		frappe.route_options = {"job_order":$('[data-fieldname="job_order"]')[0].fieldobj.value };

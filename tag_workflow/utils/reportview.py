@@ -34,6 +34,8 @@ def get():
         # If virtual doctype get data from controller het_list method
         radius = args.radius or ''
         order_status = args.order_status or ''
+        filter_loc = filter_data(args)
+
         if 'radius' in args.keys():
             del args["radius"]
 
@@ -50,14 +52,14 @@ def get():
                 page_length = int(args['page_length']) + int(args['start'])
                 args['start'] = '0'
                 args['page_length'] = str(
-                    10*(int(args['page_length']) + int(args['page_length'])))
-
+                    page_length*(int(args['page_length']) + int(args['page_length'])))
+                    
                 data = compress(execute(**args), args=args)
                 if(data):
                     data['order_length'] = 0
                     based_list = compare_order(order_status)
                     data = get_actual_number(data, based_list)
-                    data = staffing_data(data, radius, page_length)
+                    data = staffing_data(data, radius, page_length,filter_loc)
                     data = claim_left(data)
             else:
                 data = compress(execute(**args), args=args)
@@ -66,23 +68,22 @@ def get():
         frappe.msgprint(e)
 
 
-def staffing_data(data, radius, page_length):
+def staffing_data(data, radius, page_length,filter_loc):
     try:
         result = []
+        l = len(filter_loc)
         user_company = frappe.db.get_list(
             "Employee", {"user_id": frappe.session.user}, "company")
-        if(radius in distance):
+        if(radius in distance and l==0):
             data = get_data(user_company, radius, data, page_length)
-        elif(radius != 'All'):
-            for d in data['values']:
-                if(len(d) > 3 and radius == d[-4]):
-                    result.append(d)
-            data["values"] = result
+        elif(radius and l>0):
+            data = filter_location_with_radius(user_company, radius, data, page_length,filter_loc,result)
         else:
             for d in data['values']:
                 if(len(result) < page_length):
                     result.append(d)
             data["values"] = result
+       
         return data
     except Exception as e:
         frappe.msgprint(e)
@@ -110,7 +111,7 @@ def claim_left(data):
         company = frappe.db.get_value("User", frappe.session.user, "company")
         if(data):
             for d in data['values']:
-                d[-6] = claims_left(d[0], company)
+                d[-8] = claims_left(d[0], company)
         return data
     except Exception as e:
         print(e)
@@ -157,7 +158,7 @@ def check_distance(company_address, data, radius):
             for d in data['values']:
                 try:
                     lat, lng = frappe.db.get_value(
-                        "Job Site", d[-4], ["IFNULL(lat, '')", "IFNULL(lng, '')"])
+                        "Job Site", d[-6], ["IFNULL(lat, '')", "IFNULL(lng, '')"])
                     rds = haversine(add, tuple(
                         [float(lat), float(lng)]), unit='mi')
                     if(rds <= distance_value[radius] and d[0] not in orders):
@@ -173,7 +174,7 @@ def check_distance(company_address, data, radius):
 def get_loc(data):
     doc_args = set()
     for j in data:
-        doc_args.add(j[-1])
+        doc_args.update([j[-2]+'#'+j[-1]])
     doc_args =  sorted(doc_args)
     return doc_args
 
@@ -186,6 +187,7 @@ def get_location():
             'fields': [
                 '`tabJob Order`.`name`',
                 '`tabJob Order`.`job_site`',
+                '`tabJob Order`.`company`'
             ],
             'filters': [],
             'order_by': '`tabJob Order`.`modified` desc',
@@ -210,7 +212,6 @@ def get_location():
                     data['order_length'] = 0
                     based_list = compare_order(order_status)
                     data = get_actual_number(data, based_list)
-                    print(data)
                     data = get_loc(data['values'])
             else:
                 data = []
@@ -260,3 +261,28 @@ def get_lat_lng(address):
     except Exception as e:
         frappe.msgprint(e)
         return 0, 0
+
+def filter_location_with_radius(user_company, radius, data, page_length,filter_loc,result):
+    try:
+        for d in data['values']:
+            if(len(d) > 3 and d[-6] in filter_loc):
+                result.append(d)
+        data["values"] = result
+        if radius not in ['All','Custom Address']:
+            data = get_data(user_company, radius, data, page_length)
+        return data
+    except Exception as e:
+        frappe.msgprint(e)
+        return data
+
+def filter_data(args):
+    try: 
+        filter_loc = args.filter_loc
+        filter_loc = json.loads(filter_loc)
+        filter_loc = list(set(filter_loc))
+        if 'filter_loc' in args.keys():
+            del args['filter_loc']
+        return filter_loc
+    except Exception as e:
+        print(e)
+        return []

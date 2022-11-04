@@ -2,7 +2,7 @@
  "cards_label": "Reports",
  "category": "Modules",
  "charts": [],
- "creation": "2022-02-09 05:48:18.497760",
+ "creation": "2022-10-27 00:29:23.358320",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
@@ -80,8 +80,8 @@
   {
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Tag Earning",
-   "link_to": "TAG Earning",
+   "label": "Tag Earnings",
+   "link_to": "TAG Earnings",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -121,9 +121,35 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Workers Comp",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Workers Comp Summary",
+   "link_to": "Workers Comp Detail",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Workers Comp Detail",
+   "link_to": "Workers Comp Detail",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-07-12 09:43:12.529936",
+ "modified": "2022-10-27 00:32:28.110520",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Reports",

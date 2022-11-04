@@ -56,6 +56,7 @@ def setup_data():
         update_old_data_import()
         update_old_direct_order()
         update_old_company_type()
+        update_old_job_sites()
         create_job_applicant()
         set_workspace()
         setup_company_permission()
@@ -64,6 +65,9 @@ def setup_data():
         update_old_lead_status()
         share_company_with_user()
         emp_job_title()
+        update_salary_structure()
+        update_date_of_joining()
+        update_password_field()
         frappe.db.commit()
     except Exception as e:
         print(e)
@@ -355,3 +359,110 @@ def create_job_applicant():
             designation.insert(ignore_permissions = True)
     except Exception as e:
         frappe.log_error(e,'Create Industry Type and Designation')
+
+#---------------Remove job site custom field------------------------------------------------------------
+def remove_field():
+    try:
+        fields = ['column_break_13','suite_or_apartment_no','favorite_staffing_company_list']
+        for f in fields:
+            if f=="favorite_staffing_company_list":
+                if frappe.db.exists(Custom_Label,{'dt':'Company','fieldname':f}):
+                    frappe.db.sql(""" delete from `tabCustom Field` where dt="Company" and fieldname="{0}" """.format(f))
+                    frappe.db.commit()
+                    print("*************************"f'{f}'   " Field Removed Successfully************************************")
+                else:
+                    print("*******************************"f'{f}'   " not found**********************************************************")
+            else:
+                if frappe.db.exists(Custom_Label,{'dt':'Job Site','fieldname':f}):
+                    frappe.db.sql(""" delete from `tabCustom Field` where dt="Job Site" and fieldname="{0}" """.format(f))
+                    frappe.db.commit()
+                    print("*************************"f'{f}'   " Field Removed Successfully************************************")
+                else:
+                    print("*******************************"f'{f}'   " not found**********************************************************")
+    except Exception as e:
+        print(e)
+def update_old_job_sites():
+    try:
+        sites=f'select name,company from `tabJob Site` where name not in (select `tabJob Site`.name from `tabJob Site` inner join `tabIndustry Types Job Titles` on `tabIndustry Types Job Titles`.parent=`tabJob Site`.name) and company!="";'
+        data=frappe.db.sql(sites,as_dict=1)
+        if(len(data)>0):
+            print("*------updating old job sites---------*\n")
+
+            for i in data:
+                dicts_val=frappe.db.sql('''select industry_type,job_titles,wages as bill_rate,description from `tabJob Titles` where parent="{0}"'''.format(i.company),as_dict=1)
+                if len(dicts_val):
+                    doc=frappe.get_doc('Job Site',i.name)
+                    try:
+                        for j in dicts_val:
+                            doc.append('job_titles',{'industry_type': j['industry_type'], 'job_titles': j['job_titles'], 'bill_rate': j['bill_rate'], 'description': j['description']})
+                        doc.save(ignore_permissions=True)
+                    except Exception as e:
+                        continue
+    except Exception as e:
+        print(e)
+
+def update_salary_structure():
+    try:
+        company_names = frappe.db.sql("""select name from `tabCompany` where  organization_type = 'Staffing' OR organization_type = 'TAG'""",as_dict=1)
+        for company_name in company_names:
+            check = frappe.db.exists("Salary Structure",{"name":"Temporary Employees_"+company_name.name,"company":company_name.name})
+            if not check:
+                frappe.db.sql("""INSERT INTO `tabSalary Structure` (name,docstatus,company,is_active,payroll_frequency,salary_slip_based_on_timesheet,salary_component) VALUES ("{0}",1,"{1}","Yes","Weekly",1,"Basic Temp Pay")""".format("Temporary Employees_"+company_name.name,company_name.name))
+                frappe.db.sql("""INSERT INTO `tabSalary Component` (name,salary_component,salary_component_abbr,type,company,salary_component_name) VALUES("{0}","{1}","{2}","Earning","{3}","Basic Temp Pay")""".format("Basic Temp Pay_"+ company_name.name,"Basic Temp Pay_"+ company_name.name,"BTP_" + company_name.name,company_name.name))
+        
+    except Exception as e:
+        print(e)
+
+
+
+def update_date_of_joining():
+    try:
+        employees = frappe.db.sql("""select name from `tabEmployee` where date_of_joining IS NULL""",as_dict=1)
+        for employee in employees:
+            frappe.db.sql("""Update `tabEmployee` set date_of_joining = '2021-01-01' where name = '{0}'""".format(employee.name))
+        onboarded_employee = frappe.db.sql("""select name from `tabEmployee Onboarding` where date_of_joining IS NULL""",as_dict=1)
+        for employee in onboarded_employee:
+            frappe.db.sql("""Update `tabEmployee Onboarding` set date_of_joining = '2021-01-01' where name = '{0}'""".format(employee.name))
+
+    except Exception as e:
+        print(e)
+
+def update_password_field():
+    try:
+        all_companies = frappe.get_all('Company', fields=['name'], filters={'organization_type':['=', 'Staffing']})
+        for company in all_companies:
+            company_data = frappe.get_doc('Company', company.name)
+            if company_data.jazzhr_api_key and not company_data.jazzhr_api_key_data:
+                frappe.db.sql(f'''UPDATE `tabCompany` SET jazzhr_api_key_data='{"•"*len(company_data.jazzhr_api_key)}' where name = "{company_data.name}"''')
+            if company_data.client_id and not company_data.client_id_data:
+                frappe.db.sql(f'''UPDATE `tabCompany` SET client_id_data='{"•"*len(company_data.client_id)}' where name = "{company_data.name}"''')
+            if company_data.client_secret and not company_data.client_secret_data:
+                frappe.db.sql(f'''UPDATE `tabCompany` SET client_secret_data='{"•"*len(company_data.client_secret)}' where name = "{company_data.name}"''')
+            update_password_field_contd(company_data)
+            remove_fields()
+            frappe.db.commit()
+    except Exception as e:
+        print(e)
+
+def update_password_field_contd(company_data):
+    if company_data.workbright_subdomain and not company_data.workbright_subdomain_data:
+        frappe.db.sql(f'''UPDATE `tabCompany` SET workbright_subdomain_data='{"•"*len(company_data.workbright_subdomain)}' where name = "{company_data.name}"''')
+    if company_data.workbright_api_key and not company_data.workbright_api_key_data:
+        frappe.db.sql(f'''UPDATE `tabCompany` SET workbright_api_key_data='{"•"*len(company_data.workbright_api_key)}' where name = "{company_data.name}"''')
+    if company_data.branch_org_id and not company_data.branch_org_id_data:
+        frappe.db.sql(f'''UPDATE `tabCompany` SET branch_org_id_data='{"•"*len(company_data.branch_org_id)}' where name = "{company_data.name}"''')
+    if company_data.branch_api_key and not company_data.branch_api_key_data:
+        frappe.db.sql(f'''UPDATE `tabCompany` SET branch_api_key_data='{"•"*len(company_data.branch_api_key)}' where name = "{company_data.name}"''')
+
+def remove_fields():
+    fields = ['decrypt_ssn', 'decrypted_ssn', 'decrypt_client_id', 'decrypt_client_secret', 'decrypted_client_id', 'decrypted_client_secret', 'decrypt_jazzhr_api_key', 'decrypted_jazzhr_api_key', 'decrypt_subdomain_api_key', 'decrypted_subdomain_api_key', 'decrypt_subdomain', 'decrypted_subdomain', 'decrypted_api', 'decrypt_api', 'decrypt_org_id', 'decrypted_org_id']
+    for field in fields:
+        if field in ['decrypt_ssn', 'decrypted_ssn']:
+            if frappe.db.exists(Custom_Label,{'dt':'Employee','fieldname':field}):
+                frappe.db.sql(f'''DELETE FROM `tabCustom Field` WHERE dt="Employee" and fieldname="{field}"''')
+            if frappe.db.exists(Custom_Label,{'dt':'Employee Onboarding','fieldname':field}):
+                frappe.db.sql(f'''DELETE FROM `tabCustom Field` WHERE dt="Employee Onboarding" and fieldname="{field}"''')
+        elif frappe.db.exists(Custom_Label,{'dt':'Company','fieldname':field}):
+            frappe.db.sql(f'''DELETE FROM `tabCustom Field` WHERE dt="Company" and fieldname="{field}"''')
+        frappe.db.commit()
+

@@ -241,6 +241,8 @@ class DesktopPage {
 		this.in_customize_mode = false;
 		this.page && this.page.remove();
 		this.make();
+		if (frappe.session.user=='Administrator')
+			cur_page.page.page.set_primary_action('Scheduler Setting',this.display_dialog)
 	}
 
 	make() {
@@ -554,6 +556,59 @@ class DesktopPage {
 		});
 
 		this.sections["cards"] = cards;
+	}
+	
+	display_dialog(){
+		frappe.run_serially([
+			()=>{
+				frappe.call({
+					method:"tag_workflow.utils.jazz_integration.check_status",
+					callback:(r)=>{
+						if(r.message==1)
+							window.check_status = 0;
+						else
+							window.check_status  = 1;
+					}
+				})
+			},
+			()=>frappe.timeout(0.5),
+			()=>{
+				let d = new frappe.ui.Dialog({
+					title: 'Scheduler Setting',
+					fields: [
+						{
+							label: 'Enable Scheduler',
+							fieldname: 'enable',
+							fieldtype: 'Check',
+							default:window.check_status
+						},
+					],
+					primary_action_label: 'Submit',
+					primary_action(values) {
+						frappe.call({
+							method:"tag_workflow.utils.jazz_integration.enable_disable_job",
+							args:{enable:values.enable},
+							callback:(r)=>{
+								if(r.message=="OK"){
+									setTimeout(()=>{
+										frappe.msgprint({
+											title: __('Notification'),
+											indicator: 'green',
+											message: __('The Schedular Setting are Updated')
+										},3000);
+									})
+								}
+							}
+						})
+						
+						d.hide();
+					}
+				});
+				
+				d.show();
+			}
+		])
+		
 	}
 }
 

@@ -10,6 +10,7 @@ frappe.ui.form.on("Timesheet", {
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		add_button_submit(frm);
 		fields_label_update(frm)
+		hide_action_button(frm)
 		$(document).on('click', '[data-fieldname="from_time"]', function(){
 			$('.datepicker').show()
 		});
@@ -131,6 +132,9 @@ frappe.ui.form.on("Timesheet", {
 						}
 					});
 					pop_up.show();
+					pop_up.$wrapper.find('.btn.btn-primary').click(function(){
+						pop_up.hide();
+					});
 				}
 				reject();
 			});
@@ -158,7 +162,7 @@ frappe.ui.form.on("Timesheet", {
 		hide_pay_rate(frm);
 	},
 	after_save:function(frm){
-		if(frm.doc.update_other_timesheet==1){
+		if(frm.doc.update_other_timesheet==1 && frm.doc.workflow_state!='Open'){
 			frappe.call({
 				'method':'tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.edit_update_record',
 				'args':{
@@ -572,6 +576,7 @@ function update_time(frm, cdt, cdn){
 			setTimeout(() => {
 				frappe.model.set_value(cdt, cdn, "base_billing_amount", r.message[0][0]);
 				frappe.model.set_value(cdt, cdn, "billing_amount", r.message[0][0]);
+				frappe.model.set_value(cdt, cdn, "pay_amount", r.message[2][0]);
 				cur_frm.set_value('timesheet_billable_amount',r.message[0][0]);
 				cur_frm.set_value('timesheet_billable_overtime_amount',r.message[0][1]);
 				cur_frm.set_value('total_job_order_amount',r.message[0][2]);
@@ -596,7 +601,7 @@ function add_button_submit(frm){
 function submit_timesheet(frm){
 	frappe.call({
 		method: "tag_workflow.utils.timesheet.submit_staff_timesheet",
-		args: {"timesheet_name": frm.doc.name},
+		args: {"jo":frm.doc.job_order_detail, "timesheet_date":frm.doc.date_of_timesheet, "employee":frm.doc.employee,"timesheet":frm.doc.name},
 		async: 1,
 		freeze: true,
 		freeze_message: "Please wait while we are updating timesheet status...",
@@ -654,4 +659,32 @@ function update_hourly_data(r){
 	cur_frm.set_value('overtime_timesheet_hours1',r.message[1][8][0]);
 	cur_frm.set_value('billable_weekly_overtime_hours',r.message[1][9][0]);
 	cur_frm.set_value('unbillable_weekly_overtime_hours',r.message[1][10]);
+	cur_frm.set_value('todays_overtime_hours',r.message[1][11]);
+	cur_frm.set_value('timesheet_payable_amount',r.message[2][0]);
+	cur_frm.set_value('timesheet_billable_overtime_amount_staffing',r.message[2][1]);
+	cur_frm.set_value('timesheet_unbillable_overtime_amount',r.message[2][2]);
+	cur_frm.set_value('total_job_order_payable_amount',r.message[2][3]);
+	cur_frm.set_value('total_job_order_billable_overtime_amount',r.message[2][4]);
+	cur_frm.set_value('total_job_order_unbillable_overtime_amount',r.message[2][5]);
+}
+function hide_action_button(frm){
+	if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type!='Staffing' && frm.doc.workflow_state=='Open' && frappe.boot.tag.tag_user_info.company_type!='TAG'){
+		$('.actions-btn-group').hide();
+		frm.add_custom_button(__('Approve Timesheet'), function() {
+			approve_timesheet(frm);
+		}).addClass("btn-primary");
+	}
+}
+function approve_timesheet(frm){
+	frappe.call({
+		method: "tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_todays_timesheet",
+		args: {"jo":frm.doc.job_order_detail, "timesheet_date":frm.doc.date_of_timesheet, "employee":frm.doc.employee,"timesheet":frm.doc.name,"company":frm.doc.company},
+		callback: function(r){
+			if(r.message==1){
+				frappe.msgprint('Timesheet Submitted Successfully')
+				window.location.reload()
+			}
+		}
+	});
+
 }

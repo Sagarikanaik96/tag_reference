@@ -9,6 +9,7 @@ frappe.ui.form.on('Claim Order', {
 			claim_order_save(frm)
 		}
 		create_pay_rate(frm);
+		create_staff_comp_code(frm);
 	},
 	before_save: function (frm) {
 		if (!frm.doc.hiring_organization) {
@@ -86,17 +87,6 @@ frappe.ui.form.on('Claim Order', {
 		}
 		update_claim_by_staffing(frm)
 
-		$(document).on('click', '[data-fieldname="staffing_organization"]', function () {
-			companyhide(1250)
-		});
-
-		$('[data-fieldname="staffing_organization"]').mouseover(function () {
-			companyhide(300)
-		})
-
-		document.addEventListener("keydown", function () {
-			companyhide(300)
-		});
 		setTimeout(hr, 1000);
 		frm.set_df_property('agree_to_contract', 'label', 'Agree To Contract <span style="color: red;">&#42;</span>');
 		frm.set_df_property('staff_claims_no', 'label', 'No. of Employees to Claim <span style="color: red;">&#42;</span>');
@@ -107,6 +97,7 @@ frappe.ui.form.on('Claim Order', {
 			frm.set_df_property('notes', 'read_only', 1);
 		}
 		window.conf = 0;
+		if (frm.doc.job_order) frm.set_df_property('job_order','read_only',1)
 	},
 	setup: function (frm) {
 		$('[data-label="Save"]').hide()
@@ -138,7 +129,6 @@ frappe.ui.form.on('Claim Order', {
 				}
 			});
 		}
-
 	},
 	view_contract: function () {
 		let contracts = "<div class='contract_div'><h3>Staffing/Vendor Contract</h3>This Staffing/Vendor Contract (“Contract”) is entered into by and between Staffing Company and Hiring Company as further described and as set forth below. By agreeing to the Temporary Assistance Guru, Inc. (“TAG”) End-User License Agreement, and using the TAG application service and website (the “Service”) Staffing Company and Hiring Company agree that they have a contractual relationship with each other and that the following terms apply to such relationship: <br> <ol> <li> The billing rate Hiring Company shall pay Staffing Company to hire each temporary worker provided by Staffing Company (the “Worker”) is the rate set forth by the TAG Service for the location and position sought to be filled, and this rate includes all wages, worker’s compensation premiums, unemployment insurance, payroll taxes, and all other employer burdens recruiting, administration, payroll funding, and liability insurance.</li><li> Hiring Company agrees not to directly hire and employ the Worker until the Worker has completed at least 720 work hours. Hiring Company agrees to pay Staffing Company an administrative placement fee of $3,000.00 if Hiring Company directly employs the Worker prior to completion of 720 work hours.</li> <li> Hiring Company acknowledges that it has complete care, custody, and control of workplaces and job sites. Hiring Company agrees to comply with all applicable laws, regulations, and ordinances relating to health and safety, and agrees to provide any site/task specific training and/or safety devices and protective equipment necessary or required by law. Hiring Company will not, without prior written consent of Staffing Company, entrust Staffing Company employees with the handling of cash, checks, credit cards, jewelry, equipment, tools, or other valuables.</li> <li> Hiring Company agrees that it will maintain a written safety program, a hazard communication program, and an accident investigation program. Hiring Company agrees that it will make first aid kits available to Workers, that proper lifting techniques are to be used, that fall protection is to be used, and that Hiring Company completes regular inspections on electrical cords and equipment. Hiring Company represents, warrants, and covenants that it handles and stores hazardous materials properly and in compliance with all applicable laws. </li> <li> Hiring Company agrees to post Occupational Safety and Health Act (“OSHA”) of 1970 information and other safety information, as required by law. Hiring Company agrees to log all accidents in its OSHA 300 logs. Hiring Company agrees to indemnify and hold harmless Staffing Company for all claims, damages, or penalties arising out of violations of the OSHA or any state law with respect to workplaces or equipment owned, leased, or supervised by Hiring Company and to which employees are assigned. </li> <li>  Hiring Company will not, without prior written consent of Staffing Company, utilize Workers to operate machinery, equipment, or vehicles. Hiring Company agrees to indemnify and save Staffing Company and Workers harmless from any and all claims and expenses (including litigation) for bodily injury or property damage or other loss as asserted by Hiring Company, its employees, agents, the owner of any such vehicles and/or equipment or contents thereof, or by members of the general public, or any other third party, arising out of the operation or use of said vehicles and/or equipment by Workers. </li> <li> Commencement of work by dispatched Workers, or Hiring Company’s signature on work ticket serves as confirmation of Hiring Company’s agreement to conditions of service listed in or referred to by this Contract. </li> <li> Hiring Company agrees not to place Workers in a supervisory position except for a Worker designated as a “lead,” and, in that position, Hiring Company agrees to supervise all Workers at all times. </li> <li> Billable time begins at the time Workers report to the workplace as designated by the Hiring Company. </li> <li> Jobs must be canceled a minimum of 24 hours prior to start time to avoid a minimum of four hours billing per Worker. </li> <li> Staffing Company guarantees that its Workers will satisfy Hiring Company, or the first two hours are free of charge. If Hiring Company is not satisfied with the Workers, Hiring Company is to call the designated phone number for the Staffing Company within the first two hours, and Staffing Company will replace them free of charge.</li> <li> Staffing Company agrees that it will comply with Hiring Company’s safety program rules. </li> <li> Overtime will be billed at one and one-half times the regular billing rate for all time worked over forty hours in a pay period and/or eight hours in a day as provided by state law. </li> <li> Invoices are due 30 days from receipt, unless other arrangements have been made and agreed to by each of the parties. </li> <li> Interest Rate: Any outstanding balance due to Staffing Company is subject to an interest rate of two percent (2%) per month, commencing on the 90th day after the date the balance was due, until the balance is paid in full by Hiring Company. </li> <li> Severability. If any provision of this Contract is held to be invalid and unenforceable, then the remainder of this Contract shall nevertheless remain in full force and effect. </li> <li> Attorney’s Fees. Hiring Company agrees to pay reasonable attorney’s fees and/or collection fees for any unpaid account balances or in any action incurred to enforce this Contract. </li> <li> Governing Law. This Contract is governed by the laws of the state of Florida, regardless of its conflicts of laws rules. </li> <li>  If Hiring Company utilizes a Staffing Company employee to work on a prevailing wage job, Hiring Company agrees to notify Staffing Company with the correct prevailing wage rate and correct job classification for duties Staffing Company employees will be performing. Failure to provide this information or providing incorrect information may result in the improper reporting of wages, resulting in fines or penalties being imposed upon Staffing Company. The Hiring Company agrees to reimburse Staffing Company for any and all fines, penalties, wages, lost revenue, administrative and/or supplemental charges incurred by Staffing Company.</li> <li> WORKERS' COMPENSATION COSTS: Staffing Company represents and warrants that it has a strong safety program, and it is Staffing Company’s highest priority to bring its Workers home safely every day. AFFORDABLE CARE ACT (ACA): Staffing Company represents and warrants that it is in compliance with all aspects of the ACA. </li> <li> Representatives. The Hiring Company and the Staffing Company each certifies that its authorized representative has read all of the terms and conditions of this Contract and understands and agrees to the same. </li> ";
@@ -162,6 +152,18 @@ frappe.ui.form.on('Claim Order', {
 	staffing_organization: function(frm){
 		if(frm.doc.staffing_organization){
 			set_pay_rate(frm);
+			check_class_code(frm)
+		}
+	},
+	staff_class_code:function(frm){
+		if(frm.doc.staff_class_code && frm.doc.staff_class_code.length>10){
+			frappe.msgprint({
+			message: __("Maximum Characters allowed for Class Code are 10."),
+			title: __("Error"),
+			indicator: "orange",
+			});
+			frm.set_value("staff_class_code",'');
+			frappe.validated = false        
 		}
 	}
 });
@@ -249,15 +251,16 @@ function org_info(frm) {
 
 
 function claim_order_save(frm) {
-	frappe.db.get_value("Job Order", { name: frm.doc.job_order }, "is_repeat", function (r1) {
-		if (r1.is_repeat != 1) {
+	frappe.db.get_value("Job Order", { name: frm.doc.job_order }, ["is_repeat","staff_company"], function (r1) {
+		if (r1.is_repeat != 1 || ( r1.staff_company && r1.staff_company.includes(frappe.boot.tag.tag_user_info.company))) {
 			let dict = {}
 			dict[frm.doc.staffing_organization] = frm.doc.staff_claims_no
 			frappe.call({
 				method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.auto_claims_approves",
 				args: {
 					'my_data': dict,
-					'doc_name': frm.doc.job_order
+					'doc_name': frm.doc.job_order,
+					'doc_claim':frm.doc.name
 				},
 				callback: function () {
 					setTimeout(function () {
@@ -296,18 +299,6 @@ function update_claim_by_staffing(frm) {
 	}
 }
 
-function companyhide(time) {
-	setTimeout(() => {
-		let txt = $('[data-fieldname="staffing_organization"]')[1].getAttribute('aria-owns')
-		let txt2 = 'ul[id="' + txt + '"]'
-		let arry = document.querySelectorAll(txt2)[0].children
-		document.querySelectorAll(txt2)[0].children[arry.length - 2].style.display = 'none'
-		document.querySelectorAll(txt2)[0].children[arry.length - 1].style.display = 'none'
-
-
-	}, time)
-}
-
 function hr() {
 	if (cur_frm.doc.__islocal != 1) {
 		Array.from($('[data-doctype="Company"]')).forEach(_field => {
@@ -330,14 +321,11 @@ function get_remaining_employee(name,frm,joborder) {
 				'doc_name': name,
 			},
 			callback: function (r) {
-				if(r.message.length != 0){
-					let total = r.message[0].no_of_workers_joborder
+				if(r.message){
+					let total = r.message[1]
 					frm.set_value('no_of_workers_joborder', total)
 					let remaining_emp = 0;
-					for(let i in r.message){
-						remaining_emp += parseInt(r.message[i].approved_no_of_workers)
-					}
-					remaining_emp = total - remaining_emp
+					remaining_emp = total - r.message[0]
 					frm.set_value('no_of_remaining_employee', remaining_emp)
 				}else{
 					frm.set_value('no_of_remaining_employee', joborder)
@@ -378,9 +366,12 @@ function set_payrate_field(frm){
 		frappe.db.get_value('Job Order', {'name': frm.doc.job_order}, ['order_status'], (r)=>{
 			if(r.order_status == 'Completed'){
 				frm.set_df_property('employee_pay_rate', 'read_only', 1);
+				frm.set_df_property('staff_class_code', 'read_only', 1);
+				frm.set_df_property('staff_class_code_rate', 'read_only', 1);
 			}
 			else if(!['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type)){
 				$('[data-fieldname = "employee_pay_rate"]').attr('id', 'emp_pay_rate');
+				$('[data-fieldname = "staff_class_code_rate"]').attr('id', 'staff_pay_rate');
 				set_pay_rate(frm);
 				submit_claim(frm);
 			}
@@ -452,4 +443,37 @@ function check_pay_rate(frm){
 			}
 		});
 	});
+}
+
+function create_staff_comp_code(frm){
+	frappe.db.get_value('Job Order',{'name':frm.doc.job_order},['select_job', 'job_site','category'], function(r){
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.create_staff_comp_code",
+			args:{
+				"job_title": r.select_job,
+				"job_site": r.job_site,
+				"industry_type":r.category,
+				"staff_class_code": frm.doc.staff_class_code?frm.doc.staff_class_code:'' ,
+				"staffing_company": frm.doc.staffing_organization,
+				"staff_class_code_rate":frm.doc.staff_class_code_rate
+			}
+		})
+	})
+}
+function check_class_code(frm){
+	if(frm.doc.__islocal==1){
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.check_already_exist_class_code",
+			args:{
+				"job_order":frm.doc.job_order,
+				"staffing_company": frm.doc.staffing_organization,
+			},
+			callback:function(r){
+				if(r.message[0]!='Exist'){
+					frm.set_value('staff_class_code',r.message[0]);
+					frm.set_value('staff_class_code_rate',r.message[1]);
+				}				
+			}
+		})
+	}
 }

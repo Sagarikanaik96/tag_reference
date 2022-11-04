@@ -14,11 +14,15 @@ frappe.listview_settings["Claim Order"] = {
       listview.filters.length == 1 &&
       frappe.boot.tag.tag_user_info.company_type != "Staffing"
     ) {
-      listview.page.set_secondary_action(
-        "Select Head Count",
-        () => refresh(listview),
-        "octicon octicon-sync"
-      );
+      listview.page.set_secondary_action("Select Head Count", () => {
+        refresh(listview);
+      },"octicon octicon-sync");
+      $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_inactive');
+      $('.btn.btn-secondary.btn-default.btn-sm').click(() => {
+        if($('.btn.btn-secondary.btn-default.btn-sm').attr('id')=='popup_inactive'){
+          refresh(listview);
+        }
+      });
     } else if (
       listview.filters.length == 2 &&
       frappe.boot.tag.tag_user_info.company_type != "Staffing"
@@ -93,6 +97,7 @@ function refresh(listview) {
     args: {
       doc_name: listview.data[0].job_order,
     },
+    freeze:true,
     callback: function (rm) {
       frappe.db.get_value(
         "Job Order",
@@ -113,7 +118,7 @@ function refresh(listview) {
                                 <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
                                 <td>${data[p].staff_claims_no}</td>
                                 <td><input type="number" id="_${data[p].staffing_organization}" min="0" max=${data[p].staff_claims_no}></td>
-                                <td><textarea id="_${data[p].staffing_organization}_notes" class="head_count_tittle" maxlength="1000"> </textarea> </td>
+                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle" maxlength="160" ${(data[p].notes)?data[p].notes:""}> </textarea> </td>
                                 </tr>`;
           }
           profile_html += `</table>`;
@@ -185,24 +190,40 @@ function refresh(listview) {
               }
             },
           });
-          new_pop_up.show();
+          show_popup(new_pop_up);
         }
       );
     },
   });
 }
+
+function show_popup(new_pop_up){
+  new_pop_up.$wrapper.on('hidden.bs.modal', () => {
+    $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_inactive');
+  });
+  if($('.btn.btn-secondary.btn-default.btn-sm').attr('id')=='popup_inactive'){
+    $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_active');
+    new_pop_up.show();
+  }
+}
+
 function modify_head_count(listview) {
-  listview.page.set_secondary_action(
-    "Modify Head Count",
-    () => modify_claims(listview),
-    "octicon octicon-sync"
-  );
+  listview.page.set_secondary_action("Modify Head Count",() => {
+    modify_claims(listview);
+  },"octicon octicon-sync");
+  $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_inactive');
+  $('.btn.btn-secondary.btn-default.btn-sm').click(function() {
+    if($('.btn.btn-secondary.btn-default.btn-sm').attr('id')=='popup_inactive'){
+      modify_claims(listview);
+    }
+  });
 }
 function update_no(data_len, l, dict, data, r) {
   let valid = "";
   for (let i = 0; i < data_len; i++) {
     let y = document.getElementById("_" + data[i].staffing_organization).value;
-    let notes=document.getElementById("_"+data[i].staffing_organization+"_notes").value
+    let notes=document.getElementById("_"+data[i].name+"_notes").value
+    valid=check_notes_length(notes,data[i].staffing_organization)
     if (y.length == 0) {
       y = 0;
     }
@@ -225,7 +246,7 @@ function update_no(data_len, l, dict, data, r) {
     } else if (y > data[i].staff_claims_no) {
       frappe.msgprint({
         message: __(
-          "No Of Workers Exceed For:" + data[i].staffing_organization
+          "Claims approved cannot be greater than the no. of workers claimed by Staffing Company:"
         ),
         title: __("Error"),
         indicator: "red",
@@ -257,12 +278,14 @@ function update_no(data_len, l, dict, data, r) {
 }
 
 function modify_claims(listview) {
+  
   frappe.call({
     method:
       "tag_workflow.tag_workflow.doctype.claim_order.claim_order.modify_heads",
     args: {
       doc_name: listview.data[0].job_order,
     },
+    freeze:true,
     callback: function (rm) {
       frappe.db.get_value(
         "Job Order",
@@ -283,10 +306,10 @@ function modify_claims(listview) {
             profile_html += `<tr>
                                 <td>${job_data[p].name}</td>
                                 <td style="margin-right:20px;" id="${job_data[p].claims}">${job_data[p].staffing_organization}</td>
-                                <td>${job_data[p].staff_claims_no}</td>
+                                <td id="${job_data[p].name}_claim">${job_data[p].staff_claims_no}</td>
                                 <td>${job_data[p].approved_no_of_workers}</td>
-                                <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no}></td>
-                                <td><textarea id="_${job_data[p].staffing_organization}_notes" class="head_count_tittle" maxlength="1000"> </textarea> </td>
+                                <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no} ${job_data[p].hide==1?"disabled":""}></td>
+                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" maxlength="160" > ${(job_data[p].notes)?(job_data[p].notes).trim():""}</textarea> </td>
                                 </tr>`;
           }
           profile_html += `</table><style>th, td {
@@ -338,28 +361,20 @@ function modify_claims(listview) {
               let dict = {};
 
               dict = update_claims(data_len, l, dict, job_data, r);
-              if (Object.keys(dict.dict).length > 0 && dict.valid1 != "False") {
-                frappe.call({
-                  method:
-                    "tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_modified_claims",
-                  args: {
-                    my_data: dict.dict,
-                    doc_name: listview.data[0].job_order,
-                  },
-                  callback: function (r2) {
-                    if (r2.message == 1) {
-                      frappe.msgprint("Email Sent Successfully");
-                      setTimeout(function () {
-                        window.location.href =
-                          "/app/job-order/" + listview.data[0].job_order;
-                      }, 3000);
-                    }
-                  },
-                });
+
+              if(dict.valid1 != 'False')
+              {
+              update_db(dict,listview);
               }
             },
           });
-          modified_pop_up.show();
+          modified_pop_up.$wrapper.on('hidden.bs.modal', () => {
+            $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_inactive');
+          });
+          if($('.btn.btn-secondary.btn-default.btn-sm').attr('id')=='popup_inactive'){
+            $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_active');
+            modified_pop_up.show();
+          }
         }
       );
     },
@@ -368,9 +383,27 @@ function modify_claims(listview) {
 function update_claims(data_len, l, dict, job_data, r) {
   let valid1 = "";
   let total_count = 0;
+  const notes_dict = {};
+
   for (let i = 0; i < data_len; i++) {
+    if (parseInt(document.getElementById(job_data[i].name).value) > parseInt(document.getElementById(job_data[i].name+"_claim").innerHTML)) {
+      frappe.msgprint({
+        message: __("Claims approved cannot be greater than the no. of workers claimed by Staffing Company:"),
+        title: __("Warning"),
+        indicator: "red",
+      });
+      valid1 = "False";
+      console.log(valid1);
+  
+      setTimeout(function () {
+        location.reload();
+      }, 5000);
+      break;
+    }
     let y = document.getElementById(job_data[i].name).value;
-    let notes=document.getElementById("_"+job_data[i].staffing_organization+"_notes").value
+    let notes=document.getElementById("_"+job_data[i].name+"_notes").value
+    notes_dict[job_data[i].name]=notes.trim();
+    valid1=check_notes_length(notes,job_data[i].staffing_organization)
     if (y.length == 0) {
       total_count += job_data[i].approved_no_of_workers;
       continue;
@@ -423,15 +456,18 @@ function update_claims(data_len, l, dict, job_data, r) {
         indicator: "red",
       });
       valid1 = "False";
-
+      
       setTimeout(function () {
         location.reload();
       }, 5000);
-    } else {
+    }
+    else {
       total_count += y;
       y = { approve_count: y, notes: notes };
       dict[job_data[i].name] = y;
     }
+
+    
   }
   if (total_count > r["no_of_workers"]) {
     frappe.msgprint({
@@ -446,10 +482,160 @@ function update_claims(data_len, l, dict, job_data, r) {
       indicator: "red",
     });
     valid1 = "False";
-
+    console.log(valid1)
     setTimeout(function () {
       location.reload();
     }, 5000);
   }
-  return { dict, valid1 };
+  let a = check_multi_staffcomp(job_data,data_len,valid1);
+  if(a==1){
+    return { dict, valid1, notes_dict };
+  }
+}
+
+function update_notes(dict,doc_name){
+  frappe.call({
+    method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.update_notes",
+    args:{data:dict.notes_dict,doc_name:doc_name}
+   })
+}
+
+function update_db(dict,listview){
+  if (Object.keys(dict.dict).length > 0 && dict.valid1 != "False") {
+    frappe.call({
+      method:
+        "tag_workflow.tag_workflow.doctype.claim_order.claim_order.save_modified_claims",
+      args: {
+        my_data: dict.dict,
+        doc_name: listview.data[0].job_order,
+        notes_dict:dict.notes_dict
+      },
+      callback: function (r2) {
+        if (r2.message == 1) {
+          frappe.msgprint("Email Sent Successfully");
+          setTimeout(function () {
+            window.location.href =
+              "/app/job-order/" + listview.data[0].job_order;
+          }, 3000);
+        }
+      },
+    });
+  }else if(dict.valid!="False"){
+     update_notes(dict,listview.data[0].job_order);
+     setTimeout(function () {
+      window.location.href =
+        "/app/job-order/" + listview.data[0].job_order;
+    }, 3000);
+  }
+}
+
+function check_multi_staffcomp(job_data, data_len,valid1){
+  if (valid1!="False"){
+  let comp_list = [];
+  let second_list = [];
+  for (let i = 0; i < data_len; i++){
+    if(!comp_list.includes(job_data[i].staffing_organization)){
+      comp_list.push(job_data[i].staffing_organization);
+    }
+    else{
+      if(!second_list.includes(job_data[i].staffing_organization)){
+      second_list.push(job_data[i].staffing_organization)
+      }
+    }
+  }
+  if(comp_list.length == second_list.length){
+    return check_count(second_list,job_data,data_len);
+  }else{
+    return check_count_comp_list(comp_list,job_data,data_len);
+    
+  }
+}
+}
+
+function check_count(second_list,job_data,data_len){
+  for (let i in  second_list){
+      let counter = 0 ;
+      let assign_worker = 0;
+      for(let j=0 ;j<data_len; j++){
+        if(second_list[i]==job_data[j].staffing_organization){
+          let y = document.getElementById(job_data[j].name).value;
+          if (y.length == 0) {
+            console.log(y)
+            counter += job_data[j].approved_no_of_workers;
+          }
+          else{
+            counter+= parseInt(y);
+            assign_worker = parseInt(job_data[j].assigned_worker);
+          }
+        }
+      }
+      // check errror
+      if (assign_worker!= 0 &&  counter<assign_worker) {
+        frappe.msgprint({
+          message: __(`${assign_worker} Employees are assigned to this order. Number of required workers must be greater than or equal to number of assigned employees. Please modify the number of workers required or work with the staffing companies to remove an assigned employee.`),
+          title: __("Error"),
+          indicator: "red",
+        });
+        setTimeout(function () {
+          location.reload();
+        }, 3000);
+        return 0
+      }
+      
+    }
+    //Success
+    return 1;
+}
+
+function check_count_comp_list(comp_list,job_data,data_len){
+  for (let i in comp_list) {
+    let counter = 0;
+    let assign_worker = 0;
+    for (let j = 0; j < data_len; j++) {
+        if (comp_list[i] == job_data[j].staffing_organization) {
+            let y = document.getElementById(job_data[j].name).value;
+            if (y.length == 0) {
+                console.log(y)
+                counter += job_data[j].approved_no_of_workers;
+            } else {
+                counter += parseInt(y);
+                assign_worker = parseInt(job_data[j].assigned_worker);
+            }
+        }
+    }
+    //check error
+    if (assign_worker != 0 && counter < assign_worker) {
+        console.log(assign_worker, "++ais", counter)
+        frappe.msgprint({
+            message: __(`${assign_worker} Employees are assigned to this order. Number of required workers must be greater than or equal to number of assigned employees. Please modify the number of workers required or work with the staffing companies to remove an assigned employee.`),
+            title: __("Error"),
+            indicator: "red",
+        });
+        setTimeout(function() {
+            location.reload();
+        }, 3000);
+        return 0
+    }
+  }
+  //success
+  return 1
+}
+function check_notes_length(notes,staffing_org){
+  let valid1
+  if(notes && ((notes).trim()).length>160){
+    frappe.msgprint({
+      message: __(
+        "Only 160 characters are allowed in Notes for "+ staffing_org 
+      ),
+      title: __("Error"),
+      indicator: "red",
+    });
+    valid1 = "False";
+
+    setTimeout(function () {
+      location.reload();
+    }, 4000);
+  }
+  return valid1
+
 }

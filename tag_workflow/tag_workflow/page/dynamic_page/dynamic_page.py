@@ -8,20 +8,20 @@ def get_link1(name, userid):
    company = frappe.get_doc("Company", name)
    review=[]
    if company.organization_type == 'Staffing':
-      sql= """select * from `tabCompany Review`"""
+      sql= """select * from `tabCompany Review` order by creation desc"""
       data = frappe.db.sql(sql, as_dict=True)
       for i in data:
          if i['staffing_company']== name:
             review.append((i['rating'],i['comments'],i['hiring_company']))
    elif company.organization_type == 'Hiring' or company.organization_type == 'Exclusive Hiring':
-      sql= """select * from `tabHiring Company Review`"""
+      sql= """select * from `tabHiring Company Review` order by creation desc"""
       data= frappe.db.sql(sql, as_dict=True)
       for i in data:
          if i['hiring_company']== name:
             review.append((i['rating'],i['comments'],i['staffing_company']))
 
    users=[]
-   sql1= f"select full_name, enabled from `tabUser` where company='{name}' and enabled=1"
+   sql1= f'select full_name, enabled from `tabUser` where company="{name}" and enabled=1'
    data1 = frappe.db.sql(sql1, as_dict=True)
    for i in data1:
       users.append(i['full_name'])
@@ -201,8 +201,8 @@ def share_job_order(my_job_order,company_blocked):
       frappe.msgprint("company unblock order sharing")
 
 def create_link(company):
-   if company.company_logo:
-      logo = frappe.get_site_config().env_url + company.company_logo
+   if company.upload_company_logo:
+      logo = frappe.get_site_config().env_url + company.upload_company_logo
       return logo
    else:
       return "/assets/tag_workflow/images/default_logo.png"

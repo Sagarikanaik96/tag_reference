@@ -9,6 +9,7 @@ import json
 import datetime
 import requests, time
 from frappe.utils.data import getdate
+from frappe.model.mapper import get_mapped_doc
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
@@ -18,6 +19,7 @@ assignEmployees = "Assign Employee"
 NOASS = "No Access"
 exclusive_hiring = "Exclusive Hiring"
 non_exlusive='Non Exclusive'
+emp_onb = 'Employee Onboarding'
 site= frappe.utils.get_url().split('/')
 sitename=site[0]+'//'+site[2]
 response='Not Found'
@@ -68,14 +70,14 @@ def send_email(subject = None,content = None,recipients = None):
         frappe.msgprint("Could Not Send")
         return False
 
-def joborder_email_template(subject = None,content = None,recipients = None,link=None):
+def joborder_email_template(subject = None,content = None,recipients = None,link=None, sender_full_name=None,sender = None):
     try:
         from frappe.core.doctype.communication.email import make
         site= frappe.utils.get_url().split('/')
         sitename=site[0]+'//'+site[2]
         make(subject = subject, content=frappe.render_template("templates/emails/email_template_custom.html",
             {"sitename": sitename, "content":content,"subject":subject,"link":link}),
-            recipients= recipients,send_email=True)
+            recipients= recipients,send_email=True,sender_full_name=sender_full_name,sender=sender)
         return True
     except Exception as e:
         frappe.log_error(e, "Doc Share Error")
@@ -86,7 +88,8 @@ def joborder_email_template(subject = None,content = None,recipients = None,link
 @frappe.whitelist(allow_guest=False)
 def send_email_staffing_user(user, company_type, email_list=None,subject = None,body=None,additional_email = None):
     try:
-        if(company_type == "Staffing" and user == frappe.session.user):
+        org_type=frappe.db.get_value('User', {"name": frappe.session.user}, ['organization_type'])
+        if((org_type == "Staffing" or frappe.session.user=="Administrator") and user == frappe.session.user) :
             email = json.loads(email_list)
             emails = [i['email'] for i in email]
             if additional_email:
@@ -131,7 +134,6 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
             frappe.db.set_value(assignEmployees, name, "approve_employee_notification", 0)
             job = frappe.get_doc(jobOrder, job_name)
             claimed = job.staff_org_claimed if job.staff_org_claimed else ""
-            job.db_set('worker_filled',(int(employee_filled)+int(job.worker_filled)))
             if(len(claimed)==0):
                 job.db_set('staff_org_claimed',(str(claimed)+str(staffing_org)))
             else:
@@ -227,10 +229,12 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
         if int(no_of_worker_req) > len(emp_detail):
             sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org)
             share_list = frappe.db.sql(sql, as_list = True)
+            staffing_user_list = [user[0] for user in share_list]
             assign_notification(share_list,hiring_user_list,doc_name,job_order) 
             subject = 'Job Order Notification' 
             msg=f'{staffing_org} placed partial claim on your work order: {job_title}. Please review & approve the candidates matched with this work order.'
             make_system_notification(hiring_user_list,msg,assignEmployees,doc_name,subject)
+            stff_email_with_resume_required(job_order, emp_detail, no_of_worker_req, hiring_org, staffing_user_list, subject)
             return send_email(subject,msg,hiring_user_list)
         else:
             if hiring_user_list:
@@ -244,7 +248,26 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
             
     except Exception as e:
         frappe.log_error(e, "Partial Job order Failed ")
-                
+
+def stff_email_with_resume_required(job_order, emp_detail, no_of_worker_req, hiring_org, staffing_user_list, subject):
+    query = '''select sum(approved_no_of_workers) from `tabClaim Order` where job_order = "{}" '''.format(job_order.name)
+    rem_emp = frappe.db.sql(query)
+    notification_func(job_order, emp_detail, no_of_worker_req, hiring_org, staffing_user_list, subject, rem_emp)
+
+def notification_func(job_order, emp_detail, no_of_worker_req, hiring_org, staffing_user_list, subject, rem_emp):
+    if rem_emp[0][0] and job_order.is_repeat:
+        count = int(no_of_worker_req)- int(rem_emp[0][0])
+    else:
+        count = int(no_of_worker_req)-len(emp_detail)
+
+    if count>0:
+        if count==1:
+            newmsg=f'{hiring_org} has an order for {job_order.select_job} available with {count} opening available.'
+        else:
+            newmsg=f'{hiring_org} has an order for {job_order.select_job} available with {count} openings available.'
+        make_system_notification(staffing_user_list,newmsg,jobOrder,job_order.name,subject)
+        link_job_order =  f'  href="{sitename}/app/job-order/{job_order.name}"'
+        joborder_email_template(subject,newmsg,staffing_user_list,link_job_order,sender_full_name = job_order.company,sender = job_order.owner)   
    
 @frappe.whitelist(allow_guest=False)
 def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None,staff_company=None):
@@ -372,8 +395,9 @@ def check_assign_employee(total_employee_required,employee_detail = None):
 def api_sec(doctype, frm=None):
     try:
         emp = frappe.get_doc(doctype,frm)
-        ssn_decrypt = emp.get_password('ssn')
-        return ssn_decrypt
+        if emp.ssn:
+            return emp.get_password('ssn')
+        return response
     except Exception:
         frappe.log_error("No Employee in Database", "Warning")
     
@@ -404,7 +428,7 @@ def get_org_site(doctype, txt, searchfield, page_len, start, filters):
 @frappe.whitelist(allow_guest=False)
 def job_site_contact(doctype, txt, searchfield, page_len, start, filters):
     company=filters.get('job_order_company')
-    sql = ''' select name, full_name, email, mobile_no from `tabUser` where company='{0}' and name like '%%{1}%%' '''.format(company, '%s' % txt)
+    sql = ''' select name, full_name, email, mobile_no from `tabUser` where company="{0}" and name like '%%{1}%%' '''.format(company, '%s' % txt)
     return frappe.db.sql(sql)
 
 @frappe.whitelist(allow_guest=True)
@@ -462,6 +486,7 @@ def update_job_order_status():
                     frappe.db.set_value(jobOrder, job.name, "order_status", "Upcoming")
                 elif now_date > end_date:
                     frappe.db.set_value(jobOrder, job.name, "order_status", "Completed")
+                    free_redis(job.name)
     except Exception as e:
         frappe.msgprint(e)
 
@@ -606,18 +631,6 @@ def chat_room_created(hiring_org,staffing_org,job_order):
         frappe.log_error(e, "chat room creation error")
 
 @frappe.whitelist(allow_guest=False)
-def assign_employee_resume_update(employee, name):
-    if(company_type == "Staffing" and user == frappe.session.user):
-        sql = """ select resume from `tabEmployee` where name='{}' """.format(employee)
-        data = frappe.db.sql(sql,as_dict=1)
-        if(len(data) > 0 and data[0]["resume"]):
-            sql =""" UPDATE `tabAssign Employee Details` SET resume='{0}' WHERE name='{1}'; """.format(data[0]["resume"],name)
-            frappe.db.sql(sql)
-            frappe.db.commit()
-        return True
-    else:
-        return NOASS
-@frappe.whitelist(allow_guest=False)
 def joborder_resume(name):
     sql = """ select resume from `tabEmployee` where name='{}' """.format(name)
     return frappe.db.sql(sql,as_dict=1)
@@ -637,6 +650,7 @@ def approved_employee(id,name,job_order, assign_note):
         sql=""" UPDATE `tabAssign Employee Details` SET approved = 1 where employee = "{0}" and parent="{1}" """.format(i,name)
         frappe.db.sql(sql)
         frappe.db.commit()
+    assign_note = assign_note.replace('"', '""')
     sql=""" UPDATE `tabAssign Employee` SET notes = "{0}" where name = "{1}" """.format(assign_note,name)
     frappe.db.sql(sql)
     frappe.db.commit()
@@ -666,12 +680,15 @@ def timesheet_detail(job_order):
 
 
 @frappe.whitelist(allow_guest=False)
-def update_timesheet_is_check_in_sales_invoice(time_list):
+def update_timesheet_is_check_in_sales_invoice(time_list,timesheet_used):
     try:
+        timesheet_used=timesheet_used[1:-1]
+        l=timesheet_used.split(',')
         time_list = json.loads(time_list)
-
-        for i in time_list:
-            sql = """ UPDATE `tabTimesheet` SET `tabTimesheet`.is_check_in_sales_invoice = 1 where name = "{}" """.format(i['time_sheet'])
+        for i in l:
+            time=i.strip()
+            timesheet_name=time[1:-1]
+            sql = """ UPDATE `tabTimesheet` SET `tabTimesheet`.is_check_in_sales_invoice = 1 where name = "{0}" """.format(timesheet_name.strip())
             frappe.db.sql(sql)
             frappe.db.commit()
     except Exception as e:
@@ -828,9 +845,8 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
             frappe.db.sql(dat)
             frappe.db.commit()
             job = frappe.get_doc(jobOrder, job_order)
-            frappe.db.set_value(jobOrder, job_order, "worker_filled", (int(worker_fill)+int(job.worker_filled)))
-            
-            job_sql = '''select select_job,job_site,posting_date_time from `tabJob Order` where name = "{}"'''.format(job_order)
+            print(job)
+            job_sql = '''select select_job,job_site,posting_date_time,name from `tabJob Order` where name = "{}"'''.format(job_order)
             job_detail = frappe.db.sql(job_sql, as_dict=1)
             lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)
             user_list = frappe.db.sql(lst_sql, as_list=1)
@@ -838,9 +854,9 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
             for user in l:
                 add(assignEmployees, doc_name, user, read=1, write = 0, share = 0, everyone = 0)
             sub="Employee Assigned"
-            msg = f'{staffing_org} has assigned the Employees to the {job_detail[0]["select_job"]}'
+            msg = f'{staffing_org} has assigned employees to {job_detail[0]["select_job"]} for {job_detail[0]["name"]}'
             make_system_notification(l,msg,'Assign Employee',doc_name,sub)
-            msg = f'{staffing_org} has assigned the Employees to the {job_detail[0]["select_job"]}'
+            msg = f'{staffing_org} has assigned employees to {job_detail[0]["select_job"]} for {job_detail[0]["name"]}'
             link =  f'  href="{sitename}/app/assign-employee/{doc_name}" '
             joborder_email_template(sub, msg, l, link)
             return 1
@@ -1360,42 +1376,6 @@ def update_lat_lng_required(company,employee_id):
     except Exception as e:
         frappe.error_log(e,'Employee Lat Lng error')
 
-@frappe.whitelist(allow_guest=False)
-def jazz_api_sec(frm=None):
-    try:
-        comp = frappe.get_doc("Company",frm)
-        if(comp.jazzhr_api_key):
-            jazzhr_decrypt = comp.get_password('jazzhr_api_key')
-            return jazzhr_decrypt
-        else:
-            return response
-    except Exception:
-        frappe.log_error("No JazzHR API Key in Database", "Warning")
-
-@frappe.whitelist(allow_guest=False)
-def client_id_sec(frm=None):
-    try:
-        comp = frappe.get_doc("Company",frm)
-        if(comp.client_id):
-            client_id_decrypt = comp.get_password('client_id')
-            return client_id_decrypt
-        else:
-            return response
-    except Exception:
-        frappe.log_error("No Client ID in Database", "Warning")
-
-@frappe.whitelist(allow_guest=False)
-def client_secret_sec(frm=None):
-    try:
-        comp = frappe.get_doc("Company",frm)
-        if(comp.client_secret):
-            client_secret_decrypt = comp.get_password('client_secret')
-            return client_secret_decrypt
-        else:
-            return response
-    except Exception:
-        frappe.log_error("No Client Secret in Database", "Warning")
-
 def no_contact_by(company):
     try:
         sql = """select name from `tabUser` where company = '{0}'""".format(company)
@@ -1572,35 +1552,11 @@ def set_lat_lng(form_name):
         location_data = google_response.json()
         if(google_response.status_code == 200 and len(location_data)>0 and len(location_data['results'])>0):
             lat, lng = emp_location_data(location_data)
-            frappe.db.set_value('Employee Onboarding', form_name, 'lat', lat)
-            frappe.db.set_value('Employee Onboarding', form_name, 'lng', lng)
+            frappe.db.set_value(emp_onb, form_name, 'lat', lat)
+            frappe.db.set_value(emp_onb, form_name, 'lng', lng)
     except Exception as e:
         frappe.log_error(e, "Longitude Latitude Error on Employee Onboarding")
         print(e)
-
-@frappe.whitelist(allow_guest=False)
-def workbright_subdomain_sec(frm=None):
-    try:
-        comp = frappe.get_doc("Company",frm)
-        if(comp.workbright_subdomain):
-            workbright_subdomain_decrypt = comp.get_password('workbright_subdomain')
-            return workbright_subdomain_decrypt
-        else:
-            return response
-    except Exception:
-        frappe.log_error("No Workbright Subdomain in Database", "Warning")
-
-@frappe.whitelist(allow_guest=False)
-def workbright_api_key_sec(frm=None):
-    try:
-        comp = frappe.get_doc("Company",frm)
-        if(comp.workbright_api_key):
-            workbright_api_key_decrypt = comp.get_password('workbright_api_key')
-            return workbright_api_key_decrypt
-        else:
-            return response
-    except Exception:
-        frappe.log_error("No Workbright API Key in Database", "Warning")
 
 @frappe.whitelist(allow_guest=False)
 def filter_user(doctype, txt, searchfield, page_len, start, filters):
@@ -1619,3 +1575,151 @@ def filter_user(doctype, txt, searchfield, page_len, start, filters):
         frappe.db.rollback()
         frappe.log_error(e, 'Employee Boarding Activity Error')
         frappe.throw(e)
+
+@frappe.whitelist()
+def check_employee(onb_email):
+    emp = frappe.get_all('Employee', {'email': onb_email}, ['name'])
+    return True if len(emp)>0 else False
+
+@frappe.whitelist()
+def validate_employee_creation(emp_onb_name):
+    emp_onb_details = frappe.get_doc(emp_onb, emp_onb_name)
+    if emp_onb_details.status != "Completed":
+        return False
+    for activity in emp_onb_details.activities:
+        task_status = frappe.db.get_value("Task", activity.task, "status")
+        if task_status != "Completed":
+            return False
+    return True
+
+@frappe.whitelist()
+def make_employee(source_name, target_doc=None):
+    doc = frappe.get_doc(emp_onb, source_name)
+    def set_missing_values(source, target):
+        target.personal_email = frappe.db.get_value("Job Applicant", source.job_applicant, "email_id")
+        target.status = "Active"
+    emp = get_mapped_doc(emp_onb, source_name, {
+			emp_onb: {
+				"doctype": "Employee",
+				"field_map": {
+					"first_name": "employee_name",
+					"employee_grade": "grade",
+                    "gender": "employee_gender",
+				}}
+		}, target_doc, set_missing_values)
+    for i in doc.activities:
+        if i.document == 'Resume':
+            emp.resume = i.attach
+        elif i.document == 'W4':
+            emp.w4 = i.attach
+        elif i.document == 'E verify':
+            emp.e_verify = i.attach
+        elif i.document == 'New Hire Paperwork':
+            emp.hire_paperwork = i.attach
+        elif i.document == 'I9':
+            emp.i_9 = i.attach
+        elif i.document == 'ID Requirements':
+            emp.append('id_requirements', {'id_requirements': i.attach})
+        elif i.document == 'Background Check/Drug Screen':
+            emp.append('background_check_or_drug_screen', {'drug_screen':i.attach})
+        elif i.document == 'Direct Deposit Letter':
+            emp.append('direct_deposit_letter', {'direct_deposit_letter': i.attach})
+        elif i.document == 'Miscellaneous':
+            emp.append('miscellaneous', {'attachments': i.attach})
+    if doc.sssn and doc.ssn:
+        emp.ssn = doc.get_password('ssn')
+    return emp
+
+def free_redis(job_name):
+    try:
+        redis = frappe.cache()
+        if(redis.hgetall(job_name)):
+            for k in redis.hgetall(job_name):
+                redis.hdel(job_name,k)
+    except Exception as e:
+        print(e,frappe.utils.get_traceback())
+
+@frappe.whitelist()
+def get_jobtitle_based_on_industry(doctype, txt, searchfield, page_len, start, filters):
+    try:
+        company = filters.get('company')
+        industry=filters.get('industry')
+        title_list = filters.get('title_list')
+        value = ''
+        for index ,i in enumerate(title_list):
+            if index >= 1:
+                value = value+"'"+","+"'"+i
+            else:
+                value =value+i
+        sql = ''' select name,industry from `tabItem` where company = '{0}' and industry="{1}" and (name NOT IN ('{2}') and name like '%%{3}%%')'''.format(company, industry,value,'%s' % txt)
+        return frappe.db.sql(sql)
+
+    except Exception as e:
+        frappe.msgprint(e)
+        return tuple()
+
+@frappe.whitelist()
+def get_jobtitle_based_on_company(doctype, txt, searchfield, page_len, start, filters):
+    try:
+        company = filters.get('company')
+        title_list = filters.get('title_list')
+        value = ''
+        for index ,i in enumerate(title_list):
+            if index >= 1:
+                value = value+"'"+","+"'"+i
+            else:
+                value =value+i
+        sql = ''' select name,industry from `tabItem` where  company ="{0}" and (name NOT IN ('{1}') and name like '%%{2}%%') '''.format(company,value,'%s' % txt)
+        return frappe.db.sql(sql)
+
+    except Exception as e:
+        frappe.msgprint(e)
+        return tuple()
+def validate_user(doc,method):
+    error_message=_('Insufficient Permission for  {0}').format(frappe.bold('User' + ' ' + doc.email))
+    if not doc.is_new() and frappe.session.user!="Administrator":
+        user_role=frappe.db.get_value("User", {"name": frappe.session.user}, "tag_user_type")
+        doc_user_role=frappe.db.get_value("User", {"name": doc.name}, "tag_user_type")
+        if doc_user_role and (user_role=="Staffing User" or user_role=="Hiring User"):
+            if doc_user_role=="Staffing Admin" or doc_user_role=="Hiring Admin" or doc_user_role=="TAG Admin":
+                frappe.flags.error_message = error_message
+                raise frappe.PermissionError(("read", "User", doc.email)) 
+        elif doc_user_role and (user_role=="Staffing Admin" or user_role=="Hiring Admin") and doc_user_role=="TAG Admin":
+            frappe.flags.error_message = error_message
+            raise frappe.PermissionError(("read", "User", doc.email))
+    print(method)
+
+@frappe.whitelist()
+def get_password(fieldname, comp_name):
+    try:
+        comp = frappe.get_doc('Company', comp_name)
+
+        if fieldname == 'jazzhr_api_key' and comp.jazzhr_api_key:
+            return comp.get_password('jazzhr_api_key')
+        elif fieldname == 'client_id' and comp.client_id:
+            return comp.get_password('client_id')
+        elif fieldname == 'client_secret' and comp.client_secret:
+            return comp.get_password('client_secret')
+        elif fieldname == 'workbright_subdomain' and comp.workbright_subdomain:
+            return comp.get_password('workbright_subdomain')
+        elif fieldname == 'workbright_api_key' and comp.workbright_api_key:
+            return comp.get_password('workbright_api_key')
+        elif fieldname == 'branch_org_id' and comp.branch_org_id:
+            return comp.get_password('branch_org_id')
+        elif fieldname == 'branch_api_key' and comp.branch_api_key:
+            return comp.get_password('branch_api_key')
+        return response
+    except Exception as e:
+        frappe.log_error('Password Not Found', e)
+
+@frappe.whitelist(allow_guest=True)
+def branch_key(branch_key=None):
+    try:
+        if branch_key:
+            redis = frappe.cache()
+            redis.hset("branch_data", "branch_key", branch_key)
+            return "Success"
+        else:
+            return "Failed"
+    except Exception as e:
+        frappe.log_error('Branch API Call Error', e)

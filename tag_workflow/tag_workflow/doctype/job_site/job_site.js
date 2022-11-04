@@ -5,12 +5,12 @@ frappe.ui.form.on('Job Site', {
 		$('.form-footer').hide()
 		$('[data-original-title="Menu"]').hide()
 		maps();
-		hide_field(frm)
+		hide_fields(frm)
+		show_addr(frm)
 		frm.get_docfield('address').label ='Complete Address';
 		frm.refresh_field('address')
 		if(frm.doc.__islocal==1){
 			cancel_jobsite(frm);
-			frm.set_df_property('job_site_contact','hidden', 1);
 			let len_history = frappe.route_history.length;
 			if(frappe.route_history.length>1 && frappe.route_history[len_history-2][1]=='Job Order'){
 				frm.set_value('company',sessionStorage.getItem('joborder_company'));
@@ -40,21 +40,21 @@ frappe.ui.form.on('Job Site', {
 	search_on_maps: function(frm){
 		if(cur_frm.doc.search_on_maps == 1){
 			update_field(frm, "map");
+			hide_fields(frm)
 			show_addr(frm)
 		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.manually_enter==0){
 			cur_frm.set_df_property('lat','hidden',1);
 			cur_frm.set_df_property('lng','hidden',1);
-			cur_frm.set_df_property('address','hidden',0)
+			show_addr(frm);
 		}
 	},
 
 	manually_enter: function(frm){
 		if(cur_frm.doc.manually_enter == 1){
 			update_field(frm, "manually");
-			show_addr(frm)
-		}else{
-			cur_frm.set_df_property('address','hidden',0)
+			show_fields(frm);
 		}
+		show_addr(frm);
 	},
 	validate: function (frm) {
 		if(frm.doc.__islocal==1){	
@@ -114,8 +114,67 @@ frappe.ui.form.on('Job Site', {
 			frm.set_value('phone_number', '');
 			frm.set_df_property('job_site_contact','hidden', 1);
 		}
-	},
+	}, 
+	onload:function(frm){
+		frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc,cdt,cdn) {
+			const row = locals[cdt][cdn];
+			let jobtitle = frm.doc.job_titles, title_list = [];
+			for (let t in jobtitle){
+				if(jobtitle[t]['job_titles']){
+				title_list.push(jobtitle[t]['job_titles']);
+				}
+			}       
+			if (row.industry_type){
+				return {
+					query: "tag_workflow.tag_workflow.doctype.job_site.job_site.get_jobtitle_based_on_industry",
+					filters: {
+					industry:row.industry_type,
+					company:frm.doc.company,
+					title_list:title_list
+					},
+				};
+			}else{
+				return{
+					query: "tag_workflow.tag_workflow.doctype.job_site.job_site.get_jobtitle_based_on_company",
+					filters: {
+					company:frm.doc.company,
+					title_list:title_list
+					},
+				}
+			}
+		}
 
+		frm.fields_dict['job_titles'].grid.get_field('industry_type').get_query = function(doc,cdt,cdn) {
+			const row = locals[cdt][cdn];
+			if (row.job_titles){
+				return {
+				query: "tag_workflow.tag_workflow.doctype.job_site.job_site.get_industry_based_on_jobtitle",
+				filters: {
+				title:row.job_titles,
+				company:frm.doc.company,
+				},
+				};
+			}else{
+				return{
+				query: "tag_workflow.tag_workflow.doctype.job_site.job_site.get_industry_based_on_company",
+				filters: {
+				company:frm.doc.company,
+				},
+				}
+			}
+		}
+		
+	},
+    after_save:function(frm){
+        frappe.call({
+            'method':'tag_workflow.tag_workflow.doctype.job_site.job_site.update_changes',
+            'args':{
+                'doc_name':frm.doc.name
+            }
+        })
+
+    }
+		
 });
 
 /*----------fields-----------*/
@@ -188,15 +247,6 @@ function get_users(frm){
 		}
 	});
 
-}
-function show_addr(frm){
-	if(frm.doc.search_on_maps){
-		frm.set_df_property('address','hidden',0)
-    frm.get_docfield('address').label ='Complete Address';
-    frm.refresh_field('address');
-  }else if(frm.doc.manually_enter){
-  	frm.set_df_property('address','hidden',1)
-  }
 }
 function siteMap() {
     let autocomplete;
@@ -327,3 +377,61 @@ function update_data(data) {
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "lng", data["lng"]);
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
 }
+function hide_fields(frm){
+	frm.set_df_property('city','hidden',frm.doc.city && frm.doc.enter_manually ==1 ?0:1);
+	frm.set_df_property('state','hidden',frm.doc.state && frm.doc.enter_manually ==1?0:1);
+	frm.set_df_property('zip','hidden',frm.doc.zip && frm.doc.enter_manually ==1?0:1);
+}
+function show_fields(frm){
+	frm.set_df_property('city','hidden',0);
+	frm.set_df_property('state','hidden',0);
+	frm.set_df_property('zip','hidden',0);
+}
+function show_addr(frm){
+    if(frm.doc.search_on_maps){
+        frm.get_docfield('address').label ='Complete Address';
+    }else if(frm.doc.manually_enter){
+        frm.get_docfield('address').label ='Address';
+    }
+    frm.refresh_field('address');
+}
+
+frappe.ui.form.on("Industry Types Job Titles", {
+	job_titles:function(frm,cdt,cdn){
+		let child_val=locals[cdt][cdn]
+		if(child_val['job_titles']){
+			update_industry_rate(frm,cdt,cdn)
+		}
+		
+	},
+	comp_code:function(frm,cdt,cdn){
+		let child1=locals[cdt][cdn]
+		let value=child1['comp_code']
+		if((value.length)>10){
+			frappe.msgprint({
+			message: __("Maximum Characters allowed for Class Code are 10."),
+			title: __("Error"),
+			indicator: "orange",
+			});
+			frappe.model.set_value(cdt,cdn,"comp_code",'');
+			frappe.validated = false        
+		}
+	}
+});
+function update_industry_rate(frm,cdt,cdn){
+	let child=locals[cdt][cdn]
+	frappe.call({
+		'method':'tag_workflow.tag_workflow.doctype.job_site.job_site.get_industry_title_rate',
+		'args':
+		{ 'job_title':child['job_titles'],'company':frm.doc.company
+		},
+		callback:function(r){
+				if(r.message!=1){
+						frappe.model.set_value(cdt,cdn,"industry_type",r.message[0]);
+						frappe.model.set_value(cdt, cdn, "bill_rate", r.message[1]);
+						frappe.model.set_value(cdt, cdn, "description", r.message[2]);  
+				}
+		}
+	})
+}
+	

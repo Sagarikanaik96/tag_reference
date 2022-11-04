@@ -1,5 +1,7 @@
 from unicodedata import name
 import frappe
+from frappe import DoesNotExistError
+from json import loads
 from frappe.desk.form.load import get_docinfo, run_onload
 import requests, json
 from frappe import _, msgprint, throw
@@ -198,7 +200,7 @@ def get_orgs(company,employee_lis):
 def get_user(company):
     user = ""
     try:
-        sql = """select name from `tabUser` where company = '{0}' and enabled = 1 """.format(company)
+        sql = """select name from `tabUser` where company = "{0}" and enabled = 1 """.format(company)
         users = frappe.db.sql(sql, as_dict=1)
         for u in users:
             user += "\n"+str(u.name)
@@ -347,7 +349,7 @@ def get_company_order(company_type, company, result):
         return result
 
     elif(company_type in ["Hiring", exclusive_hiring]):
-        order1 = f" select name,from_date,job_start_time,job_site, company, per_hour, order_status,select_job,worker_filled,no_of_workers from `tabJob Order` where company = '{company}' and '{frappe.utils.nowdate()}'  between from_date and to_date  order by creation desc limit 5"
+        order1 = f'select name,from_date,job_start_time,job_site, company, per_hour, order_status,select_job,worker_filled,no_of_workers from `tabJob Order` where company = "{company}"and "{frappe.utils.nowdate()}" between from_date and to_date  order by creation desc limit 5'
         order = frappe.db.sql(order1,as_dict=1)
         for o in order:
             result.append({"name":o['name'], "date":(str(o['from_date'].strftime("%d %b, %Y "))+' ' +str(converttime(o['job_start_time']))),"job_site": o['job_site'], "company": o['company'], "per_hour": o['per_hour'], "select_job": o['select_job'],"worker_filled":o['worker_filled'],"no_of_workers":o['no_of_workers']})
@@ -357,18 +359,18 @@ def get_company_order(company_type, company, result):
 @frappe.read_only()
 def get_desktop_page(page):
     try:
-        wspace = Workspace(page)
-        wspace.build_workspace()
+        workspace = Workspace(loads(page))
+        workspace.build_workspace()
         return {
-                'charts': wspace.charts,
-                'shortcuts': wspace.shortcuts,
-                'cards': wspace.cards,
-                'onboarding': wspace.onboarding,
-                'allow_customization': not wspace.doc.disable_user_customization,
-                'get_order_data': get_order_data()
-        }
+			"charts": workspace.charts,
+			"shortcuts": workspace.shortcuts,
+			"cards": workspace.cards,
+			"onboardings": workspace.onboardings,
+			"quick_lists": workspace.quick_lists,
+            "get_order_data": get_order_data()
+		}
     except DoesNotExistError:
-        frappe.log_error(frappe.get_traceback())
+        frappe.log_error("Workspace Missing")
         return {}
 
 
@@ -726,7 +728,8 @@ from frappe.desk.search import search_widget, build_for_autosuggest
 @frappe.whitelist()
 def search_link(doctype, txt, query=None, filters=None, page_length=100, searchfield=None, reference_doctype=None, ignore_user_permissions=False):
     search_widget(doctype, txt.strip(), query, searchfield=searchfield, page_length=page_length, filters=filters, reference_doctype=reference_doctype, ignore_user_permissions=ignore_user_permissions)
-    temp = build_for_autosuggest(frappe.response["values"])
+    temp = build_for_autosuggest(frappe.response["values"],doctype=doctype)
+
     if temp and temp[0]['value']=='Monday' or reference_doctype == 'Assign Employee Details':
         frappe.response['results']=temp
     else:

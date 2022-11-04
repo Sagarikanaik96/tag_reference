@@ -1,4 +1,4 @@
-from erpnext.hr.doctype.designation.designation import Designation
+from erpnext.setup.doctype.designation.designation import Designation
 from tag_workflow.utils.doctype_method import append_number_if_name_exists
 import frappe
 from frappe import _

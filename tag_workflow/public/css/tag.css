@@ -1541,6 +1541,12 @@ select.input-with-feedback.form-control.ellipsis {
 }
 
 @media (max-width: 768px) {
+  [data-page-route="List/Sales Invoice/List"]
+    .frappe-card
+    .frappe-list
+    .list-subject {
+    flex-basis: 60px;
+  }
   [data-page-route="Employee"]
     .editable-form
     .layout-main-section-wrapper
@@ -1669,8 +1675,109 @@ select.input-with-feedback.form-control.ellipsis {
     .frappe-list
     .result
     .list-row-container {
-    width: 650px;
+    width: 800px;
   }
+}
+[data-fieldname="location"] table thead th {
+  font-weight: 500;
+}
+[data-fieldname="location"] .table-responsive {
+  max-height: 500px;
+  margin-bottom: 5px;
+}
+[data-fieldname="location"] .table-responsive table {
+  margin: 0;
+  position: relative;
+}
+[data-fieldname="location"] .table-responsive table thead {
+  position: sticky;
+  top: -1px;
+  background: #fff;
+  z-index: 9999;
+}
+[data-fieldname="location"] .table-responsive table thead th {
+  border-bottom-width: 1px;
+}
+[data-fieldname="location"] .table-responsive table thead:after {
+  content: "";
+  height: 1px;
+  width: 100%;
+  background: #f4f5f6;
+  position: absolute;
+  display: block;
+  bottom: 0;
+}
+[data-fieldname="location"] .table-responsive table thead:before {
+  content: "";
+  height: 2px;
+  width: 100%;
+  background: #f4f5f6;
+  position: absolute;
+  display: block;
+}
+[data-route="List/Salary Component/List"]
+  .frappe-card
+  .list-row-container
+  .list-row-col:nth-child(7) {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+[data-fieldtype="Currency"],
+[data-fieldtype="Currency"] .ellipsis div {
+  text-align: left !important;
+}
+#div_rate .control-input-wrapper input {
+  padding-left: 21px;
+}
+#div_rate:after {
+  left: 11px !important;
+  top: 55% !important;
+}
+
+
+/*---Branch Banner On Slary Slip and Payroll Entry---*/
+.banner-container{
+  display:inline-block;
+  position:relative;
+}
+#close_banner{
+  position:absolute;
+  right:5px;
+  background:none;
+  border:none;
+  color:white;
+}
+#close_banner > span{
+  font-size:25px;
+}
+#sign_up{
+  position:absolute;
+  bottom:10px;
+  left:20px;
+  background-color:black;
+  color:white;
+  padding:5px 15px;
+  border:black !important;
+  border-radius:6px !important;
+}
+#more_info{
+  position:absolute;
+  bottom:10px;
+  left:110px;
+  box-shadow: 0px 3px #888;
+  padding:5px 15px;
+  border: white !important;
+  border-radius: 6px !important;
+}
+
+.frappe-control.input-max-width[data-fieldname="branch_api_key_data"]{
+  padding-top:38px;
+}
+
+.frappe-control.input-max-width[data-fieldname="quickbooks_company_id"],
+.frappe-control.input-max-width[data-fieldname="redirect_url"],
+.frappe-control.input-max-width[data-fieldname="military_veteran"]{
+  top:12px;
 }
 
 @media (min-width: 768px) {
@@ -1724,4 +1831,25 @@ span.comment-count {
   top: 32px;
   z-index: 99;
   left: 20rem;
+}
+[data-page-route="Claim Order"] #staff_pay_rate:after {
+  position: absolute;
+  left: 10px;
+  top: 56%;
+  font-size: 13px;
+  content: "$";
+}
+[data-page-route="Claim Order"] input#staff_pay_rate {
+  padding-left: 20px;
+}
+
+[data-page-route="Assign Employee"] #staff_pay_rate:after {
+  position: absolute;
+  left: 10px;
+  top: 56%;
+  font-size: 13px;
+  content: "$";
+}
+[data-page-route="Assign Employee"] input#staff_pay_rate {
+  padding-left: 20px;
 }

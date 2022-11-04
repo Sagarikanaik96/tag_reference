@@ -17,6 +17,8 @@ frappe.ui.form.on("Job Order", {
 	},
 
 	onload: function(frm) {
+		frm.set_df_property("no_of_workers", "label", "No. of workers");
+
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing' && frm.doc.__islocal==1){
 			frm.set_value('e_signature_full_name', frappe.session.user_fullname);
 			frm.set_df_property("e_signature_full_name", "read_only", 0);
@@ -37,27 +39,6 @@ frappe.ui.form.on("Job Order", {
 
 			frm.set_value("from_date", "");
 			frm.set_df_property("time_remaining_for_make_edits", "options", " ");
-			if(frappe.boot.tag.tag_user_info.company_type!='Staffing'){
-				frappe.call({
-					method: "tag_workflow.tag_data.org_industy_type",
-					args: {company: cur_frm.doc.company,},
-					callback: function(r) {
-						if (r.message.length == 1) {
-							cur_frm.set_df_property("category", "read_only", 1);
-							cur_frm.set_value("category", r.message[0][0]);
-						} else {
-							frm.set_query("category", function(doc) {
-								return {
-									query: "tag_workflow.tag_data.hiring_category",
-									filters: {
-										hiring_company: doc.company,
-									},
-								};
-							});
-						}
-					},
-				});
-			}
 		}
 		if (frappe.boot.tag.tag_user_info.company_type != "Staffing") {
 			fields_setup();
@@ -94,15 +75,7 @@ frappe.ui.form.on("Job Order", {
 				query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_jobtitle_list",
 				filters: {
 					job_order_company: doc.company,
-					job_category: doc.category,
-				},
-			};
-		});
-		frm.set_query("category", function(doc) {
-			return {
-				query: "tag_workflow.tag_workflow.doctype.job_order.job_order.get_industry_type_list",
-				filters: {
-					job_order_company: doc.company,
+					job_site: doc.job_site,
 				},
 			};
 		});
@@ -220,21 +193,30 @@ frappe.ui.form.on("Job Order", {
 	},
 
 	select_job: function(frm) {
-		frappe.call({
-			method: "tag_workflow.tag_workflow.doctype.job_order.job_order.update_joborder_rate_desc",
-			args: {
-				company: frm.doc.company,
-				job: frm.doc.select_job,
-			},
-			callback: function(r) {
-				if (r.message) {
-					frm.set_value("description", r.message.description);
-					frm.set_value("rate", r.message.rate);
-					refresh_field("rate");
-					refresh_field("description");
-				}
-			},
-		});
+		if(frm.doc.select_job){
+			frappe.call({
+				method: "tag_workflow.tag_workflow.doctype.job_order.job_order.update_joborder_rate_desc",
+				args: {
+					job_site:frm.doc.job_site,
+					job_title: frm.doc.select_job,
+				},
+				callback: function(r) {
+					if (r.message) {
+						frm.set_df_property('category','read_only',1)
+						frm.set_df_property('worker_comp_code','read_only',1)
+						frm.set_value("description", r.message[0].description);
+						frm.set_value("rate", r.message[0].bill_rate);
+						frm.set_value("category", r.message[0].industry_type);
+						frm.set_value("worker_comp_code", r.message[0].comp_code);
+						refresh_field("rate");
+						refresh_field("description");
+						refresh_field("category");
+						refresh_field("worker_comp_code");
+					}
+				},
+			});
+		}
+			
 	},
 
 	before_save: function(frm) {
@@ -287,8 +269,10 @@ frappe.ui.form.on("Job Order", {
 			if (frappe.validated) {
 				frm.set_df_property('select_days','reqd',0)
 			}
+			check_increase_headcount(frm)
 
 		}
+		change_is_single_share(frm)
 	},
 
 	after_save: function(frm) {
@@ -434,21 +418,6 @@ frappe.ui.form.on("Job Order", {
 		}
 	},
 
-	category: function(frm) {
-		frm.set_value('shovel', "");
-		frm.set_value('select_job', "");
-		if(frm.doc.category && frm.doc.company){
-			frappe.call({
-				'method':'tag_workflow.tag_data.job_industry_type_add',
-				'args':{
-					'company':frm.doc.company,
-					'user_industry':frm.doc.category
-				}
-			})
-		}
-
-	},
-
 	validate: function(frm) {
 		rate_calculation(frm);
 		time_validation(frm)
@@ -516,7 +485,13 @@ frappe.ui.form.on("Job Order", {
 		if(phone){
 			frm.set_value('phone_number', validate_phone(phone)?validate_phone(phone):phone);
 		}
+	},
+	job_site: function(frm){
+	    if(!frm.doc.job_site){
+	        frm.set_value('select_job','');
+	    }
 	}
+	
 });
 
 /*-------check company details---------*/
@@ -593,7 +568,7 @@ function staff_company_direct_or_general(frm){
 
 function set_read_fields(frm){
 	if(frm.doc.__islocal!=1){
-		let myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description","category","availability",'select_days','selected_days'];
+		let myStringArray = ["phone_number", "address", "per_hour", "flat_rate", "email", "select_job",'job_site', "description","category","availability",'select_days','selected_days','worker_comp_code'];
 		let arrayLength = myStringArray.length;
 		for(let i = 0; i < arrayLength; i++){
 			frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -1201,6 +1176,18 @@ function set_custom_base_price(frm){
 	frm.set_value("rate_increase",frm.doc.per_hour-frm.doc.rate);
 }
 
+function check_increase_headcount(frm){
+	frappe.call({
+		'method':'tag_workflow.tag_workflow.doctype.job_order.job_order.check_increase_headcounts',
+		'args':{
+			'no_of_workers_updated':frm.doc.no_of_workers,
+			'name':frm.doc.name,
+			'company':frm.doc.company,
+			'select_job':frm.doc.select_job
+		}
+	})
+}
+
 function hide_unnecessary_data(frm){
 	let field_name = ['select_days', "worker_filled"];
 	let arrayLength = field_name.length;
@@ -1593,6 +1580,19 @@ function advance_hide(time){
 			}
 		}, time);
 	}
+}
+
+function change_is_single_share(frm){
+	frappe.call({
+		'method':'tag_workflow.tag_workflow.doctype.job_order.job_order.change_is_single_share',
+		'args':{
+			'bid':frm.doc.bid,
+			'name':frm.doc.name,	
+		},
+		callback: function(resp){
+			cur_frm.doc.is_single_share=resp.message
+		}}
+		)
 }
 
 function staff_company_asterisks(frm){
@@ -2289,6 +2289,11 @@ function single_share_job(frm){
 	if(frm.doc.__islocal!=1 && frm.doc.is_single_share==0){
 		cur_frm.set_df_property('staff_company','hidden',1)
 	}
+	if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		if(cur_frm.doc.staff_company && !cur_frm.doc.staff_company.includes(frappe.boot.tag.tag_user_info.company)){
+			cur_frm.set_df_property('staff_company','hidden',1)
+		}
+	}
 }
 function job_profile_data(data){
 	let profile_html = `<div class="table-responsive pb-2 pb-sm-0"><table style="width: 100%;"><th>Employee Name</th><th>Marked As</th><th>Actions</th><th></th>`;
@@ -2361,6 +2366,8 @@ function check_emp_claims(frm){
 	})	
 }
 function workers_claimed_change(){
+	let new_no=cur_frm.doc.no_of_workers
+	cur_frm.set_value('no_of_workers','')
 	frappe.call({
 		method:
 		  "tag_workflow.tag_workflow.doctype.job_order.job_order.workers_required_order_update",
@@ -2420,7 +2427,7 @@ function workers_claimed_change(){
 				  let l = 0;
 				  let dict = {};
 	
-				  dict = update_claims(data_len, l, dict, job_data, r);
+				  dict = update_claims(data_len, l, dict, job_data, r,new_no);
 				  if (Object.keys(dict.dict).length > 0 && dict.valid1 != "False") {
 					frappe.call({
 					  method:
@@ -2431,6 +2438,7 @@ function workers_claimed_change(){
 					  },
 					  callback: function (r2) {
 						if (r2.message == 1) {
+							cur_frm.set_value('no_of_workers',new_no)
 							cur_frm.save()
 						  setTimeout(function () {
 							window.location.href =
@@ -2457,7 +2465,7 @@ function workers_claimed_change(){
 
 }
 
-function update_claims(data_len, l, dict, job_data, r) {
+function update_claims(data_len, l, dict, job_data, r,new_no) {
 	let valid1 = "";
 	let total_count = 0;
 	for (let i = 0; i < data_len; i++) {
@@ -2507,7 +2515,7 @@ function update_claims(data_len, l, dict, job_data, r) {
 		setTimeout(function () {
 		  location.reload();
 		}, 5000);
-	  } else if (l > cur_frm.doc.no_of_workers) {
+	  } else if (l > new_no) {
 		frappe.msgprint({
 		  message: __("No Of Workers Exceed For Than required "),
 		  title: __("Error"),

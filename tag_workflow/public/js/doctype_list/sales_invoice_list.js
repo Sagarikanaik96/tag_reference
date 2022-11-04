@@ -1,5 +1,6 @@
 frappe.listview_settings["Sales Invoice"] = {
   onload: function (listview) {
+    listview.columns[0].df.label = "Company";
     document.getElementsByClassName(
       "list-row-col ellipsis"
     )[6].style.textAlign = "left";
@@ -23,6 +24,10 @@ frappe.listview_settings["Sales Invoice"] = {
     $('[data-original-title="Job Order ID"]>div>div>input').attr(
       "placeholder",
       "Job Order"
+    );
+    $('[data-original-title="Customer"]>input').attr(
+      "placeholder",
+      "Company"
     );
     $('[data-original-title="Grand Total"]>input').val(null);
     if (frappe.boot.tag.tag_user_info.company_type == "TAG") {
@@ -50,6 +55,7 @@ frappe.listview_settings["Sales Invoice"] = {
     let standard_filters_wrapper = listview.page.page_form.find(
       ".standard-filter-section"
     );
+    console.log(standard_filters_wrapper)
     listview.page.add_field(filter, standard_filters_wrapper);
     let doc_filter = document.querySelector(
       'select[data-fieldname = "docstatus"]'

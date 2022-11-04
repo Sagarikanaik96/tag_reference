@@ -234,6 +234,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 							
 						}
 					}
+					r.results = remove_options(me.doctype, me.df.fieldname, r.results)
 					me.$input.cache[doctype][term] = r.results;
 					me.awesomplete.list = me.$input.cache[doctype][term];
 					me.toggle_href(doctype);
@@ -522,3 +523,11 @@ if (Awesomplete) {
 	};
 }
 
+function remove_options(doctype, fieldname, result){
+	if(['Employee Onboarding', 'Employee Onboarding Template', 'Job Offer','Salary Structure'].includes(doctype) && ['staffing_company', 'company'].includes(fieldname)){
+		result.splice(result.length - 2, 2);
+		return result
+	}else{
+		return result
+	}
+}

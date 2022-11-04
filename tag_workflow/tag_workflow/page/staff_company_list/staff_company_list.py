@@ -89,6 +89,7 @@ def sorted_favourite_companies(user_name):
         for i in comp_doc.favourite_staffing_company_list:
             comp.append(i.favourite_staffing_company)
         comp.sort()
+        print(comp)
         return comp          
 
     except Exception as e:

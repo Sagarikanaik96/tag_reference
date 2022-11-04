@@ -1,13 +1,14 @@
 frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("Company", {
-    client_id: function(frm){
+    client_id_data: function(frm){
         update_auth_url(frm);
     },
 
-    client_secret: function(frm){
+    client_secret_data: function(frm){
         update_auth_url(frm);
     },
 	refresh: function (frm){
+		hide_and_show_tables(frm)
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
@@ -40,15 +41,6 @@ frappe.ui.form.on("Company", {
 		if(frm.doc.organization_type=='Staffing'){
 			frm.set_df_property('job_title', 'hidden', 1);
 		}
-		if (frappe.boot.tag.tag_user_info.user_type == "Staffing User" || frappe.boot.tag.tag_user_info.user_type == "Hiring User" || frappe.boot.tag.tag_user_info.user_type == "Hiring Admin"){
-			frm.set_df_property('decrypted_jazzhr_api_key', 'fieldtype', 'Password');
-			frm.set_df_property('decrypted_client_id', 'fieldtype', 'Password');
-			frm.set_df_property('decrypted_client_secret', 'fieldtype', 'Password');
-			frm.set_df_property('decrypted_jazzhr_api_key', 'hidden', 1);
-			frm.set_df_property('decrypted_client_id', 'hidden', 1);
-			frm.set_df_property('decrypted_client_secret', 'hidden', 1);
-
-		}
 		set_map(frm);
 		hide_fields(frm);
 		show_addr(frm)
@@ -62,162 +54,7 @@ frappe.ui.form.on("Company", {
 		$('[data-fieldname = "phone_no"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 		$('[data-fieldname = "accounts_payable_phone_number"]>div>div>div>input').attr("placeholder", 'Example: +XX XXX-XXX-XXXX');
 		$('[data-fieldname = "accounts_receivable_phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
-		frm.set_df_property('company_logo','hidden',0);
-	},
-
-	decrypt_jazzhr_api_key: function(frm) {
-		if(frm.doc.decrypt_jazzhr_api_key==1){
-			if(frm.doc.jazzhr_api_key){
-				frappe.call({
-					method: "tag_workflow.tag_data.jazz_api_sec",
-					args: {
-						'frm': frm.doc.name,
-					},
-					callback: function(r) {
-						if(r.message!='Not Found'){
-							frm.set_value('decrypted_jazzhr_api_key', r.message);
-							frm.set_df_property('decrypted_jazzhr_api_key','hidden',0)
-							refresh_field('decrypted_jazzhr_api_key');
-						}
-						else{
-							frm.set_df_property('decrypted_jazzhr_api_key','hidden',1)
-							frm.set_value('decrypt_jazzhr_api_key',0)
-							frappe.msgprint('Please save to proceed further')
-						}	
-					}
-				})
-			}
-			else{
-				frm.set_df_property('decrypted_jazzhr_api_key','hidden',1)
-				frm.set_value('decrypted_jazzhr_api_key', '');
-				frm.set_value('decrypt_jazzhr_api_key',0)
-				frappe.msgprint('Nothing to decrypt')
-			}
-		}
-	},
-
-	decrypt_client_id: function(frm) {
-		if(frm.doc.decrypt_client_id==1){
-			if(frm.doc.client_id){
-				frappe.call({
-					method: "tag_workflow.tag_data.client_id_sec",
-					args: {
-						'frm': frm.doc.name,
-					},
-					callback: function(r) {
-						if(r.message!='Not Found'){
-							frm.set_value('decrypted_client_id', r.message);
-							frm.set_df_property('decrypted_client_id','hidden',0)
-							refresh_field('decrypted_client_id');
-						}
-						else{
-							frm.set_df_property('decrypted_client_id','hidden',1)
-							frm.set_value('decrypt_client_id',0)
-							frappe.msgprint('Please save to proceed further')
-						}
-					}
-				})
-			}
-			else{
-				frm.set_df_property('decrypted_client_id','hidden',1)
-				frm.set_value('decrypted_client_id', '');
-				frm.set_value('decrypt_client_id',0)
-				frappe.msgprint('Nothing to decrypt')
-			}
-		}
-	},
-	decrypt_client_secret: function(frm) {
-		if(frm.doc.decrypt_client_secret==1){
-			if(frm.doc.client_secret){
-				frappe.call({
-					method: "tag_workflow.tag_data.client_secret_sec",
-					args: {
-						'frm': frm.doc.name,
-					},
-					callback: function(r) {
-						if(r.message!='Not Found'){
-							frm.set_value('decrypted_client_secret', r.message);
-							frm.set_df_property('decrypted_client_secret','hidden',0)
-							refresh_field('decrypted_client_secret');
-						}
-						else{
-							frm.set_df_property('decrypted_client_secret','hidden',1)
-							frm.set_value('decrypt_client_secret',0)
-							frappe.msgprint('Please save to proceed further')
-						}	
-					}
-				})
-			}
-			else{
-				frm.set_df_property('decrypted_client_secret','hidden',1)
-				frm.set_value('decrypted_client_secret', '');
-				frm.set_value('decrypt_client_secret',0)
-				frappe.msgprint('Nothing to decrypt')
-			}
-		}
-	},
-	decrypt_subdomain: function(frm) {
-		if(frm.doc.decrypt_subdomain==1){
-			console.log(frm.doc.name)
-			if(frm.doc.workbright_subdomain){
-				frappe.call({
-					method: "tag_workflow.tag_data.workbright_subdomain_sec",
-					args: {
-						'frm': frm.doc.name,
-					},
-					callback: function(r) {
-						if(r.message!='Not Found'){
-							frm.set_value('decrypted_subdomain', r.message);
-							frm.set_df_property('decrypted_subdomain','hidden',0)
-							refresh_field('decrypted_subdomain');
-						}
-						else{
-							frm.set_df_property('decrypted_subdomain','hidden',1)
-							frm.set_value('decrypt_subdomain',0)
-							frappe.msgprint('Please save to proceed further')
-						}	
-					}
-				})
-			}
-			else{
-				frm.set_df_property('decrypted_subdomain','hidden',1)
-				frm.set_value('decrypted_subdomain', '');
-				frm.set_value('decrypt_subdomain',0)
-				frappe.msgprint('Nothing to decrypt')
-			}
-		}
-	},
-
-	decrypt_subdomain_api_key: function(frm) {
-		if(frm.doc.decrypt_subdomain_api_key==1){
-			console.log(frm.doc.name)
-			if(frm.doc.workbright_api_key){
-				frappe.call({
-					method: "tag_workflow.tag_data.workbright_api_key_sec",
-					args: {
-						'frm': frm.doc.name,
-					},
-					callback: function(r) {
-						if(r.message!='Not Found'){
-							frm.set_value('decrypted_subdomain_api_key', r.message);
-							frm.set_df_property('decrypted_subdomain_api_key','hidden',0)
-							refresh_field('decrypted_subdomain_api_key');
-						}
-						else{
-							frm.set_df_property('decrypted_subdomain_api_key','hidden',1)
-							frm.set_value('decrypt_subdomain_api_key',0)
-							frappe.msgprint('Please save to proceed further')
-						}	
-					}
-				})
-			}
-			else{
-				frm.set_df_property('decrypted_subdomain_api_key','hidden',1)
-				frm.set_value('decrypted_subdomain_api_key', '');
-				frm.set_value('decrypt_subdomain_api_key',0)
-				frappe.msgprint('Nothing to decrypt')
-			}
-		}
+		password_fields(frm);
 	},
 	update_employee_records: function (frm){
 		if(cur_frm.is_dirty()){
@@ -367,6 +204,7 @@ frappe.ui.form.on("Company", {
 		});
 	},
 	validate: function (frm){
+		mandatory_fields(frm);
 		validate_phone_zip(frm);
 		let account_phone_no=frm.doc.accounts_receivable_phone_number || "";
 		let receive_email = frm.doc.accounts_receivable_rep_email;
@@ -405,7 +243,20 @@ frappe.ui.form.on("Company", {
 	},
 	click_here: function (frm) {
 		if (frm.doc.organization_type == "Hiring") {
-			frappe.set_route("Form", "Hiring Company Review");
+			frappe.call({
+				method: "tag_workflow.tag_workflow.doctype.company.company.check_ratings",
+				args: {
+					'company_name': frm.doc.company_name,
+				},
+				callback: function(r) {
+					if(r.message){
+						frappe.set_route("Form", "Hiring Company Review");
+					}
+					else{
+						frappe.msgprint('There are no reviews for this company yet')
+					}	
+				}
+			})			
 		} else {
 			frappe.set_route("Form", "Company Review");
 		}
@@ -414,41 +265,7 @@ frappe.ui.form.on("Company", {
 		if(frappe.session.user != 'Administrator'){
 			$('.menu-btn-group').hide();
 		}
-		cur_frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
-			const li = [];
-			document.querySelectorAll('a[data-doctype="Industry Type"]').forEach(element=>{
-				li.push(element.getAttribute("data-name"));
-			});
-			return {
-				query: "tag_workflow.tag_data.get_jobtitle_list_page",
-				filters: {
-					data: li,
-					company:doc.name
-				},
-			};
-		}
-		frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc) {
-			let industrytype = frm.doc.industry_type, industrytype_list = [];
-			for (let x in industrytype) {
-				if(industrytype[x]['industry_type']){
-					industrytype_list.push(industrytype[x]['industry_type']);
-				}
-			}
-			let jobtitle = frm.doc.job_titles, title_list = [];
-			for (let y in jobtitle){
-				if(jobtitle[y]['job_titles']){
-					title_list.push(jobtitle[y]['job_titles']);
-				}
-			}
-			return {
-				query: "tag_workflow.tag_data.get_jobtitle_list_page",
-				filters: {
-					data: industrytype_list,
-					company:doc.name,
-					title_list: title_list
-				},
-			};
-		}
+		filter_row(frm);
 		
 		
 	},
@@ -478,24 +295,11 @@ frappe.ui.form.on("Company", {
 	before_save: function(frm){
 		cur_frm.doc.employees=[];
 		cur_frm.doc.enable_perpetual_inventory=0;
-		if(frm.doc.industry_type && frm.doc.job_titles){
-			let industries=[]
-			for(let i in frm.doc.industry_type){
-				industries.push(frm.doc.industry_type[i].industry_type)
-			}
-			for(let i in frm.doc.job_titles){
-				if(industries.indexOf(frm.doc.job_titles[i].industry_type) == -1) {
-					frappe.msgprint(frm.doc.job_titles[i].job_titles+" is not mapped to an Industry. Please update accordingly.")
-					frappe.validated=false
-					break
-				}
-			}
-			
+		const u_type = frappe.boot.tag.tag_user_info.user_type ? frappe.boot.tag.tag_user_info.user_type.toLowerCase():null
+		if(frappe.boot.tag.tag_user_info.company_type =='Hiring' || frappe.boot.tag.tag_user_info.company_type =='Exclusive Hiring' || u_type=='tag admin'){
+			update_table(frm)
 		}
-		if(frm.doc.company_logo){
-			validate_logo(frm);
-
-		}
+		save_password_data(frm);
 	},
 	phone_no: function(frm){
 		set_field(frm, frm.doc.phone_no, "phone_no");
@@ -509,6 +313,22 @@ frappe.ui.form.on("Company", {
 	zip: function(frm){
 		let zip = frm.doc.zip;
 		frm.set_value('zip', zip?zip.toUpperCase():zip);
+	},
+	upload_company_logo: (frm)=>{
+        if(frm.doc.upload_company_logo){
+            frappe.db.get_value('File', {'file_url': frm.doc.upload_company_logo, 'attached_to_name': frm.doc.name, 'attached_to_field': 'upload_company_logo'}, ['file_size'], (r)=>{
+                if(r.file_size && r.file_size > 2097152){
+                    frappe.msgprint({message:__('File size exceeded the maximum allowed size of 2.0 MB'), title: __('Message'), indicator: 'red'})
+                    frm.set_value('upload_company_logo', '');
+                }
+            })
+        }
+	},
+	branch_org_id_data: (frm)=>{
+		if(frm.doc.branch_org_id_data && !Number(frm.doc.branch_org_id_data)){
+			frappe.msgprint(__('Only numbers allowed.'))
+			frm.set_value('branch_org_id_data', '');
+		}
 	}
 });
 
@@ -565,7 +385,7 @@ function update_company_fields(){
 	}
 
 	if(frappe.boot.tag.tag_user_info.user_type == "Hiring User" || frappe.boot.tag.tag_user_info.user_type == "Staffing User") {
-		let company_field = ["organization_type", "country", "industry", "default_currency", "parent_staffing", "name", "jazzhr_api_key", "make_organization_inactive", "company_name", "fein", "title", "primary_language", "contact_name", "phone_no", "email", "set_primary_contact_as_account_payable_contact", "set_primary_contact_as_account_receivable_contact", "accounts_payable_contact_name", "accounts_payable_email", "accounts_payable_phone_number", "accounts_receivable_name", "accounts_receivable_rep_email", "accounts_receivable_phone_number", "cert_of_insurance", "w9", "safety_manual", "industry_type", "employees", "address", "city", "state", "zip", "drug_screen", "drug_screen_rate", "background_check", "background_check_rate", "upload_docs", "about_organization", "mvr", "mvr_rate", "shovel", "shovel_rate", "contract_addendums", "rating", "average_rating", "click_here", "hour_per_person_drug","background_check_flat_rate","mvr_per","shovel_per_person"];
+		let company_field = ["organization_type", "country", "industry", "default_currency", "parent_staffing", "name", "jazzhr_api_key", "make_organization_inactive", "company_name", "fein", "title", "primary_language", "contact_name", "phone_no", "email", "set_primary_contact_as_account_payable_contact", "set_primary_contact_as_account_receivable_contact", "accounts_payable_contact_name", "accounts_payable_email", "accounts_payable_phone_number", "accounts_receivable_name", "accounts_receivable_rep_email", "accounts_receivable_phone_number", "cert_of_insurance", "w9", "safety_manual", "industry_type", "employees", "address", "city", "state", "zip", "drug_screen", "drug_screen_rate", "background_check", "background_check_rate", "upload_docs", "about_organization", "mvr", "mvr_rate", "shovel", "shovel_rate", "contract_addendums", "rating", "average_rating", "click_here", "hour_per_person_drug","background_check_flat_rate","mvr_per","shovel_per_person","workbright_subdomain","workbright_api_key"];
 		for (let f in company_field) {
 			cur_frm.toggle_enable(company_field[f], 0);
 		}
@@ -662,6 +482,11 @@ function uploaded_file_format(frm){
 	frm.get_field('upload_docs').df.options = {
 		restrictions: {
 			allowed_file_types: ['.pdf','.txt','.docx']
+		}
+	};
+	frm.get_field('upload_company_logo').df.options = {
+		restrictions: {
+			allowed_file_types: ['.jpg','.jpeg','.png','.svg']
 		}
 	};
 }
@@ -970,13 +795,185 @@ function update_comp_address(frm,data){
 	    }
 	})
 }
-/*------------------validate logo-------------------*/
-function validate_logo(frm){
-	let company_logo = frm.doc.company_logo;
-	let file = String(company_logo);
-	let allowedExtension = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
-	if(!allowedExtension.exec(file)){
-		frappe.throw("Invalid image format (file should be in jpg,jpeg,png or .gif format)")
-	}
 
+function mandatory_fields(frm){
+	let reqd_fields = {"Company Type": frm.doc.organization_type, "Company Name": frm.doc.company_name};
+	if (frm.doc.organization_type == 'Exclusive Hiring'){
+		reqd_fields['Parent Staffing'] = frm.doc.parent_staffing;
+	}
+	let message = '<b>Please Fill Mandatory Fields:</b>';
+	for (let key in reqd_fields) {
+		if(reqd_fields[key] === undefined || !reqd_fields[key] || (reqd_fields[key] && !reqd_fields[key].trim())){
+			message = message + '<br>' + '<span>&bull;</span> ' + key;
+		}
+	}
+	if (message != '<b>Please Fill Mandatory Fields:</b>') {
+		frappe.msgprint({ message: __(message), title: __('Missing Fields'), indicator: 'orange'});
+		frappe.validated = false;
+	}
+}
+const u_type = frappe.boot.tag.tag_user_info.user_type ? frappe.boot.tag.tag_user_info.user_type.toLowerCase():null
+const u_roles = ['staffing admin','tag admin']
+const comp =frappe.boot.tag.tag_user_info.company_type;
+
+function hide_and_show_tables(frm){
+	if(comp == 'Hiring'|| comp =='Exclusive Hiring' || (u_type=='tag admin' && !['Staffing','TAG'].includes(frm.doc.organization_type) || (u_type=='staffing admin' && frm.doc.organization_type=='Exclusive Hiring'))){
+		frm.set_df_property('other_details','options',update_inner_html('Job Titles'));
+		frm.set_df_property('industry_type','hidden',1)
+		frm.set_df_property('job_titles','hidden', 0)
+	}
+	else if(u_type=='tag admin' && comp.toLowerCase=='tag'){
+		frm.set_df_property('other_details','options',update_inner_html('Job Industry(ies)'))
+		frm.set_df_property('industry_type','hidden',0)
+		frm.set_df_property('job_titles','hidden', 0)	
+	}
+	else{
+		frm.set_df_property('other_details','options',update_inner_html('Job Industry(ies)'))
+		frm.set_df_property('industry_type','hidden',0)
+		frm.set_df_property('job_titles','hidden', 1)	
+	} 
+}
+function update_inner_html(phrase){
+	const inner_html= `\n\t\t\t${phrase}\n\t\t\t<span class="ml-2 collapse-indicator mb-1 tip-top" style="display: inline;"><svg class="icon  icon-sm" style="">\n\t\t\t<use class="mb-1" id="up-down" href="#icon-down"></use>\n\t\t</svg></span>\n\t\t`;
+	$(".frappe-control[data-fieldname='job_titles']").parent().parent().parent('.section-body').siblings('.section-head').html(inner_html)
+	return 1
+}
+
+if (frappe.boot.tag.tag_user_info.company_type=='Hiring' || frappe.boot.tag.tag_user_info.company_type =='Exclusive Hiring' || u_roles.includes(u_type)){
+jQuery(document).on("click",`.tip-top,.${$(".frappe-control[data-fieldname='job_titles']").parent().parent().parent('.section-body').siblings('.section-head').attr('class')}`,function(){
+	const cls = $(".frappe-control[data-fieldname='job_titles']").parent().parent().parent('.section-body').siblings('.section-head').hasClass('collapsed')
+	cls ? $('#up-down').attr('href',"#icon-down") : $('#up-down').attr('href',"#icon-up-line")
+	});
+}
+	
+function filter_row(frm){
+	frm.fields_dict['job_titles'].grid.get_field('job_titles').get_query = function(doc,cdt,cdn) {
+		const row = locals[cdt][cdn];
+		let jobtitle = frm.doc.job_titles, title_list = [];
+			for (let t in jobtitle){
+				if(jobtitle[t]['job_titles']){
+					title_list.push(jobtitle[t]['job_titles']);
+				}
+			}	
+		if (row.industry_type){
+			return {
+				query: "tag_workflow.tag_data.get_jobtitle_based_on_industry",
+				filters: {
+					industry:row.industry_type,
+					company:doc.name,
+					title_list:title_list
+				},
+			};
+		}else{
+			return{
+				query: "tag_workflow.tag_data.get_jobtitle_based_on_company",
+				filters: {
+					company:doc.name,
+					title_list:title_list
+				},
+			}
+		}
+		
+	}
+}
+function update_table(frm){
+		frappe.run_serially([
+			()=>frm.clear_table('industry_type'),
+			()=>{
+				if(frm.doc.job_titles){
+					const industries = frm.doc.job_titles.map(title=>title.industry_type).
+					filter((value, index, self) => self.indexOf(value) === index)
+					if (industries.length>0){
+					industries.map(i=>{
+						let row = frm.add_child('industry_type');
+						row.industry_type = i;
+					})
+				}	
+			}
+				frm.refresh_field('industry_type')
+			},
+		])
+}
+
+function get_date_time(){
+    let today = new Date();
+    let date_time = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}  ${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
+    return date_time.toString();
+}
+
+function password_fields(frm){
+	let fields = {'jazzhr_api_key': 'jazzhr_api_key_html', 'client_id': 'client_id_html', 'client_secret': 'client_secret_html', 'workbright_subdomain': 'workbright_subdomain_html', 'workbright_api_key': 'workbright_api_key_html', 'branch_org_id': 'branch_org_id_html', 'branch_api_key': 'branch_api_key_html'}
+	for(let field in fields){
+		$('[data-fieldname="'+field+'_data"]').attr('readonly', 'readonly');
+		$('[data-fieldname="'+field+'_data"]').attr('type', 'password');
+		$('[data-fieldname="'+field+'_data"]').attr('title', '');
+		let button_html = '';
+		button_html +=	`<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>`
+		if(!(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && ['branch_org_id', 'branch_api_key'].includes(field))){
+			button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-edit_off" onclick="edit_pass(this.id, '${field}')" style="width: 45px;height: 25px;padding: 3px;float: right;">Edit</button>`;
+		}
+		frm.set_df_property(fields[field], 'options',button_html)
+	}
+}
+
+window.edit_pass = (id, field)=>{
+	if(id.split('-')[1]=='edit_off'){
+		$('[data-fieldname="'+field+'_data"]').removeAttr('readonly');
+		$('[data-fieldname="'+field+'_data"]').attr('type', 'text');
+		$('#'+field+'-decrypt').hide();
+		$('#'+field+'-encrypt').hide();
+		$('#'+id).hide();
+		$('#'+id).attr('id', field+'-edit_on');
+		show_pass(field);
+	}
+}
+
+window.show_decrypt = (id, field)=>{
+	if(id.split('-')[1]=='decrypt'){
+		$('[data-fieldname="'+field+'_data"]').attr('type', 'text');
+		$('#'+field+'-decrypt').text('Encrypt');
+		$('#'+field+'-decrypt').attr('id', field+'-encrypt');
+		show_pass(field);
+	}else{
+		hide_pass(field);
+		$('[data-fieldname="'+field+'_data"]').attr('type', 'password');
+		$('#'+field+'-encrypt').text('Decrypt');
+		$('#'+field+'-encrypt').attr('id', field+'-decrypt');
+	}
+}
+
+function show_pass(fieldname){
+	frappe.call({
+		"method": "tag_workflow.tag_data.get_password",
+		"args": {
+			"fieldname": fieldname,
+			"comp_name": cur_frm.doc.name
+		},
+		"callback": (res)=>{
+			if(res.message!='Not Found'){
+				cur_frm.set_value(fieldname+'_data', res.message);
+			}else if(cur_frm.doc[fieldname]){
+				cur_frm.set_value(fieldname+'_data', '•'.repeat(cur_frm.doc[fieldname]));
+			}else{
+				cur_frm.set_value(fieldname+'_data', '');
+			}
+		}
+	})
+}
+
+function hide_pass(fieldname){
+	if(cur_frm.doc[fieldname]){
+		cur_frm.set_value(fieldname, '•'.repeat(cur_frm.doc[fieldname].length));
+	}
+}
+
+function save_password_data(frm){
+	let fields = {'jazzhr_api_key_data': 'jazzhr_api_key', 'client_id_data': 'client_id', 'client_secret_data': 'client_secret', 'workbright_subdomain_data': 'workbright_subdomain', 'workbright_api_key_data': 'workbright_api_key', 'branch_org_id_data': 'branch_org_id', 'branch_api_key_data': 'branch_api_key'}
+	for(let field in fields){
+		if(frm.doc[field]){
+			frm.set_value(fields[field], frm.doc[field]);
+		}else{
+			frm.set_value(fields[field], undefined);
+		}
+	}
 }
