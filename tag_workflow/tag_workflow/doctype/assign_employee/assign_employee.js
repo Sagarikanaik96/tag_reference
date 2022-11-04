@@ -33,6 +33,7 @@ frappe.ui.form.on("Assign Employee", {
       assigned_direct(frm);
     }
     staff_comp(frm);
+    update_claim_approve(frm)
     render_table(frm);
     approved_employee(frm);
     back_job_order_form(frm);
@@ -588,59 +589,42 @@ function staff_comp(frm) {
 }
 
 function worker_notification(frm) {
-  if (
-    frm.doc.tag_status == "Open" &&
-    frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
-    frm.doc.__islocal != 1
-  ) {
-    frappe.call({
-      method:
-        "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.worker_data",
-      args: {
-        job_order: frm.doc.job_order,
-      },
-      callback: function (r) {
-        let worker_required =
-          r.message[0].no_of_workers - r.message[0].worker_filled;
-        if (
-          worker_required < frm.doc.employee_details.length &&
-          (frm.doc.resume_required != 1 ||
-            condition == 1 ||
-            frappe.boot.tag.tag_user_info.company_type == "Hiring")
-        ) {
-          frappe.msgprint(
-            "No Of Workers required for " +
-              frm.doc.job_order +
-              " is " +
-              worker_required
-          );
-          cur_frm.fields_dict["employee_details"].grid.cannot_add_rows = false;
-          frm.set_df_property("employee_details", "read_only", 0);
-          cur_frm.fields_dict["employee_details"].refresh();
-        }
-      },
-    });
-  } else if (
-    frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
-    frm.doc.resume_required == 0 &&
-    frm.doc.job_order
-  ) {
-    frappe.call({
-      method:
-        "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.approved_workers",
-      args: {
-        job_order: frm.doc.job_order,
-        user_email: frappe.session.user_email,
-      },
-      async: 0,
-      callback: function (r) {
-        if (r.message.length != 0) {
-          update_value(frm,r);
-
-        }
-      },
-    });
-  }
+  setTimeout(function() {
+    if (
+      frm.doc.tag_status == "Open" &&
+      frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
+      frm.doc.__islocal != 1
+    ) {
+      frappe.call({
+        method:
+          "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.worker_data",
+        args: {
+          job_order: frm.doc.job_order,
+        },
+        callback: function (r) {
+          let worker_required =
+            r.message[0].no_of_workers - r.message[0].worker_filled;
+          if (
+            worker_required < frm.doc.employee_details.length &&
+            (frm.doc.resume_required != 1 ||
+              condition == 1 ||
+              frappe.boot.tag.tag_user_info.company_type == "Hiring")
+          ) {
+            frappe.msgprint(
+              "No Of Workers required for " +
+                frm.doc.job_order +
+                " is " +
+                worker_required
+            );
+            cur_frm.fields_dict["employee_details"].grid.cannot_add_rows = false;
+            frm.set_df_property("employee_details", "read_only", 0);
+            cur_frm.fields_dict["employee_details"].refresh();
+          }
+        },
+      });
+    }
+}, 2000);
+  
 }
 
 function table_emp(frm, table, msg) {
@@ -1476,4 +1460,28 @@ function check_mandatory_field(emp_id,emp_name){
       }
     }
   });
+}
+function update_claim_approve(frm){
+  if (
+    frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
+    frm.doc.resume_required == 0 &&
+    frm.doc.job_order
+  ) {
+    frappe.call({
+      method:
+        "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.approved_workers",
+      args: {
+        job_order: frm.doc.job_order,
+        user_email: frappe.session.user_email,
+      },
+      async: 0,
+      callback: function (r) {
+        if (r.message.length != 0) {
+          update_value(frm,r);
+
+        }
+      },
+    });
+  }
+
 }
