@@ -439,4 +439,3 @@ function update_industry_rate(frm,cdt,cdn){
 		}
 	})
 }
-	

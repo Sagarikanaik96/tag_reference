@@ -521,7 +521,11 @@ function remove_options(doctype, fieldname, result){
 	if((['Employee Onboarding', 'Employee Onboarding Template', 'Job Offer','Salary Structure','Salary Component'].includes(doctype) && ['staffing_company', 'company'].includes(fieldname)) || ['Assign Employee','Assign Employee Details'].includes(doctype)){
 		result.splice(result.length - 2, 2);
 		return result
-	}else{
+	}else if((['Industry Types Job Titles'].includes(doctype) && ['industry_type'].includes(fieldname))){
+		result.splice(result.length - 2, 1);
+		return result
+	}
+	else{
 		return result
 	}
 }
