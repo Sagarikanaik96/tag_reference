@@ -695,12 +695,12 @@
    "depends_on": "eval:doc.select_job",
    "fieldname": "worker_comp_code",
    "fieldtype": "Data",
-   "label": "Worker Comp Code"
+   "label": "Workers' Comp Code"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-07 06:22:16.497378",
+ "modified": "2022-11-04 00:34:10.473829",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
