@@ -109,7 +109,7 @@ def update_timesheet(user, company_type, items, cur_selected, job_order, date, f
                     frappe.msgprint(_("Timesheet is already available for employee <b>{0}</b>(<b>{1}</b>) on the given datetime.").format(item["employee_name"],item['employee']))
         else:
             frappe.msgprint(_("Date must be in between Job Order start date and end date for timesheets"))
-        enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.send_timesheet_for_approval", timesheets=timesheets,save=save)
+        enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.send_timesheet_for_approval", timesheets=timesheets,save=save,now=True)
         return True if added == 1 else False
     except Exception as e:
         frappe.msgprint(e)
