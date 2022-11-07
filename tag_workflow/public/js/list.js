@@ -7,8 +7,11 @@ frappe.views.BaseList.prototype.prepare_data = function(r){
 
     if(data && this.doctype == "Job Order" && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
         this.order_length = data.order_length;
-        if([5,10,25,50,100].includes(parseInt(cur_list.radius)))
+        if([5,10,25,50,100].includes(parseInt(cur_list.radius))){
             document.querySelector(`.btn-loc-rad[data-value="${cur_list.radius}"]`).classList.add('active');
+            localStorage.getItem(frappe.session.user+'location')==1 ?$('.btn-location').addClass('active'):$('.btn-location').removeClass('active');
+        }
+            
 
         
     }
@@ -57,8 +60,8 @@ frappe.views.BaseList.prototype.setup_paging_area = function() {
     this.order_status = 'All'
     this.selected_page_count = 20;
     this.order_length = 0;
-    this.filter_loc = [];
-    this.custom_address = '';
+    this.filter_loc = localStorage.getItem(frappe.session.user+'loc')? JSON.parse(localStorage.getItem(frappe.session.user+'loc')):[];
+    this.custom_address = frappe.boot.tag.tag_user_info.company_type=="Staffing" && localStorage.getItem(frappe.session.user+'custom-address') ? localStorage.getItem(frappe.session.user+'custom-address'):'';
 
     this.update_paging_area(paging_values,radius);
     this.$frappe_list.append(this.$paging_area);
@@ -87,6 +90,7 @@ frappe.views.BaseList.prototype.setup_paging_area = function() {
             this.refresh();
             if (this.doctype=="Job Order" && frappe.boot.tag.tag_user_info.company_type == "Staffing")
                 this.update_button();
+            
         }else if($this.is(".btn-radius")){
             let val = $this.data().value;
             $(".btn.btn-default.btn-radius.btn-sm.active").removeClass("active");
@@ -154,20 +158,21 @@ frappe.views.ListView.prototype.display_modal=function(val){
         this.page_length = 20;
         if(localStorage.getItem(frappe.session.user+'custom-address'))
             this.custom_address = localStorage.getItem(frappe.session.user+'custom-address');
+        localStorage.removeItem(frappe.session.user+'cache_data')
         this.refresh();
     }else if(val == "Custom Address"){
-        if([5,10,25,50,100].includes(this.radius))
+        if([5,10,25,50,100].includes(parseInt(this.radius)))
             document.querySelector(`.btn-loc-rad[data-value="${this.radius}"]`).classList.add('active');
         this.order_location = get_order_location();
         this.create_table(this.order_location);
         
-        this.add_fields = [{label: '', fieldname: 'location', fieldtype: 'HTML',options:this.html}];
+        this.add_fields = [{label:'Location',fieldname:'rb1',fieldtype:'Check',default:1},{label:'Custom',fieldname:'rb2',fieldtype:'Check'},{label: '', fieldname: 'location', fieldtype: 'HTML',options:this.html}];
         let dialog = new frappe.ui.Dialog({
             title: 'Please select one or more addresses',
             fields: this.add_fields,
         });
         dialog.show();
-        dialog.fields_dict['location'].disp_area.querySelector('#main').addEventListener('change',(e)=>check_cells(e))
+        toggle_radio_button(dialog);
         dialog.set_primary_action(__('Submit'), function() {
             localStorage.setItem(frappe.session.user+'location',1);
             update_radius();
@@ -208,7 +213,8 @@ frappe.views.ListView.prototype.create_table =function(location){
             </tr>`).join("");
     
   this.html = `<div class="container-fluid">
-  <div class="table-responsive">
+  
+  <div class="table-responsive" id="tab">
       <table class="table table-bordered   table-hover">
           <thead>
               <tr>
@@ -217,9 +223,12 @@ frappe.views.ListView.prototype.create_table =function(location){
                   <th>Company</th>
               </tr>
           </thead>
-          <tbody>`+ middle + `<tr> <td class="text-center"> <input id="custom-location" class="location" type="checkbox"></input></td>
-          <td id ="input-custom"><input type="text" id="custom-address" value="${localStorage.getItem(frappe.session.user+'custom-address')?localStorage.getItem(frappe.session.user+'custom-address'):''}" style="width:100%;margin-bottom:10px;"></td> 
-          </tr></tbody></table></div></div>`;
+          <tbody>`+ middle + `</tbody></table></div>
+          <div>
+          <div id ="input-custom"><input type="text" id="custom-address" placeholder="Custom" value="${localStorage.getItem(frappe.session.user+'custom-address')?localStorage.getItem(frappe.session.user+'custom-address'):''}" style="width: 100%;border: 1px solid #cccccc9e;border-radius: 10px; padding: 2px 8px;"></div>
+           
+          </div>
+          </div>`;
             
   let counter = 0;
   frappe.run_serially([
@@ -240,7 +249,8 @@ frappe.views.ListView.prototype.create_table =function(location){
             },300)
         }  
     
-    }])
+    }
+])
   
   
 }
@@ -253,9 +263,7 @@ frappe.views.ListView.prototype.single_row_event=function(items,input){
             add_rows(e.currentTarget.value);
            }else if(!i.checked && i.id!='custom-location'){
             remove_rows(e.currentTarget.value);
-           }
-           if(i.checked && i.id=='custom-location')
-            frappe.views.ListView.prototype.custom_address();   
+           }  
         }));
     /*----------Input-Event--------------*/
     
@@ -292,24 +300,21 @@ frappe.views.ListView.prototype.update_paging_area=function(paging_values,radius
 }
 /*---------------------------Updating button-----------------------------------------------------------*/
 frappe.views.ListView.prototype.update_button = function(){
+    localStorage.removeItem(frappe.session.user+'cache_data')
     this.filter_loc.length>0 || localStorage.getItem(frappe.session.user+'location')==1 ?$('.btn-location').addClass('active'):$('.btn-location').removeClass('active');
-    if ([5,10,25,50,100].includes(this.radius))
+    if ([5,10,25,50,100].includes(parseInt(this.radius)))
             document.querySelector(`.btn-loc-rad[data-value="${this.radius}"]`).classList.add('active');
 }
 const select_deselect_row =function(e){
     const items = document.querySelectorAll('.location');
     const input = document.querySelectorAll('#custom-address');
-    frappe.views.ListView.prototype.single_row_event(items,input);
-    
-    
+    frappe.views.ListView.prototype.single_row_event(items,input);    
 }
 /*----------------------------------check-cells----------------------------------------------------------------*/
 const check_cells = function(e){
     const items = document.querySelectorAll('.location');
         if(e.currentTarget.checked){
             for (let i in items) {
-                if(items[i].id=='custom-location')
-                    continue;
                 if (items[i].type == 'checkbox'){
                     items[i].checked = true;
                     add_rows(items[i].value)
@@ -349,21 +354,9 @@ function update_radius(){
 
         
 }
-/*------------------Clear-applied-filters--------------------------*/
-frappe.views.ListView.prototype.custom_address = function(){
-    document.querySelector('.btn-radius[data-value="Clear"]').click();
-    if(document.getElementById('main').checked){
-        document.getElementById('main').click();
-        cur_dialog.fields_dict['location'].disp_area.querySelector('#main').checked=false;
-    }
-    else
-        remove_cells();
-}
 function remove_cells(){
     const items = document.querySelectorAll('.location');
     for (let i in items) {
-        if(items[i].id=='custom-location')
-            continue;
         if (items[i].type == 'checkbox')
             items[i].checked = false;
         
@@ -372,8 +365,6 @@ function remove_cells(){
 /*---------Uncheck-Cells---------------*/
 function uncheck_cells(items){
     for (let i in items) {
-        if(items[i].id=='custom-location')
-            continue;
         if (items[i].type == 'checkbox'){
             items[i].checked = false;
             remove_rows(items[i].value)
@@ -394,17 +385,19 @@ function update_data(){
             if (localStorage.getItem(frappe.session.user+'radius')&& [5,10,25,50,100].includes(parseInt(localStorage.getItem(frappe.session.user+'radius'))))
                 document.querySelector(`.btn-loc-rad[data-value="${cur_list.radius}"]`).classList.add('active');
             
+
         }
     }
 
 }
 
 function clear_cache(){
-    const cache_keys =[frappe.session.user+'location',frappe.session.user+'radius',frappe.session.user+'loc',frappe.session.user+'custom_address',frappe.session.user+'cache_data','radius']
+    const cache_keys =[frappe.session.user+'location',frappe.session.user+'radius',frappe.session.user+'loc',frappe.session.user+'custom-address',frappe.session.user+'cache_data','radius']
     for (let k in cache_keys){
         if (localStorage.getItem(cache_keys[k]))
             localStorage.removeItem(cache_keys[k]);
     }
+    
 }
 
 function get_cache_radius(){
@@ -415,3 +408,57 @@ function get_cache_radius(){
     else
         return 'All';
 }
+
+function radio_button_location(){
+    if(cur_dialog.fields_dict['rb1'].get_value()==1){
+        cur_dialog.fields_dict['location'].disp_area.querySelector('#tab').hidden=false;
+        cur_dialog.fields_dict['location'].disp_area.querySelector('#custom-address').hidden=true;
+        cur_dialog.fields_dict['rb2'].set_value(0)
+        cur_list.custom_address = '';
+        localStorage.removeItem(frappe.session.user+'custom-address')
+        cur_dialog.fields_dict['location'].disp_area.querySelector('#custom-address').value=null;
+    }
+       
+    else{
+        cur_dialog.fields_dict['location'].disp_area.querySelector('#custom-address').hidden=false;
+        cur_dialog.fields_dict['rb2'].set_value(1);
+        cur_dialog.fields_dict['location'].disp_area.querySelector('#tab').hidden=true;
+
+    }
+        
+}
+
+function radio_button_custom(){
+    if(cur_dialog.fields_dict['rb2'].get_value()==1){
+        cur_dialog.fields_dict['rb1'].set_value(0)
+        cur_dialog.fields_dict['location'].disp_area.querySelector('#tab').hidden=true;
+        cur_dialog.fields_dict['location'].disp_area.querySelector('#custom-address').hidden=false;
+        cur_list.filter_loc = [];
+        localStorage.removeItem(frappe.session.user+'loc');
+        cur_dialog.fields_dict['location'].disp_area.querySelector('#main').checked=false
+        remove_cells()
+    }
+        
+    else{
+        cur_dialog.fields_dict['location'].disp_area.querySelector('#custom-address').hidden=true;
+        cur_dialog.fields_dict['location'].disp_area.querySelector('#tab').hidden=false; 
+        cur_dialog.fields_dict['rb1'].set_value(1)
+    }
+        
+}
+
+function toggle_radio_button(dialog){
+    dialog.fields_dict['location'].disp_area.querySelector('#main').addEventListener('change',(e)=>check_cells(e))
+    dialog.fields_dict['rb1'].input.addEventListener('change',e=>radio_button_location())
+    dialog.fields_dict['rb2'].input.addEventListener('change',e=>radio_button_custom())
+    if(dialog.fields_dict['rb1'].get_value()==1)
+        dialog.fields_dict['location'].disp_area.querySelector('#custom-address').hidden=true;
+
+    if(localStorage.getItem(frappe.session.user+'custom-address')){
+        dialog.fields_dict['rb2'].set_value(1)
+        dialog.fields_dict['location'].disp_area.querySelector('#tab').hidden=true;
+        dialog.fields_dict['location'].disp_area.querySelector('#custom-address').hidden=false;
+        dialog.fields_dict['rb1'].set_value(0);
+    }
+}
+
