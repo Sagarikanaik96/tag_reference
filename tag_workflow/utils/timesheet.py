@@ -25,7 +25,7 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
 
         for user in user_list:
             if not frappe.db.exists("User Permission",{"user": user.parent,"allow": "Timesheet","apply_to_all_doctypes":1, "for_value": docname}):
-                add("Timesheet", docname, user=user.parent, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
+                add("Timesheet", docname, user=user.parent, read=1, write=1, submit=1, notify=0)
                 perm_doc = frappe.get_doc(dict(doctype="User Permission",user=user.parent,allow="Timesheet",for_value=docname,apply_to_all_doctypes=1))
                 perm_doc.save(ignore_permissions=True)
             if user.parent not in staffing_user:

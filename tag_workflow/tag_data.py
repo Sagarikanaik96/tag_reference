@@ -512,7 +512,7 @@ def sales_invoice_notification(user, sid, job_order, company, invoice_name):
         user_list = frappe.db.sql(sql, as_dict=1)
         users = [l.name for l in user_list]
         for usr in users:
-            add("Sales Invoice", invoice_name, usr, read=1, write = 0, share = 0, everyone = 0, flags={"ignore_share_permission": 1})
+            add("Sales Invoice", invoice_name, usr, read=1, write = 0, share = 0, everyone = 0)
         if(users):
             make_system_notification(users, msg, 'Sales Invoice', invoice_name, subject)
             send_email(subject, msg, users)

@@ -40,18 +40,6 @@ frappe.ui.form.on("Assign Employee", {
     document_download();
 
     $('[data-fieldname="company"]').css("display", "block");
-
-    $(document).on("click", '[data-fieldname="company"]', function () {
-      companyhide(5000);
-    });
-
-    $('[data-fieldname="company"]').mouseover(function () {
-      companyhide(500);
-    });
-
-    document.addEventListener("keydown", function () {
-      companyhide(500);
-    });
     child_table_label();
     render_tab(frm);
     set_payrate_field(frm);
@@ -772,18 +760,6 @@ function company_check(frm, table, msg) {
       );
     }
   }
-}
-
-function companyhide(time) {
-  setTimeout(() => {
-    let txt = $('input[data-fieldname="company"]')[1].getAttribute("aria-owns");
-    let txt2 = 'ul[id="' + txt + '"]';
-    let arry = document.querySelectorAll(txt2)[0].children;
-    document.querySelectorAll(txt2)[0].children[arry.length - 2].style.display =
-      "none";
-    document.querySelectorAll(txt2)[0].children[arry.length - 1].style.display =
-      "none";
-  }, time);
 }
 
 function child_table_label() {
