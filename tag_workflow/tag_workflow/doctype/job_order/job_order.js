@@ -497,9 +497,7 @@ frappe.ui.form.on("Job Order", {
 		}
 	},
 	job_site: function(frm){
-	    if(!frm.doc.job_site){
 	        frm.set_value('select_job','');
-	    }
 	}
 	
 });
