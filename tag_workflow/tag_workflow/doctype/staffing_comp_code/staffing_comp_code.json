@@ -42,12 +42,12 @@
   {
    "fieldname": "class_codes_section",
    "fieldtype": "Section Break",
-   "label": "Class Codes"
+   "label": "Workers' Comp Code"
   },
   {
    "fieldname": "class_codes",
    "fieldtype": "Table",
-   "label": "Class Codes",
+   "label": "Workers' Comp Code",
    "options": "Class Code"
   },
   {
@@ -57,7 +57,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-20 08:23:23.175381",
+ "modified": "2022-11-09 00:37:19.865296",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Staffing Comp Code",
