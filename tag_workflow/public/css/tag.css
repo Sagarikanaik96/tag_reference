@@ -1754,10 +1754,9 @@ select.input-with-feedback.form-control.ellipsis {
   position:absolute;
   bottom:10px;
   left:20px;
-  background-color:black;
-  color:white;
-  padding:5px 15px;
-  border:black !important;
+  box-shadow: 0px 3px #888;
+    padding: 5px 15px;
+    border: white !important;
   border-radius:6px !important;
 }
 #more_info{
