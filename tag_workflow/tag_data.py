@@ -1728,20 +1728,6 @@ def branch_key(branch_key=None):
     except Exception as e:
         frappe.log_error('Branch API Call Error', e)
 
-def sync_class_code(doc,method):
-    try:
-        if len(doc.job_titles)==0:
-            return
-        result = frappe.db.sql(""" select  industry_type,job_titles,comp_code  from `tabIndustry Types Job Titles` where parent="{0}" and parenttype="Job Site" """.format(doc.name),as_dict=1)
-        for r in result:
-            comp_code = frappe.db.sql(""" select comp_code from `tabJob Titles` where comp_code!="{3}"  and  parent="{0}" and industry_type="{1}" and job_titles="{2}" and parenttype="Company" """.format(doc.company,r['industry_type'],r['job_titles'],r['comp_code']),as_dict=1)
-            if len(comp_code)==0:
-                continue
-            frappe.db.sql(""" update `tabJob Titles` set comp_code="{0}" where parent="{1}" and parenttype="Company" and industry_type="{2}" and job_titles="{3}" """.format(r['comp_code'],doc.company,r['industry_type'],r['job_titles']))
-    except Exception as e:
-        frappe.log_error(e,'class_code_sync_error')
-        print(e,method)
-    
 
 #-------------------checking employees mendatory fields--------------------------------#
 @frappe.whitelist()
@@ -1770,3 +1756,10 @@ def check_mandatory_field(emp_id,check,emp_name):
     except Exception as e:
         print(e)
 
+@frappe.whitelist()
+def get_comp_code(title,company):
+    try:
+        return frappe.db.sql("""select comp_code from `tabJob Titles` where parent="{0}"  and job_titles="{1}" and parenttype="Company" """.format(company,title),as_dict=1)
+    except Exception as e:
+        print (e)
+        return "Error"

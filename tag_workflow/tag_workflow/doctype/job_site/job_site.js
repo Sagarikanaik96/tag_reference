@@ -439,3 +439,22 @@ function update_industry_rate(frm,cdt,cdn){
 		}
 	})
 }
+
+frappe.ui.form.on('Industry Types Job Titles',{
+	job_titles:(frm,cdt,cdn)=>{
+		const row = locals[cdt][cdn];
+		if (row.job_titles){
+			frappe.call({
+				method:"tag_workflow.tag_data.get_comp_code",
+				args:{title:row.job_titles,company:frm.doc.company},
+				callback:(r)=>{
+					if(r.message!="Error"){
+						row.comp_code = r.message[0].comp_code
+						frm.refresh_field('job_titles')
+					}
+				}
+			})
+		 
+		}
+	}
+})

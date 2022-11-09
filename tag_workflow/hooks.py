@@ -168,8 +168,7 @@ doc_events = {
                "after_insert":'tag_workflow.utils.lead.lead_contact'
        },
        "Job Site":{
-               "after_insert":'tag_workflow.tag_data.job_site_add',
-               "on_update":"tag_workflow.tag_data.sync_class_code"
+               "after_insert":'tag_workflow.tag_data.job_site_add'
        },
        "Item":{
                "after_insert":'tag_workflow.tag_data.job_title_add'
