@@ -471,7 +471,7 @@ def staffing_radius():
         check_table = frappe.db.sql('''SELECT * FROM information_schema.tables WHERE table_name = "tabStaffing Radius"''', as_dict=1)
         if len(check_table) == 0:
             frappe.db.sql('''CREATE TABLE `tabStaffing Radius` (name varchar(255) not null primary key,job_site varchar(140),hiring_company varchar(140),staffing_company varchar(140),radius varchar(140))''')
-            frappe.enqueue('tag_workflow.utils.organization.staffing_jobsite_mapping', message=migrate_sch, queue='default', is_async=True)
+        frappe.enqueue('tag_workflow.utils.organization.staffing_jobsite_mapping', message=migrate_sch, queue='long', is_async=True)
     except Exception as e:
         frappe.log_error(e, 'Staffing Radius Error')
 
@@ -531,16 +531,27 @@ def staffing_jobsite_mapping(message = None, job_site_name = None, staffing_comp
 
     company_data, job_site_data = get_data(message, job_site_name,staffing_company)
     for company in company_data:
+        try:
+            frappe.enqueue('tag_workflow.utils.organization.staffing_jobsite_mapping_contd', company = company, job_site_data=job_site_data, gmaps=gmaps, is_async= True, queue='long')
+        except Exception as e:
+            frappe.log_error(e, 'staffing_job_site_mapping Company Error')
+            continue
+        
+@frappe.whitelist()
+def staffing_jobsite_mapping_contd(company, job_site_data, gmaps):
+    try:
         source = get_source(company)
         for job_site in job_site_data:
-            dest = get_dest(job_site)
             try:
+                dest = get_dest(job_site)
                 my_dist = gmaps.distance_matrix(source, dest)
                 km = my_dist['rows'][0]['elements'][0]['distance']['value']/1000 if  my_dist['status'] == 'OK' and my_dist['rows'][0]['elements'][0]['status']=='OK' else None
                 calculate_dist(km, company, job_site)
             except Exception as e:
-                print(e)
+                frappe.log_error(e, 'staffing_job_site_mapping Job Site Error')
                 continue
+    except Exception as e:
+        frappe.log_error(e, 'staffing_job_site_mapping_contd Error')
 
 @frappe.whitelist()
 def get_data(message, job_site_name, staffing_company):
@@ -566,7 +577,7 @@ def get_source(company):
         zip_code = str(company.zip) if company.zip else ''
         return address+","+city+","+state+","+zip_code
     except Exception as e:
-        frappe.log_error(e, 'Get Source Error')
+        frappe.log_error(e, 'staffing_job_site_mapping Get Source Error')
 
 def get_dest(job_site):
     try:
@@ -576,10 +587,13 @@ def get_dest(job_site):
         zip_code = job_site.zip if job_site.zip else ''
         return address+","+city+","+state+","+zip_code
     except Exception as e:
-        frappe.log_error(e, 'Get Destination Error')
+        frappe.log_error(e, 'staffing_job_site_mapping Get Destination Error')
 
 @frappe.whitelist()
 def calculate_dist(km, company, job_site):
-    dist = str(km*0.62137) if km!=None else None
-    frappe.db.sql(f'''INSERT INTO `tabStaffing Radius` (name, job_site, hiring_company, staffing_company, radius) VALUES("{company.name}_{job_site.name}", "{job_site.name}", "{job_site.company}", "{company.name}", "{dist}") ON DUPLICATE KEY UPDATE radius = "{dist}"''')
-    frappe.db.commit()
+    try:
+        dist = str(km*0.62137) if km!=None else None
+        frappe.db.sql(f'''INSERT INTO `tabStaffing Radius` (name, job_site, hiring_company, staffing_company, radius) VALUES("{company.name}_{job_site.name}", "{job_site.name}", "{job_site.company}", "{company.name}", "{dist}") ON DUPLICATE KEY UPDATE radius = "{dist}"''')
+        frappe.db.commit()
+    except Exception as e:
+        frappe.log_error(e, 'staffing_job_site_mapping Distance Calculation Error')
