@@ -90,8 +90,12 @@ frappe.ui.form.on('Claim Order', {
 		update_claim_by_staffing(frm)
 		if(frm.doc.staff_claims_no)
 			frm.set_df_property('staff_claims_no', 'read_only', 1);
+		$('[data-doctype="Company"]')[0].href="#"
+		console.log($('[data-doctype="Company"]')[0])
+		$('[data-doctype="Company"]').on('click', function(){
 
-		setTimeout(hr, 1000);
+			setTimeout(hr, 1000);
+		});
 		frm.set_df_property('agree_to_contract', 'label', 'Agree To Contract <span style="color: red;">&#42;</span>');
 		frm.set_df_property('staff_claims_no', 'label', 'No. of Employees to Claim <span style="color: red;">&#42;</span>');
 		get_remaining_employee(frm.doc.job_order,frm,frm.doc.no_of_workers_joborder)
@@ -306,8 +310,9 @@ function update_claim_by_staffing(frm) {
 function hr() {
 	if (cur_frm.doc.__islocal != 1) {
 		Array.from($('[data-doctype="Company"]')).forEach(_field => {
+			_field.href='#'
 			localStorage.setItem("company", cur_frm.doc.staffing_organization);
-			_field.href = '/app/dynamic_page';
+			window.location =  '/app/dynamic_page';
 		});
 	}
 }
