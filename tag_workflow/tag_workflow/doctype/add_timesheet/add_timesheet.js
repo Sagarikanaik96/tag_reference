@@ -654,7 +654,7 @@ function set_def_time(){
 }
 function checking_selected_values(){
 	cur_frm.set_value('date','')
-	if(localStorage.getItem('date')!=''){
+	if(localStorage.getItem('date')!='' && localStorage.getItem('date')!= null){
 		let jo=localStorage.getItem("job_order")
 		let date=localStorage.getItem("date")
 		cur_frm.set_value('job_order',jo)
