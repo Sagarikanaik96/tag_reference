@@ -242,7 +242,7 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 			sql2 = '''select email from `tabUser` where organization_type='staffing' and company != "{0}" and company in (select staffing_company from `tabStaffing Radius` where job_site="{1}" and radius != "None" and radius <= 25 and hiring_company="{2}")'''.format(staffing_org, job_order_data.job_site, job_order_data.company)
 			share_list2 = frappe.db.sql(sql2, as_list = True)
 			staffing_user_list = [user[0] for user in share_list2]
-			staff_email_sending_without_resume(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject)
+			staff_email_sending_without_resume(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject,doc_name)
 			return 1
 		else:
 			if hiring_user_list:
@@ -258,14 +258,14 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 	except Exception as e:
 		frappe.log_error(e, "Partial Job order Failed ")
 
-def staff_email_sending_without_resume(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject):
-    query = '''select sum(approved_no_of_workers) from `tabClaim Order` where job_order = "{}" '''.format(job_order)
+def staff_email_sending_without_resume(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject,doc_name):
+    query = f'''select sum(approved_no_of_workers) from `tabClaim Order` where job_order = "{job_order}" and name<>"{doc_name}" '''
     rem_emp = frappe.db.sql(query)
     notification_func(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject, rem_emp)
 
 def notification_func(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject, rem_emp):
 	if rem_emp[0][0] and job_order_data.is_repeat:
-		count = int(no_required) - int(rem_emp[0][0])
+		count = int(no_required) - int(rem_emp[0][0]) - int(no_assigned)
 	else:
 		count = int(no_required)-int(no_assigned)
 	if count>0:
