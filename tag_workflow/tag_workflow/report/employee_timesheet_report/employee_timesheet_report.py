@@ -63,10 +63,10 @@ def get_condition(filters):
         condition = ""
 
         if(filters.get("employee")):
-            condition += " and employee = '{0}'".format(filters.get("employee"))
+            condition += ' and employee = "{0}"'.format(filters.get("employee"))
 
         if(filters.get("company")):
-            condition += " and company = '{0}'".format(filters.get("company"))
+            condition += ' and company = "{0}"'.format(filters.get("company"))
 
         return condition
     except Exception as e:
