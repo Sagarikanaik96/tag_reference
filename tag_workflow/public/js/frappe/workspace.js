@@ -241,8 +241,10 @@ class DesktopPage {
 		this.in_customize_mode = false;
 		this.page && this.page.remove();
 		this.make();
-		if (frappe.session.user=='Administrator')
-			cur_page.page.page.set_primary_action('Scheduler Setting',this.display_dialog)
+		if (frappe.session.user=='Administrator'){
+				cur_page.page.page.set_primary_action('Scheduler Setting',this.display_dialog)
+				cur_page.page.page.add_button('Setup Functions',this.setup_functions)
+		}
 	}
 
 	make() {
@@ -609,6 +611,9 @@ class DesktopPage {
 			}
 		])
 		
+	}
+	setup_functions(){
+		frappe.call({method:"tag_workflow.utils.organization.setup_data"})
 	}
 }
 

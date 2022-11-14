@@ -10,7 +10,7 @@ from pathlib import Path
 from tag_workflow.utils.trigger_session import share_company_with_user
 from tag_workflow.controllers.master_controller import make_update_comp_perm, user_exclusive_perm
 import googlemaps
-
+from tag_workflow.utils.notification import make_system_notification
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
 migrate_sch = 'Migrate/Scheduler'
@@ -42,37 +42,42 @@ MODULE_PROFILE = [{"Staffing": ["CRM", "Projects", tag_workflow, "Accounts", "Se
 
 SPACE_PROFILE = ["CRM", "Users", tag_workflow, "Settings", "Home", "My Activities", "Reports"]
 
+
 #------setup data for TAG -------------#
+@frappe.whitelist()
 def setup_data():
     try:
         frappe.db.set_value(Global_defaults,Global_defaults,"default_currency", "USD")
         frappe.db.set_value(Global_defaults,Global_defaults,"hide_currency_symbol", "No")
         frappe.db.set_value(Global_defaults,Global_defaults,"disable_rounded_total", "1")
         frappe.db.set_value(Global_defaults,Global_defaults,"country", "United States")
-
-        update_organization_data()
-        update_roles()
-        update_tag_user_type()
-        update_role_profile()
-        update_module_profile()
-        update_permissions()
-        update_old_data_import()
-        update_old_direct_order()
-        update_old_company_type()
-        update_old_job_sites()
-        create_job_applicant()
-        set_workspace()
-        setup_company_permission()
-        check_if_user_exists()
-        update_job_title_list()
-        update_old_lead_status()
-        share_company_with_user()
-        emp_job_title()
-        update_salary_structure()
-        updating_date_of_joining()
-        update_password_field()
-        staffing_radius()
-        frappe.db.commit()
+        methods =[
+            update_organization_data,
+            update_roles,
+            update_tag_user_type,
+            update_role_profile,
+            update_module_profile,
+            update_permissions,
+            update_old_data_import,
+            update_old_direct_order,
+            update_old_company_type,
+            update_old_job_sites,
+            create_job_applicant,
+            set_workspace,
+            setup_company_permission,
+            check_if_user_exists,
+            update_job_title_list,
+            update_old_lead_status,
+            share_company_with_user,
+            emp_job_title,
+            update_salary_structure,
+            updating_date_of_joining,
+            update_password_field,
+            staffing_radius,
+            make_commit
+            ]
+        for method in methods:
+            frappe.enqueue(method,now=True)
     except Exception as e:
         print(e)
         frappe.log_error(e, "Master")
@@ -598,3 +603,11 @@ def calculate_dist(km, company, job_site):
         frappe.db.commit()
     except Exception as e:
         frappe.log_error(e, 'staffing_job_site_mapping Distance Calculation Error')
+
+def make_commit():
+    try:
+        print("*------making-sql-commit-----------------------*\n")
+        frappe.db.commit()
+    except Exception as e:
+        print(e)
+

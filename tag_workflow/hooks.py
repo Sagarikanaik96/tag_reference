@@ -142,7 +142,6 @@ doctype_list_js = {
         "System Setting": "public/js/doctype_list/system_setting.js",
 }
 
-after_migrate = ["tag_workflow.utils.organization.setup_data"]
 before_migrate = ["tag_workflow.utils.organization.remove_field"]
 # Hook on document methods and events
 validate = "tag_workflow.controllers.base_controller.validate_controller"
