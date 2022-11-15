@@ -107,7 +107,10 @@ frappe.listview_settings['Employee'] = {
 };
 
 frappe.confirm = function(_message, confirm_action, reject_action) {
-	const custom_message = "All the data linked to this employee will be deleted?";
+	let custom_message = _message;
+    if(cur_list && cur_list.doctype == 'Employee'){
+        custom_message = "All the data linked to this employee will be deleted";
+    }
 	let d = new frappe.ui.Dialog({
 		title: __("Confirm"),
 		primary_action_label: __("Confirm"),
