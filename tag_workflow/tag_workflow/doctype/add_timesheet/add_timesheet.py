@@ -10,7 +10,7 @@ from tag_workflow.utils.notification import sendmail, make_system_notification
 from frappe import enqueue
 from frappe.share import add
 from tag_workflow.utils.timesheet import remove_job_title, unsatisfied_organization, do_not_return, no_show_org
-
+import ast
 TM_FT = "%Y-%m-%d %H:%M:%S"
 jobOrder='Job Order'
 timesheet_time= 'select to_time,from_time from `tabTimesheet Detail` where parent= '
@@ -82,8 +82,8 @@ def update_timesheet(user, company_type, items, cur_selected, job_order, date, f
     try:
         added = 0
         timesheets = []
-        items = json.loads(items)
-        cur_selected = json.loads(cur_selected)
+        items=ast.literal_eval(items)
+        cur_selected = ast.literal_eval(cur_selected)
         selected_items = items
         is_employee = check_if_employee_assign(items, job_order)
         if(is_employee == 0):
