@@ -1831,3 +1831,6 @@ span.comment-count {
   z-index: 99;
   left: 20rem;
 }
+#page-query-report .datatable .dt-scrollable {
+  max-height:420px !important
+}
