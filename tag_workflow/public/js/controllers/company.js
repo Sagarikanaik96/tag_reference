@@ -54,6 +54,9 @@ frappe.ui.form.on("Company", {
 		$('[data-fieldname = "phone_no"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 		$('[data-fieldname = "accounts_payable_phone_number"]>div>div>div>input').attr("placeholder", 'Example: +XX XXX-XXX-XXXX');
 		$('[data-fieldname = "accounts_receivable_phone_number"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
+		if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.branch_enabled==0){
+			frm.set_df_property('branch_integration', 'hidden', 1);
+		}
 		password_fields(frm);
 	},
 	update_employee_records: function (frm){
