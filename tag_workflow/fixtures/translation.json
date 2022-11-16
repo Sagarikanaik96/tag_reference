@@ -126,5 +126,37 @@
   "parenttype": null,
   "source_text": "Cancelled",
   "translated_text": "Canceled"
+ },
+ {
+  "context": null,
+  "contributed": 0,
+  "contribution_docname": null,
+  "contribution_status": "",
+  "docstatus": 0,
+  "doctype": "Translation",
+  "language": "en-US",
+  "modified": "2022-11-15 22:51:36.407929",
+  "name": "144489823d",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "source_text": "Industry Type",
+  "translated_text": "Industry"
+ },
+ {
+  "context": null,
+  "contributed": 0,
+  "contribution_docname": null,
+  "contribution_status": "",
+  "docstatus": 0,
+  "doctype": "Translation",
+  "language": "en",
+  "modified": "2022-11-15 22:54:30.952330",
+  "name": "242c5fca14",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "source_text": "Industry Type",
+  "translated_text": "Industry"
  }
 ]

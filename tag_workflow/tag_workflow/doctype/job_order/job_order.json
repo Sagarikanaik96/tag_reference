@@ -379,7 +379,7 @@
    "fieldname": "category",
    "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Category",
+   "label": "Industry",
    "options": "Industry Type",
    "reqd": 1
   },
@@ -700,7 +700,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-04 00:34:10.473829",
+ "modified": "2022-11-13 20:41:26.866334",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",

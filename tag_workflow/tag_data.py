@@ -31,7 +31,7 @@ def company_details(company_name=None):
         required_field=[]
         company_info = frappe.db.sql(sql, as_dict=1)
         if(len(comp_data.industry_type)==0):
-            required_field.append('Industry Type')
+            required_field.append('Industry')
         for i in company_info[0]:
             if company_info[0][i] is None or len(company_info[0][i])==0:
                 required_field.append(i)
@@ -352,7 +352,7 @@ def staff_org_details(company_details=None):
     company_info = frappe.db.sql(sql, as_dict=1)
     mandatory_field=[]
     if(len(comp_data.industry_type)==0):
-        mandatory_field.append('Industry Type')
+        mandatory_field.append('Industry')
     for i in company_info[0]:
         if company_info[0][i] is None or len(company_info[0][i])==0:
             mandatory_field.append(i)
