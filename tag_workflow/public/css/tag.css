@@ -1834,3 +1834,6 @@ span.comment-count {
 #page-query-report .datatable .dt-scrollable {
   max-height:420px !important
 }
+.pac-container{
+  z-index: 9999999;
+}

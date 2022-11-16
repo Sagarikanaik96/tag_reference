@@ -28,7 +28,6 @@ frappe.views.BaseList.prototype.prepare_data = function(r){
             this.len = this.start;
         }
     }
-    update_data();
     
 }
 
@@ -158,7 +157,6 @@ frappe.views.ListView.prototype.display_modal=function(val){
         this.page_length = 20;
         if(localStorage.getItem(frappe.session.user+'custom-address'))
             this.custom_address = localStorage.getItem(frappe.session.user+'custom-address');
-        localStorage.removeItem(frappe.session.user+'cache_data')
         this.refresh();
     }else if(val == "Custom Address"){
         if([5,10,25,50,100].includes(parseInt(this.radius)))
@@ -180,13 +178,7 @@ frappe.views.ListView.prototype.display_modal=function(val){
             cur_list.page_length = 20;
             cur_list.refresh();
             dialog.hide();
-            localStorage.setItem(frappe.session.user+'loc',JSON.stringify(cur_list.filter_loc));
-            setTimeout(()=>{
-                
-                localStorage.setItem(frappe.session.user+'cache_data',JSON.stringify(cur_list.data));
-            },2000)
-           
-            
+            localStorage.setItem(frappe.session.user+'loc',JSON.stringify(cur_list.filter_loc));            
         });
         setTimeout(()=>{select_deselect_row()},500)    
     }else{
@@ -234,7 +226,7 @@ frappe.views.ListView.prototype.create_table =function(location){
   frappe.run_serially([
     ()=>{
         location.map((l)=>{
-            if(localStorage.getItem(frappe.session.user+'location')==1 && JSON.parse(localStorage.getItem(frappe.session.user+'loc')).includes(l[0])){
+            if(JSON.parse(localStorage.getItem(frappe.session.user+'loc'))!=null && JSON.parse(localStorage.getItem(frappe.session.user+'loc')).includes(l[0])){
                 counter++;
                 setTimeout(()=>{
                     $(`.location[data-val="${l[0]}"]`).prop('checked',true);  
@@ -300,7 +292,6 @@ frappe.views.ListView.prototype.update_paging_area=function(paging_values,radius
 }
 /*---------------------------Updating button-----------------------------------------------------------*/
 frappe.views.ListView.prototype.update_button = function(){
-    localStorage.removeItem(frappe.session.user+'cache_data')
     this.filter_loc.length>0 || localStorage.getItem(frappe.session.user+'location')==1 ?$('.btn-location').addClass('active'):$('.btn-location').removeClass('active');
     if ([5,10,25,50,100].includes(parseInt(this.radius)))
             document.querySelector(`.btn-loc-rad[data-value="${this.radius}"]`).classList.add('active');
@@ -341,8 +332,6 @@ function update_radius(){
     else
         cur_list.radius='All'; 
     /*------------------------------------------------------*/
-    localStorage.removeItem(frappe.session.user+'cache_data')
-    console.log(localStorage.getItem(frappe.session.user+'cache_data'))
     const ip_t = document.querySelectorAll('#custom-address');
     const val = ip_t[document.querySelectorAll('#custom-address').length-1].value;
     if(!localStorage.getItem(frappe.session.user+'custom-addres')&& val!=''){
@@ -375,10 +364,9 @@ function uncheck_cells(items){
 
 function update_data(){
     if(cur_list.data && cur_list.doctype == "Job Order" && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
-        if(localStorage.getItem(frappe.session.user+'cache_data')){
-            let cache_data = JSON.parse(localStorage.getItem(frappe.session.user+'cache_data'));
-            cur_list.data = []
-            cur_list.data = cache_data
+        if(localStorage.getItem(frappe.session.user+'location')==1|| localStorage.getItem(frappe.session.user+'radius')){
+            cur_list.start = 0;
+            cur_list.page_length = 20;
             /***************location button************/
             localStorage.getItem(frappe.session.user+'location')==1 ?$('.btn-location').addClass('active'):$('.btn-location').removeClass('active');
             /******************radius button*********/
@@ -392,7 +380,7 @@ function update_data(){
 }
 
 function clear_cache(){
-    const cache_keys =[frappe.session.user+'location',frappe.session.user+'radius',frappe.session.user+'loc',frappe.session.user+'custom-address',frappe.session.user+'cache_data','radius']
+    const cache_keys =[frappe.session.user+'location',frappe.session.user+'radius',frappe.session.user+'loc',frappe.session.user+'custom-address','radius']
     for (let k in cache_keys){
         if (localStorage.getItem(cache_keys[k]))
             localStorage.removeItem(cache_keys[k]);
@@ -448,6 +436,12 @@ function radio_button_custom(){
 }
 
 function toggle_radio_button(dialog){
+    const  autocomplete = new google.maps.places.Autocomplete(
+        dialog.fields_dict['location'].disp_area.querySelector('#custom-address') , {
+            types: ["geocode"]
+        }
+    );
+    console.log(autocomplete)
     dialog.fields_dict['location'].disp_area.querySelector('#main').addEventListener('change',(e)=>check_cells(e))
     dialog.fields_dict['rb1'].input.addEventListener('change',e=>radio_button_location())
     dialog.fields_dict['rb2'].input.addEventListener('change',e=>radio_button_custom())
@@ -462,3 +456,6 @@ function toggle_radio_button(dialog){
     }
 }
 
+window.onload = function(){
+    setTimeout(()=> update_data(),3000)
+}
