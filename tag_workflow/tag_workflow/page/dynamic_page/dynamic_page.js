@@ -63,10 +63,15 @@ frappe.FaceRecognition = Class.extend({
 				let company_logo = r.message[3];
 
 				let industry = "";
+				let industry_vals = []
 				for(let j in my_val.industry_type){
-					industry += my_val.industry_type[j].industry_type + "<br>";
+					industry_vals.push(my_val.industry_type[j].industry_type)
 				}
-
+				industry_vals.sort()
+				let industry_list = Array.from(new Set(industry_vals))
+				for (let p in industry_list){
+					industry += industry_list[p] + "<br>";
+				}
 				let count = 0;
 				let rate = "";
 				for(let k in r.message[1]){
