@@ -129,11 +129,6 @@ frappe.ui.form.on("Job Order", {
 		staff_company_asterisks(frm);
 		repeat_order(frm);
 		set_read_fields(frm)
-		$(document).on('click', '[data-fieldname="job_start_time"]', function(){
-			$('.datepicker').show()
-			time_validation(frm)
-
-		});
 		order_buttons(frm)
 		setTimeout(function() {
 			view_button(frm);
@@ -415,9 +410,6 @@ frappe.ui.form.on("Job Order", {
 		check_value(field, name, value);
 	},
 
-	job_start_time:function(frm){
-		time_validation(frm);
-	},
 
 	availability: function(frm){
 		if(frm.doc.availability == "Custom"){
@@ -430,7 +422,6 @@ frappe.ui.form.on("Job Order", {
 
 	validate: function(frm) {
 		rate_calculation(frm);
-		time_validation(frm)
 		set_custom_base_price(frm)
 		let l = {Company: frm.doc.company, "Select Job": frm.doc.select_job, Industry: frm.doc.category, "Job Order Start Date": cur_frm.doc.from_date, "Job Site": cur_frm.doc.job_site, "No Of Workers": cur_frm.doc.no_of_workers, Rate: cur_frm.doc.rate, "Job Order End Date": cur_frm.doc.to_date, "Job Duration": cur_frm.doc.job_order_duration, "Estimated Hours Per Day": cur_frm.doc.estimated_hours_per_day, "E-Signature Full Name": cur_frm.doc.e_signature_full_name,'Availability':cur_frm.doc.availability};
 
@@ -1309,23 +1300,6 @@ function staff_claim_button(frm){
 	}
 }
 
-
-function time_validation(frm){
-	if(frm.doc.from_date && frm.doc.from_date==frappe.datetime.nowdate()){
-		let order_date=new Date(frm.doc.from_date+' '+frm.doc.job_start_time);
-		let current_date=new Date(frappe.datetime.now_datetime());
-		let diff=current_date.getTime()-order_date.getTime();
-		diff=diff/60000;
-		if(diff>=0){
-			cur_frm.set_value('job_start_time',(current_date.getHours())+':'+(current_date.getMinutes()+1));
-			cur_frm.refresh_field('job_start_time');
-			cur_frm.refresh_field('from_date');
-			$('.datepicker').hide();
-			frappe.msgprint({message: __('Past Time Is Not Acceptable'), title: __("Error"), indicator: "orange",});
-			frappe.validated=false
-		}
-	}
-}
 
 function approved_emp(){
 	frappe.call({
