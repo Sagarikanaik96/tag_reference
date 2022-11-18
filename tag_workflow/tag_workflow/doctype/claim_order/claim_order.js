@@ -27,7 +27,7 @@ frappe.ui.form.on('Claim Order', {
 		let no_of_worker = frm.doc.no_of_workers_joborder
 		let claim_no = frm.doc.staff_claims_no
 		if (claim_no > no_of_worker) {
-			frappe.msgprint(__("Claims should not be greater than no. of workers required"));
+			frappe.msgprint(__("Claims should not be greater than number of workers required"));
 			frappe.validated = false;
 		}
 		else if (claim_no != undefined && claim_no != null && claim_no < 1) {
