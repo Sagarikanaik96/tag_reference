@@ -372,6 +372,7 @@ def set_time_sheet(self):
             })
 
 def salary_slip_validate(self):
+    self.currency = frappe.db.get_value('Global Defaults','Global Defaults',"default_currency")
     self.status = self.get_status()
     validate_active_employee(self.employee)
     self.validate_dates()
