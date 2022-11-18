@@ -130,6 +130,7 @@ frappe.ui.form.on('Employee Onboarding', {
 	},
 	staffing_company: (frm)=>{
 		get_user(frm);
+		get_template_name(frm);
 	},
 	status: (frm)=>{
 		frm.set_value('boarding_status', frm.doc.status)
@@ -223,6 +224,15 @@ frappe.ui.form.on('Employee Onboarding', {
 			}
 		})
 	},
+	template_name: (frm)=>{
+		if(frm.doc.template_name){
+			frappe.db.get_value('Employee Onboarding Template', {'company': frm.doc.staffing_company, 'template_name': frm.doc.template_name}, ['name'], (res)=>{
+				if(res && res.name){
+					frm.set_value('employee_onboarding_template', res.name);
+				}
+			})
+		}
+	}
 });
 
 function trigger_hide(frm){
@@ -267,7 +277,7 @@ function create_job_applicant_and_offer(frm){
 	let args = {
 		applicant_name: frm.doc.employee_name,
 		email: frm.doc.email,
-		company: frm.doc.company
+		company: frm.doc.staffing_company
 	}
 	if(frm.doc.contact_number){
 		args.contact_number = frm.doc.contact_number;
@@ -369,6 +379,7 @@ function confirmation(frm){
 
 function password_fields(frm){
 	if(frm.doc.__islocal!=1 && frm.doc.docstatus==0){
+		get_template_name(frm, 'Template Defined')
 		$('[data-fieldname="sssn"]').attr('readonly', 'readonly');
 		$('[data-fieldname="sssn"]').attr('type', 'password');
 		$('[data-fieldname="sssn"]').attr('title', '');
@@ -426,5 +437,27 @@ function show_pass(){
 function hide_pass(){
 	if(cur_frm.doc.sssn){
 		cur_frm.set_value('sssn', '•'.repeat(cur_frm.doc.sssn.length));
+	}
+}
+
+function get_template_name(frm, message=''){
+	if(frm.doc.staffing_company){
+		frappe.call({
+			'method': 'tag_workflow.tag_data.get_template_name',
+			'args': {
+				'company': frm.doc.staffing_company
+			},
+			'callback': (res)=>{
+				if(res.message[0]){
+					frm.set_df_property('template_name', 'options', res.message[0]);
+				}else{
+					frm.set_df_property('template_name', 'options', '');
+				}
+
+				if(res.message[1] && !message){
+					frm.set_value('template_name', res.message[1]);
+				}
+			}
+		});
 	}
 }

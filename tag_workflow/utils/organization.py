@@ -28,6 +28,8 @@ USR, EMP, COM = "User", "Employee", "Company"
 Global_defaults="Global Defaults"
 Temp_Emp = "Temp Employee"
 Job_Site = 'Job Site'
+Emp_Onb_Temp = 'Employee Onboarding Template'
+Not_Set = 'not set'
 
 ALL_ROLES = [role.name for role in frappe.db.get_list("Role", {"name": ["!=", "Employee"]}, ignore_permissions=True) or []]
 
@@ -74,6 +76,8 @@ def setup_data():
             updating_date_of_joining,
             update_password_field,
             staffing_radius,
+            set_default_template,
+            set_template_name,
             make_commit
             ]
         for method in methods:
@@ -332,7 +336,7 @@ def emp_job_title():
 #------Update Old Data Import-------
 def update_old_data_import():
     try:
-        data_imp=frappe.get_all('Data Import',fields=['name','user_company'],filters={'owner':'Administrator','reference_doctype':'Employee','user_company':['is','not set']})
+        data_imp=frappe.get_all('Data Import',fields=['name','user_company'],filters={'owner':'Administrator','reference_doctype':'Employee','user_company':['is',Not_Set]})
         tag_comp=frappe.get_all('User',fields=['company'],filters={"organization_type": 'TAG'})
         if(len(data_imp)>0 and len(tag_comp)>0):
             for i in data_imp:
@@ -343,7 +347,7 @@ def update_old_data_import():
 #-----Update Company Type--------
 def update_old_company_type():
     try:
-        jobs=frappe.get_all('Job Order',fields=['name','company'],filters={'company_type':['is','not set']})
+        jobs=frappe.get_all('Job Order',fields=['name','company'],filters={'company_type':['is',Not_Set]})
         if(len(jobs)>0):
             for i in jobs:
                 company_type=frappe.get_doc('Company',i['company'])
@@ -611,3 +615,33 @@ def make_commit():
     except Exception as e:
         print(e)
 
+@frappe.whitelist()
+def set_default_template():
+    try:
+        print("*------updating default employee onboarding template---------*\n")
+        staffing_companies = set([c['company'] for c in frappe.get_all(Emp_Onb_Temp, ['company'])])
+        for company in staffing_companies:
+            comp_data = frappe.get_all(Emp_Onb_Temp, {'company': company, 'default_template':1}, ['name'])
+            if not comp_data:
+                frappe.db.sql(f'''UPDATE `tabEmployee Onboarding Template` SET default_template = 1 WHERE name=(SELECT name FROM `tabEmployee Onboarding Template` WHERE company="{company}" ORDER BY creation LIMIT 1)''')
+                frappe.db.commit()
+    except Exception as e:
+        frappe.log_error(e, 'set_default_template Error')
+
+@frappe.whitelist()
+def set_template_name():
+    try:
+        print("*------updating template name for old employee onboarding---------*\n")
+        emp_onb = frappe.get_all('Employee Onboarding', {'employee_onboarding_template': ['is', 'set'], 'template_name':['is', Not_Set]}, ['name'])
+        emp_onb_list = [e['name'] for e in emp_onb]
+        if len(emp_onb_list) > 0:
+            frappe.db.sql(f'''UPDATE `tabEmployee Onboarding` set template_name=employee_onboarding_template where name in {tuple(emp_onb_list)}''')
+            frappe.db.commit()
+
+        emp_onb_temp = frappe.get_all(Emp_Onb_Temp, {'template_name':['is', Not_Set]}, ['name'])
+        emp_onb__temp_list = [e['name'] for e in emp_onb_temp]
+        if len(emp_onb__temp_list) > 0:
+            frappe.db.sql(f'''UPDATE `tabEmployee Onboarding Template` set template_name=name where name in {tuple(emp_onb__temp_list)}''')
+            frappe.db.commit()
+    except Exception as e:
+        frappe.log_error(e, 'set_template_name Error')

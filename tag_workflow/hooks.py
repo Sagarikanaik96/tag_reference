@@ -140,6 +140,7 @@ doctype_list_js = {
         "Payroll Entry": "public/js/doctype_list/payroll_entry_list.js",
         "Salary Structure": "public/js/doctype_list/salary_structure_list.js",
         "System Setting": "public/js/doctype_list/system_setting.js",
+        "Employee Onboarding": "public/js/doctype_list/employee_onboarding_list.js",
 }
 
 before_migrate = ["tag_workflow.utils.organization.remove_field"]

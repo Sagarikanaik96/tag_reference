@@ -3,19 +3,28 @@
 import frappe
 import unittest
 import json
-from tag_workflow.tag_data import claim_order_insert,update_timesheet,company_details,staff_org_details,update_staffing_user_with_exclusive, check_assign_employee,job_site_contact,hiring_category,org_industy_type,disable_user
+from tag_workflow.tag_data import claim_order_insert,update_timesheet,company_details,staff_org_details,update_staffing_user_with_exclusive, check_assign_employee,job_site_contact,hiring_category,org_industy_type,disable_user, get_template_name
 JO='Job Order'
 jo_test_records = frappe.get_test_records(JO)
 GTS='Genpact Test44 Staffing'
 GTST='Genpact Test Staffing'
 userGT='test_genpact_test_staffing4422@yopmail.com'
 userGTA='test_genpact_test_staffingadmin4422@yopmail.com'
+
+template_name1 = 'Temp Emp1'
+template_name2 = 'Temp Emp2'
+
+Ind_Type = 'Industry Type'
+comp_details_path = 'assets/tag_workflow/js/test_records/test_records_company_details.json'
+
+emp_onb_temp = 'Employee Onboarding Template'
 class TestTagData(unittest.TestCase):
 	def test_claim_order_insert(self):
+		self.create_job_industry()  		
 		records_file = open('assets/tag_workflow/js/test_records/test_records.json')
 		test_records = json.load(records_file)
 		self.create_company(test_records)
-		for record in jo_test_records:
+		for record in jo_test_records:		
 			job_order = frappe.new_doc(JO)
 			job_order.company = record['company']
 			job_order.select_job = record['select_job']
@@ -34,12 +43,7 @@ class TestTagData(unittest.TestCase):
 			job_order.per_hour=record['per_hour']
 			job_order.flat_rate=record['flat_rate']
 			job_order.save()
-			if isinstance(record['per_hour'], str):
-				try:
-					pay_rate=round(record['per_hour'] + record['flat_rate'],2)
-				except Exception as e:
-					if str(e)=="must be str, not int":
-						break
+			pay_rate=round(record['per_hour'] + record['flat_rate'],2)
 			result=claim_order_insert(pay_rate, job_order.company,job_order.name,job_order.no_of_workers,job_order.e_signature_full_name,job_order.staff_company)
 			self.assertEqual(1,result)
 			job_order_updated = frappe.get_doc(JO, job_order.name)
@@ -48,7 +52,17 @@ class TestTagData(unittest.TestCase):
 			self.assertEqual('Genpact Staffing',job_order_updated.staff_org_claimed)
 			self.delete_test_data(job_order.name)	
 
-	def create_company(self,test_records):
+	def create_job_industry(self):
+		try:
+			if not frappe.db.exists(Ind_Type, 'IT'):
+				frappe.get_doc({
+					'doctype': Ind_Type,
+					'industry': 'IT'
+				}).insert(ignore_permissions=True)
+		except Exception as e:
+			frappe.log_error(e, 'Test Tag Data: create_job_industry Error')
+
+	def create_company(self,test_records):	
 		for record in test_records:
 			company_exists=frappe.db.get_value('Company',{'company_name':record['company_name']},'name')
 			if not company_exists:
@@ -116,7 +130,7 @@ class TestTagData(unittest.TestCase):
 			frappe.delete_doc(JO,job_order.name)
 
 	def test_company_details(self):
-		records_file = open('assets/tag_workflow/js/test_records/test_records_company_details.json')
+		records_file = open(comp_details_path)
 		test_records = json.load(records_file)
 		self.create_company(test_records)
 		user_exists=frappe.db.get_value('User',{'email':'test_tag_admin4422@yopmail.com'},'name')
@@ -134,19 +148,19 @@ class TestTagData(unittest.TestCase):
 		self.assertEqual(['City'],fields)
 		#Test case 2
 		fields=company_details(GTST)
-		self.assertEqual(['Industry Type', 'Accounts Payable Email'],fields)
+		self.assertEqual(['Industry', 'Accounts Payable Email'],fields)
 		#Test case 3
 		fields=company_details("Genpact Hiring")
 		self.assertEqual('success',fields)
 
 	def test_staff_org_details(self):
 		frappe.set_user("Administrator")
-		records_file = open('assets/tag_workflow/js/test_records/test_records_company_details.json')
+		records_file = open(comp_details_path)
 		test_records = json.load(records_file)
 		self.create_company(test_records)
 		#Test case 1
 		fields=staff_org_details(GTST)
-		self.assertEqual(['Industry Type', 'Accounts Receivable Rep email', 'Accounts Receivable Name', 'Accounts Receivable phone number', 'Cert of Insurance', 'Safety Manual', 'W9'],fields)
+		self.assertEqual(['Industry', 'Accounts Receivable Rep email', 'Accounts Receivable Name', 'Accounts Receivable phone number', 'Cert of Insurance', 'Safety Manual', 'W9'],fields)
 		#Test case 2
 		fields=staff_org_details(GTS)
 		self.assertEqual('success',fields)
@@ -218,3 +232,62 @@ class TestTagData(unittest.TestCase):
 		disable_user(GTS,"1")
 		user_doc=frappe.get_doc('User', userGTA)
 		self.assertEqual(0,user_doc.enabled)
+
+	def test_get_template_name(self):
+		records_file = open(comp_details_path)
+		test_records = json.load(records_file)
+		self.create_company(test_records)
+		self.create_emp_onb_temp1()
+		self.create_emp_onb_temp2()
+		self.get_template_name_test()
+		self.delete_test_data2()
+	
+	def create_emp_onb_temp1(self):
+		try:
+			if not frappe.db.exists(emp_onb_temp, {'company': GTST, 'template_name': template_name1}):
+				self.temp1 = frappe.get_doc({
+					'doctype': emp_onb_temp,
+					'company': GTST,
+					'template_name': template_name1,
+					'default_template': 0
+				}).insert(ignore_permissions = True)
+		except Exception as e:
+			print(e)
+			frappe.log_error(e, 'Test tag_data: create_emp_onb_temp2 Error')
+    
+	def create_emp_onb_temp2(self):
+		try:
+			if not frappe.db.exists(emp_onb_temp, {'company': GTST, 'template_name': template_name2}):
+				self.temp1 = frappe.get_doc({
+					'doctype': emp_onb_temp,
+					'company': GTST,
+					'template_name': template_name2,
+					'default_template': 1
+				}).insert(ignore_permissions = True)
+		except Exception as e:
+			print(e)
+			frappe.log_error(e, 'Test tag_data: create_emp_onb_temp2 Error')
+
+	def get_template_name_test(self):
+		expected_result1 = f'{template_name2}\n{template_name1}'
+		expected_result2 = template_name2
+
+		result1, result2= get_template_name(GTST)
+		self.test_temp(expected_result1, result1)
+		self.test_temp(expected_result2, result2)
+
+	def test_temp(self, expected_result=None, result=None):
+		if expected_result and result:
+			self.assertEqual(expected_result, result)
+
+	def delete_test_data2(self):
+		try:
+			frappe.set_user("Administrator")
+			temp1 = frappe.db.get_value(emp_onb_temp, {'company': GTST, 'template_name': template_name1}, ['name'])
+			frappe.delete_doc(emp_onb_temp, temp1)
+
+			temp2 = frappe.db.get_value(emp_onb_temp, {'company': GTST, 'template_name': template_name2}, ['name'])
+			frappe.delete_doc(emp_onb_temp, temp2)
+		except Exception as e:
+			print(e)
+			frappe.log_error(e, 'Test tag_data: delete_test_data Error')

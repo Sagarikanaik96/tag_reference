@@ -20,6 +20,7 @@ NOASS = "No Access"
 exclusive_hiring = "Exclusive Hiring"
 non_exlusive='Non Exclusive'
 emp_onb = 'Employee Onboarding'
+emp_onb_temp = 'Employee Onboarding Template'
 site= frappe.utils.get_url().split('/')
 sitename=site[0]+'//'+site[2]
 response='Not Found'
@@ -1763,3 +1764,14 @@ def get_comp_code(title,company):
     except Exception as e:
         print (e)
         return "Error"
+
+@frappe.whitelist()
+def get_template_name(company):
+    try:
+        template_list = []
+        templates = frappe.get_all(emp_onb_temp, {'company': company}, ['name','template_name'])
+        template_list = [temp['template_name'] if temp['template_name'] else temp['name'] for temp in templates]
+        default_temp = frappe.db.get_value(emp_onb_temp, {'company': company, 'default_template': 1}, ['template_name'])
+        return '\n'.join(template_list), default_temp
+    except Exception as e:
+        frappe.log_error(e, 'get_template_name error')
