@@ -26,15 +26,19 @@ frappe.ui.form.on('Add Timesheet', {
 		frm.add_custom_button(__('Save'), function() {
 			let save=1
 			if(frm.doc.job_order && frm.doc.date && frm.doc.from_time && frm.doc.to_time && frm.doc.items){
+				updating_page(1)
 				update_timesheet(frm,save);
 			}
 			else{
+				updating_page(1)
 				update_time_data(frm,save)
 			}
 		}).addClass("btn-primary");
 		frm.add_custom_button(__('Submit Timesheet'), function() {
 			let save=0
+			updating_page(0)
 			update_timesheet(frm,save);
+			
 		}).addClass("btn-primary btn-submit");
 
 		let jo=localStorage.getItem("order")
@@ -59,6 +63,7 @@ frappe.ui.form.on('Add Timesheet', {
 		$(document).on('click', '[data-fieldname="break_to_time"]', function(){
 			$('.datepicker').show()
 		});
+		setting_job_order_value()
 	},
 
 	job_order: function(frm){
@@ -421,14 +426,6 @@ function update_timesheet(frm,save){
 			async: 1,
 			freeze: true,
 			freeze_message: "Please wait while we are adding timesheet(s)...",
-			callback: function(r){
-				if(r){
-					if(r.message == 1){
-						frappe.msgprint({message: __("Timesheet(s) has been added successfully"), title: __('Successful'), indicator: 'green'});
-						cur_frm.reload_doc();
-					}
-				}
-			}
 		});
 	}else{
 		frappe.msgprint({message: __("(*) fields are required"), title: __('Mandatory'), indicator: 'red'});
@@ -596,14 +593,6 @@ function update_timesheet_save(items,cur_selected,job_order,date,from_time,to_ti
 		async: 1,
 		freeze: true,
 		freeze_message: "Please wait while we are adding timesheet(s)...",
-		callback: function(r){
-			if(r){
-				if(r.message == 1){
-					frappe.msgprint({message: __("Timesheet(s) has been added successfully"), title: __('Successful'), indicator: 'green'});
-					cur_frm.reload_doc();
-				}
-			}
-		}
 	});
 }
 
@@ -743,4 +732,16 @@ function check_break_from_to_timesheet_value(frm){
 		frm.set_value('to_time',frm.doc.break_to_time);
 	}	
 
+}
+function updating_page(t){
+	let time_after=5000
+	if(t==0){
+		time_after=3000
+	}
+	setTimeout(function(){
+		if(!cur_dialog){
+			frappe.msgprint({message: __("Timesheet(s) has been added successfully"), title: __('Successful'), indicator: 'green'});
+			window.location.reload()
+		}
+	},time_after)
 }
