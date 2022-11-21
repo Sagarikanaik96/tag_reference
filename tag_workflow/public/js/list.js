@@ -363,7 +363,7 @@ function uncheck_cells(items){
 }
 
 function update_data(){
-    if(cur_list.data && cur_list.doctype == "Job Order" && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+    if(cur_list && cur_list.doctype == "Job Order" && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
         if(localStorage.getItem(frappe.session.user+'location')==1|| localStorage.getItem(frappe.session.user+'radius')){
             cur_list.start = 0;
             cur_list.page_length = 20;

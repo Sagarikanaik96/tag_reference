@@ -440,6 +440,27 @@ function hide_pass(){
 	}
 }
 
+
+frappe.ui.form.on('Employee Boarding Activity',{
+	status:(frm,cdt,cdn)=>{
+		const row = locals[cdt][cdn];
+		if(row.status && row.status=='Completed'){
+			console.log(frappe.meta.get_docfield)
+			frm.fields_dict['activities'].grid.grid_rows_by_docname[row.name].toggle_editable('completed_on',1)
+			frm.fields_dict['activities'].grid.grid_rows_by_docname[row.name].toggle_reqd('completed_on',1)
+			frappe.model.set_value(cdt,cdn,'completed_on',frappe.datetime.now_date())
+			frm.fields_dict['activities'].grid.grid_rows_by_docname[row.name].refresh_field('completed_on')
+			
+			
+		}else if(row.status && row.status!="Completed"){
+			frm.fields_dict['activities'].grid.grid_rows_by_docname[row.name].toggle_editable('completed_on',0)
+			frappe.model.set_value(cdt,cdn,'completed_on',undefined)
+			frm.fields_dict['activities'].grid.grid_rows_by_docname[row.name].toggle_reqd('completed_on',0)
+			frm.fields_dict['activities'].grid.grid_rows_by_docname[row.name].refresh_field('completed_on')
+		}
+	}
+})
+
 function get_template_name(frm, message=''){
 	if(frm.doc.staffing_company){
 		frappe.call({
@@ -461,3 +482,4 @@ function get_template_name(frm, message=''){
 		});
 	}
 }
+
