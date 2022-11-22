@@ -189,6 +189,7 @@ frappe.ui.form.on("Job Order", {
 		$('.frappe-control[data-fieldname="html_3"]').attr('id','claim-order-submission')
 		$('.frappe-control[data-fieldname="resumes_required"]').attr('id','resume-required')
 		$('#awesomplete_list_4').attr('id','jobsite-dropdown')
+		prevent_click_event(frm);
 	},
 
 	select_job: function(frm) {
@@ -2572,3 +2573,22 @@ frappe.get_modal = function(title, content) {
 		</div>
 	</div>`);
 };
+function prevent_click_event(frm){
+	if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
+		$('[data-doctype="Item"]').on('click', function(e){
+			remove_href('Item',e)
+		});
+		$('[data-doctype="Industry Type"]').on('click', function(e){
+			remove_href('Industry Type',e)
+		});
+		$('[data-doctype="Job Site"]').on('click', function(e){
+			remove_href('Job Site',e)
+		});
+	}
+}
+function remove_href(doc_name,e){
+	e.preventDefault()
+	Array.from($('[data-doctype="'+doc_name+'"]')).forEach(_field => {
+		_field.href='#'
+	})
+}
