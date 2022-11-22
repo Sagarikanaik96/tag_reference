@@ -47,41 +47,43 @@ SPACE_PROFILE = ["CRM", "Users", tag_workflow, "Settings", "Home", "My Activitie
 
 #------setup data for TAG -------------#
 @frappe.whitelist()
+def call_setup():
+    try:
+        frappe.enqueue("tag_workflow.utils.organization.setup_data",queue='long',timeout=4000,job_name='setup_data')
+        frappe.msgprint("Setup functions started in background.")
+    except Exception as e:
+        print(e)
+
 def setup_data():
     try:
         frappe.db.set_value(Global_defaults,Global_defaults,"default_currency", "USD")
         frappe.db.set_value(Global_defaults,Global_defaults,"hide_currency_symbol", "No")
         frappe.db.set_value(Global_defaults,Global_defaults,"disable_rounded_total", "1")
         frappe.db.set_value(Global_defaults,Global_defaults,"country", "United States")
-        methods =[
-            update_organization_data,
-            update_roles,
-            update_tag_user_type,
-            update_role_profile,
-            update_module_profile,
-            update_permissions,
-            update_old_data_import,
-            update_old_direct_order,
-            update_old_company_type,
-            update_old_job_sites,
-            create_job_applicant,
-            set_workspace,
-            setup_company_permission,
-            check_if_user_exists,
-            update_job_title_list,
-            update_old_lead_status,
-            share_company_with_user,
-            emp_job_title,
-            update_salary_structure,
-            updating_date_of_joining,
-            update_password_field,
-            staffing_radius,
-            set_default_template,
-            set_template_name,
-            make_commit
-            ]
-        for method in methods:
-            frappe.enqueue(method,now=True)
+        update_organization_data()
+        update_roles()
+        update_tag_user_type()
+        update_role_profile()
+        update_module_profile()
+        update_permissions()
+        update_old_data_import()
+        update_old_direct_order()
+        update_old_company_type()
+        update_old_job_sites()
+        create_job_applicant()
+        set_workspace()
+        setup_company_permission()
+        check_if_user_exists()
+        update_job_title_list()
+        update_old_lead_status()
+        share_company_with_user()
+        emp_job_title()
+        update_salary_structure()
+        updating_date_of_joining()
+        update_password_field()
+        staffing_radius()
+        disable_scheduler()
+        make_commit()
     except Exception as e:
         print(e)
         frappe.log_error(e, "Master")
@@ -91,6 +93,7 @@ def setup_data():
 def update_organization_data():
     try:
         print("*------updating organization data-----------*\n")
+        frappe.logger().debug("*------updating organization data-----------*\n")
         sql = """ delete from `tabOrganization Type` """
         frappe.db.sql(sql)
         for data in ADD_ORGANIZATION_DATA:
@@ -105,6 +108,7 @@ def update_organization_data():
 def update_roles():
     try:
         print("*------updating roles-----------------------*\n")
+        frappe.logger().debug("*------roles-----------*\n")
         for role in ROLES:
             if not frappe.db.exists("Role", {"name": role}):
                 role_doc = frappe.get_doc(dict(doctype = "Role", role_name = role, desk_access = 1, search_bar = 1, notifications = 1, list_sidebar = 1, bulk_action = 1, view_switcher = 1, form_sidebar = 1, timeline = 1, dashboard = 1))
@@ -117,6 +121,7 @@ def update_roles():
 def update_role_profile():
     try:
         print("*------updating role profile----------------*\n")
+        frappe.logger().debug("*------updating role profile-----------*\n")
         profiles = {k for role in ROLE_PROFILE for k in role.keys()}
         for profile in profiles:
             try:
@@ -143,9 +148,12 @@ def update_role_profile():
 def update_module_profile():
     try:
         print("*------updating module profile--------------*\n")
+        frappe.logger().debug("*------updating module profile-----------*\n")
         all_modules = [m.get("module_name") for m in get_modules_from_all_apps()]
         modules = {k for module in MODULE_PROFILE for k in module.keys()} 
+        print(modules)
         for mods in modules:
+            print(mods)
             module_data = [profile[mods] for profile in MODULE_PROFILE if mods in profile][0]
 
             if not frappe.db.exists(Module, {"name": mods}):
@@ -171,6 +179,7 @@ def module_data_update(all_modules, module_data, module_doc):
 def update_permissions():
     try:
         print("*------updating permissions-----------------*\n")
+        frappe.logger().debug("*------updating permissions-----------*\n")
         sql = """ delete from `tabCustom DocPerm` """
         frappe.db.sql(sql)
         FILE_PATH = str(Path(__file__).resolve().parent) + "/role_permission.json"
@@ -207,6 +216,7 @@ def refactor_permission_data(file_path):
 def set_workspace():
     try:
         print("*------updating workspace-------------------*\n")
+        frappe.logger().debug("*------updating workspace-----------*\n")
         workspace = frappe.get_list("Workspace", ['name'])
         for space in workspace:
             if(space.name not in SPACE_PROFILE):
@@ -218,6 +228,7 @@ def set_workspace():
 def setup_company_permission():
     try:
         print("*------company permission-------------------*\n")
+        frappe.logger().debug("*------company permission-----------*\n")
         companies = frappe.get_list("Company", ["name"])
         for com in companies:
             make_update_comp_perm(com.name)
@@ -246,6 +257,7 @@ def check_if_user_exists():
 def update_job_title_list():
     try:
         print("*------job title list-----------------------*\n")
+        frappe.logger().debug("*------updating job title list-----------*\n")
         job_designation_list=frappe.db.sql('select name,industry_type,price,description,designation_name from `tabDesignation` where organization is null and industry_type is not null;',as_dict=1)      
         if(len(job_designation_list)>0):
             for i in range(len(job_designation_list)):  
@@ -261,6 +273,7 @@ def update_job_title_list():
 def update_tag_user_type():
     try:
         print("*------updating user type-------------------*\n")
+        frappe.logger().debug("*------updating user_type-----------*\n")
         tag_admin = tag_admin = frappe.get_list('User',fields= ['name'],filters= {'tag_user_type': 'Tag Admin'}, as_list=1)
         if(len(tag_admin)>0):
             for name in tag_admin:
@@ -273,6 +286,7 @@ def update_tag_user_type():
 def update_old_lead_status():
     try:
         print('*------updating old lead status-------------*\n')
+        frappe.logger().debug("*------updating old lead status-----------*\n")
         old_leads=frappe.db.sql('select name, company_name,status from `tabLead` where company_name in (select name from `tabCompany` where organization_type="Exclusive Hiring") and status="Open";',as_dict=1)
         if(len(old_leads)>0):
             for i in range(len(old_leads)):
@@ -318,6 +332,7 @@ def single_share(old_order,i):
 def emp_job_title():
     try:
         print("*------updating employee job title----------*\n")
+        frappe.logger().debug("*------updating employee job title-----------*\n")
         sql = '''SELECT parent, GROUP_CONCAT(job_category ORDER BY idx) AS category FROM `tabJob Category` GROUP BY parent'''
         emp = frappe.db.sql(sql, as_dict = 1)
         for i in emp:
@@ -416,6 +431,7 @@ def update_old_job_sites():
 
 def update_salary_structure():
     try:
+        frappe.logger().debug("*------updating salary structure-----------*\n")
         company_names = frappe.db.sql("""select name from `tabCompany` where  organization_type = 'Staffing' OR organization_type = 'TAG'""",as_dict=1)
         for company_name in company_names:
             check = frappe.db.exists("Salary Structure",{"name":"Temporary Employees_"+company_name.name,"company":company_name.name})
@@ -432,6 +448,7 @@ def update_salary_structure():
 def updating_date_of_joining():
     try:
         print("*-----------Updating Date of Joining------------*")
+        frappe.logger().debug("*------updating Date of Joining-----------*\n")
         frappe.db.sql("""update `tabEmployee` set date_of_joining = "2021-01-01" where date_of_joining is null""")
         frappe.db.sql("""Update `tabEmployee Onboarding` set date_of_joining = '2021-01-01' where date_of_joining is null""")
     except Exception as e:
@@ -478,10 +495,11 @@ def remove_fields():
 
 def staffing_radius():
     try:
+        frappe.logger().debug("*------updating Staffing Radius----------*\n")
         check_table = frappe.db.sql('''SELECT * FROM information_schema.tables WHERE table_name = "tabStaffing Radius"''', as_dict=1)
         if len(check_table) == 0:
             frappe.db.sql('''CREATE TABLE `tabStaffing Radius` (name varchar(255) not null primary key,job_site varchar(140),hiring_company varchar(140),staffing_company varchar(140),radius varchar(140))''')
-        frappe.enqueue('tag_workflow.utils.organization.staffing_jobsite_mapping', message=migrate_sch, queue='long', is_async=True)
+        frappe.enqueue('tag_workflow.utils.organization.staffing_jobsite_mapping', message=migrate_sch, queue='long', is_async=True,job_name="setup_data")
     except Exception as e:
         frappe.log_error(e, 'Staffing Radius Error')
 
@@ -542,7 +560,7 @@ def staffing_jobsite_mapping(message = None, job_site_name = None, staffing_comp
     company_data, job_site_data = get_data(message, job_site_name,staffing_company)
     for company in company_data:
         try:
-            frappe.enqueue('tag_workflow.utils.organization.staffing_jobsite_mapping_contd', company = company, job_site_data=job_site_data, gmaps=gmaps, is_async= True, queue='long')
+            frappe.enqueue('tag_workflow.utils.organization.staffing_jobsite_mapping_contd', company = company, job_site_data=job_site_data, gmaps=gmaps, is_async= True, queue='long',job_name="setup_data")
         except Exception as e:
             frappe.log_error(e, 'staffing_job_site_mapping Company Error')
             continue
@@ -611,11 +629,33 @@ def calculate_dist(km, company, job_site):
 def make_commit():
     try:
         print("*------making-sql-commit-----------------------*\n")
+        frappe.logger().debug("*------commit-----------*\n")
         frappe.db.commit()
     except Exception as e:
         print(e)
 
 @frappe.whitelist()
+def get_job_status():
+    try:
+        from rq import Queue, Worker
+        from frappe.utils.background_jobs import get_redis_conn
+        conn = get_redis_conn()
+        workers = Worker.all(conn)
+        queues = Queue.all(conn)
+
+        for worker in workers:
+            job = worker.get_current_job()
+            if job and job.kwargs.get('job_name') == 'setup_data':
+                    return 1
+
+        for queue in queues:
+            for job in queue.jobs:
+                if job and job.kwargs.get('job_name') == 'setup_data':
+                    return 1
+        return 0
+    except Exception as e:
+        return 0
+        frappe.msgprint(e)
 def set_default_template():
     try:
         print("*------updating default employee onboarding template---------*\n")
@@ -645,3 +685,10 @@ def set_template_name():
             frappe.db.commit()
     except Exception as e:
         frappe.log_error(e, 'set_template_name Error')
+
+def disable_scheduler():
+    try:
+        print("*------disable scheduler-----------------------*\n")
+        frappe.db.sql(""" update `tabSingles` set value=1 where doctype="System Settings" and field="job_disable" """)
+    except Exception as e:
+        print(e)

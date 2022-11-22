@@ -243,7 +243,10 @@ class DesktopPage {
 		this.make();
 		if (frappe.session.user=='Administrator'){
 				cur_page.page.page.set_primary_action('Scheduler Setting',this.display_dialog)
-				cur_page.page.page.add_button('Setup Functions',this.setup_functions)
+				cur_page.page.page.add_button('Setup Functions',this.setup_functions,{'btn_class':'btn-primary btn-custom'})
+				cur_page.page.page.add_action_icon('refresh',this.get_job_status,'Refresh')
+				this.get_job_status()
+		
 		}
 	}
 
@@ -613,7 +616,22 @@ class DesktopPage {
 		
 	}
 	setup_functions(){
-		frappe.call({method:"tag_workflow.utils.organization.setup_data"})
+		frappe.call({method:"tag_workflow.utils.organization.call_setup"})
+		document.querySelector('.btn-custom').setAttribute('disabled',true)
+	}
+	get_job_status(){
+		document.querySelector('.icon-btn > svg').classList.add('fa-spin')
+		frappe.call({
+			method:"tag_workflow.utils.organization.get_job_status",
+			callback:(r)=>{
+				if(r.message)
+					document.querySelector('.btn-custom').setAttribute('disabled',true)
+				else
+					document.querySelector('.btn-custom').removeAttribute('disabled')
+				setTimeout(()=>document.querySelector('.icon-btn > svg').classList.remove('fa-spin'),1000)
+				
+			}
+		})
 	}
 }
 
