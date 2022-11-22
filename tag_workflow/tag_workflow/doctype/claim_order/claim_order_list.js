@@ -111,6 +111,7 @@ function refresh(listview) {
           "per_hour",
         ],
         function (r) {
+          let date_sequence = checking_same_date(r)
           let data = rm.message;
           let profile_html = `<table><th>Staffing Company</th><th>Workers</th><th>Approve</th><th>Notes</th>`;
           for (let p in data) {
@@ -134,7 +135,7 @@ function refresh(listview) {
               {
                 fieldname: "html_per_hour",
                 fieldtype: "HTML",
-                options: "<label>Price:</label>$" + r["per_hour"],
+                options: "<label>Price:</label>$" + r["per_hour"].toFixed(2),
               },
 
               { fieldname: "inputdata2", fieldtype: "Column Break" },
@@ -142,11 +143,7 @@ function refresh(listview) {
               {
                 fieldname: "html_date",
                 fieldtype: "HTML",
-                options:
-                  "<label>Date:</label>" +
-                  frappe.format(r["from_date"], { fieldtype: "Date" }) +
-                  "--" +
-                  frappe.format(r["to_date"], { fieldtype: "Date" }),
+                options: date_sequence    
               },
               {
                 fieldname: "html_workers",
@@ -301,6 +298,7 @@ function modify_claims(listview) {
         ],
         function (r) {
           let job_data = rm.message;
+          let date_value = checking_same_date(r)
           let profile_html = `<table class="table-responsive"><th>Claim No.</th><th>Staffing Company</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th><th>Notes</th>`;
           for (let p in job_data) {
             profile_html += `<tr>
@@ -328,23 +326,19 @@ function modify_claims(listview) {
               {
                 fieldname: "html_per_hour1",
                 fieldtype: "HTML",
-                options: "<label>Price:</label>$" + r["per_hour"],
+                options: "<label>Price:</label>$" + r["per_hour"].toFixed(2),
               },
               { fieldname: "inputdata3", fieldtype: "Column Break" },
               {
                 fieldname: "html_date1",
                 fieldtype: "HTML",
-                options:
-                  "<label>Date:</label>" +
-                  frappe.format(r["from_date"], { fieldtype: "Date" }) +
-                  "--" +
-                  frappe.format(r["to_date"], { fieldtype: "Date" }),
+                options: date_value    
               },
               {
                 fieldname: "html_workers1",
                 fieldtype: "HTML",
                 options:
-                  "<label>No. Of Workers Required:</label>" +
+                  "<label>Remaining Workers Needed:</label>" +
                   (r["no_of_workers"] - r["worker_filled"]),
               },
               { fieldname: "inputdata2", fieldtype: "Section Break" },
@@ -638,4 +632,18 @@ function check_notes_length(notes,staffing_org){
   }
   return valid1
 
+}
+function checking_same_date(r){
+  let date_order
+          if(frappe.format(r["from_date"], { fieldtype: "Date" })==frappe.format(r["to_date"], { fieldtype: "Date" })){
+            date_order=`<label>Date:</label>
+                    ${frappe.format(r["from_date"], { fieldtype: "Date" })}`
+          }
+          else{
+            date_order =`<label>Date:</label>
+                    ${frappe.format(r["from_date"], { fieldtype: "Date" })} 
+                     -- 
+                    ${frappe.format(r["to_date"], { fieldtype: "Date" })}` 
+          }
+          return date_order
 }
