@@ -79,7 +79,10 @@ app_include_js = [
         "/assets/tag_workflow/js/frappe/data_import/index.js",
         "/assets/tag_workflow/js/frappe/data_import/import_preview.js",
         "/assets/tag_workflow/js/frappe/data_import/data_exporter.js",
-        "/assets/tag_workflow/js/user_profile_controller.js"
+        "/assets/tag_workflow/js/user_profile_controller.js",
+        "/assets/tag_workflow/js/frappe/views/breadcrumbs.js",
+        "/assets/tag_workflow/js/frappe/print.js",
+        "/assets/tag_workflow/js/frappe/dashboard.js"
 
 ]
 
@@ -215,7 +218,8 @@ override_whitelisted_methods = {
         "frappe.client.save": "tag_workflow.utils.whitelisted.save",
         "erpnext.accounts.party.get_due_date": "tag_workflow.utils.invoice.get_due_date",
         "frappe.model.workflow.bulk_workflow_approval":"tag_workflow.utils.workflow.bulk_workflow_approval",
-        "erpnext.hr.utils.get_onboarding_details": "tag_workflow.utils.whitelisted.get_onboarding_details"
+        "erpnext.hr.utils.get_onboarding_details": "tag_workflow.utils.whitelisted.get_onboarding_details",
+        "frappe.handler.upload_file": "tag_workflow.utils.whitelisted.upload_file"
 }
 
 
