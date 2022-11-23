@@ -641,7 +641,7 @@ def joborder_resume(name):
     return frappe.db.sql(sql,as_dict=1)
 
 @frappe.whitelist(allow_guest=False)
-def approved_employee(id,name,job_order, assign_note):
+def approved_employee(id,name,job_order, assign_note,company):
     sql1=""" UPDATE `tabAssign Employee Details` SET approved = 0 where parent="{0}" """.format(name)
     frappe.db.sql(sql1)
     c=(str(id)[1:-1])
@@ -658,6 +658,7 @@ def approved_employee(id,name,job_order, assign_note):
     assign_note = assign_note.replace('"', '""')
     sql=""" UPDATE `tabAssign Employee` SET notes = "{0}" where name = "{1}" """.format(assign_note,name)
     frappe.db.sql(sql)
+    frappe.db.sql(""" UPDATE `tabAssign Employee` SET notes ="{0}" where job_order="{1}" and company="{2}" """.format(assign_note,job_order,company))
     frappe.db.commit()
 
 

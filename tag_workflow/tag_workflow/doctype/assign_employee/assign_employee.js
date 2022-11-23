@@ -999,6 +999,8 @@ function update_table(dialog) {
       name: cur_frm.doc.name,
       job_order: cur_frm.doc.job_order,
       assign_note: note,
+      company:cur_frm.doc.company
+      
     },
     callback: function (r) {
       if (r.message == "error") {
@@ -1385,7 +1387,12 @@ function add_notes_button(frm){
         primary_action(values) {
             frappe.call({
               method:"tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.update_notes",
-              args:{name:cur_frm.doc.name,notes:values.modal_notes}
+              args:{
+                name:cur_frm.doc.name,
+                notes:values.modal_notes,
+                job_order: cur_frm.doc.job_order,
+                company:cur_frm.doc.company
+              }
             })
             d.hide();
 

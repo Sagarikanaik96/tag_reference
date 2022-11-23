@@ -119,7 +119,7 @@ function refresh(listview) {
                                 <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
                                 <td>${data[p].staff_claims_no}</td>
                                 <td><input type="number" id="_${data[p].staffing_organization}" min="0" max=${data[p].staff_claims_no}></td>
-                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle" maxlength="160" ${(data[p].notes)?data[p].notes:""}> </textarea> </td>
+                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle " data-comp="${data[p].staffing_organization}" maxlength="160" ${(data[p].notes)?data[p].notes:""}> </textarea> </td>
                                 </tr>`;
           }
           profile_html += `</table>`;
@@ -188,6 +188,7 @@ function refresh(listview) {
             },
           });
           show_popup(new_pop_up);
+
         }
       );
     },
@@ -201,6 +202,7 @@ function show_popup(new_pop_up){
   if($('.btn.btn-secondary.btn-default.btn-sm').attr('id')=='popup_inactive'){
     $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_active');
     new_pop_up.show();
+    add_listener(new_pop_up,'staff_companies');
   }
 }
 
@@ -303,11 +305,11 @@ function modify_claims(listview) {
           for (let p in job_data) {
             profile_html += `<tr>
                                 <td>${job_data[p].name}</td>
-                                <td style="margin-right:20px;" id="${job_data[p].claims}">${job_data[p].staffing_organization}</td>
+                                <td style="margin-right:20px;" id="${job_data[p].claims}" >${job_data[p].staffing_organization}</td>
                                 <td id="${job_data[p].name}_claim">${job_data[p].staff_claims_no}</td>
                                 <td>${job_data[p].approved_no_of_workers}</td>
                                 <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no} ${job_data[p].hide==1?"disabled":""}></td>
-                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" maxlength="160" > ${(job_data[p].notes)?(job_data[p].notes).trim():""}</textarea> </td>
+                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" data-comp="${job_data[p].staffing_organization}" maxlength="160" > ${(job_data[p].notes)?(job_data[p].notes).trim():""}</textarea> </td>
                                 </tr>`;
           }
           profile_html += `</table><style>th, td {
@@ -368,6 +370,7 @@ function modify_claims(listview) {
           if($('.btn.btn-secondary.btn-default.btn-sm').attr('id')=='popup_inactive'){
             $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_active');
             modified_pop_up.show();
+            add_listener(modified_pop_up,'staff_companies1');
           }
         }
       );
@@ -646,4 +649,19 @@ function checking_same_date(r){
                     ${frappe.format(r["to_date"], { fieldtype: "Date" })}` 
           }
           return date_order
+}
+
+function add_listener(dialog,field){
+  dialog.fields_dict[field].disp_area.querySelectorAll('textarea').
+  forEach(area=>area.
+    addEventListener('keyup',e=>update_textarea(e,field))
+  )
+}
+function update_textarea(e,field){
+  cur_dialog.fields_dict[field].disp_area.querySelectorAll('textarea').
+  forEach(area=>{
+    if(area.attributes['data-comp'].value == e.currentTarget.attributes['data-comp'].value){
+      area.value = e.currentTarget.value
+    }
+  })
 }

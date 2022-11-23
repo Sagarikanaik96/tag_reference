@@ -260,7 +260,7 @@ def payrate_change(docname):
     try:
         sql = '''select data from `tabVersion` where docname="{0}" order by modified DESC'''.format(docname)
         data = frappe.db.sql(sql, as_list=1)
-        new_data = json.loads(data[0][0]) 
+        new_data = json.loads(data[0][0])
         if ('changed' not in new_data and 'row_changed' not in new_data) or len(new_data['added']) > 0 or len(new_data['removed']) > 0:
             return 'success'
         elif 'row_changed' in new_data and len(new_data['row_changed'])>0:
@@ -309,9 +309,11 @@ def update_workers_filled(job_order_name):
         frappe.log_error(e,'Workers Update')
 
 @frappe.whitelist()
-def update_notes(name,notes):
+def update_notes(name,notes,job_order,company):
     try:
-        frappe.db.sql("""update `tabAssign Employee` set notes="{1}" where name="{0}" """.format(name,notes))
-        frappe.publish_realtime(event='sync_data',doctype=AEMP,docname=name)
+        frappe.db.sql(""" UPDATE `tabAssign Employee` SET notes ="{0}" where job_order="{1}" and company="{2}" """.format(notes,job_order,company))
+        result = frappe.db.sql(""" select name from `tabAssign Employee` where job_order="{0}" and company="{1}" """.format(job_order,company),as_dict=1)
+        for r in result:
+           frappe.publish_realtime(event='sync_data',doctype=AEMP,docname=r['name'])
     except Exception as e:
         print(e)
