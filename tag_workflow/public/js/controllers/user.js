@@ -1,13 +1,14 @@
 frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("User", {
 	refresh: function(frm){
+
 		$('.form-footer').hide();
+		field_toggle();
+		multiple_assign_properties(frm);
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
-		field_toggle();
-
+		
 		cur_frm.clear_custom_buttons();
-		multi_company_setup(frm);
 		set_options(frm);
 		field_reqd();
 		field_check();
@@ -15,8 +16,7 @@ frappe.ui.form.on("User", {
 		cur_frm.dashboard.hide()
 		if(frm.doc.__islocal==1){
 			cancel_user(frm);
-		}
-
+		}		
 
 		$(document).on('click', '[data-fieldname="company"]', function(){
 			companyhide(1250)
@@ -36,11 +36,16 @@ frappe.ui.form.on("User", {
 			}
 		});
 	},
+	form_render(frm, cdt, cdn){
+		if (frm.doc.__islocal!=1){
+		frm.fields_dict.assign_multiple_company.grid.wrapper.find('.grid-delete-row').hide()
+	}},
+
 	setup: function(frm){
 		let roles = frappe.user_roles;
 		if(frm.doc.__islocal==1){
-			frm.set_value('company','')
-		}
+			frm.set_df_property('assign_multiple_company','hidden',1);
+			frm.set_value('company','')}
 
 		frm.set_query("organization_type", function(){
 			if(roles.includes('Tag Admin')){
@@ -140,17 +145,22 @@ frappe.ui.form.on("User", {
 
 	before_save: function(frm){
 		setup_profile(frm);
+		if(frm.doc.__islocal==1){
+			let new_row = frm.add_child("assign_multiple_company");
+		new_row.assign_multiple_company = frm.doc.company;
+		frm.set_df_property('assign_multiple_company','hidden',0);
+		}
 	},
 
 	after_save: function(frm){
 		update_employee(frm);
+		multi_company_setup(frm);
 	},
 	birth_date: function(frm){
 		check_bd(frm);
 	},
 	enabled: function(frm){
 		field_toggle()
-		multi_company_setup(frm);
 		terminated_option()
 	},
 	terminated: function(){
@@ -158,7 +168,7 @@ frappe.ui.form.on("User", {
 			cur_frm.set_value('enabled',0)
 		}
 	},
-	onload:function(){
+	onload:function(frm){
 		if(frappe.session.user!='Administrator'){
 			$('.menu-btn-group').hide();
 		}
@@ -182,6 +192,38 @@ frappe.ui.form.on("User", {
 		}
 	}
 });
+
+frappe.ui.form.on('Companies Assigned', {
+	form_render: function(frm,cdt,cdn) {
+	},
+    assign_multiple_company_add: function (frm,cdt,cdn) {
+		let row = locals[cdt][cdn];
+		row.assign_multiple_company = undefined
+		cur_frm.refresh_field("assign_multiple_company")
+    },
+})
+
+function multiple_assign_properties(frm) {
+	if(frm.doc.__islocal!=1){
+	$('*[data-fieldname="assign_multiple_company"]').find('.grid-remove-rows').hide();
+	$('*[data-fieldname="assign_multiple_company"]').find('.grid-remove-all-rows').hide();
+	document.querySelectorAll('[title="assign_multiple_company"] > .form-grid > .grid-body > .rows > .grid-row > .data-row > .row-index').forEach(el => el.style.pointerEvents = 'none');
+	frm.fields_dict["assign_multiple_company"].grid.wrapper.find('.grid-delete-row').hide();
+	cur_frm.fields_dict['assign_multiple_company'].grid.wrapper.find('.btn-open-row').hide();
+	cur_frm.fields_dict['assign_multiple_company'].grid.grid_rows.forEach(function (element) { element.docfields[0].set_only_once = 1; });
+	cur_frm.fields_dict['assign_multiple_company'].grid.refresh();
+	let data = [];
+	frm.doc.assign_multiple_company.forEach(function (element) {
+		data.push(element.assign_multiple_company);
+	});
+	localStorage.setItem("already_assigned_company", JSON.stringify(data));
+	frm.fields_dict['assign_multiple_company'].grid.get_field('assign_multiple_company').get_query = function (doc) {
+		return {
+			filters: [["Company", "name", "not in", cur_frm.doc.company], ["Company", "organization_type", "=", cur_frm.doc.organization_type], ["Company", "name", "not in", data]]
+		};
+	};
+}
+}
 
 /*-------first_and_last_name--------------*/
 function name_update(string){
@@ -281,6 +323,7 @@ function update_employee(frm){
 }
 
 
+
 function setup_company_value(company){
 	cur_frm.fields_dict['company'].get_query = function() {
 		return {
@@ -293,78 +336,30 @@ function setup_company_value(company){
 
 /*-------multi company--------*/
 function multi_company_setup(frm){
-	if((frappe.user_roles.includes("Tag Admin") || frappe.user_roles.includes("Staffing Admin")) && cur_frm.doc.enabled == 1 && ["Hiring Admin", "Staffing Admin"].includes(cur_frm.doc.tag_user_type)){
-		frm.add_custom_button("Assign Multi Company", function() {
+
 			(cur_frm.doc.__islocal == 1) ? frappe.msgprint("Please save the form first") : make_multicompany(frm);
-		}).addClass("btn-primary");
-	}else{
-		cur_frm.clear_custom_buttons();
-	}
 }
 
 function make_multicompany(frm){
-	let org_data = get_data(frm);
-	let table_fields = [
-		{
-			fieldname: "company", fieldtype: "Link", in_list_view: 1, label: "Organization", options: "Company", reqd: 1,
-			get_query: function(){
-				return{
-					filters: [["Company", "name", "not in", cur_frm.doc.company], ["Company", "organization_type", "=", cur_frm.doc.organization_type]]
-				}
-			}
-		}
-	];
-
-	let dialog = new frappe.ui.Dialog({
-		title: 'Multi-Organization Setup',
-		fields: [
-			{label: "Current User", fieldname: "user", fieldtype: "Link", options: "User", default: cur_frm.doc.name, read_only: 1},
-			{fieldname:"company", fieldtype:"Table", label:"", cannot_add_rows:false, in_place_edit:true, reqd:1, data:org_data, fields:table_fields},
-			{label: 'Assigned Organisation', fieldname: 'assigned',	fieldtype: 'HTML'}
-		],
-		primary_action_label: 'Submit',
-		primary_action(values) {
-			let data = values.company || [];
+	
+			let data = frm.doc.assign_multiple_company || [];
 			let company = [];
-			for(let d in data){(data[d].company) ? company.push(data[d].company) : console.log(".")}
-
-			if(company.length > 0){
+			for(let d in data){(data[d].assign_multiple_company) ? company.push(data[d].assign_multiple_company) : console.log(".")}
+			let already_assigned_company_array = JSON.parse(localStorage.getItem("already_assigned_company"))
+			if(company.length > 1 && already_assigned_company_array.length<company.length){
+				localStorage.removeItem("already_assigned_company")
+				company.shift()
 				frappe.call({
 					method: "tag_workflow.controllers.master_controller.multi_company_setup",
 					args: {"user": frm.doc.name, "company": company.join(",")},
 					freeze: true,
-					freeze_message: "<p><b>preparing user for multi-Organisarion...</b></p>",
+					freeze_message: "<p><b>Assigning user to multiple companies...</b></p>",
 					callback: function(){
-						frappe.msgprint("User <b>"+frm.doc.name+"</b> has been assigned as <b>"+frm.doc.tag_user_type+"</b> for Organisation <b>"+company.join(",")+"</b>");
+						frappe.msgprint("<b>"+frm.doc.name+"</b> has been assigned as <b>"+frm.doc.tag_user_type+"</b> to <b>"+company.join(",")+"</b>");
 						cur_frm.reload_doc();
 					}
 				});
-			}else{
-				frappe.msgprint("Please add organisation for multi-company setup");
-			}
-			dialog.hide();
-		}
-	});
-	dialog.show();
-}
-
-function get_data(frm){
-	let values = []
-	frappe.call({
-		method: "tag_workflow.utils.whitelisted.get_user_company_data",
-		args: {"user": frm.doc.name, "company": frm.doc.company},
-		async: 0,
-		callback: function(r){
-			if(r && r.message){
-				let data = r.message;
-				for(let i in data){
-					values.push({"company": data[i].company, "idx": i+1})
-				}
-			}
-		}
-	});
-	return values;
-}
+			}}
 
 /*------birth date-------*/
 function check_bd(frm){
@@ -378,7 +373,7 @@ function org_info(frm){
 		frappe.call({
 			'method':"tag_workflow.tag_data.hiring_org_name",
 			'args':{'current_user':frappe.session.user},
-			callback:function(r){
+			callback:function(r){ 
 				if(r.message=='success'){
 					frm.set_value('company',frappe.boot.tag.tag_user_info.company)
 				}

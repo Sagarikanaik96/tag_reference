@@ -10,6 +10,7 @@ from pathlib import Path
 from tag_workflow.utils.trigger_session import share_company_with_user
 from tag_workflow.controllers.master_controller import make_update_comp_perm, user_exclusive_perm
 import googlemaps
+from tag_workflow.utils.whitelisted import get_user_company_data
 from tag_workflow.utils.notification import make_system_notification
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
@@ -73,7 +74,6 @@ def setup_data():
         create_job_applicant()
         set_workspace()
         setup_company_permission()
-        check_if_user_exists()
         update_job_title_list()
         update_old_lead_status()
         share_company_with_user()
@@ -82,6 +82,7 @@ def setup_data():
         updating_date_of_joining()
         update_password_field()
         staffing_radius()
+        get_user_company_data()
         disable_scheduler()
         make_commit()
     except Exception as e:

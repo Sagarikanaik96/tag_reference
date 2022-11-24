@@ -157,9 +157,29 @@ def make_jazzhr_request(api_key, company):
 
 #--------get user data--------#
 @frappe.whitelist()
-def get_user_company_data(user, company):
+def get_user_company_data():
     try:
-        return frappe.db.get_list("Employee", {"user_id": user, "company": ('not in', (company))}, "company")
+        print("*************************' Company data loading started... '************************************")
+        all_user = frappe.db.sql("select name,company from `tabUser` where tag_user_type IN ('Staffing Admin','Hiring Admin')")
+        for each in all_user:
+            company = each[1]
+            user = each[0]
+            if company and user:
+                data = [company]
+                user_doc = frappe.get_doc("User",user)
+                company_exists=frappe.db.get_value('Companies Assigned',{'assign_multiple_company':company , 'parent':user})
+                if not company_exists:
+                    user_doc.append("assign_multiple_company",{"assign_multiple_company":company})
+                    user_doc.save()
+                a = frappe.db.get_list("Employee", {"user_id": user, "company": ('not in', (company))}, "company")
+                for i in a:
+                    company_exists=frappe.db.get_value('Companies Assigned',{'assign_multiple_company':i.company , 'parent':user},'name')
+                    if not company_exists:
+                        user_doc.append("assign_multiple_company",{"assign_multiple_company":i.company})
+                        user_doc.save()
+                        data.append(i.company)
+
+        print("*************************' Company data loading completed successfully... '************************************")
     except Exception as e:
         print(e)
 
