@@ -1,3 +1,6 @@
+
+localStorage.setItem("cert_list_exist",0);
+let cert_dict = {"DBE":"DBE- Disadvantaged Business Enterprise","DVOSB":"DVOSB- Disabled Veteran Owned Small Business","MBE":"MBE- Minority Business Enterprise","SDVOSB":"SDVOSB- Service Disabled Veteran Owned Small Business","VOSB":"VOSB- Veteran Owned Small Business","WBE":"WBE- Women Business Enterprise","WOSB":"WOSB- Woman Owned Small Business"}
 frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("Company", {
     client_id_data: function(frm){
@@ -58,6 +61,8 @@ frappe.ui.form.on("Company", {
 			frm.set_df_property('branch_integration', 'hidden', 1);
 		}
 		password_fields(frm);
+		set_up_cert_field(frm);
+		
 	},
 	update_employee_records: function (frm){
 		if(cur_frm.is_dirty()){
@@ -106,7 +111,13 @@ frappe.ui.form.on("Company", {
 					filters: [[ORG, "name", "=", "Hiring"]],
 				};
 			}
+		
 		});
+		frm.set_query("certificate_and_endorsements",function(){
+			return{
+				filters:[["Certificate and Endorsement","name","not in",JSON.parse(localStorage.getItem('cert_list_exist'))]]
+			}
+		})
 		$('[data-fieldname="parent_staffing"]').click(function(){ return false})
 		$('[data-fieldname="parent_staffing"]').click(function(){
 			if(cur_frm.doc.__islocal !==1){
@@ -241,6 +252,8 @@ frappe.ui.form.on("Company", {
 			frappe.msgprint({message: __('Invalid Email!'), indicator: 'red'});
 			frappe.validated = false;
 		}
+		validate_cert_attachment(frm);
+	
 	},
 	make_organization_inactive(){
 		frappe.call({
@@ -277,7 +290,6 @@ frappe.ui.form.on("Company", {
 		}
 		filter_row(frm);
 		
-		
 	},
 	search_on_maps: function(frm){
 		if(cur_frm.doc.search_on_maps == 1){
@@ -310,6 +322,7 @@ frappe.ui.form.on("Company", {
 			update_table(frm)
 		}
 		save_password_data(frm);
+
 	},
 	phone_no: function(frm){
 		set_field(frm, frm.doc.phone_no, "phone_no");
@@ -339,8 +352,57 @@ frappe.ui.form.on("Company", {
 			frappe.msgprint(__('Only numbers allowed.'))
 			frm.set_value('branch_org_id_data', '');
 		}
+	},
+	certificate_and_endorsements:(frm)=>{
+		let cert_list = ["DBE","DVOSB","MBE","SDVOSB","VOSB","WBE","WOSB"]
+		let requested_cert = cur_frm.doc.certificate_and_endorsements.split("-")
+		if(frm.doc.certificate_and_endorsements){
+			if(localStorage.getItem("cert_list_exist") == 0){
+				localStorage.setItem("cert_list_exist",JSON.stringify([frm.doc.certificate_and_endorsements]))
+				console.log(JSON.parse(localStorage.getItem('cert_list_exist')))
+			}
+			else{
+				let updated_list = JSON.parse(localStorage.getItem('cert_list_exist'))
+				updated_list.push(frm.doc.certificate_and_endorsements)
+				localStorage.setItem("cert_list_exist",JSON.stringify(updated_list))
+				console.log(JSON.parse(localStorage.getItem('cert_list_exist')))
+			}
+		}
+		if(frm.doc.certificate_and_endorsements){
+			frm.set_value('certificate_and_endorsements', "");
+		}
+		for(let cert of cert_list){
+			if(cert == requested_cert[0]){
+				let id_initiator = Number(localStorage.getItem("id_initiator") ) + 1 
+				localStorage.setItem("id_initiator",id_initiator)
+				let updated_html = `
+				<div class="d-flex flex-wrap input_field_in_custom_div" id="eliminate_${id_initiator}">
+					<div> <button type="button" id="cancel_${id_initiator}" class="btn btn-light" onclick="eliminate_div(this.id)">
+					<span id = "span_${id_initiator}"> ${cert} </span>&#10060;</button> 
+					</div>
+				<div class="control-input-wrapper">						
+				<div class="control-input">
+					<div class="attached-file flex justify-between align-center" id ="after_attach_${id_initiator}"  style="display: none;">
+						<div class="ellipsis">
+							<i class="fa fa-paperclip"></i>
+							<a class="attached-file-link" target="_blank" id="anchor_${id_initiator}" href="" value = "1"></a>
+						</div>
+						<div>
+							<a class="btn btn-xs btn-default"  data-action="clear_attachment" id= "clear_${id_initiator}" onclick=clear_func(this.id)>Clear</a>
+						</div>
+					</div>
+					<button class="btn btn-default btn-sm btn-attach" id="attach_${id_initiator}" data-fieldtype="Attach" data-fieldname="" onclick=attach_file(this.id) placeholder="" data-doctype="Company" style="display: inline-block;">Attach</button></div>					
+					<div class="control-value like-disabled-input" style="display: none;"></div>							
+				</div>
+				`
+			document.getElementById("custom_attach_div").innerHTML = document.getElementById("custom_attach_div").innerHTML +updated_html
+			break;
+			}
+		}
+		
 	}
 });
+
 
 /*---------hide details----------*/
 function hide_details(){
@@ -997,3 +1059,157 @@ function save_password_data(frm){
 	}
 }
 
+function validate_cert_attachment(frm){
+	let check_for_update = 0 
+	let cert_list_details =[]
+	for(let i =1;i<=Number(localStorage.getItem("id_initiator"));i++){
+		let cert_type = document.getElementById("span_"+i).innerHTML
+		cert_type = cert_type.trim()
+		let link = document.getElementById("anchor_"+i).innerHTML;
+		if(!link||link == "0"){
+			check_for_update =1
+			frappe.validated = false;
+			frappe.msgprint({message:__('	Certificate and Endorsements: Please Attach Certificate sahil'), title: __('Warning'), indicator: 'red'})
+			cur_frm.refresh()
+			break;
+		}
+		link = link.trim()
+		let make_it_link = "/files/"+link
+		let record = {"company":frm.doc.company_name,"cert_type":cert_type,"link":make_it_link,"sequence":i}
+		cert_list_details.push(record)
+	}
+	if(!check_for_update){
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.company.company.create_certificate_records",
+			args: {
+				company: cur_frm.doc.company_name,
+				cert_list:cert_list_details
+			},
+		});
+	}
+}
+function set_up_cert_field(frm){
+	if(frappe.boot.tag.tag_user_info.company_type == "Hiring" ||
+		frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"){
+			frm.set_df_property('accreditations', 'hidden', 1);
+		}
+		localStorage.setItem("id_initiator",0)
+		let html = `
+		<div id = "custom_attach_div"></div>
+		<script>
+			function clear_func(id){
+				let clear = id.split("_")
+				document.getElementById("after_attach_"+clear[1]).style.display = "none";
+				document.getElementById("attach_"+clear[1]).style.display = "inline-block";
+				document.getElementById("cancel_"+clear[1]).disabled = false
+				document.getElementById("anchor_"+clear[1]).innerHTML = ""
+				document.getElementById("cancel_"+clear[1]).style.pointerEvents = "auto";
+
+			}
+			function attach_file(id){
+				let anchor_id = id.split("_")
+				localStorage.setItem("file_name",0)
+				localStorage.setItem("div_id","anchor_"+anchor_id[1])
+				localStorage.setItem("check_flag_attach",1)
+				let val =  new frappe.ui.FileUploader({"doctype":"Company","docname":cur_frm.doc.name,"custome_check_flag":"test","restrictions": {
+					max_file_size:512000,
+					allowed_file_types: ['.pdf', '.png', '.jpeg']
+				}});
+				setTimeout(()=>{
+					document.getElementsByClassName("btn-modal-primary")[0].onclick = function() {set_file(anchor_id[1])};
+					console.log("working")
+				},300)
+			}
+				
+			function set_file(id){
+				let file = localStorage.getItem("file_name")
+				if(file!="0"){
+				document.getElementById("after_attach_"+id).style.display = "flex";
+				document.getElementById("attach_"+id).style.display = "none";	
+				
+				document.getElementById("anchor_"+id).innerHTML = file
+				document.getElementById("anchor_"+id).href = "/private/files/"+file;
+				localStorage.setItem("file_name",0)
+				document.getElementById("cancel_"+id).disabled = true
+				document.getElementById("cancel_"+id).style.pointerEvents = "none";
+				}
+			}
+			function eliminate_div(id){
+				let action_id = id.split("_")
+				let id_starter = Number(action_id[1])
+				let val = document.getElementById("span_"+action_id[1]).innerHTML
+				val = val.trim()
+				let cert_list_exist = JSON.parse(localStorage.getItem('cert_list_exist'))
+				for(let i=0 ; i<cert_list_exist.length;i++){
+					let check_val = cert_list_exist[i].split("-")
+					if(val == check_val[0]){
+						cert_list_exist.splice(i, 1);
+					}
+				}
+				localStorage.setItem("cert_list_exist",JSON.stringify(cert_list_exist))
+				let id_initiator = Number(localStorage.getItem("id_initiator"))
+				let element = document.getElementById("eliminate_"+id_starter);
+				element.parentNode.removeChild(element);
+				for(let i = id_starter+1 ; i<=id_initiator;i++){
+					let set_id = i-1
+					document.getElementById("eliminate_"+i).id = "eliminate_"+set_id
+					document.getElementById("cancel_"+i).id = "cancel_"+set_id
+					document.getElementById("span_"+i).id = "span_"+set_id
+					document.getElementById("after_attach_"+i).id = "after_attach_"+set_id
+					document.getElementById("anchor_"+i).id = "anchor_"+set_id
+					document.getElementById("clear_"+i).id = "clear_"+set_id
+					document.getElementById("attach_"+i).id = "attach_"+set_id
+				}
+				localStorage.setItem("id_initiator",id_initiator-1)
+				
+			}
+			</script>`
+		frm.set_df_property('input', 'options', [html]);
+		frappe.call({
+			method: "tag_workflow.tag_workflow.doctype.company.company.get_previous_certificate",
+			args: {company: cur_frm.doc.company_name},
+			callback: function (r){
+				for(let record of r.message){
+					if(localStorage.getItem("cert_list_exist") == 0){
+						localStorage.setItem("cert_list_exist",JSON.stringify([cert_dict[record[1]]]))
+					
+					}
+					else{
+						let updated_list = JSON.parse(localStorage.getItem('cert_list_exist'))
+						updated_list.push(cert_dict[record[1]])
+						localStorage.setItem("cert_list_exist",JSON.stringify(updated_list))
+
+					}
+					let id_initiator = Number(localStorage.getItem("id_initiator") ) + 1 
+					let file_name = record[2].split("/")
+					localStorage.setItem("id_initiator",id_initiator)
+					let updated_html = `
+					<div class="d-flex flex-wrap input_field_in_custom_div" id="eliminate_${id_initiator}">
+					<div> <button type="button" id="cancel_${id_initiator}" class="btn btn-light" onclick="eliminate_div(this.id)">
+					<span id = "span_${id_initiator}"> ${record[1]} </span>&#10060;</button> 
+					</div>
+				<div class="control-input-wrapper">						
+				<div class="control-input">
+					<div class="attached-file flex justify-between align-center" id ="after_attach_${id_initiator}"  style="display: flex;">
+						<div class="ellipsis">
+							<i class="fa fa-paperclip"></i>
+							<a class="attached-file-link" target="_blank" id="anchor_${id_initiator}" href="${record[2]}" value = "1">${file_name[2]}</a>
+						</div>
+						<div>
+							<a class="btn btn-xs btn-default"  data-action="clear_attachment" id= "clear_${id_initiator}" onclick=clear_func(this.id)>Clear</a>
+						</div>
+					</div>
+					<button class="btn btn-default btn-sm btn-attach" id="attach_${id_initiator}" data-fieldtype="Attach" data-fieldname="" onclick=attach_file(this.id) placeholder="" data-doctype="Company" style="display: none;">Attach</button></div>					
+					<div class="control-value like-disabled-input" style="display: none;"></div>							
+				</div>
+				`
+					
+					document.getElementById("custom_attach_div").innerHTML = document.getElementById("custom_attach_div").innerHTML +updated_html
+					document.getElementById("cancel_"+id_initiator).disabled = true
+					document.getElementById("cancel_"+id_initiator).style.pointerEvents = "none";
+				}
+				
+			}
+		});
+		
+}

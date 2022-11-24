@@ -131,19 +131,18 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 				return true;
 			},
 			item: function (item) {
-				let d = this.get_item(item.value);
-				if(!d.label) {	d.label = d.value; }
-
-				let _label = (me.translate_values) ? __(d.label) : d.label;
-				let html = d.html || "<strong>" + _label + "</strong>";
-				if(d.description && d.value!==d.description) {
-					html += '<br><span class="small">' + __(d.description) + '</span>';
-				}
-				return $('<li></li>')
-					.data('item.autocomplete', d)
-					.prop('aria-selected', 'false')
-					.html(`<a><p title="${_label}">${html}</p></a>`)
-					.get(0);
+                let d = this.get_item(item.value);
+                if(!d.label) {  d.label = d.value; }
+                let _label = (me.translate_values) ? __(d.label) : d.label;
+                let html = d.html || "<strong>" + _label + "</strong>";
+                if(d.description && d.value!==d.description) {
+                    html += '<br><span class="small">' + __(d.description) + '</span>';
+                }
+                return $('<li></li>')
+                    .data('item.autocomplete', d)
+                    .prop('aria-selected', 'false')
+                    .html(`<a><p title="${_label}">${html}</p></a>`)
+                    .get(0);
 			},
 			sort: function() {
 				return 0;
@@ -258,6 +257,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 		this.$input.on("awesomplete-select", function(e) {
 			let o = e.originalEvent;
 			let item = me.awesomplete.get_item(o.text.value);
+			console.log(o," +" +item)
 
 			me.autocomplete_open = false;
 
@@ -518,7 +518,7 @@ if (Awesomplete) {
 }
 
 function remove_options(doctype, fieldname, result){
-	if((['Employee Onboarding', 'Employee Onboarding Template', 'Job Offer','Salary Structure','Salary Component'].includes(doctype) && ['staffing_company', 'company'].includes(fieldname)) || ['Assign Employee','Assign Employee Details'].includes(doctype)){
+	if((['Employee Onboarding', 'Employee Onboarding Template', 'Job Offer','Salary Structure','Salary Component','Company'].includes(doctype) && ['staffing_company', 'company','certificate_and_endorsements'].includes(fieldname)) || ['Assign Employee','Assign Employee Details'].includes(doctype)){
 		result.splice(result.length - 2, 2);
 		return result
 	}else if((['Industry Types Job Titles'].includes(doctype) && ['industry_type'].includes(fieldname))){
@@ -528,4 +528,8 @@ function remove_options(doctype, fieldname, result){
 	else{
 		return result
 	}
+}
+
+function get_input_val_of_check(e){
+	console.log(e.currentTarget)
 }
