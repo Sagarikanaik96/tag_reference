@@ -1675,7 +1675,7 @@ function repeat_hiring_dia(frm){
 		title: __('Repeat Order'),
 		fields: [
 			{
-				fieldname: "direct", fieldtype: "Check", label: "direct order",
+				fieldname: "direct", fieldtype: "Check", label: "Direct Order",
 				onchange: function(){
 					let direct = cur_dialog.get_value("direct");
 					if(direct === 1){
@@ -1696,7 +1696,7 @@ function repeat_hiring_dia(frm){
 			{fieldname:"selected_companies", fieldtype:"Select", label:"Select Company", hidden:1, options:frappe.boot.tag.tag_user_info.comps.join("\n"), default: cur_frm.doc.staff_company},
 			{fieldname: "direct_1", fieldtype: "Column Break"},
 			{
-				fieldname: "normal", fieldtype: "Check", label: "open order",
+				fieldname: "normal", fieldtype: "Check", label: "Open Order",
 				onchange: function(){
 					let normal = cur_dialog.get_value("normal");
 					if(normal == 1){
