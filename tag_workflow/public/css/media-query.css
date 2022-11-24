@@ -1,0 +1,222 @@
+
+@media (max-width: 768px) {
+  .sub-menu {
+    top: 110px;
+  }
+  #page-timesheet-approval #data_head .widget {
+    padding: 0;
+  }
+  #page-timesheet-approval #data_head .widget table {
+      width: 650px;
+  }
+  [data-page-route="Add Timesheet"] [data-fieldtype="Table"] .form-grid .grid-heading-row,
+  [data-page-route="Add Timesheet"]  [data-fieldtype="Table"] .form-grid .grid-body .grid-row {
+    width: 1100px!important;
+}
+  [data-route="Form/Add Timesheet/Add Timesheet"] .layout-main-section-wrapper .layout-main-section .form-message p,
+  [data-route="timesheet-approval"] .layout-main-section-wrapper .layout-main-section .form-message p {
+    font-size: 13px;
+    margin: 15px;
+    min-width: 85px;
+}
+  [data-page-route="List/Timesheet/List"] .frappe-card .list-row-container .level-left .list-row-col:nth-child(4),
+  [data-page-route="List/Timesheet/List"] .frappe-card header .level-left .list-row-col:nth-child(4) {
+    flex: 1.4;
+}
+  .flex-item .page-icon-group {
+    display: flex !important;
+  }
+  .page-head {
+    padding-bottom: 10px;
+}
+  .add-btn .hidden-xs{
+    display: inline-block !important;
+  }
+  .layout-main-section .frappe-list .list-row .indicator-pill {
+    padding: 4px 4px;
+    height:auto;
+  }
+  .btn.btn-sm  {
+  background-color: var(--fg-color);
+}
+   .hidden-xs{
+    display: block !important;
+  }
+    .hide{
+     display: none !important;
+   }
+  .layout-main-section .frappe-list .result {
+    overflow: auto;
+    min-height: auto;
+  }
+   .layout-main-section .frappe-list .result .list-row-head,  
+   .layout-main-section .frappe-list .result .list-row-container {
+    width: 1000px !important;
+  }
+  .list-row .select-like {
+    padding: 15px 7px 15px 15px;
+}
+   .frappe-card .list-row-container .level-left .list-row-col:nth-child(4),
+    .frappe-card header .level-left .list-row-col:nth-child(4) {
+    flex: 1.4;
+}
+ 
+  .list-row-head .level-right, .list-row .level-right {
+    flex: 0.2;
+  }
+ .form-grid .grid-heading-row .data-row .sortable-handle, 
+ .form-grid .grid-body .data-row .sortable-handle {
+        padding: 10px 5px;
+  }
+   .form-section.card-section {
+    padding: 10px;
+  }
+  .social-icon {
+    justify-content:center;
+  }
+  [data-page-route="List/Sales Invoice/List"] .frappe-card .frappe-list.list-subject {
+    flex-basis: 60px;
+  }
+  [data-page-route="Employee"] .editable-form .layout-main-section-wrapper .layout-main-section {
+    margin-top: 40px;
+  }
+  [data-page-route="Employee"] .page-head .page-head-content div:nth-child(2) {
+    flex-wrap: wrap;
+    margin: 15px 0px;
+    display: contents;
+    background: #fff;
+    float:left;
+  }
+  [data-page-route="Employee"] .page-head .page-head-content div:nth-child(3) {
+    margin: 15px 0px;
+  }
+  [data-page-route="Employee"]
+    .layout-main-section-wrapper
+    .layout-main-section {
+    margin-top: 15px !important;
+  }
+  [data-page-route="Employee"] .page-head-content {
+    display: inline-block;
+  }
+  [data-page-route="Employee"] .container {
+    padding-bottom: 10px;
+  }
+  .navbar-light .navbar-nav .nav-item .btn-login-area {
+    text-align: right;
+    margin-right: 7px;
+  }
+  #order {
+    padding: 0;
+  }
+  [data-route="Form/Add Timesheet/Add Timesheet"] .layout-main-section-wrapper .layout-main-section .form-message div,
+  [data-route="timesheet-approval"] .layout-main-section-wrapper .layout-main-section .form-message div  {
+    justify-content: flex-start;
+  }
+  [data-fieldname="update_employee_records"] button {
+    margin-top: 0;
+  }
+  #page-User .layout-main-section-wrapper .layout-main-section,
+  #page-Company .layout-main-section-wrapper .layout-main-section,
+  #page-Lead .layout-main-section-wrapper .layout-main-section,
+  #page-Timesheet .layout-main-section-wrapper .layout-main-section,
+  #page-dashboard-view .dashboard .dashboard-graph {
+    width: 100%;
+    margin-left: 0;
+  }
+  .col.layout-main-section-wrapper,
+  .col-md-12.layout-main-section-wrapper {
+    left: 1rem;
+    max-width: 100%;
+    width: 100%;
+    padding: 0;
+  }
+  #page-Workspaces .page-title .title-area .title-text {
+    margin-left: 0px;
+  }
+  .page-title .title-area .indicator-pill {
+    margin: 20px 0 0 20px;
+  }
+  .modal .modal-body {
+    margin-left: 15px;
+  }
+  .new-timeline {
+    padding-left: 10px;
+  }
+  .page-title .title-area .title-text {
+    padding-left: 30px !important;
+    padding-top: 22px;
+    font-weight: 500;
+    font-size: 18px;
+    color: #4e4e4e;
+  }
+  [data-fieldtype="Table"] .form-grid {
+    overflow: auto;
+  }
+  [data-fieldtype="Table"] .form-grid .grid-heading-row,
+  [data-fieldtype="Table"] .form-grid .grid-body .grid-row {
+    width: 700px;
+  }
+  [data-fieldtype="Table"]
+    .form-grid
+    .grid-body
+    .grid-row.grid-row-open
+    .form-in-grid {
+    width: 100% !important;
+    position: absolute;
+    top: 5%;
+  }
+  #page-staff_company_list table {
+    font-size: 13px !important;
+  }
+  .hiring-home .tittle h3 {
+    font-size: 25px;
+    margin-top: 20px;
+  }
+  #terms-and-conditions {
+    padding: 0 20px !important;
+  }
+  [data-route="Workspaces/My Activities"] #page-Workspaces .page-head {
+    display: block;
+  }
+  [data-route="Workspaces/My Activities"] .page-head {
+    height: 30px !important;
+  }
+  [data-route="Workspaces/My Activities"] .page-head.drop-shadow {
+    height: 60px !important;
+  }
+  .hiring-home .search-area {
+    max-width: 350px;
+    padding-left: 10px;
+  }
+  .hiring-home .search_icon {
+    display: none;
+  }
+  [data-fieldname="get_data_from_jazzhr"] button {
+    margin-top: 0px;
+  }
+  [data-page-route="List/Sales Invoice/List"] .frappe-list .result {
+    overflow: auto;
+    min-height: auto;
+  }
+  [data-page-route="List/Sales Invoice/List"] .frappe-list .result header,
+  [data-page-route="List/Sales Invoice/List"]
+    .frappe-list
+    .result
+    .list-row-container {
+    width: 800px;
+  }
+}
+
+@media (min-width: 768px) {
+  .layout-main .form-column.col-sm-12 > form > .input-max-width {
+    max-width: 100%;
+    padding-right: 0px;
+  }
+}
+
+@media (min-width: 570px) and (max-width: 768px) {
+  .dropdown-notifications .notifications-list {
+    right: -230px;
+  }
+}
+

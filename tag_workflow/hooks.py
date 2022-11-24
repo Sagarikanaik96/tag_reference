@@ -62,7 +62,8 @@ on_session_creation = [
 ]
 
 app_include_css = [
-        "/assets/tag_workflow/css/tag.css"
+        "/assets/tag_workflow/css/tag.css",
+        "/assets/tag_workflow/css/media-query.css"
 ]
 
 app_include_js = [
