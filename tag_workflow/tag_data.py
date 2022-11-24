@@ -1590,13 +1590,14 @@ def check_employee(onb_email):
 @frappe.whitelist()
 def validate_employee_creation(emp_onb_name):
     emp_onb_details = frappe.get_doc(emp_onb, emp_onb_name)
-    if emp_onb_details.status != "Completed":
+    tasks = frappe.db.get_all('Task', {'project': emp_onb_details.project, 'status': ['!=', 'Completed']}, ['subject'])
+    tasks_list = [task['subject'].split(':')[0] for task in tasks]
+    if len(tasks_list)>0:
+        return tasks_list
+    elif emp_onb_details.status != "Completed":
         return False
-    for activity in emp_onb_details.activities:
-        task_status = frappe.db.get_value("Task", activity.task, "status")
-        if task_status != "Completed":
-            return False
-    return True
+    else:
+        return True
 
 @frappe.whitelist()
 def make_employee(source_name, target_doc=None):
@@ -1776,3 +1777,22 @@ def get_template_name(company):
         return '\n'.join(template_list), default_temp
     except Exception as e:
         frappe.log_error(e, 'get_template_name error')
+
+@frappe.whitelist()
+def set_status_complete(docname):
+    try:
+        emp_onb_data = frappe.get_doc(emp_onb, docname)
+        tasks_list = [row.task for row in emp_onb_data.activities if row.task]
+        completed_date = str(getdate())
+        if len(tasks_list)>0:
+            if len(tasks_list)==1:
+                sql = f'''UPDATE `tabTask` SET status="Completed", completed_on="{completed_date}" where name in ("{tasks_list[0]}")'''
+            else:
+                sql = f'''UPDATE `tabTask` SET status="Completed", completed_on="{completed_date}" where name in {tuple(tasks_list)}'''
+            frappe.db.sql(sql)
+            frappe.db.commit()
+        frappe.db.set_value('Project', emp_onb_data.project, 'status', 'Completed')
+        frappe.db.set_value('Project', emp_onb_data.project, 'percent_complete', '100')
+        frappe.db.set_value(emp_onb, docname, 'status', 'Completed')
+    except Exception as e:
+        frappe.log_error(e, 'set_status_complete error')

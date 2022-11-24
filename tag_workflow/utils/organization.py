@@ -82,6 +82,8 @@ def setup_data():
         updating_date_of_joining()
         update_password_field()
         staffing_radius()
+        set_default_template()
+        set_template_name()
         get_user_company_data()
         disable_scheduler()
         make_commit()
@@ -659,7 +661,7 @@ def get_job_status():
         frappe.msgprint(e)
 def set_default_template():
     try:
-        print("*------updating default employee onboarding template---------*\n")
+        frappe.logger().debug("*------updating default employee onboarding template---------*\n")
         staffing_companies = set([c['company'] for c in frappe.get_all(Emp_Onb_Temp, ['company'])])
         for company in staffing_companies:
             comp_data = frappe.get_all(Emp_Onb_Temp, {'company': company, 'default_template':1}, ['name'])
@@ -672,17 +674,23 @@ def set_default_template():
 @frappe.whitelist()
 def set_template_name():
     try:
-        print("*------updating template name for old employee onboarding---------*\n")
+        frappe.logger().debug("*------updating template name for old employee onboarding---------*\n")
         emp_onb = frappe.get_all('Employee Onboarding', {'employee_onboarding_template': ['is', 'set'], 'template_name':['is', Not_Set]}, ['name'])
         emp_onb_list = [e['name'] for e in emp_onb]
         if len(emp_onb_list) > 0:
-            frappe.db.sql(f'''UPDATE `tabEmployee Onboarding` set template_name=employee_onboarding_template where name in {tuple(emp_onb_list)}''')
+            if len(emp_onb_list)==1:
+                frappe.db.sql(f'''UPDATE `tabEmployee Onboarding` set template_name=employee_onboarding_template where name in ("{emp_onb_list[0]}")''')
+            else:
+                frappe.db.sql(f'''UPDATE `tabEmployee Onboarding` set template_name=employee_onboarding_template where name in {tuple(emp_onb_list)}''')
             frappe.db.commit()
 
         emp_onb_temp = frappe.get_all(Emp_Onb_Temp, {'template_name':['is', Not_Set]}, ['name'])
-        emp_onb__temp_list = [e['name'] for e in emp_onb_temp]
-        if len(emp_onb__temp_list) > 0:
-            frappe.db.sql(f'''UPDATE `tabEmployee Onboarding Template` set template_name=name where name in {tuple(emp_onb__temp_list)}''')
+        emp_onb_temp_list = [e['name'] for e in emp_onb_temp]
+        if len(emp_onb_temp_list) > 0:
+            if len(emp_onb_temp_list)==1:
+                frappe.db.sql(f'''UPDATE `tabEmployee Onboarding` set template_name=employee_onboarding_template where name in ("{emp_onb_temp_list[0]}")''')
+            else:
+                frappe.db.sql(f'''UPDATE `tabEmployee Onboarding Template` set template_name=name where name in {tuple(emp_onb_temp_list)}''')
             frappe.db.commit()
     except Exception as e:
         frappe.log_error(e, 'set_template_name Error')

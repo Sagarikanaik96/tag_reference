@@ -51,7 +51,7 @@ frappe.ui.form.on('Employee Onboarding', {
 		}
 	},
 	validate: (frm)=>{
-		let reqd_fields = {"First Name": frm.doc.first_name, "Last Name": frm.doc.last_name, "Email": frm.doc.email, "Company": frm.doc.staffing_company, "Employee Onboarding Template": frm.doc.employee_onboarding_template, "Activities": frm.doc.activities};
+		let reqd_fields = {"First Name": frm.doc.first_name, "Last Name": frm.doc.last_name, "Email": frm.doc.email, "Company": frm.doc.staffing_company, "Template Name": frm.doc.template_name, "Activities": frm.doc.activities};
 		mandatory_fields(reqd_fields);
 		validate_phone_zip(frm);
 		if(frm.doc.sssn && frm.doc.sssn.toString().length != 9) {
@@ -83,7 +83,6 @@ frappe.ui.form.on('Employee Onboarding', {
 			frm.set_value('boarding_status', frm.doc.status)
 		}
 		remove_lat_lng(frm);
-		
 	},
 	before_submit: (frm)=>{
 		let today_date = frm.doc.date_of_joining?frm.doc.date_of_joining:frappe.datetime.get_today()
@@ -316,20 +315,6 @@ function core_functions(frm){
 		}, __('Create'));
 		frm.page.set_inner_btn_group_as_primary(__('Create'));
 	}
-	if (frm.doc.docstatus === 1 && frm.doc.project) {
-		frappe.call({
-			method: "erpnext.hr.utils.get_boarding_status",
-			args: {
-				"project": frm.doc.project
-			},
-			callback: function(r) {
-				if (r.message) {
-					frm.set_value('status', r.message);
-				}
-				refresh_field("status");
-			}
-		});
-	}
 }
 
 function validate_employee(frm){
@@ -345,6 +330,8 @@ function validate_employee(frm){
 			'callback': (r)=>{
 				if(!r.message){
 					confirmation(frm);
+				}else if(Array.isArray(r.message)){
+					confirmation(frm, r.message);
 				}else{
 					frappe.model.open_mapped_doc({
 						method: "tag_workflow.tag_data.make_employee",
@@ -362,19 +349,32 @@ function validate_employee(frm){
 	}
 }
 
-function confirmation(frm){
+function confirmation(frm, incomplete_tasks = []){
 	return new Promise(function(resolve){
+		let message = "Onboard Employee Status not set to 'Completed'. Do you wish to create the employee record?";
+		if(incomplete_tasks.length>0){
+			message = "The following Onboard Employee Tasks or Status are not set to 'Completed'. Do you wish to create the employee record?";
+			for(let i in incomplete_tasks){
+				message+='<br>' + '<span>&bull;</span> '+incomplete_tasks[i];
+			}
+		}
 		frappe.confirm(
-			'All Onboard Employee Tasks or Status not set to "Completed". Do you wish to create the employee record? Please confirm.',
+			message,
 			()=>{
+				frappe.call({
+					method: "tag_workflow.tag_data.set_status_complete",
+					args:{
+						'docname': frm.doc.name
+					}
+				});
 				frappe.model.open_mapped_doc({
 					method: "tag_workflow.tag_data.make_employee",
 					frm: frm
 				});
 				resolve();
 			}
-		)
-	})
+		);
+	});
 }
 
 function password_fields(frm){
@@ -482,4 +482,3 @@ function get_template_name(frm, message=''){
 		});
 	}
 }
-

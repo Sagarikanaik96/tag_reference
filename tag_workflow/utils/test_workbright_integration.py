@@ -37,6 +37,7 @@ class TestWorkbrightIntegration(unittest.TestCase):
             emp_onb_doc.zip=record['zip']if record['enter_manually'] else ''
             emp_onb_doc.search_on_maps=record['search_on_maps']
             emp_onb_doc.complete_address=record['complete_address'] if record['search_on_maps'] else ''
+            emp_onb_doc.template_name='Temp Emp1' if record['staffing_company'] == staffing_company1 else 'Temp Emp2'
             emp_onb_doc.job_applicant, emp_onb_doc.job_offer = create_job_applicant_and_offer(emp_onb_doc.employee_name,emp_onb_doc.email,emp_onb_doc.staffing_company,emp_onb_doc.contact_number)
             emp_onb_doc.insert()
 
@@ -89,10 +90,12 @@ class TestWorkbrightIntegration(unittest.TestCase):
     def create_emp_onb_temp(self):
         emp_onb_temp1 = frappe.new_doc("Employee Onboarding Template")
         emp_onb_temp1.company="Test Staffing1"
+        emp_onb_temp1.template_name="Temp Emp1"
         emp_onb_temp1.insert()
 
         emp_onb_temp2 = frappe.new_doc("Employee Onboarding Template")
         emp_onb_temp2.company="Test Staffing2"
+        emp_onb_temp2.template_name="Temp Emp2"
         emp_onb_temp2.insert()
 
         return emp_onb_temp1.name, emp_onb_temp2.name

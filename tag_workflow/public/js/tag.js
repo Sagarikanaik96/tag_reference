@@ -405,3 +405,104 @@ function remove_job(name, job,employee_id,removed){
 		}
 	})
 }
+
+frappe.ui.form.Toolbar.prototype.set_page_actions = function(status){
+	let me = this;
+	this.page.clear_actions();
+
+	if(status!== 'Edit') {
+		let perm_to_check = this.frm.action_perm_type_map[status];
+		if(!this.frm.perm[0][perm_to_check]) {
+			return;
+		}
+	}
+
+	if(status === "Edit") {
+		this.page.set_primary_action(__("Edit"), function() {
+			me.frm.page.set_view('main');
+		}, 'edit');
+	} else if(status === "Cancel") {
+		let add_cancel_button = () => {
+			this.page.set_secondary_action(__(status), function() {
+				me.frm.savecancel(this);
+			});
+		};
+		if (this.has_workflow()) {
+			frappe.xcall('frappe.model.workflow.can_cancel_document', {
+				'doctype': this.frm.doc.doctype,
+			}).then((can_cancel) => {
+				if (can_cancel) {
+					add_cancel_button();
+				}
+			});
+		} else {
+			add_cancel_button();
+		}
+	} else {
+		let click = {
+			"Save": function() {
+				return me.frm.save('Save', null, this);
+			},
+			"Submit": function() {
+				return me.frm.savesubmit(this);
+			},
+			"Update": async function() {
+				check_update(me.frm);
+			},
+			"Amend": function() {
+				return me.frm.amend_doc();
+			}
+		}[status];
+
+		let icon = {
+			"Update": "edit",
+		}[status];
+
+		this.page.set_primary_action(__(status), click, icon);
+	}
+
+	this.current_status = status;
+}
+
+function check_update(frm){
+	if(frm.doc.doctype=='Employee Onboarding' && frm.doc.docstatus == 1 && frm.doc.status== 'Completed'){
+		frappe.db.get_value('Employee Onboarding', {'name': frm.doc.name}, ['status']).then((res)=>{
+			if(res.message && res.message.status!='Completed'){
+				update_emp_onb_status(frm);
+			}else{
+				return frm.save('Update', null, this);
+			}
+		})
+	}else{
+		return frm.save('Update', null, this);
+	}
+}
+
+function update_emp_onb_status(frm){
+	let tasks_list=[];
+	frm.doc.activities.forEach((element)=>{
+		tasks_list.push(element.task);
+	});
+	frappe.db.get_list('Task', {filters:{'project': frm.doc.project,'status': ['!=', 'Completed'], 'name': ['in', tasks_list]}, fields: ['subject']}).then(res=>{
+		if(res && res.length>0){
+			let message = 'All tasks will be set to "Completed". Please confirm.';
+			for(let i in res){
+				message+='<br>' + '<span>&bull;</span> '+res[i].subject.split(':')[0];
+			}
+			frappe.confirm(
+				message,
+				()=>{
+					frappe.call({
+						method: "tag_workflow.tag_data.set_status_complete",
+						args:{
+							'docname': frm.doc.name
+						}
+					});
+					return frm.save('Update', null, this);
+				}
+			)
+		}else{
+			return frm.save('Update', null, this);
+		}
+	});
+}

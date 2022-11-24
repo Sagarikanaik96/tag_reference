@@ -3,7 +3,8 @@
 import frappe
 import unittest
 import json
-from tag_workflow.tag_data import claim_order_insert,update_timesheet,company_details,staff_org_details,update_staffing_user_with_exclusive, check_assign_employee,job_site_contact,hiring_category,org_industy_type,disable_user, get_template_name
+from frappe.utils.data import getdate
+from tag_workflow.tag_data import claim_order_insert,update_timesheet,company_details,staff_org_details,update_staffing_user_with_exclusive, check_assign_employee,job_site_contact,hiring_category,org_industy_type,disable_user, get_template_name, create_job_applicant_and_offer, validate_employee_creation, set_status_complete
 JO='Job Order'
 jo_test_records = frappe.get_test_records(JO)
 GTS='Genpact Test44 Staffing'
@@ -17,6 +18,7 @@ template_name2 = 'Temp Emp2'
 Ind_Type = 'Industry Type'
 comp_details_path = 'assets/tag_workflow/js/test_records/test_records_company_details.json'
 
+emp_onb = 'Employee Onboarding'
 emp_onb_temp = 'Employee Onboarding Template'
 class TestTagData(unittest.TestCase):
 	def test_claim_order_insert(self):
@@ -240,6 +242,11 @@ class TestTagData(unittest.TestCase):
 		self.create_emp_onb_temp1()
 		self.create_emp_onb_temp2()
 		self.get_template_name_test()
+
+	def test_set_status_complete(self):
+		self.create_emp_onb()
+		self.validate_employee_creation_test()
+		self.set_status_complete_test()
 		self.delete_test_data2()
 	
 	def create_emp_onb_temp1(self):
@@ -253,12 +260,12 @@ class TestTagData(unittest.TestCase):
 				}).insert(ignore_permissions = True)
 		except Exception as e:
 			print(e)
-			frappe.log_error(e, 'Test tag_data: create_emp_onb_temp2 Error')
+			frappe.log_error(e, 'Test tag_data: create_emp_onb_temp1 Error')
     
 	def create_emp_onb_temp2(self):
 		try:
 			if not frappe.db.exists(emp_onb_temp, {'company': GTST, 'template_name': template_name2}):
-				self.temp1 = frappe.get_doc({
+				self.temp2 = frappe.get_doc({
 					'doctype': emp_onb_temp,
 					'company': GTST,
 					'template_name': template_name2,
@@ -280,9 +287,71 @@ class TestTagData(unittest.TestCase):
 		if expected_result and result:
 			self.assertEqual(expected_result, result)
 
+	def create_emp_onb(self):
+		try:
+			frappe.set_user('Administrator')
+			self.emp_onb_doc = frappe.new_doc(emp_onb)
+			self.emp_onb_doc.first_name= 'UT Ayushi'
+			self.emp_onb_doc.last_name= 'EmpOnb'
+			self.emp_onb_doc.employee_name= 'UT Ayushi EmpOnb'
+			self.emp_onb_doc.email= 'utayushi_emponb@yopmail.com'
+			self.emp_onb_doc.contact_number= '+919415685728'
+			self.emp_onb_doc.staffing_company= GTST
+			self.emp_onb_doc.date_of_birth= '2000-01-01'
+			self.emp_onb_doc.template_name= template_name1
+			self.emp_onb_doc.job_applicant, self.emp_onb_doc.job_offer = create_job_applicant_and_offer(self.emp_onb_doc.employee_name, self.emp_onb_doc.email, self.emp_onb_doc.staffing_company, self.emp_onb_doc.contact_number)
+			self.emp_onb_doc.append('activities', {'activity_name': 'Resume'})
+			self.emp_onb_doc.insert(ignore_permissions = True)
+			self.emp_onb_doc.submit()
+		except Exception as e:
+			print('Test tag_data: ', e)
+			frappe.log_error(e, 'Test tag_data: create_emp_onb Error')
+
+	def validate_employee_creation_test(self):
+		try:
+			tasks = frappe.db.get_all('Task', {'project': self.emp_onb_doc.project, 'status': ['!=', 'Completed']}, ['subject'])
+			tasks_list = [task['subject'].split(':')[0] for task in tasks]
+			if(len(tasks_list)>0):
+				self.assertTrue(isinstance(validate_employee_creation(self.emp_onb_doc.name), list))
+		except Exception as e:
+			print('Test tag_data: validate_employee_creation_test Error', e)
+			frappe.log_error(e, 'Test tag_data: validate_employee_creation_test Error')
+
+	def set_status_complete_test(self):
+		try:
+			set_status_complete(self.emp_onb_doc.name)
+			tasks_list = [row.task for row in self.emp_onb_doc.activities if row.task]
+			for task in tasks_list:
+				res_status = frappe.db.get_value('Task', {'name': task}, ['status'])
+				res_completed_on = frappe.db.get_value('Task', {'name': task}, ['completed_on'])
+				self.status_test(res_status)
+				self.date_test(res_completed_on)
+		except Exception as e:
+			print(e)
+			frappe.log_error(e, 'Test tag_data: set_status_complete_test Error')
+
+	def status_test(self, res):
+		self.assertEqual('Completed', res)
+
+	def date_test(self, res):
+		self.assertEqual(getdate(), res)
+
 	def delete_test_data2(self):
 		try:
-			frappe.set_user("Administrator")
+			job_offer, job_applicant, project= self.emp_onb_doc.job_offer, self.emp_onb_doc.job_applicant, self.emp_onb_doc.job_applicant
+			tasks_list = [row.task for row in self.emp_onb_doc.activities if row.task]
+
+			emp_onb_doc = frappe.get_doc(emp_onb, self.emp_onb_doc.name)
+			emp_onb_doc.cancel()
+			emp_onb_doc.delete()
+			frappe.delete_doc('Job Offer', job_offer)
+			frappe.delete_doc('Job Applicant', job_applicant)
+
+			if len(tasks_list)>0:
+				for task in tasks_list:
+					frappe.delete_doc('Task', task)
+			frappe.delete_doc('Project', project)
+
 			temp1 = frappe.db.get_value(emp_onb_temp, {'company': GTST, 'template_name': template_name1}, ['name'])
 			frappe.delete_doc(emp_onb_temp, temp1)
 
