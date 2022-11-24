@@ -645,7 +645,7 @@ function checking_same_date(r){
           else{
             date_order =`<label>Date:</label>
                     ${frappe.format(r["from_date"], { fieldtype: "Date" })} 
-                     -- 
+                     to 
                     ${frappe.format(r["to_date"], { fieldtype: "Date" })}` 
           }
           return date_order
