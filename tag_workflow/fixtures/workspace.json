@@ -1498,6 +1498,21 @@
     "dependencies": null,
     "hidden": 0,
     "icon": null,
+    "is_query_report": 1,
+    "label": "Employee Status Report",
+    "link_to": "Employee Status Report",
+    "link_type": "Report",
+    "onboard": 0,
+    "only_for": null,
+    "parent": "Reports",
+    "parentfield": "links",
+    "parenttype": "Workspace",
+    "type": "Link"
+   },
+   {
+    "dependencies": null,
+    "hidden": 0,
+    "icon": null,
     "is_query_report": 0,
     "label": "Workers Comp",
     "link_to": null,
@@ -1540,7 +1555,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2022-10-31 00:32:16.991058",
+  "modified": "2022-11-23 00:32:16.991058",
   "module": "Tag Workflow",
   "name": "Reports",
   "onboarding": null,
