@@ -26,8 +26,10 @@ frappe.ui.form.on('Claim Order', {
 		mandatory_fn(frm);
 		let no_of_worker = frm.doc.no_of_workers_joborder
 		let claim_no = frm.doc.staff_claims_no
+		let wrongClaimAlert = "Claims should not be greater than number of workers required"
+
 		if (claim_no > no_of_worker) {
-			frappe.msgprint(__("Claims should not be greater than number of workers required"));
+			frappe.msgprint(__(wrongClaimAlert));
 			frappe.validated = false;
 		}
 		else if (claim_no != undefined && claim_no != null && claim_no < 1) {
@@ -35,8 +37,8 @@ frappe.ui.form.on('Claim Order', {
 			frappe.validated = false;
 		}
 		else if (claim_no > frm.doc.no_of_remaining_employee) {
-			frappe.msgprint(__("Claims should not be greater than no. of remaining employee"));
 			frappe.validated = false;
+			frappe.msgprint(__(wrongClaimAlert));
 		}
 		if(window.conf==0 && frappe.validated && !['Hiring', 'Exclusive Hiring'].includes(frappe.boot.tag.tag_user_info.company_type)){
 			check_pay_rate(frm);
