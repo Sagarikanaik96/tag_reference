@@ -355,7 +355,9 @@
               </div>
             </a>
             {% endif %}
-
+            {% if frappe.boot.tag.tag_user_info.company_type !=
+              "Hiring" && frappe.boot.tag.tag_user_info.company_type !=
+              "Exclusive Hiring" %}
             <div class="tab-button custom-btn">
               <ul class="nav order">
                 <li>
@@ -372,13 +374,7 @@
                     <li class="py-2 mt-2">
                       <a href="#" onclick="job_order_page()" id="all-order-submenu">All</a>
                     </li>
-                    {% if frappe.boot.tag.tag_user_info.company_type ==
-                    "Hiring" || frappe.boot.tag.tag_user_info.company_type ==
-                    "Exclusive Hiring" %}
-                    <li class="py-2">
-                      <a href="/app/staff_company_list">Direct Order</a>
-                    </li>
-                    {% endif %} {% if
+                    {% if
                     frappe.boot.tag.tag_user_info.company_type == "Staffing"
                     %}
                     <li class="py-2">
@@ -387,12 +383,23 @@
                         <span class="circle_content" id="directOrderId"></span>
                       </div>
                     </li>
-
                     {% endif %}
                   </ul>
                 </li>
               </ul>
             </div>
+            {% else %}
+              <a href="#">
+                  <div class="tab-button custom-btn" onclick="job_order_page()" class="order-icon">
+                      <img src="/assets/tag_workflow/images/ico-order.svg" class="pr-3 pl-5" alt="orders" />Orders
+                  </div>
+              </a>
+              <a href="/app/staff_company_list">
+                  <div class="tab-button custom-btn">
+                      <img src="/assets/tag_workflow/images/buildings-light.png" class="pr-3 pl-5" alt="staffing_companies" />Staffing Companies
+                  </div>
+              </a>
+            {% endif %}
             {% if frappe.boot.tag.tag_user_info.company_type != "Hiring" &&
             frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"
             %}
