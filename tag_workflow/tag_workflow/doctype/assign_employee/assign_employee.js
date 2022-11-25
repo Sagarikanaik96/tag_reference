@@ -80,6 +80,7 @@ frappe.ui.form.on("Assign Employee", {
     }
     old_unknown_function(frm);
     render_tab(frm);
+    remove_cache_data()
   },
 
   onload: function (frm) {
@@ -1491,4 +1492,15 @@ function update_claim_approve(frm){
     });
   }
 
+}jQuery(document).on("click",".grid-remove-rows",function(){
+  remove_cache_data();
+});
+
+function remove_cache_data(){
+  if (cur_frm.doc.company && cur_frm.doc.job_order){
+  frappe.call({
+    method:"tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.free_redis",
+    args:{company:cur_frm.doc.company,job_order:cur_frm.doc.job_order}
+   })
+  }
 }

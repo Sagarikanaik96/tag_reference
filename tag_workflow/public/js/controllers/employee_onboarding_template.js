@@ -11,10 +11,12 @@ frappe.ui.form.on('Employee Onboarding Template', {
         });
         set_company(frm, 'company');
         get_user(frm, frm.doc.company);
+        
 	},
     refresh: (frm) => {
         frm.dashboard.hide();
         $('.form-footer').hide();
+       
     },
     validate: (frm)=>{
         let reqd_fields = {'Company': frm.doc.company, 'Template Name': frm.doc.template_name, 'Activities': frm.doc.activities, };
@@ -43,6 +45,13 @@ frappe.ui.form.on('Employee Onboarding Template', {
     },
     company: (frm)=>{
         get_user(frm);
+    },
+    before_load:(frm)=>{
+        const fields =['status','completed_on']
+        for (let f in fields){
+            frappe.meta.get_docfield("Employee Boarding Activity", fields[f],frm.doc.name).hidden=1;
+        }
+        frm.refresh_fields();
     }
 });
 
@@ -66,3 +75,4 @@ function check_temp_name(frm){
         }
     });
 }
+
