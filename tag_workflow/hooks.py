@@ -144,7 +144,6 @@ doctype_list_js = {
         "Employee Onboarding": "public/js/doctype_list/employee_onboarding_list.js",
 }
 
-after_migrate = ["tag_workflow.utils.organization.setup_data"]
 before_migrate = ["tag_workflow.utils.organization.remove_field"]
 # Hook on document methods and events
 validate = "tag_workflow.controllers.base_controller.validate_controller"

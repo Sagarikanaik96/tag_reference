@@ -74,6 +74,7 @@ def setup_data():
         create_job_applicant()
         set_workspace()
         setup_company_permission()
+        check_if_user_exists()
         update_job_title_list()
         update_old_lead_status()
         share_company_with_user()
