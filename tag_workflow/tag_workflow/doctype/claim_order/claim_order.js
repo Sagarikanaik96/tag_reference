@@ -125,19 +125,7 @@ frappe.ui.form.on('Claim Order', {
 			};
 		});
 		if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
-			frappe.call({
-				'method': "tag_workflow.tag_data.lead_org",
-				'args': { 'current_user': frappe.session.user },
-				'callback': function (r) {
-					if (r.message == 'success') {
-						frm.set_value('staffing_organization', frappe.boot.tag.tag_user_info.company)
-						frm.refresh_fields();
-					}
-					else {
-						frm.refresh_fields();
-					}
-				}
-			});
+			setting_staff_company(frm)
 		}
 	},
 	view_contract: function () {
@@ -244,18 +232,7 @@ function org_info(frm) {
 		})
 		frm.set_df_property("staffing_organization", "read_only", 1)
 	} else {
-		frappe.call({
-			'method': "tag_workflow.tag_data.hiring_org_name",
-			'args': { 'current_user': frappe.session.user },
-			callback: function (r) {
-				if (r.message == 'success') {
-					frm.set_value('staffing_organization', frappe.boot.tag.tag_user_info.company)
-				}
-				else {
-					frm.set_value('staffing_organization', '')
-				}
-			}
-		})
+		setting_staff_company(frm)
 	}
 }
 
@@ -497,4 +474,8 @@ function check_single_share(frm){
 			window.claim_share =0;
 	})
 	
+}
+
+function setting_staff_company(frm){
+	frm.set_value('staffing_organization',(frappe.boot.tag.tag_user_info.comps.length==1) ? frappe.boot.tag.tag_user_info.company : '')
 }

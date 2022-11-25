@@ -201,6 +201,7 @@ frappe.ui.form.on("Assign Employee", {
         filters: [["Company", "organization_type", "=", "Staffing"]],
       };
     });
+    staffing_company(frm)
   },
   view_contract: function () {
     let contracts =
@@ -814,18 +815,7 @@ function add_employee_row(frm) {
 function staffing_company(frm) {
   if (frm.doc.__islocal == 1) {
     if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
-      frappe.call({
-        method: "tag_workflow.tag_data.lead_org",
-        args: { current_user: frappe.session.user },
-        callback: function (r) {
-          if (r.message == "success") {
-            frm.set_value("company", frappe.boot.tag.tag_user_info.company);
-            frm.refresh_fields();
-          } else {
-            frm.refresh_fields();
-          }
-        },
-      });
+      frm.set_value('company',(frappe.boot.tag.tag_user_info.comps.length==1) ? frappe.boot.tag.tag_user_info.company : '')
     }
   }
 }
