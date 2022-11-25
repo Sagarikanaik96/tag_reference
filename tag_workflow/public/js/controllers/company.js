@@ -378,7 +378,7 @@ frappe.ui.form.on("Company", {
 				let updated_html = `
 				<div class="row input_field_in_custom_div" id="eliminate_${id_initiator}">
 					<div class="col-xl-3 pr-0">
-						<div> <button type="button" id="cancel_${id_initiator}" class="px-1 btn btn-light btn-sm" onclick="eliminate_div(this.id)">
+						<div> <button type="button" id="cancel_${id_initiator}" class="px-2 btn btn-sm certificate-btn" onclick="eliminate_div(this.id)">
 						<span id = "span_${id_initiator}"> ${cert} </span>
 						<svg class="icon  icon-sm ml-1" style="">
 							<use class="" href="#icon-delete"></use>
@@ -386,10 +386,10 @@ frappe.ui.form.on("Company", {
 						</button> 
 						</div>
 					</div>
-					<div class="col-xl-9 pl-lg-0 pl-3 mt-3 mt-lg-0 ">
+					<div class="col-xl-9 pl-lg-1 pl-3 mt-3 mt-lg-0 ">
 						<div class="control-input-wrapper">						
 						<div class="control-input">
-							<div class="attached-file pl-1 flex justify-between align-center" id ="after_attach_${id_initiator}"  style="display: none;">
+							<div class="attached-file p-1 flex justify-between align-center" id ="after_attach_${id_initiator}"  style="display: none;">
 								<div class="ellipsis">
 									<i class="fa fa-paperclip"></i>
 									<a class="attached-file-link" target="_blank" id="anchor_${id_initiator}" href="" value = "1"></a>

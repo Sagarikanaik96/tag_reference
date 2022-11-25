@@ -1672,4 +1672,8 @@ span.comment-count {
 .pac-container{
   z-index: 9999999;
 }
-
+.certificate-btn {
+  background: #f5e8c8;
+    border-radius: 10px;
+    margin-right: 3px;
+}
