@@ -38,6 +38,7 @@ frappe.ui.form.on("Company", {
 			$('div[data-fieldname="average_rating"]').css("display", "none");
 			cancel_company(frm);
 		} else {
+			set_up_cert_field(frm);
 			make_button_disable(frm);
 		}
 
@@ -61,7 +62,6 @@ frappe.ui.form.on("Company", {
 			frm.set_df_property('branch_integration', 'hidden', 1);
 		}
 		password_fields(frm);
-		set_up_cert_field(frm);
 
 	},
 	update_employee_records: function (frm) {
@@ -1075,7 +1075,7 @@ function validate_cert_attachment(frm) {
 		if (!link || link == "0") {
 			check_for_update = 1
 			frappe.validated = false;
-			frappe.msgprint({ message: __('	Certificate and Endorsements: Please Attach Certificate sahil'), title: __('Warning'), indicator: 'red' })
+			frappe.msgprint({ message: __('	Certificate and Endorsements: Please Attach Certificate'), title: __('Warning'), indicator: 'red' })
 			cur_frm.refresh()
 			break;
 		}
@@ -1096,8 +1096,10 @@ function validate_cert_attachment(frm) {
 }
 function set_up_cert_field(frm) {
 	if (frappe.boot.tag.tag_user_info.company_type == "Hiring" ||
-		frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring") {
+		frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" || frm.doc.organization_type!='Staffing') {
 		frm.set_df_property('accreditations', 'hidden', 1);
+		frm.set_df_property('certificate_and_endorsements', 'hidden', 1);
+
 	}
 	localStorage.setItem("id_initiator", 0)
 	let html = `
