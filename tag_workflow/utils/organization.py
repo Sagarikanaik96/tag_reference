@@ -667,7 +667,8 @@ def set_default_template():
         for company in staffing_companies:
             comp_data = frappe.get_all(Emp_Onb_Temp, {'company': company, 'default_template':1}, ['name'])
             if not comp_data:
-                frappe.db.sql(f'''UPDATE `tabEmployee Onboarding Template` SET default_template = 1 WHERE name=(SELECT name FROM `tabEmployee Onboarding Template` WHERE company="{company}" ORDER BY creation LIMIT 1)''')
+                temp_name = frappe.db.sql(f'''SELECT name FROM `tabEmployee Onboarding Template` WHERE company="{company}" ORDER BY creation LIMIT 1''', as_dict=1)
+                frappe.db.sql(f'''UPDATE `tabEmployee Onboarding Template` SET default_template = 1 WHERE name={temp_name[0]["name"]}''')
                 frappe.db.commit()
     except Exception as e:
         frappe.log_error(e, 'set_default_template Error')

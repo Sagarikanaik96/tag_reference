@@ -52,6 +52,16 @@ frappe.ui.form.on('Employee Onboarding Template', {
             frappe.meta.get_docfield("Employee Boarding Activity", fields[f],frm.doc.name).hidden=1;
         }
         frm.refresh_fields();
+    },
+    before_save: (frm)=>{
+        if(!frm.doc.default_template){
+            let filters=(frm.doc.__islocal!=1)?{'company': frm.doc.company, 'name': ['!=', frm.doc.name]}:{'company': frm.doc.company};
+            frappe.db.get_list('Employee Onboarding Template', {filters:filters, fields:['default_template']}).then(res=>{
+                if(res.length==0){
+                    frm.set_value('default_template', 1);
+                }
+            })
+        }
     }
 });
 
