@@ -8,6 +8,11 @@ from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
 from frappe.utils.global_search import update_global_search
 from frappe.utils.password import update_password as _update_password
 from erpnext.hr.utils import validate_active_employee
+from frappe.permissions import (
+	add_user_permission,
+	has_permission,
+	set_user_permission_if_allowed,
+)
 # user method update
 STANDARD_USERS = ("Guest", "Administrator")
 Abbr = "Abbreviation is mandatory"
@@ -400,3 +405,20 @@ def salary_slip_validate(self):
         if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
             frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
                             format(max_working_hours), alert=True)
+
+def update_user_permissions(self):
+    try:
+        if not self.create_user_permission: return
+        if not has_permission('User Permission', ptype='write', raise_exception=False): return
+        employee_user_permission_exists = frappe.db.exists('User Permission', {
+            'allow': 'Employee',
+            'for_value': self.name,
+            'user': self.user_id
+		})
+        if employee_user_permission_exists: return
+        user_type= frappe.db.get_value('User',{'name':self.user_id},'tag_user_type') or None
+        if not user_type:
+            add_user_permission("Employee", self.name, self.user_id)
+            set_user_permission_if_allowed("Company", self.company, self.user_id)
+    except Exception as e:
+        frappe.log_error(e,'update_permission_error')
