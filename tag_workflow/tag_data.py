@@ -1785,6 +1785,7 @@ def set_status_complete(docname):
         tasks_list = [row.task for row in emp_onb_data.activities if row.task]
         completed_date = str(getdate())
         if len(tasks_list)>0:
+            update_activity_table(tasks_list, docname, completed_date)
             if len(tasks_list)==1:
                 sql = f'''UPDATE `tabTask` SET status="Completed", completed_on="{completed_date}" where name in ("{tasks_list[0]}")'''
             else:
@@ -1796,3 +1797,15 @@ def set_status_complete(docname):
         frappe.db.set_value(emp_onb, docname, 'status', 'Completed')
     except Exception as e:
         frappe.log_error(e, 'set_status_complete error')
+
+@frappe.whitelist()
+def update_activity_table(tasks_list, docname, completed_date):
+    try:
+        if len(tasks_list)==1:
+            sql=f'''UPDATE `tabEmployee Boarding Activity` SET status="Completed", completed_on="{completed_date}" where task in ("{tasks_list[0]}") and parent = "{docname}"'''
+        else:
+            sql=f'''UPDATE `tabEmployee Boarding Activity` SET status="Completed", completed_on="{completed_date}" where task in {tuple(tasks_list)} and parent = "{docname}"'''
+        frappe.db.sql(sql)
+        frappe.db.commit()
+    except Exception as e:
+        frappe.log_error(e, 'update_activity_table error')

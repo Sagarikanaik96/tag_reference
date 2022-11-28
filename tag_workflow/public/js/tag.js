@@ -498,7 +498,8 @@ function update_emp_onb_status(frm){
 							'docname': frm.doc.name
 						}
 					});
-					return frm.save('Update', null, this);
+					frm.save('Update', null, this);
+					window.location.reload();
 				}
 			)
 		}else{
