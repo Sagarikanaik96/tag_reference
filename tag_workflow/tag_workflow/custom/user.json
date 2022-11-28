@@ -493,6 +493,7 @@
     "columns": 0,
     "creation": "2022-04-20 05:02:25.855983",
     "default": null,
+    "depends_on":"eval:(doc.__islocal!=1)&&(frappe.user_roles.includes('Tag Admin')||frappe.user_roles.includes('Staffing Admin')) && cur_frm.doc.enabled == 1 && ['Hiring Admin', 'Staffing Admin'].includes(cur_frm.doc.tag_user_type)",
     "description": "",
     "docstatus": 0,
     "dt": "User",
