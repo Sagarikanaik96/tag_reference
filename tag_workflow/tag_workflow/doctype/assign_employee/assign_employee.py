@@ -355,3 +355,10 @@ def free_redis(company,job_order):
                 redis.hdel(key,'emp')
     except Exception as e:
         frappe.log_error(e,'redis error')
+
+@frappe.whitelist()
+def add_notes(company,job_order):
+    try:
+        return frappe.db.sql(""" select notes from `tabAssign Employee` where job_order="{0}" and company="{1}" and notes!=""  limit 1 """.format(job_order,company),as_dict=1)
+    except Exception as e:
+        print(e)

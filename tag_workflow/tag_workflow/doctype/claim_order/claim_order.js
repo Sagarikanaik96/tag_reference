@@ -108,6 +108,8 @@ frappe.ui.form.on('Claim Order', {
 		}
 		window.conf = 0;
 		if (frm.doc.job_order) frm.set_df_property('job_order','read_only',1)
+		if(frm.is_new() && frappe.boot.tag.tag_user_info.company_type=="Staffing" && frm.doc.job_order && frm.doc.staffing_organization)
+			fetch_note(frm);
 	},
 	setup: function (frm) {
 		$('[data-label="Save"]').hide()
@@ -478,4 +480,17 @@ function check_single_share(frm){
 
 function setting_staff_company(frm){
 	frm.set_value('staffing_organization',(frappe.boot.tag.tag_user_info.comps.length==1) ? frappe.boot.tag.tag_user_info.company : '')
+}
+
+function fetch_note(frm){
+	frappe.call({
+		method:"tag_workflow.tag_workflow.doctype.claim_order.claim_order.fetch_notes",
+		args:{company:frm.doc.staffing_organization,job_order:frm.doc.job_order},
+		callback:(r)=>{
+			if(r.message.length>0){
+			  frm.set_value('notes',r.message[0]['notes'])
+			  frm.refresh_field('notes')
+			}
+		  }
+	})
 }

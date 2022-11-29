@@ -499,3 +499,10 @@ def check_staff_comp_code_existence(state,staff_class_code_rate,staff_class_code
 def adding_values(doc,staff_class_code,staff_class_code_rate,state):
     doc.append('class_codes',{'class_code':staff_class_code,'rate':staff_class_code_rate,'state':state})
     doc.save(ignore_permissions = True)	
+
+@frappe.whitelist()
+def fetch_notes(company,job_order):
+    try:
+        return frappe.db.sql(""" select notes from `tabClaim Order` where job_order="{0}" and staffing_organization="{1}" and notes!=""  limit 1 """.format(job_order,company),as_dict=1)
+    except Exception as e:
+        print(e)
