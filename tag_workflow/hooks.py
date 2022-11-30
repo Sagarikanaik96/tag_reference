@@ -46,7 +46,12 @@ fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflo
 				"User-mute_sounds-hidden",
 				"User-desk_theme-hidden",
 				"User-phone-hidden",
-				"User-bio-hidden"
+				"User-bio-hidden",
+                                "Company-section_break_28-hidden",
+                                "Company-date_of_establishment-hidden",
+                                "Company-default_letter_head-hidden",
+                                "Company-default_holiday_list-hidden",
+                                "Company-tax_id-hidden"
 			]
 	]
 	]}
