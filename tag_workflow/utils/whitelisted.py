@@ -13,7 +13,7 @@ from frappe.desk.desktop import Workspace
 from frappe import enqueue
 from frappe.desk.form.save import set_local_name,send_updated_docs
 from six import string_types
-
+EVENT = 'refresh_data'
 #-------global var------#
 item = "Timesheet Activity Cost"
 order = "Sales Order"
@@ -407,7 +407,9 @@ def search_staffing_by_hiring(data=None):
             if(exc_par):
                 data1=[]
                 data1.append({"name": exc_par})
+                frappe.publish_realtime(event=EVENT,user=frappe.session.user)
                 return [d['name'] for d in data1]
+            frappe.publish_realtime(event=EVENT,user=frappe.session.user)
             return [d['name'] for d in data]
         return []
     except Exception as e:

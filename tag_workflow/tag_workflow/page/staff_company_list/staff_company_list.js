@@ -51,6 +51,7 @@ frappe.FaceRecognition = Class.extend({
 					profile_html = await sorted_favourite_companies(sorted_data[p], profile_html,frappe.boot.tag.tag_user_info.company_type);
 				}
 				$("#myTable").html(profile_html);
+				populate_filter();
 			}
 		})
 	},
@@ -65,7 +66,7 @@ async function sorted_favourite_companies(data, profile_html,company_type) {
 		<use class="like-icon" href="#icon-heart"></use>
 		</svg>
 		</td>`
-		profile_html += `<tr>
+		profile_html += `<tr data-name="${data.name}" class="comps">
 					${company_type === "Exclusive Hiring" ?Likebtnexclusice:Likebtnnonexclusice}
 					<td ><a onclick=dynamic_route("${link}")>${data.name}</a></td>
 					<td>${data.address || ''}</td>	
@@ -173,4 +174,27 @@ async function get_favourites_list(company) {
 		})
 	}
 	return a
-} 
+}
+
+frappe.realtime.on('refresh_data',()=>{
+	if (localStorage.getItem('search')){
+		document.getElementById('myInput').value = '';
+		$('#myInput').keyup();
+		populate_filter();
+	}
+		
+})
+
+function populate_filter(){
+	if(localStorage.getItem('search')){
+		const val  = localStorage.getItem('search');
+		document.getElementById('myInput').value = val
+		Array.from(document.querySelectorAll('.comps')).filter((el)=>{
+			if(!el.attributes['data-name'].value.toLowerCase().startsWith(val)){
+				console.log(el.attributes['data-name'].value)
+				document.querySelector(`#myTable tr[data-name="${el.attributes['data-name'].value}"]`).style.display = 'none'	
+			}
+		})
+		localStorage.removeItem('search')
+	}
+}

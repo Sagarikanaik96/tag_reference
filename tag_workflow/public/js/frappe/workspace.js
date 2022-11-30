@@ -425,7 +425,7 @@ class DesktopPage {
 									<div class="inner-search border shadow rounded mt-2 py-3" style="display: none;">
 										<div class="d-flex flex-wrap border-bottom">
 											<div class="col-md-6">
-												<label class="text-secondary"> Top search company </label>
+												<label class="text-secondary" id="comp-name">Companies named </label>
 											</div>
 											<div class="col-md-6 text-right">
 												<a href="/app/staff_company_list" style="color: #21b9e4 !important;"> See All </a>
@@ -457,6 +457,8 @@ class DesktopPage {
 					function update_list(){
 						$(".inner-search").css("display", "none");
 						let data = document.getElementById("staff").value;
+						document.getElementById('comp-name').innerText = 'Companies named'+" "+data
+						localStorage.setItem('search',data)
 						var ignoreClickOnMeElement = document.getElementById('staff');
 						document.addEventListener('click', function(event) {
 							var isClickInsideElement = ignoreClickOnMeElement.contains(event.target);
@@ -475,7 +477,7 @@ class DesktopPage {
 									for(let d in result){
 										if(result[d] != "undefined"){
 											let link = result[d].split(' ').join('%');
-											html += "<div class='d-flex flex-wrap border-bottom' style='margin-top: 0.5rem;'><div class='col-md-12'><label class='text-secondary'><a onclick=dynamic_route('"+link+"')>"+result[d]+"</a></label></div></div>"
+											html += "<div class='d-flex flex-wrap border-bottom' style='margin-top: 0.5rem;' onclick=dynamic_route('"+link+"')><div class='col-md-12' ><label class='text-secondary'><a>"+result[d]+"</a></label></div></div>"
 										}
 									}
 									$("#staffing_list").html(html);
