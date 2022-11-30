@@ -1,0 +1,225 @@
+diff --git a/frappe/public/js/frappe/views/workspace/workspace.js b/frappe/public/js/frappe/views/workspace/workspace.js
+index 96b3f4e15a..465c5ac081 100644
+--- a/frappe/public/js/frappe/views/workspace/workspace.js
++++ b/frappe/public/js/frappe/views/workspace/workspace.js
+@@ -2,6 +2,7 @@ import EditorJS from "@editorjs/editorjs";
+ import Undo from "editorjs-undo";
+ 
+ frappe.standard_pages["Workspaces"] = function () {
++	console.log('Inworkspacestandardssss-------------')
+ 	var wrapper = frappe.container.add_page("Workspaces");
+ 
+ 	frappe.ui.make_app_page({
+@@ -18,6 +19,7 @@ frappe.standard_pages["Workspaces"] = function () {
+ 
+ frappe.views.Workspace = class Workspace {
+ 	constructor(wrapper) {
++		console.log('Inworkspacestandardconstructor-------------')
+ 		this.wrapper = $(wrapper);
+ 		this.page = wrapper.page;
+ 		this.blocks = frappe.workspace_block.blocks;
+@@ -45,8 +47,159 @@ frappe.views.Workspace = class Workspace {
+ 		`).appendTo(this.wrapper.find(".layout-side-section"));
+ 		this.sidebar = list_sidebar.find(".desk-sidebar");
+ 		this.body = this.wrapper.find(".layout-main-section");
++		if(frappe.boot.tag.tag_user_info.company_type != "TAG" && frappe.boot.tag.tag_user_info.company_type){
++			this.make_order_list();
++			this.get_order_data();
++			if(frappe.route_history.length > 1){
++				for(let i in frappe.route_history){
++					if(frappe.route_history[i][1] != ""){
++						window.location.reload();
++					}
++				}
++			}
++		}
++	}
++	make_order_list(){
++		if(frappe.boot.tag.tag_user_info.company_type == "Hiring" || frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"){
++			console.log('inif--------------')
++			$(`
++				<style>
++					.home-tab .inner-search {
++						max-width: 470px;
++						width: 100%;
++						transition: .8s ease-in-out;
++						display: none;
++						position: absolute;
++						background: #fff;
++					}
++				
++				</style>
++				<div class="row hiring-home">
++					<div class="col-xs-12 tittle">
++						<div class="widget-group-title"><h3>Discover Top-Rated Professionals</h3><p>We are here to help you with any project</p></div>
++						<div class="widget-group-control"></div>
++					</div>
++					<div class="frappe-control input-max-width search_field">
++						<div class="form-group">
++							<div class="control-input-wrapper">
++								<div class="control-input" style="display: block;">
++									<span class="search_icon">
++										<i class="fa fa-search" aria-hidden="true"></i>
++									</span>
++									<input class="form-control my-0 py-2 search-area" type="text" placeholder="Search by Staffing Company or Job Category" aria-label="Search" oninput="update_list()" id="staff">
++									<div class="inner-search border shadow rounded mt-2 py-3" style="display: none;">
++										<div class="d-flex flex-wrap border-bottom">
++											<div class="col-md-6">
++												<label class="text-secondary"> Top search company </label>
++											</div>
++											<div class="col-md-6 text-right">
++												<a href="/app/staff_company_list" style="color: #21b9e4 !important;"> See All </a>
++											</div>
++										</div>
++										<div id="staffing_list"></div>
++									</div>
++								</div>
++							</div>
++						</div>
++					</div>
++				</div>
++
++				<div class="row widget-group">
++					<div class="col-md-10 widget-group-head col-xs-6 col-sm-6">
++						<div class="widget-group-title mt-2">Today's Orders</div>
++						<div class="widget-group-control"></div>
++					</div>
++					<div class="col-md-2 col-xs-6 col-sm-6 ">
++						<button class="btn btn-xs btn-primary px-2 float-right restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">
++							View All
++						</button>
++					</div>
++					<div class="col-xs-12">
++						<div class="widget widget-shadow hiring_dashboard_table p-0 shortcut-widget-box" id="data"></div>
++					</div>
++				</div>
++				<script>
++					function update_list(){
++						$(".inner-search").css("display", "none");
++						let data = document.getElementById("staff").value;
++						var ignoreClickOnMeElement = document.getElementById('staff');
++						document.addEventListener('click', function(event) {
++							var isClickInsideElement = ignoreClickOnMeElement.contains(event.target);
++							if (!isClickInsideElement) {
++								$(".inner-search").css("display", "none");
++								document.getElementById("staff").value=""
++							}
++						});
++						frappe.call({
++							method: "tag_workflow.utils.whitelisted.search_staffing_by_hiring",
++							args: {"data": data},
++							callback: function(r){
++								if(r && r.message.length){
++									let result = r.message || [];
++									let html="";
++									for(let d in result){
++										if(result[d] != "undefined"){
++											let link = result[d].split(' ').join('%');
++											html += "<div class='d-flex flex-wrap border-bottom' style='margin-top: 0.5rem;'><div class='col-md-12'><label class='text-secondary'><a onclick=dynamic_route('"+link+"')>"+result[d]+"</a></label></div></div>"
++										}
++									}
++									$("#staffing_list").html(html);
++									$(".inner-search").css("display", "block");
++								}
++							}
++						});
++					}
++
++					function dynamic_route(name){
++						name1= name.replace(/%/g, ' ');
++						localStorage.setItem("company", name1);
++						window.location.href = "/app/dynamic_page";						
++
++					}
++				</script>
++			`).appendTo(this.wrapper.find(".layout-main-section"));
++		}else{
++			console.log('inifelse--------------')
++			$(`
++				<div class="row widget-group">
++					<div class="col-md-10 col-xs-8 widget-group-head">
++						<div class="widget-group-title mt-0 mt-md-2 ml-3 ml-md-0 col-sm-6">Today's Orders</div>
++						<div class="widget-group-control"></div>
++					</div>
++					<div class="col-md-2 col-xs-4 col-sm-6">
++					<button class="btn btn-xs px-2 float-right btn-primary restricted-button flex align-center" onclick="frappe.set_route('form', 'Job Order')">View All</button>
++					</div>
++					<div class="col-md-12">
++						<div class="widget widget-shadow p-0 hiring_dashboard_table shortcut-widget-box table-responsive table-responsive" id="data"></div>
++					</div>
++				</div>
++			`).appendTo(this.page);
++		}
+ 	}
+ 
++	get_order_data() {
++		let data;
++		frappe.call({
++			method:"tag_workflow.utils.whitelisted.get_order_data",
++			async:false,
++			callback: function(r){
++				data = r.message;
++			
++			}
++		});
++		let body;
++		let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead><tr><th>Job Title</th><th>Date & Time</th><th>Job Site</th><th>Company</th><th>Total Price</th><th style="text-align:center">Total Assigned/Required</th><th></th></tr></thead><tbody>`;
++		let html = ``;
++		for(let d in data){
++			html += `<tr><td>${data[d].select_job}</td><td>${data[d].date}</td><td>${data[d].job_site}</td><td>${data[d].company}</td><td>$ ${data[d].per_hour.toFixed(2)}</td><td style="text-align:center">${data[d].worker_filled}/${data[d].no_of_workers}</td><td><button class="btn btn-primary btn-xs primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${data[d].name}')">Order<span class="alt-underline"> Det</span>ails</button></td></tr>`;
++		}
++		if(html){
++			body = head + html + "</tbody></table>";
++		}else{
++			body = head + `<tr><td></td><td></td><td>No Data Found</td><td></td><td></td><td></td></tbody></table>`;
++		}
++		$("#data").html(body);
++	}
+ 	async setup_pages(reload) {
+ 		!this.discard && this.create_page_skeleton();
+ 		!this.discard && this.create_sidebar_skeleton();
+@@ -61,7 +214,10 @@ frappe.views.Workspace = class Workspace {
+ 
+ 		this.public_pages = this.all_pages.filter((page) => page.public);
+ 		this.private_pages = this.all_pages.filter((page) => !page.public);
+-
++		if(frappe.session.user!='Administrator'){
++			$('.menu-btn-group').hide()
++			$('[data-label="Customize"]').hide()
++        }
+ 		if (this.all_pages) {
+ 			frappe.workspaces = {};
+ 			for (let page of this.all_pages) {
+@@ -213,6 +369,7 @@ frappe.views.Workspace = class Workspace {
+ 			$drop_icon.find("use").attr("href", icon);
+ 			$child_item_section.toggleClass("hidden");
+ 		});
++		}
+ 	}
+ 
+ 	show() {
+@@ -389,7 +546,7 @@ frappe.views.Workspace = class Workspace {
+ 		}
+ 
+ 		this.clear_page_actions();
+-
++		if(frappe.session.user=='Administrator'){
+ 		this.page.set_secondary_action(__("Edit"), async () => {
+ 			if (!this.editor || !this.editor.readOnly) return;
+ 			this.is_read_only = false;
+@@ -405,6 +562,7 @@ frappe.views.Workspace = class Workspace {
+ 		this.page.add_inner_button(__("Create Workspace"), () => {
+ 			this.initialize_new_page();
+ 		});
++		}
+ 	}
+ 
+ 	initialize_editorjs_undo() {
+@@ -1320,6 +1478,7 @@ frappe.views.Workspace = class Workspace {
+ 	}
+ 
+ 	reload() {
++		console.log('inreloadstandard---------------')
+ 		this.sorted_public_items = [];
+ 		this.sorted_private_items = [];
+ 		this.setup_pages(true);

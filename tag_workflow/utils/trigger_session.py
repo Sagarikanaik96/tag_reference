@@ -16,7 +16,7 @@ def on_session_creation():
         if(comp_type == "Staffing"):
             frappe.local.response["home_page"] = "/app/staff-home"
         elif(comp_type in ["Exclusive Hiring", "Hiring"]):
-            frappe.local.response["home_page"] = "/app/home"
+            frappe.local.response["home_page"] = "/app"
     except Exception as e:
         print(e)
 
