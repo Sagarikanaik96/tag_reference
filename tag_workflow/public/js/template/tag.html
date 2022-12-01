@@ -344,26 +344,26 @@
             == "TAG" || frappe.session.user == "Administrator" %}
             <a href="/app/home" class="position-relative">
               <div class="tab-button custom-btn">
-                <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-5" alt="home" />Home
+                <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-4" alt="home" />Home
               </div>
             </a>
             {% endif %} {% if frappe.boot.tag.tag_user_info.company_type ==
             "Staffing" %}
             <a href="/app/staff-home" class="position-relative">
               <div class="tab-button custom-btn">
-                <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-5" alt="home" />Home
+                <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-4" alt="home" />Home
               </div>
             </a>
             {% endif %}
             {% if frappe.boot.tag.tag_user_info.company_type !=
-              "Hiring" && frappe.boot.tag.tag_user_info.company_type !=
-              "Exclusive Hiring" %}
+            "Hiring" && frappe.boot.tag.tag_user_info.company_type !=
+            "Exclusive Hiring" %}
             <div class="tab-button custom-btn">
               <ul class="nav order">
                 <li>
                   <a href="#" id="btn-1" class="order-icon" data-toggle="collapse" data-target="#submenu1"
                     aria-expanded="false" onclick="directOrder()">
-                    <span class="pl-3 ml-3"><img src="/assets/tag_workflow/images/ico-order.svg" class="pr-3 pl-3"
+                    <span class="pl-2"><img src="/assets/tag_workflow/images/ico-order.svg" class="pr-3 pl-3"
                         alt="crm" /></span>
                     <span class="slide-text" name="orders-submenu"> Orders </span>
                     <span><i class="fa fa-angle-down rotate" aria-hidden="true"></i></span>
@@ -389,16 +389,17 @@
               </ul>
             </div>
             {% else %}
-              <a href="#">
-                  <div class="tab-button custom-btn" onclick="job_order_page()" class="order-icon">
-                      <img src="/assets/tag_workflow/images/ico-order.svg" class="pr-3 pl-5" alt="orders" />Orders
-                  </div>
-              </a>
-              <a href="/app/staff_company_list">
-                  <div class="tab-button custom-btn">
-                      <img src="/assets/tag_workflow/images/buildings-light.png" class="pr-3 pl-5" alt="staffing_companies" />Staffing Companies
-                  </div>
-              </a>
+            <a href="#">
+              <div class="tab-button custom-btn" onclick="job_order_page()" class="order-icon">
+                <img src="/assets/tag_workflow/images/ico-order.svg" class="pr-3 pl-4" alt="orders" />Orders
+              </div>
+            </a>
+            <a href="/app/staff_company_list">
+              <div class="tab-button custom-btn">
+                <img src="/assets/tag_workflow/images/ico-buildings.svg" class="pr-3 pl-4"
+                  alt="staffing_companies" />Staffing Companies
+              </div>
+            </a>
             {% endif %}
             {% if frappe.boot.tag.tag_user_info.company_type != "Hiring" &&
             frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"
@@ -408,7 +409,7 @@
                 <li>
                   <a href="#" id="btn-1" class="crm-icon" data-toggle="collapse" data-target="#submenu2"
                     aria-expanded="false">
-                    <span class="pl-3 ml-3"><img src="/assets/tag_workflow/images/ico-crm.svg" class="pr-3 pl-3"
+                    <span class="pl-2"><img src="/assets/tag_workflow/images/ico-crm.svg" class="pr-3 pl-3"
                         alt="crm" /></span>
                     <span class="slide-text">CRM </span>
                     <span><i class="fa fa-angle-down crm-rotate" aria-hidden="true"></i></span>
@@ -435,7 +436,7 @@
                 <li>
                   <a href="#" id="2" class="ats-icon" data-toggle="collapse" data-target="#submenu3"
                     aria-expanded="false">
-                    <span class="pl-3 ml-3"><img src="/assets/tag_workflow/images/ico-ats.svg" class="pr-3 pl-3"
+                    <span class="pl-2"><img src="/assets/tag_workflow/images/ico-ats.svg" class="pr-3 pl-3"
                         alt="crm" /></span>
                     <span class="slide-text">ATS </span>
                     <span><i class="fa fa-angle-down ats-rotate" aria-hidden="true"></i></span>
@@ -455,20 +456,20 @@
 
             <a href="#" onclick="employee_page()">
               <div class="tab-button custom-btn">
-                <img src="/assets/tag_workflow/images/ico-employee.svg" class="pr-3 pl-5" alt="employee" />Employees
+                <img src="/assets/tag_workflow/images/ico-employee.svg" class="pr-3 pl-4" alt="employee" />Employees
               </div>
             </a>
             {% endif %}
 
             <a href="/app/reports">
               <div class="tab-button custom-btn">
-                <img src="/assets/tag_workflow/images/ico-invoice.svg" class="pr-3 pl-5" alt="reports" />Reports
+                <img src="/assets/tag_workflow/images/ico-invoice.svg" class="pr-3 pl-4" alt="reports" />Reports
               </div>
             </a>
 
             <a href="/app/sales-invoice">
               <div class="tab-button custom-btn">
-                <img src="/assets/tag_workflow/images/ico-invoices.svg" class="pr-3 pl-5" alt="invoice" />Invoices
+                <img src="/assets/tag_workflow/images/ico-invoices.svg" class="pr-3 pl-4" alt="invoice" />Invoices
               </div>
             </a>
 
@@ -480,12 +481,12 @@
                 <li>
                   <a href="#" id="3" class="payroll-icon" data-toggle="collapse" data-target="#submenu4"
                     aria-expanded="false">
-                    <span class="pl-3 ml-3"><img src="/assets/tag_workflow/images/payroll.svg" class="pr-2 pl-3"
+                    <span class="pl-2"><img src="/assets/tag_workflow/images/payroll.svg" class="pr-2 pl-3"
                         alt="crm" /></span>
                     <span class="slide-text"> Payroll </span>
                     <span><i class="fa fa-angle-down payroll-rotate" aria-hidden="true"></i></span>
                   </a>
-                  <ul class="inner-menu pl-5 ml-5 list-unstyled collapse" id="submenu4" role="menu"
+                  <ul class="inner-menu pl-5 ml-3 list-unstyled collapse" id="submenu4" role="menu"
                     aria-labelledby="btn-2">
                     <li class="py-2 mt-1">
                       <a href="#" id="4" class="setup-icon" data-toggle="collapse" data-target="#submenu5"
