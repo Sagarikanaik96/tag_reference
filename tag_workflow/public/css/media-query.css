@@ -1,8 +1,28 @@
 
 @media (max-width: 768px) {
-  .sub-menu {
-    top: 110px;
+  [data-page-route="Workspaces"] .hiring_dashboard_table table {
+    width:1000px;
   }
+  .header-alignment {
+    align-items: start !important;
+  }
+  .page-head {
+    padding-bottom: 40px;
+}
+  .sub-menu {
+    top:100px !important;
+  }
+ .search-bar input::-webkit-input-placeholder {
+         opacity: 0;
+    }
+  .custom-location {
+  flex-wrap: wrap;
+    justify-content: flex-start !important;
+    flex-shrink: inherit;
+}
+.custom-location button {
+  margin-top: 10px;
+}
   #page-timesheet-approval #data_head .widget {
     padding: 0;
   }
@@ -26,9 +46,6 @@
   .flex-item .page-icon-group {
     display: flex !important;
   }
-  .page-head {
-    padding-bottom: 10px;
-}
   .add-btn .hidden-xs{
     display: inline-block !important;
   }
@@ -88,7 +105,7 @@
     float:left;
   }
   [data-page-route="Employee"] .page-head .page-head-content div:nth-child(3) {
-    margin: 15px 0px;
+    margin: 5px 0px;
   }
   [data-page-route="Employee"]
     .layout-main-section-wrapper
