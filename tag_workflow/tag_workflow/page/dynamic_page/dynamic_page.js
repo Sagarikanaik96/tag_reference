@@ -12,12 +12,15 @@ frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 function hide(r,page){
 	if(frappe.boot.tag.tag_user_info.company_type=== "Staffing"){
 		$("#place_order").hide();
+		$("#work_order").css('color','#fff');
+		$("#work_order").css('background-color','#21b9e4');
 	}
 	if(frappe.boot.tag.tag_user_info.company_type===r.message[0].organization_type){
 		$("#place_order").hide();
 		$("#work_order").hide();
 	}
 	if(r.message[0].organization_type!= 'Staffing'){
+		$(".documents").hide();
 		$("#coi").hide();
 		$("#safety_manual").hide();
 		$("#w_nine").hide();
@@ -117,34 +120,26 @@ frappe.FaceRecognition = Class.extend({
 							</div>
 							<div class="col-md-6 col-sm-12 order text-left text-md-right ">
                                 <div>
-                                    <a href=javascript:new_order() class="text-decoration-none">
-                                        <button type="button" id="place_order" class="btn btn-primary btn-xs mb-1 mt-1 mr-2 ">Place Order</button>
-                                    </a>
-                                    <a href=javascript:work_order_history()>
-                                        <button type="button" id="work_order"  class="btn btn-primary  mb-1 btn-xs mt-1">Work Order History</button>
-                                    </a>
-                                </div>
-                                <div> 
-                                    <a href=javascript:document_download("${link_coi}")>
-                                        <button type="button" id="coi" class="attached-file-link btn btn-primary mr-2 btn-xs mt-2" style="padding:5px 19.5px;"> 
-                                            COI 
-                                            <i class="fa fa-download mx-2" aria-hidden="true"></i>
-                                        </button></a>
-                                    <a href=javascript:document_download("${link_sm}")>
-                                        <button type="button" id="safety_manual" class="btn btn-primary btn-xs mt-2 attached-file-link">
-                                            Safety Manual
-                                            <i class="fa fa-download mx-2" aria-hidden="true"></i>
-                                        </button>
-                                    </a>
-                                </div>
 								<div>
-									<a href=javascript:document_download("${w_nine}")>
-                                        <button type="button" id="w_nine" class="btn btn-primary btn-xs mt-2 attached-file-link">
-                                             W9
-                                            <i class="fa fa-download mx-2" aria-hidden="true"></i>
-                                        </button>
-                                    </a>
-								</div>
+                                    <a href=javascript:new_order()>
+                                        <button  type="button" id="place_order" style="width:140px;margin-right:0px !important; background-color: #21b9e4 !important; font-size: 12px; box-shadow: var(--btn-shadow); !important;color:#fff; border:1px solid transparent !important; text-align: center !important; padding:8px" class="demo btn-xs mb-1 mt-1 mr-2 ">Place Order</button>
+                                    </a></div>
+                                    <div><a href=javascript:work_order_history()>
+									<button type="button"  id="work_order" style="width:140px; padding:8px; background:white; font-size: 12px; box-shadow: var(--btn-shadow); !important;color:#333C44;border:1px solid transparent !important; text-align: center !important" class="demo btn-xs mb-1 mt-1">Work Order History</button>
+									</a></div>
+
+									<div class="documents">
+									<button class="demo demo1 btn-xs mb-1 mt-1 dropdown-toggle" style="width:140px; background:white; font-size: 12px; box-shadow: var(--btn-shadow); !important;color:#333C44;border:1px solid transparent !important; padding:8px; text-align: center !important " type="button" data-toggle="dropdown">Documents
+									<span class="caret"></span></button>
+									<ul class="dropdown-menu" style="min-width: 120px;">
+									<a style="text-decoration: none;" href=javascript:my_function("${link_coi}","COI")><div class="menuitem" style="width:130px"><div><li style=" padding: 5px; color: #333C44; display:flex; justify-content:space-between;">COI <span style = "padding-right:5px"><i class="fa fa-angle-right rotate" aria-hidden="true"></i></span></li></div></div></a>
+									<a style="text-decoration: none;" href=javascript:my_function("${link_sm}","Safety&nbsp;Manual")><div class="menuitem" style="width:130px"><li style=" padding: 5px; color: #333C44; display:flex; justify-content:space-between;">Safety Manual <span style = "padding-right:5px"><i class="fa fa-angle-right rotate" aria-hidden="true"></i></li></div></a>
+									<a style="text-decoration: none;" href=javascript:my_function("${w_nine}","W9")><div class="menuitem" style="width:130px"><li style=" padding: 5px; color: #333C44; display:flex; justify-content:space-between; ">W9 <span style = "padding-right:5px"><i class="fa fa-angle-right rotate" aria-hidden="true"></i></li></div></a>
+									</ul>
+								  </div>	
+                                </div>
+                               
+								
                             </div>
 						</div>
 								   
@@ -211,11 +206,86 @@ frappe.FaceRecognition = Class.extend({
 						</div>
 					</div>`;
 				$("#dynamic_company_data1").html(template);
+				setHover()
+
 		}
 		});
 		
 	},
 });
+
+function setHover(){
+	$(".dropdown-menu").find(".menuitem").hover(function(e){
+		$(this).css('background','#e8f8fc')
+		$(this).css('border-radius','5px')
+		$(this).css('cursor','pointer')
+		
+	},function(e){
+		$(this).css('background','white')
+		$(this).css('border-radius','5px')
+		$(this).css('cursor','default')
+		
+	})
+	$('.demo').hover(function () {
+		$(this).css('border',' 1px solid #21B9E4');
+	},function () {
+		$(this).css('border', '1px solid transparent');
+	});
+	$('head').append("<style>.demo1::after{ margin-left:3.3em }</style>");
+	
+}
+
+function my_function(title,heading){
+
+	let is_docs = title.includes(".docx")
+	let data = viewFile(title)
+	if(is_docs){
+	return document_download(title)}
+	console.log(data)
+	data = data+"#toolbar=0"
+	let html_content = `<div id="bodycontent" style= "overflow:auto; max-height:580px;padding-right:35px;padding-left:25px;padding:8px 10px 8px 10px;margin:15px 25px 10px 25px;background:rgb(215,218,222,.2);border-radius:5px; ">
+	<object width="100%" height="550px" style="max-height:480px" data="${data}"></object>
+	</div><div style="text-align:center"><a href=javascript:document_download("${title}")>
+	<button type="button" id="coi" class="attached-file-link btn btn-primary mr-2 btn-xs mt-2" style="padding:5px 19.5px;">
+	<i class="fa fa-download mx-2" aria-hidden="true"></i>
+	<span style="margin-left:5px;margin-top:5px">Download </span>
+	</button></a></div>`
+
+	let fields = [{"fieldname": "", "fieldtype": "HTML", "options": html_content}];
+	let dialog = new frappe.ui.Dialog({title: heading,	fields: fields});
+	dialog.$wrapper.find('.modal-dialog').css('max-width', '1000px');
+	dialog.$wrapper.find('h4').css('font-size', '20px');
+	dialog.show();
+}
+
+function viewFile(file1) {
+	let file2=file1.replace(/%/g, ' ');
+	let file=''
+	if(file2.includes('/private')){
+		file = file2.replace('/private/','/');
+	}
+	else{
+		file=file2
+	}
+	if(file=="" || undefined){
+		frappe.msgprint("No File Attached");
+	}
+	let link=''
+	if(file.includes('.')){
+		if(file.length>1){
+			if(file.includes('/files/')){
+				link=window.location.origin+file
+			}
+			else{
+				link=window.location.origin+'/files/'+file
+			}
+			console.log(link)
+			return  link
+
+		}
+	}
+	
+}
 
 function get_reviews(r) {
 	let rev = "";
