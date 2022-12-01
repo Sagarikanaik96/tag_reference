@@ -483,22 +483,25 @@ function update_emp_onb_status(frm){
 	frm.doc.activities.forEach((element)=>{
 		tasks_list.push(element.task);
 	});
-	frappe.db.get_list('Task', {filters:{'project': frm.doc.project,'status': ['!=', 'Completed'], 'name': ['in', tasks_list]}, fields: ['subject']}).then(res=>{
+	frappe.db.get_list('Task', {filters:{'project': frm.doc.project,'status': ['!=', 'Completed'], 'name': ['in', tasks_list]}, fields: ['name','subject']}).then(res=>{
 		if(res && res.length>0){
 			let message = 'All tasks will be set to "Completed". Please confirm.';
+			let incomplete_tasks = [];
 			for(let i in res){
 				message+='<br>' + '<span>&bull;</span> '+res[i].subject.split(':')[0];
+				incomplete_tasks.push(res[i].name)
 			}
 			frappe.confirm(
 				message,
 				()=>{
+					frm.save('Update', null, this);
 					frappe.call({
 						method: "tag_workflow.tag_data.set_status_complete",
 						args:{
-							'docname': frm.doc.name
+							'docname': frm.doc.name,
+							'tasks_list': incomplete_tasks
 						}
 					});
-					frm.save('Update', null, this);
 					window.location.reload();
 				}
 			)

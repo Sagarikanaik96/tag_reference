@@ -1590,10 +1590,11 @@ def check_employee(onb_email):
 @frappe.whitelist()
 def validate_employee_creation(emp_onb_name):
     emp_onb_details = frappe.get_doc(emp_onb, emp_onb_name)
-    tasks = frappe.db.get_all('Task', {'project': emp_onb_details.project, 'status': ['!=', 'Completed']}, ['subject'])
+    tasks = frappe.db.get_all('Task', {'project': emp_onb_details.project, 'status': ['!=', 'Completed']}, ['name','subject'])
     tasks_list = [task['subject'].split(':')[0] for task in tasks]
+    task_ids = [task['name'] for task in tasks]
     if len(tasks_list)>0:
-        return tasks_list
+        return tasks_list, task_ids
     elif emp_onb_details.status != "Completed":
         return False
     else:
@@ -1778,12 +1779,17 @@ def get_template_name(company):
     except Exception as e:
         frappe.log_error(e, 'get_template_name error')
 
+import ast
+
 @frappe.whitelist()
-def set_status_complete(docname):
+def set_status_complete(docname, tasks_list):
     try:
+        tasks_list=ast.literal_eval(tasks_list)
         emp_onb_data = frappe.get_doc(emp_onb, docname)
-        tasks_list = [row.task for row in emp_onb_data.activities if row.task]
         completed_date = str(getdate())
+        frappe.db.set_value('Project', emp_onb_data.project, 'status', 'Completed')
+        frappe.db.set_value('Project', emp_onb_data.project, 'percent_complete', '100')
+        frappe.db.set_value(emp_onb, docname, 'status', 'Completed')
         if len(tasks_list)>0:
             update_activity_table(tasks_list, docname, completed_date)
             if len(tasks_list)==1:
@@ -1792,9 +1798,6 @@ def set_status_complete(docname):
                 sql = f'''UPDATE `tabTask` SET status="Completed", completed_on="{completed_date}" where name in {tuple(tasks_list)}'''
             frappe.db.sql(sql)
             frappe.db.commit()
-        frappe.db.set_value('Project', emp_onb_data.project, 'status', 'Completed')
-        frappe.db.set_value('Project', emp_onb_data.project, 'percent_complete', '100')
-        frappe.db.set_value(emp_onb, docname, 'status', 'Completed')
     except Exception as e:
         frappe.log_error(e, 'set_status_complete error')
 

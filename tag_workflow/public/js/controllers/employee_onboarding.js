@@ -331,7 +331,7 @@ function validate_employee(frm){
 				if(!r.message){
 					confirmation(frm);
 				}else if(Array.isArray(r.message)){
-					confirmation(frm, r.message);
+					confirmation(frm, r.message[0], r.message[1]);
 				}else{
 					frappe.model.open_mapped_doc({
 						method: "tag_workflow.tag_data.make_employee",
@@ -349,23 +349,23 @@ function validate_employee(frm){
 	}
 }
 
-function confirmation(frm, incomplete_tasks = []){
+function confirmation(frm, incomplete_tasks = [], task_ids=[]){
 	return new Promise(function(resolve){
 		let message = "Onboard Employee Status not set to 'Completed'. Do you wish to create the employee record?";
+		let args = {'docname': frm.doc.name}
 		if(incomplete_tasks.length>0){
 			message = "The following Onboard Employee Tasks or Status are not set to 'Completed'. Do you wish to create the employee record?";
 			for(let i in incomplete_tasks){
 				message+='<br>' + '<span>&bull;</span> '+incomplete_tasks[i];
 			}
+			args['tasks_list']=task_ids;
 		}
 		frappe.confirm(
 			message,
 			()=>{
 				frappe.call({
 					method: "tag_workflow.tag_data.set_status_complete",
-					args:{
-						'docname': frm.doc.name
-					}
+					args:args
 				});
 				frappe.model.open_mapped_doc({
 					method: "tag_workflow.tag_data.make_employee",

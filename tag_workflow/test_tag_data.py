@@ -309,17 +309,20 @@ class TestTagData(unittest.TestCase):
 
 	def validate_employee_creation_test(self):
 		try:
-			tasks = frappe.db.get_all('Task', {'project': self.emp_onb_doc.project, 'status': ['!=', 'Completed']}, ['subject'])
+			tasks = frappe.db.get_all('Task', {'project': self.emp_onb_doc.project, 'status': ['!=', 'Completed']}, ['name','subject'])
 			tasks_list = [task['subject'].split(':')[0] for task in tasks]
+			self.task_ids=[task['name'] for task in tasks]
 			if(len(tasks_list)>0):
-				self.assertTrue(isinstance(validate_employee_creation(self.emp_onb_doc.name), list))
+				expected_res1, expected_res2 = validate_employee_creation(self.emp_onb_doc.name)
+				self.assertEqual(expected_res1, tasks_list)
+				self.assertEqual(expected_res2, self.task_ids)
 		except Exception as e:
 			print('Test tag_data: validate_employee_creation_test Error', e)
 			frappe.log_error(e, 'Test tag_data: validate_employee_creation_test Error')
 
 	def set_status_complete_test(self):
 		try:
-			set_status_complete(self.emp_onb_doc.name)
+			set_status_complete(self.emp_onb_doc.name, self.task_ids)
 			tasks_list = [row.task for row in self.emp_onb_doc.activities if row.task]
 			for task in tasks_list:
 				res_status = frappe.db.get_value('Task', {'name': task}, ['status'])

@@ -250,8 +250,8 @@ def check_islatest(self):
     modified = frappe.db.sql("""select value from tabSingles where doctype=%s and field='modified' for update""", self.doctype)
     modified = modified and modified[0][0]
     if modified and modified != cstr(self._original_modified):
-        return True
-    return False
+        return True, modified
+    return False, modified
 
 def check_ismodify(self):
     tmp = frappe.db.sql("""select modified, docstatus from `tab{0}` where name = %s for update""".format(self.doctype), self.name, as_dict=True)
@@ -262,8 +262,8 @@ def check_ismodify(self):
 
     modified = cstr(tmp.modified)
     if modified and modified != cstr(self._original_modified):
-        return True, tmp
-    return False, tmp
+        return True, tmp, modified
+    return False, tmp, modified
 
 def check_if_latest(self):
     conflict = False
@@ -271,13 +271,12 @@ def check_if_latest(self):
 
     if not self.get('__islocal') and not self.meta.get('is_virtual'):
         if self.meta.issingle:
-            conflict = check_islatest(self)
+            conflict, modified = check_islatest(self)
         else:
-            conflict, tmp = check_ismodify(self)
+            conflict, tmp, modified = check_ismodify(self)
             self.check_docstatus_transition(tmp.docstatus)
-
-        if conflict and self.doctype not in ["Company", "Employee", "Job Order", "Assign Employee", "User", "Lead", "Timesheet"]:
-                frappe.msgprint(_("Error: Document has been modified after you have opened it") + (" (%s, %s). " % (modified, self.modified)) + _("Please refresh to get the latest document."), raise_exception=frappe.TimestampMismatchError)
+        if conflict and self.doctype not in ["Company", "Employee", "Job Order", "Assign Employee", "User", "Lead", "Timesheet", "Employee Onboarding"]:
+            frappe.msgprint(_("Error: Document has been modified after you have opened it") + (" (%s, %s). " % (modified, self.modified)) + _("Please refresh to get the latest document."), raise_exception=frappe.TimestampMismatchError)
     else:
         self.check_docstatus_transition(0)
 #-----------------------------------------------------#
