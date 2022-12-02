@@ -13,7 +13,6 @@
 		"public/js/new_file_uploader/index.js"
 	],
 	"js/tag-min.js":[
-		"public/js/frappe/workspace.js",
 		"public/js/frappe/page.js",
 		"public/js/frappe/navbar.html",
 		"public/js/frappe/page.html"

@@ -261,20 +261,34 @@ def check_ismodify(self):
     return False, tmp
 
 def check_if_latest(self):
-    conflict = False
-    self._action = "save"
+		"""Checks if `modified` timestamp provided by document being updated is same as the
+		`modified` timestamp in the database. If there is a different, the document has been
+		updated in the database after the current copy was read. Will throw an error if
+		timestamps don't match.
 
-    if not self.get('__islocal') and not self.meta.get('is_virtual'):
-        if self.meta.issingle:
-            conflict = check_islatest(self)
-        else:
-            conflict, tmp = check_ismodify(self)
-            self.check_docstatus_transition(tmp.docstatus)
+		Will also validate document transitions (Save > Submit > Cancel) calling
+		`self.check_docstatus_transition`."""
 
-        if conflict and self.doctype not in ["Company", "Employee", "Job Order", "Assign Employee", "User", "Lead", "Timesheet"]:
-                frappe.msgprint(_("Error: Document has been modified after you have opened it") + (" (%s, %s). " % (modified, self.modified)) + _("Please refresh to get the latest document."), raise_exception=frappe.TimestampMismatchError)
-    else:
-        self.check_docstatus_transition(0)
+		self.load_doc_before_save(raise_exception=True)
+
+		self._action = "save"
+		previous = self._doc_before_save
+
+		# previous is None for new document insert
+		if not previous:
+			self.check_docstatus_transition(0)
+			return
+
+		if cstr(previous.modified) != cstr(self._original_modified) and self.doctype not in ["Company", "Employee", "Job Order", "Assign Employee", "User", "Lead", "Timesheet"]:
+			frappe.msgprint(
+				_("Error: Document has been modified after you have opened it")
+				+ (f" ({previous.modified}, {self.modified}). ")
+				+ _("Please refresh to get the latest document."),
+				raise_exception=frappe.TimestampMismatchError,
+			)
+
+		if not self.meta.issingle:
+			self.check_docstatus_transition(previous.docstatus)
 #-----------------------------------------------------#
 
 @frappe.whitelist()
