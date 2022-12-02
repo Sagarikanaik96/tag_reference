@@ -15,6 +15,7 @@ frappe.FaceRecognition = Class.extend({
 		setTimeout(function () {
 			me.setup(wrapper, page);
 		}, 0);
+		$('h3[title = "Staff Company List"]').html("Staffing Companies");
 	},
 	setup: function (wrapper, page) {
 		let me = this;

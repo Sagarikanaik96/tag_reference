@@ -354,7 +354,7 @@ function confirmation(frm, incomplete_tasks = [], task_ids=[]){
 		let message = "Onboard Employee Status not set to 'Completed'. Do you wish to create the employee record?";
 		let args = {'docname': frm.doc.name}
 		if(incomplete_tasks.length>0){
-			message = "The following Onboard Employee Tasks or Status are not set to 'Completed'. Do you wish to create the employee record?";
+			message = "The following Onboard Employee Tasks are not set to 'Completed'. Do you wish to create the employee record?";
 			for(let i in incomplete_tasks){
 				message+='<br>' + '<span>&bull;</span> '+incomplete_tasks[i];
 			}
