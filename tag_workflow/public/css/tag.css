@@ -1677,3 +1677,9 @@ span.comment-count {
     border-radius: 10px;
     margin-right: 3px;
 }
+.like-icon{
+  display: none;
+}
+[data-page-route="staff_company_list"] .like-icon{
+  display: block;
+}
