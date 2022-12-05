@@ -283,10 +283,10 @@ def check_pay_rate(total_bill_rate, data):
         emp_details = data['employee_details']
         temp = {'bill_rate': total_bill_rate}
         employees = {}
-        if data['employee_pay_rate'] > total_bill_rate:
+        if float(data['employee_pay_rate']) > total_bill_rate:
             temp['emp_pay_rate'] = data['employee_pay_rate']
         for i in emp_details:
-            if i['pay_rate'] > total_bill_rate:
+            if float(i['pay_rate']) > total_bill_rate:
                 employees[i['employee_name']] = i['pay_rate']
         if len(employees)>0:
             temp['employees'] = employees

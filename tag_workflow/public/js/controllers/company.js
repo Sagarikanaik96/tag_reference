@@ -408,6 +408,9 @@ frappe.ui.form.on("Company", {
 			}
 		}
 
+	},
+	timeline_refresh:(frm)=>{
+		invoice_view(frm);
 	}
 });
 
@@ -1220,4 +1223,70 @@ function set_up_cert_field(frm) {
 		}
 	});
 
+}
+
+function invoice_view(frm){
+	let html = '';
+	if(frm.doc.default_invoice_view=='Summary View'){
+		html+=`
+		<div id="content">
+			<div class="button-strip">
+				<div class="strip-button active-strip-button" data-description="Summary View" onclick="myFunction(this.id)" id="summary_view"><span class="strip-button-text">Summary View</span></div>
+				<div class="strip-button" data-description="Detailed View" onclick="myFunction(this.id)" id="detailed_view"><span class="strip-button-text">Detailed View</span></div>
+			</div>
+		</div>`;
+	}else{
+		html+=`
+		<div id="content">
+			<div class="button-strip">
+				<div class="strip-button" data-description="Summary View" onclick="myFunction(this.id)" id="summary_view"><span class="strip-button-text">Summary View</span></div>
+				<div class="strip-button active-strip-button" data-description="Detailed View" onclick="myFunction(this.id)" id="detailed_view"><span class="strip-button-text">Detailed View</span></div>
+			</div>
+		</div>`;
+	}
+	html += `
+	<style>
+		.button-strip {
+			width: 202px;
+			height: 29px;
+			border: 1px solid #1496BD;
+			border-radius: 3px;
+			display: flex;
+			box-shadow: var(--btn-shadow);
+		}
+		.strip-button {
+			background-color: white;
+			color: #1496BD;
+			width: 100px;
+			height: 27px;
+			text-align: center;
+			vertical-align: middle;
+			line-height: 26px;
+			transition: background-color .4s linear, color .2s linear;
+			cursor: pointer;
+		}
+		.strip-button span {
+			color: inherit;
+		}
+		.strip-button-text {
+			font-size: var(--text-md);
+			color: #1496BD;
+			margin: 0px;
+			padding: 0px;
+		}
+		.active-strip-button {
+			background-color: #1496BD;
+			color: white;
+		}
+	</style>`
+	frm.set_df_property('invoice_view_html', 'options', html);
+}
+
+window.myFunction=(id)=>{
+	let button = document.getElementById(id);
+	let description = button.getAttribute('data-description');
+	$('#summary_view').removeClass('active-strip-button');
+	$('#detailed_view').removeClass('active-strip-button');
+	$('#'+id).addClass('active-strip-button');
+	cur_frm.set_value('default_invoice_view', description);
 }

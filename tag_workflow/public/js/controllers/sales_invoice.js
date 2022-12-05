@@ -62,6 +62,10 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 		$('[data-label="Save"]').show();
         sync_with_quickbook(frm);
+		$('[data-original-title="Printer"]').off('click');
+		$('[data-original-title="Printer"]').on('click', ()=>{
+			frappe.set_route("print-invoice", "Sales Invoice", frm.doc.name);
+		});
 	},
 	on_submit: function(frm) {
 		if(frm.doc.docstatus ==1){
