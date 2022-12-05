@@ -278,7 +278,7 @@ function siteMap() {
     }
 
     const map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 8,
+        zoom: 11,
         center: default_location,
         mapTypeControl: false,
     });
@@ -300,7 +300,10 @@ function siteMap() {
         autocomplete.addListener("place_changed", fillInAddress);
     }
 
-
+	if (!cur_frm.is_dirty() && cur_frm.doc.address && cur_frm.doc.search_on_maps==1)
+	{            
+		document.getElementById('autocomplete-address').value = cur_frm.doc.address;	   
+	}
     function fillInAddress() {
         place = autocomplete.getPlace();
         if (!place.formatted_address && place.name) {

@@ -36,7 +36,7 @@ frappe.StaffHome = Class.extend({
 		let me = this;
 		let center = { lat: 38.889248, lng: -77.050636 };
 		me.map = new google.maps.Map(document.getElementById('maps'), {
-			zoom: 3.8,
+			zoom: 3.3,
 			center: center
 		});
 	},
@@ -72,13 +72,36 @@ frappe.StaffHome = Class.extend({
 	update_map: function (_wrapper, _page, location) {
 		let me = this;
 		let locations = location;
+		let latlngbounds = new google.maps.LatLngBounds();
 		for (let c in locations) {
 			let marker = new google.maps.Marker({
 				position: new google.maps.LatLng(locations[c][1], locations[c][2]),
 				map: me.map,
 				title: locations[c][0].concat(" ", locations[c][3])
 			});
-			console.log(marker)
+			latlngbounds.extend(marker.position);
+
+		}
+		let check_if_same_loc=new Set(location.map(item => item[0]));
+		if(check_if_same_loc.size==1){
+			me.map.setZoom(11)
+			const geocoder = new google.maps.Geocoder();
+			let request={address:locations[0][0]}
+			geocoder.geocode(request).then((result) => {
+				const {
+				results
+				} = result;
+				me.map.setCenter(results[0].geometry.location);
+			}).catch((e) => {
+				alert("Geocode was not successful for the following reason: " + e);
+			});
+		}
+		else if(location.length==0){
+			me.map.setZoom(3.3)
+		}
+		else{
+			me.map.setCenter(latlngbounds.getCenter());
+			me.map.fitBounds(latlngbounds);
 		}
 	},
 	update_order: function (_wrapper, _page, order, org_type) {
