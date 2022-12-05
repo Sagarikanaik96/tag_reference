@@ -29,9 +29,6 @@ frappe.ui.form.on("Company", {
 			frm.set_df_property("default_currency", "hidden", 1);
 			frm.set_df_property("country", "hidden", 1);
 			frm.set_df_property("hr_settings_section", "hidden", 1);
-			frm.set_df_property("accounts_payable_contact_name", "hidden", 1);
-			frm.set_df_property("accounts_payable_email", "hidden", 1);
-			frm.set_df_property("accounts_payable_phone_number", "hidden", 1);
 		}
 		if(!frappe.user.has_role("Tag Admin")){
 			frm.set_df_property("make_organization_inactive", "hidden", 1);
