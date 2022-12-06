@@ -73,14 +73,35 @@ frappe.StaffHome = Class.extend({
 		let me = this;
 		let locations = location;
 		let latlngbounds = new google.maps.LatLngBounds();
-		for (let c in locations) {
+		let ht = {}
+		unique_location_hashing(locations,ht);
+		for (let p in ht){
+			let data = ht[p].slice(2)
+			let content_list = `<div style="padding: 0px 9px 0px 10px ; max-height:120px"><br>`
+			if(data.length==1){content_list+=`<span style="font-weight:bold">${data[0]}</span>`}
+			else{
+			for(let li in data){
+				content_list+=`<li style="font-weight:bold">${data[li]}</li>`
+			}}
+			content_list+="</div>"
 			let marker = new google.maps.Marker({
-				position: new google.maps.LatLng(locations[c][1], locations[c][2]),
+				position: new google.maps.LatLng(ht[p][0], ht[p][1]),
 				map: me.map,
-				title: locations[c][0].concat(" ", locations[c][3])
+				title: p.concat(" ",ht[p].length - 2 ==1 ?ht[p][2]: " x"+JSON.stringify(ht[p].length - 2)),
+				label: {
+					text: ht[p].length - 2 ==1 ?null: " x"+JSON.stringify(ht[p].length - 2),
+					color: "#fff",
+					fontWeight: "bold"
+				  }
 			});
 			latlngbounds.extend(marker.position);
-
+			marker.info = new google.maps.InfoWindow({
+				content: content_list
+			  });
+			  
+			  google.maps.event.addListener(marker, 'click', function() {
+				marker.info.open(me.map, marker);
+			  });
 		}
 		let check_if_same_loc=new Set(location.map(item => item[0]));
 		if(check_if_same_loc.size==1){
@@ -211,6 +232,17 @@ frappe.StaffHome = Class.extend({
 	},
 });
 
+
+function unique_location_hashing(locations,ht) {
+	for(let a in locations) {
+		if(ht[locations[a][0]]!=undefined) {
+			ht[locations[a][0]].push(locations[a][3]);
+		}
+		else {
+			ht[locations[a][0]]=[locations[a][1],locations[a][2],locations[a][3]];
+		}
+	}
+}
 
 function show_info_order(order) {
 	frappe.call({
