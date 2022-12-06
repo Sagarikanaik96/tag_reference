@@ -2,7 +2,7 @@
 frappe.pages['staff_company_list'].on_page_load = function (wrapper) {
 	let page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Staff Company List',
+		title: 'Staffing Companies',
 		single_column: true
 	});
 	wrapper.face_recognition = new frappe.FaceRecognition(wrapper, page);

@@ -1,5 +1,5 @@
 let company=localStorage.getItem("company")
-
+let company_type = ""
 frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 	let page = frappe.ui.make_app_page({
 		parent: wrapper,
@@ -58,6 +58,7 @@ frappe.FaceRecognition = Class.extend({
 
 				let my_val= r.message[0];
 				let txt = "";
+				company_type = my_val.organization_type
 				let text = r.message[2];
 				for(let i in text){
 					txt += text[i].full_name + "<br>";
@@ -142,6 +143,9 @@ frappe.FaceRecognition = Class.extend({
 								
                             </div>
 						</div>
+						<div class = "container" id ="accreditations_container">
+								
+						</div>
 								   
 						<div class="accordion mt-4 custom_collapse" id="accordionExample">
 						
@@ -209,7 +213,11 @@ frappe.FaceRecognition = Class.extend({
 				setHover()
 
 		}
+
 		});
+		setTimeout(()=>{
+			create_accreditations(company,company_type)
+		},1000)
 		
 	},
 });
@@ -555,4 +563,34 @@ function get_blocked_list(page){
 			}
 		})
 	}
+}
+function create_accreditations(company_name,company_type){
+	let intitator_html = `<label><h5>Accreditations:</h5></label>
+						<div class = "container-fluid" id = "accreditations_btn_section" style= " display: inline; ">	
+						</div>`
+	frappe.call({
+		method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_accreditations",
+		args: {company: company_name},
+		callback: function(r){
+			if(r.message||company_type == "Staffing"){
+				document.getElementById("accreditations_container").innerHTML = intitator_html
+				for(let val of r.message){
+					let btn = `<button type="button" id="cancel_1 class="btn btn-primary" title="${val.attached_certificate}" onclick=create_popup(this.title)>${val.name}</button> `
+					document.getElementById("accreditations_btn_section").innerHTML = document.getElementById("accreditations_btn_section").innerHTML + btn
+				}
+				
+			}
+		}
+
+	});
+}
+function create_popup(link){
+	let certificate =`<div id="bodycontent" style= "overflow:auto; max-height:580px;padding-right:35px;padding-left:25px;padding:8px 10px 8px 10px;margin:15px 25px 10px 25px;background:rgb(215,218,222,.2);border-radius:5px; ">
+	<object width="100%" height="550px" style="max-height:480px" data="${link}"></object>
+	</div>`
+	let certificate_pop = new frappe.ui.Dialog({
+		title: "Certificate Details",
+		fields: [{fieldname: "html_37", fieldtype: "HTML", options: certificate,},],
+	});
+	certificate_pop.show();
 }

@@ -376,7 +376,7 @@ export default {
 				let check_flag_attach = localStorage.getItem("check_flag_attach")
 				if(check_flag_attach){
 					localStorage.setItem("file_name",file.name)
-					localStorage.getItem("check_flag_attach",0)
+					localStorage.setItem("check_flag_attach",0)
 				}
 				if (file.file_obj) {
 					form_data.append('file', file.file_obj, file.name);

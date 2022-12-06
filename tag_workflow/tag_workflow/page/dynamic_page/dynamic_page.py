@@ -206,3 +206,9 @@ def create_link(company):
       return logo
    else:
       return "/assets/tag_workflow/images/default_logo.png"
+
+@frappe.whitelist()
+def get_accreditations(company):
+   sql = '''select name,attached_certificate, sequence from `tabCertificate and Endorsement Details` where company = "{0}" order by sequence'''.format(company)
+   records = frappe.db.sql(sql,as_dict =True)
+   return records
