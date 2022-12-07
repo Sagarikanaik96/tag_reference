@@ -225,7 +225,8 @@ override_whitelisted_methods = {
         "frappe.client.save": "tag_workflow.utils.whitelisted.save",
         "erpnext.accounts.party.get_due_date": "tag_workflow.utils.invoice.get_due_date",
         "frappe.model.workflow.bulk_workflow_approval":"tag_workflow.utils.workflow.bulk_workflow_approval",
-        "erpnext.hr.utils.get_onboarding_details": "tag_workflow.utils.whitelisted.get_onboarding_details"
+        "erpnext.hr.utils.get_onboarding_details": "tag_workflow.utils.whitelisted.get_onboarding_details",
+        "erpnext.hr.doctype.employee.employee.get_retirement_date":"tag_workflow.utils.whitelisted.get_retirement_date"
 }
 
 

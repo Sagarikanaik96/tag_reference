@@ -1,5 +1,6 @@
 from unicodedata import name
 import frappe
+from frappe.utils import add_years, getdate
 from frappe.desk.form.load import get_docinfo, run_onload
 import requests, json
 from frappe import _, msgprint, throw
@@ -831,3 +832,17 @@ def get_onboarding_details(parent, parenttype):
 		fields=["activity_name", "role", "user", "required_for_employee_creation", "description", "task_weight", "document_required", "document", "attach"],
 		filters={"parent": parent, "parenttype": parenttype},
 		order_by= "idx")
+
+@frappe.whitelist()
+def get_retirement_date(date_of_birth=None):
+	ret = {}
+	if date_of_birth:
+		try:
+			retirement_age = int(frappe.db.get_single_value("HR Settings", "retirement_age") or 120)
+			dt = add_years(getdate(date_of_birth),retirement_age)
+			ret = {'date_of_retirement': dt.strftime('%Y-%m-%d')}
+		except ValueError:
+			# invalid date
+			ret = {}
+
+	return ret
