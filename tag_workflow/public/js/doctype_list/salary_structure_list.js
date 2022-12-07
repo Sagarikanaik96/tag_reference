@@ -22,5 +22,8 @@ frappe.listview_settings["Salary Structure"] = {
                 </a>
             </span>`
            }
+    },
+    refresh:()=>{
+        check_payroll_perm()
     }
 }

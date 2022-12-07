@@ -2,11 +2,12 @@ frappe.ui.form.on('Salary Component',{
     setup:function(frm){
 		frm.set_query("company", function() {
 			return {
-				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]],['Company',"make_organization_inactive","=",0]]
+				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]],['Company',"make_organization_inactive","=",0],['Company',"enable_payroll","=",1]]
 			}
 		});
 	},
 	refresh:function(frm){
+		check_payroll_perm()
 		if (frm.doc.__islocal==1 && frappe.boot.tag.tag_user_info.company_type == "Staffing") {
 			frappe.call({
 				'method': "tag_workflow.tag_data.lead_org",

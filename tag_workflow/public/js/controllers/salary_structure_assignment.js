@@ -4,7 +4,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
         frm.set_value('company',"")
 		frm.set_query("company", function() {
 			return {
-				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]],['Company',"make_organization_inactive","=",0]]
+				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]],['Company',"make_organization_inactive","=",0],['Company',"enable_payroll","=",1]]
 			}
 		});
 		frm.set_query("employee",function(){
@@ -14,6 +14,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 		})
 	},
 	refresh:function(frm){
+		check_payroll_perm()
         frm.set_df_property('company','read_only',0);
         frm.set_df_property('company','hidden',0);
         frm.set_query("company", function() {

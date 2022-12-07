@@ -15,6 +15,7 @@ app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.svg"
 sales_invoice="Sales Invoice"
 map= "public/js/controllers/doc_map.js"
 dialog ="public/js/controllers/dialog.js"
+perm ="public/js/controllers/perm.js"
 # Includes in <head>
 # ------------------
 fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow", "Workflow State", "Workflow Action Master",
@@ -107,15 +108,18 @@ doctype_js = {
         "Job Site": "public/js/controllers/job_sites.js",
         "Data Import":"public/js/controllers/data_import.js",
         "Notification Log": "public/js/controllers/notification_log.js",
-        "Employee Onboarding Template": "public/js/controllers/employee_onboarding_template.js",
-        "Employee Onboarding": ["public/js/controllers/employee_onboarding.js", map],
+        "Employee Onboarding Template": ["public/js/controllers/employee_onboarding_template.js",perm],
+        "Employee Onboarding": ["public/js/controllers/employee_onboarding.js", map,perm],
         "Job Offer": "public/js/controllers/job_offer.js",
         "Holiday List": "public/js/controllers/holiday_list.js",
-        "Salary Component":"public/js/controllers/salary_component.js",
-        "Salary Structure":"public/js/controllers/salary_structure.js",
-        "Salary Slip":"public/js/controllers/salary_slip.js",
-        "Salary Structure Assignment":"public/js/controllers/salary_structure_assignment.js",
-        "Claim Order":dialog
+        "Salary Component":["public/js/controllers/salary_component.js",perm],
+        "Salary Structure":["public/js/controllers/salary_structure.js",perm],
+        "Salary Slip":["public/js/controllers/salary_slip.js",perm],
+        "Salary Structure Assignment":["public/js/controllers/salary_structure_assignment.js",perm],
+        "Claim Order":dialog,
+        "Payroll Entry":["public/js/controllers/payroll_entry.js",perm],
+        "Payroll Period":["public/js/controllers/payroll_period.js",perm],
+
 
 
 }
@@ -136,12 +140,14 @@ doctype_list_js = {
         "Item": "public/js/doctype_list/item_list.js",
         "Employee Onboarding Template": "public/js/doctype_list/employee_onboarding_template_list.js",
         "Holiday List": "public/js/doctype_list/holiday_list_view.js",
-        "Salary Component":"public/js/doctype_list/salary_component_list.js",
-        "Salary Slip": "public/js/doctype_list/salary_slip_list.js",
-        "Payroll Entry": "public/js/doctype_list/payroll_entry_list.js",
-        "Salary Structure": "public/js/doctype_list/salary_structure_list.js",
+        "Salary Component":["public/js/doctype_list/salary_component_list.js",perm],
+        "Salary Slip": ["public/js/doctype_list/salary_slip_list.js",perm],
+        "Payroll Entry": ["public/js/doctype_list/payroll_entry_list.js",perm],
+        "Salary Structure": ["public/js/doctype_list/salary_structure_list.js",perm],
         "System Setting": "public/js/doctype_list/system_setting.js",
         "Employee Onboarding": "public/js/doctype_list/employee_onboarding_list.js",
+        "Payroll Period": ["public/js/doctype_list/payroll_period_list.js",perm],
+        "Salary Structure Assignment":["public/js/doctype_list/salary_structure_assignment_list.js",perm]
 }
 
 before_migrate = ["tag_workflow.utils.organization.remove_field"]

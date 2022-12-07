@@ -6,6 +6,10 @@ frappe.listview_settings['Employee Onboarding Template'] = {
     },
     refresh: () => {
         $('[data-original-title="Designation"]').hide();
+        if (frappe.boot.tag.tag_user_info.company_type =="Staffing" && frappe.flags.ats_status.ats ===0){
+            frappe.msgprint("You don't have enough permissions.");
+		    frappe.set_route("app");
+        }
     },
     formatters:{
         default_template: (val)=>{

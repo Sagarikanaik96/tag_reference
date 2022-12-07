@@ -39,5 +39,8 @@ frappe.listview_settings["Salary Component"] = {
               </a>
           </span>`
          }
+    },
+    refresh:()=>{
+      check_payroll_perm()
     }
 }

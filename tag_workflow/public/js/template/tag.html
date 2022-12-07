@@ -430,7 +430,7 @@
                 </li>
               </ul>
             </div>
-
+            {% if ats !=0 %}
             <div class="tab-button custom-btn">
               <ul class="nav crm">
                 <li>
@@ -453,7 +453,7 @@
                 </li>
               </ul>
             </div>
-
+            {%endif%}
             <a href="#" onclick="employee_page()">
               <div class="tab-button custom-btn">
                 <img src="/assets/tag_workflow/images/ico-employee.svg" class="pr-3 pl-4" alt="employee" />Employees
@@ -475,6 +475,7 @@
 
             {% if frappe.boot.tag.tag_user_info.company_type != "Hiring" &&
             frappe.boot.tag.tag_user_info.company_type != "Exclusive Hiring"
+            && payroll!="0" 
             %}
             <div class="tab-button custom-btn internal-custom-btn">
               <ul class="nav crm">

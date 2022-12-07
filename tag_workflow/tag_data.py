@@ -1812,3 +1812,18 @@ def update_activity_table(tasks_list, docname, completed_date):
         frappe.db.commit()
     except Exception as e:
         frappe.log_error(e, 'update_activity_table error')
+
+@frappe.whitelist()
+def get_ats_and_payroll_status():
+    try:
+        user = frappe.get_doc('User',frappe.session.user)
+        if user.organization_type =="Staffing":
+           return  frappe.db.sql(""" 
+            select count(*)-(count(*)-sum(enable_ats)) as ats,count(*)-(count(*)-sum(enable_payroll)) as payroll
+            from `tabCompany` 
+            where name in
+            (select assign_multiple_company from `tabCompanies Assigned` 
+            where parenttype="User" and  parent ="{0}")
+            and make_organization_inactive="0" """.format(user.name),as_dict=1)
+    except Exception as e:
+        print(e)

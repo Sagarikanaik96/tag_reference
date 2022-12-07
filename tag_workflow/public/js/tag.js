@@ -1,7 +1,8 @@
 frappe.provide("frappe.toolbar");
 frappe.provide("tag_workflow");
 
-
+frappe.flags.ats = []
+frappe.flags.ats_status = null;
 $(document).bind('toolbar_setup', function() {
 	$(".dropdown-help").empty();
 	$('.navbar-home').html(`<img class="app-logo" src="/assets/tag_workflow/images/TAG-Logo.png">`);
@@ -18,7 +19,23 @@ $(document).bind('toolbar_setup', function() {
 
 $(document).ready(function(){
 	if(frappe.boot && frappe.boot.home_page!=='setup-wizard'){
-		$(".main-section").append(frappe.render_template("tag"));
+		if(frappe.boot.tag.tag_user_info.company_type=="Staffing"){
+			frappe.call({
+				method:"tag_workflow.tag_data.get_ats_and_payroll_status",
+				callback:(r)=>{
+					$(".main-section").append(frappe.render_template("tag",r.message[0]));
+					frappe.flags.ats_status = r.message[0]
+				if (r.message[0].ats==0)
+					frappe.flags.ats.push('Employee Onboarding','Employee Onboarding Template')
+				if (r.message[0].payroll==0)
+					frappe.flags.ats.push('Salary Component','Salary Structure','Salary Structure Assignment','Salary Slip','Payroll Period','Payroll Entry')
+			}
+			})
+		}
+		else{
+			$(".main-section").append(frappe.render_template("tag",{'ats':1,'payroll':1}));
+		}
+			
 	}
 
 	if(window.location.pathname == "/app/staff-home"){
@@ -509,4 +526,71 @@ function update_emp_onb_status(frm){
 			return frm.save('Update', null, this);
 		}
 	});
+}
+
+frappe.search.utils.get_doctypes=function(keywords) {
+	let me = this;
+	let out = [];
+	let level, target,label;
+	tag_workflow.option = function(type, route, order) {
+		// check to skip extra list in the text
+		// eg. Price List List should be only Price List
+		let skip_list = type === 'List' && target.endsWith('List');
+		let label_without_type = me.bolden_match_part(__(target), keywords);
+		if (skip_list) {
+			 label = label_without_type;
+		} else {
+			label = __(`{0} ${skip_list ? '' : type}`, [label_without_type]);
+		}
+
+		return {
+			type: type,
+			label: label,
+			value: __(`{0} ${type}`, [target]),
+			index: level + order,
+			match: target,
+			route: route,
+		};
+	};
+	frappe.boot.user.can_read.forEach(function(item) {
+		level = me.fuzzy_search(keywords, item);
+		if (level) {
+			target = item;
+			if (in_list(frappe.boot.single_types, item)) {
+				out.push(tag_workflow.option("", ["Form", item, item], 0.05));
+
+			} else if (frappe.boot.user.can_search.includes(item)) {
+				check_list(me,item,level,keywords,out)
+			}
+		}
+	});
+	return out;
+}
+
+function check_list(me,item,level,keywords,out){
+	// include 'making new' option
+	if (in_list(frappe.boot.user.can_create, item)) {
+		let match = item;
+		if(!frappe.flags.ats.includes(item)){
+		out.push({
+			type: "New",
+			label: __("New {0}", [me.bolden_match_part(__(item), keywords)]),
+			value: __("New {0}", [__(item)]),
+			index: level + 0.015,
+			match: item,
+			onclick: function() {
+				frappe.new_doc(match, true);
+			}
+		})};
+	}
+	if (in_list(frappe.boot.treeviews, item)) {
+		out.push(tag_workflow.option("Tree", ["Tree", item], 0.05));
+
+	} else {
+		if(!frappe.flags.ats.includes(item)){
+			out.push(tag_workflow.option("List", ["List", item], 0.05));
+		if (frappe.model.can_get_report(item)) {
+			out.push(tag_workflow.option("Report", ["List", item, "Report"], 0.04));
+		}}
+	}
 }

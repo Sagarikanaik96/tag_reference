@@ -7,7 +7,8 @@ frappe.ui.form.on('Employee Onboarding', {
 			return {
 				filters: [
 					['Company', 'organization_type', '=', 'Staffing'],
-					['Company','make_organization_inactive','=',0]
+					['Company','make_organization_inactive','=',0],
+					['Company','enable_ats','=',1],
 				]
 			}
 		});
@@ -32,6 +33,7 @@ frappe.ui.form.on('Employee Onboarding', {
 		},250);
     },
     refresh: (frm)=>{
+		check_perm()
 		core_functions(frm);
 		$('.form-footer').hide();
         setTimeout(()=>{
