@@ -35,6 +35,7 @@ frappe.ui.form.on("User", {
 				event.preventDefault();
 			}
 		});
+		setting_user_field(frm)
 	},
 	form_render(frm, cdt, cdn){
 		if (frm.doc.__islocal!=1){
@@ -442,4 +443,25 @@ function terminated_option(){
 	if(cur_frm.doc.enabled==1){
 		cur_frm.set_value('terminated',0)
 	}
+}
+function setting_user_field(frm){
+	if(frappe.boot.tag.tag_user_info.user_type=='Staffing User' || frappe.boot.tag.tag_user_info.user_type=='Hiring User'){
+		$('[id="user-add-new"]').show()
+
+		if(frappe.session.user	==cur_frm.doc.email){
+			frm.set_df_property('enabled','read_only',1)
+			frm.set_df_property('terminated','read_only',1)
+
+		}
+		else{
+			$('[id="user-add-new"]').hide()
+			let l=['first_name','last_name','enabled','terminated','location','mobile_no','change_password','new_password','logout_all_sessions']
+			for(let vals in l){
+				cur_frm.toggle_enable(l[vals], 0);
+			}
+			frm.set_df_property('change_password','hidden',1)
+
+		}
+	}
+
 }

@@ -179,7 +179,16 @@ frappe.ui.form.on('Job Site', {
 				'job_site_name': frm.doc.name
 			}
 		});
-    }	
+    }	,
+	state:function(frm){
+		update_site_name(frm)	
+	},
+	city:function(frm){
+		update_site_name(frm)		
+	},
+	zip:function(frm){
+		update_site_name(frm)
+	}
 });
 
 /*----------fields-----------*/
@@ -461,3 +470,31 @@ frappe.ui.form.on('Industry Types Job Titles',{
 		}
 	}
 })
+function update_site_name(frm){
+	if(frm.doc.zip && frm.doc.state && frm.doc.city && frm.doc.manually_enter==1){
+		let data = {
+			street_number: '',
+			route: '',
+			locality:frm.doc.city,
+			administrative_area_level_1: frm.doc.state,
+			postal_code: frm.doc.zip ? frm.doc.zip:0,
+		};
+		update_comp_address(frm,data)
+	}
+	
+}
+function update_comp_address(frm,data){
+	frappe.call({
+		method:'tag_workflow.tag_data.update_complete_address',
+		args:{
+			data:data
+		},
+		callback:function(r){
+			if(r.message){
+				frm.set_value('job_site_name',r.message)
+				frm.set_value('job_site',r.message)
+				frm.set_value('address',r.message)
+			}
+		}
+	})
+}
