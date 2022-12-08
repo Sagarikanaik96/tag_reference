@@ -62,7 +62,7 @@ frappe.ui.form.on("Company", {
 			frm.set_df_property('branch_integration', 'hidden', 1);
 		}
 		password_fields(frm);
-
+		redirect_job_site()
 	},
 	update_employee_records: function (frm) {
 		if (cur_frm.is_dirty()) {
@@ -1303,3 +1303,8 @@ window.myFunction = (id) => {
 	$('#' + id).addClass('active-strip-button');
 	cur_frm.set_value('default_invoice_view', description);
 }
+function redirect_job_site() {
+	$('[data-fieldname="job_site"]').on("click", (e) => {
+		localStorage.setItem('need_reload',1)
+	});
+  }

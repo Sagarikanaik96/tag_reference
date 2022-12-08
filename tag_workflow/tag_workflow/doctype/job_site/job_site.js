@@ -32,6 +32,11 @@ frappe.ui.form.on('Job Site', {
 				});
 			}
 		}
+		let y=localStorage.getItem('need_reload')
+		if(y && y==1){
+			localStorage.setItem('need_reload',0)
+			window.location.reload()
+		}
 	},
 
 	setup: function(frm){
