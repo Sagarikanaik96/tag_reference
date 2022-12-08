@@ -1496,6 +1496,9 @@ select.input-with-feedback.form-control.ellipsis {
   height: 100px;
   display: inherit;
 }
+.Accreditations-btn {
+  background: #f5e8c8; border-radius: 10px;border:none; padding: 2px 11px; margin-right: 3px;
+}
 [data-page-route="List/Job Order/List"]
   .order-list-hiring
   header

@@ -1,6 +1,6 @@
-let company=localStorage.getItem("company")
+let company = localStorage.getItem("company")
 let company_type = ""
-frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
+frappe.pages['dynamic_page'].on_page_load = function (wrapper) {
 	let page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Company',
@@ -9,17 +9,17 @@ frappe.pages['dynamic_page'].on_page_load = function(wrapper) {
 	wrapper.face_recognition = new frappe.FaceRecognition(wrapper, page);
 }
 
-function hide(r,page){
-	if(frappe.boot.tag.tag_user_info.company_type=== "Staffing"){
+function hide(r, page) {
+	if (frappe.boot.tag.tag_user_info.company_type === "Staffing") {
 		$("#place_order").hide();
-		$("#work_order").css('color','#fff');
-		$("#work_order").css('background-color','#21b9e4');
+		$("#work_order").css('color', '#fff');
+		$("#work_order").css('background-color', '#21b9e4');
 	}
-	if(frappe.boot.tag.tag_user_info.company_type===r.message[0].organization_type){
+	if (frappe.boot.tag.tag_user_info.company_type === r.message[0].organization_type) {
 		$("#place_order").hide();
 		$("#work_order").hide();
 	}
-	if(r.message[0].organization_type!= 'Staffing'){
+	if (r.message[0].organization_type != 'Staffing') {
 		$(".documents").hide();
 		$("#coi").hide();
 		$("#safety_manual").hide();
@@ -29,38 +29,39 @@ function hide(r,page){
 }
 
 frappe.FaceRecognition = Class.extend({
-	init: function(wrapper, page) {
+	init: function (wrapper, page) {
 		let me = this;
 		this.parent = wrapper;
 		this.page = this.parent.page;
-		setTimeout(function() {
+		setTimeout(function () {
 			me.setup(wrapper, page);
 		}, 100);
 	},
 
-	setup: function(wrapper, page){
+	setup: function (wrapper, page) {
 		let me = this;
 		this.body = $('<div></div>').appendTo(this.page.main);
 		$(frappe.render_template('dynamic_page', "")).appendTo(this.body);
-		me.show_profile(wrapper,page);
+		me.show_profile(wrapper, page);
 	},
 
-	show_profile: function(_wrapper, page){
+	show_profile: function (_wrapper, page) {
 		frappe.call({
 			method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link1",
-			args: { "name": company || '',
-					"userid": frappe.user_info().email
-					},
+			args: {
+				"name": company || '',
+				"userid": frappe.user_info().email
+			},
 			callback: function (r) {
-				setTimeout(function(){
-					hide(r,page)
-				},10);
+				setTimeout(function () {
+					hide(r, page)
+				}, 10);
 
-				let my_val= r.message[0];
+				let my_val = r.message[0];
 				let txt = "";
 				company_type = my_val.organization_type
 				let text = r.message[2];
-				for(let i in text){
+				for (let i in text) {
 					txt += text[i].full_name + "<br>";
 				}
 
@@ -68,40 +69,40 @@ frappe.FaceRecognition = Class.extend({
 
 				let industry = "";
 				let industry_vals = []
-				for(let j in my_val.industry_type){
+				for (let j in my_val.industry_type) {
 					industry_vals.push(my_val.industry_type[j].industry_type)
 				}
 				industry_vals.sort()
 				let industry_list = Array.from(new Set(industry_vals))
-				for (let p in industry_list){
+				for (let p in industry_list) {
 					industry += industry_list[p] + "<br>";
 				}
 				let count = 0;
 				let rate = "";
-				for(let k in r.message[1]){
+				for (let k in r.message[1]) {
 					count += 1;
-					if (r.message[1][k][1]){
-						rate+= '★'.repeat(r.message[1][k][0]) + "<br>"  + r.message[1][k][1] + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
+					if (r.message[1][k][1]) {
+						rate += '★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][1] + "<br>" + r.message[1][k][2] + "<br>" + "<br>";
 					}
-					else{
-						rate+= '★'.repeat(r.message[1][k][0]) + "<br>"+ r.message[1][k][2] +"<br>"+ "<br>";
+					else {
+						rate += '★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][2] + "<br>" + "<br>";
 					}
 				}
 
 				let rev = get_reviews(r);
 
-				let arr1= add_ress(my_val)
-				let jobsite_address= arr1.join(", ");
+				let arr1 = add_ress(my_val)
+				let jobsite_address = arr1.join(", ");
 				let count_val = count;
-				count = count>1?count + ' Reviews': count + ' Review';
-				let description = my_val.about_organization?my_val.about_organization:"No description added."
-				let link_coi='';
-				let link_sm='';
-				let w_nine='';
-				if(r.message[0].cert_of_insurance || r.message[0].safety_manual ||r.message[0].w9){
+				count = count > 1 ? count + ' Reviews' : count + ' Review';
+				let description = my_val.about_organization ? my_val.about_organization : "No description added."
+				let link_coi = '';
+				let link_sm = '';
+				let w_nine = '';
+				if (r.message[0].cert_of_insurance || r.message[0].safety_manual || r.message[0].w9) {
 					link_coi = r.message[0].cert_of_insurance.split(' ').join('%');
-					link_sm= r.message[0].safety_manual.split(' ').join('%');
-					w_nine = r.message[0].w9.split(' ').join('%'); 
+					link_sm = r.message[0].safety_manual.split(' ').join('%');
+					w_nine = r.message[0].w9.split(' ').join('%');
 				}
 				let template = `
 					<div class="container form-section m-auto card-section visible-section" style="max-width: 97%;width: 100%;padding: 0;animation: animatop 1.7s cubic-bezier(0.425, 1.14, 0.47, 1.125) forwards;background: transparent;"> 
@@ -117,7 +118,7 @@ frappe.FaceRecognition = Class.extend({
 								<div id="jobsite">
 									<div id="address"> ${jobsite_address}</div>
 								</div>
-								${count_val>=10 ? ` <p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating||0} </span> <span> <a href="#" href="#" onclick="return theReviewsFunction('${rate}');"> <u> ${count} </u> </a> </span> </p>`:'<div></div>'}</div>
+								${count_val >= 10 ? ` <p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating || 0} </span> <span> <a href="#" href="#" onclick="return theReviewsFunction('${rate}');"> <u> ${count} </u> </a> </span> </p>` : '<div></div>'}</div>
 							</div>
 							<div class="col-md-6 col-sm-12 order text-left text-md-right ">
                                 <div>
@@ -192,7 +193,7 @@ frappe.FaceRecognition = Class.extend({
 								</div>
 							</div>
 
-							${count_val >=10 ? `<div class="card">
+							${count_val >= 10 ? `<div class="card">
 								<div class="card-body">
 									<div class="card-header">
 										<button class="card-title btn-block text-left " data-toggle="collapse" data-target="#collapse3" aria-expanded="false" aria-controls="collapse">
@@ -212,45 +213,46 @@ frappe.FaceRecognition = Class.extend({
 				$("#dynamic_company_data1").html(template);
 				setHover()
 
-		}
+			}
 
 		});
-		setTimeout(()=>{
-			create_accreditations(company,company_type)
-		},1000)
-		
+		setTimeout(() => {
+			create_accreditations(company, company_type)
+		}, 1000)
+
 	},
 });
 
-function setHover(){
-	$(".dropdown-menu").find(".menuitem").hover(function(e){
-		$(this).css('background','#e8f8fc')
-		$(this).css('border-radius','5px')
-		$(this).css('cursor','pointer')
-		
-	},function(e){
-		$(this).css('background','white')
-		$(this).css('border-radius','5px')
-		$(this).css('cursor','default')
-		
+function setHover() {
+	$(".dropdown-menu").find(".menuitem").hover(function (e) {
+		$(this).css('background', '#e8f8fc')
+		$(this).css('border-radius', '5px')
+		$(this).css('cursor', 'pointer')
+
+	}, function (e) {
+		$(this).css('background', 'white')
+		$(this).css('border-radius', '5px')
+		$(this).css('cursor', 'default')
+
 	})
 	$('.demo').hover(function () {
-		$(this).css('border',' 1px solid #21B9E4');
-	},function () {
+		$(this).css('border', ' 1px solid #21B9E4');
+	}, function () {
 		$(this).css('border', '1px solid transparent');
 	});
 	$('head').append("<style>.demo1::after{ margin-left:3.3em }</style>");
-	
+
 }
 
-function my_function(title,heading){
+function my_function(title, heading) {
 
 	let is_docs = title.includes(".docx")
 	let data = viewFile(title)
-	if(is_docs){
-	return document_download(title)}
+	if (is_docs) {
+		return document_download(title)
+	}
 	console.log(data)
-	data = data+"#toolbar=0"
+	data = data + "#toolbar=0"
 	let html_content = `<div id="bodycontent" style= "overflow:auto; max-height:580px;padding-right:35px;padding-left:25px;padding:8px 10px 8px 10px;margin:15px 25px 10px 25px;background:rgb(215,218,222,.2);border-radius:5px; ">
 	<object width="100%" height="550px" style="max-height:480px" data="${data}"></object>
 	</div><div style="text-align:center"><a href=javascript:document_download("${title}")>
@@ -259,206 +261,209 @@ function my_function(title,heading){
 	<span style="margin-left:5px;margin-top:5px">Download </span>
 	</button></a></div>`
 
-	let fields = [{"fieldname": "", "fieldtype": "HTML", "options": html_content}];
-	let dialog = new frappe.ui.Dialog({title: heading,	fields: fields});
+	let fields = [{ "fieldname": "", "fieldtype": "HTML", "options": html_content }];
+	let dialog = new frappe.ui.Dialog({ title: heading, fields: fields });
 	dialog.$wrapper.find('.modal-dialog').css('max-width', '1000px');
 	dialog.$wrapper.find('h4').css('font-size', '20px');
 	dialog.show();
 }
 
 function viewFile(file1) {
-	let file2=file1.replace(/%/g, ' ');
-	let file=''
-	if(file2.includes('/private')){
-		file = file2.replace('/private/','/');
+	let file2 = file1.replace(/%/g, ' ');
+	let file = ''
+	if (file2.includes('/private')) {
+		file = file2.replace('/private/', '/');
 	}
-	else{
-		file=file2
+	else {
+		file = file2
 	}
-	if(file=="" || undefined){
+	if (file == "" || undefined) {
 		frappe.msgprint("No File Attached");
 	}
-	let link=''
-	if(file.includes('.')){
-		if(file.length>1){
-			if(file.includes('/files/')){
-				link=window.location.origin+file
+	let link = ''
+	if (file.includes('.')) {
+		if (file.length > 1) {
+			if (file.includes('/files/')) {
+				link = window.location.origin + file
 			}
-			else{
-				link=window.location.origin+'/files/'+file
+			else {
+				link = window.location.origin + '/files/' + file
 			}
 			console.log(link)
-			return  link
+			return link
 
 		}
 	}
-	
+
 }
 
 function get_reviews(r) {
 	let rev = "";
 	for (let k in r.message[1].slice(0, 10)) {
 		if (r.message[1][k][1]) {
-			rev += "<div class= 'my-3'>"+'★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][1] + "<br>" + r.message[1][k][2] + "<br>" +"</div>";
+			rev += "<div class= 'my-3'>" + '★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][1] + "<br>" + r.message[1][k][2] + "<br>" + "</div>";
 		}
 		else {
-			rev += "<div class= 'my-3'>"+'★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][2] + "<br>"+"</div>";
+			rev += "<div class= 'my-3'>" + '★'.repeat(r.message[1][k][0]) + "<br>" + r.message[1][k][2] + "<br>" + "</div>";
 		}
 	}
 	return rev;
 }
 
-function new_order(){
+function new_order() {
 	let b = document.getElementById('comp_name').innerHTML;
 	let doc = frappe.model.get_new_doc("Job Order");
 	doc.company = frappe.boot.tag.tag_user_info.company;
 	doc.staff_company = b;
 	doc.posting_date_time = frappe.datetime.now_date();
 	frappe.set_route("Form", doc.doctype, doc.name);
-}	
+}
 
-function work_order_history(){
+function work_order_history() {
 	frappe.call({
 		method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link2",
-		args: { "name": company || '',
-				"comp": frappe.boot.tag.tag_user_info.company,
-				"comp_type" :frappe.boot.tag.tag_user_info.company_type,
-				"user_id": frappe.user_info().email
-				
+		args: {
+			"name": company || '',
+			"comp": frappe.boot.tag.tag_user_info.company,
+			"comp_type": frappe.boot.tag.tag_user_info.company_type,
+			"user_id": frappe.user_info().email
+
 		},
 		callback: function (r) {
 			let body;
 			let title1;
-			if(r.message[1]==="exceed"){ 
-				let opt=``;
-				title1= "Select Your Company"
-				for(let companies in r.message[0]){
+			if (r.message[1] === "exceed") {
+				let opt = ``;
+				title1 = "Select Your Company"
+				for (let companies in r.message[0]) {
 					let link = r.message[0][companies].company.split(' ').join('%@');
-					opt+=`<a href=javascript:work_order_history_for_multi_companies("${link}")><button type="button" class="btn btn-primary btn-sm mt-1" style="margin-right:10px">${r.message[0][companies].company}</button></a>`				}
-				body= opt;
-				let fields = [{"fieldname": "", "fieldtype": "HTML", "options": body}];
-				let dialog = new frappe.ui.Dialog({title: title1,	fields: fields});
+					opt += `<a href=javascript:work_order_history_for_multi_companies("${link}")><button type="button" class="btn btn-primary btn-sm mt-1" style="margin-right:10px">${r.message[0][companies].company}</button></a>`
+				}
+				body = opt;
+				let fields = [{ "fieldname": "", "fieldtype": "HTML", "options": body }];
+				let dialog = new frappe.ui.Dialog({ title: title1, fields: fields });
 				dialog.show();
 				dialog.$wrapper.find('.modal-dialog').css('max-width', '680px');
 
-				
+
 			}
-			else{
-					my_pop_up(r.message)
+			else {
+				my_pop_up(r.message)
 			}
-						
+
 		}
 	});
 }
 
 
-function work_order_history_for_multi_companies(name2){
-	let name3= name2.replace(/%@/g, ' ');
+function work_order_history_for_multi_companies(name2) {
+	let name3 = name2.replace(/%@/g, ' ');
 	frappe.call({
 		method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link3",
-		args: { "name": company || '',
-				"comp": name3,
-				"comp_type" :frappe.boot.tag.tag_user_info.company_type
+		args: {
+			"name": company || '',
+			"comp": name3,
+			"comp_type": frappe.boot.tag.tag_user_info.company_type
 		},
 		callback: function (r) {
-			my_pop_up(r.message)		
+			my_pop_up(r.message)
 		}
 	});
 }
-function my_pop_up(message){
-	let job_order=""
-	let created= ""
-	let job_category=""
-	let rate1=""
-	let total=""
-	let title1= "Work Order History"
-	for(let l in message[0]){
-		let jobb= message[0][l].name
-		for(let s in message[2]){
-			let invoice= message[2][s][1];
-			if(invoice==jobb){
-				total+=invoice+ "<br>"+ "<br>"
+function my_pop_up(message) {
+	let job_order = ""
+	let created = ""
+	let job_category = ""
+	let rate1 = ""
+	let total = ""
+	let title1 = "Work Order History"
+	for (let l in message[0]) {
+		let jobb = message[0][l].name
+		for (let s in message[2]) {
+			let invoice = message[2][s][1];
+			if (invoice == jobb) {
+				total += invoice + "<br>" + "<br>"
 			}
-			
+
 		}
 
 
-		job_order+= message[0][l].name+ "<br>"+ "<br>";
+		job_order += message[0][l].name + "<br>" + "<br>";
 	}
 
-	for(let m in message[0]){
-		let from_date= message[0][m].from_date+ "<br>"+ "<br>";
-		
-		created+=(from_date)
+	for (let m in message[0]) {
+		let from_date = message[0][m].from_date + "<br>" + "<br>";
+
+		created += (from_date)
 	}
 
-	for(let n in message[1]){
-		let job_cat= message[1][n].job_category+ "<br>"+ "<br>";
-		
-		job_category+=(job_cat)
+	for (let n in message[1]) {
+		let job_cat = message[1][n].job_category + "<br>" + "<br>";
+
+		job_category += (job_cat)
 	}
 
-	for(let p in message[0]){
-		let rate= message[0][p].rate+ "<br>"+ "<br>";
-		
-		rate1+=(rate)
+	for (let p in message[0]) {
+		let rate = message[0][p].rate + "<br>" + "<br>";
+
+		rate1 += (rate)
 	}
 
 	let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead><tr><th>Job Order</th><th>Start Date</th><th>Job Title</th><th>Rate</th><th>Invoiced Amout</th><th></th></tr></thead><tbody>`;
 	let html = ``;
-	html=html_data(html,message)
+	html = html_data(html, message)
 	let body;
-	if(html){
+	if (html) {
 		body = head + html + "</tbody></table>";
-	}else{
+	} else {
 		body = head + `<tr><td></td><td></td><td>No Data Found</td><td></td><td></td><td></td></tbody></table>`;
 	}
 
-	let fields = [{"fieldname": "", "fieldtype": "HTML", "options": body}];
-	let dialog = new frappe.ui.Dialog({title: title1,	fields: fields});
+	let fields = [{ "fieldname": "", "fieldtype": "HTML", "options": body }];
+	let dialog = new frappe.ui.Dialog({ title: title1, fields: fields });
 	dialog.show();
 	dialog.$wrapper.find('.modal-dialog').css('max-width', '980px');
 
 }
-function html_data(html,message){
-	for(let d in message[0]){
-		if(message[2][d].total_billing_amount==null){
-			message[2][d].total_billing_amount=(0).toFixed(2)
+function html_data(html, message) {
+	for (let d in message[0]) {
+		if (message[2][d].total_billing_amount == null) {
+			message[2][d].total_billing_amount = (0).toFixed(2)
 		}
-		else{
-			message[2][d].total_billing_amount=message[2][d].total_billing_amount.toFixed(2)
-		}		
+		else {
+			message[2][d].total_billing_amount = message[2][d].total_billing_amount.toFixed(2)
+		}
 		html += `<tr><td>${message[0][d].name}</td><td>${message[0][d].from_date}</td><td>${message[1][d].job_category}</td><td>$ ${message[0][d].rate}</td><td>$ ${message[2][d].total_billing_amount}${message[0][d].order_status != "Completed" ? "*" : ""}</td><td><button class="btn btn-primary btn-sm primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${message[0][d].name}')">Order <span class="alt-underline">Det</span>ails</button></td></tr>`;
-		
+
 	}
 	return html
 }
 
-function document_download(file1){
-	let file2=file1.replace(/%/g, ' ');
-	let file=''
-	if(file2.includes('/private')){
-		file = file2.replace('/private/','/');
+function document_download(file1) {
+	let file2 = file1.replace(/%/g, ' ');
+	let file = ''
+	if (file2.includes('/private')) {
+		file = file2.replace('/private/', '/');
 	}
-	else{
-		file=file2
+	else {
+		file = file2
 	}
-	if(file=="" || undefined){
+	if (file == "" || undefined) {
 		frappe.msgprint("No File Attached");
 	}
-	let link=''
-	if(file.includes('.')){
-		if(file.length>1){
-			if(file.includes('/files/')){
-				link=window.location.origin+file
+	let link = ''
+	if (file.includes('.')) {
+		if (file.length > 1) {
+			if (file.includes('/files/')) {
+				link = window.location.origin + file
 			}
-			else{
-				link=window.location.origin+'/files/'+file
+			else {
+				link = window.location.origin + '/files/' + file
 			}
-			let data=file.split('/')
+			let data = file.split('/')
 			const anchor = document.createElement('a');
 			anchor.href = link;
-			anchor.download = data[data.length-1];
+			anchor.download = data[data.length - 1];
 			document.body.appendChild(anchor);
 			anchor.click();
 			document.body.removeChild(anchor);
@@ -466,97 +471,97 @@ function document_download(file1){
 	}
 }
 
-function add_ress(my_val){
+function add_ress(my_val) {
 	let arr = [];
-		if(my_val.suite_or_apartment_no){
-			arr.push(my_val.suite_or_apartment_no);
-		}
+	if (my_val.suite_or_apartment_no) {
+		arr.push(my_val.suite_or_apartment_no);
+	}
 
-		if(my_val.address){
-			arr.push(my_val.address);
-		}
+	if (my_val.address) {
+		arr.push(my_val.address);
+	}
 
-		if(my_val.city){
-			arr.push(my_val.city);
-		}
+	if (my_val.city) {
+		arr.push(my_val.city);
+	}
 
-		if(my_val.state){
-			arr.push(my_val.state);
-		}
+	if (my_val.state) {
+		arr.push(my_val.state);
+	}
 
-		if(my_val.zip){
-			arr.push(my_val.zip);
-		}
+	if (my_val.zip) {
+		arr.push(my_val.zip);
+	}
 	return arr;
 }
 
-function block_company(){
+function block_company() {
 	frappe.call({
-		method:'tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.block_company',
+		method: 'tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.block_company',
 		"freeze": true,
 		"freeze_message": "<p><b>Blocking Staffing Company</b></p>",
-		args:{
-			'company_blocked':company,
-			'blocked_by':frappe.boot.tag.tag_user_info.company
+		args: {
+			'company_blocked': company,
+			'blocked_by': frappe.boot.tag.tag_user_info.company
 		},
-		callback:function(r){
-			if(r.message==1){
-				frappe.msgprint("The "+ company +" is blocked successfully.")
+		callback: function (r) {
+			if (r.message == 1) {
+				frappe.msgprint("The " + company + " is blocked successfully.")
 				setTimeout(function () {
 					window.location.reload()
 				}, 5000);
-			}		
-		}
-	})
-}
-
-function theReviewsFunction (rate) {
-	rate = `<div style = "overflow: auto;max-height:500px">${rate}</div>`
-	let pop_up = new frappe.ui.Dialog({
-		title: __('Ratings & Reviews'),
-		fields:[{fieldname: "rate", fieldtype: "HTML", options: rate}]
-	});
-	pop_up.show();
-}
-function unblock_company(){
-	frappe.call({
-		method:'tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.unblock_company',
-		"freeze": true,
-		"freeze_message": "<p><b>Unblocking Staffing Company</b></p>",
-		args:{
-			'company_blocked':company,
-			'blocked_by':frappe.boot.tag.tag_user_info.company
-		},
-		callback:function(r){
-			if(r.message==1){
-				frappe.msgprint("The "+ company +" is unblocked successfully.")
-				setTimeout(function () {
-					window.location.reload()
-				},5000);
 			}
 		}
 	})
 }
-function get_blocked_list(page){
-	if(frappe.boot.tag.tag_user_info.company_type=='Hiring' && frappe.boot.tag.tag_user_info.company!=company){
+
+function theReviewsFunction(rate) {
+	rate = `<div style = "overflow: auto;max-height:500px">${rate}</div>`
+	let pop_up = new frappe.ui.Dialog({
+		title: __('Ratings & Reviews'),
+		fields: [{ fieldname: "rate", fieldtype: "HTML", options: rate }]
+	});
+	pop_up.show();
+}
+function unblock_company() {
+	frappe.call({
+		method: 'tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.unblock_company',
+		"freeze": true,
+		"freeze_message": "<p><b>Unblocking Staffing Company</b></p>",
+		args: {
+			'company_blocked': company,
+			'blocked_by': frappe.boot.tag.tag_user_info.company
+		},
+		callback: function (r) {
+			if (r.message == 1) {
+				frappe.msgprint("The " + company + " is unblocked successfully.")
+				setTimeout(function () {
+					window.location.reload()
+				}, 5000);
+			}
+		}
+	})
+}
+function get_blocked_list(page) {
+	if (frappe.boot.tag.tag_user_info.company_type == 'Hiring' && frappe.boot.tag.tag_user_info.company != company) {
 		frappe.call({
-			method:'tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.checking_blocked_list',
-			args:{
-				'company_blocked':company,
-				'blocked_by':frappe.boot.tag.tag_user_info.company
+			method: 'tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.checking_blocked_list',
+			args: {
+				'company_blocked': company,
+				'blocked_by': frappe.boot.tag.tag_user_info.company
 			},
-			callback:function(r){
-				if(frappe.boot.tag.tag_user_info.user_type=='Hiring Admin'){
-					if(r.message==1){
+			callback: function (r) {
+				if (frappe.boot.tag.tag_user_info.user_type == 'Hiring Admin') {
+					if (r.message == 1) {
 						page.set_secondary_action('Block Staffing Company ', () => block_company()).addClass("btn-primary block-company-btn");
 					}
-					else{
+					else {
 						page.set_secondary_action('Unblock Staffing Company ', () => unblock_company()).addClass("btn-primary block-company-btn");
 						$("#place_order").hide();
 					}
 				}
-				else{
-					if(r.message!=1){
+				else {
+					if (r.message != 1) {
 						$("#place_order").hide();
 					}
 				}
@@ -564,33 +569,33 @@ function get_blocked_list(page){
 		})
 	}
 }
-function create_accreditations(company_name,company_type){
+function create_accreditations(company_name, company_type) {
 	let intitator_html = `<label><h5>Accreditations:</h5></label>
 						<div class = "container-fluid" id = "accreditations_btn_section" style= " display: inline; ">	
 						</div>`
 	frappe.call({
 		method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_accreditations",
-		args: {company: company_name},
-		callback: function(r){
-			if(r.message||company_type == "Staffing"){
+		args: { company: company_name },
+		callback: function (r) {
+			if (r.message || company_type == "Staffing") {
 				document.getElementById("accreditations_container").innerHTML = intitator_html
-				for(let val of r.message){
-					let btn = `<button type="button" id="cancel_1 class="btn btn-primary" title="${val.attached_certificate}" onclick=create_popup(this.title)>${val.name}</button> `
+				for (let val of r.message) {
+					let btn = `<button type="button" id="cancel_1" class="Accreditations-btn btn" title="${val.attached_certificate}" onclick=create_popup(this.title)>${val.name}</button> `
 					document.getElementById("accreditations_btn_section").innerHTML = document.getElementById("accreditations_btn_section").innerHTML + btn
 				}
-				
+
 			}
 		}
 
 	});
 }
-function create_popup(link){
-	let certificate =`<div id="bodycontent" style= "overflow:auto; max-height:580px;padding-right:35px;padding-left:25px;padding:8px 10px 8px 10px;margin:15px 25px 10px 25px;background:rgb(215,218,222,.2);border-radius:5px; ">
+function create_popup(link) {
+	let certificate = `<div id="bodycontent" style= "overflow:auto; max-height:580px;padding-right:35px;padding-left:25px;padding:8px 10px 8px 10px;margin:15px 25px 10px 25px;background:rgb(215,218,222,.2);border-radius:5px; ">
 	<object width="100%" height="550px" style="max-height:480px" data="${link}"></object>
 	</div>`
 	let certificate_pop = new frappe.ui.Dialog({
 		title: "Certificate Details",
-		fields: [{fieldname: "html_37", fieldtype: "HTML", options: certificate,},],
+		fields: [{ fieldname: "html_37", fieldtype: "HTML", options: certificate, },],
 	});
 	certificate_pop.show();
 }

@@ -409,7 +409,7 @@ frappe.ui.form.on("Company", {
 		}
 
 	},
-	timeline_refresh:(frm)=>{
+	timeline_refresh: (frm) => {
 		invoice_view(frm);
 	}
 });
@@ -1099,7 +1099,7 @@ function validate_cert_attachment(frm) {
 }
 function set_up_cert_field(frm) {
 	if (frappe.boot.tag.tag_user_info.company_type == "Hiring" ||
-		frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" || frm.doc.organization_type!='Staffing') {
+		frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" || frm.doc.organization_type != 'Staffing') {
 		frm.set_df_property('accreditations', 'hidden', 1);
 		frm.set_df_property('certificate_and_endorsements', 'hidden', 1);
 
@@ -1195,24 +1195,37 @@ function set_up_cert_field(frm) {
 				let file_name = record[2].split("/")
 				localStorage.setItem("id_initiator", id_initiator)
 				let updated_html = `
-					<div class="d-flex flex-wrap input_field_in_custom_div" id="eliminate_${id_initiator}">
-					<div> <button type="button" id="cancel_${id_initiator}" class="btn btn-light" onclick="eliminate_div(this.id)">
-					<span id = "span_${id_initiator}"> ${record[1]} </span>&#10060;</button> 
-					</div>
-				<div class="control-input-wrapper">						
-				<div class="control-input">
-					<div class="attached-file flex justify-between align-center" id ="after_attach_${id_initiator}"  style="display: flex;">
-						<div class="ellipsis">
-							<i class="fa fa-paperclip"></i>
-							<a class="attached-file-link" target="_blank" id="anchor_${id_initiator}" href="${record[2]}" value = "1">${file_name[2]}</a>
+					<div class="row input_field_in_custom_div" id="eliminate_${id_initiator}">
+						<div class="col-xl-3 pr-0">
+							<div> 
+								<button type="button" id="cancel_${id_initiator}" class="px-2 btn btn-sm certificate-btn" onclick="eliminate_div(this.id)">
+									<span id = "span_${id_initiator}"> ${record[1]} </span>
+									<svg class="icon  icon-sm ml-1" style="">
+										<use class="" href="#icon-delete"></use>
+									</svg>
+								</button> 
+							</div>
 						</div>
-						<div>
-							<a class="btn btn-xs btn-default"  data-action="clear_attachment" id= "clear_${id_initiator}" onclick=clear_func(this.id)>Clear</a>
+						<div class="col-xl-9 pl-lg-1 pl-3 mt-3 mt-lg-0 ">
+							<div class="control-input-wrapper">						
+								<div class="control-input">
+									<div class="attached-file p-1 flex justify-between align-center" id ="after_attach_${id_initiator}"  style="display: flex;">
+										<div class="ellipsis">
+											<i class="fa fa-paperclip"></i>
+											<a class="attached-file-link" target="_blank" id="anchor_${id_initiator}" href="${record[2]}" value = "1">${file_name[2]}</a>
+										</div>
+										<div>
+											<a class="btn btn-xs btn-default"  data-action="clear_attachment" id= "clear_${id_initiator}" onclick=clear_func(this.id)>Clear</a>
+										</div>
+									</div>
+									<button class="btn btn-default btn-sm btn-attach" id="attach_${id_initiator}" data-fieldtype="Attach" data-fieldname="" onclick=attach_file(this.id) placeholder="" data-doctype="Company" style="display: none;">
+										Attach
+									</button>
+									</div>					
+									<div class="control-value like-disabled-input" style="display: none;"></div>							
+							</div>
 						</div>
 					</div>
-					<button class="btn btn-default btn-sm btn-attach" id="attach_${id_initiator}" data-fieldtype="Attach" data-fieldname="" onclick=attach_file(this.id) placeholder="" data-doctype="Company" style="display: none;">Attach</button></div>					
-					<div class="control-value like-disabled-input" style="display: none;"></div>							
-				</div>
 				`
 
 				document.getElementById("custom_attach_div").innerHTML = document.getElementById("custom_attach_div").innerHTML + updated_html
@@ -1225,18 +1238,18 @@ function set_up_cert_field(frm) {
 
 }
 
-function invoice_view(frm){
+function invoice_view(frm) {
 	let html = '';
-	if(frm.doc.default_invoice_view=='Summary View'){
-		html+=`
+	if (frm.doc.default_invoice_view == 'Summary View') {
+		html += `
 		<div id="content">
 			<div class="button-strip">
 				<div class="strip-button active-strip-button" data-description="Summary View" onclick="myFunction(this.id)" id="summary_view"><span class="strip-button-text">Summary View</span></div>
 				<div class="strip-button" data-description="Detailed View" onclick="myFunction(this.id)" id="detailed_view"><span class="strip-button-text">Detailed View</span></div>
 			</div>
 		</div>`;
-	}else{
-		html+=`
+	} else {
+		html += `
 		<div id="content">
 			<div class="button-strip">
 				<div class="strip-button" data-description="Summary View" onclick="myFunction(this.id)" id="summary_view"><span class="strip-button-text">Summary View</span></div>
@@ -1282,11 +1295,11 @@ function invoice_view(frm){
 	frm.set_df_property('invoice_view_html', 'options', html);
 }
 
-window.myFunction=(id)=>{
+window.myFunction = (id) => {
 	let button = document.getElementById(id);
 	let description = button.getAttribute('data-description');
 	$('#summary_view').removeClass('active-strip-button');
 	$('#detailed_view').removeClass('active-strip-button');
-	$('#'+id).addClass('active-strip-button');
+	$('#' + id).addClass('active-strip-button');
 	cur_frm.set_value('default_invoice_view', description);
 }
