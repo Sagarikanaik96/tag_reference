@@ -113,7 +113,7 @@ function refresh(listview) {
         function (r) {
           let date_sequence = checking_same_date(r)
           let data = rm.message;
-          let profile_html = `<table><th>Staffing Company</th><th>Workers</th><th>Approve</th><th>Notes</th>`;
+          let profile_html = `<table><th>Staffing Company</th><th>Workers</th><th>Approve</th><th>Invoice Notes</th>`;
           for (let p in data) {
             profile_html += `<tr>
                                 <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
@@ -301,7 +301,7 @@ function modify_claims(listview) {
         function (r) {
           let job_data = rm.message;
           let date_value = checking_same_date(r)
-          let profile_html = `<table class="table-responsive"><th>Claim No.</th><th>Staffing Company</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th><th>Notes</th>`;
+          let profile_html = `<table class="table-responsive"><th>Claim No.</th><th>Staffing Company</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th><th>Invoice Notes</th>`;
           for (let p in job_data) {
             profile_html += `<tr>
                                 <td>${job_data[p].name}</td>
