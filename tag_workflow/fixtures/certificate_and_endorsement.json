@@ -2,7 +2,6 @@
  {
   "attribute": "WBE",
   "certificate_types": "WBE- Women Business Enterprise",
-  "certification_name": null,
   "docstatus": 0,
   "doctype": "Certificate and Endorsement",
   "modified": "2022-11-28 05:03:01.681949",
@@ -14,7 +13,6 @@
  {
   "attribute": "DBE",
   "certificate_types": "DBE- Disadvantaged Business Enterprise",
-  "certification_name": null,
   "docstatus": 0,
   "doctype": "Certificate and Endorsement",
   "modified": "2022-11-28 05:03:25.924062",
@@ -26,7 +24,6 @@
  {
   "attribute": "MBE",
   "certificate_types": "MBE- Minority Business Enterprise",
-  "certification_name": null,
   "docstatus": 0,
   "doctype": "Certificate and Endorsement",
   "modified": "2022-11-28 05:03:41.695834",
@@ -38,7 +35,6 @@
  {
   "attribute": "SDVOSB",
   "certificate_types": "SDVOSB- Service Disabled Veteran Owned Small Business",
-  "certification_name": null,
   "docstatus": 0,
   "doctype": "Certificate and Endorsement",
   "modified": "2022-11-28 05:03:57.975280",
@@ -50,7 +46,6 @@
  {
   "attribute": "VOSB",
   "certificate_types": "VOSB- Veteran Owned Small Business",
-  "certification_name": null,
   "docstatus": 0,
   "doctype": "Certificate and Endorsement",
   "modified": "2022-11-28 05:04:11.982101",
@@ -62,7 +57,6 @@
  {
   "attribute": "DVOSB",
   "certificate_types": "DVOSB- Disabled Veteran Owned Small Business",
-  "certification_name": null,
   "docstatus": 0,
   "doctype": "Certificate and Endorsement",
   "modified": "2022-11-28 05:04:33.718493",
@@ -74,7 +68,6 @@
  {
   "attribute": "WOSB",
   "certificate_types": "WOSB- Woman Owned Small Business",
-  "certification_name": null,
   "docstatus": 0,
   "doctype": "Certificate and Endorsement",
   "modified": "2022-11-28 05:04:55.251147",
