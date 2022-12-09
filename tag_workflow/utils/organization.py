@@ -411,6 +411,9 @@ def remove_field():
                     print("*************************"f'{f}'   " Field Removed Successfully************************************")
                 else:
                     print("*******************************"f'{f}'   " not found**********************************************************")
+        data=frappe.db.sql('select name from `tabCertificate and Endorsement` where certificate_types="WBE - Women Business Enterprise" ',as_dict=1)
+        if len(data)>0:
+            frappe.db.sql('truncate table `tabCertificate and Endorsement`')
     except Exception as e:
         print(e)
 def update_old_job_sites():
