@@ -144,11 +144,11 @@ frappe.FaceRecognition = Class.extend({
 								
                             </div>
 						</div>
-						<div class = "container" id ="accreditations_container">
+						<div class = "container mt-5" id ="accreditations_container">
 								
 						</div>
 								   
-						<div class="accordion mt-4 custom_collapse" id="accordionExample">
+						<div class="accordion mt-1 custom_collapse" id="accordionExample">
 						
 							<div class="card">
 								<div class="card-body">
@@ -577,10 +577,10 @@ function create_accreditations(company_name, company_type) {
 		method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_accreditations",
 		args: { company: company_name },
 		callback: function (r) {
-			if (r.message || company_type == "Staffing") {
+			if (!r.message.length==0 && company_type == "Staffing") {
 				document.getElementById("accreditations_container").innerHTML = intitator_html
 				for (let val of r.message) {
-					let btn = `<button type="button" id="cancel_1" class="Accreditations-btn btn" title="${val.attached_certificate}" onclick=create_popup(this.title)>${val.name}</button> `
+					let btn = `<button type="button" class="Accreditations-btn btn" title="${val.attached_certificate}" onclick=create_popup(this.title)>${val.certificate_type}</button> `
 					document.getElementById("accreditations_btn_section").innerHTML = document.getElementById("accreditations_btn_section").innerHTML + btn
 				}
 

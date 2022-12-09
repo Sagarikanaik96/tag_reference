@@ -209,6 +209,6 @@ def create_link(company):
 
 @frappe.whitelist()
 def get_accreditations(company):
-   sql = '''select name,attached_certificate, sequence from `tabCertificate and Endorsement Details` where company = "{0}" order by sequence'''.format(company)
+   sql = '''select name,attached_certificate, sequence,certificate_type from `tabCertificate and Endorsement Details` where company = "{0}" order by sequence'''.format(company)
    records = frappe.db.sql(sql,as_dict =True)
    return records
