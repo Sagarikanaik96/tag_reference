@@ -63,6 +63,7 @@ frappe.ui.form.on("Company", {
 		}
 		password_fields(frm);
 		redirect_job_site()
+		public_profile_redirect(frm);
 	},
 	update_employee_records: function (frm) {
 		if (cur_frm.is_dirty()) {
@@ -1308,3 +1309,16 @@ function redirect_job_site() {
 		localStorage.setItem('need_reload',1)
 	});
   }
+
+  /*-------------------company profile button-----------------*/
+
+function public_profile_redirect(frm){
+    if(frm.doc.__islocal!=1){
+        frm.add_custom_button(__('View Company Profile'), function () {
+            localStorage.setItem("company", cur_frm.doc.name);
+            window.location =  '/app/dynamic_page';
+        }).addClass("btn-primary");
+    }
+}	
+
+/*------------------------------------*/		
