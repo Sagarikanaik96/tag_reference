@@ -1,61 +1,85 @@
-<!-- this file for TG-2607 -->
-<div class="container form-section card-section visible-section" style="width: 100%; animation: animatop 1.7s cubic-bezier(0.425, 1.14, 0.47, 1.125) forwards;    padding: 5px 20px;">
+<div class="container form-section card-section visible-section"
+	style="width: 100%; animation: animatop 1.7s cubic-bezier(0.425, 1.14, 0.47, 1.125) forwards;    padding: 5px 20px;">
 	<div id="listdata">
 
 	</div>
-	<div class="d-flex flex-wrap py-0">
-		<div class="col-md-4 px-0">
-			<div id="industrydata">
 
+	<div class="staff_list">
+		<div class="row">
+			<div class="col-xs-12 col-xl-2 ">
+				<div id="company">
+
+				</div>
+			</div>
+			<div class="col-xs-12  col-xl-2 ">
+				<div id="industry">
+
+				</div>
+			</div>
+			<div class="col-xs-12 col-xl-2 ">
+				<div id="city">
+
+				</div>
+			</div>
+			<div class="col-xs-12  col-xl-2 ">
+				<div id="rating">
+
+				</div>
+			</div>
+			<div class="col-xs-12  col-xl-2 ">
+				<div id="accreditation">
+
+				</div>
 			</div>
 		</div>
-		<div class="col-md-4 px-0">
-			<div id="teamdata">
 
+		<div class="row">
+			<div id="listview" class="table-responsive px-0">
+
+				<table class="my-0" id="sorting" style="background-color: #f9f9f9;font-size: 18px;">
+					<caption>Staffing Company List</caption>
+
+					<thead>
+						<tr class="filters">
+							<th><svg class="icon  icon-sm">
+									<use class="like-icon" href="#icon-heart"></use>
+								</svg></th>
+							<th style="width: 200px;" onclick="sorted(1)" id="comp_name">Company Name</th>
+							<th onclick="sorted(2)" id="addr">Industry</th>
+							<th onclick="sorted(3)" id="city">Address</th>
+							<th onclick="sorted(4)" id="avgrate">Average Rating</th>
+							<th onclick="sorted(4)" id="accreditation">Accreditations</th>
+						</tr>
+					</thead>
+					<tbody id="myTable">
+					</tbody>
+				</table>
 			</div>
 		</div>
-		<div class="col-md-4 px-0">
-			<div id="compreview">
-
-			</div>
-		</div>
-	</div>
-	
-	<div class="row">
-			<div id="listview">
-				<input id="myInput" type="text" class="mt-3" placeholder="Search..">
-
-							<table id="sorting" style="background-color: #f9f9f9;font-size: 18px;">
-								<caption>Staffing Company List</caption>
-
-								<thead>
-									<tr class="filters">
-									<th><svg class="icon  icon-sm">
-										<use class="like-icon" href="#icon-heart"></use>
-									</svg></th>
-									<th style="width: 200px;" onclick="sorted(1)" id="comp_name">Company Name</th>
-									<th onclick="sorted(2)" id="addr">Address</th>
-									<th onclick="sorted(3)" id="city">City</th>
-									<th onclick="sorted(4)" id="state">State</th>
-									<th onclick="sorted(5)" id="zip">Zip Code</th>
-									<th onclick="sorted(6)" id="avgrate">Average Rating</th>
-									</tr>
-								</thead>
-								<tbody id="myTable">
-								</tbody>
-								</table>
-			</div>
 	</div>
 </div>
 
-<script>
-	$(document).ready(function(){
-	  $("#myInput").on("keyup", function() {
-		var value = $(this).val().toLowerCase();
-		$("#myTable tr").filter(function() {
-		  $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-		});
-	  });
-	});
-</script>
+<div class="row">
+	<div class="col-xl-6 col-xs-6 paging-area">
+		
+	</div>
+	<div class="col-xl-6 col-xs-6">
+		<div class="dropdown float-right">
+			<a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+				data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				Distance
+			</a>
+
+			<div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="min-width:110px">
+				<a class="dropdown-item" href="#" onclick="get_radius()">None</a>
+				<a class="dropdown-item" href="#" onclick="get_radius(5)">5 miles</a>
+				<a class="dropdown-item" href="#" onclick="get_radius(10)">10 miles</a>
+				<a class="dropdown-item" href="#" onclick="get_radius(25)">25 miles</a>
+				<a class="dropdown-item" href="#" onclick="get_radius(50)">50 miles</a>
+				<a class="dropdown-item" href="#" onclick="get_radius(100)">100 miles</a>
+			</div>
+		</div>
+	</div>
+
+</div>
 <script src="/assets/tag_workflow/js/controllers/sortable.js"></script>

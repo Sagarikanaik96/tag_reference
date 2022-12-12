@@ -1686,3 +1686,9 @@ span.comment-count {
 [data-page-route="staff_company_list"] .like-icon{
   display: block;
 }
+.staff-certificate-btn {
+  background: #f5e8c8;
+  border-radius: 15px;
+  margin-right: 3px;
+  font-size: 13px;
+}
