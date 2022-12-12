@@ -14,7 +14,10 @@ frappe.ui.form.on('Salary Component',{
 				'args': { 'current_user': frappe.session.user },
 				'callback': function (r) {
 					if (r.message == 'success') {
-						frm.set_value('company', frappe.boot.tag.tag_user_info.company)
+						if(frappe.boot.tag.tag_user_info.comps.length>0)
+							frm.set_value('company','')
+						else
+							frm.set_value('company', frappe.boot.tag.tag_user_info.company)
 						frm.refresh_fields();
 					}
 					else {

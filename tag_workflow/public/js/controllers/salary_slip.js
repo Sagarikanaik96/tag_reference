@@ -28,6 +28,7 @@ frappe.ui.form.on("Salary Slip", {
         if(frm.doc.salary_structure == "Temporary Employees_"+frappe.boot.tag.tag_user_info.company){
             frm.set_df_property('hour_rate', 'hidden', 1)
         }
+		check_status(frm)
     },
 	setup:function(frm){
 		frm.set_query("company", function() {

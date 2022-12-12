@@ -4,6 +4,9 @@ frappe.ui.form.on('Salary Structure', {
 		$("#navbar-breadcrumbs > li.disabled > a").html(name[0]) 
 		$('h3[title = "'+frm.doc.name+'"]').html(name[0]) 
 		check_payroll_perm()
+		setTimeout(()=>check_status(frm),500)
+		
+			
 	},
 	setup:function(frm){
 		frm.set_query("company", function() {
