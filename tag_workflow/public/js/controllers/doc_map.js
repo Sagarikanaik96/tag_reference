@@ -23,9 +23,37 @@ function initMap() {
 
     const marker = new google.maps.Marker({
         map,
+        draggable:true
     });
-    const geocoder = new google.maps.Geocoder();
 
+    map.addListener('click',(event)=>{
+		addMarker(event.latLng)
+	})
+	marker.addListener('dragend',(event)=>{
+		addMarker(event.latLng)
+	})
+    async function addMarker(latlong) {
+		marker.setMap(null)
+		marker.setPosition(latlong)
+		map.setCenter(latlong)
+		marker.setMap(map)
+		default_location.lat = latlong.lat()
+		default_location.lng = latlong.lng()
+		let geo = new google.maps.Geocoder()
+		geo.geocode({
+			"location":latlong
+		}).then((v)=>{
+            try{
+            document.getElementById("autocomplete-address").value = v['results'][0]['formatted_address']
+			cur_frm.set_value("complete_address",v['results'][0]['formatted_address']) 
+            make_address(v['results'][0], "auto",componentForm);		
+    }catch(error){console.log(error)}})
+	}
+    const geocoder = new google.maps.Geocoder();
+    geocode({
+        location: default_location
+    });
+    
     if (jQuery("#autocomplete-address").length) {
         autocomplete = new google.maps.places.Autocomplete(
             document.getElementById("autocomplete-address"), {
@@ -121,6 +149,7 @@ function update_address(data){
     let street = data.street_number ? (data.street_number + " " + data.route) : data.route;
     if (cur_frm.doc.doctype == 'Employee' || cur_frm.doc.doctype == 'Employee Onboarding') {
         update_basic_value(data)
+        frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "complete_address", document.getElementById("autocomplete-address").value);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "street_address", data.route);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state", data["administrative_area_level_1"]);
         frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city", data["locality"]);

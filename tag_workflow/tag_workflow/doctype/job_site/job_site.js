@@ -296,10 +296,37 @@ function siteMap() {
         center: default_location,
         mapTypeControl: false,
     });
+	let marker = new google.maps.Marker({
+		map:map,
+		position:default_location,
+		draggable:true
+	})
+	// markerArray.push(marker)
 
-    const marker = new google.maps.Marker({
-        map,
-    });
+	map.addListener('click',(event)=>{
+		addMarker(event.latLng)
+	})
+	marker.addListener('dragend',(event)=>{
+		addMarker(event.latLng)
+	})
+
+	async function addMarker(latlong) {
+		marker.setMap(null)
+		marker.setPosition(latlong)
+		map.setCenter(latlong)
+		marker.setMap(map)
+		default_location.lat = latlong.lat()
+		default_location.lng = latlong.lng()
+		let geo = new google.maps.Geocoder()
+		geo.geocode({
+			"location":latlong
+		}).then((v)=>{
+			document.getElementById("autocomplete-address").value = v['results'][0]['formatted_address']
+			cur_frm.set_value("job_site",v['results'][0]['formatted_address']) 
+			make_addr(v['results'][0], "auto",componentForm);
+		})
+	}
+
     const geocoder = new google.maps.Geocoder();
     geocode({
         location: default_location
@@ -398,6 +425,7 @@ function update_data(data) {
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "lat", data["lat"]);
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "lng", data["lng"]);
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
+	frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "suite_or_apartment_no", data.street_number);
 }
 function hide_fields(frm){
 	frm.set_df_property('city','hidden',frm.doc.city && frm.doc.enter_manually ==1 ?0:1);
