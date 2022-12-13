@@ -251,7 +251,7 @@ function my_function(title, heading) {
 	if (is_docs) {
 		return document_download(title)
 	}
-	console.log(data)
+	if(data==undefined){return}
 	data = data + "#toolbar=0"
 	let html_content = `<div id="bodycontent" style= "overflow:auto; max-height:580px;padding-right:35px;padding-left:25px;padding:8px 10px 8px 10px;margin:15px 25px 10px 25px;background:rgb(215,218,222,.2);border-radius:5px; ">
 	<object width="100%" height="550px" style="max-height:480px" data="${data}"></object>
