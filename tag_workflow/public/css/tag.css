@@ -1692,3 +1692,6 @@ span.comment-count {
   margin-right: 3px;
   font-size: 13px;
 }
+[data-page-route="User"] .row-index.sortable-handle.col.col-xs-1 {
+  pointer-events: none;
+}
