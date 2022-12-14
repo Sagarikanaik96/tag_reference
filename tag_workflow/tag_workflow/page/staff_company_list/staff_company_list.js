@@ -200,7 +200,8 @@ frappe.FaceRecognition = Class.extend({
 
 async function sorted_favourite_companies(data, profile_html, company_type) {
 	let title = get_title(data.name)
-	let count = get_count(data.name)>1?'<i class="fa fa-plus" style="font-size:10px" aria-hidden="true"></i>' + parseInt(get_count(data.name)-1):"";
+	let count = get_count(data.name).count>1?'<i class="fa fa-plus" style="font-size:10px" aria-hidden="true"></i>' + parseInt(get_count(data.name).count-1):"";
+	let block_count = get_count(data.name).blocked_count>1?'<i class="fa fa-plus" style="font-size:10px" aria-hidden="true"></i>' + parseInt(get_count(data.name).blocked_count-1):"";
 	let link = data.name.split(' ').join('%');
 	let Likebtnexclusice = `<td></td>`
 	let Likebtnnonexclusice = `<td>
@@ -211,8 +212,8 @@ async function sorted_favourite_companies(data, profile_html, company_type) {
 	profile_html += `<tr data-name="${data.name}" class="comps">
 					${company_type === "Exclusive Hiring" ? Likebtnexclusice : Likebtnnonexclusice}
 					<td ><a onclick=dynamic_route("${link}")>${data.name}</a></td>
-					<td>${data.industry || ''}</td>
-					<td>${data.address || ''}</td>	
+					${data.industry_type?"<td><span>"+ data.industry_type +" "+ block_count +"</span></td>": '<td></td>'}
+					<td>${data.address || data.complete_address || ''}</td>	
 					<td ${data.average_rating ?'<span class="rating pr-2"><svg class="icon icon-sm star-click" data-rating="1"><use href="#icon-star"></use></svg></span>' + data.average_rating 
 					:""}</td>
 					 ${data.accreditation ? `<td><span class="staff-certificate-btn px-3 py-1"  id="${data.name} data-toggle="tooltip" data-placement="top" title="${title}">` + data.accreditation + '</span><span class="text-primary">' + count + '</span></td>'
@@ -358,15 +359,15 @@ function get_radius(val) {
 }
 
 function get_count (company) {
-	let count =undefined
+	let count = {}
 		frappe.call({
 			method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.get_count',
 			args: { company:company},
 			async: 0,
 			callback: (r) => {
 				if (r.message) {
-				console.log(r.message)
-				count = r.message
+				count['count'] =r.message.count;
+				count['blocked_count'] =r.message.blocked_count;
 				}
 			}
 		})

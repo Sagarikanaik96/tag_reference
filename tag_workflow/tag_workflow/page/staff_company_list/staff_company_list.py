@@ -136,30 +136,34 @@ def get_industries(user):
         print(e)
 
 def get_conditions(filters):
-    cond = cond1= cond2= ''
+    cond = cond1= cond2= cond3=''
     if filters.get('company',None) not in [None,""]:
-        cond1 += """ and name like '%{company}%' """.format(company=filters.get('company'))
+        cond1 += """ and c.name like '%{company}%' """.format(company=filters.get('company'))
     if filters.get('industry',None) not in [None,""]:
-        cond += """ and industry="{industry}" """.format(industry=filters.get('industry'))
+        cond3 += """ and i.industry_type="{industry}" """.format(industry=filters.get('industry'))
     if filters.get('city',None) not in [None,""]:
-        cond1 += """ and city like '%{0}%' """.format(filters.get('city'))
+        cond1 += """ and c.city like '%{0}%' """.format(filters.get('city'))
     if filters.get('rating',None) not in [None,""]:
-        cond1 += """ and average_rating >={rating} """.format(rating=filters.get('rating'))
+        cond1 += """ and c.average_rating >={rating} """.format(rating=filters.get('rating'))
     if filters.get('accreditation',None) not in [None,""]:
         cond2 += """  and ce.certificate_type="{accreditation}" """.format(accreditation=filters.get('accreditation'))
-    return cond,cond1,cond2
+    return cond,cond1,cond2,cond3
 
 def filter_location(radius,comp,data):
     try:
         staff_location = None
-        address = frappe.db.get_value('Company',{'name':comp[0][0]},'address') or None
+        address =" ".join(frappe.db.get_value("Company", comp[0][0], [
+                           "IFNULL(suite_or_apartment_no, '')", "IFNULL(state, '')", "IFNULL(city, '')", "IFNULL(zip, '')"]))
         if address:
             location = get_custom_location(address)
             for d in data:
-                if d.address:
-                    staff_location = get_custom_location(d.address)
                 try:
+                    staff_add = " ".join(frappe.db.get_value("Company",d.name, [
+                           "IFNULL(suite_or_apartment_no, '')", "IFNULL(state, '')", "IFNULL(city, '')", "IFNULL(zip, '')"]))
+                    staff_location = get_custom_location(staff_add)
+
                     rad = haversine(location, staff_location, unit='mi')
+                    
                     if rad>radius:
                         data.remove(d)
                 except Exception:
@@ -173,24 +177,26 @@ def get_custom_location(address):
     return tuple([lat, lng])
 
 def hiring_data(filters,user_name,comp_id,start,end):
-    cond=cond1 =cond2 = ''
+    cond=cond1 =cond2 =cond3 = ''
     try:
         if filters:
             filters = json.loads(filters)
-            cond,cond1,cond2 = get_conditions(filters)
+            cond,cond1,cond2,cond3 = get_conditions(filters)
         sql = ''' select company from `tabUser` where email='{}' '''.format(user_name)
         user_comp = frappe.db.sql(sql, as_list=1)
         
-        sql = """  select c.*,count(ce.name) as count,ce.certificate_type as accreditation from `tabCompany` c 
+        sql = """  select c.*,count(ce.name) as count,ce.certificate_type as accreditation,i.industry_type,bs.staffing_company_name as is_blocked from `tabCompany` c 
+        inner join `tabIndustry Types` i on c.name=i.parent
         left join `tabCertificate and Endorsement Details` ce 
         on c.name = ce.company 
+        left join `tabBlocked Staffing Company` bs
+        on c.name = bs.name 
         where c.name in (select parent from `tabIndustry Types` where parent in (select name from `tabCompany` where organization_type='Staffing' {2}) 
-        and industry_type in (select industry_type  from `tabIndustry Types` where parent='{0}'  ))  {1}  {3}   group by c.name limit {4},{5}
-        """.format(user_comp[0][0],cond,cond1,cond2,start,end)
-       
+        and industry_type in (select industry_type  from `tabIndustry Types` where parent='{0}'  ))  {1}  {3} {4}  group by c.name limit {5},{6}
+        """.format(user_comp[0][0],cond,cond1,cond2,cond3, start,end)
+
         data = frappe.db.sql(sql, as_dict=True)
-        data = check_blocked_staffing(user_name=user_name, data=data)
-        if filters.get('radius',None):
+        if filters.get('radius',None) not in [None,""]:
             radius = filters.get('radius')
             data = filter_location(radius,user_comp,data)
         
@@ -206,10 +212,13 @@ def hiring_data(filters,user_name,comp_id,start,end):
 @frappe.whitelist()
 def get_count(company):
     try:
-        data = frappe.db.sql(""" select count(*) as count from `tabCertificate and Endorsement Details` where company="{0}" """.format(company),as_dict=1)
-        if len(data):
-            return data[0]['count']
-        return 0
+        data = frappe.db.sql(""" select count(*) as count from `tabCertificate and Endorsement Details` where company ="{0}" """.format(company),as_dict=1)
+        data1 = frappe.db.sql(""" select count(*) as blocked_count,parent from `tabIndustry Types` where parent ="{0}" order by industry_type desc """.format(company),as_dict=1)
+        result={
+            'count':data[0]['count'] if len(data) else 0,
+            'blocked_count': data1[0]['blocked_count'] if len(data1) else 0
+        }
+        return  result
     except Exception as e:
         print(e)
 
@@ -218,7 +227,6 @@ def get_title(company):
     try:
         data = frappe.db.sql(""" select certificate_type as type from `tabCertificate and Endorsement Details` where company="{0}" """.format(company),as_dict=1)
         title = [d['type'] for d in data]
-        print(title)
         return title
     except Exception as e:
         print(e)
