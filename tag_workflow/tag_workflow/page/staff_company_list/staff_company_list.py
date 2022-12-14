@@ -213,7 +213,7 @@ def hiring_data(filters,user_name,comp_id,start,end):
 def get_count(company):
     try:
         data = frappe.db.sql(""" select count(*) as count from `tabCertificate and Endorsement Details` where company ="{0}" """.format(company),as_dict=1)
-        data1 = frappe.db.sql(""" select count(*) as blocked_count,parent from `tabIndustry Types` where parent ="{0}" order by industry_type desc """.format(company),as_dict=1)
+        data1 = frappe.db.sql(""" select count(*) as blocked_count from `tabIndustry Types` where parent ="{0}" and parenttype="Company" order by industry_type desc """.format(company),as_dict=1)
         result={
             'count':data[0]['count'] if len(data) else 0,
             'blocked_count': data1[0]['blocked_count'] if len(data1) else 0

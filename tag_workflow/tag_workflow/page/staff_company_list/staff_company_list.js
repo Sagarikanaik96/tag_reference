@@ -200,8 +200,8 @@ frappe.FaceRecognition = Class.extend({
 
 async function sorted_favourite_companies(data, profile_html, company_type) {
 	let title = get_title(data.name)
-	let count = get_count(data.name).count>1?'<i class="fa fa-plus" style="font-size:10px" aria-hidden="true"></i>' + parseInt(get_count(data.name).count-1):"";
-	let block_count = get_count(data.name).blocked_count>1?'<i class="fa fa-plus" style="font-size:10px" aria-hidden="true"></i>' + parseInt(get_count(data.name).blocked_count-1):"";
+	let count = get_count(data.name).count>1?'<span class="pl-1">&#x2B;</span>' + parseInt(get_count(data.name).count-1):"";
+	let block_count = get_count(data.name).blocked_count>1?'<span class="pl-1">&#x2B;</span>' + parseInt(get_count(data.name).blocked_count-1):"";
 	let link = data.name.split(' ').join('%');
 	let Likebtnexclusice = `<td></td>`
 	let Likebtnnonexclusice = `<td>
