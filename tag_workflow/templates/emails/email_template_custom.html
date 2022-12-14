@@ -1,77 +1,53 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-    <title>{{subject}}</title>
-
-<style> 
-    body {
-        background: #FAFBFC;
-    }
-    p {
-        font-size:16px
-    }
-    .footer {
-        margin-top: 8rem;
-        color: #78849E;
-        font-size: 13px;
-    }
-    .btn-primary {
-        background: #7B68EE !important;
-    }
-    a {
-        color: #21B9E4 !important;
-    }
-    .inner-div h2 {
-        color: #21B9E4;
-    }
-    .inner-div .inner-text {
-        color: #2A2E43;
-    }
-    .inner-div {
-        max-width: 700px;
-        margin: auto;
-        width: 100%;
-        padding: 0 80px;
-        border-radius: 13px;
-    }
-</style>
-
-  </head>
-  <body>
-    <div class="container"> 
-        <div class="main-div text-center my-2"> 
-            <div class="logo py-2"> 
-                <img src="{{sitename}}/assets/tag_workflow/images/TAG-Logo.png" alt="TAG-Logo">
-            </div>
-            <div class="inner-div bg-white py-2"> 
-                <h2> {{subject}} </h2>
-                <p class="inner-text "> 
-                     {{ content }}
-                </p>
-                {% if link %}
-                    {% if lead =='true' %}
-                        <p>
-                            <a {{link}}> View Lead </a>
-                        </p>
-                    {% else %}
-                        <p>
-                            <a {{link}}> View </a>
-                        </p>
-                    {% endif %}
-                {% endif %}
-                <p class="footer"> 
-                    © 2022 TAG | All rights reserved
-                </p>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <title>{{subject}}</title>
+        <style>
+            body {
+                background: #FAFBFC;
+            }
+            p {
+                font-size: 16px
+            }
+            .footer {
+                margin-top: 8rem;
+                color: #78849E;
+                font-size: 13px;
+            }
+            .inner-div h2 {
+                color: #21B9E4;
+            }
+            .inner-div .inner-text {
+                color: #2A2E43;
+            }
+            .inner-div {
+                max-width: 700px;
+                margin: auto;
+                width: 100%;
+                padding: 0 80px;
+                border-radius: 13px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="main-div text-center my-5">
+                <div class="logo py-4">
+                    <img src="https://qa.taguru.co/assets/tag_workflow/images/TAG-Logo.png" alt="TAG-Logo">
+                </div>
+                <div class="inner-div bg-white py-5">
+                    <h2> {{subject}} </h2>
+                    <p class="inner-text ">
+                        {{ content }}
+                    </p>
+                    <p class="footer">
+                        © 2022 TAG | All rights reserved
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
-
-
-  </body>
+    </body>
 </html>

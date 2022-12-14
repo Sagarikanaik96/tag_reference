@@ -54,7 +54,17 @@ fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflo
                                 "Company-tax_id-hidden"
 			]
 	]
-	]}
+	]},
+{"dt": "Custom Fields",
+        "filters":[
+        [
+                "name", "in",
+                [
+                        "Chat Profile-user",
+                        "Chat Message-is_send"
+                ]
+        ]
+        ]}
 ]
 
 on_login = "tag_workflow.utils.trigger_session.first_login"
@@ -184,8 +194,9 @@ doc_events = {
        'Job Order':{
                "before_save":'tag_workflow.tag_workflow.doctype.job_order.job_order.validate_company'
 	},
-        
-
+        "Chat Message":{
+                "after_insert":'tag_workflow.chat_tag_data.email_notification'
+        }
 }
 
 # logo
