@@ -323,7 +323,7 @@ frappe.ui.form.on("Company", {
 			update_table(frm)
 		}
 		save_password_data(frm);
-
+		update_invoice_view(frm);
 	},
 	phone_no: function (frm) {
 		set_field(frm, frm.doc.phone_no, "phone_no");
@@ -1322,3 +1322,20 @@ function public_profile_redirect(frm){
 }	
 
 /*------------------------------------*/		
+
+function update_invoice_view(frm){
+	let view = frappe.get_cookie("invoice_view").split("|");
+	if(view.length==1){
+		document.cookie= 'invoice_view='+frm.doc.name+"*"+frm.doc.default_invoice_view+';path=/';
+	}else if(view.length>1){
+		let new_view =[];
+		for (let i in view) {
+			if (view[i].split('*')[0] == frm.doc.name) {
+				new_view.push(frm.doc.name+"*"+frm.doc.default_invoice_view)
+			}else{
+				new_view.push(view[i])
+			}
+		}
+		document.cookie = 'invoice_view ='+new_view.join('|')+';path=/';
+	}
+}

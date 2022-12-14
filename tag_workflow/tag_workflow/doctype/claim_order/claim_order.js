@@ -90,10 +90,9 @@ frappe.ui.form.on('Claim Order', {
 
 		}
 		update_claim_by_staffing(frm)
-		if(frm.doc.staff_claims_no)
+		if(frm.doc.approved_no_of_workers)
 			frm.set_df_property('staff_claims_no', 'read_only', 1);
 		$('[data-doctype="Company"]')[0].href="#"
-		console.log($('[data-doctype="Company"]')[0])
 		$('[data-doctype="Company"]').on('click', function(){
 
 			setTimeout(hr, 1000);

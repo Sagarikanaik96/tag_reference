@@ -842,25 +842,25 @@ frappe.ui.form.PrintView = class {
 	}
 
 	get_view() {
-		let view = frappe.boot.tag.tag_user_info.invoice_view;
+		let view = frappe.get_cookie("invoice_view").split("|");
 		if(view.length==0 || frappe.boot.tag.tag_user_info.company_type=='TAG'){
 			return this.get_format('Summary View');
 		}else if (view.length == 1){
-			return this.get_format(view[0]);
+			return this.get_format(view[0].split('*')[1]);
 		}else {
 			let route = frappe.get_route();
 			let doctype = route[1];
 			let docname = route[2];
 			let frm = frappe.get_doc(doctype, docname);
 			for (let i in view) {
-				if (view[i][0] == frm.company) {
-					return this.get_format(view[i])
+				if (view[i].split('*')[0] == frm.company) {
+					return this.get_format(view[i].split('*')[1]);
 				}
 			}
 		}
 	}
 
 	get_format(view) {
-		return view[1] == 'Detailed View' ? 'Invoice Detailed View' : 'Sales Invoice Report';
+		return view == 'Detailed View' ? 'Invoice Detailed View' : 'Sales Invoice Report';
 	}
 };

@@ -62,8 +62,9 @@ def get_user_info():
             com_list = frappe.db.sql(sql, as_dict=1)
             for c in com_list:
                 comps.append(c.name)
-                invoice_view.append([c.name, c.default_invoice_view])
-        data.update({"comps": comps, "exces": exces, "stfs": stfs, "invoice_view": invoice_view})
+                invoice_view.append(f"{c.name}*{c.default_invoice_view}")
+        frappe.local.cookie_manager.set_cookie('invoice_view', '|'.join([str(elem) for elem in invoice_view]))
+        data.update({"comps": comps, "exces": exces, "stfs": stfs})
         return data
     except Exception as e:
         print(e)
