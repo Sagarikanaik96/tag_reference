@@ -286,7 +286,7 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
                 enqueue(save_job_order_value,job_order=job_order,staff_company=staff_company, now=True)
                 staff_company=(staff_company.strip()).split(',')
                 for i in staff_company:
-                    user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL'''.format(i.strip()),as_list=1)
+                    user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL and user_id in (select name from `tabUser` where enabled="1") '''.format(i.strip()),as_list=1)
                     l = [l[0] for l in user_list]
                     for user in l:
                         add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
@@ -306,12 +306,12 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
             doc.company_type = non_exlusive
             doc.save(ignore_permissions = True)
 
-            sql = f''' select email from `tabUser` where organization_type='staffing' and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}")'''
+            sql = f''' select email from `tabUser` where organization_type='staffing'  and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}")'''
             user_list=frappe.db.sql(sql, as_list=1)
             l = [l[0] for l in user_list]
             for user in l:
                 add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
-            sql2 = f''' select email from `tabUser` where organization_type='staffing' and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}") and company in (select staffing_company from `tabStaffing Radius` where job_site="{doc.job_site}" and radius != "None" and radius <= 25 and hiring_company="{doc.company}")'''
+            sql2 = f''' select email from `tabUser` where organization_type='staffing' and enabled="1" and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}") and company in (select staffing_company from `tabStaffing Radius` where job_site="{doc.job_site}" and radius != "None" and radius <= 25 and hiring_company="{doc.company}")'''
             staff_user_list=frappe.db.sql(sql2, as_list=1)
             l2 = [l2[0] for l2 in staff_user_list]
             job_order_notification(job_order_title,hiring_org,job_order,subject,l2)
@@ -322,7 +322,7 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
             own_sql = ''' select owner from `tabCompany` where organization_type="Exclusive Hiring" and name="{}" '''.format(hiring_org)
             owner_info=frappe.db.sql(own_sql, as_list=1)
 
-            com_sql = ''' select company from `tabUser` where name='{}' '''.format(owner_info[0][0])
+            com_sql = ''' select company from `tabUser` where name='{0}' and enabled="1" '''.format(owner_info[0][0])
             company_info=frappe.db.sql(com_sql, as_list=1)
 
             usr_sql = ''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL '''.format(company_info[0][0])

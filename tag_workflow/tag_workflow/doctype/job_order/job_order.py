@@ -808,13 +808,13 @@ def check_increase_headcounts(no_of_workers_updated,name,company,select_job):
         link =  f'  href="{sitename}/app/job-order/{name}" '
         msg=f'{company} has increased the number of requested employees to {no_of_workers_updated} on {name} for {select_job}.'
         if old_headcounts[0][0]:
-            sql = f'''select email from `tabUser` where organization_type="staffing" and company="{old_headcounts[0][1]}"'''
+            sql = f'''select email from `tabUser` where organization_type="staffing" and enabled="1"  and company="{old_headcounts[0][1]}"'''
             share_list = frappe.db.sql(sql, as_list = True)
             share_user_list = [user[0] for user in share_list]
             make_system_notification(share_user_list,msg,doc_name_job_order,name,subject)
             joborder_email_template(subject,msg,share_user_list,link)
         else:
-            sql = f'''select email from `tabUser` where organization_type="staffing" and company in (select staffing_company from `tabStaffing Radius` where job_site="{old_headcounts[0][3]}" and radius != "None" and radius <= 25 and hiring_company="{company}")'''
+            sql = f'''select email from `tabUser` where organization_type="staffing" and enabled ="1"  and company in (select staffing_company from `tabStaffing Radius` where job_site="{old_headcounts[0][3]}" and radius != "None" and radius <= 25 and hiring_company="{company}")'''
             if old_headcounts[0][1] and old_headcounts[0][4] and old_headcounts[0][1] in old_headcounts[0][4].split(','):
                 sql+=f''' or company="{old_headcounts[0][1]}"'''
             share_list = frappe.db.sql(sql, as_list = True)
