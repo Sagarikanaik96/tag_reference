@@ -16,9 +16,14 @@ function hide(r, page) {
 		$("#work_order").css('background-color', '#21b9e4');
 	}
 	if (frappe.boot.tag.tag_user_info.company_type === r.message[0].organization_type) {
-		$("#place_order").hide();
-		$("#work_order").hide();
-	}
+        $("#place_order").hide();
+        $("#work_order").hide();
+    }
+//--------hiding place order btn for tag and admin---------//
+	if (frappe.boot.tag.tag_user_info.company_type === "TAG" || frappe.session.user === "Administrator") {
+        $("#place_order").hide();
+    }
+
 	if (r.message[0].organization_type != 'Staffing') {
 		$(".documents").hide();
 		$("#coi").hide();
@@ -126,7 +131,7 @@ frappe.FaceRecognition = Class.extend({
                                     <a href=javascript:new_order()>
                                         <button  type="button" id="place_order" style="width:140px;margin-right:0px !important; background-color: #21b9e4 !important; font-size: 12px; box-shadow: var(--btn-shadow); !important;color:#fff; border:1px solid transparent !important; text-align: center !important; padding:8px" class="demo btn-xs mb-1 mt-1 mr-2 ">Place Order</button>
                                     </a></div>
-                                    <div><a href=javascript:work_order_history()>
+                                    <div><a href=javascript:work_order_history("${company_type}")>
 									<button type="button"  id="work_order" style="width:140px; padding:8px; background:white; font-size: 12px; box-shadow: var(--btn-shadow); !important;color:#333C44;border:1px solid transparent !important; text-align: center !important" class="demo btn-xs mb-1 mt-1">Work Order History</button>
 									</a></div>
 
@@ -319,40 +324,41 @@ function new_order() {
 	frappe.set_route("Form", doc.doctype, doc.name);
 }
 
-function work_order_history() {
-	frappe.call({
-		method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link2",
-		args: {
-			"name": company || '',
-			"comp": frappe.boot.tag.tag_user_info.company,
-			"comp_type": frappe.boot.tag.tag_user_info.company_type,
-			"user_id": frappe.user_info().email
+//--------tg-5154 changes---------//
+function work_order_history(current_comp_type) {
+    frappe.call({
+        method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link2",
+        args: {
+            "name": company || '',
+            "comp": frappe.boot.tag.tag_user_info.company,
+            "comp_type": frappe.boot.tag.tag_user_info.company_type,
+            "user_id": frappe.user_info().email,
+            "current_comp_type": current_comp_type
+        },
+        callback: function (r) {
+            let body;
+            let title1;
+            if (r.message[1] === "exceed") {
+                let opt = ``;
+                title1 = "Select Your Company"
+                for (let companies in r.message[0]) {
+                    let link = r.message[0][companies].company.split(' ').join('%@');
+                    opt += `<a href=javascript:work_order_history_for_multi_companies("${link}")><button type="button" class="btn btn-primary btn-sm mt-1" style="margin-right:10px">${r.message[0][companies].company}</button></a>`
+                }
+                body = opt;
+                let fields = [{ "fieldname": "", "fieldtype": "HTML", "options": body }];
+                let dialog = new frappe.ui.Dialog({ title: title1, fields: fields });
+                dialog.show();
+                dialog.$wrapper.find('.modal-dialog').css('max-width', '680px');
 
-		},
-		callback: function (r) {
-			let body;
-			let title1;
-			if (r.message[1] === "exceed") {
-				let opt = ``;
-				title1 = "Select Your Company"
-				for (let companies in r.message[0]) {
-					let link = r.message[0][companies].company.split(' ').join('%@');
-					opt += `<a href=javascript:work_order_history_for_multi_companies("${link}")><button type="button" class="btn btn-primary btn-sm mt-1" style="margin-right:10px">${r.message[0][companies].company}</button></a>`
-				}
-				body = opt;
-				let fields = [{ "fieldname": "", "fieldtype": "HTML", "options": body }];
-				let dialog = new frappe.ui.Dialog({ title: title1, fields: fields });
-				dialog.show();
-				dialog.$wrapper.find('.modal-dialog').css('max-width', '680px');
 
+            }
+            else {
+                my_pop_up(r.message)
+            }
 
-			}
-			else {
-				my_pop_up(r.message)
-			}
-
-		}
-	});
+        }
+    });
 }
 
 
