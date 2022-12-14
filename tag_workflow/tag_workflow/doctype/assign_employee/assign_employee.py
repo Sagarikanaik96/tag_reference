@@ -318,9 +318,8 @@ def update_workers_filled(job_order_name):
 def update_notes(name,notes,job_order,company):
     try:
         frappe.db.sql(""" UPDATE `tabAssign Employee` SET notes ="{0}" where job_order="{1}" and company="{2}" """.format(notes,job_order,company))
-        result = frappe.db.sql(""" select name from `tabAssign Employee` where job_order="{0}" and company="{1}" """.format(job_order,company),as_dict=1)
-        for r in result:
-           frappe.publish_realtime(event='sync_data',doctype=AEMP,docname=r['name'])
+        frappe.db.commit()
+        frappe.publish_realtime(event='sync_data',doctype=AEMP,docname=name)
     except Exception as e:
         print(e)
 
