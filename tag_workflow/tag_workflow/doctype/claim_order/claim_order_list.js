@@ -1,4 +1,10 @@
 frappe.listview_settings["Claim Order"] = {
+  onload(listview){
+    if(!["Hiring","TAG"].includes(frappe.boot.tag.tag_user_info.company_type)){
+      cur_list.columns.splice(4, 1);
+      cur_list.render_header(cur_list.columns[4]);
+    }
+  },
   refresh(listview) {
     $('[class="btn btn-primary btn-sm primary-action"]').show();
     $(".custom-actions.hidden-xs.hidden-md").show();
@@ -87,8 +93,37 @@ frappe.listview_settings["Claim Order"] = {
 					</span>`;
       }
     },
+    staffing_organization_ratings (val, d, f) {
+      let a = 0
+      frappe.call({
+        async:false,
+         method:"tag_workflow.tag_workflow.doctype.company.company.check_staffing_reviews",
+         args:{
+           company_name: f.staffing_organization
+         },
+         callback:(r)=>{
+           a = r
+         }
+     })
+    return a.message ===0 ?'':`<span><span class='text-warning'>★</span> ${a.message}<span>`      
+    },
   },
 };
+
+
+async function get_average_rate(c){
+ return await frappe.call({
+   async:false,
+		method:"tag_workflow.tag_workflow.doctype.company.company.check_staffing_reviews",
+		args:{
+			company_name: c
+		},
+    callback:(r)=>{
+      return r.message
+    }
+})
+}
+
 
 function refresh(listview) {
   frappe.call({
@@ -110,19 +145,11 @@ function refresh(listview) {
           "no_of_workers",
           "per_hour",
         ],
-        function (r) {
+       async function (r) {
           let date_sequence = checking_same_date(r)
           let data = rm.message;
-          let profile_html = `<table><th>Staffing Company</th><th>Workers</th><th>Approve</th><th>Invoice Notes</th>`;
-          for (let p in data) {
-            profile_html += `<tr>
-                                <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
-                                <td>${data[p].staff_claims_no}</td>
-                                <td><input type="number" id="_${data[p].staffing_organization}" min="0" max=${data[p].staff_claims_no}></td>
-                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle " data-comp="${data[p].staffing_organization}" maxlength="160" ${(data[p].notes)?data[p].notes:""}> </textarea> </td>
-                                </tr>`;
-          }
-          profile_html += `</table>`;
+          let profile_html = `<table><th>Staffing Company</th><th>Avg. Rating</th><th>Workers</th><th>Approve</th><th>Invoice Notes</th>`;
+          profile_html=await html_data_selct_headcount(data,profile_html);
 
           let new_pop_up = new frappe.ui.Dialog({
             title: "Select Head Count",
@@ -193,6 +220,22 @@ function refresh(listview) {
       );
     },
   });
+}
+
+async function html_data_selct_headcount(data,profile_html) {
+  for(let p in data) {
+    let avg_rate=await get_average_rate(data[p].staffing_organization);
+
+    profile_html+=`<tr>
+                                <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
+                                <td>${avg_rate.message===0? '':`<span class='text-warning'>★ </span> ${avg_rate.message}`}</td>
+                                <td>${data[p].staff_claims_no}</td>
+                                <td><input type="number" id="_${data[p].staffing_organization}" min="0" max=${data[p].staff_claims_no}></td>
+                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle " data-comp="${data[p].staffing_organization}" maxlength="160" ${(data[p].notes)? data[p].notes:""}> </textarea> </td>
+                                </tr>`;
+  }
+  profile_html+=`</table>`;
+  return profile_html;
 }
 
 function show_popup(new_pop_up){
@@ -298,20 +341,11 @@ function modify_claims(listview) {
           "per_hour",
           "worker_filled",
         ],
-        function (r) {
+        async function (r) {
           let job_data = rm.message;
           let date_value = checking_same_date(r)
-          let profile_html = `<table class="table-responsive"><th>Claim No.</th><th>Staffing Company</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th><th>Invoice Notes</th>`;
-          for (let p in job_data) {
-            profile_html += `<tr>
-                                <td>${job_data[p].name}</td>
-                                <td style="margin-right:20px;" id="${job_data[p].claims}" >${job_data[p].staffing_organization}</td>
-                                <td id="${job_data[p].name}_claim">${job_data[p].staff_claims_no}</td>
-                                <td>${job_data[p].approved_no_of_workers}</td>
-                                <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no} ${job_data[p].hide==1?"disabled":""}></td>
-                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" data-comp="${job_data[p].staffing_organization}" maxlength="160" > ${(job_data[p].notes)?(job_data[p].notes).trim():""}</textarea> </td>
-                                </tr>`;
-          }
+          let profile_html = `<table class="table-responsive"><th>Claim No.</th><th>Staffing Company</th><th>Avg. Rating</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th><th>Notes</th>`;
+          profile_html=await html_data_modify_claims(job_data,profile_html);
           profile_html += `</table><style>th, td {
                             padding: 10px;
                           } input{width:100%;}
@@ -377,6 +411,22 @@ function modify_claims(listview) {
     },
   });
 }
+async function html_data_modify_claims(job_data,profile_html) {
+  for(let p in job_data) {
+    let avg_rate=await get_average_rate(job_data[p].staffing_organization);
+    profile_html+=`<tr>
+                                <td>${job_data[p].name}</td>
+                                <td style="margin-right:20px;" id="${job_data[p].claims}" >${job_data[p].staffing_organization}</td>
+                                <td>${avg_rate.message===0? '':`<span class='text-warning'>★</span> ${avg_rate.message}`}</td>
+                                <td id="${job_data[p].name}_claim">${job_data[p].staff_claims_no}</td>
+                                <td>${job_data[p].approved_no_of_workers}</td>
+                                <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no} ${job_data[p].hide==1? "disabled":""}></td>
+                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" data-comp="${job_data[p].staffing_organization}" maxlength="160" > ${(job_data[p].notes)? (job_data[p].notes).trim():""}</textarea> </td>
+                                </tr>`;
+  }
+  return profile_html;
+}
+
 function update_claims(data_len, l, dict, job_data, r) {
   let valid1 = "";
   let total_count = 0;

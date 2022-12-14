@@ -56,6 +56,21 @@ def check_ratings(company_name):
 	row_count = frappe.db.sql(sql)
 	return row_count[0][0]>0
 
+@frappe.whitelist()
+def check_staffing_reviews(company_name):
+	count_sql = ''' select COUNT(*) from `tabCompany Review` where staffing_company='{}' '''.format(company_name)
+	sql_row_count = frappe.db.sql(count_sql)
+
+	sql = ''' select COUNT(*),average_rating from `tabCompany` where company_name='{}' '''.format(company_name)
+	print(sql,"*"*200)
+	row_count = frappe.db.sql(sql)
+	print(row_count)
+	avg_rate = 0
+	if sql_row_count[0][0]>=10:
+		avg_rate = str(int(row_count[0][1]))
+
+	return avg_rate
+
 
 @frappe.whitelist()
 def create_salary_structure(doc,method):

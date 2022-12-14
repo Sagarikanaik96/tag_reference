@@ -89,12 +89,18 @@ frappe.ui.form.on('Claim Order', {
 			}
 
 		}
+		
 		update_claim_by_staffing(frm)
+
+		if(frm.doc.staff_claims_no)
+		frm.set_df_property('staff_claims_no', 'read_only', 1);
+
 		if(frm.doc.approved_no_of_workers)
 			frm.set_df_property('staff_claims_no', 'read_only', 1);
+
 		$('[data-doctype="Company"]')[0].href="#"
 		$('[data-doctype="Company"]').on('click', function(){
-
+			
 			setTimeout(hr, 1000);
 		});
 		frm.set_df_property('agree_to_contract', 'label', 'Agree To Contract <span style="color: red;">&#42;</span>');
@@ -105,6 +111,7 @@ frappe.ui.form.on('Claim Order', {
 		if (frappe.boot.tag.tag_user_info.company_type == "Staffing"){
 			frm.set_df_property('notes', 'read_only', 1);
 		}
+		hiring_visibility(frm);
 		window.conf = 0;
 		if (frm.doc.job_order) frm.set_df_property('job_order','read_only',1)
 		if(frm.is_new() && frappe.boot.tag.tag_user_info.company_type=="Staffing" && frm.doc.job_order && frm.doc.staffing_organization)
@@ -166,6 +173,34 @@ frappe.ui.form.on('Claim Order', {
 		}
 	}
 });
+
+function hiring_visibility(frm) {
+	if(["Hiring","TAG"].includes(frappe.boot.tag.tag_user_info.company_type)) {
+		if(frm.doc.staffing_organization) {
+			get_average_rate(frm);
+		}
+	}
+}
+
+function get_average_rate(frm){
+	document.querySelector('[data-fieldname="staffing_organization_ratings"]').classList.remove("hide-control")
+	document.querySelector('[data-fieldname="staffing_organization_ratings"]>.form-group>.clearfix>.control-label').innerHTML = "Avg. rating"
+	document.querySelector('[data-fieldname="staffing_organization_ratings"]>.form-group>.control-input-wrapper>.control-value').style.display = 'block'
+	frappe.call({
+		method:"tag_workflow.tag_workflow.doctype.company.company.check_staffing_reviews",
+		args:{
+			company_name: frm.selected_doc.staffing_organization
+		},
+		callback:function(r){
+			if(r.message ===0){
+				document.querySelector('[data-fieldname="staffing_organization_ratings"]').style.display = 'none';
+			}else{
+				document.querySelector('[data-fieldname="staffing_organization_ratings"]>.form-group>.control-input-wrapper>.control-value').innerHTML = r.message ==0?'': `<span class='text-warning'>★ </span>${r.message}`
+			}
+		}
+
+	})
+}
 
 function submit_claim(frm) {
 	frm.add_custom_button(__('Submit Claim'), function () {

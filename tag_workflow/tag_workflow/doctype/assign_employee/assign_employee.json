@@ -20,6 +20,7 @@
   "tag_status",
   "hiring_organization",
   "company",
+  "staffing_company_ratings",
   "job_location",
   "job_order_email",
   "resume_required",
@@ -269,12 +270,18 @@
    "fieldtype": "Float",
    "label": "Rate",
    "precision": "5"
+  },
+  {
+   "fieldname": "staffing_company_ratings",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Avg. Rating"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-04 00:33:55.639755",
+ "modified": "2022-12-12 02:11:51.374769",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",
