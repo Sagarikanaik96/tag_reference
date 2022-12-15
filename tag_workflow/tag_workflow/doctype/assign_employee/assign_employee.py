@@ -252,12 +252,12 @@ def my_emp_work(emps,my_emp_data):
 
 @frappe.whitelist()
 def validate_employee(doc,method):
-	job_order=frappe.get_doc(jobOrder,doc.job_order)
-	if job_order.is_repeat!=1:
-		for employee in doc.employee_details:
-			employee_doc=frappe.get_doc('Employee',employee.employee)
-			if not employee_doc.has_permission("read"):
-				frappe.flags.error_message = _('Insufficient Permission for {0}').format(frappe.bold('Employee' + ' ' + employee.employee_name))
+    job_order=frappe.get_doc(jobOrder,doc.job_order)
+    if job_order.is_repeat!=1:
+        for employee in doc.employee_details:
+            employee_doc=frappe.get_doc('Employee',employee.employee)
+            if employee_doc.company != doc.company:
+                frappe.throw('Employee does not belong to the Staffing Organization')
 
 @frappe.whitelist()
 def payrate_change(docname):
