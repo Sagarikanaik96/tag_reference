@@ -87,6 +87,7 @@ def setup_data():
         set_template_name()
         get_user_company_data()
         disable_scheduler()
+        update_ts_list_invoice()
         make_commit()
     except Exception as e:
         print(e)
@@ -699,6 +700,24 @@ def set_template_name():
             frappe.db.commit()
     except Exception as e:
         frappe.log_error(e, 'set_template_name Error')
+
+@frappe.whitelist()
+def update_ts_list_invoice():
+    try:
+        frappe.logger().debug("*------updating timesheet used in sales invoice---------*\n")
+        invoice_list = frappe.get_all('Sales Invoice', {'timesheet_used':['is', Not_Set], 'month':['is', Not_Set]}, ['name'])
+        for invoice in invoice_list:
+            invoice_doc = frappe.get_doc('Sales Invoice', invoice.name)
+            ts_list = []
+            for row in invoice_doc.timesheets:
+                sql=f'''select name from `tabTimesheet` where employee = "{row.description}" and job_order_detail = "{invoice_doc.job_order}"and name in (select parent from `tabTimesheet Detail` where from_time >= "{row.from_time}" and to_time <= "{row.to_time}")'''
+                res = frappe.db.sql_list(sql)
+                for r in res:
+                    ts_list.append(r)
+            frappe.db.sql(f'''UPDATE `tabSales Invoice` SET timesheet_used = "{str(ts_list)}" where name = "{invoice_doc.name}"''')
+            frappe.db.commit()
+    except Exception as e:
+        frappe.log_error(e, 'update_ts_list_invoice Error')
 
 def disable_scheduler():
     try:

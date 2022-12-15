@@ -127,9 +127,14 @@ def get_industries(user):
         accreditation = frappe.db.sql(""" select attribute from `tabCertificate and Endorsement` """,as_dict=1)
         accreditation = [acr['attribute'] for acr in accreditation]
         data = [ind['industry_type'] for ind in industries]
-        comps = frappe.db.sql(""" select name from `tabCompany` where organization_type="Staffing" """,as_dict=1)
-        comps = [c['name'] for c in comps]
-        comps = '\n'.join(comps)
+        org_type, comp=frappe.db.get_value('User', {'name': frappe.session.user}, ['organization_type', 'company'])
+        if org_type == 'Exclusive Hiring':
+            parent_comp=frappe.db.get_value('Company', {'name': comp}, ['parent_staffing'])
+            comps = f'{parent_comp}'
+        else:
+            comps = frappe.db.sql(""" select name from `tabCompany` where organization_type="Staffing" """,as_dict=1)
+            comps = [c['name'] for c in comps]
+            comps = '\n'.join(comps)
         return data,accreditation,comps
     except Exception as e:
         frappe.log_error(e, "Industries error")

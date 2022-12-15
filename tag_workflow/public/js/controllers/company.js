@@ -1263,15 +1263,15 @@ function invoice_view(frm) {
 		.button-strip {
 			width: 202px;
 			height: 29px;
-			border: 1px solid #1496BD;
+			border: 1px solid #21b9e4;
 			border-radius: 3px;
 			display: flex;
 			box-shadow: var(--btn-shadow);
 		}
 		.strip-button {
 			background-color: white;
-			color: #1496BD;
-			width: 100px;
+			color: #21b9e4;
+			width: 101px;
 			height: 27px;
 			text-align: center;
 			vertical-align: middle;
@@ -1284,12 +1284,12 @@ function invoice_view(frm) {
 		}
 		.strip-button-text {
 			font-size: var(--text-md);
-			color: #1496BD;
+			color: #21b9e4;
 			margin: 0px;
 			padding: 0px;
 		}
 		.active-strip-button {
-			background-color: #1496BD;
+			background-color: #21b9e4;
 			color: white;
 		}
 	</style>`
