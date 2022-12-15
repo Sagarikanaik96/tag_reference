@@ -1125,7 +1125,7 @@ function set_up_cert_field(frm) {
 				localStorage.setItem("check_flag_attach",1)
 				let val =  new frappe.ui.FileUploader({"doctype":"Company","docname":cur_frm.doc.name,"custome_check_flag":"test","restrictions": {
 					max_file_size:512000,
-					allowed_file_types: ['.pdf', '.png', '.jpeg']
+					allowed_file_types: ['.pdf', '.png', '.jpeg','.jpg']
 				}});
 				setTimeout(()=>{
 					document.getElementsByClassName("btn-modal-primary")[0].onclick = function() {set_file(anchor_id[1])};
