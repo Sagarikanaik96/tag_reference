@@ -23,7 +23,7 @@ frappe.FaceRecognition = Class.extend({
 		let me = this;
 		this.start = 0
 		this.end = 20
-		this.filters = {}
+		this.filters = {'radius':25}
 		this.options = []
 		this.data = null;
 		this.accreditation = [];
@@ -52,7 +52,7 @@ frappe.FaceRecognition = Class.extend({
 			this.refresh()
 		})
 		if (frappe.boot.tag.tag_user_info.company_type == 'Hiring'|| frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring") {
-			get_radius(25)
+			document.getElementById('dropdownMenuLink').innerText = 25;
 			me.get_industries()
 			me.add_fields()
 
@@ -199,9 +199,9 @@ frappe.FaceRecognition = Class.extend({
 
 
 async function sorted_favourite_companies(data, profile_html, company_type) {
-	let title = get_title(data.name)
-	let count = get_count(data.name).count>1?'<span class="pl-1">&#x2B;</span>' + parseInt(get_count(data.name).count-1):"";
-	let block_count = get_count(data.name).blocked_count>1?'<span class="pl-1">&#x2B;</span>' + parseInt(get_count(data.name).blocked_count-1):"";
+	let title = data.title
+	let count = data.count>1?'<span class="pl-1">&#x2B;</span>' + parseInt(data.count-1):"";
+	let block_count = data.blocked_count>1?'<span class="pl-1">&#x2B;</span>' + parseInt(data.blocked_count-1):"";
 	let link = data.name.split(' ').join('%');
 	let Likebtnexclusice = `<td></td>`
 	let Likebtnnonexclusice = `<td>
@@ -214,7 +214,7 @@ async function sorted_favourite_companies(data, profile_html, company_type) {
 					<td ><a onclick=dynamic_route("${link}")>${data.name}</a></td>
 					${data.industry_type?"<td><span>"+ data.industry_type +" "+ block_count +"</span></td>": '<td></td>'}
 					<td>${data.address || data.complete_address || ''}</td>	
-					<td ${data.average_rating ?'<span class="rating pr-2"><svg class="icon icon-sm star-click" data-rating="1"><use href="#icon-star"></use></svg></span>' + data.average_rating 
+					<td ${data.rating ?'<span class="rating pr-2"><svg class="icon icon-sm star-click" data-rating="1"><use href="#icon-star"></use></svg></span>' + data.rating 
 					:""}</td>
 					 ${data.accreditation ? `<td><span class="staff-certificate-btn px-3 py-1"  id="${data.name} data-toggle="tooltip" data-placement="top" title="${title}">` + data.accreditation + '</span><span class="text-primary">' + count + '</span></td>'
 					:"<td></td>"}
@@ -356,38 +356,4 @@ function get_radius(val) {
 		frappe.flags.staff_home.refresh()
 	}
 
-}
-
-function get_count (company) {
-	let count = {}
-		frappe.call({
-			method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.get_count',
-			args: { company:company},
-			async: 0,
-			callback: (r) => {
-				if (r.message) {
-				count['count'] =r.message.count;
-				count['blocked_count'] =r.message.blocked_count;
-				}
-			}
-		})
-		return count
-}
-
-
-function get_title(company){
-	let title =''
-		frappe.call({
-			method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.get_title',
-			args: { company:company},
-			async: 0,
-			callback: (r) => {
-				if (r.message) {
-				 for (let i in r.message)
-				 title+= '&#x2022'+" "+r.message[i]+"\n" 
-				
-				}
-			}
-		})
-		return title
 }

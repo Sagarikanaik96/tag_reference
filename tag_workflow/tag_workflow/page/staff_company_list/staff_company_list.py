@@ -3,6 +3,7 @@ import frappe
 import json
 from haversine import haversine, Unit
 from tag_workflow.utils.reportview import get_lat_lng,get_custom_location
+from tag_workflow.tag_workflow.doctype.company.company import check_staffing_reviews
 
 # this file for TG-2607
 @frappe.whitelist()
@@ -141,7 +142,7 @@ def get_industries(user):
         print(e)
 
 def get_conditions(filters):
-    cond = cond1= cond2= cond3=''
+    cond1= cond2= cond3=''
     if filters.get('company',None) not in [None,""]:
         cond1 += """ and c.name like '%{company}%' """.format(company=filters.get('company'))
     if filters.get('industry',None) not in [None,""]:
@@ -149,10 +150,10 @@ def get_conditions(filters):
     if filters.get('city',None) not in [None,""]:
         cond1 += """ and c.city like '%{0}%' """.format(filters.get('city'))
     if filters.get('rating',None) not in [None,""]:
-        cond1 += """ and c.average_rating >={rating} """.format(rating=filters.get('rating'))
+        cond1 += """ and  c.average_rating >={rating}  and (select count(*) from `tabCompany Review` r where c.name=r.staffing_company)>=10   """.format(rating=filters.get('rating'))
     if filters.get('accreditation',None) not in [None,""]:
         cond2 += """  and ce.certificate_type="{accreditation}" """.format(accreditation=filters.get('accreditation'))
-    return cond,cond1,cond2,cond3
+    return cond1,cond2,cond3
 
 def filter_location(radius,comp,data):
     try:
@@ -182,11 +183,11 @@ def get_custom_location(address):
     return tuple([lat, lng])
 
 def hiring_data(filters,user_name,comp_id,start,end):
-    cond=cond1 =cond2 =cond3 = ''
+    cond1 =cond2 =cond3 = ''
     try:
         if filters:
             filters = json.loads(filters)
-            cond,cond1,cond2,cond3 = get_conditions(filters)
+            cond1,cond2,cond3 = get_conditions(filters)
         sql = ''' select company from `tabUser` where email='{}' '''.format(user_name)
         user_comp = frappe.db.sql(sql, as_list=1)
         
@@ -196,11 +197,18 @@ def hiring_data(filters,user_name,comp_id,start,end):
         on c.name = ce.company 
         left join `tabBlocked Staffing Company` bs
         on c.name = bs.name 
-        where c.name in (select parent from `tabIndustry Types` where parent in (select name from `tabCompany` where organization_type='Staffing' {2}) 
-        and industry_type in (select industry_type  from `tabIndustry Types` where parent='{0}'  ))  {1}  {3} {4}  group by c.name limit {5},{6}
-        """.format(user_comp[0][0],cond,cond1,cond2,cond3, start,end)
-
+        left join `tabCompany Review` r
+        on c.name = r.staffing_company
+        where c.name in (select parent from `tabIndustry Types` where parent in (select name from `tabCompany` where organization_type='Staffing' {1}) 
+        and industry_type in (select industry_type  from `tabIndustry Types` where parent='{0}'  ))  {2}  {3}   group by c.name limit {4},{5}
+        """.format(user_comp[0][0],cond1,cond2,cond3, start,end)
+        
         data = frappe.db.sql(sql, as_dict=True)
+        for d in data:
+            response = get_count(d.name)
+            d.update(dict(count=response['count'],blocked_count=response['blocked_count'],title=response['title'],rating = check_staffing_reviews(d.name)))
+            
+            
         if filters.get('radius',None) not in [None,""]:
             radius = filters.get('radius')
             data = filter_location(radius,user_comp,data)
@@ -219,19 +227,19 @@ def get_count(company):
     try:
         data = frappe.db.sql(""" select count(*) as count from `tabCertificate and Endorsement Details` where company ="{0}" """.format(company),as_dict=1)
         data1 = frappe.db.sql(""" select count(*) as blocked_count from `tabIndustry Types` where parent ="{0}" and parenttype="Company" order by industry_type desc """.format(company),as_dict=1)
+        data2 = frappe.db.sql(""" select certificate_type as type from `tabCertificate and Endorsement Details` where company="{0}" """.format(company),as_dict=1)
+        title = ['&#x2022'+" "+d['type']  for d in data2]
+        title  = '\n'.join(title)
+        rating = check_staffing_reviews(company)
+        
         result={
             'count':data[0]['count'] if len(data) else 0,
-            'blocked_count': data1[0]['blocked_count'] if len(data1) else 0
+            'blocked_count': data1[0]['blocked_count'] if len(data1) else 0,
+            'title':title if title else '',
+            'rating': rating if int(rating)>0 else ''
         }
+        
         return  result
     except Exception as e:
         print(e)
 
-@frappe.whitelist()
-def get_title(company):
-    try:
-        data = frappe.db.sql(""" select certificate_type as type from `tabCertificate and Endorsement Details` where company="{0}" """.format(company),as_dict=1)
-        title = [d['type'] for d in data]
-        return title
-    except Exception as e:
-        print(e)
