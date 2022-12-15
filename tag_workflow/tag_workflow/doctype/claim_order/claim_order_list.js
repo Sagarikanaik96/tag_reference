@@ -344,7 +344,7 @@ function modify_claims(listview) {
         async function (r) {
           let job_data = rm.message;
           let date_value = checking_same_date(r)
-          let profile_html = `<table class="table-responsive"><th>Claim No.</th><th>Staffing Company</th><th>Avg. Rating</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th><th>Notes</th>`;
+          let profile_html = `<table class="table-responsive"><th>Claim No.</th><th>Staffing Company</th><th>Avg. Rating</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th><th>Invoice Notes</th>`;
           profile_html=await html_data_modify_claims(job_data,profile_html);
           profile_html += `</table><style>th, td {
                             padding: 10px;

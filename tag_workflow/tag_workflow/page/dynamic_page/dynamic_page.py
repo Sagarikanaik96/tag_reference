@@ -31,7 +31,7 @@ def get_link1(name, userid):
    return company, review, data1, company_logo
 #----------showing work order history-----------#
 @frappe.whitelist()
-def get_link2(name,comp, comp_type, user_id, current_comp_type):
+def get_link2(name,comp, comp_type, user_id):
 
    sql3= f"select company from `tabEmployee` where user_id='{user_id}'"
    data3 = frappe.db.sql(sql3, as_dict=True)
@@ -41,7 +41,7 @@ def get_link2(name,comp, comp_type, user_id, current_comp_type):
       if comp_type== "Staffing":
          sql2= f"select job_order, job_category, tag_status, company, hiring_organization from `tabAssign Employee` where company='{comp}' and hiring_organization= '{name}' and tag_status= 'Approved' order by job_order desc"
       elif comp_type == 'TAG' or frappe.session.user=='Administrator':
-         sql2 = get_sql_query(current_comp_type, name)
+         sql2 = get_sql_query(name)
       else:
          sql2= f"select job_order, job_category, tag_status, company, hiring_organization from `tabAssign Employee` where company='{name}' and hiring_organization= '{comp}' and tag_status= 'Approved' order by job_order desc"
          
@@ -61,7 +61,8 @@ def get_link2(name,comp, comp_type, user_id, current_comp_type):
       return job, data2, invoice
    
 @frappe.whitelist()
-def get_sql_query(comp_type, name):
+def get_sql_query(name):
+   comp_type=frappe.db.get_value('Company', {'name':name},['organization_type'])
    if comp_type == 'Staffing':
       return f"select job_order, job_category, tag_status, company, hiring_organization from `tabAssign Employee` where company='{name}' and tag_status= 'Approved' order by job_order desc"
    else:

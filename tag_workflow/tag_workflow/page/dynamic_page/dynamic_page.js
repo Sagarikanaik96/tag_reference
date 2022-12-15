@@ -131,7 +131,7 @@ frappe.FaceRecognition = Class.extend({
                                     <a href=javascript:new_order()>
                                         <button  type="button" id="place_order" style="width:140px;margin-right:0px !important; background-color: #21b9e4 !important; font-size: 12px; box-shadow: var(--btn-shadow); !important;color:#fff; border:1px solid transparent !important; text-align: center !important; padding:8px" class="demo btn-xs mb-1 mt-1 mr-2 ">Place Order</button>
                                     </a></div>
-                                    <div><a href=javascript:work_order_history("${company_type}")>
+                                    <div><a href=javascript:work_order_history()>
 									<button type="button"  id="work_order" style="width:140px; padding:8px; background:white; font-size: 12px; box-shadow: var(--btn-shadow); !important;color:#333C44;border:1px solid transparent !important; text-align: center !important" class="demo btn-xs mb-1 mt-1">Work Order History</button>
 									</a></div>
 
@@ -325,15 +325,14 @@ function new_order() {
 }
 
 //--------tg-5154 changes---------//
-function work_order_history(current_comp_type) {
+function work_order_history() {
     frappe.call({
         method: "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link2",
         args: {
             "name": company || '',
             "comp": frappe.boot.tag.tag_user_info.company,
             "comp_type": frappe.boot.tag.tag_user_info.company_type,
-            "user_id": frappe.user_info().email,
-            "current_comp_type": current_comp_type
+            "user_id": frappe.user_info().email
         },
         callback: function (r) {
             let body;

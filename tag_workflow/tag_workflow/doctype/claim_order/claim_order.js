@@ -92,9 +92,6 @@ frappe.ui.form.on('Claim Order', {
 		
 		update_claim_by_staffing(frm)
 
-		if(frm.doc.staff_claims_no)
-		frm.set_df_property('staff_claims_no', 'read_only', 1);
-
 		if(frm.doc.approved_no_of_workers)
 			frm.set_df_property('staff_claims_no', 'read_only', 1);
 

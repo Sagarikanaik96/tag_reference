@@ -1692,6 +1692,10 @@ span.comment-count {
   margin-right: 3px;
   font-size: 13px;
 }
-[data-page-route="User"] .row-index.sortable-handle.col.col-xs-1 {
+[data-page-route="User"] .row-index.sortable-handle.col.col-xs-1,
+.col.grid-static-col.col-xs-1.d-flex.justify-content-center {
   pointer-events: none;
+}
+[data-page-route="User"] [title="assign_multiple_company"]>div>div>div>div>div>a{
+  display: none;
 }

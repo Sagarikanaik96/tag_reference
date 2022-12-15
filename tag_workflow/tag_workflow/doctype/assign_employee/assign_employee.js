@@ -943,7 +943,7 @@ function pop_up() {
   }
   let assign_emp_id = cur_frm.doc.name;
 
-  let notes_field = `<div class="px-3"><p class="mb-1"><label for="w3review">Notes:</label></p><textarea class="w-100" rows="3" label="Notes" id="_${assign_emp_id}_notes" class="head_count_tittle" maxlength="160" ></textarea><small>Character limit: 160</small> </div>`;
+  let notes_field = `<div class="px-3"><p class="mb-1"><label for="w3review">Invoice Notes:</label></p><textarea class="w-100" rows="3" label="Notes" id="_${assign_emp_id}_notes" class="head_count_tittle" maxlength="160" ></textarea><small>Character limit: 160</small> </div>`;
   body = body + notes_field;
   let fields = [{ fieldname: "custom_notes", fieldtype: "HTML", options: body }];
   let dialog = new frappe.ui.Dialog({
