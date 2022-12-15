@@ -128,9 +128,11 @@ def assign_employee_data(hiringorg, name):
 @frappe.whitelist(allow_guest=False)
 def update_job_order(user, company_type, sid, job_name, employee_filled, staffing_org, hiringorg, name):
     try:
+        if user != frappe.session.user:
+            frappe.throw('Invalid User')
         assign_employee_doc = frappe.get_doc(assignEmployees, name)
         if job_name and name and job_name!=assign_employee_doc.job_order:
-            frappe.throw('Parameters mismatch')
+            frappe.throw('Job Order does not belong to the Assign Employees')
         if(company_type == "Hiring" or company_type == exclusive_hiring and user == frappe.session.user):
             frappe.db.set_value(assignEmployees, name, "approve_employee_notification", 0)
             job = frappe.get_doc(jobOrder, job_name)
