@@ -144,7 +144,7 @@ def get_industries(user):
 def get_conditions(filters):
     cond1= cond2= cond3=''
     if filters.get('company',None) not in [None,""]:
-        cond1 += """ and c.name like '%{company}%' """.format(company=filters.get('company'))
+        cond1 += """ and c.name  like '%{0}%' """.format(filters.get('company'))
     if filters.get('industry',None) not in [None,""]:
         cond3 += """ and i.industry_type="{industry}" """.format(industry=filters.get('industry'))
     if filters.get('city',None) not in [None,""]:
@@ -157,6 +157,7 @@ def get_conditions(filters):
 
 def filter_location(radius,comp,data):
     try:
+        filter_data = []
         staff_location = None
         address =" ".join(frappe.db.get_value("Company", comp[0][0], [
                            "IFNULL(suite_or_apartment_no, '')", "IFNULL(state, '')", "IFNULL(city, '')", "IFNULL(zip, '')"]))
@@ -169,12 +170,11 @@ def filter_location(radius,comp,data):
                     staff_location = get_custom_location(staff_add)
 
                     rad = haversine(location, staff_location, unit='mi')
-                    
-                    if rad>radius:
-                        data.remove(d)
+                    if rad<=radius:
+                        filter_data.append(d)
                 except Exception:
                     continue
-        return data
+        return filter_data
     except Exception as e:
         print(e)
 
@@ -197,11 +197,10 @@ def hiring_data(filters,user_name,comp_id,start,end):
         on c.name = ce.company 
         left join `tabBlocked Staffing Company` bs
         on c.name = bs.name 
-        left join `tabCompany Review` r
-        on c.name = r.staffing_company
         where c.name in (select parent from `tabIndustry Types` where parent in (select name from `tabCompany` where organization_type='Staffing' {1}) 
         and industry_type in (select industry_type  from `tabIndustry Types` where parent='{0}'  ))  {2}  {3}   group by c.name limit {4},{5}
         """.format(user_comp[0][0],cond1,cond2,cond3, start,end)
+        
         
         data = frappe.db.sql(sql, as_dict=True)
         for d in data:

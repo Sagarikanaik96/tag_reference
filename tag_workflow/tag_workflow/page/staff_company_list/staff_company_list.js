@@ -105,7 +105,11 @@ frappe.FaceRecognition = Class.extend({
 		const field = [
 			{
 				'parent': '#company', 'name': 'company', 'type': 'Autocomplete', 'class': 'input-xs', 'placeholder': 'Company Name','options':this.staff_comps, 'handler': () => {
-					this.filters['company'] = document.getElementById('companys').value;
+					if (document.getElementById('companys').value!='')
+						this.filters['company'] = document.getElementById('companys').value;
+					else
+					this.filters['company'] = null;
+					
 					this.update_list()
 					this.refresh()
 				}
