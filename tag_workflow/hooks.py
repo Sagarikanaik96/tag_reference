@@ -18,7 +18,7 @@ dialog ="public/js/controllers/dialog.js"
 perm ="public/js/controllers/perm.js"
 # Includes in <head>
 # ------------------
-fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow", "Workflow State", "Workflow Action Master",
+fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow", "Workflow State", "Workflow Action Master", "System Settings",
 {"dt": "Property Setter",
         "filters": [
 	[
