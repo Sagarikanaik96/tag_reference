@@ -18,17 +18,6 @@ frappe.ui.form.on("User", {
 			cancel_user(frm);
 		}		
 
-		$(document).on('click', '[data-fieldname="company"]', function(){
-			companyhide(1250)
-		});
-
-		$('[data-fieldname="company"]').mouseover(function(){
-			companyhide(210)
-		})
-
-	  	document.addEventListener("keydown", function(){
-	  		companyhide(210)
-	    })
 		$('[data-fieldname = "mobile_no"]>div>div>div>input').attr("placeholder", "Example: +XX XXX-XXX-XXXX");
 		$(document).on('keypress', function(event){
 			if (event.key === 'Enter') {
@@ -85,7 +74,7 @@ frappe.ui.form.on("User", {
 	},
 	organization_type: function(frm){
 		set_options(frm);
-		init_values();
+		init_values(frm);
 		if(!frm.doc.organization_type){
 			frm.set_query("company", function (doc) {
 				return {
@@ -119,12 +108,9 @@ frappe.ui.form.on("User", {
 		else if(frm.doc.organization_type == "TAG"){
 			frm.set_value("tag_user_type", "TAG Admin")
 		}
-		if(frappe.boot.tag.tag_user_info.company_type=="Hiring"){
+		if(frappe.boot.tag.tag_user_info.company_type=="Hiring" || (frm.doc.organization_type == "Staffing" && frappe.boot.tag.tag_user_info.company_type=='Staffing')){
 			org_info(frm);
 		}
-		if(frm.doc.organization_type == "Staffing" && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-			org_info(frm);	
-		}	
 	},
 	first_name:function(){
 		if(cur_frm.doc.first_name){
@@ -255,11 +241,11 @@ function field_check(){
 	(frappe.session.user === cur_frm.doc.name) ? cur_frm.toggle_enable("enabled", 0) : console.log("TAG");
 }
 
-function init_values(){
-	if(cur_frm.doc.__islocal == 1){
+function init_values(frm){
+	if(frm.doc.__islocal == 1){
 		let clear_values = ["username", "email", "first_name", "last_name", "company", "gender", "birth_date", "tag_user_type", "location", "mobile_no"];
 		for(let val in clear_values){
-			cur_frm.set_value(clear_values[val], "");
+			frm.set_value(clear_values[val], "");
 		}
 	}
 }
@@ -418,18 +404,6 @@ function exclusive_fields(frm){
 		$('[data-label="Save"]').show()
 	}
  }
-
-function companyhide(time) {
-	setTimeout(() => {
-		let txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns')
-		let txt2 = 'ul[id="'+txt+'"]'
-		let arry = document.querySelectorAll(txt2)[0].children
-		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
-		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
-
-		
-	}, time)
-}
 
 /*--------perpare field display-----------*/
 function field_toggle(){
