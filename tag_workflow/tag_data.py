@@ -1136,18 +1136,15 @@ def get_industrytype_list_page(doctype, txt, searchfield, page_len, start, filte
 
 @frappe.whitelist()
 def my_used_job_title(company_name,company_type):
+    z = []
     if company_type=='Hiring' or company_type=='Exclusive Hiring':
         l=frappe.db.sql('select job_titles from `tabJob Titles` where parent="{0}"'.format(company_name),as_list=1)
-        z=[]
         for i in l:
             z.append(i[0])
     elif company_type=='Staffing':
-        exc_company=frappe.db.sql('select name from `tabCompany` where parent_staffing="{0}" '.format(company_name),as_list=1)
-        z=[]
-        for i in exc_company:
-            l=frappe.db.sql('select job_titles from `tabJob Titles` where parent="{0}"'.format(i[0]),as_list=1)
-            for i in l:
-                z.append(i[0])
+        exc_company=frappe.db.sql('select job_title,job_site,staffing_company,hiring_company from `tabEmployee Pay Rate` where owner="{0}" '.format(frappe.session.user),as_list=1)
+        for i  in exc_company:
+            z.append(i[0])
     else:
         return 'TAG'
     return list(set(z))
@@ -1195,7 +1192,7 @@ def job_site_add(doc,method):
             })
             new_site.save(ignore_permissions=True)
     except Exception as e:
-       frappe.error_log(e,'Job Site Add Error')
+       frappe.log_error(e,'Job Site Add Error')
 
 @frappe.whitelist()
 def job_title_add(doc,method):

@@ -312,6 +312,52 @@ def checkingjobtitle_name(job_titless):
     return job_titless
 
 @frappe.whitelist()
+def get_staffing_company_data():
+    company_type = "Staffing"
+    get_user = frappe.db.sql ("select role_profile_name from `tabUser` where name='{0}'".format(frappe.session.user),as_dict=1)
+    if get_user[0]['role_profile_name'] == "Staffing Admin":
+        sql = frappe.db.sql("select company_name from `tabCompany` where modified_by = '{0}' and organization_type='{1}'".format(frappe.session.user,company_type))
+        if len(sql) == 1:
+            data = list(sql)
+            return  data
+        else:
+            blankdata=tuple(' ',)
+            data = list(sql)
+            data.insert(0,blankdata)
+            return  data
+    else:
+        sql = frappe.db.sql("select company_name from `tabCompany` where organization_type = '{0}'".format(company_type))
+        blankdata=tuple(' ',)
+        data = list(sql)
+        data.insert(0,blankdata)
+        return  data
+
+
+@frappe.whitelist()
+def get_hiring_company_data():
+    company_type = "Hiring"
+    get_user = frappe.db.sql ("select role_profile_name from `tabUser` where name='{0}'".format(frappe.session.user),as_dict=1)
+    if get_user[0]['role_profile_name'] == "Staffing Admin":
+        sql = frappe.db.sql("select company_name from `tabCompany` where organization_type = '{0}' and modified_by='{1}'".format(company_type,frappe.session.user))
+        blankdata=tuple(' ',)
+        data = list(sql)
+        data.insert(0,blankdata)
+        return  data
+    else:
+        sql = frappe.db.sql("select company_name from `tabCompany` where organization_type = '{0}'".format(company_type))
+        blankdata=tuple(' ',)
+        data = list(sql)
+        data.insert(0,blankdata)
+        return  data
+
+@frappe.whitelist()
+def check_payrates_data(job_industry , job_title):
+    sql = frappe.db.sql("select job_title from `tabJob Order` where select_job = '{0}' and category='{1}'".format(job_title,job_industry))
+    if sql:
+        return True
+    return False  
+
+@frappe.whitelist()
 def send_password_notification(self, new_password):
 		try:
 			if self.flags.in_insert and self.name not in STANDARD_USERS:

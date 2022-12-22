@@ -315,6 +315,12 @@ def set_pay_rate(hiring_company, job_title, job_site, staffing_company):
 		emp_pay_rate = frappe.db.exists(EPR, {"hiring_company": hiring_company,"job_title": job_title, "job_site": job_site, "staffing_company": staffing_company})
 		if emp_pay_rate:
 			return frappe.db.get_value(EPR, {"name": emp_pay_rate}, ['employee_pay_rate'])
+		else:
+			staffing_comp_pay_rate = "select employee_pay_rate from `tabPay Rates`  where  parent='{0}' and staffing_company='{1}'".format(job_title,staffing_company)
+			staffing_comp_pay_rates = frappe.db.sql(staffing_comp_pay_rate, as_dict=1)
+			if staffing_comp_pay_rates:
+				emp_pay_rate = staffing_comp_pay_rates[0]['employee_pay_rate']
+				return emp_pay_rate
 	except Exception as e:
 		frappe.log_error(e, 'Set Pay Rate Error')
 		print(e, frappe.get_traceback())
