@@ -198,8 +198,8 @@ def hiring_data(filters,user_name,comp_id,start,end):
         left join `tabBlocked Staffing Company` bs
         on c.name = bs.name 
         where c.name in (select parent from `tabIndustry Types` where parent in (select name from `tabCompany` where organization_type='Staffing' {1}) 
-        and industry_type in (select industry_type  from `tabIndustry Types` where parent='{0}'  ))  {2}  {3}   group by c.name limit {4},{5}
-        """.format(user_comp[0][0],cond1,cond2,cond3, start,end)
+        and industry_type in (select industry_type  from `tabIndustry Types` where parent='{0}'  ))  {2}  {3}   group by c.name 
+        """.format(user_comp[0][0],cond1,cond2,cond3)
         
         
         data = frappe.db.sql(sql, as_dict=True)
@@ -216,10 +216,11 @@ def hiring_data(filters,user_name,comp_id,start,end):
             data=frappe.db.sql(sql, as_list=True)
             company_name=data[int(comp_id)-1][0]
             return company_data(company_name)
-            
+        if (data):
+            data = data[0:int(end)]
         return data
     except Exception as e:
-        print(e)
+        print(e,start)
 
 @frappe.whitelist()
 def get_count(company):

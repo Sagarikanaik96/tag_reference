@@ -104,11 +104,8 @@ frappe.FaceRecognition = Class.extend({
 	add_fields: function () {
 		const field = [
 			{
-				'parent': '#company', 'name': 'company', 'type': 'Autocomplete', 'class': 'input-xs', 'placeholder': 'Company Name','options':this.staff_comps, 'handler': () => {
-					if (document.getElementById('companys').value!='')
-						this.filters['company'] = document.getElementById('companys').value;
-					else
-					this.filters['company'] = null;
+				'parent': '#company', 'name': 'company', 'type': 'Autocomplete', 'class': 'input-xs', 'placeholder': 'Company Name','options':this.staff_comps,'filter':1, 'handler': () => {
+					this.filters['company'] = document.getElementById('companys').value;
 					
 					this.update_list()
 					this.refresh()
@@ -162,6 +159,13 @@ frappe.FaceRecognition = Class.extend({
 			control.$wrapper.find(".input-with-feedback").attr("id", field[f]['name'] + "s")
 		}
 		document.getElementById('ratings').setAttribute('type', 'number')
+		document.getElementById('companys').addEventListener('keyup',(e)=>{
+			if(!e.target.value){
+				this.filters['company'] = null;
+				this.refresh()
+			}
+				
+		})
 	},
 	refresh: function () {
 		this.show_profile();
@@ -334,6 +338,7 @@ frappe.realtime.on('refresh_data', () => {
 	}
 
 })
+
 
 function populate_filter() {
 	if (localStorage.getItem('search')) {
