@@ -9,7 +9,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.selling.doctype.quotation.quotation import _make_customer
 from tag_workflow.tag_data import employee_company
 from tag_workflow.utils.notification import sendmail, make_system_notification, share_doc
-from frappe.desk.query_report import get_report_doc, generate_report_result
+from frappe.desk.query_report import get_report_doc, generate_report_result,get_prepared_report_result
 from frappe.desk.desktop import Workspace
 from frappe import enqueue
 from frappe.desk.form.save import set_local_name,send_updated_docs
@@ -310,6 +310,14 @@ def get_staffing_company_list():
 @frappe.whitelist()
 @frappe.read_only()
 def run(report_name, filters=None, user=None, ignore_prepared_report=False, custom_columns=None):
+    if user!=frappe.session.user:
+        frappe.throw('Insufficient Permission for User ' + user)
+    detail_filters = json.loads(filters)
+    if filters!='{}' and detail_filters.get('company'):
+            company_doc=frappe.get_doc('Company',detail_filters['company'])
+            if not company_doc.has_permission("read"):
+                frappe.throw('Insufficient Permission for Company ' + detail_filters['company'])
+
     if not user:
         return None
 
@@ -321,8 +329,7 @@ def run(report_name, filters=None, user=None, ignore_prepared_report=False, cust
 
     result = None
     if(report.prepared_report and not report.disable_prepared_report and not ignore_prepared_report and not custom_columns):
-        if filters:
-            if isinstance(filters, string_types):
+        if filters and isinstance(filters, string_types):
                 filters = json.loads(filters)
                 dn = filters.get("prepared_report_name")
                 filters.pop("prepared_report_name", None)
