@@ -196,7 +196,7 @@ def hiring_data(filters,user_name,comp_id,start,end):
         left join `tabCertificate and Endorsement Details` ce 
         on c.name = ce.company 
         left join `tabBlocked Staffing Company` bs
-        on c.name = bs.name 
+        on c.name = bs.staffing_company_name 
         where c.name in (select parent from `tabIndustry Types` where parent in (select name from `tabCompany` where organization_type='Staffing' {1}) 
         and industry_type in (select industry_type  from `tabIndustry Types` where parent='{0}'  ))  {2}  {3}   group by c.name 
         """.format(user_comp[0][0],cond1,cond2,cond3)
