@@ -322,3 +322,13 @@ def get_custom_location(custom_address):
     lat, lng = get_lat_lng(custom_address)
     if lat!=0 and lng!=0:
         return tuple([lat, lng])
+
+@frappe.whitelist()
+@frappe.read_only()
+def get_list():
+    args = get_form_params()
+    if args.get('or_filters') and args['or_filters'][0][0]=='for_user' and args['or_filters'][0][2]!=frappe.session.user:
+            frappe.throw('Invalid request')
+
+	# uncompressed (refactored from frappe.model.db_query.get_list)
+    return execute(**get_form_params())

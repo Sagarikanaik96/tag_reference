@@ -853,3 +853,13 @@ def get_retirement_date(date_of_birth=None):
 			ret = {}
 
 	return ret
+
+queue_prefix = 'insert_queue_for_'
+
+@frappe.whitelist()
+def deferred_insert(doctype, records):
+	records_json=json.loads(records)
+	if records_json[0]['user']!=frappe.session.user:
+		frappe.throw('Invalid request')
+	frappe.cache().rpush(queue_prefix + doctype, records)
+

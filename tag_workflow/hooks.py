@@ -228,7 +228,9 @@ override_whitelisted_methods = {
         "erpnext.accounts.party.get_due_date": "tag_workflow.utils.invoice.get_due_date",
         "frappe.model.workflow.bulk_workflow_approval":"tag_workflow.utils.workflow.bulk_workflow_approval",
         "erpnext.hr.utils.get_onboarding_details": "tag_workflow.utils.whitelisted.get_onboarding_details",
-        "erpnext.hr.doctype.employee.employee.get_retirement_date":"tag_workflow.utils.whitelisted.get_retirement_date"
+        "erpnext.hr.doctype.employee.employee.get_retirement_date":"tag_workflow.utils.whitelisted.get_retirement_date",
+        "frappe.deferred_insert.deferred_insert": "tag_workflow.utils.whitelisted.deferred_insert",
+        "frappe.desk.reportview.get_list": "tag_workflow.utils.reportview.get_list"
 }
 
 
