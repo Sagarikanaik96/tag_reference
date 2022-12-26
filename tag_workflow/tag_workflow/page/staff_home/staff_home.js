@@ -1,7 +1,25 @@
 let company1 = frappe.boot.tag.tag_user_info.company;
 let company_type = frappe.boot.tag.tag_user_info.company_type;
 frappe.breadcrumbs.clear();
+frappe.flags.prev_val = []
 frappe.flags.wrapper = null;
+function toggle_ele(point) {
+	if (frappe.flags.prev_val.length>0){	
+		const pt = frappe.flags.prev_val[0]	
+		document.getElementById(pt).style.borderLeft = 'transparent'
+		frappe.flags.prev_val = []
+	}
+		let container = $('.main-slider');
+        let scrollTo = $('#'+point);
+        let position = scrollTo.offset().top 
+                - container.offset().top 
+                + container.scrollTop();
+				container.scrollTop(position);
+		document.getElementById(point).style.borderLeft = '4px solid #7b68ef'
+		document.getElementById(point).style.borderRadius = '5px'
+		frappe.flags.prev_val.push(point)
+}
+
 
 frappe.pages['staff-home'].on_page_load = function (wrapper) {
 	let page = frappe.ui.make_app_page({
@@ -81,7 +99,7 @@ frappe.StaffHome = Class.extend({
 			if(data.length==1){content_list+=`<span style="font-weight:bold">${data[0]}</span>`}
 			else{
 			for(let li in data){
-				content_list+=`<li style="font-weight:bold">${data[li]}</li>`
+				content_list+=`<li class="select-order" style="font-weight:bold;cursor:pointer;" onclick=toggle_ele("${data[li]}")>${data[li]}</li>`
 			}}
 			content_list+="</div>"
 			let marker = new google.maps.Marker({
@@ -126,8 +144,9 @@ frappe.StaffHome = Class.extend({
 		}
 	},
 	update_order: function (_wrapper, _page, order, org_type) {
-		let html = `<div style="max-height: 385px; overflow: auto;">`;
+		let html = `<div class="main-slider" style="max-height: 385px; overflow: auto;">`;
 		for (let o in order) {
+			this.o=o;
 			let from = moment(order[0].from_date)._d.toDateString();
 			let to = moment(order[0].to_date)._d.toDateString();
 			let st = order[o].job_start_time.split(':')
@@ -139,49 +158,51 @@ frappe.StaffHome = Class.extend({
 			html += `
 				
 				<div class="row bg-white mx-2 my-3 rounded border job" data-job="${order[o].select_job}" style="margin-top: 0px !important;">
-					<div class="d-flex flex-wrap p-3 ">
-						<div class="d-flex justify-content-between w-100 ">
-							<h6>${order[o].select_job}</h6>
-							<h6>$${order[o].per_hour.toFixed(2)}</h6>
-						</div>
-						<div class="d-flex w-100 ">
-							<span class="badge badge-pill exclusive">${order[o].name}</span>
-							<span class="badge badge-pill ml-2 exclusive">${org_type}</span>
-						</div>
-						<div class="d-flex flex-wrap w-100 pt-3 ">
-							<div class="col-xl-7 col-lg-12">
+					<div id="${order[o].name}">
+						<div class="d-flex flex-wrap p-3 ">
+							<div class="d-flex justify-content-between w-100 ">
+								<h6>${order[o].select_job}</h6>
+								<h6>$${order[o].per_hour.toFixed(2)}</h6>
+							</div>
+							<div class="d-flex w-100 ">
+								<span class="badge badge-pill exclusive">${order[o].name}</span>
+								<span class="badge badge-pill ml-2 exclusive">${org_type}</span>
+							</div>
+							<div class="d-flex flex-wrap w-100 pt-3 ">
+								<div class="col-xl-7 col-lg-12">
+									<div class="row flex-nowrap">
+										<div class="pt-2 pr-2 mr-0">
+										<img src="/assets/tag_workflow/images/ico-calendar.svg">
+									</div>
+									<div>
+										<small class="text-secondary"> Start-End Date </small>
+										<p> ${from}, ${to} </p>
+									</div>
+								</div>
+								<div class="row">
+									<div class="pt-2 pr-2 mr-0">
+										<img src="/assets/tag_workflow/images/ico-worker.svg">
+									</div>
+									<div>
+										<small class="text-secondary">No. of Employees </small>
+										<p> ${order[o].approved_no_of_workers} </p>
+									</div>
+								</div>
+							</div>
+							<div class="col-xl-5 col-lg-12">
 								<div class="row flex-nowrap">
 									<div class="pt-2 pr-2 mr-0">
-									<img src="/assets/tag_workflow/images/ico-calendar.svg">
-								</div>
-								<div>
-									<small class="text-secondary"> Start-End Date </small>
-									<p> ${from}, ${to} </p>
-								</div>
-							</div>
-							<div class="row">
-								<div class="pt-2 pr-2 mr-0">
-									<img src="/assets/tag_workflow/images/ico-worker.svg">
-								</div>
-								<div>
-									<small class="text-secondary">No. of Employees </small>
-									<p> ${order[o].approved_no_of_workers} </p>
-								</div>
-							</div>
-						</div>
-						<div class="col-xl-5 col-lg-12">
-							<div class="row flex-nowrap">
-								<div class="pt-2 pr-2 mr-0">
-									<img src="/assets/tag_workflow/images/ico-clock.svg">
-								</div>
-								<div>
-									<small class="text-secondary"> Est. Daily Hours / Start Time </small>
-									<p> ${order[o].estimated_hours_per_day} Hrs / ${timeString} </p>
+										<img src="/assets/tag_workflow/images/ico-clock.svg">
+									</div>
+									<div>
+										<small class="text-secondary"> Est. Daily Hours / Start Time </small>
+										<p> ${order[o].estimated_hours_per_day} Hrs / ${timeString} </p>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-					<div class="d-flex flex-wrap w-100 pt-3 border-top">
+					<div class="d-flex flex-wrap w-100 py-3 border-top">
 						<div class="col-lg-4">
 							<!--<a href="#" class="text-secondary pt-2">See on map</a> -->
 						</div>
