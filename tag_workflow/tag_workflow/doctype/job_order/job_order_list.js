@@ -31,7 +31,7 @@ frappe.listview_settings["Job Order"] = {
       [cur_list.columns[7], cur_list.columns[9]] = [cur_list.columns[9], cur_list.columns[7],];
       [cur_list.columns[8], cur_list.columns[9]] = [cur_list.columns[9], cur_list.columns[8],];   
       cur_list.columns.splice(9, 1);
-      cur_list.columns[7].df.label = "Category";
+      cur_list.columns[7].df.label = "Industry";
       cur_list.render_header(cur_list.columns);
     }
     if (
@@ -44,7 +44,7 @@ frappe.listview_settings["Job Order"] = {
       [cur_list.columns[5], cur_list.columns[8]] = [cur_list.columns[8], cur_list.columns[5],];
       [cur_list.columns[6], cur_list.columns[9]] = [cur_list.columns[9], cur_list.columns[6],];
       cur_list.columns.splice(8, 2);
-      cur_list.columns[6].df.label = "Category";
+      cur_list.columns[6].df.label = "Industry";
       cur_list.render_header(cur_list.columns);
     }
     if (frappe.session.user != "Administrator") {
@@ -57,7 +57,7 @@ frappe.listview_settings["Job Order"] = {
       $("button.btn.btn-sm.filter-button.btn-primary-light").hide();
       frappe.route_options = {
         order_status: "",
-        is_single_share: 1,
+        staff_company:['like', frappe.boot.tag.tag_user_info.company]
       };
     } else {
       frappe.route_options = {
@@ -324,11 +324,16 @@ frappe.listview_settings["Job Order"] = {
 						function popup_content1(rawContent){
 							var cont = "";
 							for (const [key, value] of Object.entries(rawContent)) {
-								const arr = key.replace(/_/g, " ").split(" ");
-								for (var i = 0; i < arr.length; i++) {
-									arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
-								}
-								const final_key = arr.join(" ");
+                let final_key = "";
+                if(key=='category'){
+                  final_key = 'Industry';
+                }else{
+								  const arr = key.replace(/_/g, " ").split(" ");
+								  for (var i = 0; i < arr.length; i++) {
+									  arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+								  }
+								  final_key = arr.join(" ");
+                }  
 								cont+= "<b>"+final_key+":</b> "+value+" <br />";
 							}
 							return cont;

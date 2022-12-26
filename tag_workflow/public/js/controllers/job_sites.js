@@ -22,3 +22,4 @@ frappe.ui.form.on("Job Site", {
 		frm.set_value('zip', zip?zip.toUpperCase():zip);
 	}
 });
+

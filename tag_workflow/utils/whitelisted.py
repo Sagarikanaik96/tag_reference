@@ -1,5 +1,6 @@
 from unicodedata import name
 import frappe
+from frappe.utils import add_years, getdate,
 from frappe import DoesNotExistError
 from json import loads
 from frappe.desk.form.load import get_docinfo, run_onload
@@ -10,12 +11,12 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.selling.doctype.quotation.quotation import _make_customer
 from tag_workflow.tag_data import employee_company
 from tag_workflow.utils.notification import sendmail, make_system_notification, share_doc
-from frappe.desk.query_report import get_report_doc, generate_report_result
+from frappe.desk.query_report import get_report_doc, generate_report_result,get_prepared_report_result
 from frappe.desk.desktop import Workspace
 from frappe import enqueue
 from frappe.desk.form.save import set_local_name,send_updated_docs
 from six import string_types
-
+EVENT = 'refresh_data'
 #-------global var------#
 item = "Timesheet Activity Cost"
 order = "Sales Order"
@@ -159,9 +160,29 @@ def make_jazzhr_request(api_key, company):
 
 #--------get user data--------#
 @frappe.whitelist()
-def get_user_company_data(user, company):
+def get_user_company_data():
     try:
-        return frappe.db.get_list("Employee", {"user_id": user, "company": ('not in', (company))}, "company")
+        print("*************************' Company data loading started... '************************************")
+        all_user = frappe.db.sql("select name,company from `tabUser` where tag_user_type IN ('Staffing Admin','Hiring Admin')")
+        for each in all_user:
+            company = each[1]
+            user = each[0]
+            if company and user:
+                data = [company]
+                user_doc = frappe.get_doc("User",user)
+                company_exists=frappe.db.get_value('Companies Assigned',{'assign_multiple_company':company , 'parent':user})
+                if not company_exists:
+                    user_doc.append("assign_multiple_company",{"assign_multiple_company":company})
+                    user_doc.save()
+                a = frappe.db.get_list("Employee", {"user_id": user, "company": ('not in', (company))}, "company")
+                for i in a:
+                    company_exists=frappe.db.get_value('Companies Assigned',{'assign_multiple_company':i.company , 'parent':user},'name')
+                    if not company_exists:
+                        user_doc.append("assign_multiple_company",{"assign_multiple_company":i.company})
+                        user_doc.save()
+                        data.append(i.company)
+
+        print("*************************' Company data loading completed successfully... '************************************")
     except Exception as e:
         print(e)
 
@@ -291,6 +312,14 @@ def get_staffing_company_list():
 @frappe.whitelist()
 @frappe.read_only()
 def run(report_name, filters=None, user=None, ignore_prepared_report=False, custom_columns=None):
+    if user!=frappe.session.user:
+        frappe.throw('Insufficient Permission for User ' + user)
+    detail_filters = json.loads(filters)
+    if filters!='{}' and detail_filters.get('company'):
+            company_doc=frappe.get_doc('Company',detail_filters['company'])
+            if not company_doc.has_permission("read"):
+                frappe.throw('Insufficient Permission for Company ' + detail_filters['company'])
+
     if not user:
         return None
 
@@ -302,8 +331,7 @@ def run(report_name, filters=None, user=None, ignore_prepared_report=False, cust
 
     result = None
     if(report.prepared_report and not report.disable_prepared_report and not ignore_prepared_report and not custom_columns):
-        if filters:
-            if isinstance(filters, string_types):
+        if filters and isinstance(filters, string_types):
                 filters = json.loads(filters)
                 dn = filters.get("prepared_report_name")
                 filters.pop("prepared_report_name", None)
@@ -373,7 +401,6 @@ def get_desktop_page(page):
         frappe.log_error("Workspace Missing")
         return {}
 
-
 #----------------------#
 @frappe.whitelist()
 def search_staffing_by_hiring(data=None):
@@ -389,7 +416,9 @@ def search_staffing_by_hiring(data=None):
             if(exc_par):
                 data1=[]
                 data1.append({"name": exc_par})
+                frappe.publish_realtime(event=EVENT,user=frappe.session.user)
                 return [d['name'] for d in data1]
+            frappe.publish_realtime(event=EVENT,user=frappe.session.user)
             return [d['name'] for d in data]
         return []
     except Exception as e:
@@ -729,7 +758,6 @@ from frappe.desk.search import search_widget, build_for_autosuggest
 def search_link(doctype, txt, query=None, filters=None, page_length=100, searchfield=None, reference_doctype=None, ignore_user_permissions=False):
     search_widget(doctype, txt.strip(), query, searchfield=searchfield, page_length=page_length, filters=filters, reference_doctype=reference_doctype, ignore_user_permissions=ignore_user_permissions)
     temp = build_for_autosuggest(frappe.response["values"],doctype=doctype)
-
     if temp and temp[0]['value']=='Monday' or reference_doctype == 'Assign Employee Details':
         frappe.response['results']=temp
     else:
@@ -813,6 +841,20 @@ def get_onboarding_details(parent, parenttype):
 		filters={"parent": parent, "parenttype": parenttype},
 		order_by= "idx")
 
+@frappe.whitelist()
+def get_retirement_date(date_of_birth=None):
+	ret = {}
+	if date_of_birth:
+		try:
+			retirement_age = int(frappe.db.get_single_value("HR Settings", "retirement_age") or 120)
+			dt = add_years(getdate(date_of_birth),retirement_age)
+			ret = {'date_of_retirement': dt.strftime('%Y-%m-%d')}
+		except ValueError:
+			# invalid date
+			ret = {}
+
+	return ret
+
 @frappe.whitelist(allow_guest=True)
 def upload_file():
 	user = None
@@ -880,3 +922,13 @@ def upload_file():
 				"content": content,
 			}
 		).save(ignore_permissions=ignore_permissions)
+
+queue_prefix = 'insert_queue_for_'
+
+@frappe.whitelist()
+def deferred_insert(doctype, records):
+	records_json=json.loads(records)
+	if records_json[0]['user']!=frappe.session.user:
+		frappe.throw('Invalid request')
+	frappe.cache().rpush(queue_prefix + doctype, records)
+

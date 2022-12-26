@@ -16,8 +16,7 @@ frappe.ui.form.on("Employee", {
 			cancel_employee(frm);
 			tag_company(frm);
 		  }
-		employee_delete_button(frm);
-		employee_delete_button(frm);
+		employee_delete_button(frm); 
 		set_map(frm);
 		hide_field(frm);
 		show_addr(frm);

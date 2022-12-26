@@ -32,6 +32,11 @@ frappe.ui.form.on('Job Site', {
 				});
 			}
 		}
+		let y=localStorage.getItem('need_reload')
+		if(y && y==1){
+			localStorage.setItem('need_reload',0)
+			window.location.reload()
+		}
 	},
 
 	setup: function(frm){
@@ -58,47 +63,42 @@ frappe.ui.form.on('Job Site', {
 	},
 	validate: function (frm) {
 		if(frm.doc.__islocal==1){	
-			if (frm.doc.job_site_name){
-				if (frm.doc.job_site.indexOf('-') > 0){
-					frm.set_value("job_site_name",frm.doc.job_site.split('-')[0]);
-				}else{
-					frm.set_value("job_site_name",frm.doc.job_site);
+			if (frm.doc.job_site.indexOf('-') > 0){
+				frm.set_value("job_site_name",frm.doc.job_site.split('-')[0]);
+			}else{
+				frm.set_value("job_site_name",frm.doc.job_site);
+			}
+			cur_frm.refresh_field("job_site_name");
+			frappe.call({
+				"method": "tag_workflow.tag_workflow.doctype.job_site.job_site.checkingjobsiteandjob_site_contact",
+				"args": {"job_site_name": frm.doc.job_site_name,
+						"job_site_contact":frm.doc.job_site_contact,
+						},
+				"async": 0,
+				"callback": function(r){
+					if (!(r.message)){
+						frappe.msgprint({
+							message: __("Job site already exists for this contact"),
+							title: __("Error"),
+							indicator: "orange",
+						  });
+						frappe.validated = false
+					}
 				}
-				cur_frm.refresh_field("job_site_name");
-				frappe.call({
-					"method": "tag_workflow.tag_workflow.doctype.job_site.job_site.checkingjobsiteandjob_site_contact",
-					"args": {"job_site_name": frm.doc.job_site_name,
-							"job_site_contact":frm.doc.job_site_contact,
-							},
-					"async": 0,
-					"callback": function(r){
-						if (!(r.message)){
-							frappe.msgprint({
-								message: __("Job site already exists for this contact"),
-								title: __("Error"),
-								indicator: "orange",
-							});
-							frappe.validated = false
-						}
-					}
-				})
-				frappe.call({
-					"method": "tag_workflow.utils.doctype_method.checkingjobsite",
-					"args": {"job_site": frm.doc.job_site,
-		
-							},
-					"async": 0,
-					"callback": function(r){
-						frm.set_value("job_site", r.message);
-						cur_frm.refresh_field("job_site");
-					}
-				});
-			}
-			else{
-				frappe.validated = false;
-				msgprint('<b>Please fill the mandatory field:</b><br>Site Name','Alert')
-			}
+			})
+			frappe.call({
+				"method": "tag_workflow.utils.doctype_method.checkingjobsite",
+				"args": {"job_site": frm.doc.job_site,
+	
+						},
+				"async": 0,
+				"callback": function(r){
+					frm.set_value("job_site", r.message);
+					cur_frm.refresh_field("job_site");
+				}
+			});
 		}
+		
 	},
 	job_site_contact: function(frm){
 		if(!frm.doc.job_site_contact){
@@ -177,9 +177,23 @@ frappe.ui.form.on('Job Site', {
                 'doc_name':frm.doc.name
             }
         })
-
-    }
-		
+		frappe.call({
+			'method': 'tag_workflow.utils.organization.initiate_background_job',
+			'args':{
+				'message': 'Job Site',
+				'job_site_name': frm.doc.name
+			}
+		});
+    }	,
+	state:function(frm){
+		update_site_name(frm)	
+	},
+	city:function(frm){
+		update_site_name(frm)		
+	},
+	zip:function(frm){
+		update_site_name(frm)
+	}
 });
 
 /*----------fields-----------*/
@@ -278,14 +292,41 @@ function siteMap() {
     }
 
     const map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 8,
+        zoom: 11,
         center: default_location,
         mapTypeControl: false,
     });
+	let marker = new google.maps.Marker({
+		map:map,
+		position:default_location,
+		draggable:true
+	})
+	// markerArray.push(marker)
 
-    const marker = new google.maps.Marker({
-        map,
-    });
+	map.addListener('click',(event)=>{
+		addMarker(event.latLng)
+	})
+	marker.addListener('dragend',(event)=>{
+		addMarker(event.latLng)
+	})
+
+	async function addMarker(latlong) {
+		marker.setMap(null)
+		marker.setPosition(latlong)
+		map.setCenter(latlong)
+		marker.setMap(map)
+		default_location.lat = latlong.lat()
+		default_location.lng = latlong.lng()
+		let geo = new google.maps.Geocoder()
+		geo.geocode({
+			"location":latlong
+		}).then((v)=>{
+			document.getElementById("autocomplete-address").value = v['results'][0]['formatted_address']
+			cur_frm.set_value("job_site",v['results'][0]['formatted_address']) 
+			make_addr(v['results'][0], "auto",componentForm);
+		})
+	}
+
     const geocoder = new google.maps.Geocoder();
     geocode({
         location: default_location
@@ -300,7 +341,10 @@ function siteMap() {
         autocomplete.addListener("place_changed", fillInAddress);
     }
 
-
+	if (!cur_frm.is_dirty() && cur_frm.doc.address && cur_frm.doc.search_on_maps==1)
+	{            
+		document.getElementById('autocomplete-address').value = cur_frm.doc.address;	   
+	}
     function fillInAddress() {
         place = autocomplete.getPlace();
         if (!place.formatted_address && place.name) {
@@ -381,6 +425,7 @@ function update_data(data) {
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "lat", data["lat"]);
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "lng", data["lng"]);
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
+	frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "suite_or_apartment_no", data.street_number);
 }
 function hide_fields(frm){
 	frm.set_df_property('city','hidden',frm.doc.city && frm.doc.enter_manually ==1 ?0:1);
@@ -439,4 +484,50 @@ function update_industry_rate(frm,cdt,cdn){
 		}
 	})
 }
+
+frappe.ui.form.on('Industry Types Job Titles',{
+	job_titles:(frm,cdt,cdn)=>{
+		const row = locals[cdt][cdn];
+		if (row.job_titles){
+			frappe.call({
+				method:"tag_workflow.tag_data.get_comp_code",
+				args:{title:row.job_titles,company:frm.doc.company},
+				callback:(r)=>{
+					if(r.message!="Error"){
+						row.comp_code = r.message[0].comp_code
+						frm.refresh_field('job_titles')
+					}
+				}
+			})
+		 
+		}
+	}
+})
+function update_site_name(frm){
+	if(frm.doc.zip && frm.doc.state && frm.doc.city && frm.doc.manually_enter==1){
+		let data = {
+			street_number: '',
+			route: '',
+			locality:frm.doc.city,
+			administrative_area_level_1: frm.doc.state,
+			postal_code: frm.doc.zip ? frm.doc.zip:0,
+		};
+		update_comp_address(frm,data)
+	}
 	
+}
+function update_comp_address(frm,data){
+	frappe.call({
+		method:'tag_workflow.tag_data.update_complete_address',
+		args:{
+			data:data
+		},
+		callback:function(r){
+			if(r.message){
+				frm.set_value('job_site_name',r.message)
+				frm.set_value('job_site',r.message)
+				frm.set_value('address',r.message)
+			}
+		}
+	})
+}

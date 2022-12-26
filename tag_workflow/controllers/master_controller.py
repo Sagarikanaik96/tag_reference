@@ -221,7 +221,12 @@ def multi_company_setup(user, company):
     for com in company:
         check_employee(user.name, user.first_name, com, user.last_name, user.gender, user.birth_date, user.date_of_joining, user.organization_type)
 
-
+@frappe.whitelist()
+def user_company_setup(user,company_name):
+    user = frappe.get_doc(USR, user)
+    user.append("assign_multiple_company",{"assign_multiple_company":company_name})
+    user.save(ignore_permissions=True)
+    
 @frappe.whitelist()
 def addjob_order(current_user,company):
     try:

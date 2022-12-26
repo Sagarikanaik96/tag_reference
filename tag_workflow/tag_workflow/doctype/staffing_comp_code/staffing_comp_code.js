@@ -64,38 +64,17 @@ frappe.ui.form.on('Staffing Comp Code', {
 			check_previous_staffing_data(frm)
 		}
 	},
-	staffing_company:function(frm){
-		fields_data(frm)
-	},
 	job_title:function(frm){
 		if(frm.doc.job_title && frm.doc.industry_type){
 			check_previous_staffing_data(frm)
 		}
 	},
 	before_save:function(frm,cdt,cdn){
+		check_previous_staffing_data(frm)
 		check_all_values_add(frm)
 		check_same_state(frm,cdt,cdn)
 	}
 });
-function fields_data(frm){
-	if(frm.doc.job_industry && frm.doc.staffing_company){
-		fields_setup(frm);
-	}
-}
-function fields_setup(frm){
-	let text='\n'
-	frappe.call({
-		method:'tag_workflow.tag_workflow.doctype.staffing_comp_code.staffing_comp_code.get_title_industry_list',
-		args:{'industry_type':frm.doc.job_industry,'company':cur_frm.doc.staffing_company},
-		"async": 0,
-		"callback": function(r){
-			if(r.message){
-				text += r.message
-			}
-		}
-	});
-	cur_frm.set_df_property('job_title', "options",text)
-}
 function check_previous_staffing_data(frm){
 	frappe.call({
 		method:'tag_workflow.tag_workflow.doctype.staffing_comp_code.staffing_comp_code.check_previous_used_job_titles',

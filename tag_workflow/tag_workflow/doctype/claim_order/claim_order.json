@@ -129,20 +129,21 @@
    "depends_on": "eval:frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring' && frappe.boot.tag.tag_user_info.company_type!='Hiring'",
    "fieldname": "staff_class_code",
    "fieldtype": "Data",
-   "label": "Class Code",
+   "label": "Workers' Comp Code",
    "non_negative": 1,
    "precision": "2"
   },
   {
    "depends_on": "eval:frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring' && frappe.boot.tag.tag_user_info.company_type!='Hiring'",
    "fieldname": "staff_class_code_rate",
-   "fieldtype": "Currency",
-   "label": "Rate"
+   "fieldtype": "Float",
+   "label": "Rate",
+   "precision": "5"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-06 08:53:39.328518",
+ "modified": "2022-12-11 23:15:27.914718",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Claim Order",

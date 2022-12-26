@@ -1,11 +1,12 @@
 import frappe
+from frappe import _
 
 EMP = 'Employee'
 @frappe.whitelist()
 def delete_items():
 	"""delete selected items"""
 	import json
-
+	
 	items = sorted(json.loads(frappe.form_dict.get('items')), reverse=True)
 	doctype = frappe.form_dict.get('doctype')
 

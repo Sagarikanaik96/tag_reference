@@ -96,5 +96,19 @@
   "parentfield": null,
   "parenttype": null,
   "total_fields": "8"
+ },
+ {
+  "disable_auto_refresh": 0,
+  "disable_count": 0,
+  "disable_sidebar_stats": 0,
+  "docstatus": 0,
+  "doctype": "List View Settings",
+  "fields": null,
+  "modified": "2022-12-13 04:33:04.726307",
+  "name": "Assign Employee",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "total_fields": "7"
  }
 ]

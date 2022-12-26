@@ -20,6 +20,7 @@
   "tag_status",
   "hiring_organization",
   "company",
+  "staffing_company_ratings",
   "job_location",
   "job_order_email",
   "resume_required",
@@ -261,19 +262,27 @@
    "depends_on": "eval:frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring' && frappe.boot.tag.tag_user_info.company_type!='Hiring'",
    "fieldname": "staff_class_code",
    "fieldtype": "Data",
-   "label": "Class Code"
+   "label": "Workers' Comp Code"
   },
   {
    "depends_on": "eval:frappe.boot.tag.tag_user_info.company_type!='Exclusive Hiring' && frappe.boot.tag.tag_user_info.company_type!='Hiring'",
    "fieldname": "staff_class_code_rate",
-   "fieldtype": "Currency",
-   "label": "Rate"
+   "fieldtype": "Float",
+   "label": "Rate",
+   "precision": "5"
+  },
+  {
+   "fieldname": "staffing_company_ratings",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Avg. Rating"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-07 08:10:52.701466",
+ "modified": "2022-12-15 02:24:16.427999",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Assign Employee",

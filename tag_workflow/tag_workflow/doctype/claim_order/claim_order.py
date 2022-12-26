@@ -233,14 +233,16 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 		if int(no_required) > int(no_assigned):
 			sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org)
 			share_list = frappe.db.sql(sql, as_list = True)
-			staffing_user_list = [user[0] for user in share_list]
 			assign_notification(share_list,hiring_user_list,doc_name,job_order)
 			subject = 'Job Order Notification'
 			msg=f'{staffing_org} placed partial claim on your work order: {job_order_data.select_job}. Please review.'
 			make_system_notification(hiring_user_list,msg,claimOrder,doc_name,subject)
 			link =  f'  href="{sitename}/app/claim-order/{doc_name}" '
 			joborder_email_template(subject,msg,hiring_user_list,link)
-			staff_email_sending_without_resume(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject)
+			sql2 = '''select email from `tabUser` where organization_type='staffing' and company != "{0}" and company in (select staffing_company from `tabStaffing Radius` where job_site="{1}" and radius != "None" and radius <= 25 and hiring_company="{2}")'''.format(staffing_org, job_order_data.job_site, job_order_data.company)
+			share_list2 = frappe.db.sql(sql2, as_list = True)
+			staffing_user_list = [user[0] for user in share_list2]
+			staff_email_sending_without_resume(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject,doc_name)
 			return 1
 		else:
 			if hiring_user_list:
@@ -256,14 +258,14 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 	except Exception as e:
 		frappe.log_error(e, "Partial Job order Failed ")
 
-def staff_email_sending_without_resume(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject):
-    query = '''select sum(approved_no_of_workers) from `tabClaim Order` where job_order = "{}" '''.format(job_order)
+def staff_email_sending_without_resume(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject,doc_name):
+    query = f'''select sum(approved_no_of_workers) from `tabClaim Order` where job_order = "{job_order}" and name<>"{doc_name}" '''
     rem_emp = frappe.db.sql(query)
     notification_func(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject, rem_emp)
 
 def notification_func(job_order, no_required, no_assigned, hiring_org, job_order_data, staffing_user_list, subject, rem_emp):
 	if rem_emp[0][0] and job_order_data.is_repeat:
-		count = int(no_required) - int(rem_emp[0][0])
+		count = int(no_required) - int(rem_emp[0][0]) - int(no_assigned)
 	else:
 		count = int(no_required)-int(no_assigned)
 	if count>0:
@@ -313,6 +315,12 @@ def set_pay_rate(hiring_company, job_title, job_site, staffing_company):
 		emp_pay_rate = frappe.db.exists(EPR, {"hiring_company": hiring_company,"job_title": job_title, "job_site": job_site, "staffing_company": staffing_company})
 		if emp_pay_rate:
 			return frappe.db.get_value(EPR, {"name": emp_pay_rate}, ['employee_pay_rate'])
+		else:
+			staffing_comp_pay_rate = "select employee_pay_rate from `tabPay Rates`  where  parent='{0}' and staffing_company='{1}'".format(job_title,staffing_company)
+			staffing_comp_pay_rates = frappe.db.sql(staffing_comp_pay_rate, as_dict=1)
+			if staffing_comp_pay_rates:
+				emp_pay_rate = staffing_comp_pay_rates[0]['employee_pay_rate']
+				return emp_pay_rate
 	except Exception as e:
 		frappe.log_error(e, 'Set Pay Rate Error')
 		print(e, frappe.get_traceback())
@@ -497,3 +505,10 @@ def check_staff_comp_code_existence(state,staff_class_code_rate,staff_class_code
 def adding_values(doc,staff_class_code,staff_class_code_rate,state):
     doc.append('class_codes',{'class_code':staff_class_code,'rate':staff_class_code_rate,'state':state})
     doc.save(ignore_permissions = True)	
+
+@frappe.whitelist()
+def fetch_notes(company,job_order):
+    try:
+        return frappe.db.sql(""" select notes from `tabClaim Order` where job_order="{0}" and staffing_organization="{1}" and notes!=""  limit 1 """.format(job_order,company),as_dict=1)
+    except Exception as e:
+        print(e)

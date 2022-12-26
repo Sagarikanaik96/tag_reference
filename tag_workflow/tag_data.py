@@ -20,6 +20,7 @@ NOASS = "No Access"
 exclusive_hiring = "Exclusive Hiring"
 non_exlusive='Non Exclusive'
 emp_onb = 'Employee Onboarding'
+emp_onb_temp = 'Employee Onboarding Template'
 site= frappe.utils.get_url().split('/')
 sitename=site[0]+'//'+site[2]
 response='Not Found'
@@ -31,7 +32,7 @@ def company_details(company_name=None):
         required_field=[]
         company_info = frappe.db.sql(sql, as_dict=1)
         if(len(comp_data.industry_type)==0):
-            required_field.append('Industry Type')
+            required_field.append('Industry')
         for i in company_info[0]:
             if company_info[0][i] is None or len(company_info[0][i])==0:
                 required_field.append(i)
@@ -127,9 +128,11 @@ def assign_employee_data(hiringorg, name):
 @frappe.whitelist(allow_guest=False)
 def update_job_order(user, company_type, sid, job_name, employee_filled, staffing_org, hiringorg, name):
     try:
+        if user != frappe.session.user:
+            frappe.throw('Invalid User')
         assign_employee_doc = frappe.get_doc(assignEmployees, name)
         if job_name and name and job_name!=assign_employee_doc.job_order:
-            frappe.throw('Parameters mismatch')
+            frappe.throw('Job Order does not belong to the Assign Employees')
         if(company_type == "Hiring" or company_type == exclusive_hiring and user == frappe.session.user):
             frappe.db.set_value(assignEmployees, name, "approve_employee_notification", 0)
             job = frappe.get_doc(jobOrder, job_name)
@@ -227,13 +230,15 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
         hiring_user_list = [user[0] for user in hiring_list]
 
         if int(no_of_worker_req) > len(emp_detail):
-            sql = '''select email from `tabUser` where organization_type='staffing' and company != "{}"'''.format(staffing_org)
+            sql = f'''select email from `tabUser` where organization_type='Staffing' and company != "{staffing_org}"'''
             share_list = frappe.db.sql(sql, as_list = True)
-            staffing_user_list = [user[0] for user in share_list]
             assign_notification(share_list,hiring_user_list,doc_name,job_order) 
             subject = 'Job Order Notification' 
             msg=f'{staffing_org} placed partial claim on your work order: {job_title}. Please review & approve the candidates matched with this work order.'
             make_system_notification(hiring_user_list,msg,assignEmployees,doc_name,subject)
+            sql2 = f'''select email from `tabUser` where organization_type='Staffing' and company != "{staffing_org}" and company in (select staffing_company from `tabStaffing Radius` where job_site="{job_order.job_site}" and radius != "None" and radius <= 25 and hiring_company="{job_order.company}")'''
+            share_list2 = frappe.db.sql(sql2, as_list = True)
+            staffing_user_list= [user[0] for user in share_list2]
             stff_email_with_resume_required(job_order, emp_detail, no_of_worker_req, hiring_org, staffing_user_list, subject)
             return send_email(subject,msg,hiring_user_list)
         else:
@@ -274,7 +279,6 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
     try:
         doc = frappe.get_doc(jobOrder,job_order)
         subject="New Work Order"
-
         sql = ''' select data from `tabVersion` where ref_doctype='Job Order' and docname='{}' '''.format(job_order)
         update_values=frappe.db.sql(sql, as_list=1)
         if(len(update_values)<2):
@@ -284,7 +288,7 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
                 enqueue(save_job_order_value,job_order=job_order,staff_company=staff_company, now=True)
                 staff_company=(staff_company.strip()).split(',')
                 for i in staff_company:
-                    user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL'''.format(i.strip()),as_list=1)
+                    user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL and user_id in (select name from `tabUser` where enabled="1") '''.format(i.strip()),as_list=1)
                     l = [l[0] for l in user_list]
                     for user in l:
                         add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
@@ -304,12 +308,15 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
             doc.company_type = non_exlusive
             doc.save(ignore_permissions = True)
 
-            sql = f''' select email from `tabUser` where organization_type='staffing' and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}") '''
+            sql = f''' select email from `tabUser` where organization_type='staffing'  and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}")'''
             user_list=frappe.db.sql(sql, as_list=1)
             l = [l[0] for l in user_list]
             for user in l:
                 add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
-            job_order_notification(job_order_title,hiring_org,job_order,subject,l)
+            sql2 = f''' select email from `tabUser` where organization_type='staffing' and enabled="1" and company not in (select staffing_company_name from `tabBlocked Staffing Company` where parent="{hiring_org}") and company in (select staffing_company from `tabStaffing Radius` where job_site="{doc.job_site}" and radius != "None" and radius <= 25 and hiring_company="{doc.company}")'''
+            staff_user_list=frappe.db.sql(sql2, as_list=1)
+            l2 = [l2[0] for l2 in staff_user_list]
+            job_order_notification(job_order_title,hiring_org,job_order,subject,l2)
         elif org_type[0][0]=="Exclusive Hiring":
             doc.company_type = 'Exclusive'
             doc.save(ignore_permissions = True)
@@ -317,7 +324,7 @@ def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title
             own_sql = ''' select owner from `tabCompany` where organization_type="Exclusive Hiring" and name="{}" '''.format(hiring_org)
             owner_info=frappe.db.sql(own_sql, as_list=1)
 
-            com_sql = ''' select company from `tabUser` where name='{}' '''.format(owner_info[0][0])
+            com_sql = ''' select company from `tabUser` where name='{0}' and enabled="1" '''.format(owner_info[0][0])
             company_info=frappe.db.sql(com_sql, as_list=1)
 
             usr_sql = ''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL '''.format(company_info[0][0])
@@ -348,7 +355,7 @@ def staff_org_details(company_details=None):
     company_info = frappe.db.sql(sql, as_dict=1)
     mandatory_field=[]
     if(len(comp_data.industry_type)==0):
-        mandatory_field.append('Industry Type')
+        mandatory_field.append('Industry')
     for i in company_info[0]:
         if company_info[0][i] is None or len(company_info[0][i])==0:
             mandatory_field.append(i)
@@ -636,7 +643,7 @@ def joborder_resume(name):
     return frappe.db.sql(sql,as_dict=1)
 
 @frappe.whitelist(allow_guest=False)
-def approved_employee(id,name,job_order, assign_note):
+def approved_employee(id,name,job_order, assign_note,company):
     sql1=""" UPDATE `tabAssign Employee Details` SET approved = 0 where parent="{0}" """.format(name)
     frappe.db.sql(sql1)
     c=(str(id)[1:-1])
@@ -653,6 +660,7 @@ def approved_employee(id,name,job_order, assign_note):
     assign_note = assign_note.replace('"', '""')
     sql=""" UPDATE `tabAssign Employee` SET notes = "{0}" where name = "{1}" """.format(assign_note,name)
     frappe.db.sql(sql)
+    frappe.db.sql(""" UPDATE `tabAssign Employee` SET notes ="{0}" where job_order="{1}" and company="{2}" """.format(assign_note,job_order,company))
     frappe.db.commit()
 
 
@@ -989,19 +997,22 @@ def user_company(doctype,txt,searchfield,page_len,start,filters):
 def send_email1(user, company_type, sid, name, doctype, recepients, subject=None, content=None, cc=None, bcc=None):
     site= frappe.utils.get_url().split('/')
     sitename=site[0]+'//'+site[2]
-    frappe.sendmail(recipients=recepients,cc=cc, bcc=bcc,subject=subject, reference_name=name, message=content, template="email_template_custom", args = dict(sitename=sitename,content=content,subject=subject))
-    
-    frappe.get_doc({
-		"doctype":"Communication",
-		"subject": subject,
-		"content": content,
-		"sender": user,
-		"recipients": recepients,
-		"cc": cc or None,
-		"bcc": bcc or None,
-		"reference_doctype": doctype,
-		"reference_name": name,
-	}).insert(ignore_permissions=True)
+    if user == frappe.session.user:
+        frappe.sendmail(recipients=recepients,cc=cc, bcc=bcc,subject=subject, reference_name=name, message=content, template="email_template_custom", args = dict(sitename=sitename,content=content,subject=subject))
+        
+        frappe.get_doc({
+            "doctype":"Communication",
+            "subject": subject,
+            "content": content,
+            "sender": user,
+            "recipients": recepients,
+            "cc": cc or None,
+            "bcc": bcc or None,
+            "reference_doctype": doctype,
+            "reference_name": name,
+        }).insert(ignore_permissions=True)
+    else:
+        frappe.throw('Insufficient Permission for User')
     
 @frappe.whitelist(allow_guest=False)
 def hide_decrypt_ssn(doctype, frm=None):
@@ -1130,18 +1141,15 @@ def get_industrytype_list_page(doctype, txt, searchfield, page_len, start, filte
 
 @frappe.whitelist()
 def my_used_job_title(company_name,company_type):
+    z = []
     if company_type=='Hiring' or company_type=='Exclusive Hiring':
         l=frappe.db.sql('select job_titles from `tabJob Titles` where parent="{0}"'.format(company_name),as_list=1)
-        z=[]
         for i in l:
             z.append(i[0])
     elif company_type=='Staffing':
-        exc_company=frappe.db.sql('select name from `tabCompany` where parent_staffing="{0}" '.format(company_name),as_list=1)
-        z=[]
-        for i in exc_company:
-            l=frappe.db.sql('select job_titles from `tabJob Titles` where parent="{0}"'.format(i[0]),as_list=1)
-            for i in l:
-                z.append(i[0])
+        exc_company=frappe.db.sql('select job_title,job_site,staffing_company,hiring_company from `tabEmployee Pay Rate` where owner="{0}" '.format(frappe.session.user),as_list=1)
+        for i  in exc_company:
+            z.append(i[0])
     else:
         return 'TAG'
     return list(set(z))
@@ -1189,7 +1197,7 @@ def job_site_add(doc,method):
             })
             new_site.save(ignore_permissions=True)
     except Exception as e:
-       frappe.error_log(e,'Job Site Add Error')
+       frappe.log_error(e,'Job Site Add Error')
 
 @frappe.whitelist()
 def job_title_add(doc,method):
@@ -1584,13 +1592,15 @@ def check_employee(onb_email):
 @frappe.whitelist()
 def validate_employee_creation(emp_onb_name):
     emp_onb_details = frappe.get_doc(emp_onb, emp_onb_name)
-    if emp_onb_details.status != "Completed":
+    tasks = frappe.db.get_all('Task', {'project': emp_onb_details.project, 'status': ['!=', 'Completed']}, ['name','subject'])
+    tasks_list = [task['subject'].split(':')[0] for task in tasks]
+    task_ids = [task['name'] for task in tasks]
+    if len(tasks_list)>0:
+        return tasks_list, task_ids
+    elif emp_onb_details.status != "Completed":
         return False
-    for activity in emp_onb_details.activities:
-        task_status = frappe.db.get_value("Task", activity.task, "status")
-        if task_status != "Completed":
-            return False
-    return True
+    else:
+        return True
 
 @frappe.whitelist()
 def make_employee(source_name, target_doc=None):
@@ -1651,7 +1661,7 @@ def get_jobtitle_based_on_industry(doctype, txt, searchfield, page_len, start, f
                 value = value+"'"+","+"'"+i
             else:
                 value =value+i
-        sql = ''' select name,industry from `tabItem` where company = '{0}' and industry="{1}" and (name NOT IN ('{2}') and name like '%%{3}%%')'''.format(company, industry,value,'%s' % txt)
+        sql = ''' select name,industry,company from `tabItem` where company in ('{0}','') and industry="{1}" and (name NOT IN ('{2}') and name like '%%{3}%%')'''.format(company, industry,value,'%s' % txt)
         return frappe.db.sql(sql)
 
     except Exception as e:
@@ -1669,7 +1679,7 @@ def get_jobtitle_based_on_company(doctype, txt, searchfield, page_len, start, fi
                 value = value+"'"+","+"'"+i
             else:
                 value =value+i
-        sql = ''' select name,industry from `tabItem` where  company ="{0}" and (name NOT IN ('{1}') and name like '%%{2}%%') '''.format(company,value,'%s' % txt)
+        sql = ''' select name,industry,company from `tabItem` where  company in("{0}",'') and (name NOT IN ('{1}') and name like '%%{2}%%') '''.format(company,value,'%s' % txt)
         return frappe.db.sql(sql)
 
     except Exception as e:
@@ -1723,3 +1733,99 @@ def branch_key(branch_key=None):
             return "Failed"
     except Exception as e:
         frappe.log_error('Branch API Call Error', e)
+
+
+#-------------------checking employees mendatory fields--------------------------------#
+@frappe.whitelist()
+def check_mandatory_field(emp_id,check,emp_name):
+    try:
+        msg = ""
+        emp_name = emp_name.title()
+        data = frappe.db.sql("""select first_name,last_name,email,company,status,date_of_birth from `tabEmployee` where name = '{0}'""".format(emp_id),as_dict=1)
+        emp_fields = []
+        for field in data[0]:
+            print(field)
+            if data[0][field] == None:
+                display_field_name = field.replace("_"," ")
+                msg +="<span>&#8226;</span> "+display_field_name.title()+"<br>"
+                emp_fields.append(field)
+        
+        if len(msg) == 0:
+            return "success"
+        elif check == 1:
+            return emp_fields
+        elif check == 2:
+            return[msg,emp_name,1]
+        else:
+            return [msg,emp_name]
+
+    except Exception as e:
+        print(e)
+
+@frappe.whitelist()
+def get_comp_code(title,company):
+    try:
+        return frappe.db.sql("""select comp_code from `tabJob Titles` where parent="{0}"  and job_titles="{1}" and parenttype="Company" """.format(company,title),as_dict=1)
+    except Exception as e:
+        print (e)
+        return "Error"
+
+@frappe.whitelist()
+def get_template_name(company):
+    try:
+        template_list = []
+        templates = frappe.get_all(emp_onb_temp, {'company': company}, ['name','template_name'])
+        template_list = [temp['template_name'] if temp['template_name'] else temp['name'] for temp in templates]
+        default_temp = frappe.db.get_value(emp_onb_temp, {'company': company, 'default_template': 1}, ['template_name'])
+        return '\n'.join(template_list), default_temp
+    except Exception as e:
+        frappe.log_error(e, 'get_template_name error')
+
+import ast
+
+@frappe.whitelist()
+def set_status_complete(docname, tasks_list):
+    try:
+        tasks_list=ast.literal_eval(tasks_list)
+        emp_onb_data = frappe.get_doc(emp_onb, docname)
+        completed_date = str(getdate())
+        frappe.db.set_value('Project', emp_onb_data.project, 'status', 'Completed')
+        frappe.db.set_value('Project', emp_onb_data.project, 'percent_complete', '100')
+        frappe.db.set_value(emp_onb, docname, 'status', 'Completed')
+        if len(tasks_list)>0:
+            update_activity_table(tasks_list, docname, completed_date)
+            if len(tasks_list)==1:
+                sql = f'''UPDATE `tabTask` SET status="Completed", completed_on="{completed_date}" where name in ("{tasks_list[0]}")'''
+            else:
+                sql = f'''UPDATE `tabTask` SET status="Completed", completed_on="{completed_date}" where name in {tuple(tasks_list)}'''
+            frappe.db.sql(sql)
+            frappe.db.commit()
+    except Exception as e:
+        frappe.log_error(e, 'set_status_complete error')
+
+@frappe.whitelist()
+def update_activity_table(tasks_list, docname, completed_date):
+    try:
+        if len(tasks_list)==1:
+            sql=f'''UPDATE `tabEmployee Boarding Activity` SET status="Completed", completed_on="{completed_date}" where task in ("{tasks_list[0]}") and parent = "{docname}"'''
+        else:
+            sql=f'''UPDATE `tabEmployee Boarding Activity` SET status="Completed", completed_on="{completed_date}" where task in {tuple(tasks_list)} and parent = "{docname}"'''
+        frappe.db.sql(sql)
+        frappe.db.commit()
+    except Exception as e:
+        frappe.log_error(e, 'update_activity_table error')
+
+@frappe.whitelist()
+def get_ats_and_payroll_status():
+    try:
+        user = frappe.get_doc('User',frappe.session.user)
+        if user.organization_type =="Staffing":
+           return  frappe.db.sql(""" 
+            select count(*)-(count(*)-sum(enable_ats)) as ats,count(*)-(count(*)-sum(enable_payroll)) as payroll
+            from `tabCompany` 
+            where name in
+            (select assign_multiple_company from `tabCompanies Assigned` 
+            where parenttype="User" and  parent ="{0}")
+            and make_organization_inactive="0" """.format(user.name),as_dict=1)
+    except Exception as e:
+        print(e)

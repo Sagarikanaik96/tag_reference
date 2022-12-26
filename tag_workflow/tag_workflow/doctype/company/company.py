@@ -9,6 +9,7 @@ from frappe import enqueue
 from frappe.utils.nestedset import NestedSet
 create_default_accounts=Company.create_default_accounts
 from datetime import datetime
+import ast
 class CustomCompany(Company):
 	def on_update(self):
 		NestedSet.on_update(self)
@@ -51,9 +52,24 @@ class CustomCompany(Company):
 
 @frappe.whitelist()
 def check_ratings(company_name):
-	sql = ''' select COUNT(*) from `tabHiring Company Review` where hiring_company='{}' '''.format(company_name)
+	sql = """select COUNT(*) from `tabHiring Company Review` where hiring_company="{}" """.format(company_name)
 	row_count = frappe.db.sql(sql)
 	return row_count[0][0]>0
+
+@frappe.whitelist()
+def check_staffing_reviews(company_name):
+	count_sql = """select COUNT(*) from `tabCompany Review` where staffing_company="{}" """.format(company_name)
+	sql_row_count = frappe.db.sql(count_sql)
+
+	sql = """ select COUNT(*),average_rating from `tabCompany` where company_name="{}" """.format(company_name)
+	print(sql,"*"*200)
+	row_count = frappe.db.sql(sql)
+	print(row_count)
+	avg_rate = 0
+	if sql_row_count[0][0]>=10:
+		avg_rate = str(int(row_count[0][1]))
+
+	return avg_rate
 
 
 @frappe.whitelist()
@@ -87,9 +103,29 @@ def create_salary_structure(doc,method):
 				doc_sal_struct.salary_component = comp_name +doc.company_name
 				doc_sal_struct.insert()
 
-				
+@frappe.whitelist()	
+def create_certificate_records(company,cert_list):
+	cert_list = ast.literal_eval(cert_list)
+	sql = '''delete from `tabCertificate and Endorsement Details` where company = "{0}"'''.format(company)
+	print(cert_list,type(cert_list))
+	frappe.db.sql(sql)
+	for certificate in cert_list:
+		doc_certificate = frappe.new_doc('Certificate and Endorsement Details')
+		doc_certificate.company = certificate["company"]
+		doc_certificate.certificate_type = certificate["cert_type"]
+		doc_certificate.attached_certificate = certificate["link"]
+		doc_certificate.sequence = certificate["sequence"]
+		doc_certificate.save(ignore_permissions = True)
 
 
+@frappe.whitelist()
+def get_previous_certificate(company):
+	records = frappe.db.sql('''select company,certificate_type,attached_certificate,sequence from `tabCertificate and Endorsement Details` where company = "{0}" order by sequence'''.format(company),as_list=True)
+	print(records)
+	return records
 
-
-
+@frappe.whitelist()
+def get_certificate_type(cert_attribute):
+	sql = '''select name from `tabCertificate and Endorsement` where name like "{}%"''' .format(cert_attribute)
+	cert_name = frappe.db.sql(sql)
+	return cert_name

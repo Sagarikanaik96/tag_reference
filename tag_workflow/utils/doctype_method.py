@@ -8,6 +8,11 @@ from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
 from frappe.utils.global_search import update_global_search
 from frappe.utils.password import update_password as _update_password
 from hrms.hr.utils import validate_active_employee
+from frappe.permissions import (
+	add_user_permission,
+	has_permission,
+	set_user_permission_if_allowed,
+)
 # user method update
 STANDARD_USERS = ("Guest", "Administrator")
 Abbr = "Abbreviation is mandatory"
@@ -245,8 +250,8 @@ def check_islatest(self):
     modified = frappe.db.sql("""select value from tabSingles where doctype=%s and field='modified' for update""", self.doctype)
     modified = modified and modified[0][0]
     if modified and modified != cstr(self._original_modified):
-        return True
-    return False
+        return True, modified
+    return False, modified
 
 def check_ismodify(self):
     tmp = frappe.db.sql("""select modified, docstatus from `tab{0}` where name = %s for update""".format(self.doctype), self.name, as_dict=True)
@@ -257,8 +262,8 @@ def check_ismodify(self):
 
     modified = cstr(tmp.modified)
     if modified and modified != cstr(self._original_modified):
-        return True, tmp
-    return False, tmp
+        return True, tmp, modified
+    return False, tmp, modified
 
 def check_if_latest(self):
 		"""Checks if `modified` timestamp provided by document being updated is same as the
@@ -290,7 +295,6 @@ def check_if_latest(self):
 		if not self.meta.issingle:
 			self.check_docstatus_transition(previous.docstatus)
 #-----------------------------------------------------#
-
 @frappe.whitelist()
 def checkingjobsite(job_site):
     job_site = job_site.strip()
@@ -320,6 +324,52 @@ def checkingjobtitle_name(job_titless):
     if frappe.db.sql(sql):
         return append_number_if_name_exists("Item", job_titless, fieldname="job_titless", separator="-", filters=None)
     return job_titless
+
+@frappe.whitelist()
+def get_staffing_company_data():
+    company_type = "Staffing"
+    get_user = frappe.db.sql ("select role_profile_name from `tabUser` where name='{0}'".format(frappe.session.user),as_dict=1)
+    if get_user[0]['role_profile_name'] == "Staffing Admin":
+        sql = frappe.db.sql("select company_name from `tabCompany` where modified_by = '{0}' and organization_type='{1}'".format(frappe.session.user,company_type))
+        if len(sql) == 1:
+            data = list(sql)
+            return  data
+        else:
+            blankdata=tuple(' ',)
+            data = list(sql)
+            data.insert(0,blankdata)
+            return  data
+    else:
+        sql = frappe.db.sql("select company_name from `tabCompany` where organization_type = '{0}'".format(company_type))
+        blankdata=tuple(' ',)
+        data = list(sql)
+        data.insert(0,blankdata)
+        return  data
+
+
+@frappe.whitelist()
+def get_hiring_company_data():
+    company_type = "Hiring"
+    get_user = frappe.db.sql ("select role_profile_name from `tabUser` where name='{0}'".format(frappe.session.user),as_dict=1)
+    if get_user[0]['role_profile_name'] == "Staffing Admin":
+        sql = frappe.db.sql("select company_name from `tabCompany` where organization_type = '{0}' and modified_by='{1}'".format(company_type,frappe.session.user))
+        blankdata=tuple(' ',)
+        data = list(sql)
+        data.insert(0,blankdata)
+        return  data
+    else:
+        sql = frappe.db.sql("select company_name from `tabCompany` where organization_type = '{0}'".format(company_type))
+        blankdata=tuple(' ',)
+        data = list(sql)
+        data.insert(0,blankdata)
+        return  data
+
+@frappe.whitelist()
+def check_payrates_data(job_industry , job_title):
+    sql = frappe.db.sql("select job_title from `tabJob Order` where select_job = '{0}' and category='{1}'".format(job_title,job_industry))
+    if sql:
+        return True
+    return False  
 
 @frappe.whitelist()
 def send_password_notification(self, new_password):
@@ -386,6 +436,7 @@ def set_time_sheet(self):
             })
 
 def salary_slip_validate(self):
+    self.currency = frappe.db.get_value('Global Defaults','Global Defaults',"default_currency")
     self.status = self.get_status()
     validate_active_employee(self.employee)
     self.validate_dates()
@@ -413,3 +464,20 @@ def salary_slip_validate(self):
         if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
             frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
                             format(max_working_hours), alert=True)
+
+def update_user_permissions(self):
+    try:
+        if not self.create_user_permission: return
+        if not has_permission('User Permission', ptype='write', raise_exception=False): return
+        employee_user_permission_exists = frappe.db.exists('User Permission', {
+            'allow': 'Employee',
+            'for_value': self.name,
+            'user': self.user_id
+		})
+        if employee_user_permission_exists: return
+        user_type= frappe.db.get_value('User',{'name':self.user_id},'tag_user_type') or None
+        if not user_type:
+            add_user_permission("Employee", self.name, self.user_id)
+            set_user_permission_if_allowed("Company", self.company, self.user_id)
+    except Exception as e:
+        frappe.log_error(e,'update_permission_error')

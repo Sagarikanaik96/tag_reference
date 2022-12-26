@@ -146,13 +146,13 @@ frappe.ui.Page = Class.extend({
 				<div class="page-form row" id="hiring_filter">
 					<div class="filter-selector">
 						<button class="btn btn-default btn-sm filter-button" onclick="hiring_click('Ongoing');">
-							<span class="button-label hidden-xs">Ongoing Order<span></span></span>
+							<span class="button-label hidden-xs">Ongoing Orders<span></span></span>
 						</button>
 						<button class="btn btn-default btn-sm filter-button" onclick="hiring_click('Upcoming');">
-							<span class="button-label hidden-xs">Upcoming Order<span></span></span>
+							<span class="button-label hidden-xs">Upcoming Orders<span></span></span>
 						</button>
 						<button class="btn btn-default btn-sm filter-button" onclick="hiring_click('Completed');">
-							<span class="button-label hidden-xs">Completed Order<span></span></span>
+							<span class="button-label hidden-xs">Completed Orders<span></span></span>
 						</button>
 						<button class="btn btn-default btn-sm filter-button active" onclick="hiring_click('All');">
 							<span class="button-label hidden-xs">All Orders<span></span></span>
@@ -186,16 +186,16 @@ frappe.ui.Page = Class.extend({
 					<div class="page-form row" id="staffing__filter">
 							<div class="filter-selector">
 									<button class="btn btn-default btn-sm filter-button" id='staff_filter_button1' title="Available to claim" value='Available Order'>
-											<span class="button-label hidden-xs">Available Order<span></span></span>
+											<span class="button-label hidden-xs">Available Orders<span></span></span>
 									</button>
 									<button class="btn btn-default btn-sm filter-button" id='staff_filter_button2'  title="Claimed & in progress" value='Ongoing Order'>
-											<span class="button-label hidden-xs">Ongoing Order<span></span></span>
+											<span class="button-label hidden-xs">Ongoing Orders<span></span></span>
 									</button>
 									<button class="btn btn-default btn-sm filter-button" id='staff_filter_button3' title="Claimed and upcoming" value='Upcoming Order'>
-											<span class="button-label hidden-xs">Upcoming Order<span></span></span>
+											<span class="button-label hidden-xs">Upcoming Orders<span></span></span>
 									</button>
 									<button class="btn btn-default btn-sm filter-button" id='staff_filter_button4' title="Completed" value='Completed Order'>
-											<span class="button-label hidden-xs">Completed Order<span></span></span>
+											<span class="button-label hidden-xs">Completed Orders<span></span></span>
 									</button>
 									<button class="btn btn-default btn-sm filter-button active" id='staff_filter_button5' value='All Order'>
 											<span class="button-label hidden-xs">All Orders<span></span></span>

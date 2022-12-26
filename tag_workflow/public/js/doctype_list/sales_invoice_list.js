@@ -218,7 +218,7 @@ frappe.listview_settings["Sales Invoice"] = {
       $(".custom-actions.hidden-xs.hidden-md").show();
       $('[class="btn btn-primary btn-sm primary-action"]').show();
       $('[class="btn btn-default btn-sm ellipsis"]').show();
-      frappe.set_route("print", "Sales Invoice", doc.name);
+      frappe.set_route("print-invoice", "Sales Invoice", doc.name);
     },
   },
 };

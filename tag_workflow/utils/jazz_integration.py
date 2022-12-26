@@ -2,7 +2,9 @@ import frappe
 from frappe import _, msgprint, throw
 import json, requests, time
 from rq import Queue, Worker
+from rq.command import send_stop_job_command
 from frappe.utils.background_jobs import get_redis_conn
+from frappe.utils.doctor import purge_pending_jobs
 from frappe.utils import now_datetime
 from tag_workflow.utils.notification import make_system_notification
 SYS_SETTING = 'System Settings'
@@ -82,7 +84,7 @@ def jazzhr_applicant_data(api_key, company):
             end += JAZZHR_MAX_ITR
 
         #--------sql update---------------#
-        frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_make_sql", queue='long', job_name="JazzHR SQL", is_async=True, api_key=api_key, company=company)
+        frappe.enqueue("tag_workflow.utils.jazz_integration.jazzhr_make_sql", queue='long', job_name=company, is_async=True, api_key=api_key, company=company)
     except Exception as e:
         frappe.log_error(e, "JazzHR - start_log_queue")
         check_sent_notification(company,2)
@@ -480,15 +482,19 @@ def schedule_job():
 
 @frappe.whitelist()
 def enable_disable_job(enable):
+    conn = get_redis_conn()
+    workers = Worker.all(conn)
     sql  ="""select name from `tabCompany` where jazzhr_api_key is not null and organization_type='Staffing' and make_organization_inactive='0'"""
     try:
         if int(enable)==0:
             frappe.db.set_value(SYS_SETTING,SYS_SETTING,'job_disable',1,update_modified=False)
-            result = frappe.db.sql(sql,as_dict=1)
-            if len(result)>0:
-                for c in result:
-                    terminate_job(c['name'])
-                    
+            data =frappe.db.sql(sql,as_dict=1)
+            purge_pending_jobs()
+            for c in data:
+                for worker in workers:
+                    job = worker.get_current_job()
+                    if job and job.kwargs.get('job_name') == c['name']:
+                        send_stop_job_command(conn,job.id)
         else:
             frappe.db.set_value(SYS_SETTING,SYS_SETTING,'job_disable',0,update_modified=False)
         frappe.publish_realtime(event='sync_doc',doctype= SYS_SETTING, docname = SYS_SETTING)
@@ -503,3 +509,4 @@ def check_status():
         return frappe.db.get_value(SYS_SETTING,SYS_SETTING,'job_disable')
     except Exception as e:
         print(e)
+

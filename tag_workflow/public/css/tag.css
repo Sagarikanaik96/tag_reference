@@ -1496,6 +1496,9 @@ select.input-with-feedback.form-control.ellipsis {
   height: 100px;
   display: inherit;
 }
+.Accreditations-btn {
+  background: #f5e8c8; border-radius: 10px;border:none; padding: 2px 11px; margin-right: 3px;
+}
 [data-page-route="List/Job Order/List"]
   .order-list-hiring
   header
@@ -1526,157 +1529,6 @@ select.input-with-feedback.form-control.ellipsis {
   .level-left
   .list-row-col:nth-child(5) {
   margin-left: 20px;
-}
-
-/*------ Media query start ----*/
-@media (max-width: 1300px) {
-  .col.layout-main-section-wrapper,
-  .col-md-12.layout-main-section-wrapper {
-    left: 10rem;
-    max-width: 80%;
-  }
-  #page-Workspaces .page-title .title-area .title-text {
-    margin-left: 152px;
-  }
-}
-
-@media (max-width: 768px) {
-  [data-page-route="List/Sales Invoice/List"]
-    .frappe-card
-    .frappe-list
-    .list-subject {
-    flex-basis: 60px;
-  }
-  [data-page-route="Employee"]
-    .editable-form
-    .layout-main-section-wrapper
-    .layout-main-section {
-    margin-top: 40px;
-  }
-  [data-page-route="Employee"] .page-head .page-head-content div:nth-child(2) {
-    flex-wrap: wrap;
-    margin: 15px 0px;
-    display: contents;
-    background: #fff;
-  }
-  [data-page-route="Employee"]
-    .layout-main-section-wrapper
-    .layout-main-section {
-    margin-top: 15px !important;
-  }
-  [data-page-route="Employee"] .page-head-content {
-    display: inline-block;
-  }
-  [data-page-route="Employee"] .container {
-    padding-bottom: 10px;
-  }
-  .navbar-light .navbar-nav .nav-item .btn-login-area {
-    text-align: right;
-    margin-right: 7px;
-  }
-  #order {
-    padding: 0;
-  }
-  [data-route="Form/Add Timesheet/Add Timesheet"]
-    .layout-main-section-wrapper
-    .layout-main-section
-    .form-message
-    div {
-    display: table;
-  }
-  [data-fieldname="update_employee_records"] button {
-    margin-top: 0;
-  }
-  #page-User .layout-main-section-wrapper .layout-main-section,
-  #page-Company .layout-main-section-wrapper .layout-main-section,
-  #page-Lead .layout-main-section-wrapper .layout-main-section,
-  #page-Timesheet .layout-main-section-wrapper .layout-main-section,
-  #page-dashboard-view .dashboard .dashboard-graph {
-    width: 100%;
-    margin-left: 0;
-  }
-  .col.layout-main-section-wrapper,
-  .col-md-12.layout-main-section-wrapper {
-    left: 1rem;
-    max-width: 100%;
-    width: 100%;
-    padding: 0;
-  }
-  #page-Workspaces .page-title .title-area .title-text {
-    margin-left: 0px;
-  }
-  .page-title .title-area .indicator-pill {
-    margin: 5px 0 0 20px;
-  }
-  .modal .modal-body {
-    margin-left: 15px;
-  }
-  .new-timeline {
-    padding-left: 10px;
-  }
-  .page-title .title-area .title-text {
-    padding-left: 20px;
-    padding-top: 20px;
-    font-weight: 500;
-    font-size: 18px;
-    color: #4e4e4e;
-  }
-  [data-fieldtype="Table"] .form-grid {
-    overflow: auto;
-  }
-  [data-fieldtype="Table"] .form-grid .grid-heading-row,
-  [data-fieldtype="Table"] .form-grid .grid-body .grid-row {
-    width: 700px;
-  }
-  [data-fieldtype="Table"]
-    .form-grid
-    .grid-body
-    .grid-row.grid-row-open
-    .form-in-grid {
-    width: 100% !important;
-    position: absolute;
-    top: 5%;
-  }
-  #page-staff_company_list table {
-    font-size: 13px !important;
-  }
-  .hiring-home .tittle h3 {
-    font-size: 25px;
-    margin-top: 20px;
-  }
-  #terms-and-conditions {
-    padding: 0 20px !important;
-  }
-  [data-route="Workspaces/My Activities"] #page-Workspaces .page-head {
-    display: block;
-  }
-  [data-route="Workspaces/My Activities"] .page-head {
-    height: 30px !important;
-  }
-  [data-route="Workspaces/My Activities"] .page-head.drop-shadow {
-    height: 60px !important;
-  }
-  .hiring-home .search-area {
-    max-width: 350px;
-    padding-left: 10px;
-  }
-  .hiring-home .search_icon {
-    display: none;
-  }
-  [data-fieldname="get_data_from_jazzhr"] button {
-    margin-top: 0px;
-  }
-  [data-page-route="List/Sales Invoice/List"] .frappe-list .result {
-    overflow: auto;
-    min-height: auto;
-  }
-  [data-page-route="List/Sales Invoice/List"] .frappe-list .result header,
-  [data-page-route="List/Sales Invoice/List"]
-    .frappe-list
-    .result
-    .list-row-container {
-    width: 800px;
-  }
 }
 [data-fieldname="location"] table thead th {
   font-weight: 500;
@@ -1754,10 +1606,9 @@ select.input-with-feedback.form-control.ellipsis {
   position:absolute;
   bottom:10px;
   left:20px;
-  background-color:black;
-  color:white;
-  padding:5px 15px;
-  border:black !important;
+  box-shadow: 0px 3px #888;
+    padding: 5px 15px;
+    border: white !important;
   border-radius:6px !important;
 }
 #more_info{
@@ -1779,20 +1630,6 @@ select.input-with-feedback.form-control.ellipsis {
 .frappe-control.input-max-width[data-fieldname="military_veteran"]{
   top:12px;
 }
-
-@media (min-width: 768px) {
-  .layout-main .form-column.col-sm-12 > form > .input-max-width {
-    max-width: 100%;
-    padding-right: 0px;
-  }
-}
-
-@media (min-width: 570px) and (max-width: 768px) {
-  .dropdown-notifications .notifications-list {
-    right: -230px;
-  }
-}
-
 .text-extra-muted.comment-count {
   display: none !important;
 }
@@ -1832,24 +1669,33 @@ span.comment-count {
   z-index: 99;
   left: 20rem;
 }
-[data-page-route="Claim Order"] #staff_pay_rate:after {
-  position: absolute;
-  left: 10px;
-  top: 56%;
+#page-query-report .datatable .dt-scrollable {
+  max-height:420px !important
+}
+.pac-container{
+  z-index: 9999999;
+}
+.certificate-btn {
+  background: #f5e8c8;
+    border-radius: 10px;
+    margin-right: 3px;
+}
+.like-icon{
+  display: none;
+}
+[data-page-route="staff_company_list"] .like-icon{
+  display: block;
+}
+.staff-certificate-btn {
+  background: #f5e8c8;
+  border-radius: 15px;
+  margin-right: 3px;
   font-size: 13px;
-  content: "$";
 }
-[data-page-route="Claim Order"] input#staff_pay_rate {
-  padding-left: 20px;
+[data-page-route="User"] .row-index.sortable-handle.col.col-xs-1,
+.col.grid-static-col.col-xs-1.d-flex.justify-content-center {
+  pointer-events: none;
 }
-
-[data-page-route="Assign Employee"] #staff_pay_rate:after {
-  position: absolute;
-  left: 10px;
-  top: 56%;
-  font-size: 13px;
-  content: "$";
-}
-[data-page-route="Assign Employee"] input#staff_pay_rate {
-  padding-left: 20px;
+[data-page-route="User"] [title="assign_multiple_company"]>div>div>div>div>div>a{
+  display: none;
 }

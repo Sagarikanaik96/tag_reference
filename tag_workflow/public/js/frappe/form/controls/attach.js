@@ -22,7 +22,6 @@ frappe.ui.form.ControlAttach = frappe.ui.form.ControlData.extend({
 		this.input = this.$input.get(0);
 		this.set_input_attributes();
 		this.has_input = true;
-
 		frappe.utils.bind_actions_with_object(this.$value, this);
 		this.toggle_reload_button();
 	},

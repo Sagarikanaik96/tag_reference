@@ -290,3 +290,95 @@ function branch_banner(doctype){
 		});
 	}
 }
+frappe.views.QueryReport.prototype.get_menu_items = function() {
+	let items = [
+		{
+			label: __('Refresh'),
+			action: () => this.refresh(),
+			class: 'visible-xs'
+		},
+		{
+			label: __('Print'),
+			action: () => {
+				let dialog = frappe.ui.get_print_settings(
+					false,
+					print_settings => this.print_report(print_settings),
+					this.report_doc.letter_head,
+					this.get_visible_columns()
+				);
+				this.add_portrait_warning(dialog);
+			},
+			condition: () => frappe.model.can_print(this.report_doc.ref_doctype),
+			standard: true
+		},
+		{
+			label: __('PDF'),
+			action: () => {
+				let dialog = frappe.ui.get_print_settings(
+					false,
+					print_settings => this.pdf_report(print_settings),
+					this.report_doc.letter_head,
+					this.get_visible_columns()
+				);
+
+				this.add_portrait_warning(dialog);
+			},
+			condition: () => frappe.model.can_print(this.report_doc.ref_doctype),
+			standard: true
+		},
+		{
+			label: __('Export'),
+			action: () => this.export_report(),
+			condition: () => frappe.model.can_export(this.report_doc.ref_doctype),
+			standard: true
+		},
+		{
+			label: __('User Permissions'),
+			action: () => frappe.set_route('List', 'User Permission', {
+				doctype: 'Report',
+				name: this.report_name
+			}),
+			condition: () => frappe.model.can_set_user_permissions('Report'),
+			standard: true
+		}
+	];
+
+	if (frappe.user.is_report_manager()) {
+		items.push({
+			label: __('Save'),
+			action: () => {
+				let d = new frappe.ui.Dialog({
+					title: __('Save Report'),
+					fields: [
+						{
+							fieldtype: 'Data',
+							fieldname: 'report_name',
+							label: __("Report Name"),
+							default: this.report_doc.is_standard == 'No' ? this.report_name : "",
+							reqd: true
+						}
+					],
+					primary_action: (values) => {
+						frappe.call({
+							method: "frappe.desk.query_report.save_report",
+							args: {
+								reference_report: this.report_name,
+								report_name: values.report_name,
+								columns: this.get_visible_columns()
+							},
+							callback: function(r) {
+								this.show_save = false;
+								d.hide();
+								frappe.set_route('query-report', r.message);
+							}
+						});
+					}
+				});
+				d.show();
+			},
+			standard: true
+		})
+	}
+
+	return items;
+}

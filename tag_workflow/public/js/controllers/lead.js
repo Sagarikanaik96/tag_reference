@@ -5,7 +5,7 @@ frappe.ui.form.on("Lead", {
     $('.custom-actions.hidden-xs.hidden-md').show();
     setTimeout(()=>{
       $('[data-label="Create"]').addClass("hide");
-    }, 100);
+    }, 3000);
     view_contract(frm);
 	  cur_frm.dashboard.hide();
     $('[data-original-title="Menu"]').hide()
@@ -211,7 +211,7 @@ frappe.ui.form.on("Lead", {
 function reqd_fields(frm) {
   let reqd = ["company_name", "email_id"];
   for (let r in reqd) {
-    cur_frm.set_df_property(reqd[r], "reqd", 1);
+    cur_frm.toggle_reqd(reqd[r], 1);
   }
 
   let roles = frappe.user_roles;

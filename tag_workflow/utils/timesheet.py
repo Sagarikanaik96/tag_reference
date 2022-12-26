@@ -8,6 +8,7 @@ from tag_workflow.utils.notification import sendmail, make_system_notification
 import json
 from frappe.utils import time_diff_in_seconds
 from frappe import enqueue
+import ast
 # global #
 JOB = "Job Order"
 assignEmployee="Assign Employee"
@@ -126,16 +127,12 @@ def check_if_employee_assign(items):
 @frappe.whitelist()
 def remove_job_title(emp_doc,job_order):
     try:
-        print("def"*500)
         sql = f'''select select_job from `tabJob Order` where name="{job_order}"'''
         data = frappe.db.sql(sql, as_list=1)
         job_title = data[0][0]
-        print(job_title,emp_doc,"bhg"*500)
         if len(emp_doc.employee_job_category)!=0:
-            print("ghi"*100)
             for i in emp_doc.employee_job_category:
                 if i.job_category==job_title:
-                    print("aba"*500)
                     emp_doc.remove(i)
                     emp_doc.save(ignore_permissions=True)
 
@@ -288,7 +285,7 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
         frappe.log_error(e, "Hiring Company Rating")
         frappe.throw(e)
 def staffing_company_rating(hiring_company,staffing_company,ratings,job_order):
-    ratings = json.loads(ratings)
+    ratings = ast.literal_eval(ratings)
     doc = frappe.new_doc('Company Review')
     doc.staffing_company=staffing_company
     doc.hiring_company=hiring_company
@@ -469,9 +466,7 @@ def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None
     try:
         timesheet_doc=frappe.get_doc('Timesheet', timesheet)
         user_company_name=frappe.db.get_value("User", frappe.session.user, "company")
-        if not timesheet_doc.has_permission("read"):
-            frappe.throw('Insufficient permission')
-        elif timesheet_doc.employee_company!=user_company_name:
+        if timesheet_doc.employee_company!=user_company_name:
             frappe.throw('Logged in user does not belong to the Timesheet Staffing Company')
         elif timesheet_doc.job_order_detail!=job_order:
             frappe.throw('Timesheet '+timesheet_doc.name+' does not belong to the Job Order '+job_order)
@@ -700,7 +695,7 @@ def emp_status(i,data1,j):
 @frappe.whitelist()
 def checking_same_values_timesheet(user_selected_timesheet):
     try:
-        new_timesheet_list=json.loads(user_selected_timesheet)
+        new_timesheet_list=ast.literal_eval(user_selected_timesheet)
         new_timesheet_list_data=tuple(new_timesheet_list)
         if(len(new_timesheet_list_data)>1):
             timeseheets_status=frappe.db.sql('select workflow_state,job_order_detail,date_of_timesheet from `tabTimesheet` where name in {0} '.format(new_timesheet_list_data),as_dict=1)

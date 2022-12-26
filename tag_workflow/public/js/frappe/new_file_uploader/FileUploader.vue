@@ -373,6 +373,11 @@ export default {
 				xhr.setRequestHeader('X-Frappe-CSRF-Token', frappe.csrf_token);
 
 				let form_data = new FormData();
+				let check_flag_attach = localStorage.getItem("check_flag_attach")
+				if(check_flag_attach){
+					localStorage.setItem("file_name",file.name)
+					localStorage.setItem("check_flag_attach",0)
+				}
 				if (file.file_obj) {
 					form_data.append('file', file.file_obj, file.name);
 				}

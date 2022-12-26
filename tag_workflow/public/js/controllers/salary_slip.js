@@ -21,14 +21,22 @@ frappe.ui.form.on("Salary Slip", {
 		}, 1000);
 	},
     refresh:function(frm){
+		check_payroll_perm()
         if(frm.doc.status =='Draft' && frm.doc.salary_structure == "Temporary Employees_"+frappe.boot.tag.tag_user_info.company){
             set_new_total(frm);
         }
         if(frm.doc.salary_structure == "Temporary Employees_"+frappe.boot.tag.tag_user_info.company){
             frm.set_df_property('hour_rate', 'hidden', 1)
         }
+		check_status(frm)
     },
-
+	setup:function(frm){
+		frm.set_query("company", function() {
+			return {
+				"filters":[ ['Company', "organization_type", "in", ["Staffing" ]],['Company',"make_organization_inactive","=",0],['Company',"enable_payroll","=",1]]
+			}
+		});
+	},
 
 });
 

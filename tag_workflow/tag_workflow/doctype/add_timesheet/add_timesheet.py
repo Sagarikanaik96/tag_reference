@@ -10,7 +10,7 @@ from tag_workflow.utils.notification import sendmail, make_system_notification
 from frappe import enqueue
 from frappe.share import add
 from tag_workflow.utils.timesheet import remove_job_title, unsatisfied_organization, do_not_return, no_show_org
-
+import ast
 TM_FT = "%Y-%m-%d %H:%M:%S"
 jobOrder='Job Order'
 timesheet_time= 'select to_time,from_time from `tabTimesheet Detail` where parent= '
@@ -81,9 +81,7 @@ def get_datetime(date, from_time, to_time):
 def update_timesheet(user, company_type, items, cur_selected, job_order, date, from_time, to_time, break_from_time=None, break_to_time=None,save=None):
     try:
         added = 0
-        timesheets = []
-        items = json.loads(items)
-        cur_selected = json.loads(cur_selected)
+        items=ast.literal_eval(items)
         selected_items = items
         is_employee = check_if_employee_assign(items, job_order)
         if(is_employee == 0):
@@ -94,22 +92,19 @@ def update_timesheet(user, company_type, items, cur_selected, job_order, date, f
     
         if(posting_date >= job.from_date and posting_date <= job.to_date):
             from_time, to_time = get_datetime(date, from_time, to_time)
-            
-            for item in selected_items:
-                tip_amount=check_tip(item)
-                child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, item['from_time'], item['to_time'], item['break_from'], item['break_to'])
-                is_ok = check_old_timesheet(child_from, child_to, item['employee'],item['timesheet_value'])
-                if(is_ok == 0):                   
-                    timesheet=timesheet_data(item,job_order,job,tip_amount,break_from,break_to,posting_date,child_from,child_to,date)
-                    staffing_own_timesheet(save,timesheet,company_type)
-                    timesheets.append({"employee": item['employee'], "docname": timesheet.name, "company": job.company, "job_title": job.select_job,  "employee_name": item['employee_name']})
-                    added = 1
-                    update_previous_timesheet(jo=job_order, timesheet_date=posting_date, employee=item['employee'],timesheet=timesheet,to_time=child_to,save=save,timesheet_already_exist=item['timesheet_value'])
+            select_items=selected_items.copy()
+            length_selected=len(selected_items)-1
+            for i in range(length_selected,-1,-1):
+                child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, selected_items[i]['from_time'], selected_items[i]['to_time'], selected_items[i]['break_from'], selected_items[i]['break_to'])
+                is_ok = check_old_timesheet(child_from, child_to, selected_items[i]['employee'],selected_items[i]['timesheet_value'])
+                if(is_ok == 0):   
+                    added=1              
                 else:
-                    frappe.msgprint(_("Timesheet is already available for employee <b>{0}</b>(<b>{1}</b>) on the given datetime.").format(item["employee_name"],item['employee']))
+                    select_items.pop(i)
+                    frappe.msgprint(_("Timesheet is already available for employee <b>{0}</b>(<b>{1}</b>) on the given datetime.").format(selected_items[i]["employee_name"],selected_items[i]['employee']))            
         else:
             frappe.msgprint(_("Date must be in between Job Order start date and end date for timesheets"))
-        enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.send_timesheet_for_approval", timesheets=timesheets,save=save)
+        frappe.enqueue('tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.create_new_timesheet',job_name=job_order,selected_items=select_items,date=date,from_time=from_time,to_time=to_time,job=job,job_order=job_order,company_type=company_type,posting_date=posting_date,save=save,now=True)
         return True if added == 1 else False
     except Exception as e:
         frappe.msgprint(e)
@@ -638,3 +633,16 @@ def update_list_page_calculation(timesheet,jo, timesheet_date, employee,working_
         return amount,overtime_hours,data[1]
     except Exception as e:
         frappe.log_error(e,'listing page error')
+def create_new_timesheet(selected_items,date,from_time,to_time,job,job_order,company_type,posting_date,save):
+    try:
+        timesheets = []
+        for item in selected_items:
+            tip_amount=check_tip(item)
+            child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, item['from_time'], item['to_time'], item['break_from'], item['break_to'])                  
+            timesheet=timesheet_data(item,job_order,job,tip_amount,break_from,break_to,posting_date,child_from,child_to,date)
+            staffing_own_timesheet(save,timesheet,company_type)
+            timesheets.append({"employee": item['employee'], "docname": timesheet.name, "company": job.company, "job_title": job.select_job,  "employee_name": item['employee_name']})
+            update_previous_timesheet(jo=job_order, timesheet_date=posting_date, employee=item['employee'],timesheet=timesheet,to_time=child_to,save=save,timesheet_already_exist=item['timesheet_value'])
+        enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.send_timesheet_for_approval", timesheets=timesheets,save=save,now=True)
+    except Exception as e:
+        frappe.log_error(e,'back job')

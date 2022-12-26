@@ -14,9 +14,11 @@ app_logo_url = "/assets/tag_workflow/images/TAG-Logo-Emblem.svg"
 # global
 sales_invoice="Sales Invoice"
 map= "public/js/controllers/doc_map.js"
+dialog ="public/js/controllers/dialog.js"
+perm ="public/js/controllers/perm.js"
 # Includes in <head>
 # ------------------
-fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow", "Workflow State", "Workflow Action Master",
+fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow", "Workflow State", "Workflow Action Master", "System Settings",
 {"dt": "Property Setter",
         "filters": [
 	[
@@ -47,11 +49,11 @@ fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflo
 				"User-desk_theme-hidden",
 				"User-phone-hidden",
 				"User-bio-hidden",
-                                "Company-section_break_28-hidden",
-                                "Company-date_of_establishment-hidden",
-                                "Company-default_letter_head-hidden",
-                                "Company-default_holiday_list-hidden",
-                                "Company-tax_id-hidden"
+				"Company-section_break_28-hidden",
+				"Company-date_of_establishment-hidden",
+				"Company-default_letter_head-hidden",
+				"Company-default_holiday_list-hidden",
+				"Company-tax_id-hidden"
 			]
 	]
 	]},
@@ -76,7 +78,8 @@ on_session_creation = [
 ]
 
 app_include_css = [
-        "/assets/tag_workflow/css/tag_customed.css"
+        "/assets/tag_workflow/css/tag_customed.css",
+        "/assets/tag_workflow/css/media-query.css"
 ]
 
 app_include_js = [
@@ -85,7 +88,7 @@ app_include_js = [
         "/assets/tag_workflow/js/controllers/sortable.js",
         "/assets/tag-template.min.js",
         "/assets/js/file_upload.min.js",
-        "/assets/js/tag-min.js",
+        "/assets/js/tagjs-min.js",
         "/assets/tag_workflow/js/frappe/form/controls/attach.js",
         "/assets/tag_workflow/js/frappe/form/controls/link.js",
         "/assets/tag_workflow/js/twilio_utils.js",
@@ -95,10 +98,12 @@ app_include_js = [
         "/assets/tag_workflow/js/frappe/data_import/import_preview.js",
         "/assets/tag_workflow/js/frappe/data_import/data_exporter.js",
         "/assets/tag_workflow/js/user_profile_controller.js",
+        "/assets/tag_workflow/js/frappe/form/controls/time.js",
+        '/assets/tag_workflow/js/payroll_entry_quick_entry.js',
         "/assets/tag_workflow/js/frappe/views/breadcrumbs.js",
         "/assets/tag_workflow/js/frappe/print.js",
-        "/assets/tag_workflow/js/frappe/dashboard.js"
-
+        "/assets/tag_workflow/js/frappe/dashboard.js",
+        '/assets/tag_workflow/js/tag_workflow_routing.js'
 ]
 
 web_include_css = [
@@ -107,7 +112,7 @@ web_include_css = [
 
 # include js in doctype views
 doctype_js = {
-        "User" : "public/js/controllers/user.js",
+        "User" : ["public/js/controllers/user.js",dialog],
         "Company": ["public/js/controllers/company.js",map],
         "Designation":"public/js/controllers/designation.js",
         "Item": "public/js/controllers/item.js",
@@ -122,14 +127,18 @@ doctype_js = {
         "Job Site": "public/js/controllers/job_sites.js",
         "Data Import":"public/js/controllers/data_import.js",
         "Notification Log": "public/js/controllers/notification_log.js",
-        "Employee Onboarding Template": "public/js/controllers/employee_onboarding_template.js",
-        "Employee Onboarding": ["public/js/controllers/employee_onboarding.js", map],
+        "Employee Onboarding Template": ["public/js/controllers/employee_onboarding_template.js",perm],
+        "Employee Onboarding": ["public/js/controllers/employee_onboarding.js", map,perm],
         "Job Offer": "public/js/controllers/job_offer.js",
         "Holiday List": "public/js/controllers/holiday_list.js",
-        "Salary Component":"public/js/controllers/salary_component.js",
-        "Salary Structure":"public/js/controllers/salary_structure.js",
-        "Salary Slip":"public/js/controllers/salary_slip.js",
-        "Salary Structure Assignment":"public/js/controllers/salary_structure_assignment.js"
+        "Salary Component":["public/js/controllers/salary_component.js",perm],
+        "Salary Structure":["public/js/controllers/salary_structure.js",perm],
+        "Salary Slip":["public/js/controllers/salary_slip.js",perm],
+        "Salary Structure Assignment":["public/js/controllers/salary_structure_assignment.js",perm],
+        "Claim Order":dialog,
+        "Payroll Entry":["public/js/controllers/payroll_entry.js",perm],
+        "Payroll Period":["public/js/controllers/payroll_period.js",perm],
+
 
 
 }
@@ -150,14 +159,16 @@ doctype_list_js = {
         "Item": "public/js/doctype_list/item_list.js",
         "Employee Onboarding Template": "public/js/doctype_list/employee_onboarding_template_list.js",
         "Holiday List": "public/js/doctype_list/holiday_list_view.js",
-        "Salary Component":"public/js/doctype_list/salary_component_list.js",
-        "Salary Slip": "public/js/doctype_list/salary_slip_list.js",
-        "Payroll Entry": "public/js/doctype_list/payroll_entry_list.js",
-        "Salary Structure": "public/js/doctype_list/salary_structure_list.js",
+        "Salary Component":["public/js/doctype_list/salary_component_list.js",perm],
+        "Salary Slip": ["public/js/doctype_list/salary_slip_list.js",perm],
+        "Payroll Entry": ["public/js/doctype_list/payroll_entry_list.js",perm],
+        "Salary Structure": ["public/js/doctype_list/salary_structure_list.js",perm],
         "System Setting": "public/js/doctype_list/system_setting.js",
+        "Employee Onboarding": "public/js/doctype_list/employee_onboarding_list.js",
+        "Payroll Period": ["public/js/doctype_list/payroll_period_list.js",perm],
+        "Salary Structure Assignment":["public/js/doctype_list/salary_structure_assignment_list.js",perm]
 }
 
-after_migrate = ["tag_workflow.utils.organization.setup_data"]
 before_migrate = ["tag_workflow.utils.organization.remove_field"]
 # Hook on document methods and events
 validate = "tag_workflow.controllers.base_controller.validate_controller"
@@ -235,7 +246,10 @@ override_whitelisted_methods = {
         "erpnext.accounts.party.get_due_date": "tag_workflow.utils.invoice.get_due_date",
         "frappe.model.workflow.bulk_workflow_approval":"tag_workflow.utils.workflow.bulk_workflow_approval",
         "erpnext.hr.utils.get_onboarding_details": "tag_workflow.utils.whitelisted.get_onboarding_details",
-        "frappe.handler.upload_file": "tag_workflow.utils.whitelisted.upload_file"
+        "erpnext.hr.doctype.employee.employee.get_retirement_date":"tag_workflow.utils.whitelisted.get_retirement_date",
+        "frappe.handler.upload_file": "tag_workflow.utils.whitelisted.upload_file",
+        "frappe.deferred_insert.deferred_insert": "tag_workflow.utils.whitelisted.deferred_insert",
+        "frappe.desk.reportview.get_list": "tag_workflow.utils.reportview.get_list"
 }
 
 

@@ -3,6 +3,7 @@ from frappe import _
 import json, ast
 from frappe.share import add
 from tag_workflow.utils.timesheet import approval_notification, denied_notification
+from tag_workflow.tag_data import check_mandatory_field
 jobOrder='Job Order'
 #-----------------------------#
 def get_status(order, company, date):
@@ -50,7 +51,7 @@ def get_data(company, order):
 
 #-----------------------------------------------#
 @frappe.whitelist()
-def get_child_data(order, timesheet, date=None):
+def get_child_data(order, timesheet=None, date=None):
     try:
         result = []
         company = frappe.db.get_value("Timesheet", {"name": timesheet}, "employee_company")
@@ -91,15 +92,26 @@ def get_child_data(order, timesheet, date=None):
 def approve_timesheets(timesheet, action):
     try:
         data = []
+        emp_with_insuficient_details = []
         timesheets=json.loads(timesheet)
         for t in timesheets:
             doc = frappe.get_doc("Timesheet", t)
-            frappe.db.set_value('Timesheet',t,'workflow_state',action)
-            frappe.db.set_value('Timesheet',t,'status',"Submitted")
-            frappe.db.set_value('Timesheet',t,'docstatus',1)
-            data.append({"date": doc.date_of_timesheet, "timesheet": t})
+            emp_fields = check_mandatory_field(doc.employee,1,"1")
+            empty_field_str = ""
+            for field in emp_fields:
+                empty_field_str += ", "+field.title()
+                empty_field_str = empty_field_str.replace("_"," ")
+            if emp_fields == "success":
+                frappe.db.set_value('Timesheet',t,'workflow_state',action)
+                frappe.db.set_value('Timesheet',t,'status',"Submitted")
+                frappe.db.set_value('Timesheet',t,'docstatus',1)
+                data.append({"date": doc.date_of_timesheet, "timesheet": t})
+            else:
+                empty_field_str = empty_field_str[1:]
+                emp_with_insuficient_details.append([doc.employee_name.title(),empty_field_str])
+
         approval_notification(job_order=doc.job_order_detail,staffing_company=doc.employee_company,date=None, hiring_company=doc.company, timesheet_name=doc.name, timesheet_approved_time=doc.modified, current_time=frappe.utils.now())
-        return data[0] if(len(data) > 0) else {"date": "", "timesheet": ""}
+        return data[0] if(len(data) > 0) else {"date": "", "timesheet": ""},emp_with_insuficient_details,len(timesheets)
     except Exception as e:
         frappe.throw(e)
 

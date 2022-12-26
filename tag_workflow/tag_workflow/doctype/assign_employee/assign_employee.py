@@ -129,12 +129,15 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
         all_employees=filters.get('all_employees')
         doc = frappe.get_doc('Job Site',job_location)
         value = ''
+        key = emp_company+""+job_order+""+distance
+        redis = frappe.cache()
+        if redis.hget(key,'emp'):
+            return cache_data(redis,key,employee_lis)
         for index ,i in enumerate(employee_lis):
             if index >= 1:
                 value = value+"'"+","+"'"+i
             else:
                 value =value+i
-
         if all_employees:
             sql = """
                 select * from(
@@ -170,6 +173,7 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
                 where `distance` < {7} order by `distance`*1
                 """.format(emp_company, job_category, company, value, '%s' % txt,doc.lat,doc.lng,distance_value[distance],job_order)
         emp = frappe.db.sql(sql)
+        save_data_in_redis(key,emp)
         return emp
     except Exception as e:
         frappe.msgprint(e)
@@ -248,12 +252,12 @@ def my_emp_work(emps,my_emp_data):
 
 @frappe.whitelist()
 def validate_employee(doc,method):
-	job_order=frappe.get_doc(jobOrder,doc.job_order)
-	if job_order.is_repeat!=1:
-		for employee in doc.employee_details:
-			employee_doc=frappe.get_doc('Employee',employee.employee)
-			if not employee_doc.has_permission("read"):
-				frappe.flags.error_message = _('Insufficient Permission for {0}').format(frappe.bold('Employee' + ' ' + employee.employee_name))
+    job_order=frappe.get_doc(jobOrder,doc.job_order)
+    if job_order.is_repeat!=1:
+        for employee in doc.employee_details:
+            employee_doc=frappe.get_doc('Employee',employee.employee)
+            if employee_doc.company != doc.company:
+                frappe.throw('Employee does not belong to the Staffing Organization')
 
 @frappe.whitelist()
 def payrate_change(docname):
@@ -261,9 +265,11 @@ def payrate_change(docname):
         sql = '''select data from `tabVersion` where docname="{0}" order by modified DESC'''.format(docname)
         data = frappe.db.sql(sql, as_list=1)
         new_data = json.loads(data[0][0]) 
+        doc = frappe.get_doc(AEMP,docname)
+        free_redis(doc.company,doc.job_order)
         if ('changed' not in new_data and 'row_changed' not in new_data) or len(new_data['added']) > 0 or len(new_data['removed']) > 0:
             return 'success'
-        elif 'row_changed' in new_data:
+        elif 'row_changed' in new_data and len(new_data['row_changed'])>0:
             for i in new_data['row_changed'][0][3]:
                 if i[0] == 'employee_name':
                     return 'success'
@@ -277,10 +283,10 @@ def check_pay_rate(total_bill_rate, data):
         emp_details = data['employee_details']
         temp = {'bill_rate': total_bill_rate}
         employees = {}
-        if float(data['employee_pay_rate']) > float(total_bill_rate):
+        if float(data['employee_pay_rate']) > total_bill_rate:
             temp['emp_pay_rate'] = data['employee_pay_rate']
         for i in emp_details:
-            if float(i['pay_rate']) > float(total_bill_rate):
+            if float(i['pay_rate']) > total_bill_rate:
                 employees[i['employee_name']] = i['pay_rate']
         if len(employees)>0:
             temp['employees'] = employees
@@ -309,9 +315,49 @@ def update_workers_filled(job_order_name):
         frappe.log_error(e,'Workers Update')
 
 @frappe.whitelist()
-def update_notes(name,notes):
+def update_notes(name,notes,job_order,company):
     try:
-        frappe.db.sql("""update `tabAssign Employee` set notes="{1}" where name="{0}" """.format(name,notes))
+        frappe.db.sql(""" UPDATE `tabAssign Employee` SET notes ="{0}" where job_order="{1}" and company="{2}" """.format(notes,job_order,company))
+        frappe.db.commit()
         frappe.publish_realtime(event='sync_data',doctype=AEMP,docname=name)
+    except Exception as e:
+        print(e)
+
+def cache_data(redis,key,employee_lis):
+    try:
+        data = redis.hget(key,'emp')
+        if len(data)>0:
+            for d in data:
+                if d[0] in employee_lis:
+                   data.remove(d)
+            redis.hset(key,'emp',data)
+            return data
+    except Exception as e:
+        frappe.log_error(e,'cache_data_error')
+
+def save_data_in_redis(key,emp):
+    try:
+        redis = frappe.cache()
+        if len(emp) and redis.hget(key,'emp')==None:
+            redis.hset(key,'emp',list(emp))
+    except Exception as e:
+        frappe.log_error(e,'store_data _error')
+
+@frappe.whitelist()       
+def free_redis(company,job_order):
+    try:
+        redis = frappe.cache()
+        distances =['5 miles','10 miles','20 miles','50 miles']
+        for d in distances:
+            key = company+""+job_order+""+d
+            if redis.hget(key,'emp'):
+                redis.hdel(key,'emp')
+    except Exception as e:
+        frappe.log_error(e,'redis error')
+
+@frappe.whitelist()
+def add_notes(company,job_order):
+    try:
+        return frappe.db.sql(""" select notes from `tabAssign Employee` where job_order="{0}" and company="{1}" and notes!=""  limit 1 """.format(job_order,company),as_dict=1)
     except Exception as e:
         print(e)

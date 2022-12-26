@@ -189,7 +189,7 @@ frappe.TimesheetApproval = Class.extend({
 				"freeze": true,
 				"freeze_message": "Please wait while we are updating data...",
 				"callback": function(r){
-					frappe.msgprint("Timesheet(s) has been updated.");
+					check_condition(r);
 					let data = r.message || {};
 					page.fields_dict.job_order.set_value(me.order);
 					render_child_data(me.order, data.date, data.timesheet);
@@ -346,4 +346,39 @@ function select_all(){
 /*-----------------------show timesheet------------------*/
 function show_timesheet(_order, _date, name){
 	frappe.set_route("form", "Timesheet", name);
+}
+
+/*************************check condition*********************************/
+function check_condition(r){
+	if(r.message[1].length == 0){
+		frappe.msgprint("Timesheet(s) has been updated.");
+		setTimeout(function() {
+            refresh_table()
+        }, 2000);
+	}
+	else if(r.message[1].length == 1){
+		let msg= "This Employee is missing the below required fields. You will be unable to approve their timesheets unless these fields are populated<br><br>"
+		for (let employee of r.message[1]) {
+			msg += "<span>&#8226;</span> " + employee[0]+" -  "+employee[1] +"<br>"
+		  }
+		frappe.msgprint({message: __(msg), title: __("Warning"), indicator: "yellow",});
+		setTimeout(function() {
+            refresh_table()
+        }, 2000);
+	}
+	else{
+		let msg= "These Employees are missing the below required fields. You will be unable to approve their timesheets unless these fields are populated<br><br>"
+		for (let employee of r.message[1]) {
+			msg += "<span>&#8226;</span> " + employee[0] +" -  " + employee[1] +"<br>"
+		  }
+		frappe.msgprint({message: __(msg), title: __("Warning"), indicator: "yellow",});
+		setTimeout(function() {
+            refresh_table()
+        }, 2000);
+			
+	}
+	
+}
+function refresh_table(){
+	$(".btn.btn-secondary.btn-default.btn-sm").click()
 }

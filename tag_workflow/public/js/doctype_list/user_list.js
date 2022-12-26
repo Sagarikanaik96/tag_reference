@@ -64,10 +64,13 @@ frappe.listview_settings['User'] = {
 
 	$('#navbar-breadcrumbs > li > a').html('Company Users');
 	listview.$page.find(`div[data-fieldname="name"]`).addClass("hide");
+	$('.primary-action').attr('id','user-add-new');
+	$('.filter-button').find('.button-label').attr('id','user-filtericon')
 	}
+	
 };
 
-frappe.ui.form.ControlPassword = class ControlAttach extends frappe.ui.form.ControlData({
+frappe.ui.form.ControlPassword = frappe.ui.form.ControlData.extend({
 	input_type: "password",
 	make: function() {
 		this._super();
@@ -120,4 +123,35 @@ function get_role_profile1(){
 	});
 	return text
 
+}
+
+frappe.ui.FilterGroup.prototype.get_filter_area_template= function() {
+	/* eslint-disable indent */
+	return $(`
+		<div class="filter-area">
+			<div class="filter-edit-area">
+				<div class="text-muted empty-filters text-center">
+					${__('No filters selected')}
+				</div>
+			</div>
+			<hr class="divider"></hr>
+			<div class="filter-action-buttons">
+				<button class="text-muted add-filter btn btn-xs">
+					+ ${__('Add a Filter')}
+				</button>
+				<div>
+					<button class="btn btn-secondary btn-xs clear-filters" id="user-clear-filtericon">
+						${__('Clear Filters')}
+					</button>
+					${this.filter_button ?
+						`<button class="btn btn-primary btn-xs apply-filters">
+							${__('Apply Filters')}
+						</button>`
+						: ''
+					}
+				</div>
+			</div>
+		</div>`
+	);
+	/* eslint-disable indent */
 }

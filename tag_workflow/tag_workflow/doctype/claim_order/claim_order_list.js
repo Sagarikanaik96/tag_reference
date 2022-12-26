@@ -1,4 +1,10 @@
 frappe.listview_settings["Claim Order"] = {
+  onload(listview){
+    if(!["Hiring","TAG"].includes(frappe.boot.tag.tag_user_info.company_type)){
+      cur_list.columns.splice(4, 1);
+      cur_list.render_header(cur_list.columns[4]);
+    }
+  },
   refresh(listview) {
     $('[class="btn btn-primary btn-sm primary-action"]').show();
     $(".custom-actions.hidden-xs.hidden-md").show();
@@ -87,8 +93,37 @@ frappe.listview_settings["Claim Order"] = {
 					</span>`;
       }
     },
+    staffing_organization_ratings (val, d, f) {
+      let a = 0
+      frappe.call({
+        async:false,
+         method:"tag_workflow.tag_workflow.doctype.company.company.check_staffing_reviews",
+         args:{
+           company_name: f.staffing_organization
+         },
+         callback:(r)=>{
+           a = r
+         }
+     })
+    return a.message ===0 ?'':`<span><span class='text-warning'>★</span> ${a.message}<span>`      
+    },
   },
 };
+
+
+async function get_average_rate(c){
+ return await frappe.call({
+   async:false,
+		method:"tag_workflow.tag_workflow.doctype.company.company.check_staffing_reviews",
+		args:{
+			company_name: c
+		},
+    callback:(r)=>{
+      return r.message
+    }
+})
+}
+
 
 function refresh(listview) {
   frappe.call({
@@ -110,18 +145,11 @@ function refresh(listview) {
           "no_of_workers",
           "per_hour",
         ],
-        function (r) {
+       async function (r) {
+          let date_sequence = checking_same_date(r)
           let data = rm.message;
-          let profile_html = `<table><th>Staffing Company</th><th>Workers</th><th>Approve</th><th>Notes</th>`;
-          for (let p in data) {
-            profile_html += `<tr>
-                                <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
-                                <td>${data[p].staff_claims_no}</td>
-                                <td><input type="number" id="_${data[p].staffing_organization}" min="0" max=${data[p].staff_claims_no}></td>
-                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle" maxlength="160" ${(data[p].notes)?data[p].notes:""}> </textarea> </td>
-                                </tr>`;
-          }
-          profile_html += `</table>`;
+          let profile_html = `<table><th>Staffing Company</th><th>Avg. Rating</th><th>Workers</th><th>Approve</th><th>Invoice Notes</th>`;
+          profile_html=await html_data_selct_headcount(data,profile_html);
 
           let new_pop_up = new frappe.ui.Dialog({
             title: "Select Head Count",
@@ -134,7 +162,7 @@ function refresh(listview) {
               {
                 fieldname: "html_per_hour",
                 fieldtype: "HTML",
-                options: "<label>Price:</label>$" + r["per_hour"],
+                options: "<label>Price:</label>$" + r["per_hour"].toFixed(2),
               },
 
               { fieldname: "inputdata2", fieldtype: "Column Break" },
@@ -142,11 +170,7 @@ function refresh(listview) {
               {
                 fieldname: "html_date",
                 fieldtype: "HTML",
-                options:
-                  "<label>Date:</label>" +
-                  frappe.format(r["from_date"], { fieldtype: "Date" }) +
-                  "--" +
-                  frappe.format(r["to_date"], { fieldtype: "Date" }),
+                options: date_sequence    
               },
               {
                 fieldname: "html_workers",
@@ -191,10 +215,27 @@ function refresh(listview) {
             },
           });
           show_popup(new_pop_up);
+
         }
       );
     },
   });
+}
+
+async function html_data_selct_headcount(data,profile_html) {
+  for(let p in data) {
+    let avg_rate=await get_average_rate(data[p].staffing_organization);
+
+    profile_html+=`<tr>
+                                <td style="margin-right:20px;" >${data[p].staffing_organization}</td>
+                                <td>${avg_rate.message===0? '':`<span class='text-warning'>★ </span> ${avg_rate.message}`}</td>
+                                <td>${data[p].staff_claims_no}</td>
+                                <td><input type="number" id="_${data[p].staffing_organization}" min="0" max=${data[p].staff_claims_no}></td>
+                                <td><textarea id="_${data[p].name}_notes" class="head_count_tittle " data-comp="${data[p].staffing_organization}" maxlength="160" ${(data[p].notes)? data[p].notes:""}> </textarea> </td>
+                                </tr>`;
+  }
+  profile_html+=`</table>`;
+  return profile_html;
 }
 
 function show_popup(new_pop_up){
@@ -204,6 +245,7 @@ function show_popup(new_pop_up){
   if($('.btn.btn-secondary.btn-default.btn-sm').attr('id')=='popup_inactive'){
     $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_active');
     new_pop_up.show();
+    add_listener(new_pop_up,'staff_companies');
   }
 }
 
@@ -299,19 +341,11 @@ function modify_claims(listview) {
           "per_hour",
           "worker_filled",
         ],
-        function (r) {
+        async function (r) {
           let job_data = rm.message;
-          let profile_html = `<table class="table-responsive"><th>Claim No.</th><th>Staffing Company</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th><th>Notes</th>`;
-          for (let p in job_data) {
-            profile_html += `<tr>
-                                <td>${job_data[p].name}</td>
-                                <td style="margin-right:20px;" id="${job_data[p].claims}">${job_data[p].staffing_organization}</td>
-                                <td id="${job_data[p].name}_claim">${job_data[p].staff_claims_no}</td>
-                                <td>${job_data[p].approved_no_of_workers}</td>
-                                <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no} ${job_data[p].hide==1?"disabled":""}></td>
-                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" maxlength="160" > ${(job_data[p].notes)?(job_data[p].notes).trim():""}</textarea> </td>
-                                </tr>`;
-          }
+          let date_value = checking_same_date(r)
+          let profile_html = `<table class="table-responsive"><th>Claim No.</th><th>Staffing Company</th><th>Avg. Rating</th><th>Claims</th><th>Claims Approved</th><th>Modifiy Claims Approved</th><th>Invoice Notes</th>`;
+          profile_html=await html_data_modify_claims(job_data,profile_html);
           profile_html += `</table><style>th, td {
                             padding: 10px;
                           } input{width:100%;}
@@ -328,23 +362,19 @@ function modify_claims(listview) {
               {
                 fieldname: "html_per_hour1",
                 fieldtype: "HTML",
-                options: "<label>Price:</label>$" + r["per_hour"],
+                options: "<label>Price:</label>$" + r["per_hour"].toFixed(2),
               },
               { fieldname: "inputdata3", fieldtype: "Column Break" },
               {
                 fieldname: "html_date1",
                 fieldtype: "HTML",
-                options:
-                  "<label>Date:</label>" +
-                  frappe.format(r["from_date"], { fieldtype: "Date" }) +
-                  "--" +
-                  frappe.format(r["to_date"], { fieldtype: "Date" }),
+                options: date_value    
               },
               {
                 fieldname: "html_workers1",
                 fieldtype: "HTML",
                 options:
-                  "<label>No. Of Workers Required:</label>" +
+                  "<label>Remaining Workers Needed:</label>" +
                   (r["no_of_workers"] - r["worker_filled"]),
               },
               { fieldname: "inputdata2", fieldtype: "Section Break" },
@@ -374,12 +404,29 @@ function modify_claims(listview) {
           if($('.btn.btn-secondary.btn-default.btn-sm').attr('id')=='popup_inactive'){
             $('.btn.btn-secondary.btn-default.btn-sm').attr('id', 'popup_active');
             modified_pop_up.show();
+            add_listener(modified_pop_up,'staff_companies1');
           }
         }
       );
     },
   });
 }
+async function html_data_modify_claims(job_data,profile_html) {
+  for(let p in job_data) {
+    let avg_rate=await get_average_rate(job_data[p].staffing_organization);
+    profile_html+=`<tr>
+                                <td>${job_data[p].name}</td>
+                                <td style="margin-right:20px;" id="${job_data[p].claims}" >${job_data[p].staffing_organization}</td>
+                                <td>${avg_rate.message===0? '':`<span class='text-warning'>★</span> ${avg_rate.message}`}</td>
+                                <td id="${job_data[p].name}_claim">${job_data[p].staff_claims_no}</td>
+                                <td>${job_data[p].approved_no_of_workers}</td>
+                                <td><input type="number" id="${job_data[p].name}" min="0" max=${job_data[p].staff_claims_no} ${job_data[p].hide==1? "disabled":""}></td>
+                                <td><textarea id="_${job_data[p].name}_notes" class="head_count_tittle" data-comp="${job_data[p].staffing_organization}" maxlength="160" > ${(job_data[p].notes)? (job_data[p].notes).trim():""}</textarea> </td>
+                                </tr>`;
+  }
+  return profile_html;
+}
+
 function update_claims(data_len, l, dict, job_data, r) {
   let valid1 = "";
   let total_count = 0;
@@ -638,4 +685,33 @@ function check_notes_length(notes,staffing_org){
   }
   return valid1
 
+}
+function checking_same_date(r){
+  let date_order
+          if(frappe.format(r["from_date"], { fieldtype: "Date" })==frappe.format(r["to_date"], { fieldtype: "Date" })){
+            date_order=`<label>Date:</label>
+                    ${frappe.format(r["from_date"], { fieldtype: "Date" })}`
+          }
+          else{
+            date_order =`<label>Date:</label>
+                    ${frappe.format(r["from_date"], { fieldtype: "Date" })} 
+                     to 
+                    ${frappe.format(r["to_date"], { fieldtype: "Date" })}` 
+          }
+          return date_order
+}
+
+function add_listener(dialog,field){
+  dialog.fields_dict[field].disp_area.querySelectorAll('textarea').
+  forEach(area=>area.
+    addEventListener('keyup',e=>update_textarea(e,field))
+  )
+}
+function update_textarea(e,field){
+  cur_dialog.fields_dict[field].disp_area.querySelectorAll('textarea').
+  forEach(area=>{
+    if(area.attributes['data-comp'].value == e.currentTarget.attributes['data-comp'].value){
+      area.value = e.currentTarget.value
+    }
+  })
 }

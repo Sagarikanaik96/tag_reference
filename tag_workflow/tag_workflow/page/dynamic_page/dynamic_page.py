@@ -29,24 +29,22 @@ def get_link1(name, userid):
    company_logo = create_link(company)
 
    return company, review, data1, company_logo
-
+#----------showing work order history-----------#
 @frappe.whitelist()
 def get_link2(name,comp, comp_type, user_id):
+
    sql3= f"select company from `tabEmployee` where user_id='{user_id}'"
-   data3 = frappe.db.sql(sql3, as_dict=True)  
+   data3 = frappe.db.sql(sql3, as_dict=True)
    if len(data3)>1:
       return data3,"exceed"
    else:
       if comp_type== "Staffing":
-         company1= comp
-         company2= name
-
+         sql2= f"select job_order, job_category, tag_status, company, hiring_organization from `tabAssign Employee` where company='{comp}' and hiring_organization= '{name}' and tag_status= 'Approved' order by job_order desc"
+      elif comp_type == 'TAG' or frappe.session.user=='Administrator':
+         sql2 = get_sql_query(name)
       else:
-         company1= name
-         company2= comp
-   
-
-      sql2= f"select job_order, job_category, tag_status, company, hiring_organization from `tabAssign Employee` where company='{company1}' and hiring_organization= '{company2}' and tag_status= 'Approved' order by job_order desc"
+         sql2= f"select job_order, job_category, tag_status, company, hiring_organization from `tabAssign Employee` where company='{name}' and hiring_organization= '{comp}' and tag_status= 'Approved' order by job_order desc"
+         
       data2= frappe.db.sql(sql2, as_dict=True)
       job=[]
       invoice=[]
@@ -54,14 +52,22 @@ def get_link2(name,comp, comp_type, user_id):
          job1= j["job_order"]
          jo= frappe.get_doc("Job Order", j["job_order"])
          job.append(jo)
-        
+         
          sql4= f"select job_order, sum(total_billing_amount) as total_billing_amount from `tabSales Invoice` where job_order='{job1}'"
-         data4 = frappe.db.sql(sql4, as_dict=True)  
+         data4 = frappe.db.sql(sql4, as_dict=True)
          for i in data4:
             invoice.append(i)
-
+            
       return job, data2, invoice
-
+   
+@frappe.whitelist()
+def get_sql_query(name):
+   comp_type=frappe.db.get_value('Company', {'name':name},['organization_type'])
+   if comp_type == 'Staffing':
+      return f"select job_order, job_category, tag_status, company, hiring_organization from `tabAssign Employee` where company='{name}' and tag_status= 'Approved' order by job_order desc"
+   else:
+      return f"select job_order, job_category, tag_status, company, hiring_organization from `tabAssign Employee` where hiring_organization= '{name}' and tag_status= 'Approved' order by job_order desc"
+#---------------------#
 
 @frappe.whitelist()
 def get_link3(name,comp, comp_type):
@@ -206,3 +212,9 @@ def create_link(company):
       return logo
    else:
       return "/assets/tag_workflow/images/default_logo.png"
+
+@frappe.whitelist()
+def get_accreditations(company):
+   sql = '''select name,attached_certificate, sequence,certificate_type from `tabCertificate and Endorsement Details` where company = "{0}" order by sequence'''.format(company)
+   records = frappe.db.sql(sql,as_dict =True)
+   return records

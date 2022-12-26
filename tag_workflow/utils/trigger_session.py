@@ -34,7 +34,7 @@ def update_boot(boot):
 
 def get_user_info():
     try:
-        comps, exces, stfs = [], [], []
+        comps, exces, stfs, invoice_view = [], [], [], []
         user = frappe.session.user
         user_doc = frappe.get_doc(USR, user)
         api_key = frappe.get_site_config().tag_gmap_key or ''
@@ -45,9 +45,9 @@ def get_user_info():
 
         sql = ""
         if(user_doc.organization_type == "Hiring"):
-            sql = """select name from `tabCompany` where organization_type = "Staffing" """
+            sql = """select name, default_invoice_view from `tabCompany` where organization_type = "Hiring" and name in (select company from `tabEmployee` where user_id = '{0}')""".format(user_doc.name)
         elif(user_doc.organization_type == "Staffing"):
-            sql = """select name from `tabCompany` where organization_type = "Staffing" and name in (select company from `tabEmployee` where user_id = '{0}')""".format(user_doc.name)
+            sql = """select name, default_invoice_view from `tabCompany` where organization_type = "Staffing" and name in (select company from `tabEmployee` where user_id = '{0}')""".format(user_doc.name)
             excs = frappe.db.sql(""" select name from `tabCompany` where organization_type = "Exclusive Hiring" and parent_staffing in (select company from `tabEmployee` where user_id = %s) """,user_doc.name, as_dict=1)
             for e in excs:
                 exces.append(e.name)
@@ -56,12 +56,14 @@ def get_user_info():
             for s in stfs_list:
                 stfs.append(s.company)
         elif(user_doc.organization_type == "Exclusive Hiring"):
-            sql = """ select parent_staffing as name from `tabCompany` where name = '{0}' """.format(user_doc.company)
+            sql = """ select parent_staffing as name, default_invoice_view from `tabCompany` where name = '{0}' """.format(user_doc.company)
 
         if(sql):
             com_list = frappe.db.sql(sql, as_dict=1)
             for c in com_list:
                 comps.append(c.name)
+                invoice_view.append(f"{c.name}*{c.default_invoice_view}")
+        frappe.local.cookie_manager.set_cookie('invoice_view', '|'.join([str(elem) for elem in invoice_view]))
         data.update({"comps": comps, "exces": exces, "stfs": stfs})
         return data
     except Exception as e:

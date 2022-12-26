@@ -139,6 +139,8 @@ frappe.ui.form.on("Timesheet", {
 				reject();
 			});
 		}
+		check_mandatory_field(frm.doc.employee,frm.doc.employee_name)
+
 	},
 
 	job_order_detail: function(frm){
@@ -688,3 +690,18 @@ function approve_timesheet(frm){
 	});
 
 }
+function check_mandatory_field(emp_id,emp_name){
+	frappe.call({
+	  method:"tag_workflow.tag_data.check_mandatory_field",
+	  args:{emp_id: emp_id,check: 0,emp_name:emp_name},
+	  callback: function(r){
+		let msg = r.message[1] + " is missing the below required fields. You will be unable to approve their timesheets unless these fields are populated.<br><br>"
+		if(r.message != "success"){
+			frappe.validated = false
+			msg += r.message[0]
+		  	frappe.msgprint({message: __(msg), title: __("Warning"), indicator: "yellow",});
+			
+		}
+	  }
+	});
+  }

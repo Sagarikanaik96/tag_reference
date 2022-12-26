@@ -24,7 +24,7 @@ def fetch_columns():
         },
         {
             'fieldname': 'ssn',
-            'fieldtype': 'Int',
+            'fieldtype': 'Data',
             'label': 'SSN',
             'width': 150
         },
@@ -43,9 +43,10 @@ def fetch_columns():
         },
         {
             'fieldname': 'rate',
-            'fieldtype': 'Currency',
+            'fieldtype': 'float',
             'label': 'Rate',
-            'width': 100
+            'width': 100,
+            'precision':5
         },
         {
             'fieldname': 'reg_hours',
@@ -119,7 +120,7 @@ def fetch_data(start_date,end_date,company,condition):
             data2=frappe.db.sql('''select TS.employee_name as emp_name,EM.ssn as ssn,TS.job_order_detail as order_id,TS.employee,sum(timesheet_hours-todays_overtime_hours) as reg_hours,sum(todays_overtime_hours)as ot_hours,sum(timesheet_payable_amount-timesheet_billable_overtime_amount_staffing-timesheet_unbillable_overtime_amount) as reg_wages,sum(timesheet_billable_overtime_amount_staffing) as ot_wages,AE.staff_class_code as comp_code,AE.staff_class_code_rate as rate from `tabTimesheet` as TS inner join `tabJob Order` as JO on JO.name=TS.job_order_detail inner join `tabEmployee` as EM on EM.name=TS.employee inner join `tabAssign Employee` as AE on AE.job_order=JO.name inner join `tabJob Site` as JS on JS.name=JO.job_site where TS.workflow_state='Approved' and JO.resumes_required=1 and AE.staff_class_code is not null %s group by employee,JO.name order by TS.name desc;''' % mandatory_condition,as_dict=1)
             data1.extend(data2)
             for i in range(len(data1)):
-                if(data1[i]['ssn']!=None):
+                if(data1[i]['ssn']!=None and data1[i]['ssn']!=''):
                     doc=frappe.get_doc('Employee',data1[i]['employee'])
                     ssn_decrypt = doc.get_password('ssn')
                     data1[i]['ssn']=ssn_decrypt
