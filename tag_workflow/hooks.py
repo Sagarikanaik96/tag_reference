@@ -84,7 +84,8 @@ app_include_js = [
         "/assets/tag_workflow/js/frappe/data_import/data_exporter.js",
         "/assets/tag_workflow/js/user_profile_controller.js",
         "/assets/tag_workflow/js/frappe/form/controls/time.js",
-        '/assets/tag_workflow/js/payroll_entry_quick_entry.js'
+        '/assets/tag_workflow/js/payroll_entry_quick_entry.js',
+        '/assets/tag_workflow/js/tag_workflow_routing.js'
 
 ]
 
