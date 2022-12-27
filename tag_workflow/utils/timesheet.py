@@ -284,6 +284,19 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
     except Exception as e:
         frappe.log_error(e, "Hiring Company Rating")
         frappe.throw(e)
+
+@frappe.whitelist()
+def rating_no_show(rating_no_show,invoice_name):
+    try:
+        if rating_no_show:
+            rating_no_show=1
+        else:
+            rating_no_show=0
+        frappe.db.sql('''update `tabSales Invoice` set rating_no_show="{}" where name="{}"'''.format(rating_no_show,invoice_name))
+    except Exception as e:
+        frappe.log_error(e, "Staffing Company Rating")
+        frappe.throw(e)
+
 def staffing_company_rating(hiring_company,staffing_company,ratings,job_order):
     ratings = ast.literal_eval(ratings)
     doc = frappe.new_doc('Company Review')
