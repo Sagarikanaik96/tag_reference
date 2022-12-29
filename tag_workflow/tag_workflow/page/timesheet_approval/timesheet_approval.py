@@ -4,6 +4,7 @@ import json, ast
 from frappe.share import add
 from tag_workflow.utils.timesheet import approval_notification, denied_notification
 from tag_workflow.tag_data import check_mandatory_field
+import ast
 jobOrder='Job Order'
 #-----------------------------#
 def get_status(order, company, date):
@@ -40,11 +41,13 @@ def get_data(company, order):
             d.update({"order_status": job_order_status})
             status = get_status(order, company, d['date_of_timesheet'])
             d.update({"workflow_state": status})
+            exported = frappe.db.get_list('Timesheet', {'job_order_detail':d['job_order_detail'], 'date_of_timesheet': d['date_of_timesheet']}, ['ts_exported'], pluck='ts_exported')
+            ts_exported = 'Yes' if len(set(exported))==1 and exported[0]==1 else 'No'
+            d.update({'ts_exported': ts_exported})
             result.append(d)
 
             if not frappe.db.exists("DocShare", {"user": frappe.session.user, "share_name": d['name'], "read": 1, "write": 1, "submit": 1}):
                 add("Timesheet", d.name, user=frappe.session.user, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
-
         return result
     except Exception as e:
         frappe.msgprint(e)
@@ -59,14 +62,14 @@ def get_child_data(order, timesheet=None, date=None):
         user_company=frappe.db.get_value('User',{'name':job_order_owner},'organization_type')
         if user_company=='Staffing':
             if(date != "null"):
-                sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.date_of_timesheet = '{1}' and t.employee_company = '{2}' order by t.creation asc""".format(order, date, company)
+                sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours, t.ts_exported from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.date_of_timesheet = '{1}' and t.employee_company = '{2}' order by t.creation asc""".format(order, date, company)
             else:
-                sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.employee_company = '{1}' order by t.creation asc""".format(order, company)
+                sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours, t.ts_exported from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.employee_company = '{1}' order by t.creation asc""".format(order, company)
         else:
             if(date != "null"):
-                sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.date_of_timesheet = '{1}' and t.employee_company = '{2}' and t.workflow_state!='Open' order by t.creation asc""".format(order, date, company)
+                sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours, t.ts_exported from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.date_of_timesheet = '{1}' and t.employee_company = '{2}' and t.workflow_state!='Open' order by t.creation asc""".format(order, date, company)
             else:
-                sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.employee_company = '{1}' and t.workflow_state!='Open' order by t.creation asc""".format(order, company)
+                sql = """ select t.workflow_state, t.name, t.employee, t.employee_name, t.no_show, t.non_satisfactory, t.dnr, t.replaced, t.date_of_timesheet, c.from_time, c.to_time, c.break_start_time, c.break_end_time, c.hours, t.ts_exported from `tabTimesheet` t inner join `tabTimesheet Detail` c where t.name = c.parent and t.job_order_detail = '{0}' and t.employee_company = '{1}' and t.workflow_state!='Open' order by t.creation asc""".format(order, company)
         
 
         data = frappe.db.sql(sql, as_dict=1)
@@ -78,7 +81,7 @@ def get_child_data(order, timesheet=None, date=None):
 
             state=employee_status(d)
 
-            result.append({"employee": d['employee'], "employee_name": d['employee_name'], "from_time": from_time, "to_time": to_time, "break_start": break_start, "break_end": break_end, "name": d['name'], "hours": d['hours'], "workflow_state": d['workflow_state'], "state": state})
+            result.append({"employee": d['employee'], "employee_name": d['employee_name'], "from_time": from_time, "to_time": to_time, "break_start": break_start, "break_end": break_end, "name": d['name'], "hours": d['hours'], "workflow_state": d['workflow_state'], "state": state, "ts_exported":d["ts_exported"]})
 
             if not frappe.db.exists("DocShare", {"user": frappe.session.user, "share_name": d['name'], "read": 1, "write": 1, "submit": 1}):
                 add("Timesheet", d['name'], user=frappe.session.user, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
@@ -152,3 +155,19 @@ def employee_status(d):
     if(d.replaced == 1):
         state = 'Replaced'
     return state
+
+@frappe.whitelist()
+def get_selected_ts(checkbox_values):
+    try:
+        ts_list = []
+        values=ast.literal_eval(checkbox_values)
+        for i in values:
+            if '_' in i:
+                ts = frappe.db.get_list('Timesheet', {'date_of_timesheet': i.split('_')[1], 'job_order_detail': i.split('_')[0]}, ['name'], pluck='name')
+                for t in ts:
+                    ts_list.append(t)
+            elif 'TS' in i:
+                ts_list.append(i)
+        return ts_list
+    except Exception as e:
+        frappe.log_error(e, 'get_selected_ts Error')

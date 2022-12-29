@@ -272,7 +272,7 @@ function hide_fields_data(frm){
 let is_no_show_again = false
 
 function check_staffing_reviews(frm){
-	if((frappe.user_roles.includes('Hiring Admin') || frappe.user_roles.includes('Hiring User')) && frappe.session.user!='Administrator'){
+	if((frappe.user_roles.includes('Hiring Admin') || frappe.user_roles.includes('Hiring User')) && frappe.session.user!='Administrator' && frappe.boot.tag.tag_user_info.company_type!='TAG'){
 		frappe.db.get_value("Sales Invoice",{"job_order":frm.doc.job_order,"rating_no_show":1,"company":frm.doc.company},['name'],(r) =>{
 	if(!r.name){
 		frappe.db.get_value("Company Review", {"name": frm.doc.company+"-"+frm.doc.job_order},['rating'], function(a){
