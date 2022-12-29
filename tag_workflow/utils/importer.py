@@ -889,7 +889,7 @@ class Column:
                 self.warnings.append({"col": self.column_number, "message": ("The following values are invalid: {0}. Values must be one of {1}".format(invalid_values, valid_values)),})
 
     def fieldtype_data_check(self):
-        if self.df.name == "Contact-email_address":
+        if self.df.name == "Employee-email":
             values = list(set([cstr(v) for v in self.column_values[1:] if v]))
             for email in values:
                 if not validate_email_address(email):
@@ -897,13 +897,13 @@ class Column:
         self.fieldtype_data_check_remaining()
 
     def fieldtype_data_check_remaining(self):
-        if self.df.name == "Contact-phone_number":
+        if self.df.name == "Employee-contact_number":
             values = list(set([cstr(v) for v in self.column_values[1:] if v]))
             for phone in values:
                 if not is_valid(phone):
                     self.warnings.append({"col": self.column_number, "message": ("The Mobile number is invalid")})
 
-        if self.df.name == "Contact-zip":
+        if self.df.name == "Employee-zip":
             values = list(set([cstr(v) for v in self.column_values[1:] if v]))
             for phone in values:
                 if not zip_valid(phone):
