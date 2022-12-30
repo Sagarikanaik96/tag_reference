@@ -1,6 +1,6 @@
 from unicodedata import name
 import frappe
-from frappe.utils import add_years, getdate,
+from frappe.utils import add_years, getdate
 from frappe import DoesNotExistError
 from json import loads
 from frappe.desk.form.load import get_docinfo, run_onload

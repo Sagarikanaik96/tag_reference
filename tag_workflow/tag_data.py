@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from frappe.share import add
+from frappe.share import add_docshare as add
 from frappe import enqueue
 from tag_workflow.utils.notification import sendmail, make_system_notification
 from frappe.utils import get_datetime,now
