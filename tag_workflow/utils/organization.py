@@ -489,7 +489,7 @@ def update_password_field_contd(company_data):
     if company_data.branch_api_key and not company_data.branch_api_key_data:
         frappe.db.sql(f'''UPDATE `tabCompany` SET branch_api_key_data='{"•"*len(company_data.branch_api_key)}' where name = "{company_data.name}"''')
 
-def remove_fields():
+def remove_field():
     fields = ['decrypt_ssn', 'decrypted_ssn', 'decrypt_client_id', 'decrypt_client_secret', 'decrypted_client_id', 'decrypted_client_secret', 'decrypt_jazzhr_api_key', 'decrypted_jazzhr_api_key', 'decrypt_subdomain_api_key', 'decrypted_subdomain_api_key', 'decrypt_subdomain', 'decrypted_subdomain', 'decrypted_api', 'decrypt_api', 'decrypt_org_id', 'decrypted_org_id']
     for field in fields:
         if field in ['decrypt_ssn', 'decrypted_ssn']:
@@ -500,6 +500,8 @@ def remove_fields():
         elif frappe.db.exists(Custom_Label,{'dt':'Company','fieldname':field}):
             frappe.db.sql(f'''DELETE FROM `tabCustom Field` WHERE dt="Company" and fieldname="{field}"''')
         frappe.db.commit()
+    frappe.db.sql('''ALTER TABLE tabCompany DROP IF EXISTS bulk_upload_resume, DROP IF EXISTS decrypt_org_id, DROP IF EXISTS decrypted_org_id, DROP IF EXISTS decrypt_api, DROP IF EXISTS decrypted_api''')
+    frappe.db.commit()
 
 def staffing_radius():
     try:
