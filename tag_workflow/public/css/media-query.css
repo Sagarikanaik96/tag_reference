@@ -146,7 +146,7 @@
   }
   .col.layout-main-section-wrapper,
   .col-md-12.layout-main-section-wrapper {
-    left: 1rem;
+    left: 0rem !important;
     max-width: 100%;
     width: 100%;
     padding: 0;
