@@ -23,8 +23,17 @@ frappe.data_import.ImportPreview = class ImportPreview {
 		});
 	}
 
+	set_csv_data(doc){
+		if(doc == "Contact" || doc == "Employee"){
+			let skip_data = ["JDoe@example.com"]
+			return  this.preview_data.data.filter(word =>{
+				return !skip_data.includes(word[3])
+			})
+		}
+		return  this.preview_data.data
+	}
 	refresh() {
-		this.data = this.preview_data.data;
+		this.data = this.set_csv_data(this.doctype);
 		this.make_wrapper();
 		this.prepare_columns();
 		this.prepare_data();
@@ -358,7 +367,6 @@ function get_columns_for_picker(doctype,exporting_for) {
 	let doctype_fields = frappe.meta
 		.get_docfields(doctype)
 		.filter(exportable_fields);
-	console.log('vlue of object',doctype_fields)
 	if(doctype=='Contact'){
 		out[doctype] = [
 			{

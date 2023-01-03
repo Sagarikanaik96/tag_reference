@@ -96,3 +96,15 @@ def update_changes(doc_name):
 				doc.save(ignore_permissions=True)
 	except Exception as e:
 		frappe.log_error(e,'Job Site Update')
+
+@frappe.whitelist()
+def get_sites_based_on_company(doctype, txt, searchfield, page_len, start, filters):
+	try:
+		company = filters.get('company')
+		site_list = filters.get('site_list')
+		value=exist_values(site_list)
+		sql = ''' select name from `tabJob Site` where  company ="{0}" and name NOT IN ('{1}') and name like "%%{2}%%" '''.format(company,value,'%s' % txt)
+		return frappe.db.sql(sql)
+	except Exception as e:
+		frappe.msgprint(e)
+		return tuple()
