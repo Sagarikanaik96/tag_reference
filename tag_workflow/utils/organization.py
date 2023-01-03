@@ -415,6 +415,8 @@ def remove_field():
         data=frappe.db.sql('select name from `tabCertificate and Endorsement` where certificate_types="WBE - Women Business Enterprise" ',as_dict=1)
         if len(data)>0:
             frappe.db.sql('truncate table `tabCertificate and Endorsement`')
+        frappe.db.sql('''ALTER TABLE tabCompany DROP IF EXISTS bulk_upload_resume, DROP IF EXISTS decrypt_org_id, DROP IF EXISTS decrypted_org_id, DROP IF EXISTS decrypt_api, DROP IF EXISTS decrypted_api''')
+        frappe.db.commit()
     except Exception as e:
         print(e)
 def update_old_job_sites():

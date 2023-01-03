@@ -254,7 +254,7 @@ frappe.ui.form.on("Company", {
 			frappe.validated = false;
 		}
 		validate_cert_attachment(frm);
-
+		validate_office_code(frm);
 	},
 	make_organization_inactive() {
 		frappe.call({
@@ -324,6 +324,9 @@ frappe.ui.form.on("Company", {
 		}
 		save_password_data(frm);
 		update_invoice_view(frm);
+		if(frm.doc.staff_complete_enable==0){
+			frm.set_value('office_code', '');
+		}
 	},
 	phone_no: function (frm) {
 		set_field(frm, frm.doc.phone_no, "phone_no");
@@ -1337,5 +1340,13 @@ function update_invoice_view(frm){
 			}
 		}
 		document.cookie = 'invoice_view ='+new_view.join('|')+';path=/';
+	}
+}
+
+function validate_office_code(frm){
+	let office_code = frm.doc.office_code;
+	if(office_code && office_code.length != 5){
+		frappe.msgprint('Minimum and Maximum Characters allowed for Office Code are 5.');
+		frappe.validated = false;
 	}
 }

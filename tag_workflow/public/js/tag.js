@@ -1,6 +1,5 @@
 frappe.provide("frappe.toolbar");
 frappe.provide("tag_workflow");
-
 frappe.flags.ats = []
 frappe.flags.ats_status = null;
 $(document).bind('toolbar_setup', function() {
@@ -102,7 +101,7 @@ frappe.ui.form.States = Class.extend({
 			// show actions from that state
 			this.show_actions(state);
 		}
-
+		
 	},
 
 	show_actions: function(state) {
@@ -593,4 +592,46 @@ function check_list(me,item,level,keywords,out){
 			out.push(tag_workflow.option("Report", ["List", item, "Report"], 0.04));
 		}}
 	}
+}
+
+function export_csv(ts_list){
+    frappe.call({
+        'method': 'tag_workflow.utils.timesheet.csv_data',
+        'args': {
+            'ts_list': ts_list,
+        },
+        callback: (r)=>{
+			let export_ts_headers = "Customer Code, Personnel Code, Hour Type, Work Date, Position Code, Pay Hours, Bill Hours, Office Code, Date Time IN, Date Time OUT, Pay Rate, Bill Rate, PO Number, Approver Name, Approval Date Time, Source, Assignment Number, Project Code";
+			r.message.forEach(function(row){
+				export_ts_headers += "\n"+row.join(',');
+            });
+            //merge the data with CSV
+            let exporttimesheetElement = document.createElement('a');
+            exporttimesheetElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(export_ts_headers);
+            exporttimesheetElement.target = '_blank';
+
+            //provide the name for the CSV file to be downloaded
+			let datetimestamp = frappe.datetime.now_datetime().split(" ");
+			datetimestamp[0] = frappe.format(datetimestamp[0], {fieldtype:'Date'});
+			datetimestamp[1] = datetimestamp[1].split(':').join('_');
+            exporttimesheetElement.download = 'TimeClockImport_'+datetimestamp.join(' ')+'.csv';
+
+            exporttimesheetElement.click();
+        }
+    });
+}
+
+function change_view(){
+	let ch =document.querySelector(".toggle_icon").id
+	console.log(ch)
+    if(ch =="toggle_display_1"){
+		console.log("first_click")
+		document.querySelector(".toggle_icon").id="toggle_display_0"
+	  $(".col.layout-main-section-wrapper, .col-md-12.layout-main-section-wrapper").css ({"left": "8rem","max-width": "90%","width": "100%"})
+    }
+    else{
+		document.querySelector(".toggle_icon").id="toggle_display_1"
+		$(".col.layout-main-section-wrapper, .col-md-12.layout-main-section-wrapper").css ({"left": "0rem","max-width": "none","width": "100%"})
+
+    }
 }

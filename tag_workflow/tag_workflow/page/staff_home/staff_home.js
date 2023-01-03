@@ -96,7 +96,7 @@ frappe.StaffHome = Class.extend({
 		for (let p in ht){
 			let data = ht[p].slice(2)
 			let content_list = `<div style="padding: 0px 9px 0px 10px ; max-height:120px"><br>`
-			if(data.length==1){content_list+=`<span style="font-weight:bold">${data[0]}</span>`}
+			if(data.length==1){content_list+=`<span style="font-weight:bold;cursor:pointer;" onclick=toggle_ele("${data[0]}")>${data[0]}</span>`}
 			else{
 			for(let li in data){
 				content_list+=`<li class="select-order" style="font-weight:bold;cursor:pointer;" onclick=toggle_ele("${data[li]}")>${data[li]}</li>`

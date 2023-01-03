@@ -1,5 +1,9 @@
 
 @media (max-width: 768px) {
+  [data-route="Workspaces/My Activities"] .sub-menu,
+[data-route="staff-home"] .sub-menu {
+  top: 30px !important;
+}
   [data-page-route="Workspaces"] .hiring_dashboard_table table {
     width:1000px;
   }
@@ -142,7 +146,7 @@
   }
   .col.layout-main-section-wrapper,
   .col-md-12.layout-main-section-wrapper {
-    left: 1rem;
+    left: 0rem !important;
     max-width: 100%;
     width: 100%;
     padding: 0;

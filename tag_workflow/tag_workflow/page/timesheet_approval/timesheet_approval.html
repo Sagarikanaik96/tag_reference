@@ -13,13 +13,16 @@
 					<tr>
 						<th style="text-align: center;width: 10%;">
 							<div class="row-index sortable-handle col col-xs-1" style="height: 0px;">
-								<input type="checkbox" class="grid-row-check pull-left" disabled>
+								<input type="checkbox" class="grid-row-check pull-left" onclick="select_all(this.id)" id="_main_all">
 							</div>
 						</th>
 						<th style="text-align: center; width: 20%;">Date of Timesheet</th>
 						<th style="text-align: center; width: 25%;">Status</th>
 						<th style="text-align: center; width: 20%;">Job Order</th>
 						<th style="text-align: center; width: 25%;">Status of Work Order</th>
+						{%if (frappe.boot.tag.tag_user_info.export_ts == 1 ) { %}
+						<th style="text-align: center; width: 20%;">Exported</th>
+						{% } %}
 					</tr>
 				</thead>
 				<tbody id="data_approval">
@@ -44,7 +47,7 @@
 					<tr>
 						<th style="text-align: center;width: 5%;">
 							<div class="row-index sortable-handle col col-xs-1" style="height: 0px;">
-								<input type="checkbox" class="grid-row-check pull-left" onclick="select_all()" id="all">
+								<input type="checkbox" class="grid-row-check pull-left" onclick="select_all(this.id)" id="all">
 							</div>
 						</th>
 						<th style="text-align: left; width: 20%;">Employee Name</th>
@@ -55,6 +58,9 @@
 						<th style="text-align: center; width: 10%;">Break To Time</th>
 						<th style="text-align: center; width: 10%;">Total Hours</th>
 						<th style="text-align: center; width: 15%;">Employee Status</th>
+						{%if (frappe.boot.tag.tag_user_info.export_ts == 1 ) { %}
+						<th style="text-align: center; width: 10%;">Exported</th>
+						{% } %}
 					</tr>
 				</thead>
 				<tbody id="child"></tbody>
