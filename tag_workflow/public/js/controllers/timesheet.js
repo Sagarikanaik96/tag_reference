@@ -35,8 +35,6 @@ frappe.ui.form.on("Timesheet", {
 		}
 		let timesheet_fields = ["naming_series", "customer", "status", "currency", "exchange_rate"];
 		hide_timesheet_field(timesheet_fields);
-
-		check_update_timesheet(frm);
 		let child_table = ['activity_type','from_time', 'to_time', 'hrs', 'billing_amount']
 		for(let i in child_table){
 			$( "[data-fieldname="+child_table[i]+"]" ).on('mouseover',function(e) {

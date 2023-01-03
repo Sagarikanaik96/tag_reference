@@ -59,7 +59,7 @@ frappe.data_import.DataExporter = class DataExporter {
 				{
 					fieldtype: 'HTML',
 					fieldname: 'military_veteran',
-					options:" ** Please type only 0 and 1 are Military Veteran<br> ** For Gender,Options are: Male, Female,Decline to answer<br> ** For Status,Options Available are: Active,Inactive,Suspended,Left"
+					options:['Contact','Employee'].includes(this.doctype)?"":"** Please type only 0 and 1 are Military Veteran<br> ** For Gender,Options are: Male, Female,Decline to answer<br> ** For Status,Options Available are: Active,Inactive,Suspended,Left"
 				},
 				{
 					fieldtype: 'Section Break'
@@ -103,6 +103,12 @@ frappe.data_import.DataExporter = class DataExporter {
 		this.update_record_count_message();
 
 		this.dialog.show();
+		
+		if(['Contact','Employee'].includes(this.doctype)){this.hide_fields()}
+	}
+
+	hide_fields() {
+		let a=this.dialog.$wrapper.find('.modal-content>.modal-body>div>.form-layout>.form-page').children(); a[1].style.display="none"; a[2].style.display="none";
 	}
 
 	export_records() {

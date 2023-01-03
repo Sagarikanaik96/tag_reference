@@ -1,3 +1,4 @@
+frappe.require('/assets/tag_workflow/js/tag.js');
 frappe.listview_settings["Timesheet"] = {
   hide_name_column: true,
   add_fields: [
@@ -39,6 +40,21 @@ frappe.listview_settings["Timesheet"] = {
         return `<span class="filterable ellipsis" title="" id="${val}-${f.name}" ><a class="filterable ellipsis" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}" >${val}</a></span>`;
       }
     },
+    ts_exported(val, d){
+      if(val==0){
+        return `<span class="ellipsis" title="Exported: ">
+          <a class="filterable ellipsis" data-filter="${d.fieldname},=,${val}">
+            No
+          </a>
+        </span>`
+      }else{
+        return `<span class="ellipsis" title="Exported: ">
+          <a class="filterable ellipsis" data-filter="${d.fieldname},=,${val}">
+            Yes
+          </a>
+        </span>`
+      }
+    }
   },
 
   onload: function (listview) {
@@ -98,7 +114,8 @@ frappe.listview_settings["Timesheet"] = {
         .addClass("btn-primary");
     }
     add_filters(listview);
-  },
+    export_ts_button(listview);
+  }
 };
 
 /*-------------------------------*/
@@ -221,4 +238,29 @@ function checking_selected_values(listview){
       }
     }
   })
+}
+
+$(document).on('change', '[title="Select All"], .list-row-checkbox', function () {
+  if(cur_list.$checks.length==0){
+    $('#main_export_ts').hide();
+  }else{
+    $('#main_export_ts').show();
+  }
+});
+
+function export_ts_button(listview){
+  if(frappe.boot.tag.tag_user_info.export_ts==1){
+    listview.page.set_secondary_action('Export Timesheet',()=>{
+      let selected_rows = cur_list.$checks;
+      let ts_name=[];
+      for(let i in selected_rows){
+        if(!isNaN(parseInt(i)))
+          ts_name.push(selected_rows[i].dataset.name);
+      }
+      if(ts_name.length>0){
+        export_csv(ts_name);
+      }
+    }).addClass("btn-primary").attr('id','main_export_ts');
+    $('#main_export_ts').hide();
+  }
 }

@@ -284,6 +284,19 @@ def company_rating(hiring_company=None,staffing_company=None,ratings=None,job_or
     except Exception as e:
         frappe.log_error(e, "Hiring Company Rating")
         frappe.throw(e)
+
+@frappe.whitelist()
+def rating_no_show(rating_no_show,invoice_name):
+    try:
+        if rating_no_show:
+            rating_no_show=1
+        else:
+            rating_no_show=0
+        frappe.db.sql('''update `tabSales Invoice` set rating_no_show="{}" where name="{}"'''.format(rating_no_show,invoice_name))
+    except Exception as e:
+        frappe.log_error(e, "Staffing Company Rating")
+        frappe.throw(e)
+
 def staffing_company_rating(hiring_company,staffing_company,ratings,job_order):
     ratings = ast.literal_eval(ratings)
     doc = frappe.new_doc('Company Review')
@@ -725,3 +738,45 @@ def check_selected_values(data1,timesheets_to_update):
         return data2
     else:
         return data1
+
+@frappe.whitelist()
+def csv_data(ts_list):
+    try:
+        ts_list=ast.literal_eval(ts_list)
+        ts_data, exported_ts = [], []
+        for ts in ts_list:
+            ts_details = frappe.get_doc('Timesheet', ts)
+            office_code = frappe.db.get_value('Company', {'name': ts_details.employee_company}, ['office_code'])
+            if office_code and ts_details.workflow_state=='Approved':
+                exported_ts.append(ts_details.name)
+                hiring_comp, emp_id, date_of_ts, pos_code, ts_hours =  ts_details.company, ts_details.employee, ts_details.date_of_timesheet.strftime('%m-%d-%Y'), ts_details.job_title, ts_details.timesheet_hours
+                from_time, to_time, pay_rate, bill_rate, job_order = ts_details.time_logs[0].from_time.strftime("%m-%d-%Y %H:%M"), ts_details.time_logs[0].to_time.strftime("%m-%d-%Y %H:%M"), ts_details.employee_pay_rate, ts_details.per_hour_rate+ts_details.flat_rate, ts_details.job_order_detail
+                if ts_details.todays_overtime_hours==0:
+                    ts_data = no_ot_data(ts_details, ts_data, office_code, hiring_comp, emp_id, date_of_ts, pos_code, ts_hours, from_time, to_time, pay_rate, bill_rate, job_order)
+                else:
+                    ts_data.append([hiring_comp, emp_id, 'Regular', date_of_ts, pos_code, ts_hours, ts_hours, office_code, from_time, to_time, pay_rate, bill_rate, job_order, '', '', 'TAG', '', ''])
+                    ts_data.append([hiring_comp, emp_id, 'Overtime', date_of_ts, pos_code, ts_details.todays_overtime_hours, ts_hours, office_code, from_time, to_time, pay_rate*1.5, bill_rate*1.5, job_order, '', '', 'TAG', '', ''])
+        if len(exported_ts)>0:
+            sql = f'''UPDATE `tabTimesheet` SET ts_exported = 1 WHERE name in {tuple(exported_ts)}''' if len(exported_ts)>1 else f'''UPDATE `tabTimesheet` SET ts_exported = 1 WHERE name in ("{exported_ts[0]}")'''
+            frappe.db.sql(sql)
+            frappe.db.commit()
+        return ts_data
+    except Exception as e:
+        frappe.log_error(e, 'csv_data Error')
+
+@frappe.whitelist()
+def no_ot_data(ts_details, ts_data, office_code, hiring_comp, emp_id, date_of_ts, pos_code, ts_hours, from_time, to_time, pay_rate, bill_rate, job_order):
+    try:
+        if ts_details.timesheet_billable_amount == 0 and ts_details.no_show==0 and ts_details.time_logs[0].extra_hours>0:
+            ts_data.append([hiring_comp, emp_id, 'Regular', date_of_ts, pos_code, ts_hours, ts_hours, office_code, from_time, to_time, pay_rate, bill_rate, job_order, '', '', 'TAG', '', ''])
+            ts_data.append([hiring_comp, emp_id, 'Overtime', date_of_ts, pos_code, ts_details.time_logs[0].extra_hours, ts_hours, office_code, from_time, to_time, pay_rate*1.5, bill_rate, job_order, '', '', 'TAG', '', ''])
+        else:
+            if ts_details.timesheet_unbillable_overtime_amount > 0:
+                unbillable_hours=ts_details.timesheet_unbillable_overtime_amount/(1.5*pay_rate)
+                ts_data.append([hiring_comp, emp_id, 'Regular', date_of_ts, pos_code, ts_hours, ts_hours, office_code, from_time, to_time, pay_rate, bill_rate, job_order, '', '', 'TAG', '', ''])
+                ts_data.append([hiring_comp, emp_id, 'Overtime', date_of_ts, pos_code, unbillable_hours, ts_hours, office_code, from_time, to_time, pay_rate, bill_rate, job_order, '', '', 'TAG', '', ''])
+            else:
+                ts_data.append([hiring_comp, emp_id, 'Regular', date_of_ts, pos_code, ts_hours, ts_hours, office_code, from_time, to_time, pay_rate*1.5, bill_rate, job_order, '', '', 'TAG', '', ''])
+        return ts_data
+    except Exception as e:
+        frappe.log_error(e, 'no_ot_data Error')

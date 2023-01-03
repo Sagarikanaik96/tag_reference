@@ -1,3 +1,6 @@
+frappe.require('/assets/tag_workflow/js/tag.js');
+window.row_selected = 0;
+window.selected_ts = [];
 frappe.pages['timesheet-approval'].on_page_load = function(wrapper) {
 	let page = frappe.ui.make_app_page({
 		parent: wrapper,
@@ -23,7 +26,12 @@ frappe.TimesheetApproval = Class.extend({
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').css("display", "flex");
 		$(frappe.render_template('timesheet_approval', "")).appendTo(this.body);
-
+		if(frappe.boot.tag.tag_user_info.export_ts==1){
+			page.add_button('Export Timesheets', ()=>{
+				export_timesheet();
+			}).addClass('btn-primary').attr('id', 'main_export_ts');
+			$('#main_export_ts').hide();
+		}
 		me.job_order = page.add_field({
 			label: 'Job Order', fieldtype: 'Link',fieldname: 'job_order', options: "Job Order", reqd: 1, onchange: function(){
 				me.order_info(wrapper, page);
@@ -134,6 +142,7 @@ frappe.TimesheetApproval = Class.extend({
 	},
 
 	make_main_table: function(_wrapper, _page, data, _company){
+		$('.actions-btn-group').hide();
 		let me = this;
 		me.main_data = ``;
 		for(let i in data){
@@ -144,29 +153,47 @@ frappe.TimesheetApproval = Class.extend({
 				workflow='Open'
 			}
 			me.main_data += `
-				<tr onclick=render_child_data('${data[i].job_order_detail}','${data[i].date_of_timesheet}','${data[i].name}')>
+				<tr>
 					<td style='text-align: center; width: 10%;'>
 						<div class='row-index sortable-handle col col-xs-1' style='height: 0px;'>
-							<input type='checkbox' class='grid-row-check pull-left' disabled>
+							<input type='checkbox' class='grid-row-check pull-left main' id="_main_${i}" onclick="select_row(this.id)" data-description="${data[i].workflow_state}" value = "${data[i].job_order_detail}_${data[i].date_of_timesheet}">
 						</div>
 					</td>
-					<td style='text-align: center; width: 20%;'>${date}</td>
-					<td style='text-align: center; width: 25%;'>${workflow}</td>
-					<td style='text-align: center; width: 20%;'>${data[i].job_order_detail}</td>" +
-					<td style='text-align: center; width: 25%;'>${data[i].order_status}</td>
-				</tr>`;
+					<td style='text-align: center; width: 20%;' onclick=render_child_data('${data[i].job_order_detail}','${data[i].date_of_timesheet}','${data[i].name}')>${date}</td>
+					<td style='text-align: center; width: 25%;' onclick=render_child_data('${data[i].job_order_detail}','${data[i].date_of_timesheet}','${data[i].name}')>${workflow}</td>
+					<td style='text-align: center; width: 20%;' onclick=render_child_data('${data[i].job_order_detail}','${data[i].date_of_timesheet}','${data[i].name}') >${data[i].job_order_detail}</td>" +
+					<td style='text-align: center; width: 25%;' onclick=render_child_data('${data[i].job_order_detail}','${data[i].date_of_timesheet}','${data[i].name}')>${data[i].order_status}</td>`;
+			if(frappe.boot.tag.tag_user_info.export_ts==1){
+				me.main_data+=`<td style='text-align: center; width: 25%;' onclick=render_child_data('${data[i].job_order_detail}','${data[i].date_of_timesheet}','${data[i].name}')>${data[i].ts_exported}</td>`;
+			}
+			me.main_data+=`</tr>`;
 		}
 		$("#data_approval").append(me.main_data);
 	},
 
 	make_action(wrapper, page, action){
 		let me = this;
+		let selected_row_status=[];
+		$('input:checkbox').each((_i, element)=>{
+			if(element.checked && element.dataset){
+				selected_row_status.push(element.dataset.description);
+			}
+		});
+		if(selected_row_status.length==1 && selected_row_status[0]!='Approval Request'){
+			frappe.msgprint("Timesheet already "+selected_row_status[0].toLowerCase()+".");
+		}else{
+			me.make_action_contd(wrapper,page, action);
+		}
+	},
+
+	make_action_contd(wrapper, page, action){
+		let me = this;
 		let rowCount = $("#child tr").length || 0;
 		me.count = [];
 		me.value = [];
 		for(let r=0;r<rowCount;r++){
 			let id = $("#_"+String(r))[0];
-			if(id.checked == 1){
+			if(id.checked == 1 && id.dataset && id.dataset.description=='Approval Request'){
 				me.count.push(r);
 				me.value.push(id.value);
 			}
@@ -287,17 +314,21 @@ function get_state(state){
 }
 
 function render_child_data(order, date, timesheet){
+	$('.actions-btn-group').show();
+	$('#main_export_ts').hide();
+	$('input:checkbox').prop('checked', false); 
 	frappe.call({
 		"method": "tag_workflow.tag_workflow.page.timesheet_approval.timesheet_approval.get_child_data",
 		"args": {"order": order, "timesheet": timesheet, "date": date},
 		"callback": function(r){
 			let data = r.message || [];
 			let html = ``;
+			let all_workflow_state = [];
 			for(let d in data){
+				all_workflow_state.push(data[d].workflow_state);
 				let workflow = get_state(data[d].workflow_state);
 				let state = data[d].state ? `<p class="indicator-pill red filterable ellipsis">${data[d].state}</p>` : '';
-				let inp = ["Approved", "Denied", "In Progress"].includes(data[d].workflow_state) ? `<input type='checkbox' class='grid-row-check pull-left' id="_${d}" value="${data[d].name}" disabled>` : `<input type='checkbox' class='grid-row-check pull-left' id="_${d}" value="${data[d].name}">`; 
-
+				let inp = `<input type='checkbox' class='grid-row-check pull-left' id="_${d}" value="${data[d].name}" onclick="select_row(this.id)" data-description="${data[d].workflow_state}">`;
 				html += `
 					<tr>
 						<td style='text-align: center; width: 5%;'>
@@ -314,9 +345,12 @@ function render_child_data(order, date, timesheet){
 						<td style='text-align: center; width: 10%;' onclick=show_timesheet('${order}','${date}','${data[d].name}')>${data[d].break_start}</td>
 						<td style='text-align: center; width: 10%;' onclick=show_timesheet('${order}','${date}','${data[d].name}')>${data[d].break_end}</td>
 						<td style='text-align: center; width: 10%;' onclick=show_timesheet('${order}','${date}','${data[d].name}')>${data[d].hours.toFixed(2)} hrs</td>
-						<td style='text-align: center; width: 15%;' onclick=show_timesheet('${order}','${date}','${data[d].name}')>${state}</td>
-					</tr>
-				`;
+						<td style='text-align: center; width: 15%;' onclick=show_timesheet('${order}','${date}','${data[d].name}')>${state}</td>`;
+				if(frappe.boot.tag.tag_user_info.export_ts==1){
+					let exported = data[d].ts_exported==1 ? 'Yes' : 'No';
+					html+=`<td style='text-align: center; width: 15%;' onclick=show_timesheet('${order}','${date}','${data[d].name}')>${exported}</td>`;
+				}
+				html+=`</tr>`;
 			}
 			$("#child").empty();
 			$("#child").append(html);
@@ -325,19 +359,35 @@ function render_child_data(order, date, timesheet){
 			document.getElementById("all").checked = 0;
 			localStorage.setItem("date", "");
 			localStorage.setItem("name", "");
+			if(!all_workflow_state.includes('Approval Request')){
+				$('.actions-btn-group').hide();
+			}
 		}
 	});
 }
 
 /*--------------------------select all-------------------*/
-function select_all(){
-	let all = document.getElementById("all").checked;
-	let rowCount = $("#child tr").length || 0;
+function select_all(id){
+	let id1, id2, id3;
+	if(id=='_main_all'){
+		id1= '_main_all';
+		id2='#data_approval tr';
+		id3='#_main_';
+	}else{
+		id1= 'all';
+		id2='#child tr';
+		id3='#_';
+	}
+	let all = document.getElementById(id1);
+	let rowCount = $(id2).length || 0;
 	for(let r=0;r<rowCount;r++){
-		let id = $("#_"+String(r));
-		if(all == 1 && id.is(':disabled') == 0){
+		let id = $(id3+String(r));
+		if(all.checked==1 && id.is(':disabled') == 0){
+			if(id[0].dataset && id[0].dataset.description=='Approved')
+				$('#main_export_ts').show();
 			id[0].checked = true;
 		}else{
+			$('#main_export_ts').hide();
 			id[0].checked = false;
 		}
 	}
@@ -381,4 +431,39 @@ function check_condition(r){
 }
 function refresh_table(){
 	$(".btn.btn-secondary.btn-default.btn-sm").click()
+}
+
+window.select_row= function(id){
+	let button = document.getElementById(id);
+	if(button.dataset && button.dataset.description=='Approved'){
+		if(button.checked){
+			window.row_selected = window.row_selected+1;
+			window.selected_ts.push(button.value);
+			$('#main_export_ts').show();
+		}else{
+			window.row_selected = window.row_selected-1;
+			window.selected_ts = window.selected_ts.filter(e => e !== button.value);
+			if(window.row_selected==0)
+				$('#main_export_ts').hide();
+		}
+	}
+}
+
+window.export_timesheet = ()=>{
+	let values = []
+	$('input:checkbox').each((_i, element)=>{
+		if(element.checked && element.value){
+			values.push(element.value);
+		}
+	});
+	frappe.call({
+		"method": "tag_workflow.tag_workflow.page.timesheet_approval.timesheet_approval.get_selected_ts",
+		"args": {
+			"checkbox_values": values
+		},
+		"async":0,
+		"callback": function(res){
+			export_csv(res.message);
+		}
+	});
 }

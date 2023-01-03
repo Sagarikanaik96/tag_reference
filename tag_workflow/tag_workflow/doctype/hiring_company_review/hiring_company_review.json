@@ -17,25 +17,33 @@
   {
    "fieldname": "staffing_company",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Staffing Company",
    "read_only": 1
   },
   {
    "fieldname": "hiring_company",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Hiring Company",
    "read_only": 1
   },
   {
    "fieldname": "job_order",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Job Order",
    "read_only": 1
   },
   {
    "fieldname": "rating",
    "fieldtype": "Rating",
-   "label": "Rating",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Ratings",
    "read_only": 1
   },
   {

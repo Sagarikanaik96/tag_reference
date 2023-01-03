@@ -158,5 +158,21 @@
   "parenttype": null,
   "source_text": "Industry Type",
   "translated_text": "Industry"
- }
+ },
+ {
+   "context": null,
+   "contributed": 0,
+   "contribution_docname": null,
+   "contribution_status": "",
+   "docstatus": 0,
+   "doctype": "Translation",
+   "language": "en",
+   "modified": "2022-12-29 02:06:40.889308",
+   "name": "1434a873bf",
+   "parent": null,
+   "parentfield": null,
+   "parenttype": null,
+   "source_text": "Hiring Company Review",
+   "translated_text": "Ratings & Reviews"
+  }   
 ]
