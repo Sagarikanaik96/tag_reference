@@ -115,6 +115,10 @@ frappe.listview_settings["Timesheet"] = {
     }
     add_filters(listview);
     export_ts_button(listview);
+    if(frappe.boot.tag.tag_user_info.export_ts==0){
+      listview.columns.splice(-1);
+      listview.render_header(listview.columns);
+    }
   }
 };
 
