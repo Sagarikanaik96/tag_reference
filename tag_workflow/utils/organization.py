@@ -61,6 +61,9 @@ def setup_data():
         frappe.db.set_value(Global_defaults,Global_defaults,"hide_currency_symbol", "No")
         frappe.db.set_value(Global_defaults,Global_defaults,"disable_rounded_total", "1")
         frappe.db.set_value(Global_defaults,Global_defaults,"country", "United States")
+        import_json("Company")
+        import_json("Contact")
+        import_json("Employee")
         update_organization_data()
         update_roles()
         update_tag_user_type()
@@ -727,3 +730,15 @@ def disable_scheduler():
         frappe.db.sql(""" update `tabSingles` set value=1 where doctype="System Settings" and field="job_disable" """)
     except Exception as e:
         print(e)
+
+def import_json(doctype, submit=False):
+    data = json.loads(open(frappe.get_app_path('tag_workflow', 'utils', 'demo', 'data',
+    frappe.scrub(doctype) + '.json')).read())
+
+    for d in data:
+        doc = frappe.new_doc(doctype)
+        doc.update(d)
+        doc.insert()
+        if submit:
+            doc.submit()
+    frappe.db.commit()

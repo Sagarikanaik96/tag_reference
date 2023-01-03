@@ -1,4 +1,5 @@
 frappe.listview_settings["Contact"] = {
+    filters: [["email_id", "!=", "JDoe@example.com"]],
     onload:function(listview){
         if(frappe.session.user!='Administrator'){
             $('.custom-actions.hidden-xs.hidden-md').hide()

@@ -1,4 +1,20 @@
 frappe.ui.form.on("Item", {
+	onload: function(frm){frm.fields_dict['job_site_table'].grid.get_field('job_site').get_query = function (doc,cdt,cdn) {
+			let jobsites = frm.doc.job_site_table, site_list = [];
+			for (let t in jobsites){
+				if(jobsites[t]['job_site']){
+					site_list.push(jobsites[t]['job_site']);
+				}
+			}
+			return{
+				query: "tag_workflow.tag_workflow.doctype.job_site.job_site.get_sites_based_on_company",
+				filters: {
+				company:frm.doc.company,
+				site_list:site_list
+				},
+			}
+			
+	};},
 	refresh: function(frm,cdt,cdn){
 		$('.form-footer').hide();
 		cur_frm.clear_custom_buttons();
@@ -96,6 +112,15 @@ frappe.ui.form.on("Item", {
 		validate_form(frm);		
 	},
 	company: function(frm){
+		if(frm.doc.company){
+			frappe.db.get_value("Item", {"name": frm.doc.name}, "company", (r) => {
+				if (r!=frm.doc.company){
+					frm.doc.job_site_table=[]
+			frm.refresh_field("job_site_table")
+				}
+			});
+			
+		}
 		if(!frm.doc.company){
 			frm.set_value('company', '');
 			$('[data-fieldname = "company"]').attr('title', '');
@@ -161,6 +186,14 @@ frappe.ui.form.on("Item", {
 		});
 	},
 });
+
+frappe.ui.form.on('Job Sites', {
+    job_site_table_add: function (frm, cdt, cdn) {
+		let child = locals[cdt][cdn];
+		child.bill_rate = frm.doc.rate
+		frm.refresh_field("job_site_table")
+	},
+})
 
 function set_job_site_disable_enable(cdt,cdn){
 	$("[data-fieldname=" + 'hiring_company' + "]").on('click', function (e) {

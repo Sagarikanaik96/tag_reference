@@ -32,6 +32,8 @@ SalarySlip.calculate_total_for_salary_slip_based_on_timesheet = calculate_total_
 SalarySlip.set_time_sheet = set_time_sheet
 SalarySlip.validate = salary_slip_validate
 Employee.update_user_permissions = update_user_permissions
+Exporter.get_data_as_docs = get_data_as_docs
+
 def get_key(key):
     try:
         if(frappe.cache().get_value("aws")):

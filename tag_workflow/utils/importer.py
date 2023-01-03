@@ -39,6 +39,7 @@ class Importer:
         else:
             self.emp_series = 1
 
+        self.con_series = self.get_contact_series()
         self.data_import = data_import
         if not self.data_import:
             self.data_import = frappe.get_doc(doctype="Data Import")
@@ -49,6 +50,17 @@ class Importer:
         self.import_type = self.data_import.import_type
 
         self.import_file = ImportFile(doctype, file_path or data_import.google_sheets_url or data_import.import_file, self.template_options, self.import_type,)
+        self.name = "No Name"
+    
+    def get_contact_series(self):
+        con_count = frappe.db.sql(""" select * from `tabSeries` where name = "HR-CONTACT-" """, as_dict=1)
+        if(con_count):
+            con_series = con_count[0]['current'] + 1
+        else:
+            frappe.db.sql(""" insert into `tabSeries` (name, current) values ('HR-CONTACT-', 1)""", as_dict=1)
+            frappe.db.commit()
+            con_series = 1
+        return con_series
 
     def get_data_for_import_preview(self):
         return self.import_file.get_data_for_import_preview()
@@ -66,9 +78,14 @@ class Importer:
 
     def upload_record(self):
         try:
-            self.column = 'insert into `tabEmployee` (name, employee_name, first_name, last_name, email, company, status, date_of_birth, contact_number, employee_gender, sssn, military_veteran, street_address, suite_or_apartment_no, city, state, zip, lat, lng, naming_series, lft, rgt, creation) values ' + self.sql
-            frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-EMP-" """, self.emp_series)
-            frappe.db.sql(self.column[0:-1])
+            if self.doctype == "Employee":
+                self.column = 'insert into `tabEmployee` (name, employee_name, first_name, last_name, email, company, status, date_of_birth, contact_number, employee_gender, sssn, military_veteran, street_address, suite_or_apartment_no, city, state, zip, lat, lng, naming_series, lft, rgt, creation) values ' + self.sql
+                frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-EMP-" """, self.emp_series)
+                frappe.db.sql(self.column[0:-1])
+            elif self.doctype == "Contact":
+                self.column = 'insert into `tabContact` (name, first_name, phone_number, email_address, email_id, owner_company, company, contact_address, city, zip, suite_or_apartment_no) values ' + self.sql
+                frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-CONTACT-" """, self.con_series)
+                frappe.db.sql(self.column[0:-1])
             frappe.db.commit()
         except Exception as e:
             frappe.db.rollback()
@@ -126,7 +143,8 @@ class Importer:
 
     def check_import_data(self, doc, current_index, row_indexes, total_payload_count, import_log):
         try:
-            self.check_emp_error(doc)
+            if self.doctype == "Employee":
+                self.check_emp_error(doc)
 
             start = timeit.default_timer()
             y = doc.contact_number or ''
@@ -146,8 +164,10 @@ class Importer:
                 import_log.append(frappe._dict(success=True, docname=doc, row_indexes=row_indexes))
             else:
                 message_log = ['{"title": "Error", "message": "Data Error"}']
-
-                msg_exc = """<b>First Name* and Last Name*</b>: cannot be empty and < , > is not allowed\n<b>Email*</b>: accepts the alphanumeric value in format abc@xyz.com.\n<b>Status*</b>: Active/Inactive/Suspended/Left.\n<b>Company*</b>: You can add data in your company. if kept empty it takes the value of your own company.\n<b>Military Veteran</b>: Please type only 0 or 1, and Yes or NO in Military Veteran.\n<b>Gender</b>: Male, Female or Decline to answer.\n<b>SSN</b>: accepts the 9 digits.\n<b>Contact No.</b>: accepts the 10 to 12 digit.\n<b>Date of birth</b>: is mandatory\n  """
+                if self.doctype == "Employee":
+                    msg_exc = """<b>First Name* and Last Name*</b>: cannot be empty and < , > is not allowed\n<b>Email*</b>: accepts the alphanumeric value in format abc@xyz.com.\n<b>Status*</b>: Active/Inactive/Suspended/Left.\n<b>Company*</b>: You can add data in your company. if kept empty it takes the value of your own company.\n<b>Military Veteran</b>: Please type only 0 or 1, and Yes or NO in Military Veteran.\n<b>Gender</b>: Male, Female or Decline to answer.\n<b>SSN</b>: accepts the 9 digits.\n<b>Contact No.</b>: accepts the 10 to 12 digit.\n<b>Date of birth</b>: is mandatory\n  """
+                elif self.doctype == "Contact":
+                    msg_exc = """<b>Contact Name*</b>: cannot be empty and < , > is not allowed\n<b>Email*</b>: accepts the alphanumeric value in format abc@xyz.com.\n<b>Owner Company*</b>: You can add data in your company and cannot be empty and < , > is not allowed\n<b>Phone Number</b>: accepts the 10 to 12 digit.\n  """
 
                 import_log.append(frappe._dict(success=False, exception=msg_exc, messages=message_log, docname=doc, row_indexes=row_indexes))
 
@@ -245,28 +265,47 @@ class Importer:
 
     def process_doc(self, doc):
         if self.import_type == INSERT:
+            if self.doctype == "Contact":
+                return self.insert_record_contact(doc)
             return self.insert_record(doc)
         elif self.import_type == UPDATE:
             return self.update_record(doc)
+    
+    def insert_record_contact(self, docs):
+        try:
+            if frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) and frappe.db.exists("Company", docs.company):
+                if (docs.first_name and docs.email_address and docs.owner_company and docs.phone_number):
+                    if not frappe.db.sql("SELECT company_name FROM `tabLead` WHERE lead_owner = '{0}' or owner='{1}'".format(frappe.session.user, frappe.session.user), as_list=True):
+                        return self.name, "Failed"
+                    
+                    self.name = "HR-CONTACT-" + str(self.con_series)
+                    self.sql += str(tuple([self.name, docs.first_name, docs.phone_number, docs.email_address,docs.email_address, (docs.owner_company or ""), (docs.company or ""), (docs.contact_address or ""), (docs.city or ""), (docs.zip or ""), (docs.suite_or_apartment_no or "")])) + ","
+                    self.con_series += 1
+                    return self.name, "Pass"
+            
+            return self.name, "Failed"
+        except Exception as e:
+            frappe.log_error(e, "insert record for contact")
+            return 'No Name', 'Failed'
 
+    
     def insert_record(self, docs):
         try:
-            name = 'No Name'
             keys = docs.keys()
-            if(frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) == True and frappe.db.exists("Company", docs.company) and "first_name" in keys and "last_name" in keys and "email" in keys and "status" in keys):
+            if (frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) == True and frappe.db.exists("Company", docs.company) and "first_name" in keys and "last_name" in keys and "email" in keys and "status" in keys):
                 if(docs.first_name and docs.last_name and docs.email and docs.status and docs.date_of_birth):
-                    name = "HR-EMP-"+str(self.emp_series)
+                    self.name = "HR-EMP-"+str(self.emp_series)
                     lat, lng = self.update_emp_lat_lng(docs)
 
-                    self.sql += str(tuple([name, (docs.first_name + " " + docs.last_name), docs.first_name, docs.last_name, docs.email, docs.company, docs.status, str(docs.date_of_birth), docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
+                    self.sql += str(tuple([self.name, (docs.first_name + " " + docs.last_name), docs.first_name, docs.last_name, docs.email, docs.company, docs.status, str(docs.date_of_birth), docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
 
                     self.emp_series += 1
                     time.sleep(0.1)
-                    return name, "Pass"
+                    return self.name, "Pass"
                 else:
-                    return name, "Failed"
+                    return self.name, "Failed"
             else:
-                return name, "Failed"
+                return self.name, "Failed"
         except Exception as e:
             frappe.log_error(e, "insert_record")
             return 'No Name', 'Failed'
@@ -443,7 +482,9 @@ class ImportFile:
             if all(v in INVALID_VALUES for v in row):
                 # empty row
                 continue
-
+            if self.doctype in ["Employee", "Contact"] and "JDoe@example.com" in row:
+                # sample record
+                continue
             if not header:
                 header = Header(i, row, self.doctype, self.raw_data, self.column_to_field_map)
             else:

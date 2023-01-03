@@ -1,5 +1,4 @@
 frappe.provide('frappe.data_import');
-
 frappe.data_import.DataExporter = class DataExporter {
 	constructor(doctype, exporting_for) {
 		this.doctype = doctype;
@@ -131,7 +130,7 @@ frappe.data_import.DataExporter = class DataExporter {
 
 		let filters = null;
 		if (values.export_records === 'by_filter') {
-			filters = this.get_filters();
+			filters = this.get_filters(this.doctype);
 		}
 
 		open_url_post(method, {
@@ -251,7 +250,6 @@ frappe.data_import.DataExporter = class DataExporter {
 
 	update_primary_action(no_of_records) {
 		let $primary_action = this.dialog.get_primary_btn();
-
 		if (no_of_records != null) {
 			let label = '';
 			if (no_of_records === 0) {
