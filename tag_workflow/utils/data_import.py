@@ -32,7 +32,7 @@ def start_import(data_import):
     """This method runs in background job"""
     data_import = frappe.get_doc("Data Import", data_import)
     try:
-        if(data_import.reference_doctype != "Employee"):
+        if(data_import.reference_doctype not in ["Employee", "Contact"]):
             from frappe.core.doctype.data_import.importer import Importer
         else:
             from tag_workflow.utils.importer import Importer
@@ -56,3 +56,33 @@ def get_import_list(doctype, txt, searchfield, page_len, start, filters):
     else:
         sql = ''' select name from `tabDocType` where name like "%%{0}%%" '''.format('%s' % txt)
         return frappe.db.sql(sql)
+
+
+def get_filter_field(doctype: str):
+    mapping = {
+        "Contact": "email_id",
+        "Employee": "email"
+    }
+    return mapping.get(doctype)
+
+@frappe.whitelist()
+def download_template(doctype, export_fields=None, export_records=None, export_filters=None, file_type="CSV"):
+    
+    export_fields = frappe.parse_json(export_fields)
+    export_filters = frappe.parse_json(export_filters)
+    export_data = export_records != "blank_template"
+
+
+    if doctype in ["Contact", "Employee"]:
+        export_filters = [[doctype, get_filter_field(doctype), '=', 'JDoe@example.com']]
+        export_data = True
+    
+    e = Exporter(
+        doctype,
+        export_fields=export_fields,
+        export_data=export_data,
+        export_filters=export_filters,
+        file_type=file_type,
+        export_page_length=5 if export_records == "5_records" else None,
+    )
+    e.build_response()
