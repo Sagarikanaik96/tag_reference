@@ -1680,19 +1680,19 @@ def get_jobtitle_based_on_company(doctype, txt, searchfield, page_len, start, fi
     except Exception as e:
         frappe.msgprint(e)
         return tuple()
+
 def validate_user(doc,method):
     error_message=_('Insufficient Permission for  {0}').format(frappe.bold('User' + ' ' + doc.email))
     if not doc.is_new() and frappe.session.user!="Administrator":
         user_role=frappe.db.get_value("User", {"name": frappe.session.user}, "tag_user_type")
         doc_user_role=frappe.db.get_value("User", {"name": doc.name}, "tag_user_type")
-        if doc_user_role and (user_role=="Staffing User" or user_role=="Hiring User"):
-            if doc_user_role=="Staffing Admin" or doc_user_role=="Hiring Admin" or doc_user_role=="TAG Admin":
-                frappe.flags.error_message = error_message
-                raise frappe.PermissionError(("read", "User", doc.email)) 
-        elif doc_user_role and (user_role=="Staffing Admin" or user_role=="Hiring Admin") and doc_user_role=="TAG Admin":
+        if doc_user_role and (((user_role=="Staffing User" or user_role=="Hiring User") and (doc_user_role=="Staffing Admin" or doc_user_role=="Hiring Admin" or doc_user_role=="TAG Admin")) or ((user_role=="Staffing Admin" or user_role=="Hiring Admin") and doc_user_role=="TAG Admin")):
             frappe.flags.error_message = error_message
-            raise frappe.PermissionError(("read", "User", doc.email))
+            raise frappe.PermissionError(("read", "User", doc.email)) 
     print(method)
+    user = frappe.get_doc('User',frappe.session.user)
+    if not doc.is_new() and (doc.email!=user.email or doc.company!=user.company):
+        frappe.throw('Insufficient Permission')
 
 @frappe.whitelist()
 def get_password(fieldname, comp_name):

@@ -129,3 +129,11 @@ def get_certificate_type(cert_attribute):
 	sql = '''select name from `tabCertificate and Endorsement` where name like "{}%"''' .format(cert_attribute)
 	cert_name = frappe.db.sql(sql)
 	return cert_name
+
+@frappe.whitelist()
+def validate_saved_fields(doc,method):
+	user = frappe.get_doc('User',frappe.session.user)
+	if not doc.is_new() and user.tag_user_type=="Hiring User":
+		company = frappe.get_doc('Company',doc.name)
+		if doc.title!=company.title or doc.fein!=company.fein or doc.phone_no!=company.phone_no or doc.email!=company.email:
+			frappe.throw('Insufficient Permission')
