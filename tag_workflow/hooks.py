@@ -90,6 +90,7 @@ app_include_js = [
         "/assets/tag_workflow/js/twilio_utils.js",
         "/assets/tag_workflow/js/list.js",
         "/assets/tag_workflow/js/emp_functions.js",
+        "/assets/tag_workflow/js/staff_invoice_ratings.js",
         "/assets/tag_workflow/js/frappe/data_import/index.js",
         "/assets/tag_workflow/js/frappe/data_import/import_preview.js",
         "/assets/tag_workflow/js/frappe/data_import/data_exporter.js",
