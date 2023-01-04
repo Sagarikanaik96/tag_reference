@@ -158,11 +158,19 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
     except Exception as e:
         frappe.db.rollback()
         frappe.log_error(e, "final_notification")
-
+        
+def check_employee_exists(v):
+    for emp in v:
+        emp_doc=frappe.get_doc("Employee",emp['employee'])
+        if not emp_doc or (emp_doc and emp_doc.employee_name!=emp['employee_name']):
+            frappe.local.response['http_status_code'] = 500
+            frappe.throw('Invalid Request')
 
 @frappe.whitelist(allow_guest=False)
 def receive_hiring_notification(user, company_type, hiring_org, job_order, staffing_org, emp_detail, doc_name, no_of_worker_req, is_single_share, job_title,employee_filled,notification_check):
     try:
+        v = json.loads(emp_detail)
+        check_employee_exists(v)
         if(company_type == "Staffing" and user == frappe.session.user):
             if int(notification_check)==0:
                 bid_receive=frappe.get_doc(jobOrder,job_order)
@@ -184,7 +192,6 @@ def receive_hiring_notification(user, company_type, hiring_org, job_order, staff
             job_detail = frappe.db.sql(job_sql, as_dict=1)
             lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)
             user_list = frappe.db.sql(lst_sql, as_list=1)
-            v = json.loads(emp_detail)
             s = ''
             for i in v:
                 s += i['employee_name'] + ','
