@@ -5,7 +5,7 @@
 import frappe
 from frappe.model.document import Document
 from tag_workflow.tag_data import chat_room_created
-from frappe.share import add
+from frappe.share import add_docshare as add
 from tag_workflow.utils.notification import sendmail, make_system_notification
 from tag_workflow.tag_data import joborder_email_template
 import json

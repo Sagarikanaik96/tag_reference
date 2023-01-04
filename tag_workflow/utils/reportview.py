@@ -1,21 +1,13 @@
 import frappe
-from frappe import _
-from frappe.desk.reportview import get_list, get_count, execute, get_form_params, validate_args, validate_fields, validate_filters, setup_group_by, raise_invalid_field, is_standard, extract_fieldname, get_meta_and_docfield, update_wildcard_field_param, clean_params, parse_json, get_parenttype_and_fieldname, compress, save_report, export_query, append_totals_row, get_labels, handle_duration_fieldtype_values, delete_items, delete_bulk, get_sidebar_stats, get_stats, get_filter_dashboard_data, scrub_user_tags, get_match_cond, build_match_conditions, get_filters_cond
+from frappe.desk.reportview import execute, get_form_params, compress
 
 import frappe
 import json
 import frappe.permissions
-from frappe.model.db_query import DatabaseQuery
-from frappe.model import default_fields, optional_fields
-from six import string_types, StringIO
-from frappe.core.doctype.access_log.access_log import make_access_log
-from frappe.utils import cstr, format_duration
 from frappe.model.base_document import get_controller
-import googlemaps
 import json
 import requests
-import time
-from haversine import haversine, Unit
+from haversine import haversine
 from tag_workflow.tag_workflow.doctype.job_order.job_order import claims_left
 from tag_workflow.tag_workflow.doctype.job_order.job_order import my_used_job_orders
 
@@ -130,8 +122,8 @@ def get_data(user_company, radius, data, page_length):
         company_address = []
         result = []
         for com in user_company:
-            add = " ".join(frappe.db.get_value("Company", com.company, [
-                           "IFNULL(suite_or_apartment_no, '')", "IFNULL(state, '')", "IFNULL(city, '')", "IFNULL(zip, '')"]))
+            add_temp = frappe.db.get_value("Company", com.company, ["suite_or_apartment_no", "state", "city", "zip"])
+            add = " ".join(["" if i == None else i for i in add_temp])
             if(add and add not in company_address):
                 lat, lng = get_lat_lng(add)
                 lat_lng = tuple([lat, lng])

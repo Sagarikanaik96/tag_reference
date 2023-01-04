@@ -1,7 +1,7 @@
 import frappe
 import requests
 
-from frappe.share import add
+from frappe.share import add_docshare as add
 ORD='Job Order'
 @frappe.whitelist()
 def get_link1(name, userid):

@@ -5,7 +5,7 @@
 
 import json
 import frappe
-from frappe.share import add
+from frappe.share import add_docshare as add
 from frappe import _, msgprint, throw
 from tag_workflow.controllers import base_controller
 from frappe import enqueue

@@ -1,7 +1,7 @@
 import frappe
 from frappe import _
 import json, ast
-from frappe.share import add
+from frappe.share import add_docshare as add
 from tag_workflow.utils.timesheet import approval_notification, denied_notification
 from tag_workflow.tag_data import check_mandatory_field
 import ast

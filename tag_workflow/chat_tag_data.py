@@ -2,7 +2,7 @@ from email import message
 from webbrowser import get
 import frappe
 from frappe import _, msgprint
-from frappe.share import add
+from frappe.share import add_docshare as add
 
 from tag_workflow.utils.notification import make_system_notification
 

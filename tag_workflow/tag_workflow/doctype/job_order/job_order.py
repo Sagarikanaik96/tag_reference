@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 import frappe
 from frappe.utils import user
-from frappe.share import add
+from frappe.share import add_docshare as add
 from tag_workflow.tag_data import hiring_org_name,joborder_email_template,chat_room_created,job_order_notification,free_redis
 from tag_workflow.utils.notification import sendmail
 from tag_workflow.utils.notification import make_system_notification

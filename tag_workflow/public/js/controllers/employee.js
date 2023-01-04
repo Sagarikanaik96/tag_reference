@@ -121,19 +121,6 @@ frappe.ui.form.on("Employee", {
 		});
 
 
-		$(document).on('click', '[data-fieldname="company"]', function(){
-			companyhide(1250);
-		});
-
-		$('[data-fieldname="company"]').mouseover(function(){
-			companyhide(300);
-		});
-
-	  	document.addEventListener("keydown", function(){
-			companyhide(300);
-		});
-
-
 		$(document).on('click', '[data-fieldname="resume"]', function(){
 			filerestriction()
 		});
@@ -483,22 +470,6 @@ function attachrefresh(){
 			oInput.children[1].innerText  = oInput.children[1].innerText.split('/').slice(-1);
 		});
 	},200);
-}
-
-
-
-function companyhide(time){
-	setTimeout(() => {
-		let txt  = $('[data-fieldname="company"]')[0].getAttribute('aria-owns');
-		if(txt != null){
-			let txt2 = 'ul[id="'+txt+'"]';
-			let  arry = document.querySelectorAll(txt2)[0].children;
-			if(arry.length && cur_frm.doc.doctype == "Employee"){
-				document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none';
-				document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none';
-			}
-		}
-	}, time);
 }
 
 function employee_delete_button(frm){

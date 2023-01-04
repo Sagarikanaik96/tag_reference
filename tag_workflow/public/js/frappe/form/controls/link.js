@@ -4,14 +4,14 @@
 // link validation
 // custom queries
 // add_fetches
-// import Awesomplete from 'awesomplete';
+import Awesomplete from 'awesomplete';
 
 frappe.ui.form.recent_link_validations = {};
 
-frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
+frappe.ui.form.ControlLink = class ControlLink extends frappe.ui.form.ControlData{
 	
-	trigger_change_on_input_event: false,
-	make_input: function() {
+	static trigger_change_on_input_event= false;
+	make_input() {
 		let me = this;
 		$(`<div class="link-field ui-front" style="position: relative;">
 			<input type="text" class="input-with-feedback form-control">
@@ -54,23 +54,23 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 		this.setup_buttons();
 		this.setup_awesomeplete();
 		this.bind_change_event();
-	},
-	get_options: function() {
+	}
+	get_options() {
 		return this.df.options;
-	},
+	}
 	get_reference_doctype() {
 		// this is used to get the context in which link field is loaded
 		if (this.doctype) return this.doctype;
 		else {
 			return frappe.get_route && frappe.get_route()[0] === 'List' ? frappe.get_route()[1] : null;
 		}
-	},
-	setup_buttons: function() {
+	}
+	setup_buttons() {
 		if(this.only_input && !this.with_link_btn) {
 			this.$input_area.find(".link-btn").remove();
 		}
-	},
-	open_advanced_search: function() {
+	}
+	open_advanced_search() {
 		let doctype = this.get_options();
 		if(!doctype) return;
 		new frappe.ui.form.LinkSelector({
@@ -79,8 +79,8 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 			txt: this.get_input_value()
 		});
 		return false;
-	},
-	new_doc: function() {
+	}
+	new_doc() {
 		let doctype = this.get_options();
 		let me = this;
 
@@ -110,8 +110,8 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 		});
 
 		return false;
-	},
-	setup_awesomeplete: function() {
+	}
+	setup_awesomeplete() {
 		let me = this;
 
 		this.$input.cache = {};
@@ -227,6 +227,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 							
 						}
 					}
+					console.log('Hi', r.results, me.doctype, me.df.fieldtype)
 					r.results = remove_options(me.doctype, me.df.fieldname, r.results)
 					me.$input.cache[doctype][term] = r.results;
 					me.awesomplete.list = me.$input.cache[doctype][term];
@@ -291,7 +292,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 				me.$input.val("");
 			}
 		});
-	},
+	}
 
 	merge_duplicates(results) {
 		// in case of result like this
@@ -308,7 +309,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 			return [...newArr, currElem];
 		}, []);
 		// returns [{value: 'Manufacturer 1', 'description': 'mobile part 1, mobile part 2'}]
-	},
+	}
 
 	toggle_href(doctype) {
 		if (frappe.model.can_select(doctype) && !frappe.model.can_read(doctype)) {
@@ -317,7 +318,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 		} else {
 			this.$input_area.find(".link-btn").removeClass('hide');
 		}
-	},
+	}
 
 	get_filter_description(filters) {
 		let doctype = this.get_options();
@@ -376,9 +377,9 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 			.join(', ');
 
 		return __('Filters applied for {0}', [filter_string]);
-	},
+	}
 
-	set_custom_query: function(args) {
+	set_custom_query(args) {
 		let set_nulls = function(obj) {
 			$.each(obj, function(key, value) {
 				if(value!==undefined) {
@@ -446,7 +447,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 			if(!args.filters) args.filters = {};
 			$.extend(args.filters, this.df.filters);
 		}
-	},
+	}
 
 	validate(value) {
 		// validate the value just entered
@@ -460,7 +461,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 
 		return this.validate_link_and_fetch(this.df, this.get_options(),
 			this.docname, value);
-	},
+	}
 
 	validate_link_and_fetch(df, options, docname, value) {
 		if (!value) return;
@@ -493,7 +494,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 
 			return response.name;
 		});
-	},
+	}
 
 	get_fetch_map() {
 		const fetch_map = {};
@@ -507,7 +508,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 
 		return fetch_map;
 	}
-});
+};
 
 if (Awesomplete) {
 	Awesomplete.prototype.get_item = function(value) {
@@ -518,7 +519,7 @@ if (Awesomplete) {
 }
 
 function remove_options(doctype, fieldname, result){
-	if((['Employee Onboarding', 'Employee Onboarding Template', 'Job Offer','Salary Structure','Salary Component','Company', 'Companies Assigned', 'User'].includes(doctype) && ['staffing_company', 'company','certificate_and_endorsements', 'assign_multiple_company'].includes(fieldname)) || ['Assign Employee','Assign Employee Details'].includes(doctype)){
+	if((['Employee Onboarding', 'Employee Onboarding Template', 'Job Offer','Salary Structure','Salary Component','Company', 'Companies Assigned', 'User', 'Job Order', 'Employee'].includes(doctype) && ['staffing_company', 'company','certificate_and_endorsements', 'assign_multiple_company'].includes(fieldname)) || ['Assign Employee','Assign Employee Details'].includes(doctype)){
 		result.splice(result.length - 2, 2);
 		return result
 	}else if((['Industry Types Job Titles'].includes(doctype) && ['industry_type'].includes(fieldname))){
@@ -528,8 +529,4 @@ function remove_options(doctype, fieldname, result){
 	else{
 		return result
 	}
-}
-
-function get_input_val_of_check(e){
-	console.log(e.currentTarget)
 }

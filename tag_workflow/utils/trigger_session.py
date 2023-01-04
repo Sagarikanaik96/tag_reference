@@ -1,6 +1,6 @@
 import frappe
 from frappe import enqueue
-from frappe.share import add
+from frappe.share import add_docshare as add
 from frappe.core.doctype.session_default_settings.session_default_settings import set_session_default_values
 from frappe.sessions import Session, get_expiry_period, get_geo_ip_country
 

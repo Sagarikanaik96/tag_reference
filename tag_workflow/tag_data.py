@@ -3,7 +3,6 @@ from frappe import _
 from frappe.share import add_docshare as add
 from frappe import enqueue
 from tag_workflow.utils.notification import sendmail, make_system_notification
-from frappe.utils import get_datetime,now
 from frappe.utils import date_diff
 import json
 import datetime
@@ -367,8 +366,6 @@ def staff_org_details(company_details=None):
 
 @frappe.whitelist(allow_guest=False)
 def update_staffing_user_with_exclusive(company,company_name):
-    from frappe.share import add
-
     sql = '''select name from `tabUser` where company = "{}" and tag_user_type = 'Staffing User' '''.format(company)
     a = frappe.db.sql(sql, as_list=1)
     try:
@@ -752,8 +749,8 @@ def staff_assigned_employees(job_order, user_email,resume_required):
             data1=frappe.db.sql(sql1,as_dict=True)
             sql=f" select name, claims_approved from `tabAssign Employee` where job_order='{job_order}' and tag_status='Approved' and  company in (select company from `tabEmployee` where email='{frappe.session.user}')"
             assigned_data=frappe.db.sql(sql, as_dict=1)
-            emp_data= frappe.get_doc('Assign Employee', assigned_data[0]['name'])
             if(len(assigned_data)>0):
+                emp_data= frappe.get_doc('Assign Employee', assigned_data[0]['name'])
                 sql=f" select name from `tabAssign Employee` where job_order='{job_order}' and tag_status='Open' and  company in (select company from `tabEmployee` where email='{frappe.session.user}')"
                 assigned_data=frappe.db.sql(sql)
                 if(len(assigned_data)>0):
@@ -934,8 +931,6 @@ def company_exist(hiring_company):
         return 'yes'
     else:
         return 'no'
-
-from frappe.share import add
 
 @frappe.whitelist(allow_guest=False)
 def claim_order_insert(pay_rate, hiring_org=None,job_order=None,no_of_workers_joborder=None,e_signature_full_name=None,staff_company=None):

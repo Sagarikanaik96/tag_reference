@@ -264,6 +264,8 @@ def payrate_change(docname):
     try:
         sql = '''select data from `tabVersion` where docname="{0}" order by modified DESC'''.format(docname)
         data = frappe.db.sql(sql, as_list=1)
+        if len(data)==0:
+            return 'success'
         new_data = json.loads(data[0][0]) 
         doc = frappe.get_doc(AEMP,docname)
         free_redis(doc.company,doc.job_order)
@@ -275,7 +277,6 @@ def payrate_change(docname):
                     return 'success'
         return 'failure'
     except Exception as e:
-        frappe.log_error(e, 'Pay Rate Change Error')
         print(e, frappe.get_traceback())
 
 def check_pay_rate(total_bill_rate, data):

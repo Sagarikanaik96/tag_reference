@@ -1,7 +1,5 @@
 import frappe
-from frappe import _, msgprint
-from frappe.share import add
-
+from frappe.share import add_docshare as add
 
 #------------email and system notification----------#
 def sendmail(emails, message, subject, doctype, docname):

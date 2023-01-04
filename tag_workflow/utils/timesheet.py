@@ -1,7 +1,6 @@
-from time import time
 import frappe
-from frappe import _, msgprint
-from frappe.share import add
+from frappe import _
+from frappe.share import add_docshare as add
 import datetime
 from pymysql.constants.ER import NO
 from tag_workflow.utils.notification import sendmail, make_system_notification
@@ -26,7 +25,7 @@ def send_timesheet_for_approval(employee, docname, company, job_order):
 
         for user in user_list:
             if not frappe.db.exists("User Permission",{"user": user.parent,"allow": "Timesheet","apply_to_all_doctypes":1, "for_value": docname}):
-                add("Timesheet", docname, user=user.parent, read=1, write=1, submit=1, notify=0)
+                add("Timesheet", docname, user=user.parent, read=1, write=1, submit=1, notify=0, flags={"ignore_share_permission": 1})
                 perm_doc = frappe.get_doc(dict(doctype="User Permission",user=user.parent,allow="Timesheet",for_value=docname,apply_to_all_doctypes=1))
                 perm_doc.save(ignore_permissions=True)
             if user.parent not in staffing_user:

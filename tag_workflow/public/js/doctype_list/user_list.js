@@ -70,13 +70,13 @@ frappe.listview_settings['User'] = {
 	
 };
 
-frappe.ui.form.ControlPassword = frappe.ui.form.ControlData.extend({
-	input_type: "password",
-	make: function() {
-		this._super();
-	},
-	make_input: function() {
-		this._super();
+frappe.ui.form.ControlPassword = class ControlData extends frappe.ui.form.ControlData{
+	static input_type= "password";
+	make() {
+		super.make();
+	}
+	make_input() {
+		super.make_input();
 		this.$wrapper.find(":input[type='password'][data-fieldtype='Password']").addClass("hidepassword");
 		this.$input.parent().append($('<span class="input-area" > <input type="checkbox"  id="showPassword"  data-fieldtype=Check autocomplete="off" class="input-with-feedback-showPassword" ></span>'));
 		this.$input.parent().append($('<span class="label-area">Show Password</span>'));
@@ -88,7 +88,7 @@ frappe.ui.form.ControlPassword = frappe.ui.form.ControlData.extend({
 			}
 		});
 	}
-});
+};
 
 function get_organization_type(){
 	let text='\n'

@@ -5,10 +5,9 @@ import datetime
 import frappe
 from frappe import _
 from frappe.model.document import Document
-import json, datetime
-from tag_workflow.utils.notification import sendmail, make_system_notification
+from tag_workflow.utils.notification import make_system_notification
 from frappe import enqueue
-from frappe.share import add
+from frappe.share import add_docshare as add
 from tag_workflow.utils.timesheet import remove_job_title, unsatisfied_organization, do_not_return, no_show_org
 import ast
 TM_FT = "%Y-%m-%d %H:%M:%S"

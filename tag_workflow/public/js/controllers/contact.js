@@ -12,18 +12,6 @@ frappe.ui.form.on("Contact", {
 			cancel_cantact(frm);
 		}
 
-		$(document).on('click', '[data-fieldname="company"]', function(){
-			companyhide(2000)
-		});
-
-		$('[data-fieldname="company"]').mouseover(function(){
-			companyhide(300)
-		})
-
-	  	document.addEventListener("keydown", function(){
-	  		companyhide(300)
-	    })
-
 		set_map(frm);
 		hide_fields(frm);
 		show_addr(frm)
@@ -142,19 +130,6 @@ function cancel_cantact(frm){
 	frm.add_custom_button(__('Cancel'), function(){
 		frappe.set_route("Form", "Contact");
 	});
-}
-
-
-function companyhide(time) {
-	setTimeout(() => {
-		let txt  = $('[data-fieldname="company"]')[1].getAttribute('aria-owns')
-		let txt2 = 'ul[id="'+txt+'"]'
-		let  arry = document.querySelectorAll(txt2)[0].children
-		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
-		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
-
-		
-	}, time)
 }
 
 function lead_fields(frm){

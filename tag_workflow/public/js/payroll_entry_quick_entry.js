@@ -1,15 +1,14 @@
 frappe.provide('frappe.ui.form')
-frappe.ui.form.PayrollPeriodQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
-	init: function(doctype, after_insert, init_callback, doc, force) {
-		this._super(doctype, after_insert, init_callback, doc, force);
-		this.skip_redirect_on_error = true;
-        
-	},
-    render_dialog: function() {
+frappe.ui.form.PayrollPeriodQuickEntryForm = class PayrollPeriodQuickEntryForm extends frappe.ui.form.QuickEntryForm{
+	constructor(doctype, after_insert, init_callback, doc, force) {
+		super(doctype, after_insert, init_callback, doc, force);
+		this.skip_redirect_on_error = true; 
+	}
+    render_dialog() {
 		this.mandatory = this.mandatory.concat();
-		this._super();
+		super.render_dialog();
         check_status(this.dialog)
-        this.dialog.get_field("company").get_query = function(doc) {
+        this.dialog.get_field("company").get_query = function() {
             return {
                 filters: {
                     organization_type:"Staffing",
@@ -22,7 +21,7 @@ frappe.ui.form.PayrollPeriodQuickEntryForm = frappe.ui.form.QuickEntryForm.exten
     
         }
 	}
-})
+}
 
 function check_status(dialog){
     if(frappe.boot.tag.tag_user_info.company_type =="Staffing" && frappe.boot.tag.tag_user_info.comps.length>0){
