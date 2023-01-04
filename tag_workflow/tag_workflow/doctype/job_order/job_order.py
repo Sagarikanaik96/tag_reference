@@ -483,7 +483,7 @@ def make_notes(company):
 def get_company_details(comp_name):
     try:
         company_doc=frappe.get_doc('Company',comp_name)
-        if not company_doc.has_permission("read"):
+        if not frappe.has_permission(company_doc, "read", throw=False):
             user_details=frappe.db.get_all('User Permission', filters={'user': frappe.session.user,'allow':'Company','for_value':comp_name,'applicable_for':ORD}, fields={'name'})
             if user_details==[]:
                 frappe.local.response['http_status_code'] = 500
