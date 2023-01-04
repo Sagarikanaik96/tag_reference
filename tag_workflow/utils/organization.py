@@ -199,6 +199,7 @@ def update_permissions():
         for perm in permissions:
             permission_doc = frappe.get_doc(dict(perm))
             permission_doc.save()
+            frappe.db.commit()
     except Exception as e:
         print(e)
         frappe.log_error(e, "update_permissions")
