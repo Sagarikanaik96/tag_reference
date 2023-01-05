@@ -386,6 +386,10 @@ def get_company_order(company_type, company, result):
 @frappe.whitelist()
 @frappe.read_only()
 def get_desktop_page(page):
+    json_data=json.loads(page)
+    if '<' in json_data['title'] or '>' in json_data['title'] or '%' in json_data['title']:
+        frappe.throw('Invalid Request')
+    
     try:
         workspace = Workspace(loads(page))
         workspace.build_workspace()
