@@ -57,13 +57,13 @@
 {% endmacro %}
 
 {% block head_include %}
-<link type="text/css" rel="stylesheet" href="/assets/css/login.css?ver={{ build_version }}">
+<link type="text/css" rel="stylesheet" href="/assets/tag_workflow/css/login.bundle.css?ver={{ build_version }}">
 {% endblock %}
 
 {% macro logo_section() %}
 <div class="page-card-head">
 	<img class="app-logo" src="{{ logo }}" alt="logo-img">
-	<h4>{{ _("Welcome!")}}</h4>
+	<h4 class="mt-0">{{ _("Welcome!")}}</h4>
 </div>
 {% endmacro %}
 
