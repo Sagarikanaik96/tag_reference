@@ -1,6 +1,7 @@
 [
     {
         "name": "Temporary Assistance Guru LLC",
+        "organization_type":"Staffing",
         "company_name": "Temporary Assistance Guru LLC",
         "default_currency": "USD",
         "country": "United States"

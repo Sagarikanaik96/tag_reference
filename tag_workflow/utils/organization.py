@@ -57,13 +57,19 @@ def call_setup():
 
 def setup_data():
     try:
+        import_json_list = ["Company","Contact","Employee"]
         frappe.db.set_value(Global_defaults,Global_defaults,"default_currency", "USD")
         frappe.db.set_value(Global_defaults,Global_defaults,"hide_currency_symbol", "No")
         frappe.db.set_value(Global_defaults,Global_defaults,"disable_rounded_total", "1")
         frappe.db.set_value(Global_defaults,Global_defaults,"country", "United States")
-        import_json("Company")
-        import_json("Contact")
-        import_json("Employee")
+        comp_name ="Temporary Assistance Guru LLC"
+        for doc in import_json_list:
+            if doc == "Company" and not  frappe.db.exists({"doctype": "Company", "name": comp_name}):
+                import_json("Company")
+            elif doc == "Employee" and not frappe.db.exists({"doctype": "Employee", "email": "JDoe@example.com","company":comp_name,"first_name":"John","last_name":"Doe"}):
+                import_json("Employee")
+            elif doc == "Contact" and not frappe.db.exists({"doctype":"Contact","first_name": "John Doe","email_id": "JDoe@example.com","owner_company":comp_name}):
+                import_json("Contact")
         update_organization_data()
         update_roles()
         update_tag_user_type()
@@ -769,3 +775,4 @@ def old_job_title_child_append(i, dicts_val, doc):
         if not site_exists:
             doc.append('job_site_table',{'job_site': j['parent'], 'bill_rate': j['bill_rate'], 'comp_code': j['comp_code']})
     doc.save(ignore_permissions=True)
+    
