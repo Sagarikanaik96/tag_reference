@@ -74,6 +74,7 @@ def setup_data():
         update_old_direct_order()
         update_old_company_type()
         update_old_job_sites()
+        update_old_job_titles()
         create_job_applicant()
         set_workspace()
         setup_company_permission()
@@ -743,3 +744,28 @@ def import_json(doctype, submit=False):
         if submit:
             doc.submit()
     frappe.db.commit()
+
+def update_old_job_titles():
+    try:
+        titles=f'select name from `tabItem` where company!="";'
+        data=frappe.db.sql(titles,as_dict=1)
+        if(len(data)>0):
+            print("*------updating old job titles---------*\n")
+            for i in data:
+                dicts_val=frappe.db.sql('''select parent,bill_rate,comp_code from `tabIndustry Types Job Titles` where job_titles="{0}"'''.format(i.name),as_dict=1)
+                if len(dicts_val):
+                    doc=frappe.get_doc('Item',i.name)
+                    try:
+                        old_job_title_child_append(i, dicts_val, doc)
+                    except Exception as e:
+                        continue
+    except Exception as e:
+        print(e)
+
+
+def old_job_title_child_append(i, dicts_val, doc):
+    for j in dicts_val:
+        site_exists=frappe.db.get_value('Job Sites',{'parent':i['name'],'job_site':j['parent']},'name')
+        if not site_exists:
+            doc.append('job_site_table',{'job_site': j['parent'], 'bill_rate': j['bill_rate'], 'comp_code': j['comp_code']})
+    doc.save(ignore_permissions=True)
