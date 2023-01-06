@@ -326,17 +326,22 @@
                 <span class="px-2">&#x2b;</span>New Order
               </button>
             </div>
-            {% endif %} {% if frappe.boot.tag.tag_user_info.company_type ==
-            "Hiring" || frappe.boot.tag.tag_user_info.company_type ==
-            "Exclusive Hiring" || frappe.boot.tag.tag_user_info.company_type
-            == "TAG" || frappe.session.user == "Administrator" %}
-            <a href="/app/home" class="position-relative">
-              <div class="tab-button custom-btn">
-                <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-4" alt="home" />Home
-              </div>
-            </a>
-            {% endif %} {% if frappe.boot.tag.tag_user_info.company_type ==
-            "Staffing" %}
+            {% endif %} {% if frappe.boot.tag.tag_user_info.company_type
+              == "TAG" || frappe.session.user == "Administrator" %}
+              <a href="/app/home" class="position-relative">
+                <div class="tab-button custom-btn">
+                  <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-4" alt="home" />Home
+                </div>
+              </a>
+              {% endif %} 
+              {% if frappe.boot.tag.tag_user_info.company_type =="Hiring" || frappe.boot.tag.tag_user_info.company_type =="Exclusive Hiring" %}
+              <a href="/app/hiring-home" class="position-relative">
+                <div class="tab-button custom-btn">
+                  <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-4" alt="home" />Home
+                </div>
+              </a>
+              {% endif%}
+             {% if frappe.boot.tag.tag_user_info.company_type =="Staffing" %}
             <a href="/app/staff-home" class="position-relative">
               <div class="tab-button custom-btn mt-4 mt-md-2 ">
                 <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-4" alt="home" />Home

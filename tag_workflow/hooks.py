@@ -77,6 +77,8 @@ on_session_creation = [
 ]
 
 app_include_css = [
+        "/assets/tag_workflow/css/tag_customed.css",
+        "/assets/tag_workflow/css/media-query.css",
         "login.bundle.css",
         "tag_customed.bundle.css",
         "media-query.bundle.css",
