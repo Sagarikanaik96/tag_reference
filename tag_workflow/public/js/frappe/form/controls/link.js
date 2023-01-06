@@ -227,7 +227,6 @@ frappe.ui.form.ControlLink = class ControlLink extends frappe.ui.form.ControlDat
 							
 						}
 					}
-					console.log('Hi', r.results, me.doctype, me.df.fieldtype)
 					r.results = remove_options(me.doctype, me.df.fieldname, r.results)
 					me.$input.cache[doctype][term] = r.results;
 					me.awesomplete.list = me.$input.cache[doctype][term];
@@ -258,7 +257,6 @@ frappe.ui.form.ControlLink = class ControlLink extends frappe.ui.form.ControlDat
 		this.$input.on("awesomplete-select", function(e) {
 			let o = e.originalEvent;
 			let item = me.awesomplete.get_item(o.text.value);
-			console.log(o," +" +item)
 
 			me.autocomplete_open = false;
 

@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Hiring Company Review', {
-	// refresh: function(frm) {
-
-	// }
+	refresh: ()=>{
+		hiring_review();
+	}
 });

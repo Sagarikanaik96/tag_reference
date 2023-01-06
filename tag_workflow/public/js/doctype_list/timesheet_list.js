@@ -254,7 +254,7 @@ $(document).on('change', '[title="Select All"], .list-row-checkbox', function ()
 
 function export_ts_button(listview){
   if(frappe.boot.tag.tag_user_info.export_ts==1){
-    listview.page.set_secondary_action('Export Timesheet',()=>{
+    listview.page.set_secondary_action('Export Timesheets',()=>{
       let selected_rows = cur_list.$checks;
       let ts_name=[];
       for(let i in selected_rows){

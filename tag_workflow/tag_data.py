@@ -88,23 +88,19 @@ def joborder_email_template(subject = None,content = None,recipients = None,link
 @frappe.whitelist(allow_guest=False)
 def send_email_staffing_user(user, company_type, email_list=None,subject = None,body=None,additional_email = None):
     try:
-        org_type=frappe.db.get_value('User', {"name": frappe.session.user}, ['organization_type'])
-        if((org_type == "Staffing" or frappe.session.user=="Administrator") and user == frappe.session.user) :
+        if((company_type in ['TAG', 'Staffing'] or frappe.session.user=="Administrator") and user == frappe.session.user) :
             email = json.loads(email_list)
             emails = [i['email'] for i in email]
             if additional_email:
                 v = additional_email.split(',')
                 for i in v:
                     emails.append(i)
-            value = send_email(subject, body, emails)
-            if value:
-                return 1
-            else:
-                return 0
+            frappe.sendmail(recipients=emails,subject=subject, message=body, template="email_template_custom", args = dict(sitename=sitename,content=body,subject=subject))
+            return 1
         else:
             return 0
     except Exception as e:
-        print(e)
+        print(e, frappe.get_traceback())
         return 0
 
 
@@ -562,7 +558,6 @@ def filter_company_employee(doctype, txt, searchfield, page_len, start, filters)
             else:
                 value =value+i
         sql = """ select name, employee_name,company from `tabEmployee` where company='{0}' and (name NOT IN ('{1}') and name like '%%{2}%%')""".format(company, value, '%s' % txt)
-        print('***********', sql)
         return frappe.db.sql(sql)
     except Exception as e:
         frappe.db.rollback()

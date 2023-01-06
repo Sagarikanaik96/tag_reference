@@ -9,18 +9,21 @@ frappe.ui.form.on("Staffing Email", {
 			frm.add_custom_button(__("Send"), function () {
 				frappe.call({
 					method: "tag_workflow.tag_data.send_email_staffing_user",
+					freeze: true,
 					args: {
 						user: frappe.session.user,
 						company_type: frappe.boot.tag.tag_user_info.company_type,
-						email_list: cur_frm.doc.email_recipients,
-						subject: cur_frm.doc.subject,
-						body: cur_frm.doc.body,
-						additional_email: cur_frm.doc.additional_recipients,
+						email_list: frm.doc.email_recipients,
+						subject: frm.doc.subject,
+						body: frm.doc.body,
+						additional_email: frm.doc.additional_recipients,
 					},
 					callback: function (r) {
 						if (r.message == "1") {
-							cur_frm.remove_custom_button("Send");
-							cur_frm.save();
+							frm.remove_custom_button("Send");
+							frm.save().then(()=>{
+								frappe.msgprint({message: __("Email Sent Successfully"),indicator: "green"});
+							});
 						}
 					},
 				});

@@ -3,6 +3,7 @@
 
 frappe.ui.form.on('Company Review', {
 	refresh: function() {
-		$('.form-footer').hide()
+		staffing_review();
+		$('.form-footer').hide();
 	}
 });

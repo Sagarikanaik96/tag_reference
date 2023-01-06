@@ -57,19 +57,10 @@ def call_setup():
 
 def setup_data():
     try:
-        import_json_list = ["Company","Contact","Employee"]
         frappe.db.set_value(Global_defaults,Global_defaults,"default_currency", "USD")
         frappe.db.set_value(Global_defaults,Global_defaults,"hide_currency_symbol", "No")
         frappe.db.set_value(Global_defaults,Global_defaults,"disable_rounded_total", "1")
         frappe.db.set_value(Global_defaults,Global_defaults,"country", "United States")
-        comp_name ="Temporary Assistance Guru LLC"
-        for doc in import_json_list:
-            if doc == "Company" and not  frappe.db.exists({"doctype": "Company", "name": comp_name}):
-                import_json("Company")
-            elif doc == "Employee" and not frappe.db.exists({"doctype": "Employee", "email": "JDoe@example.com","company":comp_name,"first_name":"John","last_name":"Doe"}):
-                import_json("Employee")
-            elif doc == "Contact" and not frappe.db.exists({"doctype":"Contact","first_name": "John Doe","email_id": "JDoe@example.com","owner_company":comp_name}):
-                import_json("Contact")
         update_organization_data()
         update_roles()
         update_tag_user_type()
@@ -98,6 +89,16 @@ def setup_data():
         get_user_company_data()
         disable_scheduler()
         update_ts_list_invoice()
+        update_hiring_reviews()
+        import_json_list = ["Company","Contact","Employee"]
+        comp_name ="Temporary Assistance Guru LLC"
+        for doc in import_json_list:
+            if doc == "Company" and not  frappe.db.exists({"doctype": "Company", "name": comp_name}):
+                import_json("Company")
+            elif doc == "Employee" and not frappe.db.exists({"doctype": "Employee", "email": "JDoe@example.com","company":comp_name,"first_name":"John","last_name":"Doe"}):
+                import_json("Employee")
+            elif doc == "Contact" and not frappe.db.exists({"doctype":"Contact","first_name": "John Doe","email_id": "JDoe@example.com","owner_company":comp_name}):
+                import_json("Contact")
         make_commit()
     except Exception as e:
         print(e)
@@ -751,6 +752,7 @@ def import_json(doctype, submit=False):
             doc.submit()
     frappe.db.commit()
 
+    
 def update_old_job_titles():
     try:
         titles=f'select name from `tabItem` where company!="";'
@@ -768,11 +770,23 @@ def update_old_job_titles():
     except Exception as e:
         print(e)
 
-
 def old_job_title_child_append(i, dicts_val, doc):
     for j in dicts_val:
         site_exists=frappe.db.get_value('Job Sites',{'parent':i['name'],'job_site':j['parent']},'name')
         if not site_exists:
             doc.append('job_site_table',{'job_site': j['parent'], 'bill_rate': j['bill_rate'], 'comp_code': j['comp_code']})
     doc.save(ignore_permissions=True)
-    
+
+def update_hiring_reviews():
+    try:
+        frappe.logger().debug("*------Hiring Company Reviews Update---------*\n")
+        reviews_name = frappe.get_all('Hiring Company Review', {'rating':['is', 'set'], 'ratings_hiring':0}, ['name'])
+        reviews_list = [r['name'] for r in reviews_name]
+        if len(reviews_list) > 0:
+            if len(reviews_list)==1:
+                frappe.db.sql(f'''UPDATE `tabHiring Company Review` set ratings_hiring=rating where name in ("{reviews_list[0]}")''')
+            else:
+                frappe.db.sql(f'''UPDATE `tabHiring Company Review` set ratings_hiring=rating where name in {tuple(reviews_list)}''')
+            frappe.db.commit()
+    except Exception as e:
+        frappe.log_error(e,'update_hiring_reviews Error')

@@ -17,3 +17,15 @@ function check_status(frm){
         frm.refresh_field('company')
     }
 }
+function hiring_review(){
+    if (frappe.boot.tag.tag_user_info.company_type =="Staffing"){
+        frappe.msgprint("You don't have enough permissions.");
+        frappe.set_route("app");
+    }
+}
+function staffing_review(){
+    if (["Hiring", "Exclusive Hiring"].includes(frappe.boot.tag.tag_user_info.company_type)){
+        frappe.msgprint("You don't have enough permissions.");
+        frappe.set_route("app");
+    }
+}

@@ -30,18 +30,24 @@ $(document).ready(function(){
 					frappe.flags.ats.push('Salary Component','Salary Structure','Salary Structure Assignment','Salary Slip','Payroll Period','Payroll Entry')
 			}
 			})
+			frappe.flags.ats.push('Hiring Company Review')
 		}
 		else{
 			$(".main-section").append(frappe.render_template("tag",{'ats':1,'payroll':1}));
 		}
-			
+		list_for_hiring();
 	}
 
 	if(window.location.pathname == "/app/staff-home"){
-                setTimeout(frappe.breadcrumbs.clear(), 5000);
-        }
+        setTimeout(frappe.breadcrumbs.clear(), 5000);
+    }
 });
 
+let list_for_hiring= ()=>{
+	if(["Hiring", "Exclusive Hiring"].includes(frappe.boot.tag.tag_user_info.company_type)){
+		frappe.flags.ats.push('Company Review');
+	}
+}
 
 frappe.provide("tag_workflow.workflow");
 frappe.ui.form.States = Class.extend({
@@ -386,7 +392,6 @@ frappe.ui.form.ControlInput.prototype.set_label = function(label) {
 
 /*----------------------------------------*/
 function redirect_job(name, child_name){
-	console.log(name, child_name);
 	window.location.href = '/app/assign-employee/'+name;
 }
 
@@ -623,9 +628,7 @@ function export_csv(ts_list){
 
 function change_view(){
 	let ch =document.querySelector(".toggle_icon").id
-	console.log(ch)
     if(ch =="toggle_display_1"){
-		console.log("first_click")
 		document.querySelector(".toggle_icon").id="toggle_display_0"
 	  $(".col.layout-main-section-wrapper, .col-md-12.layout-main-section-wrapper").css ({"left": "8rem","max-width": "90%","width": "100%"})
     }

@@ -55,7 +55,7 @@ def get_user_info():
             stfs_list = frappe.db.get_list("Employee", {"user_id": user_doc.name}, "company")
             for s in stfs_list:
                 stfs.append(s.company)
-        elif(user_doc.organization_type == "Exclusive Hiring"):
+        elif user_doc.organization_type == "Exclusive Hiring":
             sql = """ select parent_staffing as name, default_invoice_view from `tabCompany` where name = '{0}' """.format(user_doc.company)
 
         if(sql):
@@ -68,13 +68,17 @@ def get_user_info():
         print(e)
         
 def get_comp_info(sql, org_type, comps, invoice_view):
-    export_ts = 0
-    com_list = frappe.db.sql(sql, as_dict=1)
-    for c in com_list:
-        comps.append(c.name)
-        export_ts = check_export_ts(c.name, export_ts) if org_type=='Staffing' else export_ts
-        invoice_view.append(f"{c.name}*{c.default_invoice_view}")
-    return comps, export_ts, invoice_view
+    try:
+        export_ts = 0
+        com_list = frappe.db.sql(sql, as_dict=1)
+        for c in com_list:
+            comps.append(c.name)
+            export_ts = check_export_ts(c.name, export_ts) if org_type=='Staffing' else export_ts
+            invoice_view.append(f"{c.name}*{c.default_invoice_view}")
+        return comps, export_ts, invoice_view
+    except Exception as e:
+        print('get_comp_info Error', frappe.get_traceback())
+        frappe.log_error(e, 'get_comp_info_error')
 
 # check company share
 def add_company_share_permission(users):
@@ -157,5 +161,10 @@ def first_login():
 
 @frappe.whitelist()
 def check_export_ts(comp_name, export_ts):
-    staff_complete = frappe.db.get_value('Company', {'name': comp_name, 'organization_type': 'Staffing'}, ['staff_complete_enable', 'office_code'])
-    return 1 if staff_complete and staff_complete[0] == 1 and len(staff_complete[1])==5 else export_ts
+    try:
+        staff_complete = frappe.db.get_value('Company', {'name': comp_name, 'organization_type': 'Staffing'}, ['staff_complete_enable', 'office_code'])
+        return 1 if staff_complete[0] == 1 and staff_complete[1] and len(staff_complete[1])==5 else export_ts
+    except Exception as e:
+        print("check_export_ts Error",frappe.get_traceback())
+        frappe.log_error(e, "check_export_ts Error")
+        

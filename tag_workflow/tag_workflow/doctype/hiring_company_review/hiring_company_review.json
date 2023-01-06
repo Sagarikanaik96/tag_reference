@@ -11,7 +11,8 @@
   "hiring_company",
   "job_order",
   "rating",
-  "comments"
+  "comments",
+  "ratings_hiring"
  ],
  "fields": [
   {
@@ -24,10 +25,11 @@
   },
   {
    "fieldname": "hiring_company",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Hiring Company",
+   "options": "Company",
    "read_only": 1
   },
   {
@@ -41,8 +43,6 @@
   {
    "fieldname": "rating",
    "fieldtype": "Rating",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Ratings",
    "read_only": 1
   },
@@ -51,11 +51,18 @@
    "fieldtype": "Text",
    "label": "Comments",
    "read_only": 1
+  },
+  {
+   "fieldname": "ratings_hiring",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Ratings"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-01-02 23:49:11.725053",
+ "modified": "2023-01-06 01:58:59.503386",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Hiring Company Review",

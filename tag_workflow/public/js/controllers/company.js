@@ -289,6 +289,10 @@ frappe.ui.form.on("Company", {
 		if (frappe.session.user != 'Administrator') {
 			$('.menu-btn-group').hide();
 		}
+		if(frappe.boot.tag.tag_user_info.user_type == "Staffing User"){
+			frm.set_df_property("staff_complete_enable", "read_only", 1);
+			frm.set_df_property("office_code", "read_only", 1);
+		}
 		filter_row(frm);
 
 	},
