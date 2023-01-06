@@ -279,20 +279,6 @@
     }
 
     @media (max-width: 768px) {
-
-      /* .change .bar1 {
-        -webkit-transform: rotate(-45deg) translate(-1px, 0px);
-        transform: rotate(-45deg) translate(-1px, 0px);
-      }
-
-      .change .bar2 {
-        opacity: 0;
-      } */
-
-      /* .change .bar3 {
-        -webkit-transform: rotate(45deg) translate(-8px, -8px);
-        transform: rotate(45deg) translate(-8px, -8px);
-      } */
       .sub-menu {
         display: none;
         transition: 0.5s ease-in-out;
@@ -318,7 +304,6 @@
     }
   </style>
 </head>
-
 <body>
   <div class="container-fluid">
     <div class="row">
@@ -331,7 +316,7 @@
               <div class="bar3"></div>
             </div>
           </div>
-          <div class="sub-menu w-100 border-top border-right" id="myDIV">
+          <div class="sub-menu w-100 mt-2 mt-md-0  border-top border-right" id="myDIV">
             {% if frappe.boot.tag.tag_user_info.company_type == "Hiring" ||
             frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"
             %}
@@ -353,7 +338,7 @@
             {% endif %} {% if frappe.boot.tag.tag_user_info.company_type ==
             "Staffing" %}
             <a href="/app/staff-home" class="position-relative">
-              <div class="tab-button custom-btn mt-5 mt-md-2 ">
+              <div class="tab-button custom-btn mt-4 mt-md-2 ">
                 <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-4" alt="home" />Home
               </div>
             </a>

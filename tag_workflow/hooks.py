@@ -17,7 +17,6 @@ map= "public/js/controllers/doc_map.js"
 dialog ="public/js/controllers/dialog.js"
 perm ="public/js/controllers/perm.js"
 # Includes in <head>
-# ------------------
 fixtures = ["Workspace", "Website Settings", "Web Page", "Translation", "Workflow", "Workflow State", "Workflow Action Master", "System Settings",
 {"dt": "Property Setter",
         "filters": [
@@ -78,9 +77,9 @@ on_session_creation = [
 ]
 
 app_include_css = [
-        "/assets/tag_workflow/css/tag_customed.css",
-        "/assets/tag_workflow/css/media-query.css",
-        "login.bundle.css"
+        "login.bundle.css",
+        "tag_customed.bundle.css",
+        "media-query.bundle.css",
 ]
 
 app_include_js = [
@@ -137,8 +136,9 @@ doctype_js = {
         "Claim Order":dialog,
         "Payroll Entry":["public/js/controllers/payroll_entry.js",perm],
         "Payroll Period":["public/js/controllers/payroll_period.js",perm],
-        "Company Review": ["tag_workflow/doctype/company_review/company_review.js",perm],
-        "Hiring Company Review": ["tag_workflow/doctype/hiring_company_review/hiring_company_review.js",perm]
+
+
+
 }
 
 # doctype list
@@ -164,9 +164,7 @@ doctype_list_js = {
         "System Setting": "public/js/doctype_list/system_setting.js",
         "Employee Onboarding": "public/js/doctype_list/employee_onboarding_list.js",
         "Payroll Period": ["public/js/doctype_list/payroll_period_list.js",perm],
-        "Salary Structure Assignment":["public/js/doctype_list/salary_structure_assignment_list.js",perm],
-        "Company Review": ["tag_workflow/doctype/company_review/company_review_list.js",perm],
-        "Hiring Company Review": ["tag_workflow/doctype/hiring_company_review/hiring_company_review_list.js",perm]
+        "Salary Structure Assignment":["public/js/doctype_list/salary_structure_assignment_list.js",perm]
 }
 
 before_migrate = ["tag_workflow.utils.organization.remove_field"]
