@@ -324,7 +324,7 @@ function setup_company_value(company){
 /*-------multi company--------*/
 function multi_company_setup(frm){
 
-			(cur_frm.doc.__islocal == 1) ? frappe.msgprint("Please save the form first") : make_multicompany(frm);
+			if(cur_frm.doc.__islocal != 1) {make_multicompany(frm);}
 }
 
 function make_multicompany(frm){

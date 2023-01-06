@@ -4,13 +4,14 @@ import frappe
 from frappe.core.doctype.user.user import User
 from frappe.model.document import Document
 from frappe.core.doctype.navbar_settings.navbar_settings import NavbarSettings
+from erpnext.setup.doctype.employee import employee
 from erpnext.setup.doctype.employee.employee import Employee
 from erpnext.setup.doctype.company.company import Company
 from erpnext.crm.doctype.lead.lead import Lead
 from erpnext.projects.doctype.timesheet.timesheet import Timesheet
 from frappe.core.doctype.data_import.exporter import Exporter
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
-from tag_workflow.utils.doctype_method import send_password_notification,validate_username, suggest_username, send_login_mail, raise_no_permission_to, validate_duplicate_user_id, validate_abbr, validate_standard_navbar_items, create_contact, update_cost, validate_mandatory_fields, run_post_save_methods, check_if_latest,calculate_total_for_salary_slip_based_on_timesheet,set_time_sheet,salary_slip_validate,update_user_permissions,get_data_as_docs
+from tag_workflow.utils.doctype_method import send_password_notification,validate_username, suggest_username, send_login_mail, raise_no_permission_to, validate_duplicate_user_id, validate_abbr, validate_standard_navbar_items, create_contact, update_cost, validate_mandatory_fields, run_post_save_methods, check_if_latest,calculate_total_for_salary_slip_based_on_timesheet,set_time_sheet,salary_slip_validate,update_user_permissions,get_data_as_docs,validate_employee_roles
 import requests, json
 from frappe.core.doctype.data_import.exporter import Exporter
 
@@ -34,6 +35,7 @@ SalarySlip.set_time_sheet = set_time_sheet
 SalarySlip.validate = salary_slip_validate
 Employee.update_user_permissions = update_user_permissions
 Exporter.get_data_as_docs = get_data_as_docs
+employee.validate_employee_role = validate_employee_roles
 
 def get_key(key):
     try:
