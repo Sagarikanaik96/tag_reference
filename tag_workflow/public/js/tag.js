@@ -634,7 +634,7 @@ function change_view(){
     }
     else{
 		document.querySelector(".toggle_icon").id="toggle_display_1"
-		$(".col.layout-main-section-wrapper, .col-md-12.layout-main-section-wrapper").css ({"left": "0rem","max-width": "none","width": "100%"})
+		$(".col.layout-main-section-wrapper, .col-md-12.layout-main-section-wrapper").css ({"left": "0rem","max-width": "none!important","width": "100%"})
 
     }
 }

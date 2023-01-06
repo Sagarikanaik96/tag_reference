@@ -503,10 +503,10 @@ input::-webkit-credentials-auto-fill-button {
   font-size: 14px;
 }
 
-.editable-form .form-section [data-fieldtype="Table"] .sortable-handle span,
+/* .editable-form .form-section [data-fieldtype="Table"] .sortable-handle span,
 .form-layout .form-section [data-fieldtype="Table"] .sortable-handle span {
   display: none;
-}
+} */
 
 /* View contract start */
 [data-route="Form/Job Order"] .modal .modal-dialog {
