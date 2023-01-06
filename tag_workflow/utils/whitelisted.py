@@ -312,16 +312,15 @@ def get_staffing_company_list():
 @frappe.whitelist()
 @frappe.read_only()
 def run(report_name, filters=None, user=None, ignore_prepared_report=False, custom_columns=None):
-    if user!=frappe.session.user:
+    if not user:
+        user = frappe.session.user
+    elif user!=frappe.session.user:
         frappe.throw('Insufficient Permission for User ' + user)
     detail_filters = json.loads(filters)
     if filters!='{}' and detail_filters.get('company'):
             company_doc=frappe.get_doc('Company',detail_filters['company'])
             if not company_doc.has_permission("read"):
                 frappe.throw('Insufficient Permission for Company ' + detail_filters['company'])
-
-    if not user:
-        return None
 
     report = get_report_doc(report_name)
 
