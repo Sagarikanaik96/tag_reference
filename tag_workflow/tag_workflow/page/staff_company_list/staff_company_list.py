@@ -22,7 +22,6 @@ def comp(comp_id=None,company_name=None,filters=None,start=0,end=20):
             user_type=frappe.db.sql(sql, as_list=1)
             if user_type[0][0]=='Hiring':
                data = hiring_data(filters,user_name,comp_id,start,end)
-
             elif(user_type[0][0]=='Exclusive Hiring'): 
                 sql=""" select parent_staffing from `tabCompany` where name='{0}'  """.format(company_name)
                 staff_comp_name = frappe.db.sql(sql, as_list=1)
@@ -84,7 +83,6 @@ def sorted_favourite_companies(user_name):
         for i in comp_doc.favourite_staffing_company_list:
             comp.append(i.favourite_staffing_company)
         comp.sort()
-        print(comp)
         return comp          
 
     except Exception as e:
@@ -159,14 +157,14 @@ def filter_location(radius,comp,data):
     try:
         filter_data = []
         staff_location = None
-        address =" ".join(frappe.db.get_value("Company", comp[0][0], [
-                           "IFNULL(suite_or_apartment_no, '')", "IFNULL(state, '')", "IFNULL(city, '')", "IFNULL(zip, '')"]))
+        address_sql = frappe.db.sql('''select suite_or_apartment_no, state, city, zip from tabCompany where name = "{0}"'''.format(comp[0][0]), as_list=True)
+        address = " ".join(address_sql[0])
         if address:
             location = get_custom_location(address)
             for d in data:
                 try:
-                    staff_add = " ".join(frappe.db.get_value("Company",d.name, [
-                           "IFNULL(suite_or_apartment_no, '')", "IFNULL(state, '')", "IFNULL(city, '')", "IFNULL(zip, '')"]))
+                    staff_add_sql = frappe.db.sql('''select suite_or_apartment_no, state, city, zip from tabCompany where name = "{0}"'''.format(d.name), as_list=True)
+                    staff_add = " ".join(staff_add_sql[0])
                     staff_location = get_custom_location(staff_add)
 
                     rad = haversine(location, staff_location, unit='mi')
@@ -203,6 +201,7 @@ def hiring_data(filters,user_name,comp_id,start,end):
         
         
         data = frappe.db.sql(sql, as_dict=True)
+
         for d in data:
             response = get_count(d.name)
             d.update(dict(count=response['count'],blocked_count=response['blocked_count'],title=response['title'],rating = check_staffing_reviews(d.name)))
