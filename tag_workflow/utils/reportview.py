@@ -146,10 +146,9 @@ def check_distance(company_address, data, radius):
         for add in company_address:
             for d in data['values']:
                 try:
-                    lat, lng = frappe.db.get_value(
-                        "Job Site", d[-6], ["IFNULL(lat, '')", "IFNULL(lng, '')"])
+                    geo_data = frappe.db.sql('''select lat, lng from `tabJob Site` where name = "{0}"'''.format(d[-6]), as_list=True)
                     rds = haversine(add, tuple(
-                        [float(lat), float(lng)]), unit='mi')
+                        [float(geo_data[0][0]), float(geo_data[0][1])]), unit='mi')
                     if(rds <= distance_value[radius] and d[0] not in orders):
                         result.append(d)
                         orders.append(d[0])
