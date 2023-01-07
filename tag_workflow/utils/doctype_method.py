@@ -537,8 +537,9 @@ def get_data_as_docs(self):
 			related_children_docs = grouped_children_data.get(doc.name, {})
 			yield {**doc, **related_children_docs}
 
-def validate_employee_roles(doc):
+def validate_employee_roles(doc,method):
 	# called via User hook
+	print(method)
 	if "Employee" in [d.role for d in doc.get("roles")]:
 		if not frappe.db.get_value("Employee", {"user_id": doc.name}):
 			doc.get("roles").remove(doc.get("roles", {"role": "Employee"})[0])
