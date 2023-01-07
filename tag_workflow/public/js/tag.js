@@ -630,7 +630,7 @@ function change_view(){
 	let ch =document.querySelector(".toggle_icon").id
     if(ch =="toggle_display_1"){
 		document.querySelector(".toggle_icon").id="toggle_display_0"
-	  $(".col.layout-main-section-wrapper, .col-md-12.layout-main-section-wrapper").css ({"left": "8rem","max-width": "90%","width": "100%"})
+	  $(".col.layout-main-section-wrapper, .col-md-12.layout-main-section-wrapper").css ({"left": "10rem","max-width": "86%","width": "100%"})
     }
     else{
 		document.querySelector(".toggle_icon").id="toggle_display_1"

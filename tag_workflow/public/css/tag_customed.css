@@ -281,13 +281,13 @@ input::-webkit-credentials-auto-fill-button {
 .icon.icon-md.sidebar-toggle-placeholder {
   display: none;
 }
-
 .col.layout-main-section-wrapper,
 .col-md-12.layout-main-section-wrapper {
-  left: 8rem;
-  max-width:90%;
+   left: 10rem!important;
+  max-width: 86%!important;
   width: 100%;
   transition: .5s ease-in-out;
+  -webkit-transition: .5s ease-in-out;
 }
 
 .comment-box {
@@ -434,20 +434,23 @@ input::-webkit-credentials-auto-fill-button {
 /* Staff Company List table */
 
 /* Hiring table */
-[data-route="Workspaces/My Activities"] .sub-menu,
+[data-route="hiring-home"] .sub-menu,
 [data-route="staff-home"] .sub-menu {
-  top: 61px !important;
-  z-index: 99 !important;
+  top: 61px!important;
+  padding-top: 30px!important;
+  z-index: 99;
   transition: 0.5s ease !important;
+  -webkit-transition: 0.5s ease !important;
 }
-[data-route="staff-home"] #page-staff-home .page-head {
-  display: none;
+[data-route="staff-home"] #page-staff-home .page-head,
+[data-route="hiring-home"] .page-head  {
+  display: none !important;
 }
 [data-route="staff-home"] .home-tab .tab-content {
   margin-top: 20px;
 }
 #page-Workspaces .page-title .title-area .title-text {
-  margin-left: 120px;
+  margin-left: 155px;
   font-weight: 600;
 }
 /* Chat UI */
@@ -560,7 +563,7 @@ textarea.form-control {
   background-repeat: no-repeat;
   background-position: right;
   background-size: contain;
-}
+}    
 .hiring-home .tittle h3 {
   font-weight: 600;
   font-size: 30px;
@@ -777,12 +780,12 @@ textarea.form-control {
   font-size: 13px;
   content: "$";
 }
-[data-route="Workspaces/My Activities"] #page-Workspaces .page-head {
+[data-route="hiring-home"] #page-hiring-home .page-head {
   display: none;
 }
-[data-route="Workspaces/My Activities"] #page-Workspaces {
+[data-route="hiring-home"]  #page-hiring-home {
   padding: 20px 0;
-  transition: 2s ease-in-out;
+  transition: .5s ease-in-out;
 }
 .notification-settings {
   display: none;
@@ -953,6 +956,9 @@ span.frappe-timestamp.mini {
 .control-value.like-disabled-input {
   background-color: white;
   border: 1px solid#f4f5f6;
+}
+.admin-title {
+  margin-left:155px !important;
 }
 
 input.input-with-feedback.form-control.bold,
@@ -1648,13 +1654,13 @@ select.input-with-feedback.form-control.ellipsis {
   #terms-and-conditions {
     padding: 0 20px !important;
   }
-  [data-route="Workspaces/My Activities"] #page-Workspaces .page-head {
+  [data-route="hiring-home"] #page-hiring-home  .page-head {
     display: block;
   }
-  [data-route="Workspaces/My Activities"] .page-head {
+  [data-route="hiring-home"] .page-head {
     height: 30px !important;
   }
-  [data-route="Workspaces/My Activities"] .page-head.drop-shadow {
+  [data-route="hiring-home"] .page-head.drop-shadow {
     height: 60px !important;
   }
   .hiring-home .search-area {
