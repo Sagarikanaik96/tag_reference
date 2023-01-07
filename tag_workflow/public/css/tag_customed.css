@@ -1854,3 +1854,9 @@ span.comment-count {
 [data-page-route="Assign Employee"] input#staff_pay_rate {
   padding-left: 20px;
 }
+.like-icon{
+  display: none;
+}
+[data-page-route="staff_company_list"] .like-icon{
+  display: block;
+}

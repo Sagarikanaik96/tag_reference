@@ -1891,6 +1891,7 @@ span.comment-count {
 
 
 
+
 @media (max-width: 768px) {
   [data-route="Workspaces/My Activities"] .sub-menu,
 [data-route="staff-home"] .sub-menu {
@@ -2131,5 +2132,4 @@ span.comment-count {
     right: -230px;
   }
 }
-
 
