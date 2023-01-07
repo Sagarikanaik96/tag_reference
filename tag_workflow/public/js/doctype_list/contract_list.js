@@ -31,7 +31,7 @@ frappe.listview_settings["Contract"] = {
     },
     refresh:function(){
         $('.btn-primary').hide()
-        $('[data-original-title = "Name"]>input').attr('placeholder', 'Contract ID');
+        $('[data-original-title = "ID"]>input').attr('placeholder', 'Contract ID');
         $('[data-original-title = "Hiring Company"]>input').attr('placeholder', 'Company Name');
         $('span.level-item:nth-child(3)').html('Contract ID');
         $('.list-header-subject > div:nth-child(4) > span:nth-child(1)').html('Company Name');

@@ -12,7 +12,7 @@ frappe.listview_settings["Contact"] = {
             }
         }
         $('[title = "Contact"]').html('Contacts');
-        $('[data-original-title = "Name"]').hide();
+        $('[data-original-title = "ID"]').hide();
         $('[data-original-title = "Owner Company"]').hide();
     },
     refresh:function(){

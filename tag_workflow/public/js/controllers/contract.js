@@ -33,18 +33,6 @@ frappe.ui.form.on("Contract", {
 
 		}
 
-		$(document).on('click', '[data-fieldname="staffing_company"]', function(){
-			companyhide(2000)
-		});
-
-		$('[data-fieldname="staffing_company"]').mouseover(function(){
-			companyhide(500)
-		})
-
-	  	document.addEventListener("keydown", function(){
-	  		companyhide(500)
-	    })
-
 		frm.set_df_property('contract_terms', 'read_only', 1);
 		let child_table=['industry_type','job_titles','wages'];
 		for(let i in child_table){
@@ -53,6 +41,7 @@ frappe.ui.form.on("Contract", {
 				$(this).attr('title', file);
 			});
 		}
+
 		if(frm.doc.__islocal==1 ||(cur_frm.doc.docstatus==0 && frappe.boot.tag.tag_user_info.company!=frm.doc.hiring_company)){
 			frm.set_df_property('signe_hiring','hidden',1)
 		}
@@ -302,20 +291,6 @@ function cancel_cantract(frm){
 	});
 }
 
-
-function companyhide(time) {
-	setTimeout(() => {
-		let txt  = $('[data-fieldname="staffing_company"]')[1].getAttribute('aria-owns')
-		let txt2 = 'ul[id="'+txt+'"]'
-		let  arry = document.querySelectorAll(txt2)[0].children
-		document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
-		document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
-
-		
-	}, time)
-}
-
-
 function hide_submit_button(frm){
 	if(frm.doc.__islocal!=1 && !frm.doc.signe_hiring){
 		$('[data-label = "Submit"]').css('display', 'none');
@@ -326,9 +301,13 @@ function hide_submit_button(frm){
 
 frappe.ui.form.on("Job Titles", {
 	job_titles:function(){
-
 		$('[data-label = "Save"]').css('display', 'block');
 	},
+	job_titles_add:()=>{
+		$('[data-fieldname="industry_type"]').on("click", ()=>{
+			$('input[data-fieldname="industry_type"]').removeAttr('disabled');
+		})
+	}
 })
 frappe.ui.form.on("Industry Types", {
 	industry_type:function(){

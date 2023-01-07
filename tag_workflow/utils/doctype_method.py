@@ -138,23 +138,19 @@ def validate_standard_navbar_items(self):
 #------crm contact------#
 def create_contact(self):
     if not self.lead_name:
+        self.set_full_name()
         self.set_lead_name()
-
-    names = self.lead_name.strip().split(" ")
-    if len(names) > 1:
-        first_name, last_name = names[0], " ".join(names[1:])
-    else:
-        first_name, last_name = self.lead_name, None
 
     contact = frappe.new_doc("Contact")
     contact.update({
-        "first_name": first_name,
-        "last_name": last_name,
+        "first_name": self.first_name or self.lead_name,
+        "last_name": self.last_name,
         "salutation": self.salutation,
         "gender": self.gender,
-        "designation": self.designation,
+        "job_title": self.job_title,
         "company_name": self.company_name,
-        "email_address": self.email_id
+        "email_address": self.email_id,
+        "phone_number": self.phone_no
     })
 
     if self.company:
@@ -170,7 +166,7 @@ def create_contact(self):
 
     if self.phone:
         contact.append("phone_nos", {
-            "phone": self.phone,
+            "phone": self.phone_no,
             "is_primary_phone": 1
         })
 
@@ -180,6 +176,7 @@ def create_contact(self):
             "is_primary_mobile_no":1
         })
     contact.insert(ignore_permissions=True)
+    contact.reload()  # load changes by hooks on contact
     return contact
 
 #-------timesheet------#

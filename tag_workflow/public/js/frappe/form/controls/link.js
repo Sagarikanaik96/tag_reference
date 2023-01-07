@@ -517,7 +517,7 @@ if (Awesomplete) {
 }
 
 function remove_options(doctype, fieldname, result){
-	if((['Employee Onboarding', 'Employee Onboarding Template', 'Job Offer','Salary Structure','Salary Component','Company', 'Companies Assigned', 'User', 'Job Order', 'Employee'].includes(doctype) && ['staffing_company', 'company','certificate_and_endorsements', 'assign_multiple_company'].includes(fieldname)) || ['Assign Employee','Assign Employee Details'].includes(doctype)){
+	if((['Employee Onboarding', 'Employee Onboarding Template', 'Job Offer','Salary Structure','Salary Component','Company', 'Companies Assigned', 'User', 'Job Order', 'Employee', 'Lead', 'Contract'].includes(doctype) && ['staffing_company', 'company','certificate_and_endorsements', 'assign_multiple_company', 'owner_company'].includes(fieldname)) || ['Assign Employee','Assign Employee Details'].includes(doctype)){
 		result.splice(result.length - 2, 2);
 		return result
 	}else if((['Industry Types Job Titles'].includes(doctype) && ['industry_type'].includes(fieldname))){

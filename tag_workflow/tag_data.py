@@ -1693,7 +1693,7 @@ def validate_user(doc,method):
             raise frappe.PermissionError(("read", "User", doc.email)) 
     print(method)
     user = frappe.get_doc('User',frappe.session.user)
-    if not doc.is_new() and frappe.session.user!="Administrator" and frappe.session.user!=tagAdmin and (doc.email!=user.email or doc.company!=user.company or doc.tag_user_type!=user.tag_user_type or doc.organization_type!=user.organization_type):
+    if not doc.is_new() and doc.owner!=frappe.session.user and frappe.session.user!='Guest' and frappe.session.user!="Administrator" and frappe.session.user!=tagAdmin and (doc.email!=user.email or doc.company!=user.company or doc.tag_user_type!=user.tag_user_type or doc.organization_type!=user.organization_type):
         frappe.throw('Insufficient Permission')
 
 @frappe.whitelist()

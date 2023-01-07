@@ -5,6 +5,7 @@ frappe.ui.form.on("Lead", {
     $('.custom-actions.hidden-xs.hidden-md').show();
     setTimeout(()=>{
       $('[data-label="Create"]').addClass("hide");
+      $('[data-label="Action"]').addClass("hide");
     }, 3000);
     view_contract(frm);
 	  cur_frm.dashboard.hide();
@@ -24,19 +25,6 @@ frappe.ui.form.on("Lead", {
     if(frm.doc.__islocal==1){
 			cancel_lead(frm);
 		}
-
-
-    $(document).on('click', '[data-fieldname="owner_company"]', function(){
-      companyhide(1250)
-    });
-
-    $('[data-fieldname="owner_company"]').mouseover(function(){
-      companyhide(1000)
-    })
-
-      document.addEventListener("keydown", function(){
-        companyhide(1000)
-      })
 
     set_map(frm);
     hide_fields(frm);
@@ -133,21 +121,10 @@ frappe.ui.form.on("Lead", {
       cur_frm.set_value('lead_name',(frm.doc.contact_first_name).trim()+' '+(frm.doc.contact_last_name).trim())
     }
    if (frappe.boot.tag.tag_user_info.company_type=='Staffing') {
-    frm.set_value("organization_type", "Exclusive Hiring");} 
-    if(frm.doc.notes && frm.doc.user_notes){
-      if(frm.doc.user_notes!=frm.doc.notes){
-        cur_frm.set_value('user_notes',frm.doc.notes)
-        cur_frm.set_value('notes','')
-      }
-    }
-    else{
-      cur_frm.set_value('user_notes',frm.doc.notes)  
-      cur_frm.set_value('notes','')
-    }
+    frm.set_value("organization_type", "Exclusive Hiring");}
   },
-  after_save:function(frm){
-    if(frm.doc.user_notes && frm.doc.user_notes!=frm.doc.notes)
-    {
+  after_save: function(frm){
+    if(frm.doc.user_notes){
       frappe.call({
         "method": "frappe.desk.form.utils.add_comment",
         'async':0,
@@ -158,9 +135,11 @@ frappe.ui.form.on("Lead", {
           comment_email: frappe.session.user,
           comment_by: frappe.session.user_fullname,
           comment_type:'Comment'
-            }
-          });
-          frm.reload_doc()
+        },
+        "callback": ()=>{
+          frappe.db.set_value('Lead', frm.doc.name, 'user_notes', '');
+        }
+      });
     }
   },
   dob:function(frm){
@@ -227,91 +206,6 @@ function reqd_fields(frm) {
   }
 }
 
-/*------------onboard----------------*/
-function onboard_org(frm) {
-  let email = frm.doc.email_id;
-  let exclusive = frm.doc.company_name;
-  let person_name = frm.doc.lead_name;
-  let organization_type = frm.doc.organization_type;
-  let lead = frm.doc.name;
-
-  frappe.db.get_value(
-    "User",
-    { name: frappe.session.user },
-    "company",
-    function (r) {
-      if (r && r.company) {
-        frm
-          .add_custom_button("Onboard Organization", function () {
-            check_dirty()
-              ? onboard_orgs(
-                  lead,
-                  exclusive,
-                  r.company,
-                  email,
-                  person_name,
-                  frm,
-                  organization_type
-                )
-              : console.log("TAG");
-          })
-          .addClass("btn-primary");
-      }
-    }
-  );
-}
-
-function check_dirty() {
-  let is_ok = true;
-  if (cur_frm.is_dirty() == 1) {
-    frappe.msgprint("Please save the form before Onboard Organization");
-    is_ok = false;
-  }
-  return is_ok;
-}
-
-/*-------onboard----------*/
-function onboard_orgs(
-  lead,
-  exclusive,
-  staffing,
-  email,
-  person_name,
-  frm,
-  organization_type
-) {
-  if (exclusive && email) {
-    frappe.call({
-      method: "tag_workflow.controllers.crm_controller.onboard_org",
-      freeze: true,
-      freeze_message:
-        "<p><b>Please wait while we are preparing Organization for onboarding</b></p>",
-      args: {
-        "lead":lead,
-        exclusive: exclusive,
-        staffing: staffing,
-        email: email,
-        person_name: person_name,
-        phone:frm.doc.phone_no,
-        organization_type: organization_type,
-      },
-      callback: function (r) {
-        console.log(r);
-      },
-    });
-  } else {
-    !exclusive
-      ? cur_frm.scroll_to_field("company_name")
-      : cur_frm.scroll_to_field("email_id");
-    frappe.msgprint({
-      message: __(
-        "<b>Organization Name</b> and <b>Email Address</b> is required for Onboarding"
-      ),
-      title: __("Warning"),
-      indicator: "red",
-    });
-  }
-}
 
 /*--------makecontract--------*/
 let _contract = `<p><b>Staffing/Vendor Contract</b></p>
@@ -383,7 +277,6 @@ function run_contract(frm) {
 function hide_details() {
   let fields = [
     "source",
-    "designation",
     "campaign_name",
     "mobile_no",
   ];
@@ -483,20 +376,6 @@ function email_box(frm){
       });
       pop_up.show();
 }
-
-
-function companyhide(time) {
-  setTimeout(() => {
-    let txt  = $('[data-fieldname="owner_company"]')[1].getAttribute('aria-owns')
-    let txt2 = 'ul[id="'+txt+'"]'
-    let arry = document.querySelectorAll(txt2)[0].children
-    document.querySelectorAll(txt2)[0].children[arry.length-2].style.display='none'
-    document.querySelectorAll(txt2)[0].children[arry.length-1].style.display='none'
-
-    
-  }, time)
-}
-
 
 function hide_fields(frm){
   frm.set_df_property('address_lines_2','hidden',frm.doc.address_lines_2 && frm.doc.enter_manually ==1?0:1);
