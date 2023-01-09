@@ -327,7 +327,7 @@
               </button>
             </div>
             {% endif %} {% if frappe.boot.tag.tag_user_info.company_type
-              == "TAG" || frappe.session.user == "Administrator" %}
+              == "" || frappe.session.user == "Administrator" %}
               <a href="/app/home" class="position-relative">
                 <div class="tab-button custom-btn">
                   <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-4" alt="home" />Home
@@ -341,6 +341,13 @@
                 </div>
               </a>
               {% endif%}
+            {% if frappe.boot.tag.tag_user_info.company_type =="TAG" %}
+              <a href="/app/tagadmin-page" class="position-relative">
+                <div class="tab-button custom-btn">
+                  <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-4" alt="home" />Home
+                </div>
+              </a>
+            {%endif%}
              {% if frappe.boot.tag.tag_user_info.company_type =="Staffing" %}
             <a href="/app/staff-home" class="position-relative">
               <div class="tab-button custom-btn mt-4 mt-md-2 ">
@@ -607,7 +614,7 @@
     $(".toggle_icon").click(function () {
       $(".sub-menu").toggle();
       
-      $(".col.layout-main-section-wrapper, .col-md-12.layout-main-section-wrapper").css ({"left": "0","max-width": "none!important","width": "100%"});
+      $(".col.layout-main-section-wrapper, .col-md-12.layout-main-section-wrapper").css ({"left": "0","max-width": "none","width": "100%"});
       change_view()
      
       

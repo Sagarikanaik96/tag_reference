@@ -8,6 +8,10 @@
 		<a class="navbar-brand navbar-home gulu" href="/app/staff-home">
 			<img class="app-logo" style="width: {{ navbar_settings.logo_width || 24 }}px" src="{{ frappe.boot.app_logo_url }}" alt="">
 		</a>
+		{% } else if (frappe.boot.tag.tag_user_info.company_type =="TAG") { %}
+		<a class="navbar-brand navbar-home gulu" href="/app/tagadmin-page">
+			<img class="app-logo" style="width: {{ navbar_settings.logo_width || 24 }}px" src="{{ frappe.boot.app_logo_url }}" alt="">
+		</a>
 		{% } else  { %}
 		<a class="navbar-brand navbar-home " href="/app">
 			<img class="app-logo" style="width: {{ navbar_settings.logo_width || 24 }}px" src="{{ frappe.boot.app_logo_url }}" alt="">
