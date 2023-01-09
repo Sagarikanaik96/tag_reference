@@ -19,6 +19,7 @@
 			<a class="dropdown-item switch-to-desk hidden" id="swtich-to" href="/app/staff-home">{{ _('Switch To Desk') }}</a>
 			{%- elif frappe.request.cookies.get('ctype')=='Hiring' -%}
 			<a class="dropdown-item switch-to-desk hidden" id="swtich-to" href="/app/hiring-home">{{ _('Switch To Desk') }}</a>
+			{%- elif frappe.request.cookies.get('ctype') == 'TAG' -%}
 			{%- else-%}
 			<a class="dropdown-item switch-to-desk hidden" id="swtich-to" href="/app">{{ _('Switch To Desk') }}</a>
 			{%-endif-%}
