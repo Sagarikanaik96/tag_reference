@@ -6,6 +6,7 @@ let note = '';
 let company_branch = 0;
 frappe.ui.form.on("Assign Employee", {
   refresh: function (frm) {
+    $('[data-original-title="Menu"]').hide();
     setTimeout(add_dynamic, 500);
     hide_class_code_rate(frm);
     select_employees(frm);
@@ -29,6 +30,7 @@ frappe.ui.form.on("Assign Employee", {
           frappe.set_route("List", "Job Order");
         }, 5000);
       }
+      $('[data-label="Save"]').show();
     } else {
       assigned_direct(frm);
     }
