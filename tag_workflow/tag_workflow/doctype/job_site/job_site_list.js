@@ -7,7 +7,10 @@ frappe.listview_settings['Job Site'] = {
             $('.menu-btn-group').hide();
         }
     },
-	refresh: function(){
+	refresh: function(listview){
 		$('#navbar-breadcrumbs > li:nth-child(2) > a').html('Job Sites');
+		$('[data-original-title="ID"]>input').attr('placeholder', 'Name');
+		listview.columns[0].df.label='Name';
+		listview.render_header(listview.columns);
 	}
 }
