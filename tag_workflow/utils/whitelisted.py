@@ -839,24 +839,35 @@ def save(doc):
 
 @frappe.whitelist()
 def get_onboarding_details(parent, parenttype):
-    return frappe.get_all("Employee Boarding Activity",
-		fields=["activity_name", "role", "user", "required_for_employee_creation", "description", "task_weight", "document_required", "document", "attach"],
+	return frappe.get_all(
+		"Employee Boarding Activity",
+		fields=[
+			"activity_name",
+			"role",
+			"user",
+			"required_for_employee_creation",
+			"description",
+			"task_weight",
+			"begin_on",
+			"duration",
+            "document_required",
+            "document",
+            "attach"
+		],
 		filters={"parent": parent, "parenttype": parenttype},
-		order_by= "idx")
+		order_by="idx",
+	)
 
 @frappe.whitelist()
 def get_retirement_date(date_of_birth=None):
-	ret = {}
 	if date_of_birth:
 		try:
-			retirement_age = int(frappe.db.get_single_value("HR Settings", "retirement_age") or 120)
-			dt = add_years(getdate(date_of_birth),retirement_age)
-			ret = {'date_of_retirement': dt.strftime('%Y-%m-%d')}
+			retirement_age = cint(frappe.db.get_single_value("HR Settings", "retirement_age") or 120)
+			dt = add_years(getdate(date_of_birth), retirement_age)
+			return dt.strftime("%Y-%m-%d")
 		except ValueError:
 			# invalid date
-			ret = {}
-
-	return ret
+			return
 
 @frappe.whitelist(allow_guest=True)
 def upload_file():

@@ -124,5 +124,19 @@
   "parentfield": null,
   "parenttype": null,
   "total_fields": "6"
+ },
+ {
+  "disable_auto_refresh": 0,
+  "disable_count": 0,
+  "disable_sidebar_stats": 0,
+  "docstatus": 0,
+  "doctype": "List View Settings",
+  "fields": null,
+  "modified": "2023-01-09 04:33:04.726307",
+  "name": "Employee Onboarding Template",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "total_fields": "5"
  }
 ]

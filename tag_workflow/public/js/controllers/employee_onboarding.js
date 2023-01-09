@@ -132,6 +132,7 @@ frappe.ui.form.on('Employee Onboarding', {
 	staffing_company: (frm)=>{
 		get_user(frm);
 		get_template_name(frm);
+		get_holiday_list(frm);
 	},
 	status: (frm)=>{
 		frm.set_value('boarding_status', frm.doc.status)
@@ -483,4 +484,12 @@ function get_template_name(frm, message=''){
 			}
 		});
 	}
+}
+
+function get_holiday_list(frm){
+	frappe.db.get_value("Company", {name:frm.doc.staffing_company}, ['enable_ats', 'default_holiday_list'], (res)=>{
+		if(res.enable_ats==1 && res.default_holiday_list){
+			frm.set_value("holiday_list",res.default_holiday_list)
+		}
+	})
 }

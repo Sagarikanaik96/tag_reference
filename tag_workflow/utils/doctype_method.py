@@ -2,8 +2,7 @@ import frappe
 from frappe import _
 import re
 from frappe import enqueue, msgprint
-from frappe.utils import (cint, flt, has_gravatar, escape_html, format_datetime, now_datetime, get_formatted_email, today)
-from frappe.utils import flt, cstr, now, get_datetime_str, file_lock, date_diff
+from frappe.utils import (cint, flt, get_formatted_email, cstr, unique)
 from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
 from frappe.utils.global_search import update_global_search
 from frappe.utils.password import update_password as _update_password
@@ -541,3 +540,56 @@ def validate_employee_roles(doc,method):
 	if "Employee" in [d.role for d in doc.get("roles")]:
 		if not frappe.db.get_value("Employee", {"user_id": doc.name}):
 			doc.get("roles").remove(doc.get("roles", {"role": "Employee"})[0])
+
+def create_task_and_notify_user(self):
+    # create the task for the given project and assign to the concerned person
+    if self.holiday_list:
+        holiday_list = self.get_holiday_list()
+
+    for activity in self.activities:
+        if activity.task:
+            continue
+        
+        values = {
+            "doctype": "Task",
+            "project": self.project,
+            "subject": activity.activity_name + " : " + self.employee_name,
+            "description": activity.description,
+            "department": self.department,
+            "company": self.company,
+            "task_weight": activity.task_weight			
+        }
+
+        if self.holiday_list:
+            dates = self.get_task_dates(activity, holiday_list)
+            values["exp_start_date"] = dates[0]
+            values["exp_end_date":] = dates[1]
+
+        task = frappe.get_doc(values).insert(ignore_permissions=True)
+        activity.db_set("task", task.name)
+
+        users = [activity.user] if activity.user else []
+        if activity.role:
+            user_list = frappe.db.sql_list(
+                """
+                SELECT
+                    DISTINCT(has_role.parent)
+                FROM
+                    `tabHas Role` has_role
+                        LEFT JOIN `tabUser` user
+                            ON has_role.parent = user.name
+                WHERE
+                    has_role.parenttype = 'User'
+                        AND user.enabled = 1
+                        AND has_role.role = %s
+            """,
+                activity.role,
+            )
+            users = unique(users + user_list)
+
+            if "Administrator" in users:
+                users.remove("Administrator")
+
+        # assign the task the users
+        if users:
+            self.assign_task_to_users(task, users)
