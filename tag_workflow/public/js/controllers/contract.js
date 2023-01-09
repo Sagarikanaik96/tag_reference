@@ -1,5 +1,8 @@
 frappe.ui.form.on("Contract", {
 	refresh: function(frm){
+		$('[data-fieldname="industry_type"]').on("click", ()=>{
+            $('input[data-fieldname="industry_type"]').removeAttr('disabled');
+		})
 		hide_and_show_tables(frm);
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
@@ -353,3 +356,4 @@ function company_onboard_sign(frm)
 				frappe.validated=false;
 			}
 }
+

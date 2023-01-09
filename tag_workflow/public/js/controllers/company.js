@@ -11,6 +11,9 @@ frappe.ui.form.on("Company", {
 		update_auth_url(frm);
 	},
 	refresh: function (frm) {
+		$('[data-fieldname="industry_type"]').on("click", ()=>{
+            $('input[data-fieldname="industry_type"]').removeAttr('disabled');
+		})
 		hide_and_show_tables(frm)
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
@@ -1354,3 +1357,10 @@ function validate_office_code(frm){
 		frappe.validated = false;
 	}
 }
+frappe.ui.form.on("Job Titles", {
+    job_titles_add:()=>{
+        $('[data-fieldname="industry_type"]').on("click", ()=>{
+            $('input[data-fieldname="industry_type"]').removeAttr('disabled');
+        })
+    }
+})

@@ -1,7 +1,7 @@
 frappe.pages['tagadmin-page'].on_page_load = function(wrapper) {
 	let page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: "TagHome",
+		title: "Home",
 		single_column: true
 	});
 	wrapper.TagHome = new frappe.TagHome(wrapper, page);
