@@ -638,3 +638,9 @@ function change_view(){
 
     }
 }
+
+// Disables "Updated To A New Version" pop-up
+frappe.Application.prototype.show_change_log = function () { };
+
+// Disables "New Updates are available" pop-up
+frappe.Application.prototype.show_update_available = function () { };
