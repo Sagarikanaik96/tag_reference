@@ -1535,6 +1535,25 @@ select.input-with-feedback.form-control.ellipsis {
   margin-left: 20px;
 }
 
+.widget {
+  padding: 15px !important;
+  box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
+   border: 1px solid #cccccc36 !important;
+}
+.widget.hiring_dashboard_table,
+#page-Workspaces .widget.spacer  {
+  padding: 0px !important;
+  box-shadow: none !important;
+  border: none!important;
+ 
+}
+.widget.shortcut-widget-box .widget-title,
+.widget .widget-head .widget-title {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+}
+
+
 /*------ Media query start ----*/
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
