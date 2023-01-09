@@ -1552,6 +1552,10 @@ select.input-with-feedback.form-control.ellipsis {
   font-size: 16px !important;
   font-weight: 500 !important;
 }
+[data-page-route="Add Timesheet"] .card-section .form-grid.error,
+[data-page-route="Assign Employee"] .form-grid.error {
+  border: 1px solid#EBEEF0!important;
+}
 
 
 /*------ Media query start ----*/
