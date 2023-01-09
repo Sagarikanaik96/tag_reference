@@ -17,15 +17,17 @@ frappe.ui.form.on("Sales Invoice", {
 			$('[data-label="View"]').hide();
 			$('[data-label="Create"]').hide();
 			$('[data-label="Fetch%20Timesheet"]').hide();
-
-
-		},250)
+			$('.grid-footer')[0].style.display="block";
+		},550)
 	},
 	refresh: function(frm){
 		$('.form-footer').hide()
 		$('[data-original-title="Menu"]').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
+		setTimeout(function(){
+			$('.grid-footer')[0].style.display="block";
+		},550)
 		hide_fields_data(frm)
 		cur_frm.clear_custom_buttons();
 		let is_table = '';
