@@ -103,7 +103,8 @@ app_include_js = [
         "/assets/tag_workflow/js/frappe/print.js",
         "/assets/tag_workflow/js/frappe/dashboard.js",
         '/assets/tag_workflow/js/tag_workflow_routing.js',
-        'tag.bundle.js'
+        'tag.bundle.js',
+        "/assets/tag_workflow/js/data.js"
 ]
 
 web_include_css = [
