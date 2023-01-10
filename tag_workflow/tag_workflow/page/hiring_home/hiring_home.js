@@ -40,7 +40,7 @@ frappe.HireHome = Class.extend({
 						<span class="search_icon">
 							<i class="fa fa-search" aria-hidden="true"></i>
 						</span>
-						<input class="form-control my-0 py-2 search-area" type="text" placeholder="Search by Staffing Company or Job Category" aria-label="Search" oninput="update_list()" id="staff">
+						<input class="form-control my-0 py-2 search-area" type="text" placeholder="Search by Staffing Company or Industry" aria-label="Search" oninput="update_list()" id="staff">
 						<div class="inner-search border shadow rounded mt-2 py-3" style="display: none;">
 							<div class="d-flex flex-wrap border-bottom">
 								<div class="col-md-6">
