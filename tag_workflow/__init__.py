@@ -11,6 +11,8 @@ from erpnext.crm.doctype.lead.lead import Lead
 from erpnext.projects.doctype.timesheet.timesheet import Timesheet
 from frappe.core.doctype.data_import.exporter import Exporter
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
+from frappe import handler
+from tag_workflow.utils.whitelisted import upload_file
 from tag_workflow.utils.doctype_method import send_password_notification,validate_username, suggest_username, send_login_mail, raise_no_permission_to, validate_duplicate_user_id, validate_abbr, validate_standard_navbar_items, create_contact, update_cost, validate_mandatory_fields, run_post_save_methods, check_if_latest,calculate_total_for_salary_slip_based_on_timesheet,set_time_sheet,salary_slip_validate,update_user_permissions,get_data_as_docs,validate_employee_roles
 from tag_workflow.utils.doctype_method import create_task_and_notify_user
 import requests, json
@@ -39,6 +41,7 @@ Employee.update_user_permissions = update_user_permissions
 Exporter.get_data_as_docs = get_data_as_docs
 employee.validate_employee_role = validate_employee_roles
 EmployeeBoardingController.create_task_and_notify_user = create_task_and_notify_user
+handler.upload_file = upload_file
 
 def get_key(key):
     try:

@@ -1,21 +1,58 @@
 from unicodedata import name
+import re
 import frappe
 from frappe.utils import add_years, getdate
 from frappe import DoesNotExistError
 from json import loads
 from frappe.desk.form.load import get_docinfo, run_onload
 import requests, json
-from frappe import _, msgprint, throw
+from frappe import _, msgprint, throw, is_whitelisted
 from frappe.utils import cint, cstr, flt, now_datetime, getdate, nowdate
 from frappe.model.mapper import get_mapped_doc
 from erpnext.selling.doctype.quotation.quotation import _make_customer
-from tag_workflow.tag_data import employee_company
 from tag_workflow.utils.notification import sendmail, make_system_notification, share_doc
 from frappe.desk.query_report import get_report_doc, generate_report_result,get_prepared_report_result
 from frappe.desk.desktop import Workspace
 from frappe import enqueue
 from frappe.desk.form.save import set_local_name,send_updated_docs
 from six import string_types
+from mimetypes import guess_type
+from typing import TYPE_CHECKING
+from frappe.utils import cint
+from frappe.utils.image import optimize_image
+
+if TYPE_CHECKING:
+	from frappe.core.doctype.user.user import User
+
+ALLOWED_MIMETYPES = (
+	"image/png",
+	"image/jpeg",
+	"application/pdf",
+	"application/msword",
+	"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+	"application/vnd.ms-excel",
+	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	"application/vnd.oasis.opendocument.text",
+	"application/vnd.oasis.opendocument.spreadsheet",
+	"text/plain",
+)
+
+ALLOWED_FILE_EXTENSIONS = (
+    "png",
+    "jpeg",
+    "jpg",
+    "pdf",
+    "doc",
+    "docx",
+    "xls",
+    "xlsx",
+    "odt",
+    "ods",
+    "txt",
+    "csv"
+)
+
+
 EVENT = 'refresh_data'
 #-------global var------#
 item = "Timesheet Activity Cost"
@@ -869,61 +906,70 @@ def get_retirement_date(date_of_birth=None):
 			# invalid date
 			return
 
+import re
 @frappe.whitelist(allow_guest=True)
 def upload_file():
-	user = None
-	if frappe.session.user == "Guest":
-		if frappe.get_system_settings("allow_guests_to_upload_files"):
-			ignore_permissions = True
-		else:
-			raise frappe.PermissionError
-	else:
-		user: "User" = frappe.get_doc("User", frappe.session.user)
-		ignore_permissions = False
+    user = None
+    validation_message = "You can only upload JPG, PNG, PDF, TXT or Microsoft documents."
+    if frappe.session.user == "Guest":
+        if frappe.get_system_settings("allow_guests_to_upload_files"):
+            ignore_permissions  = True
+        else:
+            raise frappe.PermissionError
+    else:
+        user : "User" = frappe.get_doc("User", frappe.session.user)
+        ignore_permissions = False
+	
+    files = frappe.request.files
+    is_private = frappe.form_dict.is_private
+    doctype = frappe.form_dict.doctype
+    docname = frappe.form_dict.docname
+    fieldname = frappe.form_dict.fieldname
+    file_url = frappe.form_dict.file_url
+    folder = frappe.form_dict.folder or "Home"
+    method = frappe.form_dict.method
+    filename = frappe.form_dict.file_name
+    optimize = frappe.form_dict.optimize
+    content = None
+    
+    if "file" in files:
+        upload_file  = files["file"]
+        filename = upload_file.filename
+        content_type = guess_type(filename)[0]
+              
+        split_file_name  = filename.rsplit(".",1)
+        if len(split_file_name) <= 1:
+            throw(_(validation_message))
+        if split_file_name[1].lower() not in ALLOWED_FILE_EXTENSIONS:
+            throw(_(validation_message))
+        
+        filename = re.sub(r"[!@#$%^&*(){};:,./<>?\|`+\s]", "", split_file_name[0]) + "." + split_file_name[1]
+        content = upload_file.stream.read()
+        if optimize and content_type.startswith("image/"):
+            args = {"content": content, "content_type": content_type}
+            if frappe.form_dict.max_width:
+                args["max_width"] = int(frappe.form_dict.max_width)
+            if frappe.form_dict.max_height:
+                args["max_height"] = int(frappe.form_dict.max_height)
+            content = optimize_image(**args)
 
-	files = frappe.request.files
-	is_private = frappe.form_dict.is_private
-	doctype = frappe.form_dict.doctype
-	docname = frappe.form_dict.docname
-	fieldname = frappe.form_dict.fieldname
-	file_url = frappe.form_dict.file_url
-	folder = frappe.form_dict.folder or "Home"
-	method = frappe.form_dict.method
-	filename = frappe.form_dict.file_name
-	optimize = frappe.form_dict.optimize
-	content = None
-	is_private = 0 
+    frappe.local.uploaded_file = content
+    frappe.local.uploaded_filename = filename
 
-	if "file" in files:
-		file = files["file"]
-		content = file.stream.read()
-		filename = file.filename
+    if content is not None and (
+        frappe.session.user == "Guest" or (user and not user.has_desk_access())
+    ):
+        filetype = guess_type(filename)[0]
+        if filetype not in ALLOWED_MIMETYPES:
+            throw(_(validation_message))
 
-		content_type = guess_type(filename)[0]
-		if optimize and content_type.startswith("image/"):
-			args = {"content": content, "content_type": content_type}
-			if frappe.form_dict.max_width:
-				args["max_width"] = int(frappe.form_dict.max_width)
-			if frappe.form_dict.max_height:
-				args["max_height"] = int(frappe.form_dict.max_height)
-			content = optimize_image(**args)
+    if method:
+        method = frappe.get_attr(method)
+        is_whitelisted(method)
+        return method()
 
-	frappe.local.uploaded_file = content
-	frappe.local.uploaded_filename = filename
-
-	if content is not None and (
-		frappe.session.user == "Guest" or (user and not user.has_desk_access())
-	):
-		filetype = guess_type(filename)[0]
-		if filetype not in ALLOWED_MIMETYPES:
-			frappe.throw(_("You can only upload JPG, PNG, PDF, TXT or Microsoft documents."))
-
-	if method:
-		method = frappe.get_attr(method)
-		is_whitelisted(method)
-		return method()
-	else:
-		return frappe.get_doc(
+    else:
+        return frappe.get_doc(
 			{
 				"doctype": "File",
 				"attached_to_doctype": doctype,
@@ -936,6 +982,7 @@ def upload_file():
 				"content": content,
 			}
 		).save(ignore_permissions=ignore_permissions)
+	
 
 queue_prefix = 'insert_queue_for_'
 
