@@ -2,7 +2,7 @@
     "name": "tag_workflow",
     "dependencies": {
       "ace-builds": "^1.4.13",
-      "air-datepicker": "github:frappe/air-datepicker",
+      "air-datepicker": "https://github.com/frappe/air-datepicker.git",
       "autoprefixer": "^9.8.8",
       "awesomplete": "^1.1.5",
       "bootstrap": "4.6.1",
@@ -31,7 +31,8 @@
       "redis": "^3.1.1",
       "rtlcss": "2.6.2",
       "showdown": "^1.9.1",
-      "socket.io": "^2.4.0",
+      "socket.io": "^4.5.1",
+      "socket.io-client": "^4.5.1",
       "superagent": "^3.8.2",
       "touch": "^3.1.0",
       "vue": "^2.6.11",
