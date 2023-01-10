@@ -1565,6 +1565,10 @@ select.input-with-feedback.form-control.ellipsis {
     box-shadow: 0 0.125rem 0.25rem rgb(0 0 0 / 8%) !important;
     background:#fff;
 } 
+[data-fieldtype="Table"] .form-grid .grid-heading-row .row-index,
+[data-fieldtype="Table"] .form-grid .grid-body .row-index {
+  display:none;
+}
 
 
 /*------ Media query start ----*/

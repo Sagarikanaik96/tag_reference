@@ -509,11 +509,6 @@ input::-webkit-credentials-auto-fill-button {
   font-size: 14px;
 }
 
-/* .editable-form .form-section [data-fieldtype="Table"] .sortable-handle span,
-.form-layout .form-section [data-fieldtype="Table"] .sortable-handle span {
-  display: none;
-} */
-
 /* View contract start */
 [data-route="Form/Job Order"] .modal .modal-dialog {
   max-width: 900px !important;
@@ -1566,7 +1561,10 @@ select.input-with-feedback.form-control.ellipsis {
     box-shadow: 0 0.125rem 0.25rem rgb(0 0 0 / 8%) !important;
     background:#fff;
 } 
-
+[data-fieldtype="Table"] .form-grid .grid-heading-row .row-index,
+[data-fieldtype="Table"] .form-grid .grid-body .row-index {
+  display:none;
+}
 
 
 /*------ Media query start ----*/
