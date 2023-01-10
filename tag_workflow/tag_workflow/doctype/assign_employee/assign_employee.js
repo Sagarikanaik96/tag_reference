@@ -42,7 +42,7 @@ frappe.ui.form.on("Assign Employee", {
     document_download();
 
     $('[data-fieldname="company"]').css("display", "block");
-
+    $('[data-fieldname = "employee_pay_rate"]').attr("id", "emp_pay_rate");
     child_table_label();
     render_tab(frm);
     set_payrate_field(frm);
@@ -1121,8 +1121,6 @@ function set_payrate_field(frm) {
           frappe.boot.tag.tag_user_info.company_type
         )
       ) {
-        $('[data-fieldname = "employee_pay_rate"]').attr("id", "emp_pay_rate");
-
       }
     }
   );

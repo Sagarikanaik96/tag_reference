@@ -1,21 +1,29 @@
 diff --git a/erpnext/setup/doctype/employee/employee.json b/erpnext/setup/doctype/employee/employee.json
-index 99693d9..9cba22a 100644
+index 99693d9091..71db3dfae5 100644
 --- a/erpnext/setup/doctype/employee/employee.json
 +++ b/erpnext/setup/doctype/employee/employee.json
-@@ -18,7 +18,6 @@
+@@ -18,30 +18,27 @@
    "middle_name",
    "last_name",
    "employee_name",
 -  "column_break_9",
    "gender",
-   "date_of_birth",
+-  "date_of_birth",
    "salutation",
-@@ -31,17 +30,15 @@
+   "column_break1",
++  "company",
++  "status",
++  "date_of_birth",
+   "date_of_joining",
+   "image",
+-  "status",
+   "erpnext_user",
+   "user_id",
    "create_user",
    "create_user_permission",
    "company_details_section",
+-  "company",
 +  "reports_to",
-   "company",
 +  "designation",
    "department",
    "employee_number",
@@ -94,7 +102,7 @@ index 99693d9..9cba22a 100644
   "image_field": "image",
   "links": [],
 - "modified": "2022-09-13 10:27:14.579197",
-+ "modified": "2023-01-07 09:34:38.861140",
++ "modified": "2023-01-10 06:26:23.278770",
   "modified_by": "Administrator",
   "module": "Setup",
   "name": "Employee",

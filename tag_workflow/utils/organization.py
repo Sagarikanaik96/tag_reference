@@ -536,7 +536,7 @@ def check_js_update(message, job_site_name, staffing_company):
     if message== Job_Site:
         js_details = frappe.db.sql(f'''SELECT data FROM `tabVersion` WHERE docname = "{job_site_name}" ORDER BY modified DESC''', as_dict=1)
         js_changed = json.loads(js_details[0].data) if len(js_details) > 0 else []
-        if 'created_by'in js_changed:
+        if not js_changed:
             js_details = frappe.get_doc(Job_Site, job_site_name)
             return True if js_details.address or js_details.state or js_details.city or js_details.zip else False
         elif 'changed' in js_changed:
@@ -556,7 +556,7 @@ def check_comp_update(message, staffing_company):
     if message== 'Company':
         comp_details = frappe.db.sql(f'''SELECT data FROM `tabVersion` WHERE docname = "{staffing_company}" ORDER BY modified DESC''', as_dict=1)
         comp_changed = json.loads(comp_details[0].data) if len(comp_details) > 0 else []
-        if 'created_by' in comp_changed:
+        if not comp_changed:
             comp_details = frappe.get_doc('Company', staffing_company)
             return True if comp_details.complete_address or comp_details.address or comp_details.state or comp_details.city or comp_details.zip else False
         elif 'changed' in comp_changed:
