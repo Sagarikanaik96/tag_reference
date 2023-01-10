@@ -291,11 +291,9 @@ def filter_location_with_custom_address(custom_address,radius,data,page_length):
         result, orders = [], []
         for d in data['values']:
             try:
-                lat, lng = frappe.db.get_value(
-                    "Job Site", d[-6], ["IFNULL(lat, '')", "IFNULL(lng, '')"])
+                geo_data = frappe.db.sql('''select lat, lng from `tabJob Site` where name = "{0}"'''.format(d[-6]), as_list=True)
                 rad = haversine(custom_location, tuple(
-                        [float(lat), float(lng)]), unit='mi')
-                print(rad,radius,custom_address)
+                        [float(geo_data[0][0]), float(geo_data[0][1])]), unit='mi')
                 if(radius in ['All',CUSTOM] and (rad <=5 or rad<=10 or rad<=25 or rad<=50  or rad<=100 and d[0] not in orders)) or (radius not in['All',CUSTOM] and rad<=distance_value[radius] and d[0] not in orders):
                     result.append(d)
                     orders.append(d[0])
