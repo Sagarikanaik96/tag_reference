@@ -442,9 +442,10 @@ input::-webkit-credentials-auto-fill-button {
   transition: 0.5s ease !important;
   -webkit-transition: 0.5s ease !important;
 }
+[data-route="hiring-home"] .page-head,
 [data-route="staff-home"] #page-staff-home .page-head,
-[data-route="hiring-home"] .page-head  {
-  display: none !important;
+[data-route="tagadmin-page"] #page-tagadmin-page .page-head   {
+  display: none!important;
 }
 [data-route="staff-home"] .home-tab .tab-content {
   margin-top: 20px;
@@ -1556,6 +1557,14 @@ select.input-with-feedback.form-control.ellipsis {
 [data-page-route="Assign Employee"] .form-grid.error {
   border: 1px solid#EBEEF0!important;
 }
+[data-page-route="tagadmin-page"] .layout-main-section .home {
+    min-height: 570px;
+    border: 1px solid #cccccc36 !important;
+    border-radius:12px;
+    padding:15px;
+    box-shadow: 0 0.125rem 0.25rem rgb(0 0 0 / 8%) !important;
+    background:#fff;
+} 
 
 
 /*------ Media query start ----*/
