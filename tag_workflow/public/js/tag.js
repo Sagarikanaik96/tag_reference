@@ -341,8 +341,10 @@ frappe.search.AwesomeBar.prototype.setup = function(element){
 		$input.val("");
 	});
 
-	$input.on("keydown", null, 'esc', function() {
-		$input.blur();
+	$input.on("keydown", (e) => {
+		if (e.key == "Escape") {
+			$input.trigger("blur");
+		}
 	});
 	frappe.search.utils.setup_recent();
 	frappe.tags.utils.fetch_tags();
