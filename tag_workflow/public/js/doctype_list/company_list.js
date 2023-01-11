@@ -10,8 +10,11 @@ frappe.listview_settings["Company"] = {
     indicator[1] = { Active: "green", Inactive: "red" }[status];
     return indicator;
   },
-  onload: function () {
+  onload: function (listview) {
     $('h3[title="Company"]').html('Affiliate Companies');
+    $('[data-fieldname="name"]').attr("placeholder", "Name");
+    listview.columns[0].df.label="Name";
+    listview.render_header(listview);
     if(frappe.session.user != 'Administrator'){
       $('.custom-actions.hidden-xs.hidden-md').hide();
       $('[data-original-title="Refresh"]').hide();

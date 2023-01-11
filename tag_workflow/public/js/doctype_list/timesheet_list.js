@@ -58,6 +58,7 @@ frappe.listview_settings["Timesheet"] = {
   },
 
   onload: function (listview) {
+    $('[data-fieldname="name"]').hide();
     jQuery(document).on("click", ".apply-filters", function () {
       let jo = "";
       $(".link-field")

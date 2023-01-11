@@ -1,5 +1,8 @@
 frappe.listview_settings["Hiring Company Review"] = {
     onload:(listview)=>{
+        $('[data-fieldname="name"]').attr("placeholder", "Name");
+        listview.columns[0].df.label="Name";
+        listview.render_header(listview);
         hiring_review();
         $('[data-original-title="Hiring Company"]>div>div>input').val('');
         $('.list-row-col.ellipsis.hidden-xs.text-right').removeClass('text-right');
