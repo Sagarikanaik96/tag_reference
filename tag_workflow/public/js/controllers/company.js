@@ -11,6 +11,8 @@ frappe.ui.form.on("Company", {
 		update_auth_url(frm);
 	},
 	refresh: function (frm) {
+		$("#company-tab_break_63 > div.row.form-section.card-section.visible-section > div > div > form > div > div > div.form-grid-container > div > div.grid-heading-row > div:nth-child(2) > div").css("display", "none");
+		$("#company-tab_break_155 > div.row.form-section.card-section.visible-section > div > div > form > div > div > div.form-grid-container > div > div.grid-heading-row > div:nth-child(2) > div").css("display", "none");
 		$('[data-fieldname="industry_type"]').on("click", ()=>{
             $('input[data-fieldname="industry_type"]').removeAttr('disabled');
 		})

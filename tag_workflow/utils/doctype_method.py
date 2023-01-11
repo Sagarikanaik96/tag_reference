@@ -280,7 +280,7 @@ def check_if_latest(self):
 			self.check_docstatus_transition(0)
 			return
 
-		if cstr(previous.modified) != cstr(self._original_modified) and self.doctype not in ["Company", "Employee", "Job Order", "Assign Employee", "User", "Lead", "Timesheet", "Employee Onboarding"]:
+		if cstr(previous.modified) != cstr(self._original_modified) and self.doctype not in ["Company", "Employee", "Job Order", "Assign Employee", "User", "Lead", "Timesheet", "Employee Onboarding", "Contract"]:
 			frappe.msgprint(
 				_("Error: Document has been modified after you have opened it")
 				+ (f" ({previous.modified}, {self.modified}). ")

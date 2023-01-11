@@ -1,0 +1,13 @@
+diff --git a/frappe/permissions.py b/frappe/permissions.py
+index d734f79a4e..b6b4cfb250 100644
+--- a/frappe/permissions.py
++++ b/frappe/permissions.py
+@@ -349,7 +349,7 @@ def has_user_permission(doc, user=None):
+ 
+ 		return True
+ 
+-	if not check_user_permission_on_link_fields(doc):
++	if doctype not in ['Assign Employee', 'Timesheet'] and not check_user_permission_on_link_fields(doc):
+ 		return False
+ 
+ 	for d in doc.get_all_children():
