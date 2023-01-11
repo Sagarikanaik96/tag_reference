@@ -4,7 +4,9 @@
   --primary-hover-color: #0a97bfeb;
   --label-color: #454f63;
 }
-
+body {
+  background: #f9fafa;
+}
 label {
   color: var(--label-color) !important;
   font-size: 14px !important;
@@ -284,8 +286,8 @@ input::-webkit-credentials-auto-fill-button {
 
 .col.layout-main-section-wrapper,
 .col-md-12.layout-main-section-wrapper {
-  left: 10rem !important;
-  max-width: 86%!important;
+  left: 10rem;
+  max-width: 86%;
   width: 100%;
   transition: .5s ease-in-out;
   -webkit-transition: .5s ease-in-out;
@@ -454,7 +456,6 @@ input::-webkit-credentials-auto-fill-button {
   margin-top: 20px;
 }
 #page-Workspaces .page-title .title-area .title-text {
-  margin-left: 152px;
   font-weight: 600;
 }
 /* Chat UI */
@@ -1554,12 +1555,7 @@ select.input-with-feedback.form-control.ellipsis {
   border: 1px solid#EBEEF0!important;
 }
 [data-page-route="tagadmin-page"] .layout-main-section .home {
-    min-height: 570px;
-    border: 1px solid #cccccc36 !important;
-    border-radius:12px;
-    padding:15px;
-    box-shadow: 0 0.125rem 0.25rem rgb(0 0 0 / 8%) !important;
-    background:#fff;
+    padding-top: 25px;
 } 
 [data-fieldtype="Table"] .form-grid .grid-heading-row .row-index,
 [data-fieldtype="Table"] .form-grid .grid-body .row-index {
@@ -1576,9 +1572,6 @@ select.input-with-feedback.form-control.ellipsis {
   .col-md-12.layout-main-section-wrapper {
     left: 10rem ;
     max-width: 82%;
-  }
-  #page-Workspaces .page-title .title-area .title-text {
-    margin-left: 152px;
   }
 }
 
@@ -1924,9 +1917,6 @@ span.comment-count {
 }
 [data-page-route="User"] [title="assign_multiple_company"]>div>div>div>div>div>a{
   display: none;
-}
-.admin-title {
-  margin-left:155px !important;
 }
 
 
