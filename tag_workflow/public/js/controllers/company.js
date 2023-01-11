@@ -1352,9 +1352,16 @@ function update_invoice_view(frm){
 
 function validate_office_code(frm){
 	let office_code = frm.doc.office_code;
-	if(office_code && office_code.length != 5){
-		frappe.msgprint('Minimum and Maximum Characters allowed for Office Code are 5.');
-		frappe.validated = false;
+	if(office_code){
+		if(office_code.length!=5){
+			frappe.msgprint('Minimum and Maximum Characters allowed for Office Code are 5.');
+			frappe.validated = false;
+		}
+		let regEx = /^[0-9a-zA-Z]+$/;
+		if(!office_code.match(regEx)){
+			frappe.msgprint('Only alphabets and numbers are allowed in Office Code.');
+			frappe.validated = false;
+		}
 	}
 }
 frappe.ui.form.on("Job Titles", {
