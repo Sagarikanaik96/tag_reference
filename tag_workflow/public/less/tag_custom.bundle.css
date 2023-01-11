@@ -1566,6 +1566,9 @@ select.input-with-feedback.form-control.ellipsis {
   display:none;
 }
 
+#datepickers-container{
+  z-index: 999999;
+}
 
 /*------ Media query start ----*/
 @media (max-width: 1300px) {

@@ -1,7 +1,10 @@
 frappe.ui.form.on('Payroll Entry',{
     refresh:(frm)=>{
         check_payroll_perm()
-        check_status(frm)
+        setTimeout(()=>{
+            check_status(frm)
+        },200)
+        
     },
     setup:function(frm){
 		frm.set_query("company", function() {

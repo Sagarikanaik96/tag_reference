@@ -29,6 +29,8 @@ frappe.ui.form.on("Salary Slip", {
             frm.set_df_property('hour_rate', 'hidden', 1)
         }
 		check_status(frm)
+		frm.set_value("company",(frappe.boot.tag.tag_user_info.comps.length==1) ? frappe.boot.tag.tag_user_info.company :"")
+
     },
 	setup:function(frm){
 		frm.set_query("company", function() {
