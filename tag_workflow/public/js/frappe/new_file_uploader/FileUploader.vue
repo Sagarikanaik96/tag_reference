@@ -118,7 +118,7 @@
 	</div>
 </template>
 <script>
-import FilePreview from '../../../../../../frappe/frappe/public/js/frappe/file_uploader/FilePreview.vue';
+import FilePreview from './FilePreview.vue';
 import FileBrowser from '../../../../../../frappe/frappe/public/js/frappe/file_uploader/FileBrowser.vue';
 import WebLink from '../../../../../../frappe/frappe/public/js/frappe/file_uploader/WebLink.vue';
 
