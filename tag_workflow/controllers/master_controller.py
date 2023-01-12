@@ -155,7 +155,7 @@ def make_employee_permission(user, company):
 def new_user_job_perm(user):
     try:
         user_list = [{"name": user}]
-        company = frappe.db.get_list(COM, {"organization_type": "Hiring"}, "name")
+        company = frappe.db.get_all(COM, {"organization_type": "Hiring"}, "name")
         for com in company:
             update_job_order_permission(user_list, com['name'])
     except Exception as e:
@@ -168,7 +168,7 @@ def user_exclusive_perm(user, company, organization_type=None):
 
         if(organization_type == "Staffing"):
             new_user_job_perm(user)
-            exclusive = frappe.get_list("Company", {"parent_staffing": company}, "name")
+            exclusive = frappe.get_all("Company", {"parent_staffing": company}, "name")
             for ex in exclusive:
                 update_exclusive_perm([{"name": user}], ex.name)
 

@@ -64,7 +64,7 @@ def send_login_mail(self, subject, template, add_args, now=None):
     onboard = 0
     company, email = "", ""
     parent = frappe.db.get_value("Company", self.company, "parent_staffing")
-    user_list = frappe.db.get_list("User", {"company": self.company}, "name")
+    user_list = frappe.db.get_all("User", {"company": self.company}, "name")
     if(parent and (len(user_list) <= 1)):
         onboard = 1
         company = parent
@@ -369,24 +369,24 @@ def check_payrates_data(job_industry , job_title):
 
 @frappe.whitelist()
 def send_password_notification(self, new_password):
-		try:
-			if self.flags.in_insert and self.name not in STANDARD_USERS:
-					if new_password:
-						# new password given, no email required
-						_update_password(user=self.name, pwd=new_password,
-							logout_all_sessions=self.logout_all_sessions)
+    try:
+        if self.flags.in_insert and self.name not in STANDARD_USERS:
+                if new_password:
+                    # new password given, no email required
+                    _update_password(user=self.name, pwd=new_password,
+                        logout_all_sessions=self.logout_all_sessions)
 
-					if not self.flags.no_welcome_mail and cint(self.send_welcome_email):
-						enqueue(self.send_welcome_mail_to_user,now=False)
-						self.flags.email_sent = 1
-						if frappe.session.user != 'Guest':
-							msgprint(_("Welcome email sent"))
-						return
-			if not self.flags.in_insert:
-				self.email_new_password(new_password)
+                if not self.flags.no_welcome_mail and cint(self.send_welcome_email):
+                    enqueue(self.send_welcome_mail_to_user,now=False)
+                    self.flags.email_sent = 1
+                    if frappe.session.user != 'Guest':
+                        msgprint(_("Welcome email sent"))
+                    return
+        if not self.flags.in_insert:
+            self.email_new_password(new_password)
 
-		except frappe.OutgoingEmailError:
-			print(frappe.get_traceback())
+    except frappe.OutgoingEmailError:
+        print(frappe.get_traceback())
 
 #------------------------------------------SalarySlip-----------------------------------------#
 
