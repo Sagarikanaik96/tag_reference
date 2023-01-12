@@ -298,7 +298,6 @@ function make_hiring_notification(frm) {
 }
 
 function check_job_title(frm){
-  console.log(frm.doc.select_job)
   frappe.call({
     method:
       "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.add_job_title",

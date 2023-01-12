@@ -781,7 +781,8 @@ textarea.form-control {
   padding-left: 18px;
 }
 [data-page-route="Job Order"] #div_rate:after,
-#div_extra:after {
+#div_extra:after,
+[data-page-route="Item"] [data-fieldtype="Currency"]:after {
   position: absolute;
   left: 3px;
   top: 56%;
@@ -1583,6 +1584,7 @@ select.input-with-feedback.form-control.ellipsis {
    background: #f9fafa !important;
 }
 
+[data-route="List/Timesheet/List"] #navbar-breadcrumbs li:nth-child(1) {display:none}
 
 /*------ Media query start ----*/
 @media (max-width: 1300px) {
@@ -1779,10 +1781,12 @@ select.input-with-feedback.form-control.ellipsis {
 [data-fieldtype="Currency"] .ellipsis div {
   text-align: left !important;
 }
-#div_rate .control-input-wrapper input {
+#div_rate .control-input-wrapper input,
+[data-page-route="Item"] [data-fieldtype="Currency"] .control-input-wrapper input{
   padding-left: 21px;
 }
-#div_rate:after {
+#div_rate:after,
+[data-page-route="Item"] [data-fieldtype="Currency"]:after {
   left: 11px !important;
   top: 55% !important;
 }

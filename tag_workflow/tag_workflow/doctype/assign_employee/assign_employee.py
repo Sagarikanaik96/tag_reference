@@ -37,28 +37,8 @@ def get_dest(dest):
 
 @frappe.whitelist()
 def add_job_title(docname):
-    sql=f"select employee from `tabAssign Employee Details` where parent='{docname}'"
-    data=frappe.db.sql(sql,as_list=True)
-    sql=f"select job_category,job_order from `tabAssign Employee` where name='{docname}'"
-    new_data=frappe.db.sql(sql,as_list=True)
-    job_title = new_data[0][0]
-    job_order_data = frappe.get_doc('Job Order',new_data[0][1])
-    status = job_order_data.order_status
-    if status !="Completed":
-        for emp in data:
-            try:
-                sql=f"select job_category from `tabJob Category` where parent='{emp[0]}'"
-                categories=frappe.db.sql(sql,as_list=True)
-                categories = [cat[0] for cat in categories]
-                if job_title not in categories:
-                    emp_data = frappe.get_doc('Employee',emp[0])
-                    check_status_sql = f"select COUNT(*) from `tabDNR` where parent='{emp[0]}' and job_order='{new_data[0][1]}' UNION select COUNT(*) from `tabNo Show List` where parent='{emp[0]}' and job_order='{new_data[0][1]}' UNION select COUNT(*) from `tabUnsatisfied Organization` where parent='{emp[0]}' and job_order='{new_data[0][1]}'"
-                    negative_status=frappe.db.sql(check_status_sql,as_list=True)
-                    negative_status = [int(a[0]) for a in negative_status]
-                    add_job_title_to_profile(job_title, emp_data, negative_status)
-            except Exception:
-                pass
-
+    frappe.enqueue("add_job_title_in_background",queue="default",docname = docname,)
+   
 def add_job_title_to_profile(job_title, emp_data, negative_status):
     if not sum(negative_status):
         if not len(emp_data.employee_job_category):
@@ -264,6 +244,7 @@ def payrate_change(docname):
     try:
         sql = '''select data from `tabVersion` where docname="{0}" order by modified DESC'''.format(docname)
         data = frappe.db.sql(sql, as_list=1)
+        print(data,"#####################################################")
         if len(data)==0:
             return 'success'
         new_data = json.loads(data[0][0]) 
@@ -362,3 +343,28 @@ def add_notes(company,job_order):
         return frappe.db.sql(""" select notes from `tabAssign Employee` where job_order="{0}" and company="{1}" and notes!=""  limit 1 """.format(job_order,company),as_dict=1)
     except Exception as e:
         print(e)
+
+@frappe.whitelist()
+def add_job_title_in_background(docname):
+    sql=f"select employee from `tabAssign Employee Details` where parent='{docname}'"
+    data=frappe.db.sql(sql,as_list=True)
+    sql=f"select job_category,job_order from `tabAssign Employee` where name='{docname}'"
+    new_data=frappe.db.sql(sql,as_list=True)
+    job_title = new_data[0][0]
+    job_order_data = frappe.get_doc('Job Order',new_data[0][1])
+    status = job_order_data.order_status
+    if status !="Completed":
+        for emp in data:
+            try:
+                sql=f"select job_category from `tabJob Category` where parent='{emp[0]}'"
+                categories=frappe.db.sql(sql,as_list=True)
+                categories = [cat[0] for cat in categories]
+                if job_title not in categories:
+                    emp_data = frappe.get_doc('Employee',emp[0])
+                    check_status_sql = f"select COUNT(*) from `tabDNR` where parent='{emp[0]}' and job_order='{new_data[0][1]}' UNION select COUNT(*) from `tabNo Show List` where parent='{emp[0]}' and job_order='{new_data[0][1]}' UNION select COUNT(*) from `tabUnsatisfied Organization` where parent='{emp[0]}' and job_order='{new_data[0][1]}'"
+                    negative_status=frappe.db.sql(check_status_sql,as_list=True)
+                    negative_status = [int(a[0]) for a in negative_status]
+                    add_job_title_to_profile(job_title, emp_data, negative_status)
+            except Exception:
+                pass
+

@@ -16,6 +16,11 @@ frappe.ui.form.on("Item", {
 			
 	};},
 	refresh: function(frm,cdt,cdn){
+		frm.set_value('job_titless_name', frm.doc.job_titless);
+		if(frm.doc.__islocal!=1){
+			frm.set_df_property('job_titless_name', 'read_only', 1);
+		}
+		// $("#item-details > div:nth-child(1) > div > div:nth-child(2) > form > div:nth-child(3) > div > div.control-input-wrapper > div.control-input > input").html("$ 0.00")
 		$('.form-footer').hide();
 		cur_frm.clear_custom_buttons();
 		hide_connections(frm);
@@ -38,6 +43,7 @@ frappe.ui.form.on("Item", {
 				frm.set_df_property('company', 'read_only', 1);
 			} 
 		}
+		
 		frm.set_df_property('job_titless', 'hidden', 0);
 		if(frappe.boot.tag.tag_user_info.company_type != 'TAG' && frappe.session.user != 'Administrator'){
 			frm.set_df_property('company', 'reqd', 1);
@@ -63,6 +69,7 @@ frappe.ui.form.on("Item", {
 		frm.fields_dict['pay_rate'].grid.wrapper.find('.grid-add-row').click(function() {
 			set_job_site_disable_enable(cdt,cdn);
 		})
+		
 	},
 	before_save: function(frm,cdt,cdn){
 		frm.set_value("item_code", frm.doc.job_titless);
