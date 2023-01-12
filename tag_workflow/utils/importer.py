@@ -26,7 +26,7 @@ INVALID_VALUES = ("", None)
 MAX_ROWS_IN_PREVIEW = 10
 INSERT = "Insert New Records"
 UPDATE = "Update Existing Records"
-
+DATA_IMPORT_LOG = "Data Import Log"
 
 class Importer:
     def __init__(self, doctype, data_import=None, file_path=None, import_type=None, console=False):
@@ -49,7 +49,7 @@ class Importer:
         self.template_options = frappe.parse_json(self.data_import.template_options or "{}")
         self.import_type = self.data_import.import_type
 
-        self.import_file = ImportFile(doctype, file_path or data_import.google_sheets_url or data_import.import_file, self.template_options, self.import_type,)
+        self.import_file = ImportFile(doctype, file_path or self.data_import.google_sheets_url or self.data_import.import_file, self.template_options, self.import_type,)
         self.name = "No Name"
     
     def get_contact_series(self):
@@ -63,7 +63,17 @@ class Importer:
         return con_series
 
     def get_data_for_import_preview(self):
-        return self.import_file.get_data_for_import_preview()
+        out = self.import_file.get_data_for_import_preview()
+
+        out.import_log = frappe.get_all(
+			DATA_IMPORT_LOG,
+			fields=["row_indexes", "success"],
+			filters={"data_import": self.data_import.name},
+			order_by="log_index",
+			limit=10,
+		)
+
+        return out
 
     def before_import(self):
         # set user lang for translations
@@ -106,15 +116,27 @@ class Importer:
             return
 
         # setup import log
-        if self.data_import.import_log:
-            import_log = frappe.parse_json(self.data_import.import_log)
-        else:
-            import_log = []
+        import_log = (
+			frappe.get_all(
+				DATA_IMPORT_LOG,
+				fields=["row_indexes", "success", "log_index"],
+				filters={"data_import": self.data_import.name},
+				order_by="log_index",
+			)
+			or []
+		)
 
-        # remove previous failures from import log
-        import_log = [log for log in import_log if log.get("success")]
+        log_index = 0
 
-        return import_data_contd(self, import_log)
+        # Do not remove rows in case of retry after an error or pending data import
+        if (
+			self.data_import.status == "Partial Success"
+			and len(import_log) >= self.data_import.payload_count
+		):
+			# remove previous failures from import log only in case of retry after partial success
+            import_log = [log for log in import_log if log.get("success")]
+
+        return import_data_contd(self, import_log,log_index)
 
     def bulk_emp_insert(self, import_log, total_payload_count):
         try:
@@ -128,8 +150,7 @@ class Importer:
             elif len(failures) > 0:
                 status = "Partial Success"
             else:
-                status = "Success"
-
+                status = "Success" 
             if self.console:
                 self.print_import_log(import_log)
             else:
@@ -141,7 +162,7 @@ class Importer:
         except Exception as e:
             frappe.log_error(e, "bulk_emp_insert")
 
-    def check_import_data(self, doc, current_index, row_indexes, total_payload_count, import_log):
+    def check_import_data(self, doc, current_index, row_indexes, total_payload_count, import_log,log_index):
         try:
             if self.doctype == "Employee":
                 self.check_emp_error(doc)
@@ -159,7 +180,13 @@ class Importer:
                 update_progress_bar("Importing {0} records".format(total_payload_count), current_index, total_payload_count,)
             elif total_payload_count > 5:
                 frappe.publish_realtime("data_import_progress", {"current": current_index, "total": total_payload_count, "docname": doc, "data_import": self.data_import.name, "success": True, "row_indexes": row_indexes, "eta": eta,},)
-
+            create_import_log(
+						self.data_import.name,
+						log_index,
+						{"success": True, "docname": doc, "row_indexes": row_indexes},
+					)
+            log_index += 1
+            
             if message == "Pass":
                 import_log.append(frappe._dict(success=True, docname=doc, row_indexes=row_indexes))
             else:
@@ -173,11 +200,34 @@ class Importer:
 
             frappe.db.commit()
         except Exception as e:
-            import_log.append(frappe._dict(success=False,exception=frappe.get_traceback(),messages=frappe.local.message_log,row_indexes=row_indexes,))
+            messages = frappe.local.message_log
             frappe.clear_messages()
             # rollback if exception
             frappe.db.rollback()
+            create_import_log(
+						self.data_import.name,
+						log_index,
+						{
+							"success": False,
+							"exception": frappe.get_traceback(),
+							"messages": messages,
+							"row_indexes": row_indexes,
+						},
+					)
+
+            log_index += 1
             frappe.log_error(e, "check_import_data")
+        
+        # Logs are db inserted directly so will have to be fetched again
+        import_log = (
+            frappe.get_all(
+                DATA_IMPORT_LOG,
+                fields=["row_indexes", "success", "log_index"],
+                filters={"data_import": self.data_import.name},
+                order_by="log_index",
+            )
+            or []
+        )
 
     def check_emp_error(self, doc):
         try:
@@ -314,7 +364,9 @@ class Importer:
     def update_emp_lat_lng(self, doc):
         try:
             lat, lng = '', ''
-            address = doc.city + ", " + doc.state + ", " + (doc.zip if doc.zip != 0 and doc.zip is not None else "")
+            doc.city = doc.city + ", " if doc.city else " "
+            doc.state = doc.state + ", " if doc.state else " "
+            address = doc.city +  doc.state + (doc.zip if doc.zip != 0 and doc.zip is not None else "")
             google_location_data_url = GOOGLE_API_URL + address
             google_response = requests.get(google_location_data_url)
             location_data = google_response.json()
@@ -372,7 +424,15 @@ class Importer:
         if not self.data_import:
             return
 
-        import_log = frappe.parse_json(self.data_import.import_log or "[]")
+        import_log = (
+			frappe.get_all(
+				DATA_IMPORT_LOG,
+				fields=["row_indexes", "success"],
+				filters={"data_import": self.data_import.name},
+				order_by="log_index",
+			)
+			or []
+		)
         failures = [log for log in import_log if not log.get("success")]
         row_indexes = []
         for f in failures:
@@ -385,6 +445,36 @@ class Importer:
         header_row = [col.header_title for col in self.import_file.columns]
         rows = [header_row]
         rows += [row.data for row in self.import_file.data if row.row_number in row_indexes]
+
+        build_csv_response(rows, self.doctype)
+
+    def export_import_log(self):
+        from frappe.utils.csvutils import build_csv_response
+
+        if not self.data_import:
+            return
+
+        import_log = frappe.get_all(
+            DATA_IMPORT_LOG,
+            fields=["row_indexes", "success", "messages", "exception", "docname"],
+            filters={"data_import": self.data_import.name},
+            order_by="log_index",
+        )
+
+        header_row = ["Row Numbers", "Status", "Message", "Exception"]
+
+        rows = [header_row]
+
+        for log in import_log:
+            row_number = json.loads(log.get("row_indexes"))[0]
+            status = "Success" if log.get("success") else "Failure"
+            message = (
+                "Successfully Imported {}".format(log.get("docname"))
+                if log.get("success")
+                else log.get("messages")
+            )
+            exception = frappe.utils.cstr(log.get("exception", ""))
+            rows += [[row_number, status, message, exception]]
 
         build_csv_response(rows, self.doctype)
 
@@ -436,7 +526,7 @@ class ImportFile:
         self.warnings = []
 
         self.file_doc = self.file_path = self.google_sheets_url = None
-        if isinstance(file, frappe.string_types):
+        if isinstance(file, str):
             if frappe.db.exists("File", {"file_url": file}):
                 self.file_doc = frappe.get_doc("File", {"file_url": file})
             elif "docs.google.com/spreadsheets" in file:
@@ -683,7 +773,7 @@ class Row:
 
         elif df.fieldtype in ["Date", "Datetime"]:
             value = self.get_date(value, col)
-            if isinstance(value, frappe.string_types):
+            if isinstance(value, str):
                 # value was not parsed as datetime object
                 self.warnings.append({"row": self.row_number, "col": col.column_number, "field": df_as_json(df), "message": _("Value {0} must in {1} format").format(frappe.bold(value), frappe.bold(get_user_format(col.date_format))),})
                 return
@@ -1043,7 +1133,9 @@ import re
 def zip_valid(s):
     return bool(re.match(r'^[1-9][\d]{4}$',s) and len(re.findall(r'(\d)(?=\d\1)',s))<2)
 
-def import_data_contd(self, import_log):
+def import_data_contd(self, import_log, log_index):
+
+
     # parse docs from rows
     payloads = self.import_file.get_payloads_for_import()
 
@@ -1051,8 +1143,11 @@ def import_data_contd(self, import_log):
     imported_rows = []
     for log in import_log:
         log = frappe._dict(log)
-        if log.success:
-            imported_rows += log.row_indexes
+        if log.success or len(import_log) < self.data_import.payload_count:
+            imported_rows += json.loads(log.row_indexes)
+
+        log_index = log.log_index
+
 
     # start import
     total_payload_count = len(payloads)
@@ -1070,7 +1165,7 @@ def import_data_contd(self, import_log):
                     frappe.publish_realtime("data_import_progress", {"current": current_index, "total": total_payload_count, "skipping": True, "data_import": self.data_import.name,},)
                 continue
 
-            self.check_import_data(doc, current_index, row_indexes, total_payload_count, import_log)
+            self.check_import_data(doc, current_index, row_indexes, total_payload_count, import_log,log_index)
 
     import_log = self.bulk_emp_insert(import_log, total_payload_count)
     return import_log
@@ -1187,3 +1282,17 @@ def new_sub_build_fields_for_column_match(out,label,df,parent_meta,parent):
             new_df.child_table_df = table_field
             out[by_label] = new_df
             out[by_fieldname] = new_df
+
+def create_import_log(data_import, log_index, log_details):
+	frappe.get_doc(
+		{
+			"doctype": DATA_IMPORT_LOG,
+			"log_index": log_index,
+			"success": log_details.get("success"),
+			"data_import": data_import,
+			"row_indexes": json.dumps(log_details.get("row_indexes")),
+			"docname": log_details.get("docname"),
+			"messages": json.dumps(log_details.get("messages", "[]")),
+			"exception": log_details.get("exception"),
+		}
+	).db_insert()

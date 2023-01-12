@@ -1,0 +1,28 @@
+diff --git a/frappe/public/js/frappe/views/reports/query_report.js b/frappe/public/js/frappe/views/reports/query_report.js
+index dc5e285..bbc5f3e 100644
+--- a/frappe/public/js/frappe/views/reports/query_report.js
++++ b/frappe/public/js/frappe/views/reports/query_report.js
+@@ -172,17 +172,17 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
+ 	}
+ 
+ 	add_card_button_to_toolbar() {
+-		this.page.add_inner_button(__("Create Card"), () => {
+-			this.add_card_to_dashboard();
+-		});
++		// this.page.add_inner_button(__("Create Card"), () => {
++		// 	this.add_card_to_dashboard();
++		// });
+ 	}
+ 
+ 	add_chart_buttons_to_toolbar(show) {
+ 		if (show) {
+ 			this.create_chart_button && this.create_chart_button.remove();
+-			this.create_chart_button = this.page.add_button(__("Set Chart"), () => {
+-				this.open_create_chart_dialog();
+-			});
++			// this.create_chart_button = this.page.add_button(__("Set Chart"), () => {
++			// 	this.open_create_chart_dialog();
++			// });
+ 
+ 			if (this.chart_fields || this.chart_options) {
+ 				this.add_to_dashboard_button && this.add_to_dashboard_button.remove();
