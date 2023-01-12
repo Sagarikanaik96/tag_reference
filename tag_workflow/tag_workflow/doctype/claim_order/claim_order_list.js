@@ -4,6 +4,9 @@ frappe.listview_settings["Claim Order"] = {
       cur_list.columns.splice(4, 1);
       cur_list.render_header(cur_list.columns[4]);
     }
+    $('[data-original-title="ID"]>input').attr("placeholder", "Name");
+    listview.columns[0].df.label="Name";
+    listview.render_header(listview);
   },
   refresh(listview) {
     $('[class="btn btn-primary btn-sm primary-action"]').show();

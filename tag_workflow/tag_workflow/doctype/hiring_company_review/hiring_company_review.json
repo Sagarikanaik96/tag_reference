@@ -12,7 +12,7 @@
   "job_order",
   "rating",
   "comments",
-  "ratings_hiring"
+  "rating_hiring"
  ],
  "fields": [
   {
@@ -53,8 +53,8 @@
    "read_only": 1
   },
   {
-   "fieldname": "ratings_hiring",
-   "fieldtype": "Int",
+   "fieldname": "rating_hiring",
+   "fieldtype": "Float",
    "hidden": 1,
    "in_list_view": 1,
    "label": "Ratings"
@@ -62,7 +62,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-01-06 01:58:59.503386",
+ "modified": "2023-01-12 01:58:59.503386",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Hiring Company Review",

@@ -9,7 +9,7 @@ frappe.listview_settings["Hiring Company Review"] = {
         let rating_filter = {
             condition: "=",
             default: null,
-            fieldname: "ratings_hiring",
+            fieldname: "rating_hiring",
             fieldtype: "Data",
             input_class: "input-xs",
             label: "Ratings",
@@ -23,14 +23,22 @@ frappe.listview_settings["Hiring Company Review"] = {
         listview.page.add_field(rating_filter, standard_filters_wrapper);
     },
     formatters:{
-        ratings_hiring(val,d,f){
+        rating_hiring(val,d,f){
+            let rating = val?val*5:0;
             return `<div class="list-row-col ellipsis hidden-xs ">
 				<span class="ellipsis" title="${f.name}: ${val}">
 				<a class="filterable ellipsis">
-					<span class="rating pr-2"><svg class="icon icon-sm star-click" data-rating="1"><use href="#icon-star"></use></svg>(${val})</span>
+					<span class="rating pr-2"><svg class="icon icon-sm star-click" data-rating="1"><use href="#icon-star"></use></svg>(${rating})</span>
 				</a>
 			</span>
 			</div>`
         }
+    }
+}
+
+function hiring_review(){
+    if (frappe.boot.tag.tag_user_info.company_type =="Staffing"){
+        frappe.msgprint("You don't have enough permissions.");
+        frappe.set_route("app");
     }
 }

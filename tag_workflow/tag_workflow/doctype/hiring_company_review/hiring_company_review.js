@@ -6,3 +6,10 @@ frappe.ui.form.on('Hiring Company Review', {
 		hiring_review();
 	}
 });
+
+function hiring_review(){
+    if (frappe.boot.tag.tag_user_info.company_type =="Staffing"){
+        frappe.msgprint("You don't have enough permissions.");
+        frappe.set_route("app");
+    }
+}

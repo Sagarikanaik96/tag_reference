@@ -63,7 +63,7 @@ frappe.ui.form.on('Add Timesheet', {
 		$(document).on('click', '[data-fieldname="break_to_time"]', function(){
 			$('.datepicker').show()
 		});
-		setting_job_order_value()
+		//setting_job_order_value()
 	},
 
 	job_order: function(frm){
