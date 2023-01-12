@@ -13,7 +13,7 @@ frappe.ui.form.on('Add Timesheet', {
 		cur_frm.disable_save();
 		frm.dashboard.set_headline(__(`<div style="display: flex;flex-direction: inherit;"><p>Job Order description will be available here...</p></div>`));
 		$(".help-box.small.text-muted").css("display", "none");
-		$(".col.layout-main-section-wrapper, .col-md-12.layout-main-section-wrapper").css("max-width", "95%");
+		$(".col.layout-main-section-wrapper, .col-md-12.layout-main-section-wrapper").css("max-width", "89%");
 		$(".form-message.blue").css("background", "lightyellow");
 		$(".form-message.blue").css("color", "black");
 		$(".form-message.blue").css("margin-top", "10px");

@@ -1338,14 +1338,14 @@ select.input-with-feedback.form-control.ellipsis {
   .form-grid
   .grid-heading-row
   .data-row
-  .sortable-handle,
+  div:nth-child(3),
 [data-page-route="Add Timesheet"]
   .form-grid
   .grid-body
   .data-row
-  .sortable-handle {
-  max-width: 3.5% !important;
-  flex: 0 0 3.5% !important;
+    div:nth-child(3) {
+  max-width: 13.5% !important;
+  flex: 0 0 13.5% !important;
   height: auto;
 }
 
@@ -1357,14 +1357,14 @@ select.input-with-feedback.form-control.ellipsis {
 [data-page-route="Timesheet"] .form-grid .grid-body .data-row .sortable-handle,
 [data-page-route="Sales Invoice"]
   .form-page
-  .form-section:nth-child(11)
+  .form-section:nth-child(16)
   .form-grid
   .grid-heading-row
   .data-row
   .sortable-handle,
 [data-page-route="Sales Invoice"]
   .form-page
-  .form-section:nth-child(11)
+  .form-section:nth-child(16)
   .form-grid
   .grid-body
   .data-row
@@ -1395,32 +1395,32 @@ select.input-with-feedback.form-control.ellipsis {
   div.grid-static-col:nth-child(7),
 [data-page-route="Sales Invoice"]
   .form-page
-  .form-section:nth-child(11)
-  .form-grid
-  .grid-heading-row
-  .data-row
-  div.grid-static-col:nth-child(6),
-[data-page-route="Sales Invoice"]
-  .form-page
-  .form-section:nth-child(11)
-  .form-grid
-  .grid-body
-  .data-row
-  div.grid-static-col:nth-child(6),
-[data-page-route="Sales Invoice"]
-  .form-page
-  .form-section:nth-child(11)
+  .form-section:nth-child(16)
   .form-grid
   .grid-heading-row
   .data-row
   div.grid-static-col:nth-child(7),
 [data-page-route="Sales Invoice"]
   .form-page
-  .form-section:nth-child(11)
+  .form-section:nth-child(16)
   .form-grid
   .grid-body
   .data-row
-  div.grid-static-col:nth-child(7) {
+  div.grid-static-col:nth-child(7),
+[data-page-route="Sales Invoice"]
+  .form-page
+  .form-section:nth-child(16)
+  .form-grid
+  .grid-heading-row
+  .data-row
+  div.grid-static-col:nth-child(8),
+[data-page-route="Sales Invoice"]
+  .form-page
+  .form-section:nth-child(16)
+  .form-grid
+  .grid-body
+  .data-row
+  div.grid-static-col:nth-child(8) {
   max-width: 10.5% !important;
   flex: 0 0 10.5% !important;
 }
@@ -1546,7 +1546,8 @@ select.input-with-feedback.form-control.ellipsis {
    border: 1px solid #cccccc36 !important;
 }
 .widget.hiring_dashboard_table,
-#page-Workspaces .widget.spacer  {
+#page-Workspaces .widget.spacer,
+#page-Workspaces .layout-main-section   {
   padding: 0px !important;
   box-shadow: none !important;
   border: none!important;
@@ -1568,9 +1569,20 @@ select.input-with-feedback.form-control.ellipsis {
 #datepickers-container{
   z-index: 999999;
 }
-[data-page-route="tagadmin-page"] .layout-main-section .home {
+[data-page-route="tagadmin-page"] .layout-main-section .home { 
     padding-top: 25px;
 } 
+[data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-head span.list-liked-by-me, 
+[data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-container span.list-row-like {
+  display:none;
+}
+/* [data-page-route="Add Timesheet"] .layout-main-section-wrapper {
+    max-width: 90% !important;
+} */
+[data-page-route=Workspaces] .layout-main-section {
+   background: #f9fafa !important;
+}
+
 
 /*------ Media query start ----*/
 @media (max-width: 1300px) {
