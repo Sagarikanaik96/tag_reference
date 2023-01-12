@@ -20,6 +20,9 @@ from frappe.core.doctype.data_import.exporter import Exporter
 from hrms.controllers.employee_boarding_controller import EmployeeBoardingController
 from frappe.desk.form import save
 from tag_workflow.utils.whitelisted import   savedocs
+from frappe.core.doctype.data_import import data_import
+from tag_workflow.utils.data_import import download_template
+
 __version__ = '0.0.1'
 
 
@@ -45,6 +48,7 @@ EmployeeBoardingController.create_task_and_notify_user = create_task_and_notify_
 handler.upload_file = upload_file
 save.savedocs = savedocs
 
+data_import.download_template = download_template
 def get_key(key):
     try:
         if(frappe.cache().get_value("aws")):

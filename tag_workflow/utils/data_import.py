@@ -58,12 +58,6 @@ def get_import_list(doctype, txt, searchfield, page_len, start, filters):
         return frappe.db.sql(sql)
 
 
-def get_filter_field(doctype: str):
-    mapping = {
-        "Contact": "email_id",
-        "Employee": "email"
-    }
-    return mapping.get(doctype)
 
 @frappe.whitelist()
 def download_template(doctype, export_fields=None, export_records=None, export_filters=None, file_type="CSV"):
@@ -74,7 +68,6 @@ def download_template(doctype, export_fields=None, export_records=None, export_f
 
 
     if doctype in ["Contact", "Employee"]:
-        export_filters = [[doctype, get_filter_field(doctype), '=', 'JDoe@example.com']]
         export_data = True
     
     e = Exporter(

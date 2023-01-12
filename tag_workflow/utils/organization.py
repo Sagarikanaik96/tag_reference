@@ -90,15 +90,7 @@ def setup_data():
         disable_scheduler()
         update_ts_list_invoice()
         update_hiring_reviews()
-        import_json_list = ["Company","Contact","Employee"]
-        comp_name ="Temporary Assistance Guru LLC"
-        for doc in import_json_list:
-            if doc == "Company" and not  frappe.db.exists({"doctype": "Company", "name": comp_name}):
-                import_json("Company")
-            elif doc == "Employee" and not frappe.db.exists({"doctype": "Employee", "email": "JDoe@example.com","company":comp_name,"first_name":"John","last_name":"Doe"}):
-                import_json("Employee")
-            elif doc == "Contact" and not frappe.db.exists({"doctype":"Contact","first_name": "John Doe","email_id": "JDoe@example.com","owner_company":comp_name}):
-                import_json("Contact")
+        import_sample_data()
         make_commit()
     except Exception as e:
         print(e)
@@ -790,3 +782,20 @@ def update_hiring_reviews():
             frappe.db.commit()
     except Exception as e:
         frappe.log_error(e,'update_hiring_reviews Error')
+
+
+def import_sample_data():
+    import_json_list = ["Company","Contact","Employee"]
+    comp_name ="Temporary Assistance Guru LLC"
+    for doc in import_json_list:
+        if doc == "Company" and not  frappe.db.exists({"doctype": doc, "name": comp_name}):
+            import_json("Company")
+        elif doc == "Employee":
+            employee = frappe.db.sql("SELECT * FROM `tabEmployee` WHERE email='JDoe@example.com' and company='{0}' and first_name='John' and last_name='Doe'".format(comp_name))
+            if employee:
+                frappe.db.sql("UPDATE `tabEmployee` set ssn='123456789', employee_gender='Male' WHERE email='JDoe@example.com' and company='{0}' and first_name='John' and last_name='Doe'".format(comp_name))
+                frappe.db.commit()            
+            else:
+                import_json("Employee")
+        elif doc == "Contact" and not frappe.db.sql("SELECT * FROM `tabContact` WHERE email_address='JDoe@example.com' and first_name='John Doe' and owner_company='{0}'".format(comp_name)):
+            import_json("Contact")

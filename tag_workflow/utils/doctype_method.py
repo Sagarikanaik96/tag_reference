@@ -480,58 +480,61 @@ def update_user_permissions(self):
 
 
 def get_data_as_docs(self):
-		def format_column_name(df):
-			return "`tab{0}`.`{1}`".format(df.parent, df.fieldname)
-		filters = self.export_filters
-		if self.meta.is_nested_set():
-			order_by = "`tab{0}`.`lft` ASC".format(self.doctype)
-		else:
-			order_by = "`tab{0}`.`creation` DESC".format(self.doctype)
+    def format_column_name(df):
+        return "`tab{0}`.`{1}`".format(df.parent, df.fieldname)
+    filters = self.export_filters
+    if self.meta.is_nested_set():
+        order_by = "`tab{0}`.`lft` ASC".format(self.doctype)
+    else:
+        order_by = "`tab{0}`.`creation` DESC".format(self.doctype)
 
-		parent_fields = [
-			format_column_name(df) for df in self.fields if df.parent == self.doctype
-		]
-		if self.doctype == "Employee":
-			parent_data = frappe.db.sql("select * from `tabEmployee` where email='JDoe@example.com'",as_dict=1)
-		else:
-			parent_data = frappe.db.get_list(
-					self.doctype,
-					filters=filters,
-					fields=["name"] + parent_fields,
-					limit_page_length=self.export_page_length,
-					order_by=order_by,
-					as_list=0,
-				)
-		parent_names = [p.name for p in parent_data]
+    parent_fields = [
+        format_column_name(df) for df in self.fields if df.parent == self.doctype
+    ]
+    company = "Temporary Assistance Guru LLC"
+    if self.doctype == "Employee":
+        parent_data = frappe.db.sql("select * from `tabEmployee` where email='JDoe@example.com' and company='{0}'".format(company),as_dict=1)
+    elif self.doctype == "Contact":
+        parent_data = frappe.db.sql("select * from `tabContact` where email_address='JDoe@example.com' and owner_company='{0}'".format(company),as_dict=1)
+    else:
+        parent_data = frappe.db.get_list(
+                self.doctype,
+                filters=filters,
+                fields=["name"] + parent_fields,
+                limit_page_length=self.export_page_length,
+                order_by=order_by,
+                as_list=0,
+            )
+    parent_names = [p.name for p in parent_data]
 
-		child_data = {}
-		for key in self.exportable_fields:
-			if key == self.doctype:
-				continue
-			child_table_df = self.meta.get_field(key)
-			child_table_doctype = child_table_df.options
-			child_fields = ["name", "idx", "parent", "parentfield"] + list(
-				set(
-					[format_column_name(df) for df in self.fields if df.parent == child_table_doctype]
-				)
-			)
-			data = frappe.db.get_list(
-				child_table_doctype,
-				filters={
-					"parent": ("in", parent_names),
-					"parentfield": child_table_df.fieldname,
-					"parenttype": self.doctype,
-				},
-				fields=child_fields,
-				order_by="idx asc",
-				as_list=0,
-			)
-			child_data[key] = data
+    child_data = {}
+    for key in self.exportable_fields:
+        if key == self.doctype:
+            continue
+        child_table_df = self.meta.get_field(key)
+        child_table_doctype = child_table_df.options
+        child_fields = ["name", "idx", "parent", "parentfield"] + list(
+            set(
+                [format_column_name(df) for df in self.fields if df.parent == child_table_doctype]
+            )
+        )
+        data = frappe.db.get_list(
+            child_table_doctype,
+            filters={
+                "parent": ("in", parent_names),
+                "parentfield": child_table_df.fieldname,
+                "parenttype": self.doctype,
+            },
+            fields=child_fields,
+            order_by="idx asc",
+            as_list=0,
+        )
+        child_data[key] = data
 
-		grouped_children_data = self.group_children_data_by_parent(child_data)
-		for doc in parent_data:
-			related_children_docs = grouped_children_data.get(doc.name, {})
-			yield {**doc, **related_children_docs}
+    grouped_children_data = self.group_children_data_by_parent(child_data)
+    for doc in parent_data:
+        related_children_docs = grouped_children_data.get(doc.name, {})
+        yield {**doc, **related_children_docs}
 
 
 def validate_employee_roles(doc,method):

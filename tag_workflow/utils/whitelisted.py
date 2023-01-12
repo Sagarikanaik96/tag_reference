@@ -868,9 +868,9 @@ def savedocs(doc, action):
         if doc.docstatus==1:
             doc.submit()
         else:
-            old_password = doc_dict["old_password"]
-            new_password = doc_dict["new_password"]
             if doc.doctype == "User":
+                old_password = doc_dict["old_password"]
+                new_password = doc_dict["new_password"]
                 validate_passwords(user=doc_dict["email"],
                                 old_password=old_password,
                                 new_password=new_password,
