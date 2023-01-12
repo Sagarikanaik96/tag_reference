@@ -39,10 +39,10 @@ frappe.TagHome = Class.extend({
 						<div class="widget-footer"></div>
 					</div>
 					<div class="widget widget-shadow shortcut-widget-box" data-widget-name="a98f4b28cd"
-						onclick=redirect_doc("job-site")>
+						onclick=redirect_doc("sales-invoice")>
 						<div class="widget-head">
 							<div>
-								<div class="widget-title ellipsis">Job Sites</div>
+								<div class="widget-title ellipsis">Invoice</div>
 								<div class="widget-subtitle"></div>
 							</div>
 							<div class="widget-control"></div>
