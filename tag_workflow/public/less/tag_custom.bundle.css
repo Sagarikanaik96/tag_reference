@@ -1582,9 +1582,6 @@ select.input-with-feedback.form-control.ellipsis {
 /* [data-page-route="Add Timesheet"] .layout-main-section-wrapper {
     max-width: 90%!important;
 } */
-[data-page-route=“Add Timesheet”] .form-grid .grid-body .data-row div:nth-child(11) [data-fieldtype=Currency] .ellipsis div {
-  display: none;
-}
 [data-page-route=Workspaces] .layout-main-section {
    background: #f9fafa !important;
 }
@@ -2188,4 +2185,6 @@ span.comment-count {
     right: -230px;
   }
 }
-
+[data-page-route="Add Timesheet"] .form-grid .grid-body .data-row div:nth-child(11) .static-area{
+  display: none;
+}
