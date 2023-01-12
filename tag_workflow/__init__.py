@@ -18,7 +18,8 @@ from tag_workflow.utils.doctype_method import create_task_and_notify_user
 import requests, json
 from frappe.core.doctype.data_import.exporter import Exporter
 from hrms.controllers.employee_boarding_controller import EmployeeBoardingController
-
+from frappe.desk.form import save
+from tag_workflow.utils.whitelisted import   savedocs
 __version__ = '0.0.1'
 
 
@@ -42,6 +43,7 @@ Exporter.get_data_as_docs = get_data_as_docs
 employee.validate_employee_role = validate_employee_roles
 EmployeeBoardingController.create_task_and_notify_user = create_task_and_notify_user
 handler.upload_file = upload_file
+save.savedocs = savedocs
 
 def get_key(key):
     try:

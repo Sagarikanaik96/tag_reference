@@ -427,11 +427,17 @@ input::-webkit-credentials-auto-fill-button {
   max-width: 324px;
   width: 100%;
 }
-#page-User [data-fieldname="new_password"] {
+#page-User [data-fieldname="new_password"]{
   margin-bottom: 20px;
 }
-#page-User [data-fieldname="new_password"] #showPassword {
-  margin: 0 8px -2px 0 !important;
+#page-User [data-fieldname="new_password"] #showPassword  {
+  margin: 0 8px -2px 0 !important; 
+}
+#page-User [data-fieldname="old_password"] {
+  margin-bottom: 20px;
+}
+#page-User [data-fieldname="old_password"] #oldPassword{
+  margin: 0 8px -2px 0 !important; 
 }
 /* Staff Company List table */
 

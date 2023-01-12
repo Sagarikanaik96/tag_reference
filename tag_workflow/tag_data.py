@@ -9,6 +9,7 @@ import datetime
 import requests, time
 from frappe.utils.data import getdate
 from frappe.model.mapper import get_mapped_doc
+from frappe.core.doctype.user.user import User
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
@@ -535,7 +536,14 @@ def hiring_org_name(current_user):
     user_company=frappe.db.sql(sql, as_list=1)
     if(len(user_company)==1):
         return 'success'
-           
+
+@frappe.whitelist(allow_guest=False)
+def check_old_password(current_user,old_password):    
+    user = User.find_by_credentials(current_user, old_password)
+    if not user["is_authenticated"]:
+        return False
+    return True
+
 @frappe.whitelist(allow_guest=False)
 def designation_activity_data(doc,method):
     if not frappe.db.exists("Item", {"name":doc.name}):

@@ -77,9 +77,23 @@ frappe.ui.form.ControlPassword = class ControlData extends frappe.ui.form.Contro
 	}
 	make_input() {
 		super.make_input();
-		this.$wrapper.find(":input[type='password'][data-fieldtype='Password']").addClass("hidepassword");
-		this.$input.parent().append($('<span class="input-area" > <input type="checkbox"  id="showPassword"  data-fieldtype=Check autocomplete="off" class="input-with-feedback-showPassword" ></span>'));
+		if (this.$input[0].dataset.fieldname === "new_password"){
+			this.$wrapper.find(":input[type='password'][data-fieldname='new_password']").addClass("hidepassword");
+			this.$input.parent().append($('<span class="input-area" > <input type="checkbox"  id="showPassword"  data-fieldtype=Check autocomplete="off" class="input-with-feedback-showPassword" ></span>'));
+		}else{
+			this.$wrapper.find(":input[type='password'][data-fieldname='old_password']").addClass("datapassword");
+			this.$input.parent().append($('<span class="input-area" > <input type="checkbox"  id="oldPassword"  data-fieldtype=Check autocomplete="off" class="input-with-feedback-showPassword" ></span>'));
+		}
 		this.$input.parent().append($('<span class="label-area">Show Password</span>'));
+		
+		$("#oldPassword").click(function() {
+			if($(".datapassword").attr("type") == "password"){
+				$(".datapassword").attr("type", "text")
+			}else if($(".datapassword").attr("type") != "password"){
+				$(".datapassword").attr("type", "password")
+			}
+		});
+		
 		$("#showPassword").click( function() {
 			if ($(".hidepassword").attr("type") == "password") {
 				$(".hidepassword").attr("type", "text");

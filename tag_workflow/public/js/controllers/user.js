@@ -1,7 +1,6 @@
 frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.ui.form.on("User", {
 	refresh: function(frm){
-
 		$('.form-footer').hide();
 		field_toggle();
 		multiple_assign_properties(frm);
@@ -25,6 +24,7 @@ frappe.ui.form.on("User", {
 			}
 		});
 		setting_user_field(frm)
+		cur_frm.set_value("old_password", "");
 	},
 	form_render(frm, cdt, cdn){
 		if (frm.doc.__islocal!=1){
@@ -142,6 +142,7 @@ frappe.ui.form.on("User", {
 	after_save: function(frm){
 		update_employee(frm);
 		multi_company_setup(frm);
+		cur_frm.set_value("old_password", "");
 	},
 	birth_date: function(frm){
 		check_bd(frm);
@@ -162,6 +163,8 @@ frappe.ui.form.on("User", {
 	},
 	validate:function(frm){
 		let phone = frm.doc.mobile_no;
+		let old_password = frm.doc.old_password;
+		let new_password = frm.doc.new_password;
 		if (phone){
 			if(!validate_phone(phone)){
 				frappe.msgprint({message: __("Invalid Mobile Number!"),indicator: "red"});
@@ -171,13 +174,28 @@ frappe.ui.form.on("User", {
 				frm.set_value('mobile_no', validate_phone(phone));
 			}
 		}
+		if(!cur_frm.get_field("old_password").df.hidden  && new_password){
+			if(old_password){
+				check_old_password(frm,old_password,new_password)
+			}else{
+				frappe.throw("Pelase enter old password")
+			}
+		}else if(cur_frm.get_field("old_password").df.hidden){
+			//pass
+		}
+		else{
+			if(old_password){
+				frappe.throw("Pelase enter new password")
+			}
+		}
+		
 	},
 	mobile_no: function(frm){
 		let phone = frm.doc.mobile_no;
 		if(phone){
 			frm.set_value('mobile_no', validate_phone(phone)?validate_phone(phone):phone);
 		}
-	}
+	},
 });
 
 frappe.ui.form.on('Companies Assigned', {
@@ -421,11 +439,9 @@ function terminated_option(){
 function setting_user_field(frm){
 	if(frappe.boot.tag.tag_user_info.user_type=='Staffing User' || frappe.boot.tag.tag_user_info.user_type=='Hiring User'){
 		$('[id="user-add-new"]').show()
-
 		if(frappe.session.user	==cur_frm.doc.email){
 			frm.set_df_property('enabled','read_only',1)
 			frm.set_df_property('terminated','read_only',1)
-
 		}
 		else{
 			$('[id="user-add-new"]').hide()
@@ -434,8 +450,32 @@ function setting_user_field(frm){
 				cur_frm.toggle_enable(l[vals], 0);
 			}
 			frm.set_df_property('change_password','hidden',1)
-
 		}
 	}
-
+	if(frappe.session.user	!= cur_frm.doc.email){
+		frm.set_df_property('old_password','hidden',1)
+	}
 }
+
+function check_old_password(frm,old_password,new_password){
+	console.log("new and old password",new_password,old_password)
+	if(old_password && new_password){
+		if(old_password == new_password){
+			frappe.validated = false; 
+			frappe.throw("Old and new password can not be same")
+		}else{
+			frappe.call({
+				'method':"tag_workflow.tag_data.check_old_password",
+				args:{'current_user':cur_frm.doc.email,"old_password": cur_frm.doc.old_password},
+				callback:function(r){ 
+					if(!r.message){
+						frappe.validated = false; 
+						frappe.throw("Old password is incorrect")
+					}
+				}	
+			})
+		}
+	}else{
+			frappe.throw("Pelase enter new password")
+		}
+	}

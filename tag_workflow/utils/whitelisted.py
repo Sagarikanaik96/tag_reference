@@ -17,12 +17,9 @@ from frappe import enqueue
 from frappe.desk.form.save import set_local_name,send_updated_docs
 from six import string_types
 from mimetypes import guess_type
-from typing import TYPE_CHECKING
 from frappe.utils import cint
 from frappe.utils.image import optimize_image
-
-if TYPE_CHECKING:
-	from frappe.core.doctype.user.user import User
+from frappe.core.doctype.user.user import User
 
 ALLOWED_MIMETYPES = (
 	"image/png",
@@ -832,33 +829,61 @@ def fetch_data(filter_name):
     except Exception as e:
         frappe.msgprint(e, 'Employment History Filter: Fetch Data Error')
 
+def check_password(user, old_password):
+    check_user_password = User.find_by_credentials(user, old_password)
+    if not check_user_password['is_authenticated']:
+        return True
+    return False
+
+def validate_passwords(user, old_password, new_password, doc):
+    if frappe.session.user == user:
+        if old_password and not new_password:
+            frappe.throw('New password is required')
+        elif not old_password and  new_password:
+            frappe.throw('Old password is required')
+        elif old_password == new_password:
+            frappe.throw('Old and new password can not be same')
+        elif old_password:
+            if not check_password(user, old_password):
+                frappe.throw("Old password is incorrect")
+        else:
+            doc.save()
+    elif not check_password(user, new_password):
+        frappe.throw("Old and new password can not be same")
+    else:
+        doc.save()
+
 @frappe.whitelist()
 def savedocs(doc, action):
-	"""save / submit / update doclist"""
-	try:
-		#if '__islocal' in json.loads(doc):
-		doc_dict=json.loads(doc)
-		doc = frappe.get_doc(json.loads(doc))
-		set_local_name(doc)
+    """save / submit / update doclist"""
+    try:
+        #if '__islocal' in json.loads(doc):
+        doc_dict = json.loads(doc)
+        doc = frappe.get_doc(doc_dict)
+        set_local_name(doc)
+        if '__islocal' in doc_dict and frappe.session.user!=doc.owner:
+            frappe.throw('Invalid owner')
+            
+        doc.docstatus = {"Save":0, "Submit": 1, "Update": 1, "Cancel": 2}[action]
+        if doc.docstatus==1:
+            doc.submit()
+        else:
+            old_password = doc_dict["old_password"]
+            new_password = doc_dict["new_password"]
+            if doc.doctype == "User":
+                validate_passwords(user=doc_dict["email"],
+                                old_password=old_password,
+                                new_password=new_password,
+                                doc=doc)
+            else:
+                doc.save()
+        run_onload(doc)
+        send_updated_docs(doc)
+        frappe.msgprint(frappe._("Saved"), indicator='green', alert=True)
 
-		if '__islocal' in doc_dict and frappe.session.user!=doc.owner:
-			frappe.throw('Invalid owner')
-		# action
-		doc.docstatus = {"Save":0, "Submit": 1, "Update": 1, "Cancel": 2}[action]
-
-		if doc.docstatus==1:
-			doc.submit()
-		else:
-			doc.save()
-
-		# update recent documents
-		run_onload(doc)
-		send_updated_docs(doc)
-
-		frappe.msgprint(frappe._("Saved"), indicator='green', alert=True)
-	except Exception:
-		frappe.errprint(frappe.utils.get_traceback())
-		raise
+    except Exception:
+        frappe.errprint(frappe.utils.get_traceback())
+        raise
 
 @frappe.whitelist(methods=['POST', 'PUT'])
 def save(doc):
