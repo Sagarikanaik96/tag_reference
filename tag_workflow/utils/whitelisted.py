@@ -841,7 +841,7 @@ def validate_passwords(user, old_password, new_password, doc):
             frappe.throw('New password is required')
         elif not old_password and  new_password:
             frappe.throw('Old password is required')
-        elif old_password == new_password:
+        elif old_password and new_password and (old_password == new_password):
             frappe.throw('Old and new password can not be same')
         elif old_password:
             if not check_password(user, old_password):

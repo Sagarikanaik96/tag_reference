@@ -86,10 +86,11 @@ frappe.ui.form.ControlPassword = class ControlData extends frappe.ui.form.Contro
 		}
 		this.$input.parent().append($('<span class="label-area">Show Password</span>'));
 		
-		$("#oldPassword").click(function() {
+
+		$("#oldPassword").unbind('click').bind('click', function() {
 			if($(".datapassword").attr("type") == "password"){
 				$(".datapassword").attr("type", "text")
-			}else if($(".datapassword").attr("type") != "password"){
+			}else{
 				$(".datapassword").attr("type", "password")
 			}
 		});
