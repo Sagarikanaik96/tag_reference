@@ -1567,21 +1567,16 @@ select.input-with-feedback.form-control.ellipsis {
     padding-top: 25px;
 } 
 [data-fieldtype="Table"] .form-grid .grid-heading-row .row-index,
-[data-fieldtype="Table"] .form-grid .grid-body .row-index {
+[data-fieldtype="Table"] .form-grid .grid-body .row-index,
+[data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-head span.list-liked-by-me, 
+[data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-container span.list-row-like,
+[data-route="List/Timesheet/List"] #navbar-breadcrumbs li:nth-child(1),
+[data-page-route=Item] [data-fieldtype=Currency]:after {
   display:none;
 }
 #datepickers-container{
   z-index: 999999;
 }
-[data-route="List/Timesheet/List"] #navbar-breadcrumbs li:nth-child(1) {display:none}
-
-[data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-head span.list-liked-by-me, 
-[data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-container span.list-row-like {
-  display:none;
-}
-/* [data-page-route="Add Timesheet"] .layout-main-section-wrapper {
-    max-width: 90%!important;
-} */
 [data-page-route=Workspaces] .layout-main-section {
    background: #f9fafa !important;
 }
