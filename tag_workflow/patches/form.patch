@@ -1,0 +1,15 @@
+diff --git a/frappe/public/js/frappe/form/form.js b/frappe/public/js/frappe/form/form.js
+index a8c73ba..ccb727b 100644
+--- a/frappe/public/js/frappe/form/form.js
++++ b/frappe/public/js/frappe/form/form.js
+@@ -45,8 +45,8 @@ frappe.ui.form.Form = class FrappeForm {
+ 		this.beforeUnloadListener = (event) => {
+ 			event.preventDefault();
+ 			// A String is returned for compatability with older Browsers. Return Value has to be truthy to trigger "Leave Site" Dialog
+-			return (event.returnValue =
+-				"There are unsaved changes, are you sure you want to exit?");
++			// return (event.returnValue =
++			// 	"There are unsaved changes, are you sure you want to exit?");
+ 		};
+ 	}
+ 
