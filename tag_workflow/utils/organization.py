@@ -80,6 +80,7 @@ def setup_data():
         update_old_lead_status()
         share_company_with_user()
         emp_job_title()
+        update_jobtitle()
         update_salary_structure()
         updating_date_of_joining()
         update_password_field()
@@ -799,3 +800,15 @@ def import_sample_data():
                 import_json("Employee")
         elif doc == "Contact" and not frappe.db.sql("SELECT * FROM `tabContact` WHERE email_address='JDoe@example.com' and first_name='John Doe' and owner_company='{0}'".format(comp_name)):
             import_json("Contact")
+
+    
+def update_jobtitle():
+    job_titles = frappe.get_all('Item', {'job_titless':['is', 'set'], 'job_titless_name':['is','not set']}, ['name'])
+    print('*------Trying to update Jobtitles------------*\n')
+    if len(job_titles)>0:
+        print('*------update started Jobtitles------------*\n')
+        sql= '''update `tabItem` set job_titless_name = job_titless'''
+        frappe.db.sql(sql)
+        frappe.db.commit()
+    else:
+        print('*------Jobtitles are already uptodate------------*\n')

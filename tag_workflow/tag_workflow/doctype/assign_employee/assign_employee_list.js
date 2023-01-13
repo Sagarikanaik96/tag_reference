@@ -1,5 +1,8 @@
 frappe.listview_settings['Assign Employee'] = {
     onload: function(){
+            $('[data-original-title="ID"]>input').attr('placeholder', 'Name');
+            cur_list.columns[0].df.label = "Name";
+            cur_list.render_header(cur_list.columns);
             $('.custom-actions.hidden-xs.hidden-md').hide();
 			$('[data-original-title="Refresh"]').hide();
 			$('.menu-btn-group').hide();
@@ -55,5 +58,6 @@ frappe.listview_settings['Assign Employee'] = {
     refresh:function(){
         $("button.btn.btn-primary.btn-sm.primary-action").hide()
         $("button.btn.btn-default.btn-sm.ellipsis").hide()
+        
     }
 }

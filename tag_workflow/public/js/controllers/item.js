@@ -16,11 +16,7 @@ frappe.ui.form.on("Item", {
 			
 	};},
 	refresh: function(frm,cdt,cdn){
-		frm.set_value('job_titless_name', frm.doc.job_titless);
-		if(frm.doc.__islocal!=1){
-			frm.set_df_property('job_titless_name', 'read_only', 1);
-		}
-		// $("#item-details > div:nth-child(1) > div > div:nth-child(2) > form > div:nth-child(3) > div > div.control-input-wrapper > div.control-input > input").html("$ 0.00")
+		readonly_fields(frm)
 		$('.form-footer').hide();
 		cur_frm.clear_custom_buttons();
 		hide_connections(frm);
@@ -44,7 +40,6 @@ frappe.ui.form.on("Item", {
 			} 
 		}
 		
-		frm.set_df_property('job_titless', 'hidden', 0);
 		if(frappe.boot.tag.tag_user_info.company_type != 'TAG' && frappe.session.user != 'Administrator'){
 			frm.set_df_property('company', 'reqd', 1);
 		}
@@ -72,6 +67,7 @@ frappe.ui.form.on("Item", {
 		
 	},
 	before_save: function(frm,cdt,cdn){
+		frm.set_value("job_titless_name", frm.doc.job_titless);
 		frm.set_value("item_code", frm.doc.job_titless);
 		cur_frm.set_value('item_group','All Item Groups')
 		cur_frm.set_value('stock_uom','Nos')
@@ -288,7 +284,7 @@ function validate_form(frm){
 
 function readonly_fields(frm){
 	if(frm.doc.__islocal!=1 && !(frappe.boot.tag.tag_user_info.company_type=='TAG' || frappe.session.user == 'Administrator')){
-		let fields = ['industry', 'rate', 'company','job_titless', 'descriptions'];
+		let fields = ['industry', 'rate', 'company','job_titless', 'descriptions','job_titless_name'];
 		for (let i in fields){
 			frm.set_df_property(fields[i], 'read_only', 1);
 		}
