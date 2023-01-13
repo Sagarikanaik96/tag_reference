@@ -792,10 +792,8 @@ function add_employee_row(frm) {
 }
 
 function staffing_company(frm) {
-  if (frm.doc.__islocal == 1) {
-    if (frappe.boot.tag.tag_user_info.company_type == "Staffing") {
-      frm.set_value('company',(frappe.boot.tag.tag_user_info.comps.length==1) ? frappe.boot.tag.tag_user_info.company : '')
-    }
+  if (frm.doc.__islocal == 1 && frappe.boot.tag.tag_user_info.company_type == "Staffing" && frappe.boot.tag.tag_user_info.comps.length==1) {
+      frm.set_value('company', frappe.boot.tag.tag_user_info.company);
   }
 }
 
