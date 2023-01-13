@@ -258,7 +258,9 @@ frappe.ui.form.on("Company", {
 			frappe.msgprint({ message: __('Invalid Email!'), indicator: 'red' });
 			frappe.validated = false;
 		}
-		validate_cert_attachment(frm);
+		if(frm.doc.__islocal!=1){
+			validate_cert_attachment(frm);
+		}	
 		validate_office_code(frm);
 	},
 	make_organization_inactive() {
