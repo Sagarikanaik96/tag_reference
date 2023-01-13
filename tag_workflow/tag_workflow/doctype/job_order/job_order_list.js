@@ -374,10 +374,6 @@ frappe.listview_settings["Job Order"] = {
     },
   },
 };
-function format_column(val, d, f) {
-  let category = f.category;
-  return `<div class = "list-row-col ellipsis hidden-xs text-center" ><span class=" ellipsis" title="" id="${val}-${f.name}" >${category}</span></div>`;
-}
 
 function get_company_job_order() {
   let text = "\n";

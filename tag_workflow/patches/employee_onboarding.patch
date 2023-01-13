@@ -1,5 +1,5 @@
 diff --git a/hrms/hr/doctype/employee_onboarding/employee_onboarding.json b/hrms/hr/doctype/employee_onboarding/employee_onboarding.json
-index 1d2ea0c6..1ee0c107 100644
+index 1d2ea0c6..1104a9e3 100644
 --- a/hrms/hr/doctype/employee_onboarding/employee_onboarding.json
 +++ b/hrms/hr/doctype/employee_onboarding/employee_onboarding.json
 @@ -8,24 +8,24 @@
@@ -46,22 +46,23 @@ index 1d2ea0c6..1ee0c107 100644
    },
    {
     "allow_on_submit": 1,
-@@ -162,8 +161,7 @@
+@@ -162,8 +161,8 @@
    {
     "fieldname": "boarding_begins_on",
     "fieldtype": "Date",
 -   "label": "Onboarding Begins On",
 -   "reqd": 1
++   "hidden": 1,
 +   "label": "Onboarding Begins On"
    },
    {
     "fieldname": "holiday_list",
-@@ -174,7 +172,7 @@
+@@ -174,7 +173,7 @@
   ],
   "is_submittable": 1,
   "links": [],
 - "modified": "2022-01-29 12:33:57.120384",
-+ "modified": "2023-01-08 14:50:34.098641",
++ "modified": "2023-01-13 00:48:04.691999",
   "modified_by": "Administrator",
   "module": "HR",
   "name": "Employee Onboarding",

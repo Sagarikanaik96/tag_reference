@@ -63,10 +63,10 @@ def staffing_data(data, radius, page_length,filter_loc,custom_address):
             "Employee", {"user_id": frappe.session.user}, "company")
         if(radius in distance and l==0 and custom_address==''):
             data = get_data(user_company, radius, data, page_length)
-        elif(radius and l>0):
-            data = filter_location_with_radius(user_company, radius, data, page_length,filter_loc,result)
         elif (custom_address!=''):
             data = filter_location_with_custom_address(custom_address,radius,data,page_length)
+        elif(radius and l>0):
+            data = filter_location_with_radius(user_company, radius, data, page_length,filter_loc,result)
         else:
             for d in data['values']:
                 if(len(result) < page_length):
@@ -97,10 +97,10 @@ def get_actual_number(data, based_list):
 def claim_left(data):
     try:
         data_list = data
-        company = frappe.db.get_value("User", frappe.session.user, "company")
+        company_name = frappe.db.get_value("User", frappe.session.user, "company")
         if(data):
             for d in data['values']:
-                d[-8] = claims_left(d[0], company)
+                d[-8] = claims_left(d[0], company_name)
         return data
     except Exception as e:
         print(e)
