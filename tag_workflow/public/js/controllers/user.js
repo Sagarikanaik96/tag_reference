@@ -24,7 +24,7 @@ frappe.ui.form.on("User", {
 			}
 		});
 		setting_user_field(frm)
-		cur_frm.set_value("old_password", "");
+		
 	},
 	form_render(frm, cdt, cdn){
 		if (frm.doc.__islocal!=1){
