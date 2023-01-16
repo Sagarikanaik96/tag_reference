@@ -23,12 +23,11 @@ frappe.listview_settings["Hiring Company Review"] = {
         listview.page.add_field(rating_filter, standard_filters_wrapper);
     },
     formatters:{
-        rating_hiring(val,d,f){
-            let rating = val?val*5:0;
+        rating_hiring(val,_d,f){
             return `<div class="list-row-col ellipsis hidden-xs ">
 				<span class="ellipsis" title="${f.name}: ${val}">
 				<a class="filterable ellipsis">
-					<span class="rating pr-2"><svg class="icon icon-sm star-click" data-rating="1"><use href="#icon-star"></use></svg>(${rating})</span>
+					<span class="rating pr-2"><svg class="icon icon-sm star-click" data-rating="1"><use href="#icon-star"></use></svg>(${val})</span>
 				</a>
 			</span>
 			</div>`

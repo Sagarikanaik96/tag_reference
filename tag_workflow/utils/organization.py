@@ -773,15 +773,17 @@ def old_job_title_child_append(i, dicts_val, doc):
 def update_hiring_reviews():
     try:
         frappe.logger().debug("*------Hiring Company Reviews Update---------*\n")
-        reviews_name = frappe.get_all('Hiring Company Review', {'rating':['is', 'set'], 'rating_hiring':0}, ['name'])
-        reviews_list = [r['name'] for r in reviews_name]
+        sql = '''select name from `tabHiring Company Review` where rating=rating_hiring'''
+        reviews_name=frappe.db.sql(sql,as_list=1)
+        reviews_list = [r[0] for r in reviews_name]
         if len(reviews_list) > 0:
             if len(reviews_list)==1:
-                frappe.db.sql(f'''UPDATE `tabHiring Company Review` set rating_hiring=rating where name in ("{reviews_list[0]}")''')
+                frappe.db.sql(f'''UPDATE `tabHiring Company Review` set rating_hiring=rating*5 where name in ("{reviews_list[0]}")''')
             else:
-                frappe.db.sql(f'''UPDATE `tabHiring Company Review` set rating_hiring=rating where name in {tuple(reviews_list)}''')
+                frappe.db.sql(f'''UPDATE `tabHiring Company Review` set rating_hiring=rating*5 where name in {tuple(reviews_list)}''')
             frappe.db.commit()
     except Exception as e:
+        print('update_hiring_reviews Error', e, frappe.get_traceback())
         frappe.log_error(e,'update_hiring_reviews Error')
 
 

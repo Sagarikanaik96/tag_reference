@@ -773,16 +773,15 @@ textarea.form-control {
   right: 10px;
 }
 [data-page-route="Job Order"] #div_rate,
-#div_extra {
+#div_extra{
   position: relative;
 }
 [data-page-route="Job Order"] #div_rate > input,
-#div_extra > input {
+#div_extra > input{
   padding-left: 18px;
 }
 [data-page-route="Job Order"] #div_rate:after,
-#div_extra:after,
-[data-page-route="Item"] [data-fieldtype="Currency"]:after {
+#div_extra:after{
   position: absolute;
   left: 3px;
   top: 56%;
@@ -1012,14 +1011,16 @@ input.input-with-feedback.form-control,
   padding-left: 20px;
 }
 
-[data-page-route="Assign Employee"] #emp_pay_rate:after {
+[data-page-route="Assign Employee"] #emp_pay_rate:after,
+[data-page-route="Item"] #title_rate:after {
   position: absolute;
   left: 10px;
   top: 56%;
   font-size: 13px;
   content: "$";
 }
-[data-page-route="Assign Employee"] input#emp_pay_rate {
+[data-page-route="Assign Employee"] input#emp_pay_rate,
+[data-page-route="Item"] input#title_rate{
   padding-left: 20px;
 }
 
@@ -1568,7 +1569,7 @@ select.input-with-feedback.form-control.ellipsis {
 [data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-head span.list-liked-by-me, 
 [data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-container span.list-row-like,
 [data-route="List/Timesheet/List"] #navbar-breadcrumbs li:nth-child(1),
-[data-page-route=Item] [data-fieldtype=Currency]:after {
+[data-page-route=Item] [title="Bill Rate"]:after{
   display:none;
 }
 #datepickers-container{
@@ -1777,12 +1778,10 @@ select.input-with-feedback.form-control.ellipsis {
 [data-fieldtype="Currency"] .ellipsis div {
   text-align: left !important;
 }
-#div_rate .control-input-wrapper input,
-[data-page-route="Item"] [data-fieldtype="Currency"] .control-input-wrapper input{
+#div_rate .control-input-wrapper input{
   padding-left: 21px;
 }
-#div_rate:after,
-[data-page-route="Item"] [data-fieldtype="Currency"]:after {
+#div_rate:after{
   left: 11px !important;
   top: 55% !important;
 }

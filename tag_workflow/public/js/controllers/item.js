@@ -16,6 +16,12 @@ frappe.ui.form.on("Item", {
 			
 	};},
 	refresh: function(frm,cdt,cdn){
+		$('[data-fieldname="rate"]').attr('id', 'title_rate');
+		frm.set_value('job_titless_name', frm.doc.job_titless);
+		if(frm.doc.__islocal!=1){
+			frm.set_df_property('job_titless_name', 'read_only', 1);
+		}
+		// $("#item-details > div:nth-child(1) > div > div:nth-child(2) > form > div:nth-child(3) > div > div.control-input-wrapper > div.control-input > input").html("$ 0.00")
 		readonly_fields(frm)
 		$('.form-footer').hide();
 		cur_frm.clear_custom_buttons();
