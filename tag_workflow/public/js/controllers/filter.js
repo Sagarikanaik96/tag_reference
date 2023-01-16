@@ -8,7 +8,6 @@ function hide_and_show_tables(frm){
 			frm.set_df_property('job_order_detail','options',update_inner_html('Job Titles'));
 			frm.set_df_property('_industry_types','hidden',1)
 			frm.set_df_property('job_titles','hidden',0)
-			console.log(frm.get_docfield('hiring_company').label)
 		}	
 		else{
 			frm.set_df_property('job_order_detail','options',update_inner_html('Job Industry(ies)'))
@@ -49,6 +48,7 @@ function filter_row(frm){
 	}
 }
 function update_table(frm){
+	if(frm.get_docfield('hiring_company').label !='Staffing Company'){
 		frappe.run_serially([
 			()=>frm.clear_table('_industry_types'),
 			()=>{
@@ -63,6 +63,7 @@ function update_table(frm){
 				frm.refresh_field('_industry_types')
 			},
 		])
+	}
 }
 
 function update_inner_html(phrase){
