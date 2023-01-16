@@ -190,7 +190,7 @@ def create_month_sales_invoice(source_name, company,month,year,first_day,last_da
     doclist.year = year
     doclist.first_day = first_day
     doclist.last_day = last_day
-
+    doclist.title = customer.name+" "+doclist.month+" "+doclist.year
     update_item(company, source_name, doclist,first_day,last_day)
     update_salesinvoice_list(source_name, doclist,first_day,last_day)
     set_missing_values(source_name, doclist, customer=customer, ignore_permissions=ignore_permissions)
