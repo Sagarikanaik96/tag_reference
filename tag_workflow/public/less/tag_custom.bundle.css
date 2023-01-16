@@ -1191,23 +1191,26 @@ select.input-with-feedback.form-control.ellipsis {
   header
   .level-left
   .list-row-col:nth-child(3),
+[data-page-route="List/Job Order/List"]
+  .frappe-card
+  .list-row-container
+  .level-left
+  .list-row-col:nth-child(3) {
+  flex: 1.3;
+}
+
 [data-page-route="List/Timesheet/List"]
   .frappe-card
   header
   .level-left
   .list-row-col:nth-child(4),
-[data-page-route="List/Job Order/List"]
-  .frappe-card
-  .list-row-container
-  .level-left
-  .list-row-col:nth-child(3),
 [data-page-route="List/Timesheet/List"]
   .frappe-card
   .list-row-container
   .level-left
   .list-row-col:nth-child(4) {
-  flex: 1.3;
-}
+    flex: 1.6;
+  }
 
 .list-row .level-right,
 .list-row-head .level-right {
@@ -1572,7 +1575,8 @@ select.input-with-feedback.form-control.ellipsis {
 [data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-head span.list-liked-by-me, 
 [data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-container span.list-row-like,
 [data-route="List/Timesheet/List"] #navbar-breadcrumbs li:nth-child(1),
-[data-page-route=Item] [title="Bill Rate"]:after {
+[data-page-route=Item] [title="Bill Rate"]:after,
+ [data-page-route="Timesheet"] [data-label="Create%20Salary%20Slip"] {
   display:none;
 }
 #datepickers-container{
