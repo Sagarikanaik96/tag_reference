@@ -213,7 +213,7 @@
     "in_preview": 0,
     "in_standard_filter": 0,
     "insert_after": "organization_type_column_break",
-    "label": "User Type",
+    "label": "Role",
     "length": 0,
     "mandatory_depends_on": "eval: doc.organization_type",
     "modified": "2021-11-12 20:12:36.798791",
