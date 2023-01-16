@@ -16,12 +16,14 @@ frappe.ui.form.on("Item", {
 			
 	};},
 	refresh: function(frm,cdt,cdn){
-		$('[data-fieldname="rate"]').attr('id', 'title_rate');
-		frm.set_value('job_titless_name', frm.doc.job_titless);
-		if(frm.doc.__islocal!=1){
-			frm.set_df_property('job_titless_name', 'read_only', 1);
+		if(cur_frm.doc.__islocal==1){
+			Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
+				_field.id = "id_mvr_hour";		
+			})
+			
+			$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
 		}
-		// $("#item-details > div:nth-child(1) > div > div:nth-child(2) > form > div:nth-child(3) > div > div.control-input-wrapper > div.control-input > input").html("$ 0.00")
+		$('[data-fieldname="rate"]').attr('id', 'title_rate');
 		readonly_fields(frm)
 		$('.form-footer').hide();
 		cur_frm.clear_custom_buttons();
@@ -59,13 +61,6 @@ frappe.ui.form.on("Item", {
 			Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
 				_field.id = "id_rate";
 			}) 
-		}
-		if(cur_frm.doc.__islocal==1){
-			Array.from($('[data-fieldtype="Currency"]')).forEach(_field =>{
-				_field.id = "id_mvr_hour";		
-			})
-			
-			$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
 		}
 		frm.fields_dict['pay_rate'].grid.wrapper.find('.grid-add-row').click(function() {
 			set_job_site_disable_enable(cdt,cdn);

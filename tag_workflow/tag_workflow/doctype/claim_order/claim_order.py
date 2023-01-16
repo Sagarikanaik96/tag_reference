@@ -343,8 +343,17 @@ def payrate_change(docname):
 		print(e, frappe.get_traceback())
 
 @frappe.whitelist()
-def create_pay_rate(hiring_company, job_title, job_site, employee_pay_rate, staffing_company):
+def create_pay_rate(hiring_company, job_order, employee_pay_rate, staffing_company):
 	try:
+		frappe.enqueue('tag_workflow.tag_workflow.doctype.claim_order.claim_order.create_pay_rate_job', now = True, hiring_company=hiring_company, job_order=job_order, employee_pay_rate=employee_pay_rate, staffing_company=staffing_company)
+	except Exception as e:
+		print('create_pay_rate Error', e, frappe.get_traceback())
+		frappe.log_error(e, 'Set Pay Rate Error')
+
+@frappe.whitelist()
+def create_pay_rate_job(hiring_company, job_order, employee_pay_rate, staffing_company):   	
+	try:
+		job_title, job_site=frappe.db.get_value(jobOrder,{'name':job_order},['select_job', 'job_site'])
 		emp_pay_rate = frappe.db.exists(EPR, {"hiring_company": hiring_company,"job_title": job_title, "job_site": job_site, "staffing_company": staffing_company})
 		if emp_pay_rate:
 			pay_rate = frappe.db.get_value(EPR, {"name": emp_pay_rate}, ['employee_pay_rate'])
@@ -358,10 +367,11 @@ def create_pay_rate(hiring_company, job_title, job_site, employee_pay_rate, staf
 			doc.job_site = job_site
 			doc.employee_pay_rate = employee_pay_rate
 			doc.staffing_company = staffing_company
-			doc.insert()
+			doc.insert(ignore_permissions=True)
+			frappe.db.commit()
 	except Exception as e:
-		frappe.log_error(e, 'Set Pay Rate Error')
-		print(e, frappe.get_traceback())
+		frappe.log_error(e, 'Set Pay Rate Job Error')
+		frappe.logger().debug('Set Pay Rate Job Error', frappe.get_traceback())
 
 @frappe.whitelist()
 def auto_claims_approves(my_data,doc_name,doc_claim):
@@ -430,10 +440,18 @@ def hide_and_show(c,doc_name,assigned_worker):
 	except Exception as e:
 		print(e,frappe.utils.get_traceback())
 
+@frappe.whitelist()
+def create_staff_comp_code(job_order,staff_class_code, staffing_company,staff_class_code_rate):
+	try:
+		frappe.enqueue('tag_workflow.tag_workflow.doctype.claim_order.claim_order.create_staff_comp_code_job', now=True, job_order=job_order, staff_class_code=staff_class_code, staffing_company=staffing_company,staff_class_code_rate=staff_class_code_rate)
+	except Exception as e:
+		print('create_staff_comp_code Error', e, frappe.get_traceback())
+		frappe.log_error(e,'create_staff_comp_code Error')
 
 @frappe.whitelist()
-def create_staff_comp_code(job_title,job_site,industry_type, staff_class_code, staffing_company,staff_class_code_rate):
+def create_staff_comp_code_job(job_order, staff_class_code, staffing_company,staff_class_code_rate):
 	try:
+		job_title, job_site, industry_type = frappe.db.get_value(jobOrder,{'name':job_order},['select_job', 'job_site','category'])
 		if(len(staff_class_code)>0):
 			job_titlename=job_title_value(job_title)
 			state=frappe.db.get_value('Job Site',job_site,['state'])
@@ -457,9 +475,11 @@ def create_staff_comp_code(job_title,job_site,industry_type, staff_class_code, s
 					field.ignore_user_permissions = 1
 				doc.flags.ignore_permissions = True
 				doc.insert()
+				frappe.db.commit()
 	except Exception as e:
-		frappe.log_error(e, 'Set Class Code Error')
-		print(e, frappe.get_traceback())
+		frappe.logger().debug('Set Class Code Job Error',frappe.get_traceback())
+		frappe.log_error(e, 'Set Class Code Job Error')
+
 def job_title_value(job_title):
 	job_title_name=job_title.split('-')
 	if(len(job_title_name)==1):

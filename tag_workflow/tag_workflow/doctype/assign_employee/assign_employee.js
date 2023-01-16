@@ -1118,6 +1118,7 @@ function set_payrate_field(frm) {
           frappe.boot.tag.tag_user_info.company_type
         )
       ) {
+        $('[data-fieldname = "employee_pay_rate"]').attr("id", "emp_pay_rate");
       }
     }
   );
@@ -1178,8 +1179,7 @@ function create_pay_rate(frm) {
       "tag_workflow.tag_workflow.doctype.claim_order.claim_order.create_pay_rate",
     args: {
       hiring_company: frm.doc.hiring_organization,
-      job_title: frm.doc.job_category,
-      job_site: frm.doc.job_location,
+      job_order: frm.doc.job_order,
       employee_pay_rate: frm.doc.employee_pay_rate,
       staffing_company: frm.doc.company,
     },
@@ -1296,19 +1296,15 @@ function update_workers_filled(frm){
   }
 }
 function create_staff_comp_code(frm){
-	frappe.db.get_value('Job Order',{'name':frm.doc.job_order},['select_job', 'job_site','category'], function(r){
-		frappe.call({
-			method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.create_staff_comp_code",
-			args:{
-				"job_title": r.select_job,
-				"job_site": r.job_site,
-				"industry_type":r.category,
-				"staff_class_code": frm.doc.staff_class_code?frm.doc.staff_class_code:'' ,
-				"staffing_company": frm.doc.company,
-				"staff_class_code_rate":frm.doc.staff_class_code_rate
-			}
-		})
-	})
+  frappe.call({
+    method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.create_staff_comp_code",
+    args:{
+      "job_order":frm.doc.job_order,
+      "staff_class_code": frm.doc.staff_class_code?frm.doc.staff_class_code:'' ,
+      "staffing_company": frm.doc.company,
+      "staff_class_code_rate":frm.doc.staff_class_code_rate
+    }
+  })
 }
 function check_class_code(frm){
 	if(frm.doc.__islocal==1){
