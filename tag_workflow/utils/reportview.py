@@ -41,7 +41,7 @@ def get():
                 args['page_length'] = str(
                     page_length*(int(args['page_length']) + int(args['page_length'])))
                 try:
-                    data = compress(execute_custom(**args),args)
+                    data = compress(execute(**args),args)
                 except Exception as e:
                     print('e-----------',e)
                 if(data):
