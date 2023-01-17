@@ -10,14 +10,14 @@ import requests
 from haversine import haversine
 from tag_workflow.tag_workflow.doctype.job_order.job_order import claims_left
 from tag_workflow.tag_workflow.doctype.job_order.job_order import my_used_job_orders
-
+from frappe.model.db_query import DatabaseQuery
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL = f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
 distance_value = {"5": 5, "10": 10, "25": 25, "50": 50, "100": 100}
 distance = ['5', '10', '25', '50', '100']
 JOB = "Job Order"
 CUSTOM = 'Custom Address'
-
+get_table_columns=DatabaseQuery.get_table_columns
 @frappe.whitelist()
 @frappe.read_only()
 def get():
@@ -40,8 +40,10 @@ def get():
                 args['start'] = '0'
                 args['page_length'] = str(
                     page_length*(int(args['page_length']) + int(args['page_length'])))
-                    
-                data = compress(execute(**args), args=args)
+                try:
+                    data = compress(execute_custom(**args),args)
+                except Exception as e:
+                    print('e-----------',e)
                 if(data):
                     data['order_length'] = 0
                     based_list = compare_order(order_status)
@@ -321,3 +323,207 @@ def get_list():
 
 	# uncompressed (refactored from frappe.model.db_query.get_list)
     return execute(**get_form_params())
+
+def execute_custom(doctype, *args, **kwargs):
+	return DatabaseQueryCustom(doctype).execute(*args, **kwargs)
+
+from frappe.utils import (
+	add_to_date,
+	cint
+)
+import copy
+class DatabaseQueryCustom:
+	get_table_columns=DatabaseQuery.get_table_columns
+	prepare_args=DatabaseQuery.prepare_args
+	parse_args=DatabaseQuery.parse_args
+	sanitize_fields=DatabaseQuery.sanitize_fields
+	extract_tables=DatabaseQuery.extract_tables
+	set_optional_columns=DatabaseQuery.set_optional_columns
+	build_conditions=DatabaseQuery.build_conditions
+	build_filter_conditions=DatabaseQuery.build_filter_conditions
+	build_match_conditions=DatabaseQuery.build_match_conditions
+	get_permission_query_conditions=DatabaseQuery.get_permission_query_conditions
+	get_share_condition=DatabaseQuery.get_share_condition
+	set_field_tables=DatabaseQuery.set_field_tables
+	cast_name_fields=DatabaseQuery.cast_name_fields
+	set_order_by=DatabaseQuery.set_order_by
+	validate_order_by_and_group_by=DatabaseQuery.validate_order_by_and_group_by
+	add_limit=DatabaseQuery.add_limit
+	add_comment_count=DatabaseQuery.add_comment_count
+	update_user_settings=DatabaseQuery.update_user_settings
+
+	def __init__(self, doctype, user=None):
+		self.doctype = doctype
+		self.tables = []
+		self.link_tables = []
+		self.conditions = []
+		self.or_conditions = []
+		self.fields = None
+		self.user = user or frappe.session.user
+		self.ignore_ifnull = False
+		self.flags = frappe._dict()
+		self.reference_doctype = None
+
+	def execute(
+		self,
+		fields=None,
+		filters=None,
+		or_filters=None,
+		docstatus=None,
+		group_by=None,
+		order_by="KEEP_DEFAULT_ORDERING",
+		limit_start=False,
+		limit_page_length=None,
+		as_list=False,
+		with_childnames=False,
+		debug=False,
+		ignore_permissions=False,
+		user=None,
+		with_comment_count=False,
+		join="left join",
+		distinct=False,
+		start=None,
+		page_length=None,
+		limit=None,
+		ignore_ifnull=False,
+		save_user_settings=False,
+		save_user_settings_fields=False,
+		update=None,
+		add_total_row=None,
+		user_settings=None,
+		reference_doctype=None,
+		run=True,
+		strict=True,
+		pluck=None,
+		ignore_ddl=False,
+		*,
+		parent_doctype=None,
+	) -> list:
+
+		if (
+			not ignore_permissions
+			and not frappe.has_permission(self.doctype, "select", user=user, parent_doctype=parent_doctype)
+			and not frappe.has_permission(self.doctype, "read", user=user, parent_doctype=parent_doctype)
+		):
+			frappe.flags.error_message = _("Insufficient Permission for {0}").format(
+				frappe.bold(self.doctype)
+			)
+			raise frappe.PermissionError(self.doctype)
+		# filters and fields swappable
+		# its hard to remember what comes first
+		if isinstance(fields, dict) or (
+			fields and isinstance(fields, list) and isinstance(fields[0], list)
+		) or fields and isinstance(filters, list) and len(filters) > 1 and isinstance(filters[0], str):
+			# if fields is given as dict/list of list, its probably filters
+			filters, fields = fields, filters
+    
+		if fields:
+			self.fields = fields
+		else:
+			self.fields = [f"`tab{self.doctype}`.`{pluck or 'name'}`"]
+
+		if start:
+			limit_start = start
+		if page_length:
+			limit_page_length = page_length
+		if limit:
+			limit_page_length = limit
+
+		self.filters = filters or []
+		self.or_filters = or_filters or []
+		self.docstatus = docstatus or []
+		self.group_by = group_by
+		self.order_by = order_by
+		self.limit_start = cint(limit_start)
+		self.limit_page_length = cint(limit_page_length) if limit_page_length else None
+		self.with_childnames = with_childnames
+		self.debug = debug
+		self.join = join
+		self.distinct = distinct
+		self.as_list = as_list
+		self.ignore_ifnull = ignore_ifnull
+		self.flags.ignore_permissions = ignore_permissions
+		self.user = user or frappe.session.user
+		self.update = update
+		self.user_settings_fields = copy.deepcopy(self.fields)
+		self.run = run
+		self.strict = strict
+		self.ignore_ddl = ignore_ddl
+
+		# for contextual user permission check
+		# to determine which user permission is applicable on link field of specific doctype
+		self.reference_doctype = reference_doctype or self.doctype
+
+		if user_settings:
+			self.user_settings = json.loads(user_settings)
+
+		self.columns = self.get_table_columns()
+
+		# no table & ignore_ddl, return
+		if not self.columns:
+			return []
+
+		result = self.build_and_run()
+
+		if with_comment_count and not as_list and self.doctype:
+			self.add_comment_count(result)
+
+		if save_user_settings:
+			self.save_user_settings_fields = save_user_settings_fields
+			self.update_user_settings()
+
+		if pluck:
+			return [d[pluck] for d in result]
+		print(add_total_row)
+		return result
+
+	def build_and_run(self):
+		args = self.prepare_args()
+		args.limit = self.add_limit()
+		company_name = frappe.db.get_value("User", frappe.session.user, "company")
+		unclaimed_noresume_by_company=[]
+		unclaimed_noresume_by_comp=f'select name from `tabJob Order` where (claim not like "%{company_name}%" or claim is Null) and order_status!="Completed" and resumes_required=0'
+		my_unaval_claims=frappe.db.sql(unclaimed_noresume_by_comp,as_list=1)
+		for i in my_unaval_claims:
+			data=frappe.get_doc('Job Order',i[0])
+			claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{data.name}"'
+			data1=frappe.db.sql(claims,as_list=1)
+			if(data1[0][0]!=None):
+				if int(data.no_of_workers)-int(data1[0][0])>0:
+					unclaimed_noresume_by_company.append(data.name)
+			else:
+				unclaimed_noresume_by_company.append(data.name)
+		unclaimed_jo=()
+		for jo in unclaimed_noresume_by_company:
+			unclaimed_jo=unclaimed_jo+(jo,)
+		str_unclaimed_jo=str(unclaimed_jo)
+		str_unclaimed_job=str_unclaimed_jo[:-2] + str_unclaimed_jo[-1]
+		if args.conditions:
+			args.conditions = "where "+ args.conditions+ " and ((`tabJob Order`.claim like '%"+company_name+"%') or ((`tabJob Order`.claim not like '%"+company_name+"%' or `tabJob Order`.claim is Null) and `tabJob Order`.order_status!='Completed' and `tabJob Order`.resumes_required=1 and `tabJob Order`.worker_filled!=`tabJob Order`.no_of_workers) or (`tabJob Order`.name in "+str_unclaimed_job+"))"
+		if self.distinct:
+			args.fields = "distinct " + args.fields
+			args.order_by = "" 
+
+		# Postgres requires any field that appears in the select clause to also
+		# appear in the order by and group by clause
+		if frappe.db.db_type == "postgres" and args.order_by and args.group_by:
+			args = self.prepare_select_args(args)
+
+		query = (
+			"""select %(fields)s
+			from %(tables)s
+			%(conditions)s
+			%(group_by)s
+			%(order_by)s
+			%(limit)s"""
+			% args
+		)
+
+		return frappe.db.sql(
+			query,
+			as_dict=not self.as_list,
+			debug=self.debug,
+			update=self.update,
+			ignore_ddl=self.ignore_ddl,
+			run=self.run,
+		)
