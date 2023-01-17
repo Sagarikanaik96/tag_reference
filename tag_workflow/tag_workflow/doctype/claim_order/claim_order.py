@@ -119,7 +119,6 @@ def order_details(doc_name):
 @frappe.whitelist()
 def remaining_emp(doc_name):
 	try:
-		print(doc_name,'doc_name is >>>>>>>>>>>>>>>')
 		datas=''' select sum(approved_no_of_workers) as approved_no_of_workers  from `tabClaim Order` where job_order = "{}"  '''.format(doc_name)
 		data=frappe.db.sql(datas,as_dict=True)
 		if(len(data)):
@@ -133,7 +132,6 @@ def remaining_emp(doc_name):
 		worker_required=job_order.no_of_workers
 		return int(approved_claims),worker_required
 	except Exception as e:
-		print(e, frappe.get_traceback(),"three error is :>>>>>>>>>>>>>>")
 		frappe.db.rollback()
 
 @frappe.whitelist()
@@ -327,7 +325,6 @@ def set_pay_rate(hiring_company, job_title, job_site, staffing_company):
 				return emp_pay_rate
 	except Exception as e:
 		frappe.log_error(e, 'Set Pay Rate Error')
-		print(e, frappe.get_traceback(),"second error is  >>>>>>>>>>")
 
 @frappe.whitelist()
 def payrate_change(docname):
@@ -512,7 +509,6 @@ def check_already_exist_class_code(job_order,staffing_company):
 			return ['Exist']
 	except Exception as e:
 		frappe.log_error(e, 'Set Class Code Error')
-		print(e, frappe.get_traceback(),"error is >>>>>>>>>>>>>>>>>>>>>>>")
 def check_staff_comp_code_existence(state,staff_class_code_rate,staff_class_code,industry_type,staffing_company,job_titlename,check_industry_vals):
 	comp_code=frappe.db.sql('select SCC.name from `tabStaffing Comp Code` as SCC inner join `tabClass Code` as CC on SCC.name=CC.parent where job_industry="{0}" and CC.state="{1}" and staffing_company="{2}" and job_title like "{3}%" '.format(industry_type,state,staffing_company,job_titlename),as_dict=1)
 	if len(comp_code)>0:

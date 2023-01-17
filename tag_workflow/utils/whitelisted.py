@@ -729,7 +729,6 @@ def get_company_job_order(user_type):
         if user_type=='Staffing':
             sql=f'''select name from `tabCompany` where organization_type="Hiring" or parent_staffing in (select company from `tabEmployee` where email="{current_user}") '''
             companies = frappe.db.sql(sql, as_dict=1)
-            print("data is :>>>>>>>>>>>>>>>",companies,current_user)
             data = [c['name'] for c in companies]
             return "\n".join(data)
         elif user_type=="Hiring" or user_type==exclusive_hiring:
@@ -832,7 +831,6 @@ def fetch_data(filter_name):
 
 def check_password(user, old_password):
     check_user_password = User.find_by_credentials(user, old_password)
-    print("check_user_password", check_user_password)
     return check_user_password['is_authenticated']
 
 def check_password_policy(new_password):
@@ -879,9 +877,9 @@ def savedocs(doc, action):
         else:
             if doc.doctype == "User":
                 check_user = frappe.db.sql("select * from `tabUser` where  name='{0}'".format(doc_dict["email"]))
+                new_password = doc_dict["new_password"]
                 if check_user:
                     old_password = doc_dict.get("old_password")
-                    new_password = doc_dict["new_password"]
                     validate_passwords(user=doc_dict["email"],
                                     old_password=old_password,
                                     new_password=new_password,

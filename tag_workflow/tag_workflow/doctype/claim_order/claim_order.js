@@ -124,7 +124,6 @@ frappe.ui.form.on('Claim Order', {
 			fetch_note(frm);
 	},
 	setup: function (frm) {
-		console.log("employee pay rate >>>>>>>",cur_frm.doc.employee_pay_rate)
 		$('[data-label="Save"]').hide()
 		frm.set_query("staffing_organization", function () {
 			return {
