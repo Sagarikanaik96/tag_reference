@@ -1576,7 +1576,8 @@ select.input-with-feedback.form-control.ellipsis {
 [data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-container span.list-row-like,
 [data-route="List/Timesheet/List"] #navbar-breadcrumbs li:nth-child(1),
 [data-page-route=Item] [title="Bill Rate"]:after,
- [data-page-route="Timesheet"] [data-label="Create%20Salary%20Slip"] {
+ [data-page-route="Timesheet"] [data-label="Create%20Salary%20Slip"],
+ [data-page-route="Item"] [data-fieldtype="Table"] [data-fieldname="job_site"] .reqd:after {
   display:none;
 }
 #datepickers-container{
