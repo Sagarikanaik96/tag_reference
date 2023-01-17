@@ -409,7 +409,7 @@ function exclusive_fields(frm){
 				$('[data-label="Save"]').hide()
 				$('[data-label="Assign%20Multi%20Company"]').hide()
   
-				let myStringArray = ["first_name", "last_name", "enabled", "terminated", "gender", "birth_date", "location", "mobile_no", "new_password", "logout_all_sessions"];
+				let myStringArray = ["first_name", "last_name", "enabled", "terminated", "gender", "birth_date", "location", "mobile_no", "new_password","old_password", "logout_all_sessions"];
 				let arrayLength = myStringArray.length;
 				for (let i = 0; i < arrayLength; i++) {
 					frm.set_df_property(myStringArray[i], "read_only", 1);
@@ -458,7 +458,6 @@ function setting_user_field(frm){
 }
 
 function check_old_password(frm,old_password,new_password){
-	console.log("new and old password",new_password,old_password)
 	if(old_password && new_password){
 		if(old_password == new_password){
 			frappe.validated = false; 

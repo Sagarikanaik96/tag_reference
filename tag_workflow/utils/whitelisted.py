@@ -19,7 +19,7 @@ from six import string_types
 from mimetypes import guess_type
 from frappe.utils import cint
 from frappe.utils.image import optimize_image
-from frappe.core.doctype.user.user import User
+from frappe.core.doctype.user.user import User,test_password_strength,handle_password_test_fail
 
 ALLOWED_MIMETYPES = (
 	"image/png",
@@ -729,6 +729,7 @@ def get_company_job_order(user_type):
         if user_type=='Staffing':
             sql=f'''select name from `tabCompany` where organization_type="Hiring" or parent_staffing in (select company from `tabEmployee` where email="{current_user}") '''
             companies = frappe.db.sql(sql, as_dict=1)
+            print("data is :>>>>>>>>>>>>>>>",companies,current_user)
             data = [c['name'] for c in companies]
             return "\n".join(data)
         elif user_type=="Hiring" or user_type==exclusive_hiring:
@@ -831,9 +832,14 @@ def fetch_data(filter_name):
 
 def check_password(user, old_password):
     check_user_password = User.find_by_credentials(user, old_password)
-    if not check_user_password['is_authenticated']:
-        return True
-    return False
+    print("check_user_password", check_user_password)
+    return check_user_password['is_authenticated']
+
+def check_password_policy(new_password):
+    result = test_password_strength(new_password)
+    feedback = result.get("feedback", None)
+    if feedback and not feedback.get("password_policy_validation_passed", False):
+        handle_password_test_fail(feedback)
 
 def validate_passwords(user, old_password, new_password, doc):
     if frappe.session.user == user:
@@ -846,11 +852,14 @@ def validate_passwords(user, old_password, new_password, doc):
         elif old_password:
             if not check_password(user, old_password):
                 frappe.throw("Old password is incorrect")
-        else:
-            doc.save()
-    elif not check_password(user, new_password):
+            else:
+                check_password_policy(new_password)
+                doc.old_password = None
+                doc.save()
+    elif check_password(user, new_password):
         frappe.throw("Old and new password can not be same")
     else:
+        check_password_policy(new_password)
         doc.save()
 
 @frappe.whitelist()
@@ -869,12 +878,17 @@ def savedocs(doc, action):
             doc.submit()
         else:
             if doc.doctype == "User":
-                old_password = doc_dict["old_password"]
-                new_password = doc_dict["new_password"]
-                validate_passwords(user=doc_dict["email"],
-                                old_password=old_password,
-                                new_password=new_password,
-                                doc=doc)
+                check_user = frappe.db.sql("select * from `tabUser` where  name='{0}'".format(doc_dict["email"]))
+                if check_user:
+                    old_password = doc_dict.get("old_password")
+                    new_password = doc_dict["new_password"]
+                    validate_passwords(user=doc_dict["email"],
+                                    old_password=old_password,
+                                    new_password=new_password,
+                                    doc=doc)
+                else:
+                    check_password_policy(new_password)
+                    doc.save()
             else:
                 doc.save()
         run_onload(doc)

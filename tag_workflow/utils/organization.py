@@ -796,7 +796,7 @@ def import_sample_data():
         elif doc == "Employee":
             employee = frappe.db.sql("SELECT * FROM `tabEmployee` WHERE email='JDoe@example.com' and company='{0}' and first_name='John' and last_name='Doe'".format(comp_name))
             if employee:
-                frappe.db.sql("UPDATE `tabEmployee` set ssn='123456789', employee_gender='Male' WHERE email='JDoe@example.com' and company='{0}' and first_name='John' and last_name='Doe'".format(comp_name))
+                frappe.db.sql("UPDATE `tabEmployee` set sssn='123456789', ssn='123456789', employee_gender='Male' WHERE email='JDoe@example.com' and company='{0}' and first_name='John' and last_name='Doe'".format(comp_name))
                 frappe.db.commit()            
             else:
                 import_json("Employee")

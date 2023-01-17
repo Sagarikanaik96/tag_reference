@@ -332,7 +332,7 @@ class Importer:
                     self.sql += str(tuple([self.name, docs.first_name, docs.phone_number, docs.email_address,docs.email_address, (docs.owner_company or ""), (docs.company or ""), (docs.contact_address or ""), (docs.city or ""), (docs.zip or ""), (docs.suite_or_apartment_no or "")])) + ","
                     self.con_series += 1
                     return self.name, "Pass"
-            
+                return self.name, "Failed"
             return self.name, "Failed"
         except Exception as e:
             frappe.log_error(e, "insert record for contact")

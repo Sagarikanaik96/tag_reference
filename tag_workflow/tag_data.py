@@ -540,9 +540,8 @@ def hiring_org_name(current_user):
 @frappe.whitelist(allow_guest=False)
 def check_old_password(current_user,old_password):    
     user = User.find_by_credentials(current_user, old_password)
-    if not user["is_authenticated"]:
-        return False
-    return True
+    print("User is :>>", user)
+    return user["is_authenticated"]
 
 @frappe.whitelist(allow_guest=False)
 def designation_activity_data(doc,method):
