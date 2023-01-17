@@ -11,15 +11,6 @@ frappe.ui.form.on('Claim Order', {
 		}
 		create_pay_rate(frm);
 		create_staff_comp_code(frm);
-		frappe.call({
-			method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.get_or_create_jobtitle",
-			args:{
-				'job_order':cur_frm.doc.job_order,
-				'staffing_company':frappe.boot.tag.tag_user_info.company,
-				"hiring_company":cur_frm.doc.hiring_organization,
-				"employee_pay_rate":cur_frm.doc.employee_pay_rate
-			}
-		})
 	},
 	before_save: function (frm) {
 		if (!frm.doc.hiring_organization) {
