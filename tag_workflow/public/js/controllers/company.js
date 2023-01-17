@@ -89,7 +89,7 @@ frappe.ui.form.on("Company", {
 
 	setup: function (frm) {
 		Array.from($('[data-fieldtype="Currency"]')).forEach(_field => {
-			if (_field.title !== "total_monthly_sales") {
+			if (_field.title !== "total_monthly_sales" && frappe.boot.tag.tag_user_info.user_type!= "Hiring User") {
 				_field.id = "id_mvr_hour"
 			}
 		})
