@@ -602,7 +602,7 @@ def timesheet_data(item,job_order,job,tip_amount,break_from,break_to,posting_dat
     emp_pay_rate = get_emp_pay_rate(job_order, job.company, item['company'], item['employee'])
     if(item['timesheet_value'] and len(item['timesheet_value'])>0):
         timesheet=frappe.get_doc('Timesheet',item['timesheet_value'])                        
-        timesheet.time_logs=''
+        timesheet.set("time_logs", [])
     else:
         timesheet = frappe.get_doc(dict(doctype = "Timesheet", company=job.company, job_order_detail=job_order, employee = item['employee'], from_date=job.from_date, to_date=job.to_date, job_name=job.select_job, per_hour_rate=job.per_hour, flat_rate=job.flat_rate, status_of_work_order=job.order_status, date_of_timesheet=date, timesheet_hours=cur_timesheet_hours,total_weekly_hours= week_all_hours+cur_timesheet_hours, current_job_order_hours=all_job_hours+cur_timesheet_hours, overtime_timesheet_hours= overtime_hours, total_weekly_overtime_hours= overtime_all_hours, cuurent_job_order_overtime_hours= float(overtime_current_job_hours_val), total_weekly_hiring_hours= week_hiring_hours + cur_timesheet_hours, total_weekly_overtime_hiring_hours= overtime_hiring_hours, overtime_timesheet_hours1= hiring_timesheet_oh, billable_weekly_overtime_hours= overtime_hiring_hours, unbillable_weekly_overtime_hours= overtime_all_hours- overtime_hiring_hours, employee_pay_rate = emp_pay_rate,todays_overtime_hours=todays_overtime_hours))
     flat_rate = job.flat_rate + tip_amount

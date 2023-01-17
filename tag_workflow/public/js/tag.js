@@ -608,22 +608,31 @@ function export_csv(ts_list){
             'ts_list': ts_list,
         },
         callback: (r)=>{
-			let export_ts_headers = "Customer Code, Personnel Code, Hour Type, Work Date, Position Code, Pay Hours, Bill Hours, Office Code, Date Time IN, Date Time OUT, Pay Rate, Bill Rate, PO Number, Approver Name, Approval Date Time, Source, Assignment Number, Project Code";
-			r.message.forEach(function(row){
-				export_ts_headers += "\n"+row.join(',');
-            });
-            //merge the data with CSV
-            let exporttimesheetElement = document.createElement('a');
-            exporttimesheetElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(export_ts_headers);
-            exporttimesheetElement.target = '_blank';
-
-            //provide the name for the CSV file to be downloaded
-			let datetimestamp = frappe.datetime.now_datetime().split(" ");
-			datetimestamp[0] = frappe.format(datetimestamp[0], {fieldtype:'Date'});
-			datetimestamp[1] = datetimestamp[1].split(':').join('_');
-            exporttimesheetElement.download = 'TimeClockImport_'+datetimestamp.join(' ')+'.csv';
-
-            exporttimesheetElement.click();
+			if(r.message[0]=='Success'){
+				let export_ts_headers = "Customer Code, Personnel Code, Hour Type, Work Date, Position Code, Pay Hours, Bill Hours, Office Code, Date Time IN, Date Time OUT, Pay Rate, Bill Rate, PO Number, Approver Name, Approval Date Time, Source, Assignment Number, Project Code";
+				r.message[1].forEach(function(row){
+					export_ts_headers += "\n"+row.join(',');
+				});
+				//merge the data with CSV
+				let exporttimesheetElement = document.createElement('a');
+				exporttimesheetElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(export_ts_headers);
+				exporttimesheetElement.target = '_blank';
+	
+				//provide the name for the CSV file to be downloaded
+				let datetimestamp = frappe.datetime.now_datetime().split(" ");
+				datetimestamp[0] = frappe.format(datetimestamp[0], {fieldtype:'Date'});
+				datetimestamp[1] = datetimestamp[1].split(':').join('_');
+				exporttimesheetElement.download = 'TimeClockImport_'+datetimestamp.join(' ')+'.csv';
+	
+				exporttimesheetElement.click();
+			}else{
+				let message = '';
+				if(r.message[1].includes(' and '))
+					message = 'These companies do not have office codes: '+r.message[1]+'. Please fill the details or unselect them to continue.';
+				else
+					message = r.message[1]+' does not have office code. Please fill the details to export the timesheet(s).';
+				frappe.msgprint(message);
+			}
         }
     });
 }

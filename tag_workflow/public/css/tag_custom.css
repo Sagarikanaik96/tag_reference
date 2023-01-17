@@ -1889,27 +1889,6 @@ span.comment-count {
   z-index: 99;
   left: 20rem;
 }
-[data-page-route="Claim Order"] #staff_pay_rate:after {
-  position: absolute;
-  left: 10px;
-  top: 56%;
-  font-size: 13px;
-  content: "$";
-}
-[data-page-route="Claim Order"] input#staff_pay_rate {
-  padding-left: 20px;
-}
-
-[data-page-route="Assign Employee"] #staff_pay_rate:after {
-  position: absolute;
-  left: 10px;
-  top: 56%;
-  font-size: 13px;
-  content: "$";
-}
-[data-page-route="Assign Employee"] input#staff_pay_rate {
-  padding-left: 20px;
-}
 .like-icon{
   display: none;
 }
