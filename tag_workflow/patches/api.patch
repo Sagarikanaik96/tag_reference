@@ -1,0 +1,18 @@
+diff --git a/frappe/api.py b/frappe/api.py
+index 1048468..9d5435d 100644
+--- a/frappe/api.py
++++ b/frappe/api.py
+@@ -11,8 +11,13 @@ import frappe.handler
+ from frappe import _
+ from frappe.utils.data import sbool
+ from frappe.utils.response import build_response
++import newrelic.agent
+ 
++#filename = str(Path(__file__).resolve().parent) + "/newrelic.ini"
++filename = "/home/erpuser/newrelic/newrelic.ini"
++newrelic.agent.initialize(filename)
+ 
++@newrelic.agent.wsgi_application()
+ def handle():
+ 	"""
+ 	Handler for `/api` methods

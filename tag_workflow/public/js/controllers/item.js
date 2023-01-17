@@ -23,7 +23,6 @@ frappe.ui.form.on("Item", {
 			
 			$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
 		}
-		$('[data-fieldname="rate"]').attr('id', 'title_rate');
 		readonly_fields(frm)
 		$('.form-footer').hide();
 		cur_frm.clear_custom_buttons();
@@ -46,6 +45,7 @@ frappe.ui.form.on("Item", {
 			else if(frappe.route_history.length>1 && frappe.route_history[len_history-2][1]=='Contract'){
 				frm.set_df_property('company', 'read_only', 1);
 			} 
+			$('[data-fieldname="rate"]').attr('id', 'title_rate');
 		}
 		
 		if(frappe.boot.tag.tag_user_info.company_type != 'TAG' && frappe.session.user != 'Administrator'){

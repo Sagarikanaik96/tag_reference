@@ -169,7 +169,8 @@ doctype_list_js = {
         "System Setting": "public/js/doctype_list/system_setting.js",
         "Employee Onboarding": "public/js/doctype_list/employee_onboarding_list.js",
         "Payroll Period": ["public/js/doctype_list/payroll_period_list.js",perm],
-        "Salary Structure Assignment":["public/js/doctype_list/salary_structure_assignment_list.js",perm]
+        "Salary Structure Assignment":["public/js/doctype_list/salary_structure_assignment_list.js",perm],
+        "Data Import":["public/js/doctype_list/data_import_list.js"]
 }
 
 before_migrate = ["tag_workflow.utils.organization.remove_field"]
