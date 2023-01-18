@@ -180,15 +180,16 @@ class Importer:
                 update_progress_bar("Importing {0} records".format(total_payload_count), current_index, total_payload_count,)
             elif total_payload_count > 5:
                 frappe.publish_realtime("data_import_progress", {"current": current_index, "total": total_payload_count, "docname": doc, "data_import": self.data_import.name, "success": True, "row_indexes": row_indexes, "eta": eta,},)
-            create_import_log(
-						self.data_import.name,
-						log_index,
-						{"success": True, "docname": doc, "row_indexes": row_indexes},
-					)
+            
             log_index += 1
             
             if message == "Pass":
                 import_log.append(frappe._dict(success=True, docname=doc, row_indexes=row_indexes))
+                create_import_log(
+						self.data_import.name,
+						log_index,
+						{"success": True, "docname": doc, "row_indexes": row_indexes},
+					)
             else:
                 message_log = ['{"title": "Error", "message": "Data Error"}']
                 if self.doctype == "Employee":
@@ -197,7 +198,16 @@ class Importer:
                     msg_exc = """<b>Contact Name*</b>: cannot be empty and < , > is not allowed\n<b>Email*</b>: accepts the alphanumeric value in format abc@xyz.com.\n<b>Owner Company*</b>: You can add data in your company and cannot be empty and < , > is not allowed\n<b>Phone Number</b>: accepts the 10 to 12 digit.\n  """
 
                 import_log.append(frappe._dict(success=False, exception=msg_exc, messages=message_log, docname=doc, row_indexes=row_indexes))
-
+                create_import_log(
+						self.data_import.name,
+						log_index,
+						{
+							"success": False,
+							"exception": msg_exc,
+							"messages": message_log,
+							"row_indexes": row_indexes,
+						},
+					)
             frappe.db.commit()
         except Exception as e:
             messages = frappe.local.message_log
@@ -325,12 +335,12 @@ class Importer:
         try:
             if frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) and frappe.db.exists("Company", docs.company):
                 if (docs.first_name and docs.email_address and docs.owner_company and docs.phone_number):
-                    if not frappe.db.sql("SELECT company_name FROM `tabLead` WHERE lead_owner = '{0}' or owner='{1}'".format(frappe.session.user, frappe.session.user), as_list=True):
+                    if not frappe.db.sql("SELECT company_name FROM `tabLead` WHERE (lead_owner = '{0}' or owner='{1}') and company_name='{2}'".format(frappe.session.user, frappe.session.user, docs.owner_company), as_list=True):
                         return self.name, "Failed"
-                    
                     self.name = "HR-CONTACT-" + str(self.con_series)
                     self.sql += str(tuple([self.name, docs.first_name, docs.phone_number, docs.email_address,docs.email_address, (docs.owner_company or ""), (docs.company or ""), (docs.contact_address or ""), (docs.city or ""), (docs.zip or ""), (docs.suite_or_apartment_no or "")])) + ","
                     self.con_series += 1
+                    time.sleep(0.1)
                     return self.name, "Pass"
                 return self.name, "Failed"
             return self.name, "Failed"

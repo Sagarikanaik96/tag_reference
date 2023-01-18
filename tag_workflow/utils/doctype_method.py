@@ -495,7 +495,12 @@ def get_data_as_docs(self):
     if self.doctype == "Employee":
         parent_data = frappe.db.sql("select * from `tabEmployee` where email='JDoe@example.com' and company='{0}'".format(company),as_dict=1)
     elif self.doctype == "Contact":
-        parent_data = frappe.db.sql("select * from `tabContact` where email_address='JDoe@example.com' and owner_company='{0}'".format(company),as_dict=1)
+        contact_data  = frappe.db.sql("select * from `tabContact` where email_address='JDoe@example.com' and owner_company='{0}'".format(company),as_dict=1)
+        del_key = 'name'
+        for data in contact_data:
+            if del_key in data:
+                del data[del_key]
+        parent_data = contact_data
     else:
         parent_data = frappe.db.get_list(
                 self.doctype,
@@ -506,7 +511,6 @@ def get_data_as_docs(self):
                 as_list=0,
             )
     parent_names = [p.name for p in parent_data]
-
     child_data = {}
     for key in self.exportable_fields:
         if key == self.doctype:

@@ -7,6 +7,8 @@ frappe.ui.form.on('Hiring Company Review', {
             $('[data-rating='+i+']').off('click');
         }
 		hiring_review();
+        frm.disable_save();
+        $('[data-original-title="Menu"]').hide();
 	}
 });
 
