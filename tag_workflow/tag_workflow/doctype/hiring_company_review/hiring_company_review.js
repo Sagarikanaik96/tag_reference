@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Hiring Company Review', {
-	refresh: ()=>{
+	refresh: (frm)=>{
         for(let i=0; i<=5; i++){
             $('[data-rating='+i+']').off('click');
         }
