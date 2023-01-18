@@ -275,8 +275,17 @@ def check_pay_rate(total_bill_rate, data):
     except Exception as e:
         frappe.log_error(e, 'Check Pay Rate Pop Up Error')
         print(e, frappe.get_traceback())
+
 @frappe.whitelist()
 def update_workers_filled(job_order_name):
+    try:
+        frappe.enqueue('tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.update_workers_filled_job', now=True, job_order_name=job_order_name)
+    except Exception as e:
+        print(e, frappe.get_traceback())
+        frappe.log_error(e,'Workers Update')
+
+@frappe.whitelist()
+def update_workers_filled_job(job_order_name):
     try:
         worker_filled=0
         job=frappe.get_doc(jobOrder,job_order_name)
@@ -293,7 +302,7 @@ def update_workers_filled(job_order_name):
             frappe.db.commit()
 
     except Exception as e:
-        frappe.log_error(e,'Workers Update')
+        frappe.log_error(e,'Workers Update Job')
 
 @frappe.whitelist()
 def update_notes(name,notes,job_order,company):

@@ -3,6 +3,9 @@
 
 frappe.ui.form.on('Hiring Company Review', {
 	refresh: ()=>{
+        for(let i=0; i<=5; i++){
+            $('[data-rating='+i+']').off('click');
+        }
 		hiring_review();
 	}
 });

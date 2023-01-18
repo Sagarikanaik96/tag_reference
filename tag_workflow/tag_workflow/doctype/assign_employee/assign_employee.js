@@ -147,15 +147,8 @@ frappe.ui.form.on("Assign Employee", {
         }
       },
     });
-    frm.set_value("previous_worker", frm.doc.employee_details.length);
 
-    frappe.call({
-      method: "tag_workflow.tag_data.previous_worker_count",
-      args: {
-        name: cur_frm.doc.name,
-        previous_worker: frm.doc.employee_details.length,
-      },
-    });
+    frappe.db.set_value('Assign Employee', frm.doc.name, "previous_worker", parseInt(frm.doc.employee_details.length))
     create_pay_rate(frm);
     update_workers_filled(frm);
     create_staff_comp_code(frm)

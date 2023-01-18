@@ -43,8 +43,7 @@
   {
    "fieldname": "rating",
    "fieldtype": "Rating",
-   "label": "Ratings",
-   "read_only": 1
+   "label": "Ratings"
   },
   {
    "fieldname": "comments",
@@ -62,10 +61,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-01-12 01:58:59.503386",
+ "modified": "2023-01-17 08:47:15.873106",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Hiring Company Review",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -83,5 +83,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

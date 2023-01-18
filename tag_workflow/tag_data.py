@@ -857,9 +857,7 @@ def receive_hire_notification(user, company_type, hiring_org, job_order, staffin
             dat=f'update `tabAssign Employee` set tag_status="Approved" where name="{doc_name}"'
             frappe.db.sql(dat)
             frappe.db.commit()
-            job = frappe.get_doc(jobOrder, job_order)
-            print(job)
-            job_sql = '''select select_job,job_site,posting_date_time,name from `tabJob Order` where name = "{}"'''.format(job_order)
+            job_sql = '''select select_job,name from `tabJob Order` where name = "{}"'''.format(job_order)
             job_detail = frappe.db.sql(job_sql, as_dict=1)
             lst_sql = ''' select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(hiring_org)
             user_list = frappe.db.sql(lst_sql, as_list=1)
