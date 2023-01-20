@@ -92,6 +92,7 @@ def make_company(exclusive, staffing, org_type,contract_number):
             if(my_job_title.company):
                 my_job_title.company=exclusive
                 my_job_title.save(ignore_permissions=True)
+        save_address(company,contract.lead)
         return company.name
     except Exception as e:
         frappe.throw(e)
@@ -104,3 +105,19 @@ def make_user(exclusive, email, person_first_name,person_last_name, org_type, us
         return user.name
     except Exception as e:
         frappe.throw(e)
+
+def save_address(company, lead):
+    try:
+        lead_doc = frappe.get_doc("Lead", {"name": lead})
+        company.search_on_maps = lead_doc.search_on_maps
+        company.enter_manually = lead_doc.enter_manually
+        company.complete_address = lead_doc.complete_address
+        company.suite_or_apartment_no = lead_doc.suite_or_apartment_no
+        company.address = lead_doc.address_lines_1
+        company.state = lead_doc.state_2
+        company.city = lead_doc.city_or_town
+        company.zip = lead_doc.zip
+        company.save(ignore_permissions=True)
+    except Exception as e:
+        frappe.log_error(e, 'save_address error')
+        print(e, frappe.get_traceback())

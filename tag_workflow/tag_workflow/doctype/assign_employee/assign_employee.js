@@ -42,7 +42,6 @@ frappe.ui.form.on("Assign Employee", {
     document_download();
 
     $('[data-fieldname="company"]').css("display", "block");
-    $('[data-fieldname = "employee_pay_rate"]').attr("id", "emp_pay_rate");
     child_table_label();
     render_tab(frm);
     set_payrate_field(frm);
@@ -1106,11 +1105,7 @@ function set_payrate_field(frm) {
         frm.set_df_property("employee_pay_rate", "read_only", 1);
         frm.set_df_property('staff_class_code', 'read_only', 1);
 				frm.set_df_property('staff_class_code_rate', 'read_only', 1);
-      } else if (
-        !["Hiring", "Exclusive Hiring"].includes(
-          frappe.boot.tag.tag_user_info.company_type
-        )
-      ) {
+      } else{
         $('[data-fieldname = "employee_pay_rate"]').attr("id", "emp_pay_rate");
       }
     }

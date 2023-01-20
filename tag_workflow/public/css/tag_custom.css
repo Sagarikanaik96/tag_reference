@@ -7,6 +7,9 @@
 body {
   background: #f9fafa;
 }
+button:focus {
+  outline: transparent;
+}
 label {
   color: var(--label-color) !important;
   font-size: 14px !important;

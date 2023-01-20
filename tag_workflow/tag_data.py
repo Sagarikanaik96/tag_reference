@@ -1695,10 +1695,9 @@ def validate_user(doc,method):
         if doc_user_role and (((user_role=="Staffing User" or user_role=="Hiring User") and (doc_user_role=="Staffing Admin" or doc_user_role=="Hiring Admin" or doc_user_role==tagAdmin)) or ((user_role=="Staffing Admin" or user_role=="Hiring Admin") and doc_user_role==tagAdmin)):
             frappe.flags.error_message = error_message
             raise frappe.PermissionError(("read", "User", doc.email)) 
-    print(method)
     user = frappe.get_doc('User',frappe.session.user)
 
-    if not doc.is_new() and doc.owner!=frappe.session.user and frappe.session.user!='Guest' and frappe.session.user!="Administrator" and frappe.session.user!=tagAdmin and (doc.email!=user.email or doc.company!=user.company or doc.tag_user_type!=user.tag_user_type or doc.organization_type!=user.organization_type):
+    if not doc.is_new() and doc.owner!=frappe.session.user and frappe.session.user!='Guest' and frappe.session.user!="Administrator" and user.tag_user_type!=tagAdmin and (doc.email!=user.email or doc.company!=user.company or doc.tag_user_type!=user.tag_user_type or doc.organization_type!=user.organization_type):
         frappe.throw('Insufficient Permission')
 
 @frappe.whitelist()

@@ -284,6 +284,9 @@ function validate_form(frm){
 }
 
 function readonly_fields(frm){
+	if(frm.doc.__islocal != 1 && frappe.boot.tag.tag_user_info.company_type == 'TAG'){
+		$('[data-fieldname="rate"]').attr('id', 'title_rate');
+	}
 	if(frm.doc.__islocal!=1 && !(frappe.boot.tag.tag_user_info.company_type=='TAG' || frappe.session.user == 'Administrator')){
 		let fields = ['industry', 'rate', 'company','job_titless', 'descriptions','job_titless_name'];
 		for (let i in fields){

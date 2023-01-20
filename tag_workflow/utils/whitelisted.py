@@ -836,9 +836,10 @@ def check_password(user, old_password):
 
 def check_password_policy(new_password):
     result = test_password_strength(new_password)
-    feedback = result.get("feedback", None)
-    if feedback and not feedback.get("password_policy_validation_passed", False):
-        handle_password_test_fail(feedback)
+    if result:
+        feedback = result.get("feedback", None)
+        if feedback and not feedback.get("password_policy_validation_passed", False):
+            handle_password_test_fail(feedback)
 
 def validate_passwords(user, old_password, new_password, doc):
     if frappe.session.user == user:

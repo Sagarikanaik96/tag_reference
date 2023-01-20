@@ -92,6 +92,7 @@ def setup_data():
         update_ts_list_invoice()
         update_hiring_reviews()
         import_sample_data()
+        update_comp_series()
         make_commit()
     except Exception as e:
         print(e)
@@ -814,3 +815,22 @@ def update_jobtitle():
         frappe.db.commit()
     else:
         print('*------Jobtitles are already uptodate------------*\n')
+
+@frappe.whitelist()
+def update_comp_series():
+    try:
+        sql1= '''CREATE TABLE IF NOT EXISTS company_index (id SERIAL, last_comp_id int)'''
+        frappe.db.sql(sql1)
+        frappe.db.commit()
+        comp_list = frappe.get_all('Company', ['name','comp_id'], order_by="creation")
+        if len(comp_list) and comp_list[0]['comp_id']!='CO-000001':
+            comp_id=1
+            for comp in comp_list:
+                frappe.db.set_value('Company', comp.name, 'comp_id', 'CO-'+str(comp_id).zfill(6))
+                comp_id+=1
+            sql2=f'''INSERT INTO company_index(last_comp_id) VALUES({comp_id})'''
+            frappe.db.sql(sql2)
+            frappe.db.commit()
+    except Exception as e:
+        print(e, frappe.get_traceback())
+        frappe.log_error(e, 'update_company_series')

@@ -183,7 +183,8 @@ doc_events = {
         "Company": {
             "on_trash": validate,
             "after_insert": 'tag_workflow.tag_workflow.doctype.company.company.create_salary_structure',
-            "before_save": 'tag_workflow.tag_workflow.doctype.company.company.validate_saved_fields'
+            "before_save": 'tag_workflow.tag_workflow.doctype.company.company.validate_saved_fields',
+            "before_insert": 'tag_workflow.tag_workflow.doctype.company.company.set_comp_id'
         },
         "User": {
             "on_update": validate,

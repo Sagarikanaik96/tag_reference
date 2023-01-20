@@ -746,10 +746,10 @@ def csv_data(ts_list):
         ts_data, exported_ts, company = [], [], []
         for ts in ts_list:
             ts_details = frappe.get_doc('Timesheet', ts)
-            office_code = frappe.db.get_value('Company', {'name': ts_details.employee_company}, ['office_code'])
+            office_code, comp_id = frappe.db.get_value('Company', {'name': ts_details.employee_company}, ['office_code', 'comp_id'])
             if office_code and ts_details.workflow_state=='Approved':
                 exported_ts.append(ts_details.name)
-                hiring_comp, emp_id, date_of_ts, pos_code, ts_hours =  ts_details.company[:50], ts_details.employee, ts_details.date_of_timesheet.strftime('%m-%d-%Y'), ts_details.job_title[:15], ts_details.total_hours
+                hiring_comp, emp_id, date_of_ts, pos_code, ts_hours =  comp_id, ts_details.employee, ts_details.date_of_timesheet.strftime('%m-%d-%Y'), ts_details.job_title[:15], ts_details.total_hours
                 from_time, to_time, pay_rate, bill_rate, job_order = ts_details.time_logs[0].from_time.strftime("%m-%d-%Y %H:%M"), ts_details.time_logs[0].to_time.strftime("%m-%d-%Y %H:%M"), ts_details.employee_pay_rate, ts_details.per_hour_rate, ts_details.job_order_detail
                 if ts_details.todays_overtime_hours==0:
                     ts_data = no_ot_data(ts_details, ts_data, office_code, hiring_comp, emp_id, date_of_ts, pos_code, ts_hours, from_time, to_time, pay_rate, bill_rate, job_order)

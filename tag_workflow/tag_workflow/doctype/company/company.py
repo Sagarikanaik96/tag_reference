@@ -137,3 +137,14 @@ def validate_saved_fields(doc,method):
 		company = frappe.get_doc('Company',doc.name)
 		if doc.title!=company.title or doc.fein!=company.fein or doc.phone_no!=company.phone_no or doc.email!=company.email:
 			frappe.throw('Insufficient Permission')
+
+@frappe.whitelist()
+def set_comp_id(doc, method):
+	try:   	
+		last_comp_index=frappe.db.sql(f'''SELECT last_comp_id FROM company_index WHERE id=1''', as_list=1)
+		doc.comp_id = 'CO-'+str(last_comp_index[0][0]).zfill(6)
+		frappe.db.sql('''UPDATE company_index SET last_comp_id=last_comp_id+1 WHERE id=1''')
+		frappe.db.commit()
+	except Exception as e:
+		frappe.log_error(e, 'set_comp_id error')
+		print(e, frappe.get_traceback())
