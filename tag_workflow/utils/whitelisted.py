@@ -62,6 +62,7 @@ url_link="https://api.resumatorapi.com/v1/applicants/"
 apikey="?apikey="
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 exclusive_hiring="Exclusive Hiring"
+no_perm='Insufficient Permission for User'
 #-----------------------------------#
 def set_missing_values(source, target, customer=None, ignore_permissions=True):
     if customer:
@@ -1030,3 +1031,43 @@ def deferred_insert(doctype, records):
 		frappe.throw('Invalid request')
 	frappe.cache().rpush(queue_prefix + doctype, records)
 
+@frappe.whitelist()
+def set_seen_value(value, user):
+    if frappe.session.user==user:   	
+        frappe.db.set_value('Notification Settings', user, 'seen', value, update_modified=False)
+    else:
+        frappe.throw(no_perm) 
+
+@frappe.whitelist()
+def mark_as_read(room):
+    """Mark the message as read
+    Args:
+        room (str): Room's name.
+    """
+    members = frappe.db.get_value('Chat Room', {'name':room}, ['members'])
+    if frappe.session.user in members:
+        frappe.enqueue('chat.utils.update_room', room=room,
+                    is_read=1, update_modified=False)
+    else:
+        frappe.throw(no_perm)
+
+@frappe.whitelist(allow_guest=True)
+def set_typing(room, user, is_typing, is_guest):
+    """Set the typing text accordingly
+    Args:
+        room (str): Room's name.
+        user (str): Sender who is typing.
+        is_typing (bool): Whether user is typing.
+        is_guest (bool): Whether user is guest or not.
+    """
+    if user==frappe.session.user:
+        result = {
+            'room': room,
+            'user': user,
+            'is_typing': is_typing,
+            'is_guest': is_guest
+        }
+        event = room + ':typing'
+        frappe.publish_realtime(event=event,message=result)
+    else:
+        frappe.throw(no_perm)

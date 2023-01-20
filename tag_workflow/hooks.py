@@ -255,7 +255,10 @@ override_whitelisted_methods = {
         "hrms.overrides.employee_master.get_retirement_date":"tag_workflow.utils.whitelisted.get_retirement_date",
         "frappe.handler.upload_file": "tag_workflow.utils.whitelisted.upload_file",
         "frappe.deferred_insert.deferred_insert": "tag_workflow.utils.whitelisted.deferred_insert",
-        "frappe.desk.reportview.get_list": "tag_workflow.utils.reportview.get_list"
+        "frappe.desk.reportview.get_list": "tag_workflow.utils.reportview.get_list",
+        "frappe.desk.doctype.notification_settings.notification_settings.set_seen_value": "tag_workflow.utils.whitelisted.set_seen_value",
+        "chat.api.message.mark_as_read": "tag_workflow.utils.whitelisted.mark_as_read",
+        "chat.api.message.set_typing": "tag_workflow.utils.whitelisted.set_typing"
 }
 
 
