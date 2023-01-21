@@ -774,7 +774,7 @@ def old_job_title_child_append(i, dicts_val, doc):
 def update_hiring_reviews():
     try:
         frappe.logger().debug("*------Hiring Company Reviews Update---------*\n")
-        sql = '''select name from `tabHiring Company Review` where rating=rating_hiring'''
+        sql = '''select name from `tabHiring Company Review` where rating_hiring=0'''
         reviews_name=frappe.db.sql(sql,as_list=1)
         reviews_list = [r[0] for r in reviews_name]
         if len(reviews_list) > 0:
