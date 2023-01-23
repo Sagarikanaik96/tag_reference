@@ -92,6 +92,9 @@ input::-webkit-credentials-auto-fill-button {
 }
 
 @media (max-width: 768px) {
+   #website-post-login {
+        text-align: right!important;
+    }
   .btn-login-area {
     text-align: right !important;
     margin-right: 7px !important;

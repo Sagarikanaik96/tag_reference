@@ -1,24 +1,61 @@
-@media (max-width: 768px) {
-  [data-route="Workspaces/My Activities"] .sub-menu,
-[data-route="staff-home"] .sub-menu {
-  top: 30px !important;
+@media (max-width: 1200px) {
+    #page-staff_company_list .staff_list table thead tr th:nth-last-child(1),
+    #page-staff_company_list .staff_list table tbody tr td:nth-last-child(1)  {
+        width: 20%;
+    }
 }
-  [data-page-route="Workspaces"] .hiring_dashboard_table table {
+
+@media (max-width: 1024px) {
+    #page-staff_company_list .staff_list table   {
+       width: 905px;
+    }
+}
+
+@media (max-width: 768px) {
+    #website-post-login {
+        text-align: right!important;
+    }
+    .search-bar input::placeholder {
+         color: transparent !important;
+    }
+    .form-tabs li a {
+    margin: 0 10px!important;
+  }
+    .page-head .page-head-content {
+  margin-top: -10px;
+}
+    .custom-slide {
+  background: #fff;
+}
+.form-grid-container .form-grid {
+  min-width: auto;
+}
+  #page-staff_company_list .page-head-content {
+        height:0px;
+  }
+  [data-page-route="Job Order"] .page-head {
+    height: 165px;
+    }
+  [data-route="Workspaces/My Activities"] .sub-menu,
+    [data-route="staff-home"] .sub-menu {
+    top: 30px !important;
+  }
+  .page-hiring-home .hiring_dashboard_table table {
     width:1000px;
   }
   .header-alignment {
     align-items: start !important;
   }
   .page-head {
-    padding-bottom: 40px;
-}
+    padding-bottom: 50px;
+  }
   .sub-menu {
     top:105px !important;
   }
   
  .search-bar input::-webkit-input-placeholder {
-         opacity: 0;
-    }
+    opacity: 0;
+  }
   .custom-location {
   flex-wrap: wrap;
     justify-content: flex-start !important;
@@ -61,7 +98,9 @@
   background-color: var(--fg-color);
 }
    .hidden-xs{
-    display: block !important;
+       display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center;
   }
     .hide{
      display: none !important;

@@ -8,7 +8,7 @@ body {
   background: #f9fafa;
 }
 button:focus {
-  outline: transparent;
+    outline: transparent;
 }
 label {
   color: var(--label-color) !important;
@@ -515,11 +515,6 @@ input::-webkit-credentials-auto-fill-button {
   color: var(--primary-color);
   font-size: 14px;
 }
-
-/* .editable-form .form-section [data-fieldtype="Table"] .sortable-handle span,
-.form-layout .form-section [data-fieldtype="Table"] .sortable-handle span {
-  display: none;
-} */
 
 /* View contract start */
 [data-route="Form/Job Order"] .modal .modal-dialog {
@@ -1072,7 +1067,7 @@ select.input-with-feedback.form-control.ellipsis {
   padding: 0 0.75rem;
 }
 [data-fieldtype="Table"] .form-grid .grid-heading-row .grid-static-col,
-[data-fieldtype="Table"] .form-grid .grid-heading-row .row-index {
+[data-fieldtype="Table"] .form-grid .grid-heading-row .row-check {
   height: auto;
 }
 [data-fieldtype="Table"]
@@ -1576,8 +1571,9 @@ select.input-with-feedback.form-control.ellipsis {
 [data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-container span.list-row-like,
 [data-route="List/Timesheet/List"] #navbar-breadcrumbs li:nth-child(1),
 [data-page-route=Item] [title="Bill Rate"]:after,
- [data-page-route="Timesheet"] [data-label="Create%20Salary%20Slip"],
- [data-page-route="Item"] [data-fieldtype="Table"] [data-fieldname="job_site"] .reqd:after  {
+[data-page-route="Timesheet"] [data-label="Create%20Salary%20Slip"],
+[data-page-route="Item"] [data-fieldtype="Table"] [data-fieldname="job_site"] .reqd:after,
+#page-staff_company_list .staff_list .clearfix  {
   display:none;
 }
 #datepickers-container{
@@ -1589,14 +1585,21 @@ select.input-with-feedback.form-control.ellipsis {
 [data-page-route=Workspaces] .layout-main-section {
    background: #f9fafa !important;
 }
-
+[data-page-route="Add Timesheet"] .form-grid .grid-heading-row .data-row .sortable-handle, [data-page-route="Add Timesheet"] .form-grid .grid-body .data-row .sortable-handle {
+  max-width: 3.5% !important;
+  flex: 0 0 3.5% !important;
+  height: auto;
+}
 
 /*------ Media query start ----*/
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
   .col-md-12.layout-main-section-wrapper {
-    left: 10rem;
-    max-width: 80%;
+    left: 13rem!important;
+    max-width: 80%!important;
+  }
+  .page-head .page-head-content {
+    margin-top: 10px;
   }
 }
 
