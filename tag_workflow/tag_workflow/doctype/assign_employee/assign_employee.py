@@ -111,7 +111,7 @@ def get_employee(doctype, txt, searchfield, page_len, start, filters):
         value = ''
         key = emp_company+""+job_order+""+distance
         redis = frappe.cache()
-        if redis.hget(key,'emp'):
+        if redis.hget(key,'emp') and not txt:
             return cache_data(redis,key,employee_lis)
         for index ,i in enumerate(employee_lis):
             if index >= 1:
