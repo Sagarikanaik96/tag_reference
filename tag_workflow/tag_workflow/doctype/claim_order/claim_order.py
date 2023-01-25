@@ -3,8 +3,10 @@
 
 
 import frappe
+from uuid import uuid4
 from frappe.model.document import Document
-from tag_workflow.tag_data import chat_room_created
+from tag_workflow.utils.doctype_method import checkingjobtitle_name
+from tag_workflow.tag_data import chat_room_created,new_job_title_company
 from frappe.share import add_docshare as add
 from tag_workflow.utils.notification import sendmail, make_system_notification
 from tag_workflow.tag_data import joborder_email_template
@@ -313,16 +315,31 @@ def claim_field_readonly(docname):
 
 @frappe.whitelist()
 def set_pay_rate(hiring_company, job_title, job_site, staffing_company):
+	print("Job title is :>>>", job_title)
 	try:
 		emp_pay_rate = frappe.db.exists(EPR, {"hiring_company": hiring_company,"job_title": job_title, "job_site": job_site, "staffing_company": staffing_company})
 		if emp_pay_rate:
 			return frappe.db.get_value(EPR, {"name": emp_pay_rate}, ['employee_pay_rate'])
 		else:
-			staffing_comp_pay_rate = "select employee_pay_rate from `tabPay Rates`  where  parent='{0}' and staffing_company='{1}'".format(job_title,staffing_company)
-			staffing_comp_pay_rates = frappe.db.sql(staffing_comp_pay_rate, as_dict=1)
-			if staffing_comp_pay_rates:
-				emp_pay_rate = staffing_comp_pay_rates[0]['employee_pay_rate']
-				return emp_pay_rate
+			all_query = "select job_pay_rate,hiring_company,job_site from `tabPay Rates`  where  parent like '{0}%' and staffing_company='{1}' and hiring_company='{2}' and job_site='{3}'".format(job_title,staffing_company,hiring_company,job_site)
+			hiring_company_query = "select job_pay_rate,hiring_company,job_site from `tabPay Rates`  where  parent like '{0}%' and staffing_company='{1}' and hiring_company='{2}'".format(job_title,staffing_company,hiring_company)
+			only_job_title_query = "select job_pay_rate,hiring_company,job_site from `tabPay Rates`  where  parent like '{0}%' and staffing_company='{1}'".format(job_title,staffing_company)
+			
+			job_title_query = "select wages from `tabJob Titles` where job_titles like'{0}%' and parent = '{1}'".format(job_title.split("-")[0], staffing_company)
+			all_query_res = frappe.db.sql(all_query, as_dict=1)
+			hiring_company_res = frappe.db.sql(hiring_company_query, as_dict=1)
+			only_job_title_res = frappe.db.sql(only_job_title_query, as_dict=1)
+			job_title_res = frappe.db.sql(job_title_query, as_dict=1)
+
+			if all_query_res:
+				return all_query_res[0]['job_pay_rate']
+			elif hiring_company_res:
+				return hiring_company_res[0]['job_pay_rate']
+			elif only_job_title_res:
+				return only_job_title_res[0]['job_pay_rate']
+			else:
+				if job_title_res:
+					return job_title_res[0]['wages']
 	except Exception as e:
 		frappe.log_error(e, 'Set Pay Rate Error')
 
@@ -532,3 +549,177 @@ def fetch_notes(company,job_order):
         return frappe.db.sql(""" select notes from `tabClaim Order` where job_order="{0}" and staffing_organization="{1}" and notes!=""  limit 1 """.format(job_order,company),as_dict=1)
     except Exception as e:
         print(e)
+
+@frappe.whitelist()
+def check_and_create_pay_rates(name,staffing_company,hiring_company,job_site,rate,job_order):
+	check_payrates = frappe.db.sql(""" select name from `tabPay Rates` 
+					where staffing_company='{0}' and parent='{1}' and hiring_company='{2}' and job_site='{3}' 
+					""".format(staffing_company,name,hiring_company,job_site), 
+					as_list=1)
+	if not check_payrates:
+		insert_or_update_rates = """ INSERT INTO `tabPay Rates` (name,owner,parent,parentfield,parenttype,
+									staffing_company,hiring_company,job_site,job_pay_rate,job_order) values 
+									""" + str(tuple([uuid4().hex[:10],frappe.session.user, 
+								  	name, "pay_rate", "Item", staffing_company, hiring_company, 
+								  	job_site, rate,job_order]))
+	else:
+		insert_or_update_rates = """
+			update `tabPay Rates` set job_pay_rate= '{0}' where staffing_company='{1}' and hiring_company='{2}' and job_site='{3}'
+		""".format(rate,staffing_company,hiring_company,job_site)
+	frappe.db.sql(insert_or_update_rates)
+	frappe.db.commit()
+
+@frappe.whitelist()
+def get_or_create_jobtitle(job_order,staffing_company,hiring_company,employee_pay_rate):
+	get_job_order_data = frappe.db.sql("select select_job,job_site,rate,category,company from `tabJob Order` where name='{0}'".format(job_order),as_dict=1)
+	check_item_data = frappe.db.sql("select name from `tabItem` where name like '{0}%' and company='{1}'".format(get_job_order_data[0]['select_job'].split("-")[0],staffing_company),as_dict=1)
+	job_title = frappe.db.sql(""" select wages, industry_type, description from `tabJob Titles` where job_titles like '{0}%' and parent = '{1}'""".format(get_job_order_data[0]["select_job"],hiring_company), as_dict=1)
+	if job_title:
+		if check_item_data:
+			check_and_create_pay_rates(check_item_data[0]['name'],staffing_company,hiring_company, get_job_order_data[0]['job_site'], employee_pay_rate ,job_order)
+		else:
+			name = checkingjobtitle_name(get_job_order_data[0]['select_job'])
+			item_sql = """INSERT INTO `tabItem` 
+				(name,
+				docstatus,
+				owner,
+				naming_series,
+				item_code,
+				item_name,
+				item_group,
+				is_item_from_hub,
+				stock_uom,
+				disabled,
+				allow_alternative_item,
+				is_stock_item,
+				include_item_in_manufacturing,
+				opening_stock,
+				valuation_rate,
+				standard_rate,
+				is_fixed_asset,
+				auto_create_assets,
+				over_delivery_receipt_allowance,
+				over_billing_allowance,
+				description,
+				shelf_life_in_days,
+				end_of_life,
+				default_material_request_type,
+				weight_per_unit,
+				has_batch_no,
+				create_new_batch,
+				has_expiry_date,
+				retain_sample,
+				sample_quantity,
+				has_serial_no,
+				has_variants,
+				variant_based_on,
+				is_purchase_item,
+				min_order_qty,
+				safety_stock,
+				lead_time_days,
+				last_purchase_rate,
+				is_customer_provided_item,
+				delivered_by_supplier,
+				country_of_origin,
+				is_sales_item,
+				grant_commission,
+				max_discount,
+				enable_deferred_revenue,
+				no_of_months,
+				enable_deferred_expense,
+				no_of_months_exp,
+				inspection_required_before_purchase,
+				inspection_required_before_delivery,
+				is_sub_contracted_item,
+				publish_in_hub,
+				synced_with_hub,
+				published_in_website,
+				total_projected_qty,
+				industry,
+				job_titless,
+				rate,
+				company,
+				is_nil_exempt,
+				is_non_gst,
+				descriptions,
+				job_titless_name) 
+				values (
+					'{0}',
+					'0',
+					'{1}',
+					'STO-ITEM-.YYYY.-',
+					'{2}',
+					'{3}',
+					'All Item Groups',
+					'0',
+					'Nos',
+					'0',
+					'0',
+					'1',
+					'1',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'{4}',
+					'0',
+					'2099-12-31',
+					'Purchase',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'Item Attribute',
+					'1',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'United States',
+					'1',
+					'1',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'0',
+					'{5}',
+					'{6}',
+					'{7}',
+					'{8}',
+					'0',
+					'0',
+					'{9}',
+					'{10}'
+					)""".format(
+						name,
+						frappe.session.user,
+						name,
+						name,
+						name,
+						get_job_order_data[0]['category'],
+						name,
+						employee_pay_rate,
+						staffing_company,
+						job_title[0]["description"],
+						name)
+			frappe.db.sql(item_sql)
+			new_job_title_company(job_name=name, company=staffing_company,industry=get_job_order_data[0]['category'],rate=employee_pay_rate, description=job_title[0]["description"])
+			frappe.db.commit()
+			check_and_create_pay_rates(name,staffing_company,hiring_company, get_job_order_data[0]['job_site'],employee_pay_rate,job_order)

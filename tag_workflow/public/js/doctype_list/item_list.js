@@ -51,7 +51,7 @@ setTimeout(function(){
             cur_list.refresh()
           }
           else{
-            frappe.flags.my_list.push(r.message)
+            frappe.flags.my_list.push("success")
             frappe.flags.company='False'
             frappe.flags.tag_list='False'
             cur_list.refresh()
@@ -82,7 +82,14 @@ setTimeout(function(){
 
 frappe.views.BaseList.prototype.prepare_data = function(r) {
   this.page_length = 500;
-  let data = r.message || {};
+  let valuedata= [];
+  let unique = []
+  for(let value of r.message.values){
+    value[15] = value[15].split("-")[0]
+    valuedata.push(value)
+  }
+  let data_dict = {keys:r.message.keys,values:valuedata};
+  let data = data_dict || {};
   data = !Array.isArray(data) ?
       frappe.utils.dict(data.keys, data.values) :
       data;
@@ -98,8 +105,16 @@ frappe.views.BaseList.prototype.prepare_data = function(r) {
     this.data = this.data.filter((d) => !d.company)
 
   }
-  if((frappe.flags.my_list).length>0){
-  this.data = this.data.filter((d) => frappe.flags.my_list[0].includes(d.name))
+  if ((frappe.flags.my_list).length > 0) {
+    frappe.flags.my_list = this.data
+    frappe.flags.my_list.forEach(element => {
+      if (!unique.includes(element['company'])) {
+          if(element['company']){
+            unique.push(element['company']);
+          }
+      }
+    });
+    this.data = this.data.filter((d) => unique.includes(d.company))
   }
   
   this.data = this.data.uniqBy((d) => d.name);

@@ -346,26 +346,18 @@ def get_staffing_company_data():
 @frappe.whitelist()
 def get_hiring_company_data():
     company_type = "Hiring"
-    get_user = frappe.db.sql ("select role_profile_name from `tabUser` where name='{0}'".format(frappe.session.user),as_dict=1)
-    if get_user[0]['role_profile_name'] == "Staffing Admin":
-        sql = frappe.db.sql("select company_name from `tabCompany` where organization_type = '{0}' and modified_by='{1}'".format(company_type,frappe.session.user))
-        blankdata=tuple(' ',)
-        data = list(sql)
-        data.insert(0,blankdata)
-        return  data
-    else:
-        sql = frappe.db.sql("select company_name from `tabCompany` where organization_type = '{0}'".format(company_type))
-        blankdata=tuple(' ',)
-        data = list(sql)
-        data.insert(0,blankdata)
-        return  data
+    sql = frappe.db.sql("select company_name from `tabCompany` where organization_type = '{0}'".format(company_type))
+    blankdata=tuple(' ',)
+    data = list(sql)
+    data.insert(0,blankdata)
+    return  data
 
 @frappe.whitelist()
-def check_payrates_data(job_industry , job_title):
-    sql = frappe.db.sql("select job_title from `tabJob Order` where select_job = '{0}' and category='{1}'".format(job_title,job_industry))
+def check_payrates_data(name):
+    sql = frappe.db.sql("select name from `tabPay Rates` where name='{0}' and job_order is not null ".format(name))
     if sql:
         return True
-    return False  
+    return False
 
 def send_password_notification(self, new_password):
     try:

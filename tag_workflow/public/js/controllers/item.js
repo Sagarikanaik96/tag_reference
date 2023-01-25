@@ -23,18 +23,16 @@ frappe.ui.form.on("Item", {
 			
 			$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
 		}
+		frm.trigger("set_options");
 		readonly_fields(frm)
 		$('.form-footer').hide();
 		cur_frm.clear_custom_buttons();
 		hide_connections(frm);
 		hide_fields();
 		read_only_company_field(frm);
-		frm.fields_dict['pay_rate'].grid.wrapper.find('.grid-remove-rows').hide()
 		$('[data-fieldname="company"]').css("display",'block');
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
-		set_staffing_data();
-		set_hiring_data();
 		set_job_site_disable_enable(cdt,cdn);
 		if(frm.doc.__islocal==1){
 			let len_history = frappe.route_history.length;
@@ -65,7 +63,9 @@ frappe.ui.form.on("Item", {
 		frm.fields_dict['pay_rate'].grid.wrapper.find('.grid-add-row').click(function() {
 			set_job_site_disable_enable(cdt,cdn);
 		})
-		
+		frm.fields_dict['pay_rate'].grid.wrapper.find('.grid-remove-rows').click(function() {
+			check_and_delete_pay_rates(frm)
+		})
 	},
 	before_save: function(frm,cdt,cdn){
 		frm.set_value("job_titless_name", frm.doc.job_titless);
@@ -75,15 +75,16 @@ frappe.ui.form.on("Item", {
 		frappe.call({"method": "tag_workflow.controllers.master_controller.check_item_group"});
 		let items = locals[cdt][cdn]; 
 		{ $.each(frm.doc.pay_rate || [], function(i, v) {
-				if(v.staffing_company == undefined || v.staffing_company.length == 0){
-					v.employee_pay_rate = 0.00
+				if(v.staffing_company == undefined || v.staffing_company.length == 0 || v.staffing_company =="TAG"){
+					v.job_pay_rate = 0.00
 					v.hiring_company = ""
 					v.site = ""
+					v.staffing_company = ""
 				}
 				else if(v.staffing_company.length != 0){
 					if( v.hiring_company == undefined || v.hiring_company.length == 0){
-						if(v.employee_pay_rate == 0 || v.employee_pay_rate == undefined){
-							v.employee_pay_rate  = items.rate
+						if(v.job_pay_rate == 0 || v.job_pay_rate == undefined ){
+							v.job_pay_rate  = items.rate
 						}
 					}
 				}
@@ -172,23 +173,22 @@ frappe.ui.form.on("Item", {
 		}
 		
 	},	
-	pay_rate_on_form_rendered:function(frm){
+	pay_rate_on_form_rendered:function(frm,cdt,cdn){
 		frm.fields_dict['pay_rate'].grid.wrapper.find('.grid-delete-row').click(function() {
-			frappe.call({
-				method: "tag_workflow.utils.doctype_method.check_payrates_data", 
-				args:{
-					"job_industry":frm.doc.industry,
-					"job_title":frm.doc.job_titless,	
-				},
-				callback: function(response) {
-					if(response.message){
-						frappe.msgprint("Already linked with job order")
-						frm.reload_doc()
-					}
-				}
-			})
+			check_and_delete_pay_rates(frm)
 		});
+		frm.fields_dict['pay_rate'].grid.wrapper.find('.grid-remove-rows').click(function() {
+			check_and_delete_pay_rates(frm)
+		})
 	},
+	setup: function (frm) {
+		frm.set_query("staffing_company", "pay_rate", function() {
+			return {
+					filters:[['Company', "organization_type", "in", ["Staffing"]]]
+				}
+		})
+		set_hiring_company();
+	}
 });
 
 frappe.ui.form.on('Job Sites', {
@@ -202,9 +202,9 @@ frappe.ui.form.on('Job Sites', {
 function set_job_site_disable_enable(cdt,cdn){
 	$("[data-fieldname=" + 'hiring_company' + "]").on('click', function (e) {
 		let hiring_company_data = e.target.value;
-		if(hiring_company_data == undefined || hiring_company_data.length != 0){
+		if(! hiring_company_data){
 			$("[data-fieldname=" + 'job_site' + "]").prop("disabled", true)
-		}else if(hiring_company_data.length != 0){
+		}else if( hiring_company_data.length != 0){
 			$("[data-fieldname=" + 'job_site' + "]").prop("disabled", false)
 		}
 	});
@@ -212,7 +212,7 @@ function set_job_site_disable_enable(cdt,cdn){
 	$("[data-fieldname=" + 'job_site' + "]").on('click', function (e) {
 		let items = locals[cdt][cdn]; 
 		for(const data of items.pay_rate){
-			if(data['hiring_company'] == undefined || data['hiring_company'].length == 0 ){
+			if(data['hiring_company'] == undefined || data['hiring_company'].length == 0 || data['job_order']){
 				$("[data-name=" + data['name'] + "]  [data-fieldname=" + 'job_site' + "]").prop("disabled", true)
 			}else if(data['hiring_company'].length != 0){
 				$("[data-name=" + data['name'] + "]  [data-fieldname=" + 'job_site' + "]").prop("disabled", false)
@@ -221,25 +221,29 @@ function set_job_site_disable_enable(cdt,cdn){
 	});
 }
 
-function set_staffing_data(){
-		frappe.call({
-			method: "tag_workflow.utils.doctype_method.get_staffing_company_data", 
-			callback: function(response) {
-				frappe.meta.get_docfield('Pay Rates', 'staffing_company', cur_frm.doc.name).options = response.message;
-				cur_frm.refresh_field('pay_rate')
-			}
-		})
-}
-
-function set_hiring_data(){	
+function check_and_delete_pay_rates(frm){
 	frappe.call({
-		method: "tag_workflow.utils.doctype_method.get_hiring_company_data", 
+		method: "tag_workflow.utils.doctype_method.check_payrates_data", 
+		args:{
+			"name":frm.fields_dict['pay_rate'].grid.open_grid_row.row.doc.name
+		},
 		callback: function(response) {
-			frappe.meta.get_docfield('Pay Rates', 'hiring_company', cur_frm.doc.name).options = response.message;
-			cur_frm.refresh_field('pay_rate')
+			if(response.message){
+				frappe.msgprint("Already linked with job order")
+				frm.reload_doc()
+			}
 		}
 	})
+}
 
+function set_hiring_company(){
+	frappe.call({
+		"method": "tag_workflow.utils.doctype_method.get_hiring_company_data",
+		"callback": function(response){
+			frappe.meta.get_docfield('Pay Rates', 'hiring_company', cur_frm.doc.name).options = response.message;
+			cur_frm.refresh_field("hiring_company")
+		}
+	})
 }
 
 /*-------hide fields------------*/
