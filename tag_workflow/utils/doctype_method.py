@@ -367,26 +367,26 @@ def check_payrates_data(job_industry , job_title):
         return True
     return False  
 
-@frappe.whitelist()
 def send_password_notification(self, new_password):
     try:
         if self.flags.in_insert and self.name not in STANDARD_USERS:
-                if new_password:
-                    # new password given, no email required
-                    _update_password(user=self.name, pwd=new_password,
-                        logout_all_sessions=self.logout_all_sessions)
+            if new_password:
+                # new password given, no email required
+                _update_password(
+                    user=self.name, pwd=new_password, logout_all_sessions=self.logout_all_sessions
+                )
 
-                if not self.flags.no_welcome_mail and cint(self.send_welcome_email):
-                    enqueue(self.send_welcome_mail_to_user,now=False)
-                    self.flags.email_sent = 1
-                    if frappe.session.user != 'Guest':
-                        msgprint(_("Welcome email sent"))
-                    return
-        if not self.flags.in_insert:
+            if not self.flags.no_welcome_mail and cint(self.send_welcome_email):
+                self.send_welcome_mail_to_user()
+                self.flags.email_sent = 1
+                if frappe.session.user != "Guest":
+                    msgprint(_("Welcome email sent"))
+        else:
             self.email_new_password(new_password)
 
     except frappe.OutgoingEmailError:
-        print(frappe.get_traceback())
+        # email server not set, don't send email
+        self.log_error("Unable to send new password notification")
 
 #------------------------------------------SalarySlip-----------------------------------------#
 

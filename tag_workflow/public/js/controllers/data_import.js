@@ -1,3 +1,4 @@
+frappe.ui.form.off("Data Import", "show_import_warnings");
 frappe.ui.form.on("Data Import", {
     before_save: function(frm){
         if(frm.doc.__islocal==1){
@@ -95,9 +96,87 @@ frappe.ui.form.on("Data Import", {
             frm.set_value('import_type','')
             frm.set_df_property('import_type','read_only',0)
         }
-    }
+    },
+    show_import_warnings(frm, preview_data) {
+		let warnings = JSON.parse(frm.doc.template_warnings || "[]");
+		warnings = warnings.concat(preview_data.warnings || []);
+        
+		// group warnings by row
+		let warnings_by_row = {};
+		let other_warnings = [];
+		for (let warning of warnings) {
+            if (warning.row) {
+                warnings_by_row[warning.row] = warnings_by_row[warning.row] || [];
+				warnings_by_row[warning.row].push(warning);
+			} else {
+                other_warnings.push(warning);
+			}
+		}
+        if(frm.doc.import_file){
+            other_warnings = reqd_fields_missing(frm.doc.reference_doctype, preview_data, other_warnings);
+        }
+        frm.toggle_display("import_warnings_section", warnings.length > 0 || other_warnings.length > 0);
+        if (warnings.length === 0 && other_warnings.length === 0 ) {
+            frm.get_field("import_warnings").$wrapper.html("");
+            return;
+        }
+        let html = show_import_warnings_contd(frm, preview_data, warnings_by_row, other_warnings);
+		frm.get_field("import_warnings").$wrapper.html(`
+			<div class="row">
+				<div class="col-sm-10 warnings">${html}</div>
+			</div>
+		`);
+	}
+})
+
+function show_import_warnings_contd(frm, preview_data, warnings_by_row, other_warnings){
+    let html = "";
+    let columns = preview_data.columns;
+    html += Object.keys(warnings_by_row)
+        .map((row_number) => {
+            let message = warnings_by_row[row_number]
+                .map((w) => {
+                    if (w.field) {
+                        let label =
+                            w.field.label +
+                            (w.field.parent !== frm.doc.reference_doctype
+                                ? ` (${w.field.parent})`
+                                : "");
+                        return `<li>${label}: ${w.message}</li>`;
+                    }
+                    return `<li>${w.message}</li>`;
+                })
+                .join("");
+            return `
+            <div class="warning" data-row="${row_number}">
+                <h5 class="text-uppercase">${__("Row {0}", [row_number])}</h5>
+                <div class="body"><ul>${message}</ul></div>
+            </div>
+        `;
+        })
+        .join("");
+
+    html += other_warnings
+        .map((warning) => {
+            let header = "";
+            if (warning.col) {
+                let column_number = `<span class="text-uppercase">${__("Column {0}", [
+                    warning.col,
+                ])}</span>`;
+                let column_header = columns[warning.col].header_title;
+                header = `${column_number} (${column_header})`;
+            }
+            return `
+                <div data-col="${warning.col}">
+                    <h5>${header}</h5>
+                    <div class="body">${warning.message}</div>
+                </div>
+            `;
+        })
+        .join("");
+    return html;
 }
-)
+
 function uploaded_file_format(frm){
     frm.get_field('import_file').df.options = {
         restrictions: {
@@ -120,4 +199,55 @@ function data_import_values(frm){
             frm.set_df_property('reference_doctype','read_only',1)
         }
     }
+}
+
+function reqd_fields_missing(doctype, preview_data, other_warnings){
+    let columns = preview_data.columns;
+    let res = missing_col(doctype, columns, other_warnings);
+    let mandatory_fields = res[0];
+    other_warnings = res[1];
+    if(mandatory_fields.length>0){
+        for(let col in columns){
+            if(!columns[col].df){
+                continue;
+            }
+            else{
+                other_warnings=reqd_row_missing(preview_data, col, columns, mandatory_fields, other_warnings);
+            }
+        }
+    }
+    return other_warnings;
+}
+
+function reqd_row_missing(preview_data, col, columns, mandatory_fields, other_warnings){
+    let missing_rows = '';
+    let row = preview_data.data;
+    if(mandatory_fields.includes(columns[col].df.label)){
+        for(let data in row){
+            missing_rows+=!row[data][col]?'<li>Row '+(parseInt(data)+1)+'</li>':'';
+        }
+        if(missing_rows!='')
+            other_warnings.push({'missing_col': 1, 'message': '<h5>Missing Required Field COLUMN '+col+' ('+columns[col].df.label+')</h5><ul>'+missing_rows+'</ul>'})
+    }
+    return other_warnings;
+}
+
+function missing_col(doctype, columns, other_warnings){
+    let mandatory_fields = [];
+    let column = [];
+    if(doctype == 'Employee'){
+        mandatory_fields = ['First Name', 'Last Name', 'Email', 'Company', 'Date of Birth', 'Status'];
+    }else if(doctype == 'Contact'){
+        mandatory_fields = ['Owner Company', 'Contact Name', 'Phone Number', 'Email'];
+    }
+    for(let col in columns){
+        if(columns[col].df && mandatory_fields.includes(columns[col].df.label)){
+            column.push(columns[col].df.label);
+        }
+    }
+    let difference = column != mandatory_fields && mandatory_fields.length>0 ? mandatory_fields.filter(x => !column.includes(x)) : [];
+    for(let col in difference){
+        other_warnings.push({'missing_col': 1, 'message': '<h5>Missing Required COLUMN: '+difference[col]+'</h5>'});
+    }
+    return [mandatory_fields, other_warnings];
 }

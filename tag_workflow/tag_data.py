@@ -1283,11 +1283,17 @@ def employee_work_history(employee_no):
 
 @frappe.whitelist(allow_guest=True)
 def get_update_password_user(key):
-    result = frappe._dict()
-    if key:
-        result.user = frappe.db.get_value("User", {"reset_password_key": key})
-        user_type=frappe.get_doc('User',result.user)
-        return user_type.organization_type
+    try:
+        result = frappe._dict()
+        if key:
+            result.user = frappe.db.get_value("User", {"reset_password_key": key})
+            if not result.user:
+                return 'set'
+            else:
+                user_type=frappe.get_doc('User',result.user)
+                return user_type.organization_type
+    except Exception as e:
+        print(e, frappe.get_traceback())
 
 
 @frappe.whitelist()

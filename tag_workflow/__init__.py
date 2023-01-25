@@ -29,6 +29,7 @@ __version__ = '0.0.1'
 User.validate_username = validate_username 
 User.suggest_username = suggest_username
 User.send_login_mail = send_login_mail
+User.send_password_notification = send_password_notification
 Document.raise_no_permission_to = raise_no_permission_to
 Document.run_post_save_methods = run_post_save_methods
 Document.check_if_latest = check_if_latest
