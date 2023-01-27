@@ -6,7 +6,7 @@ def sendmail(emails, message, subject, doctype, docname):
     try:
         site= frappe.utils.get_url().split('/')
         sitename=site[0]+'//'+site[2]
-        frappe.sendmail(emails, subject=subject, delayed=False, reference_doctype=doctype, reference_name=docname, message=message, template="email_template_custom", args = dict(sitename=sitename,content=message,subject=subject))
+        frappe.sendmail(emails, subject=subject, delayed=False, reference_doctype=doctype, reference_name=docname, message=message, template="email_template_custom", args = dict(sitename=sitename,content=message,subject=subject),now=True)
     except Exception as e:
         frappe.log_error(e, "Frappe Mail")
 
