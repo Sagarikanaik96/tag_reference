@@ -141,16 +141,22 @@ def get_industries(user):
 
 def get_conditions(filters):
     cond1= cond2= cond3=''
+    industry_data = ""
+    accreditation_data = ""
     if filters.get('company',None) not in [None,""]:
         cond1 += """ and c.name  like '%{0}%' """.format(filters.get('company'))
     if filters.get('industry',None) not in [None,""]:
-        cond3 += """ and i.industry_type="{industry}" """.format(industry=filters.get('industry'))
+        industry = filters.get('industry').split(",")
+        industry_data = tuple(map(str.strip,industry))
+        cond3 += """ and i.industry_type in  {industry} """.format(industry=industry_data)
     if filters.get('city',None) not in [None,""]:
         cond1 += """ and c.city like '%{0}%' """.format(filters.get('city'))
     if filters.get('rating',None) not in [None,""]:
         cond1 += """ and  c.average_rating >={rating}  and (select count(*) from `tabCompany Review` r where c.name=r.staffing_company)>=10   """.format(rating=filters.get('rating'))
     if filters.get('accreditation',None) not in [None,""]:
-        cond2 += """  and ce.certificate_type="{accreditation}" """.format(accreditation=filters.get('accreditation'))
+        accreditation = filters.get('accreditation').split(",")
+        accreditation_data= tuple(map(str.strip,accreditation))
+        cond2 += """  and ce.certificate_type in  {accreditation} """.format(accreditation=accreditation_data)
     return cond1,cond2,cond3
 
 def filter_location(radius,comp,data):
@@ -188,7 +194,6 @@ def hiring_data(filters,user_name,comp_id,start,end):
             cond1,cond2,cond3 = get_conditions(filters)
         sql = ''' select company from `tabUser` where email='{}' '''.format(user_name)
         user_comp = frappe.db.sql(sql, as_list=1)
-        
         sql = """  select c.*,count(ce.name) as count,ce.certificate_type as accreditation,i.industry_type,bs.staffing_company_name as is_blocked from `tabCompany` c 
         inner join `tabIndustry Types` i on c.name=i.parent
         left join `tabCertificate and Endorsement Details` ce 
@@ -199,9 +204,7 @@ def hiring_data(filters,user_name,comp_id,start,end):
         and industry_type in (select industry_type  from `tabIndustry Types` where parent='{0}'  ))  {2}  {3}   group by c.name 
         """.format(user_comp[0][0],cond1,cond2,cond3)
         
-        
         data = frappe.db.sql(sql, as_dict=True)
-
         for d in data:
             response = get_count(d.name)
             d.update(dict(count=response['count'],blocked_count=response['blocked_count'],title=response['title'],rating = check_staffing_reviews(d.name)))
@@ -230,14 +233,12 @@ def get_count(company):
         title = ['&#x2022'+" "+d['type']  for d in data2]
         title  = '\n'.join(title)
         rating = check_staffing_reviews(company)
-        
         result={
             'count':data[0]['count'] if len(data) else 0,
             'blocked_count': data1[0]['blocked_count'] if len(data1) else 0,
             'title':title if title else '',
             'rating': rating if int(rating)>0 else ''
         }
-        
         return  result
     except Exception as e:
         print(e)

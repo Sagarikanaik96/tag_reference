@@ -106,13 +106,12 @@ frappe.FaceRecognition = Class.extend({
 			{
 				'parent': '#company', 'name': 'company', 'type': 'Autocomplete', 'class': 'input-xs', 'placeholder': 'Company Name','options':this.staff_comps,'filter':1, 'handler': () => {
 					this.filters['company'] = document.getElementById('companys').value;
-					
 					this.update_list()
 					this.refresh()
 				}
 			},
 			{
-				'parent': '#industry', 'name': 'industry', 'type': 'Select', 'class': 'input-xs', 'placeholder': 'Industry', 'options': this.options, 'handler': () => {
+				'parent': '#industry', 'name': 'industry', 'type': 'MultiSelect', 'class': 'input-xs', 'placeholder': 'Industry', 'options': this.options, 'handler': () => {
 					this.filters['industry'] = document.getElementById('industrys').value;
 					this.update_list()
 					this.refresh()
@@ -133,7 +132,8 @@ frappe.FaceRecognition = Class.extend({
 				}
 			},
 			{
-				'parent': '#accreditation', 'name': 'accreditation', 'type': 'Select', 'class': 'input-xs ', 'placeholder': 'Accreditations', 'options':this.accreditation, 'handler': () => {
+				'parent': '#accreditation', 'name': 'accreditation', 'type': 'MultiSelect','class': 'input-xs ', 'placeholder': 'Accreditations', 
+				'options':this.accreditation, 'handler': () => {
 					this.filters['accreditation'] = document.getElementById('accreditations').value;
 					this.update_list()
 					this.refresh()
@@ -171,8 +171,6 @@ frappe.FaceRecognition = Class.extend({
 		this.show_profile();
 	},
 	get_industries: function () {
-		this.options.push(null)
-		this.accreditation.push(null)
 		if (frappe.boot.tag.tag_user_info.company_type == "Hiring" ||frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ) {
 			frappe.call({
 				method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.get_industries',
