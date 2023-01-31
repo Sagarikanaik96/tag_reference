@@ -4,7 +4,7 @@ frappe.ui.form.on('Job Site', {
 	refresh: function(frm){
 		$('.form-footer').hide()
 		$('[data-original-title="Menu"]').hide()
-		maps();
+		maps(frm);
 		hide_fields(frm)
 		show_addr(frm)
 		frm.get_docfield('address').label ='Complete Address';
@@ -43,19 +43,19 @@ frappe.ui.form.on('Job Site', {
 		get_users(frm)
 	},
 	search_on_maps: function(frm){
-		if(cur_frm.doc.search_on_maps == 1){
+		if(frm.doc.search_on_maps == 1){
 			update_field(frm, "map");
 			hide_fields(frm)
 			show_addr(frm)
-		}else if(cur_frm.doc.search_on_maps ==0 && cur_frm.doc.manually_enter==0){
-			cur_frm.set_df_property('lat','hidden',1);
-			cur_frm.set_df_property('lng','hidden',1);
+		}else if(frm.doc.search_on_maps ==0 && frm.doc.manually_enter==0){
+			frm.set_df_property('lat','hidden',1);
+			frm.set_df_property('lng','hidden',1);
 			show_addr(frm);
 		}
 	},
 
 	manually_enter: function(frm){
-		if(cur_frm.doc.manually_enter == 1){
+		if(frm.doc.manually_enter == 1){
 			update_field(frm, "manually");
 			show_fields(frm);
 		}
@@ -68,7 +68,7 @@ frappe.ui.form.on('Job Site', {
 			}else{
 				frm.set_value("job_site_name",frm.doc.job_site);
 			}
-			cur_frm.refresh_field("job_site_name");
+			frm.refresh_field("job_site_name");
 			frappe.call({
 				"method": "tag_workflow.tag_workflow.doctype.job_site.job_site.checkingjobsiteandjob_site_contact",
 				"args": {"job_site_name": frm.doc.job_site_name,
@@ -94,7 +94,7 @@ frappe.ui.form.on('Job Site', {
 				"async": 0,
 				"callback": function(r){
 					frm.set_value("job_site", r.message);
-					cur_frm.refresh_field("job_site");
+					frm.refresh_field("job_site");
 				}
 			});
 		}
@@ -222,12 +222,12 @@ let html = `
 	</html>
 `
 
-function maps(){
+function maps(frm){
 	 setTimeout(()=>{
-	 	$(cur_frm.fields_dict.html.wrapper).html(html)
-	 	siteMap();
+	 	$(frm.fields_dict.html.wrapper).html(html)
+	 	siteMap(frm);
 	 }, 500);
-	 if(cur_frm.is_new())
+	 if(frm.is_new())
 	 	$('.frappe-control[data-fieldname="map"]').html('')
 }
 
@@ -267,7 +267,7 @@ function get_users(frm){
 	});
 
 }
-function siteMap() {
+function siteMap(frm) {
     let autocomplete;
     let place;
     let componentForm = {
@@ -284,10 +284,10 @@ function siteMap() {
         lat: 38.889248,
         lng: -77.050636
     };
-    if (cur_frm.doc.lat && cur_frm.doc.lng) {
+    if (frm.doc.lat && frm.doc.lng) {
         default_location = {
-            lat: Number(cur_frm.doc.lat),
-            lng: Number(cur_frm.doc.lng)
+            lat: Number(frm.doc.lat),
+            lng: Number(frm.doc.lng)
         };
     }
 
@@ -322,8 +322,8 @@ function siteMap() {
 			"location":latlong
 		}).then((v)=>{
 			document.getElementById("autocomplete-address").value = v['results'][0]['formatted_address']
-			cur_frm.set_value("job_site",v['results'][0]['formatted_address']) 
-			make_addr(v['results'][0], "auto",componentForm);
+			frm.set_value("job_site",v['results'][0]['formatted_address']) 
+			make_addr(frm, v['results'][0], "auto",componentForm);
 		})
 	}
 
@@ -341,9 +341,9 @@ function siteMap() {
         autocomplete.addListener("place_changed", fillInAddress);
     }
 
-	if (!cur_frm.is_dirty() && cur_frm.doc.address && cur_frm.doc.search_on_maps==1)
+	if (!frm.is_dirty() && frm.doc.address && frm.doc.search_on_maps==1)
 	{            
-		document.getElementById('autocomplete-address').value = cur_frm.doc.address;	   
+		document.getElementById('autocomplete-address').value = frm.doc.address;	   
 	}
     function fillInAddress() {
         place = autocomplete.getPlace();
@@ -360,7 +360,7 @@ function siteMap() {
                 });
             }
         } else {
-            make_addr(place, "auto",componentForm);
+            make_addr(frm, place, "auto",componentForm);
             geocode({
                 address: place.formatted_address
             });
@@ -380,7 +380,7 @@ function siteMap() {
         });
     }
 }
-function make_addr(value, key, componentForm) {
+function make_addr(frm, value, key, componentForm) {
     let data = {
         name: "",
         street_number: "",
@@ -405,7 +405,7 @@ function make_addr(value, key, componentForm) {
         data["name"] = value.formatted_address;
         makes(value,key,componentForm,data);
     }
-    update_data(data)
+    update_data(frm, data)
 }
 function makes(value, _key, componentForm, data) {
     for (let i in value.address_components) {
@@ -417,15 +417,15 @@ function makes(value, _key, componentForm, data) {
         }
     }
 }
-function update_data(data) {
-    frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "job_site", document.getElementById("autocomplete-address").value);
-    frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "address", document.getElementById("autocomplete-address").value);
-    frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "state", data["administrative_area_level_1"]);
-    frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "city", data["locality"]);
-    frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "lat", data["lat"]);
-    frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "lng", data["lng"]);
-    frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
-	frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "suite_or_apartment_no", data.street_number);
+function update_data(frm, data) {
+    frappe.model.set_value(frm.doc.doctype, frm.doc.name, "job_site", document.getElementById("autocomplete-address").value);
+    frappe.model.set_value(frm.doc.doctype, frm.doc.name, "address", document.getElementById("autocomplete-address").value);
+    frappe.model.set_value(frm.doc.doctype, frm.doc.name, "state", data["administrative_area_level_1"]);
+    frappe.model.set_value(frm.doc.doctype, frm.doc.name, "city", data["locality"]);
+    frappe.model.set_value(frm.doc.doctype, frm.doc.name, "lat", data["lat"]);
+    frappe.model.set_value(frm.doc.doctype, frm.doc.name, "lng", data["lng"]);
+    frappe.model.set_value(frm.doc.doctype, frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
+	frappe.model.set_value(frm.doc.doctype, frm.doc.name, "suite_or_apartment_no", data.street_number);
 }
 function hide_fields(frm){
 	frm.set_df_property('city','hidden',frm.doc.city && frm.doc.enter_manually ==1 ?0:1);
