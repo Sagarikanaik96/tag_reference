@@ -139,10 +139,10 @@ frappe.ui.form.on("User", {
 		}
 		cur_frm.set_value("old_password", "");
 	},
-
 	after_save: function(frm){
 		update_employee(frm);
 		multi_company_setup(frm);
+		employee_status(frm);
 	},
 	birth_date: function(frm){
 		check_bd(frm);
@@ -475,6 +475,15 @@ function check_old_password(frm,old_password,new_password){
 			})
 		}
 	}else{
-			frappe.throw("Pelase enter new password")
-		}
+		frappe.throw("Pelase enter new password")
 	}
+}
+
+function employee_status(frm){
+	frappe.call({
+		method: "tag_workflow.tag_data.employee_status_change",
+		args:{
+			"user": frm.doc.name
+		}
+	});
+}

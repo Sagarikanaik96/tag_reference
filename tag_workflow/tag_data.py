@@ -1836,3 +1836,30 @@ def get_ats_and_payroll_status():
             and make_organization_inactive="0" """.format(user.name),as_dict=1)
     except Exception as e:
         print(e)
+
+@frappe.whitelist()
+def employee_status_change(user):
+    try:
+        enqueue('tag_workflow.tag_data.employee_status_change_job', queue="short", is_async='True', user=user)
+    except Exception:
+        print("employee_status_change Error", frappe.get_traceback())
+        frappe.log_error(frappe.get_traceback(), "employee_status_change Error")
+
+@frappe.whitelist()
+def employee_status_change_job(user):
+    try:
+        def emp_status(user, value):
+            emp= frappe.db.get_value('Employee',{'user_id':user},'name') or None
+            if emp:
+                frappe.db.set_value('Employee', emp, 'status', 'Active' if value==1 else 'Inactive')
+        sql = '''select data from `tabVersion` where docname="{0}" order by modified DESC'''.format(user)
+        data = frappe.db.sql(sql, as_list=1)
+        new_data = json.loads(data[0][0])
+        if 'changed' in new_data:
+            for i in new_data['changed']:
+                if i[0]=='enabled':
+                    emp_status(user, i[2])
+                    break
+    except Exception:
+        print("employee_status_change_job Error", frappe.get_traceback())
+        frappe.log_error(frappe.get_traceback(), "employee_status_change_job Error")

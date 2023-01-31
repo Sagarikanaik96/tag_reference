@@ -101,6 +101,7 @@ def setup_data():
         update_hiring_reviews()
         import_sample_data()
         update_comp_series()
+        change_emp_status()
         make_commit()
     except Exception as e:
         print(e)
@@ -1022,7 +1023,7 @@ def popultae_job_title():
                 frappe.db.sql(insert_or_update_rates)
                 frappe.db.commit()
     redis_con.set("popultae_job_title", "executed once")
-    
+
 @frappe.whitelist()
 def update_user_permission():
     try:
@@ -1069,3 +1070,19 @@ def update_user_permission_for_user(user):
     except Exception as e:
         print(e, frappe.get_traceback())
         frappe.log_error(e, 'update_user_permission in organization.py')
+
+@frappe.whitelist()
+def change_emp_status():
+    try:
+        sql='''SELECT emp.name FROM tabUser AS user LEFT JOIN tabEmployee AS emp ON user.name=emp.user_id WHERE user.enabled=0 AND emp.status="Active"'''
+        emp_names=frappe.db.sql(sql, as_dict=1)
+        emp_list = [emp['name'] for emp in emp_names]
+        if len(emp_list) > 0:
+            if len(emp_list)==1:
+                frappe.db.sql(f'''UPDATE `tabEmployee` SET status='Inactive' WHERE name IN ("{emp_list[0]}")''')
+            else:
+                frappe.db.sql(f'''UPDATE `tabEmployee` SET status='Inactive' WHERE name IN {tuple(emp_list)}''')
+            frappe.db.commit()
+    except Exception as e:
+        print('change_emp_status Error', e, frappe.get_traceback())
+        frappe.log_error(e,'change_emp_status Error')
