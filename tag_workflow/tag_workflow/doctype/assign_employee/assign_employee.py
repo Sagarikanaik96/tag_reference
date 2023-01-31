@@ -237,6 +237,12 @@ def validate_employee(doc,method):
             employee_doc=frappe.get_doc('Employee',employee.employee)
             if employee_doc.company != doc.company:
                 frappe.throw('Employee does not belong to the Staffing Organization')
+    user = frappe.get_doc('User',frappe.session.user)
+    if not doc.is_new() and (user.tag_user_type=="Hiring Admin" or user.tag_user_type=="Hiring User"):
+        for employee in doc.employee_details:
+            assign_emp = frappe.db.get_list("Assign Employee Details", {"employee": employee.employee,"parent":doc.name}, ["name"], ignore_permissions=True)
+            if assign_emp==[]:
+                frappe.throw("Insufficient permission to modify employee")
 
 @frappe.whitelist()
 def payrate_change(docname):
