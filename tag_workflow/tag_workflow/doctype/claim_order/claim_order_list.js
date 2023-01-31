@@ -115,7 +115,7 @@ frappe.listview_settings["Claim Order"] = {
 
 
 async function get_average_rate(c){
- return await frappe.call({
+ return frappe.call({
    async:false,
 		method:"tag_workflow.tag_workflow.doctype.company.company.check_staffing_reviews",
 		args:{
