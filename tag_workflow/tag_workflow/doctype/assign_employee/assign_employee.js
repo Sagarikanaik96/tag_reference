@@ -1330,12 +1330,12 @@ function hide_class_code_rate(frm){
 function add_notes_button(frm){
   const role = frappe.boot.tag.tag_user_info.user_type;
   if(frm.doc.tag_status=="Approved" && frm.doc.resume_required==1 && (role=='Hiring Admin'|| role=='Hiring User')){
-    frm.add_custom_button('Update Notes',()=>{
+    frm.add_custom_button('Update Invoice Notes',()=>{
       let d = new frappe.ui.Dialog({
-        title: 'Update Notes',
+        title: 'Update Invoice Notes',
         fields: [
             {
-                label: 'Notes',
+                label: 'Invoice Notes',
                 fieldname: 'modal_notes',
                 fieldtype: 'Small Text',
                 reqd:1,

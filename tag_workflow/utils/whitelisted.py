@@ -18,6 +18,7 @@ from frappe.desk.form.save import set_local_name,send_updated_docs
 from six import string_types
 from mimetypes import guess_type
 from frappe.utils import cint
+from uuid import uuid4
 from frappe.utils.image import optimize_image
 from frappe.core.doctype.user.user import User,test_password_strength,handle_password_test_fail
 
@@ -866,6 +867,85 @@ def validate_passwords(user, old_password, new_password, doc):
         check_password_policy(new_password)
         doc.save()
 
+def delete_job_title(doc,data):
+    frappe.db.sql("DELETE FROM `tabIndustry Types Job Titles` WHERE   job_titles='{0}' and parent !='{1}'".format(doc.name,data.get("job_site")),as_dict=1)
+
+def update_job_title(data,doc):
+    create_and_update_job_site = """
+                    UPDATE `tabIndustry Types Job Titles`
+                    SET comp_code ='{0}', bill_rate='{1}'
+                    WHERE job_titles like "{2}%" and  parent="{3}"
+                """.format(data.get("comp_code") if data.get("comp_code") else "",
+                    data.get("bill_rate"),doc.name,data.get("job_site"))
+    frappe.db.sql(create_and_update_job_site)
+    frappe.db.commit()
+    delete_job_title(doc=doc,data=data)    
+    doc.save()
+
+def populte_job_title(doc):
+    if doc.job_site_table:
+        for data in doc.job_site_table:
+            check_job_title = frappe.db.sql('select * from `tabIndustry Types Job Titles` where job_titles like "{0}%" and  parent="{1}"'.format(doc.name,data.get("job_site")),as_dict=1)
+            if check_job_title:
+                update_job_title(data=data,doc=doc)
+            else:  
+                user = frappe.session.user
+                add_job_title = """ INSERT INTO `tabIndustry Types Job Titles`
+                                    (modified_by,owner,docstatus,parent,parentfield,
+                                    parenttype,idx,industry_type,job_titles,bill_rate,
+                                    description,name,comp_code) values("{0}","{1}","0","{2}","job_titles",
+                                    "Job Site","{3}","{4}","{5}","{6}","{7}","{8}","{9}") 
+                                """.format(user,user,data.get("job_site"),
+                                    data.get("idx"),doc.industry,doc.name,
+                                    data.get("bill_rate"),doc.description,uuid4().hex[:10],data.get("comp_code") if data.get("comp_code") else "")
+                data = frappe.db.sql(add_job_title)
+                frappe.db.commit()
+                doc.save()
+    else:
+        delete_job_title = "DELETE FROM `tabIndustry Types Job Titles` WHERE industry_type='{0}' and job_titles='{1}'".format(doc.industry,doc.name)
+        frappe.db.sql(delete_job_title)
+        doc.save()
+
+def delete_job_site(data,doc):
+    frappe.db.sql("DELETE FROM `tabJob Sites` WHERE   job_site='{0}' and parent !='{1}'".format(doc.name,data.get("job_titles")),as_dict=1)
+
+def update_job_site(data,doc):
+    create_and_update_job_site = """
+                    UPDATE `tabJob Sites`
+                    SET comp_code ='{0}', bill_rate='{1}'
+                    WHERE parent like "{2}%" and job_site="{3}"
+                """.format(data.get("comp_code") if data.get("comp_code") else "",
+                    data.get("bill_rate"),data.get("job_titles"),doc.name)
+    frappe.db.sql(create_and_update_job_site)
+    frappe.db.commit()
+    frappe.db.sql("DELETE FROM `tabJob Sites` WHERE   job_site='{0}' and parent !='{1}'".format(doc.name,data.get("job_titles")),as_dict=1)
+    delete_job_site(data,doc)
+    doc.save()
+
+def populte_job_site(doc):
+    if doc.job_titles:
+        for data in doc.job_titles:
+            check_job_site = frappe.db.sql(""" 
+                SELECT * from `tabJob Sites` tjs where parent like "{0}%" and job_site="{1}"
+            """.format(data.get("job_titles"),doc.name),as_dict=1)
+            if check_job_site:
+                update_job_site(data=data,doc=doc)
+            else:
+                user = frappe.session.user
+                create_and_update_job_site = """
+                    insert into `tabJob Sites`(name,modified_by,owner,docstatus,
+                    idx,job_site,bill_rate,parent,parentfield,parenttype,comp_code) 
+                    values("{0}","{1}","{2}","0","{3}","{4}","{5}","{6}",
+                    "job_site_table","Item","{7}")
+                """.format(uuid4().hex[:10],user,user,data.get("idx"),doc.name,
+                    data.get("bill_rate"),data.get("job_titles"),data.get("comp_code")
+                     if data.get("comp_code") else "")
+                frappe.db.sql(create_and_update_job_site)
+                frappe.db.commit()
+                doc.save()
+    else:
+        doc.save()
+
 @frappe.whitelist()
 def savedocs(doc, action):
     """save / submit / update doclist"""
@@ -893,12 +973,15 @@ def savedocs(doc, action):
                 else:
                     check_password_policy(new_password)
                     doc.save()
+            elif  doc.doctype == 'Item':
+                populte_job_title(doc)
+            elif doc.doctype == "Job Site":
+                populte_job_site(doc)
             else:
                 doc.save()
         run_onload(doc)
         send_updated_docs(doc)
         frappe.msgprint(frappe._("Saved"), indicator='green', alert=True)
-
     except Exception:
         frappe.errprint(frappe.utils.get_traceback())
         raise
