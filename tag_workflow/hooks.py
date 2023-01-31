@@ -259,7 +259,9 @@ override_whitelisted_methods = {
         "frappe.desk.reportview.get_list": "tag_workflow.utils.reportview.get_list",
         "frappe.desk.doctype.notification_settings.notification_settings.set_seen_value": "tag_workflow.utils.whitelisted.set_seen_value",
         "chat.api.message.mark_as_read": "tag_workflow.utils.whitelisted.mark_as_read",
-        "chat.api.message.set_typing": "tag_workflow.utils.whitelisted.set_typing"
+        "chat.api.message.set_typing": "tag_workflow.utils.whitelisted.set_typing",
+        "chat.api.message.send": "tag_workflow.utils.whitelisted.send",
+        "chat.api.message.get_all": "tag_workflow.utils.whitelisted.get_all"
 }
 
 
