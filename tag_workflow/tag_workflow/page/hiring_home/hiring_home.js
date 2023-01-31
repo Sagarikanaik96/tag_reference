@@ -8,12 +8,16 @@ frappe.pages['hiring-home'].on_page_load = function(wrapper) {
 	wrapper.HireHome.get_order_data();
 
 }
+frappe.pages['hiring-home'].refresh = function(wrapper) {
+	reload_page()
+}
 frappe.HireHome = Class.extend({
 	init: function (wrapper, page) {
 		let me = this;
 		this.parent = wrapper;
 		this.page = this.parent.page;
 		me.setup(wrapper, page);
+	
 
 	},
 	setup: function (wrapper, page) {
@@ -228,7 +232,7 @@ frappe.HireHome = Class.extend({
 			}
 		});
 		let body;
-		let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead><tr><th>Job Title</th><th>Date & Time</th><th>Job Site</th><th>Company</th><th>Total Price</th><th style="text-align:center">Total Assigned/Required</th><th></th></tr></thead><tbody>`;
+		let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead id="Hiring_home_head"><tr><th>Job Title</th><th>Date & Time</th><th>Job Site</th><th>Company</th><th>Total Price</th><th style="text-align:center">Total Assigned/Required</th><th></th></tr></thead><tbody>`;
 		let html = ``;
 		for(let d in data){
 			html += `<tr><td>${data[d].select_job}</td><td>${data[d].date}</td><td>${data[d].job_site}</td><td>${data[d].company}</td><td>$ ${data[d].per_hour.toFixed(2)}</td><td style="text-align:center">${data[d].worker_filled}/${data[d].no_of_workers}</td><td><button class="btn btn-primary btn-xs primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${data[d].name}')">Order<span class="alt-underline"> Det</span>ails</button></td></tr>`;
@@ -243,6 +247,13 @@ frappe.HireHome = Class.extend({
 
 });
 
+function reload_page(){
+	let val = parseInt(localStorage.getItem("refresh"))
+	if(val == 1){
+		window.location.reload()
+	}
+	localStorage.setItem("refresh",0)
+}
 function redirect_doc(name) {
 	location.href = '/app/' + name
 }

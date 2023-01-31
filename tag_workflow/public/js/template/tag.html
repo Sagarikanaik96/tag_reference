@@ -336,7 +336,7 @@
               </a>
               {% endif %} 
               {% if frappe.boot.tag.tag_user_info.company_type =="Hiring" || frappe.boot.tag.tag_user_info.company_type =="Exclusive Hiring" %}
-              <a href="/app/hiring-home" class="position-relative">
+              <a href="/app/hiring-home" class="position-relative"id="Hiring_Home" onclick="refresh_page()">
                 <div class="tab-button custom-btn">
                   <img src="/assets/tag_workflow/images/ico-home.svg" class="pr-3 pl-4" alt="home" />Home
                 </div>
@@ -557,6 +557,9 @@
   <script>
     function myFunction(x) {
       x.classList.toggle("change");
+    }
+    function refresh_page(){
+      localStorage.setItem("refresh",1)
     }
   </script>
 </body>
