@@ -137,12 +137,12 @@ frappe.ui.form.on("User", {
 		new_row.assign_multiple_company = frm.doc.company;
 		frm.set_df_property('assign_multiple_company','hidden',0);
 		}
+		cur_frm.set_value("old_password", "");
 	},
 
 	after_save: function(frm){
 		update_employee(frm);
 		multi_company_setup(frm);
-		cur_frm.set_value("old_password", "");
 	},
 	birth_date: function(frm){
 		check_bd(frm);

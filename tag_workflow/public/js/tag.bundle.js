@@ -6,5 +6,5 @@ import './frappe/page'
 import './frappe/page.html'
 import './frappe/navbar.html'
 import './frappe/data_import/index'
-
+import './frappe/workspace.js'
 import './frappe/form/controls/link.js'

@@ -840,22 +840,26 @@ def check_password_policy(new_password):
         feedback = result.get("feedback", None)
         if feedback and not feedback.get("password_policy_validation_passed", False):
             handle_password_test_fail(feedback)
+def existing_user_validate_password(user,old_password,new_password,doc):
+    if old_password and not new_password:
+        frappe.throw('New password is required')
+    elif not old_password and  new_password:
+        frappe.throw('Old password is required')
+    elif old_password and new_password and (old_password == new_password):
+        frappe.throw('Old and new password can not be same')
+    elif old_password:
+        if not check_password(user, old_password):
+            frappe.throw("Old password is incorrect")
+        else:
+            check_password_policy(new_password)
+            doc.old_password = None
+            doc.save()
+    else:
+        doc.save()
 
 def validate_passwords(user, old_password, new_password, doc):
     if frappe.session.user == user:
-        if old_password and not new_password:
-            frappe.throw('New password is required')
-        elif not old_password and  new_password:
-            frappe.throw('Old password is required')
-        elif old_password and new_password and (old_password == new_password):
-            frappe.throw('Old and new password can not be same')
-        elif old_password:
-            if not check_password(user, old_password):
-                frappe.throw("Old password is incorrect")
-            else:
-                check_password_policy(new_password)
-                doc.old_password = None
-                doc.save()
+        existing_user_validate_password(user,old_password,new_password,doc)
     elif check_password(user, new_password):
         frappe.throw("Old and new password can not be same")
     else:

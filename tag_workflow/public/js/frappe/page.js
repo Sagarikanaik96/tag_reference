@@ -231,9 +231,7 @@ frappe.ui.Page = Class.extend({
 				</div>`).prependTo(this.main);
       }
     }
-    this.page_form = $('<div class="page-form row hide"></div>').prependTo(
-      this.main
-    );
+    this.page_form = $('<div class="page-form row hide"></div>').prependTo(this.main);
     this.inner_toolbar = this.custom_actions;
     this.icon_group = this.page_actions.find(".page-icon-group");
 
@@ -1018,13 +1016,14 @@ frappe.ui.Page = Class.extend({
   hide_form: function () {
     this.page_form.addClass("hide");
   },
-  get_form_values: function () {
-    let values = {};
-    this.page_form.fields_dict.forEach(function (field, key) {
-      values[key] = field.get_value();
-    });
-    return values;
-  },
+  get_form_values() {
+		let values = {};
+		for (let fieldname in this.fields_dict) {
+			let field = this.fields_dict[fieldname];
+			values[fieldname] = field.get_value();
+		}
+		return values;
+	},
   add_view: function (name, html) {
     let element = html;
     if (typeof html === "string") {
