@@ -2,6 +2,7 @@ frappe.require('/assets/tag_workflow/js/twilio_utils.js');
 frappe.require('/assets/tag_workflow/js/emp_functions.js');
 frappe.ui.form.on("Employee", {
 	refresh: function(frm){
+		$("#employee-basic_details_tab > div:nth-child(5)").hide()
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
@@ -569,9 +570,6 @@ function set_map (frm) {
 		$(frm.fields_dict.map.wrapper).html(html);
 		initMap();
 	}, 500);
-	if((frm.doc.search_on_maps == 0 && frm.doc.enter_manually ==0)||frm.doc.enter_manually ==1 || frm.is_new()){
-		frm.set_df_property('map','hidden',1);
-	}
 }
 
 

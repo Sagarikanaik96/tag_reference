@@ -16,6 +16,7 @@ frappe.ui.form.on("Company", {
 		$('[data-fieldname="industry_type"]').on("click", ()=>{
             $('input[data-fieldname="industry_type"]').removeAttr('disabled');
 		})
+		frm.set_value("search_on_maps",1)
 		hide_and_show_tables(frm)
 		$('.form-footer').hide();
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
@@ -721,12 +722,6 @@ function show_addr(frm) {
 		frm.get_docfield('address').label = 'Complete Address';
 	} else if (frm.doc.enter_manually) {
 		frm.get_docfield('address').label = 'Address';
-	}
-
-	if (frm.doc.enter_manually == 1) {
-		cur_frm.toggle_display("complete_address", 0);
-	} else {
-		cur_frm.toggle_display("complete_address", 1);
 	}
 	frm.refresh_field('address');
 }

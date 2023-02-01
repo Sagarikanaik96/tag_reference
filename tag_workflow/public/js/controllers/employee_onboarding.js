@@ -264,9 +264,6 @@ function set_map (frm) {
 		$(frm.fields_dict.map.wrapper).html(html);
 		initMap();
 	}, 500);
-	if((frm.doc.search_on_maps == 0 && frm.doc.enter_manually ==0)||frm.doc.enter_manually == 1 || frm.is_new()){
-		frm.set_df_property('map', 'hidden', 1);
-	}
 }
 
 function hide_field(frm){

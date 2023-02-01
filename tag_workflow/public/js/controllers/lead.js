@@ -399,16 +399,6 @@ function show_addr(frm){
     }else if(frm.doc.enter_manually){
         frm.get_docfield('address_lines_1').label ='Address Line 1';
     }
-
-    if(frm.doc.enter_manually == 1){
-        cur_frm.toggle_reqd("complete_address", 0);
-        cur_frm.toggle_reqd("address_lines_1", 1);
-        cur_frm.toggle_display("complete_address", 0);
-    }else{
-        cur_frm.toggle_reqd("complete_address", 1);
-        cur_frm.toggle_reqd("address_lines_1", 0);
-        cur_frm.toggle_display("complete_address", 1);
-    }
     frm.refresh_field('address_lines_1');
 }
 
@@ -430,9 +420,6 @@ function set_map (frm) {
     $(frm.fields_dict.map.wrapper).html(html);
     initMap();
   }, 500);
- if((frm.doc.search_on_maps == 0 && frm.doc.enter_manually ==0)||frm.doc.enter_manually ==1 || frm.is_new()){
-    frm.set_df_property('map','hidden',1);
-  }
 }
 
 

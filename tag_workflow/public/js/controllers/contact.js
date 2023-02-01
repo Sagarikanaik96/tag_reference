@@ -6,6 +6,7 @@ frappe.ui.form.on("Contact", {
 		$('[data-original-title="Menu"]').hide()
 		$('[data-label="Invite%20as%20User"]').hide()
 		$('[data-label="Links"]').hide()
+		
 		init_fields();
 		make_field_mandatory();
 		if(frm.doc.__islocal==1){
@@ -157,11 +158,6 @@ function show_addr(frm){
 		frm.get_docfield('contact_address').label ='Contact Address';
 	}
 
-    if(frm.doc.enter_manually == 1){
-        cur_frm.toggle_display("complete_address", 0);
-    }else{
-        cur_frm.toggle_display("complete_address", 1);
-    }
     frm.refresh_field('contact_address');
 }
 
@@ -183,9 +179,7 @@ function set_map (frm) {
 		$(frm.fields_dict.map.wrapper).html(html);
 		initMap();
 	}, 500);
-  if((frm.doc.search_on_maps == 0 && frm.doc.enter_manually ==0)||frm.doc.enter_manually ==1 || frm.is_new()){
-    frm.set_df_property('map','hidden',1);
-  }
+
 }
 
 function validate_phone_zip(frm){
