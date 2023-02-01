@@ -148,6 +148,8 @@ def make_employee_permission(user, company):
         if not frappe.db.exists(PERMISSION,{"user": user,"allow": COM,"apply_to_all_doctypes":1, "for_value": company}):
             perm_doc = frappe.get_doc(dict(doctype=PERMISSION,user=user, allow=COM, for_value=company, apply_to_all_doctypes=1))
             perm_doc.save(ignore_permissions=True)
+            print("permissions updated")
+            frappe.db.commit()
     except Exception as e:
         frappe.log_error(e, PERMISSION)
 

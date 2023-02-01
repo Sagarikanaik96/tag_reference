@@ -60,7 +60,6 @@ frappe.breadcrumbs = {
 			this.set_custom_breadcrumbs(breadcrumbs);
 		} else {
 			// workspace
-			this.set_workspace_breadcrumb(breadcrumbs);
 
 			// form / print
 			let view = frappe.get_route()[0];

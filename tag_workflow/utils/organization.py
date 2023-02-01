@@ -89,6 +89,7 @@ def setup_data():
         update_salary_structure()
         updating_date_of_joining()
         update_password_field()
+        update_user_permission()
         staffing_radius()
         set_default_template()
         set_template_name()
@@ -1019,3 +1020,50 @@ def popultae_job_title():
                 frappe.db.sql(insert_or_update_rates)
                 frappe.db.commit()
     redis_con.set("popultae_job_title", "executed once")
+    
+@frappe.whitelist()
+def update_user_permission():
+    try:
+        user_lst = frappe.db.sql("""select name from tabUser where name not in (select user_id from tabEmployee where user_id is not null)""",as_list=1)
+        user_list = [r[0] for r in user_lst]
+        user_list.remove("Administrator")
+        user_list.remove("Guest")
+        for user in user_list:
+            user_doc = frappe.get_doc("User",user)
+            add("Company",user_doc.company,user,read=1, write = 1, share = 1, everyone = 0)
+            lst = frappe.db.sql("""select name from `tabJob Order` where staff_company="{}";""".format(user_doc.company))
+            dir_doc_list = [r[0] for r in lst]
+            for order in dir_doc_list:
+                add(Job_Label,order,user, read=1, write = 0, share = 0, everyone = 0)
+                frappe.db.commit()
+            emp_doc = frappe.new_doc("Employee")
+            emp_doc.first_name = user_doc.first_name
+            emp_doc.last_name = user_doc.last_name
+            emp_doc.email = user_doc.name
+            emp_doc.date_of_birth = user_doc.birth_date if user_doc.birth_date else "1970-01-01"
+            emp_doc.company = user_doc.company
+            emp_doc.user_id = user_doc.name
+            emp_doc.status = 'Active' if user_doc.enabled ==1 else 'Inactive'
+            emp_doc.save()
+            frappe.db.commit()
+        for user in user_list:
+            user_doc = frappe.get_doc("User",user)
+            check_employee(user_doc.name,user_doc.first_name,user_doc.company,user_doc.last_name,user_doc.gender,user_doc.birth_date,user_doc.date_of_joining, user_doc.organization_type)
+    except Exception as e:
+        print(e, frappe.get_traceback())
+        frappe.log_error(e, 'update_user_permission in organization.py')
+
+@frappe.whitelist()
+def update_user_permission_for_user(user):
+    try:
+        user_doc = frappe.get_doc("User",user)
+        add("Company",user_doc.company,user,read=1, write = 1, share = 1, everyone = 0)
+        lst = frappe.db.sql("""select name from `tabJob Order` where staff_company="{}";""".format(user_doc.company))
+        dir_doc_list = [r[0] for r in lst]
+        for order in dir_doc_list:
+            add(Job_Label,order,user, read=1, write = 0, share = 0, everyone = 0)
+            frappe.db.commit()
+        check_employee(user_doc.name,user_doc.first_name,user_doc.company,user_doc.last_name,user_doc.gender,user_doc.birth_date,user_doc.date_of_joining, user_doc.organization_type)
+    except Exception as e:
+        print(e, frappe.get_traceback())
+        frappe.log_error(e, 'update_user_permission in organization.py')
