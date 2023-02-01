@@ -449,6 +449,7 @@ frappe.ui.form.on("Assign Employee Details", {
         check_old_value(child);
       }
       branch_wallet(frm.doc.company, child.employee, child.employee_name, cdt, cdn);
+      frappe.model.set_value(cdt, cdn, "remove_employee", 0);
     }
   },
   employee_details_add: function (frm, cdt, cdn) {
