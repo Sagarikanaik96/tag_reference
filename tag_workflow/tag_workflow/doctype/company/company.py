@@ -11,6 +11,20 @@ create_default_accounts=Company.create_default_accounts
 from datetime import datetime
 import ast
 class CustomCompany(Company):
+	def validate(self):
+		self.update_default_account = False
+		if self.is_new():
+			self.update_default_account = True
+		self.validate_abbr()
+		self.validate_default_accounts()
+		self.validate_currency()
+		self.validate_coa_input()
+		self.validate_provisional_account_for_non_stock_items()
+		self.check_country_change()
+		self.check_parent_changed()
+		self.set_chart_of_accounts()
+		self.validate_parent_company()
+   	
 	def on_update(self):
 		NestedSet.on_update(self)
 		frappe.db.commit()
@@ -33,8 +47,7 @@ class CustomCompany(Company):
 			self.create_default_tax_template()
 
 		if not frappe.db.get_value("Department", {"company": self.name}):
-			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
-			install_post_company_fixtures(frappe._dict({'company_name': self.name}))
+			self.create_default_departments()
 
 		if not frappe.local.flags.ignore_chart_of_accounts:
 			self.set_default_accounts()
@@ -44,10 +57,13 @@ class CustomCompany(Company):
 		if self.default_currency:
 			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
 
-		if hasattr(frappe.local, 'enable_perpetual_inventory') and \
-			self.name in frappe.local.enable_perpetual_inventory:
+		if (hasattr(frappe.local, "enable_perpetual_inventory") and self.name in frappe.local.enable_perpetual_inventory):
 			frappe.local.enable_perpetual_inventory[self.name] = self.enable_perpetual_inventory
 
+		if frappe.flags.parent_company_changed:
+			from frappe.utils.nestedset import rebuild_tree
+
+			rebuild_tree("Company", "parent_company")
 		frappe.clear_cache()
 
 @frappe.whitelist()

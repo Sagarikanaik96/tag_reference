@@ -37,7 +37,7 @@ def get_dest(dest):
 
 @frappe.whitelist()
 def add_job_title(docname):
-    frappe.enqueue("add_job_title_in_background",queue="default",docname = docname,)
+    frappe.enqueue("add_job_title_in_background",queue="default",docname = docname,is_async=True)
    
 def add_job_title_to_profile(job_title, emp_data, negative_status):
     if not sum(negative_status):
