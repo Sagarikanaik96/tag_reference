@@ -48,7 +48,7 @@ function filter_row(frm){
 	}
 }
 function update_table(frm){
-	if(frm.get_docfield('hiring_company').label !='Staffing Company'){
+	if(frm.get_docfield('hiring_company').label !='Staffing Company' && frm.doc.job_titles && frm.doc.job_titles.length>0){
 		frappe.run_serially([
 			()=>frm.clear_table('_industry_types'),
 			()=>{

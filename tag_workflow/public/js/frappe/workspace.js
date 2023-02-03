@@ -153,7 +153,7 @@ frappe.views.Workspace = class Workspace {
 
 					}
 				</script>
-			`).appendTo(this.wrapper.find(".layout-main-section"));
+			`)
 		}else{
 			$(`
 				<div class="row widget-group">
@@ -168,7 +168,7 @@ frappe.views.Workspace = class Workspace {
 						<div class="widget widget-shadow p-0 hiring_dashboard_table shortcut-widget-box table-responsive table-responsive" id="data"></div>
 					</div>
 				</div>
-			`).appendTo(this.page);
+			`)
 		}
 	}
 
