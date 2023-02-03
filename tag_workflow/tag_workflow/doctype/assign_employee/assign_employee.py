@@ -212,9 +212,13 @@ def check_emp_available(frm):
             for i in l:
                 d1={}
                 y=frappe.get_doc(AEMP,i[1])
-                d1['job_order']=y.job_order
-                d1['employee']=i[0]
-                z.append(d1)
+                if y.job_order != job_order:
+                    d1['job_order']=y.job_order
+                    d1['employee']=i[0]
+                    z.append(d1)
+                else:
+                    d1['job_order']=1
+                    z.append(d1)
             return z, pay_rate
         else:
             return 1, pay_rate

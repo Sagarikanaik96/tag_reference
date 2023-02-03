@@ -1010,46 +1010,59 @@ function confirm_message(frm) {
           let pop_up1;
           let msg1 = "";
           for (let i = 0; i <= r.message[0].length - 1; i++) {
-            let new_msg =
-              "Warning: " +
-              r.message[0][i]["employee"] +
-              " is scheduled for " +
-              r.message[0][i]["job_order"] +
-              " within this Job Order’s timeframe.";
-            msg1 = msg1 + "<br>" + new_msg;
+            if(r.message[0][i]["job_order"] != 1){
+              let new_msg =
+                "Warning: " +
+                r.message[0][i]["employee"] +
+                " is scheduled for " +
+                r.message[0][i]["job_order"] +
+                " within this Job Order’s timeframe.";
+              msg1 = msg1 + "<br>" + new_msg;
+            }else{
+              msg1 = ""
+            }
           }
           let pay_msg = pay_rate_message(frm, r.message[1]);
-          pop_up1 = pay_msg == "" ? msg1 : msg1 + "<hr>" + pay_msg;
-          let confirm_assign = new frappe.ui.Dialog({
-            title: __("Warning"),
-            fields: [
-              {
-                fieldname: "save_joborder",
-                fieldtype: "HTML",
-                options: pop_up1,
-              },
-            ],
-          });
-          confirm_assign.no_cancel();
-          confirm_assign.set_primary_action(__("Confirm"), function () {
-            let resp = "frappe.validated = false";
-            window.conf = 1;
-            frm.save();
-            resolve(resp);
-            confirm_assign.hide();
-          });
-          confirm_assign.set_secondary_action_label(__("Cancel"));
-          confirm_assign.set_secondary_action(() => {
-            confirm_assign.hide();
-          });
-          confirm_assign.show();
-          confirm_assign.$wrapper.find(".modal-dialog").css("width", "450px");
+          set_popup(msg1,pop_up1,pay_msg,frm,resolve)
         });
       }
     },
   });
 }
-
+function set_popup(msg1,pop_up1,pay_msg,frm,resolve){
+  if(msg1){
+    pop_up1 = pay_msg == "" ? msg1 : msg1 + "<hr>" + pay_msg;
+    let confirm_assign = new frappe.ui.Dialog({
+      title: __("Warning"),
+      fields: [
+        {
+          fieldname: "save_joborder",
+          fieldtype: "HTML",
+          options: pop_up1,
+        },
+      ],
+    });
+    confirm_assign.no_cancel();
+    confirm_assign.set_primary_action(__("Confirm"), function () {
+      let resp = "frappe.validated = false";
+      window.conf = 1;
+      frm.save();
+      resolve(resp);
+      confirm_assign.hide();
+    });
+    confirm_assign.set_secondary_action_label(__("Cancel"));
+    confirm_assign.set_secondary_action(() => {
+      confirm_assign.hide();
+    });
+    confirm_assign.show();
+    confirm_assign.$wrapper.find(".modal-dialog").css("width", "450px");
+  }else{
+    let resp = "frappe.validated = false";
+    window.conf = 1;
+    frm.save();
+    resolve(resp);
+  }
+}
 function add_employee_button(frm) {
   if (frm.doc.tag_status == "Open") {
     cur_frm.fields_dict["employee_details"].grid.cannot_add_rows = false;
