@@ -205,9 +205,9 @@ def check_employee(name, first_name, company, last_name=None, gender=None, date_
 
 
         if(organization_type != "TAG"):
-            make_employee_permission(name, company)
-            enqueue("tag_workflow.controllers.master_controller.user_exclusive_perm", now=True, user=name, company=company, organization_type=None)
-            enqueue("tag_workflow.utils.trigger_session.share_company_with_user", now=True, users=users)
+            enqueue("tag_workflow.controllers.master_controller.make_employee_permission", user=name, company=company)
+            enqueue("tag_workflow.controllers.master_controller.user_exclusive_perm", user=name, company=company, organization_type=None)
+            enqueue("tag_workflow.utils.trigger_session.share_company_with_user", users=users)
             enqueue("tag_workflow.controllers.master_controller.share_old_docs", queue='default', user=name, company=company, company_type=organization_type)
             enqueue("tag_workflow.controllers.master_controller.new_staff_company", now=True, user=name, company=company, company_type=organization_type)
         elif(organization_type == "TAG"):
