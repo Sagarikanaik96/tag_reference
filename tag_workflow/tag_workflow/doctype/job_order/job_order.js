@@ -1,6 +1,7 @@
 // Copyright (c) 2021, SourceFuse and contributors
 // For license information, please see license.txt
 frappe.require('/assets/tag_workflow/js/twilio_utils.js');
+window.multiple_comp = []
 frappe.ui.form.on("Job Order", {
 	assign_employees: function(frm) {
 		if(frm.doc.to_date < frappe.datetime.now_datetime()) {
@@ -311,6 +312,7 @@ frappe.ui.form.on("Job Order", {
 					job_order: cur_frm.doc.name,
 					job_order_title: cur_frm.doc.select_job,
 					staff_company: cur_frm.doc.staff_company,
+					multiple_comp:window.multiple_comp
 				},
 				callback:function(r){
 				    if(r.message==1){
@@ -1669,6 +1671,7 @@ function repeat_hiring_dia(frm){
 					}
 					cur_dialog.fields_dict.company.refresh();
 					cur_dialog.fields_dict.direct_2.refresh()
+					window.multiple_comp=[]
 				}
 			},
 			{fieldname:"selected_companies", fieldtype:"Select", label:"Select Company", hidden:1, options:frappe.boot.tag.tag_user_info.comps.join("\n"), default: cur_frm.doc.staff_company},
@@ -1689,12 +1692,15 @@ function repeat_hiring_dia(frm){
 				let direct = cur_dialog.get_value("company");
 				let existed_company=cur_dialog.get_value('selected_companies')
 				if(existed_company===undefined || existed_company.length==1 && direct){
-					cur_dialog.set_value('selected_companies',direct)
-				}
-				else if(!existed_company.includes(direct)  && direct){
-					let new_value=existed_company+','+direct
-					cur_dialog.set_value('selected_companies',new_value)
-				}
+                    cur_dialog.set_value('selected_companies',direct)
+                    window.multiple_comp.push(direct);
+                }
+                else if(!existed_company.includes(direct)  && direct){
+                    let new_value=existed_company+','+direct
+                    cur_dialog.set_value('selected_companies',new_value)
+                    window.multiple_comp.push(direct);
+                }
+
 			}},
 			{fieldname:"selected_companies",fieldtype:"Data",label:"Selected Companies",default:" ",read_only:1,hidden:1},]
 	});

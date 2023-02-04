@@ -278,31 +278,39 @@ def notification_func(job_order, emp_detail, no_of_worker_req, hiring_org, staff
         joborder_email_template(subject,newmsg,staffing_user_list,link_job_order,sender_full_name = job_order.company,sender = job_order.owner)   
    
 @frappe.whitelist(allow_guest=False)
-def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None,staff_company=None):
+def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None,staff_company=None,multiple_comp=None):
     try:
         doc = frappe.get_doc(jobOrder,job_order)
         subject="New Work Order"
         sql = ''' select data from `tabVersion` where ref_doctype='Job Order' and docname='{}' '''.format(job_order)
+        multiple_comp = ast.literal_eval(multiple_comp)
         update_values=frappe.db.sql(sql, as_list=1)
         if(len(update_values)<2):
             sql = '''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org)
             org_type=frappe.db.sql(sql, as_list=1)
             if staff_company and org_type[0][0]=="Hiring":
                 enqueue(save_job_order_value,job_order=job_order,staff_company=staff_company, now=True)
-                staff_company=(staff_company.strip()).split(',')
+                staff_company = staff_comp_for_dir_order(multiple_comp,staff_company)
                 for i in staff_company:
                     user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL and user_id in (select name from `tabUser` where enabled="1") '''.format(i.strip()),as_list=1)
                     l = [l[0] for l in user_list]
                     for user in l:
                         add(jobOrder, job_order, user, read=1, write = 0, share = 0, everyone = 0)
+                        frappe.db.commit()
                     frappe.enqueue(single_job_order_notification,job_order_title=job_order_title,hiring_org=hiring_org,job_order=job_order,subject=subject,l=l,staff_company=i,now=True)
+                    frappe.db.commit()
                 return 1
             else:
                 frappe.enqueue(staff_email_notification_cont,hiring_org=hiring_org, job_order=job_order, job_order_title=job_order_title,doc=doc,subject=subject, now=True)
                 return 1
     except Exception as e:
         print(e, frappe.get_traceback())
-
+def staff_comp_for_dir_order(multiple_comp,staff_company):
+    if multiple_comp and len(multiple_comp)>0:
+        return multiple_comp
+    else:
+        return (staff_company.strip()).split(',,')
+    
 def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title=None,doc=None,subject=None):
     try:
         sql = '''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org)
