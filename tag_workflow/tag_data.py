@@ -289,8 +289,7 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
             sql = '''select organization_type from `tabCompany` where name='{}' '''.format(hiring_org)
             org_type=frappe.db.sql(sql, as_list=1)
             if staff_company and org_type[0][0]=="Hiring":
-                enqueue(save_job_order_value,job_order=job_order,staff_company=staff_company, now=True)
-                staff_company = staff_comp_for_dir_order(multiple_comp,staff_company)
+                staff_company = staff_comp_for_dir_order(multiple_comp,staff_company,job_order)
                 for i in staff_company:
                     user_list=frappe.db.sql(''' select user_id from `tabEmployee` where company='{}' and user_id IS NOT NULL and user_id in (select name from `tabUser` where enabled="1") '''.format(i.strip()),as_list=1)
                     l = [l[0] for l in user_list]
@@ -305,8 +304,9 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
                 return 1
     except Exception as e:
         print(e, frappe.get_traceback())
-def staff_comp_for_dir_order(multiple_comp,staff_company):
+def staff_comp_for_dir_order(multiple_comp,staff_company,job_order):
     if multiple_comp and len(multiple_comp)>0:
+        enqueue(save_job_order_value,job_order=job_order, now=True)
         return multiple_comp
     else:
         return (staff_company.strip()).split(',,')
@@ -1346,12 +1346,11 @@ def emp_location_data(address_dt):
     except Exception as e:
         frappe.log_error(e, "Longitude latitude address")
         return '', ''
-def save_job_order_value(job_order,staff_company):
+def save_job_order_value(job_order):
     doc=frappe.get_doc(jobOrder,job_order)
     doc.company_type = non_exlusive
     doc.is_single_share = 1
-    if(',' in staff_company):
-        doc.claim=staff_company
+    doc.claim=staff_company
     doc.save(ignore_permissions = True)
 
 @frappe.whitelist()
