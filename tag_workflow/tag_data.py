@@ -309,6 +309,7 @@ def staff_comp_for_dir_order(multiple_comp,staff_company,job_order):
         enqueue(save_job_order_value,job_order=job_order, now=True)
         return multiple_comp
     else:
+        frappe.db.sql('''update `tabJob Order` set is_single_share = 1 where name = "{}"'''.format(job_order))
         return (staff_company.strip()).split(',,')
     
 def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title=None,doc=None,subject=None):
