@@ -1239,3 +1239,65 @@ def get_all(room, email):
         return result
     else:
         raise_not_authorized_error()
+
+from frappe.desk.doctype.tag.tag import DocTags
+@frappe.whitelist()
+def add_tags(tags, dt, docs, color=None):
+    "adds a new tag to a record, and creates the Tag master"
+    tags = frappe.parse_json(tags)
+    docs = frappe.parse_json(docs)
+    for doc in docs:
+        jo_doc = frappe.get_doc('Job Order', doc)
+        if not jo_doc.has_permission("read"):
+            frappe.local.response['http_status_code'] = 500
+            frappe.throw(('Insufficient Permission'))
+        for tag in tags:
+            DocTags(dt).add(doc, tag)
+
+EPL="Energy Point Log"
+@frappe.whitelist()
+def get_energy_points_percentage_chart_data(user, field):
+	if user!="Administrator" and user!=frappe.session.user:
+		frappe.throw("Insufficient Permission for fetching chart data")
+	result = frappe.get_all(
+		EPL,
+		filters={"user": user, "type": ["!=", "Review"]},
+		group_by=field,
+		order_by=field,
+		fields=[field, "ABS(sum(points)) as points"],
+		as_list=True,
+	)
+
+	return {
+		"labels": [r[0] for r in result if r[0] is not None],
+		"datasets": [{"values": [r[1] for r in result]}],
+	}
+
+
+@frappe.whitelist()
+def get_user_rank(user):
+	if user!="Administrator" and user!=frappe.session.user:
+		frappe.throw("Insufficient Permission for fetching user rank")
+	month_start = datetime.today().replace(day=1)
+	monthly_rank = frappe.get_all(
+		EPL,
+		group_by="user",
+		filters={"creation": [">", month_start], "type": ["!=", "Review"]},
+		fields=["user", "sum(points)"],
+		order_by="sum(points) desc",
+		as_list=True,
+	)
+
+	all_time_rank = frappe.get_all(
+		EPL,
+		group_by="user",
+		filters={"type": ["!=", "Review"]},
+		fields=["user", "sum(points)"],
+		order_by="sum(points) desc",
+		as_list=True,
+	)
+
+	return {
+		"monthly_rank": [i + 1 for i, r in enumerate(monthly_rank) if r[0] == user],
+		"all_time_rank": [i + 1 for i, r in enumerate(all_time_rank) if r[0] == user],
+	}

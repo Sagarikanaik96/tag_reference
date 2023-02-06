@@ -261,7 +261,10 @@ override_whitelisted_methods = {
         "chat.api.message.mark_as_read": "tag_workflow.utils.whitelisted.mark_as_read",
         "chat.api.message.set_typing": "tag_workflow.utils.whitelisted.set_typing",
         "chat.api.message.send": "tag_workflow.utils.whitelisted.send",
-        "chat.api.message.get_all": "tag_workflow.utils.whitelisted.get_all"
+        "chat.api.message.get_all": "tag_workflow.utils.whitelisted.get_all",
+        "frappe.desk.doctype.tag.tag.add_tags": "tag_workflow.utils.whitelisted.add_tags",
+        "frappe.desk.page.user_profile.user_profile.get_energy_points_percentage_chart_data": "tag_workflow.utils.whitelisted.get_energy_points_percentage_chart_data",
+        "frappe.desk.page.user_profile.user_profile.get_user_rank": "tag_workflow.utils.whitelisted.get_user_rank"
 }
 
 
