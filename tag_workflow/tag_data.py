@@ -306,7 +306,7 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
         print(e, frappe.get_traceback())
 def staff_comp_for_dir_order(multiple_comp,staff_company,job_order):
     if multiple_comp and len(multiple_comp)>0:
-        enqueue(save_job_order_value,job_order=job_order, now=True)
+        enqueue(save_job_order_value,job_order=job_order, staff_company=staff_company, now=True)
         return multiple_comp
     else:
         frappe.db.sql('''update `tabJob Order` set is_single_share = 1 where name = "{}"'''.format(job_order))
@@ -1347,7 +1347,7 @@ def emp_location_data(address_dt):
     except Exception as e:
         frappe.log_error(e, "Longitude latitude address")
         return '', ''
-def save_job_order_value(job_order):
+def save_job_order_value(job_order,staff_company):
     doc=frappe.get_doc(jobOrder,job_order)
     doc.company_type = non_exlusive
     doc.is_single_share = 1
@@ -1538,7 +1538,7 @@ def remove_assign_employee(employee_name,job_order_name,assign_doc):
         remove_assigned_emp(employee_name,job_order_name,assign_doc)
 
 def remove_assigned_emp(employee_name,job_order_name,assign_doc):
-    assign_doc.append('employee_removed',{'employee_id':employee_name.name,'employee_name':employee_name,'order_status':job_order_name.order_status})
+    assign_doc.append('employee_removed',{'employee_id':employee_name.name,'employee_name':employee_name.employee_name,'order_status':job_order_name.order_status})
     assign_doc.save(ignore_permissions = True)
 
 def unremove_assign_emp(employee_name,assign_doc):

@@ -77,9 +77,11 @@ def get_timesheet_data(job_order, user, company_type,date,timesheets_to_update=N
             open_exist=frappe.db.sql('select TS.name as name,employee,from_time,to_time,TD.break_start_time as break_from,TD.break_end_time as break_to,TD.hours as hours,tip,billing_amount,TD.extra_hours as extra_hours,TD.extra_rate as extra_rate,TS.no_show,TS.non_satisfactory,TS.dnr from `tabTimesheet` as TS INNER JOIN `tabTimesheet Detail` as TD on TS.name=TD.parent where job_order_detail="{0}" and date_of_timesheet="{1}" and workflow_state="Open" order by TS.name desc'.format(job_order,date),as_dict=True)
             if(len(open_exist)):
                 data1=exist_data(open_exist,data1,timesheets_to_update)
-                return data1
-            else: 
-                return data1
+                sql=f'''SELECT start_time, end_time, break_from, break_to FROM `tabDraft Time` WHERE date_of_ts="{date}" AND job_order="{job_order}" AND first_ts="{open_exist[len(open_exist)-1].name}" AND last_ts="{open_exist[0].name}" ORDER BY id desc'''
+                draft_ts=frappe.db.sql(sql,as_dict=True)
+                return data1, draft_ts
+            else:
+                return data1, {}
         return []
     except Exception as e:
         frappe.msgprint(e)
@@ -693,7 +695,11 @@ def exist_data(open_exist,data1,timesheets_to_update):
     data1=check_selected_values(data1,timesheets_to_update)
     return data1
 def emp_status(i,data1,j):
-    if(data1[j]['status']!='Removed'):
+    if data1[j]['status'] == 'Replaced':
+        return 'Replaced'
+    elif data1[j]['status']=='Removed':
+        return 'Removed'
+    else:
         status=''
         if i['dnr']==1:
             status='DNR'
@@ -702,9 +708,7 @@ def emp_status(i,data1,j):
         if i['non_satisfactory']==1:
             status=nonSatisfactory
         return status
-    else:
-        status='Removed'
-        return status
+
 @frappe.whitelist()
 def checking_same_values_timesheet(user_selected_timesheet):
     try:

@@ -1086,3 +1086,14 @@ def change_emp_status():
     except Exception as e:
         print('change_emp_status Error', e, frappe.get_traceback())
         frappe.log_error(e,'change_emp_status Error')
+
+@frappe.whitelist()
+def draft_ts_time():
+    try:
+        check_table = frappe.db.sql('''SELECT * FROM information_schema.tables WHERE table_name = "tabDraft Time"''', as_dict=1)
+        if len(check_table) == 0:
+            frappe.db.sql('''CREATE TABLE `tabDraft Time` (id int NOT NULL AUTO_INCREMENT PRIMARY KEY, date_of_ts date,job_order varchar(140),start_time time(6),end_time time(6),break_from time(6), break_to time(6), first_ts varchar(255),last_ts varchar(255))''')
+            frappe.db.commit();
+    except Exception as e:
+        print('draft_ts_time', e, frappe.get_traceback())
+        frappe.log_error(e, 'draft_ts_time')

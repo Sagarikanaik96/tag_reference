@@ -10,6 +10,7 @@ from frappe import enqueue
 from frappe.share import add_docshare as add
 from tag_workflow.utils.timesheet import remove_job_title, unsatisfied_organization, do_not_return, no_show_org
 import ast
+import re
 TM_FT = "%Y-%m-%d %H:%M:%S"
 jobOrder='Job Order'
 timesheet_time= 'select to_time,from_time from `tabTimesheet Detail` where parent= '
@@ -79,6 +80,7 @@ def get_datetime(date, from_time, to_time):
 @frappe.whitelist()
 def update_timesheet(user, company_type, items, cur_selected, job_order, date, from_time, to_time, break_from_time=None, break_to_time=None,save=None):
     try:
+        items=re.sub(r'([\'\"]\s*:\s*)null(\s*[,}])', '\\1None\\2', items)
         added = 0
         items=ast.literal_eval(items)
         selected_items = items
@@ -94,7 +96,7 @@ def update_timesheet(user, company_type, items, cur_selected, job_order, date, f
             select_items=selected_items.copy()
             length_selected=len(selected_items)-1
             for i in range(length_selected,-1,-1):
-                child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, selected_items[i]['from_time'], selected_items[i]['to_time'], selected_items[i]['break_from'], selected_items[i]['break_to'])
+                child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, selected_items[i]['from_time'], selected_items[i]['to_time'])
                 is_ok = check_old_timesheet(child_from, child_to, selected_items[i]['employee'],selected_items[i]['timesheet_value'])
                 if(is_ok == 0):   
                     added=1              
@@ -103,9 +105,10 @@ def update_timesheet(user, company_type, items, cur_selected, job_order, date, f
                     frappe.msgprint(_("Timesheet is already available for employee <b>{0}</b>(<b>{1}</b>) on the given datetime.").format(selected_items[i]["employee_name"],selected_items[i]['employee']))            
         else:
             frappe.msgprint(_("Date must be in between Job Order start date and end date for timesheets"))
-        frappe.enqueue('tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.create_new_timesheet',job_name=job_order,selected_items=select_items,date=date,from_time=from_time,to_time=to_time,job=job,job_order=job_order,company_type=company_type,posting_date=posting_date,save=save,now=True)
+        frappe.enqueue('tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.create_new_timesheet',job_name=job_order,selected_items=select_items,date=date,from_time=from_time,to_time=to_time,job=job,job_order=job_order,company_type=company_type,posting_date=posting_date, break_from_time=break_from_time, break_to_time=break_to_time,save=save,now=True)
         return True if added == 1 else False
     except Exception as e:
+        print(e, frappe.get_traceback())
         frappe.msgprint(e)
 
 #--------------------------------------------------#
@@ -207,7 +210,7 @@ def checkreplaced_emp(employee, job_order):
 #check whether tip is given
 def check_tip(item):
     if 'tip_amount' in item.keys():
-        tip_amount = item['tip_amount']
+        tip_amount = item['tip_amount'] if item['tip_amount'] else 0.0
     else:
         tip_amount=0
     return tip_amount
@@ -632,16 +635,58 @@ def update_list_page_calculation(timesheet,jo, timesheet_date, employee,working_
         return amount,overtime_hours,data[1]
     except Exception as e:
         frappe.log_error(e,'listing page error')
-def create_new_timesheet(selected_items,date,from_time,to_time,job,job_order,company_type,posting_date,save):
+def create_new_timesheet(selected_items,date,from_time,to_time,job,job_order,company_type,break_from_time,break_to_time, posting_date,save):
     try:
         timesheets = []
+        ts_name = []
         for item in selected_items:
             tip_amount=check_tip(item)
-            child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, item['from_time'], item['to_time'], item['break_from'], item['break_to'])                  
+            child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, item['from_time'], item['to_time'], item['break_from'] if 'break_from' in item else None, item['break_to'] if 'break_to' in item else None)                  
             timesheet=timesheet_data(item,job_order,job,tip_amount,break_from,break_to,posting_date,child_from,child_to,date)
             staffing_own_timesheet(save,timesheet,company_type)
+            ts_name.append(timesheet.name)
             timesheets.append({"employee": item['employee'], "docname": timesheet.name, "company": job.company, "job_title": job.select_job,  "employee_name": item['employee_name']})
             update_previous_timesheet(jo=job_order, timesheet_date=posting_date, employee=item['employee'],timesheet=timesheet,to_time=child_to,save=save,timesheet_already_exist=item['timesheet_value'])
+        if save=='1':
+            enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.draft_ts_time", start_time=from_time, end_time=to_time, break_from=break_from_time, break_to=break_to_time, job_order=job_order, date_of_ts=date, ts_name=ts_name, now=True)
         enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.send_timesheet_for_approval", timesheets=timesheets,save=save,now=True)
     except Exception as e:
+        print(frappe.get_traceback())
         frappe.log_error(e,'back job')
+
+@frappe.whitelist()
+def draft_ts_time(start_time, end_time, break_from, break_to, job_order, date_of_ts, ts_name):
+    try:
+        ts_name.sort()
+        delete_old_data(ts_name[0], ts_name[len(ts_name)-1])
+        if not break_from:
+            break_from="NULL"
+            if break_to:
+                sql='''INSERT INTO `tabDraft Time` (start_time, end_time, break_from, break_to, job_order, date_of_ts, first_ts, last_ts) VALUES ("%s", "%s", %s, "%s", "%s", "%s", "%s", "%s")'''%(start_time, end_time, break_from, break_to, job_order, date_of_ts, ts_name[0], ts_name[len(ts_name)-1])
+            else:
+                break_to="NULL"
+                sql='''INSERT INTO `tabDraft Time` (start_time, end_time, break_from, break_to, job_order, date_of_ts, first_ts, last_ts) VALUES ("%s", "%s", %s, %s, "%s", "%s", "%s", "%s")'''%(start_time, end_time, break_from, break_to, job_order, date_of_ts, ts_name[0], ts_name[len(ts_name)-1])
+        elif not break_to:
+            break_to="NULL"
+            sql='''INSERT INTO `tabDraft Time` (start_time, end_time, break_from, break_to, job_order, date_of_ts, first_ts, last_ts) VALUES ("%s", "%s", "%s", %s, "%s", "%s", "%s", "%s")'''%(start_time, end_time, break_from, break_to, job_order, date_of_ts, ts_name[0], ts_name[len(ts_name)-1])
+        else:
+            sql='''INSERT INTO `tabDraft Time` (start_time, end_time, break_from, break_to, job_order, date_of_ts, first_ts, last_ts) VALUES ("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")'''%(start_time, end_time, break_from, break_to, job_order, date_of_ts, ts_name[0], ts_name[len(ts_name)-1])
+        frappe.db.sql(sql)
+        frappe.db.commit()
+    except Exception as e:
+        print('draft_ts_time error', e, frappe.get_traceback())
+        frappe.log_error(e, 'draft_ts_time error')
+
+@frappe.whitelist()
+def delete_old_data(first_ts, last_ts):
+    try:
+        old_data= frappe.db.sql(f'''SELECT id FROM `tabDraft Time` WHERE first_ts="{first_ts}" AND last_ts="{last_ts}"''', as_list=1)
+        old_data_list=[d[0] for d in old_data]
+        if len(old_data_list)==1:
+            frappe.db.sql(f'''delete from `tabDraft Time` where id in ("{old_data_list[0]}")''')
+        elif len(old_data_list)>1:
+            frappe.db.sql(f'''delete from `tabDraft Time` where id in {tuple(old_data_list)}''')
+        frappe.db.commit()
+    except Exception as e:
+        print('delete_old_data error', e, frappe.get_traceback())
+        frappe.log_error(e, 'delete_old_data error')

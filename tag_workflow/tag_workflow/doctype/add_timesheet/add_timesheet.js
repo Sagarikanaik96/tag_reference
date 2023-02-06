@@ -1,6 +1,7 @@
 // Copyright (c) 2022, SourceFuse and contributors
 // For license information, please see license.txt
-
+window.draft_start_time='';
+window.draft_end_time=''
 frappe.ui.form.on('Add Timesheet', {
 	refresh: function(frm) {
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
@@ -18,7 +19,7 @@ frappe.ui.form.on('Add Timesheet', {
 		$(".form-message.blue").css("color", "black");
 		$(".form-message.blue").css("margin-top", "10px");
 		$(".editable-form .layout-main-section-wrapper .layout-main-section, .submitted-form .layout-main-section-wrapper .layout-main-section, #page-Company .layout-main-section-wrapper .layout-main-section, #page-Timesheet .layout-main-section-wrapper .layout-main-section, #page-Lead .layout-main-section-wrapper .layout-main-section");
-
+		cur_frm.set_value('date','')
 		frm.set_value("from_time", "");
 		frm.set_value("to_time", "");
 		frm.set_value("break_from_time", "");
@@ -26,17 +27,14 @@ frappe.ui.form.on('Add Timesheet', {
 		frm.add_custom_button(__('Save'), function() {
 			let save=1
 			if(frm.doc.job_order && frm.doc.date && frm.doc.from_time && frm.doc.to_time && frm.doc.items){
-				updating_page(1)
 				update_timesheet(frm,save);
 			}
 			else{
-				updating_page(1)
 				update_time_data(frm,save)
 			}
 		}).addClass("btn-primary");
 		frm.add_custom_button(__('Submit Timesheet'), function() {
 			let save=0
-			updating_page(0)
 			update_timesheet(frm,save);
 			
 		}).addClass("btn-primary btn-submit");
@@ -63,7 +61,6 @@ frappe.ui.form.on('Add Timesheet', {
 		$(document).on('click', '[data-fieldname="break_to_time"]', function(){
 			$('.datepicker').show()
 		});
-		//setting_job_order_value()
 	},
 
 	job_order: function(frm){
@@ -158,7 +155,6 @@ function check_date(frm){
 			frappe.msgprint("Date can't be future date.");
 			frm.set_value("date", "");
 		}else if(frm.doc.date >= frm.doc.from_date && frm.doc.date <= frm.doc.to_date){
-			console.log("TAG");
 			cur_frm.set_value('from_time','')
 			cur_frm.set_value('to_time','')
 			cur_frm.set_value('break_from_time','')
@@ -185,10 +181,10 @@ function get_employee_data(frm){
 			if(r){
 				localStorage.setItem("timesheet_to_update", '');
 				cur_frm.clear_table("items");
-				let data = r.message || [];
+				let data = r.message[0] || [];
 				for(let d in data){
 					let child = frappe.model.get_new_doc("Timesheet Item", cur_frm.doc, "items");
-					update_time_values(data,d)			
+					update_time_values(data,d,r.message[1]);
 					$.extend(child, {
 						"employee": data[d]['employee'],
 						"employee_name": data[d]['employee_name'],
@@ -233,11 +229,17 @@ frappe.ui.form.on("Timesheet Item", {
 
 	from_time: function(frm, cdt, cdn){
 		let child = frappe.get_doc(cdt, cdn);
+		if(!child.from_time){
+			frappe.model.set_value(child.doctype, child.name, "from_time", "00:00:00");
+		}
 		update_child_time(child, frm);
 	},
 
 	to_time: function(frm, cdt, cdn){
 		let child = frappe.get_doc(cdt, cdn);
+		if(!child.to_time){
+			frappe.model.set_value(child.doctype, child.name, "to_time", "00:00:00");
+		}
 		update_child_time(child, frm);
 	},
 
@@ -328,6 +330,8 @@ function update_child_time(child, frm){
 	}else{
 		frappe.model.set_value(child.doctype, child.name, "hours", 0);
 		frappe.model.set_value(child.doctype, child.name, "amount", 0);
+		frappe.model.set_value(child.doctype, child.name, "from_time", "00:00:00");
+		frappe.model.set_value(child.doctype, child.name, "to_time", "00:00:00");
 	}
 }
 
@@ -392,13 +396,11 @@ function update_time(frm){
 	let item = frm.doc.items || [];
 	for(let i in item){
 		if(frm.doc.from_time && frm.doc.to_time){
-			frappe.model.set_value(item[i].doctype, item[i].name, "from_time", frm.doc.from_time);
-			frappe.model.set_value(item[i].doctype, item[i].name, "to_time", frm.doc.to_time);
+			set_time_values(frm, i, item);
 		}else{
 			frappe.model.set_value(item[i].doctype, item[i].name, "from_time", "");
 			frappe.model.set_value(item[i].doctype, item[i].name, "to_time", "");
 		}
-
 		if(frm.doc.break_from_time && frm.doc.break_to_time){
 			frappe.model.set_value(item[i].doctype, item[i].name, "break_from", frm.doc.break_from_time);
 			frappe.model.set_value(item[i].doctype, item[i].name, "break_to", frm.doc.break_to_time);
@@ -407,11 +409,25 @@ function update_time(frm){
 			frappe.model.set_value(item[i].doctype, item[i].name, "break_to", "");
 		}
 	}
+	window.draft_start_time=frm.doc.from_time;
+	window.draft_end_time=frm.doc.to_time;
+}
+
+function set_time_values(frm, i, item){
+	if(frm.doc.from_time !== window.draft_start_time){
+		frappe.model.set_value(item[i].doctype, item[i].name, "from_time", frm.doc.from_time);
+	}
+	if(frm.doc.to_time !== window.draft_end_time){
+		frappe.model.set_value(item[i].doctype, item[i].name, "to_time", frm.doc.to_time);
+		if(!item[i].from_time){
+			frappe.model.set_value(item[i].doctype, item[i].name, "from_time", frm.doc.from_time);
+		}
+	}
 }
 
 /*--------------------------------------------------*/
 function update_timesheet(frm,save){
-	if(frm.doc.job_order && frm.doc.date && frm.doc.from_time && frm.doc.to_time && frm.doc.items){
+	if(frm.doc.job_order && frm.doc.date && frm.doc.from_time && frm.doc.to_time && frm.doc.items.length>0){
 		let items = frm.doc.items || [];
 		let cur_selected = cur_frm.get_selected();
 		let job_order = frm.doc.job_order;
@@ -426,6 +442,12 @@ function update_timesheet(frm,save){
 			async: 1,
 			freeze: true,
 			freeze_message: "Please wait while we are adding timesheet(s)...",
+			callback: (r)=>{
+				if(r && r.message == 1){
+					frappe.msgprint({message: __("Timesheet(s) has been added successfully"), title: __('Successful'), indicator: 'green'});
+					setTimeout(()=>window.location.reload(),3000)
+				}
+			}
 		});
 	}else{
 		frappe.msgprint({message: __("(*) fields are required"), title: __('Mandatory'), indicator: 'red'});
@@ -475,37 +497,6 @@ function check_replaced_emp(child, frm){
             }
         });
     }
-}
-function check_availability(r,frm){
-	const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-	if(r['availability']=='Mon-Fri'){
-		const f_d = new Date(frm.doc.date);
-		let day = weekday[f_d.getDay()];
-		const my_days=["Monday","Tuesday","Wednesday","Thursday","Friday"]
-		if(!my_days.includes(day)){
-			frappe.msgprint('The job order is available from Monday To Friday')
-			frm.set_value("date", "");			
-		}
-	}
-	else if(r['availability']=='Sat & Sun'){
-		const avl_days=['Saturday','Sunday']
-		const f_d = new Date(frm.doc.date);
-		let day = weekday[f_d.getDay()];
-		if(!avl_days.includes(day)){
-			frappe.msgprint('The job order is available only for Saturday and Sunday')
-			frm.set_value("date", "");
-		}
-	}
-	else if(r['availability']=='Custom'){
-		const selected=r['selected_days']
-		const f_d = new Date(frm.doc.date);
-		let day = weekday[f_d.getDay()];
-		const my_days=selected.split(", ")
-		if(!my_days.includes(day)){
-			frappe.msgprint('The job order is available only for '+my_days)
-			frm.set_value("date", "");
-		}
-	}
 }
 
 function sort_employees(frm){
@@ -593,6 +584,12 @@ function update_timesheet_save(items,cur_selected,job_order,date,from_time,to_ti
 		async: 1,
 		freeze: true,
 		freeze_message: "Please wait while we are adding timesheet(s)...",
+		callback: function(r){
+			if(r && r.message == 1){
+				frappe.msgprint({message: __("Timesheet(s) has been added successfully"), title: __('Successful'), indicator: 'green'});
+				setTimeout(()=>window.location.reload(),3000)
+			}
+		}
 	});
 }
 
@@ -621,19 +618,15 @@ function update_time_data(frm,save){
 		update_save_timesheet(frm,save)
 	},1000)
 }
-function update_time_values(data,d){
-	if(!(cur_frm.doc.from_time)){
-		cur_frm.set_value('from_time',data[d]['enter_time'])
+function update_time_values(data,d,draft_ts){	
+	if(draft_ts.length > 0){
+		window.draft_start_time=draft_ts[0]['start_time']
+		window.draft_end_time=draft_ts[0]['end_time']
+		cur_frm.set_value('from_time',draft_ts[0]['start_time'])
+		cur_frm.set_value('to_time',draft_ts[0]['end_time'])
+		cur_frm.set_value('break_from_time',draft_ts[0]['break_from'])
+		cur_frm.set_value('break_to_time',draft_ts[0]['break_to'])
 	}
-	if(!(cur_frm.doc.to_time)){
-		cur_frm.set_value('to_time',data[d]['exit_time'])
-	}
-	if(!(cur_frm.doc.break_from_time)){
-		cur_frm.set_value('break_from_time',data[d]['break_from'])
-	}
-	if(!(cur_frm.doc.break_to_time)){
-		cur_frm.set_value('break_to_time',data[d]['break_to'])
-	}		
 }
 function set_def_time(){
 	cur_frm.set_value("from_time", "");
@@ -654,15 +647,19 @@ function checking_selected_values(){
 }
 function check_break_time(frm){
 	if(frm.doc.from_time && frm.doc.to_time){
-		if(frm.doc.break_from_time && (frm.doc.break_from_time<frm.doc.from_time || frm.doc.break_from_time>frm.doc.to_time) ){
-			$('.datepicker.active').hide();
-			frm.set_value('break_from_time','')
+		if(frm.doc.break_from_time && (Date.parse('01/01/2011 '+frm.doc.break_from_time)<Date.parse('01/01/2011 '+frm.doc.from_time) || Date.parse('01/01/2011 '+frm.doc.break_from_time)>Date.parse('01/01/2011 '+frm.doc.to_time)) ){
+			$('.datepicker.active').removeClass('active');
+			setTimeout(()=>{
+				frm.set_value('break_from_time','')
+			},1)
 			frappe.msgprint({message: __("Break Start Time should be between Start time and End time"), title: __('Break Time Error'), indicator: 'red'});
 			frappe.validated=false;
 		}
-		if(frm.doc.break_to_time && (frm.doc.break_to_time<frm.doc.from_time || frm.doc.break_to_time>frm.doc.to_time) ){
-			$('.datepicker.active').hide();
-			frm.set_value('break_to_time','')
+		if(frm.doc.break_to_time && (Date.parse('01/01/2011 '+frm.doc.break_to_time)<Date.parse('01/01/2011 '+frm.doc.from_time) || Date.parse('01/01/2011 '+frm.doc.break_to_time)>Date.parse('01/01/2011 '+frm.doc.to_time)) ){
+			$('.datepicker.active').removeClass('active');
+			setTimeout(()=>{
+				frm.set_value('break_to_time','')
+			},1)
 			frappe.msgprint({message: __("Break End Time should be between Start time and End time"), title: __('Break Time Error'), indicator: 'red'});
 			frappe.validated=false;
 		}
@@ -732,16 +729,4 @@ function check_break_from_to_timesheet_value(frm){
 		frm.set_value('to_time',frm.doc.break_to_time);
 	}	
 
-}
-function updating_page(t){
-	let time_after=5000
-	if(t==0){
-		time_after=3000
-	}
-	setTimeout(function(){
-		if(!cur_dialog){
-			frappe.msgprint({message: __("Timesheet(s) has been added successfully"), title: __('Successful'), indicator: 'green'});
-			window.location.reload()
-		}
-	},time_after)
 }
