@@ -1,5 +1,5 @@
 diff --git a/frappe/core/doctype/user/user.json b/frappe/core/doctype/user/user.json
-index 6b3748f..2a49462 100644
+index 6b3748f..fef6d5a 100644
 --- a/frappe/core/doctype/user/user.json
 +++ b/frappe/core/doctype/user/user.json
 @@ -7,16 +7,15 @@
@@ -7,7 +7,8 @@ index 6b3748f..2a49462 100644
   "engine": "InnoDB",
   "field_order": [
 -  "enabled",
-   "section_break_3",
+-  "section_break_3",
++  "user_type_detail",
    "email",
    "first_name",
    "middle_name",
@@ -34,7 +35,20 @@ index 6b3748f..2a49462 100644
    "logout_all_sessions",
    "reset_password_key",
    "last_reset_password_key_generated_on",
-@@ -162,13 +162,6 @@
+@@ -99,12 +99,6 @@
+    "oldfieldtype": "Check",
+    "read_only": 1
+   },
+-  {
+-   "depends_on": "enabled",
+-   "fieldname": "section_break_3",
+-   "fieldtype": "Section Break",
+-   "label": "Basic Info"
+-  },
+   {
+    "fieldname": "email",
+    "fieldtype": "Data",
+@@ -162,13 +156,6 @@
     "label": "Unsubscribed",
     "no_copy": 1
    },
@@ -48,7 +62,18 @@ index 6b3748f..2a49462 100644
    {
     "fieldname": "username",
     "fieldtype": "Data",
-@@ -247,14 +240,14 @@
+@@ -232,8 +219,8 @@
+    "collapsible": 1,
+    "depends_on": "enabled",
+    "fieldname": "short_bio",
+-   "fieldtype": "Section Break",
+-   "label": "More Information"
++   "fieldtype": "Tab Break",
++   "label": "Company Info "
+   },
+   {
+    "fieldname": "gender",
+@@ -247,14 +234,14 @@
     "fieldname": "phone",
     "fieldtype": "Data",
     "label": "Phone",
@@ -66,7 +91,7 @@ index 6b3748f..2a49462 100644
    },
    {
     "fieldname": "birth_date",
-@@ -275,10 +268,6 @@
+@@ -275,10 +262,6 @@
     "fieldtype": "Attach Image",
     "label": "Banner Image"
    },
@@ -77,7 +102,26 @@ index 6b3748f..2a49462 100644
    {
     "fieldname": "interest",
     "fieldtype": "Small Text",
-@@ -615,13 +604,13 @@
+@@ -300,7 +283,7 @@
+    "collapsible": 1,
+    "depends_on": "eval:doc.enabled && (!doc.__islocal || !cint(doc.send_welcome_email))",
+    "fieldname": "change_password",
+-   "fieldtype": "Section Break",
++   "fieldtype": "Tab Break",
+    "label": "Change Password"
+   },
+   {
+@@ -592,7 +575,8 @@
+   },
+   {
+    "fieldname": "column_break_11",
+-   "fieldtype": "Column Break"
++   "fieldtype": "Column Break",
++   "hidden": 1
+   },
+   {
+    "fieldname": "column_break_26",
+@@ -615,13 +599,13 @@
     "options": "Module Profile"
    },
    {
@@ -98,7 +142,7 @@ index 6b3748f..2a49462 100644
    {
     "fieldname": "column_break_75",
     "fieldtype": "Column Break"
-@@ -648,18 +637,28 @@
+@@ -648,18 +632,33 @@
     "label": "Auto follow documents that you Like"
    },
    {
@@ -122,14 +166,19 @@ index 6b3748f..2a49462 100644
     "label": "Auto follow documents that are assigned to you"
 +  },
 +  {
-+    "fieldname": "old_password",
-+    "fieldtype": "Password",
-+    "label": "Old Password",
-+    "no_copy": 1
-+   },
++   "fieldname": "old_password",
++   "fieldtype": "Password",
++   "label": "Old Password",
++   "no_copy": 1
++  },
 +  {
 +   "fieldname": "column_break_33",
 +   "fieldtype": "Column Break"
++  },
++  {
++   "fieldname": "user_type_detail",
++   "fieldtype": "Tab Break",
++   "label": "Profile"
    }
   ],
   "icon": "fa fa-user",
@@ -138,7 +187,7 @@ index 6b3748f..2a49462 100644
    }
   ],
 - "modified": "2022-09-19 16:05:46.485242",
-+ "modified": "2023-01-11 00:26:19.076705",
++ "modified": "2023-01-30 06:54:51.591896",
   "modified_by": "Administrator",
   "module": "Core",
   "name": "User",
