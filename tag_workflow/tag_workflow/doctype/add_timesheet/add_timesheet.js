@@ -229,7 +229,7 @@ frappe.ui.form.on("Timesheet Item", {
 
 	from_time: function(frm, cdt, cdn){
 		let child = frappe.get_doc(cdt, cdn);
-		if(!child.from_time){
+		if(!child.from_time && frm.doc.from_time && frm.doc.to_time){
 			frappe.model.set_value(child.doctype, child.name, "from_time", "00:00:00");
 		}
 		update_child_time(child, frm);
@@ -237,7 +237,7 @@ frappe.ui.form.on("Timesheet Item", {
 
 	to_time: function(frm, cdt, cdn){
 		let child = frappe.get_doc(cdt, cdn);
-		if(!child.to_time){
+		if(!child.to_time && frm.doc.from_time && frm.doc.to_time){
 			frappe.model.set_value(child.doctype, child.name, "to_time", "00:00:00");
 		}
 		update_child_time(child, frm);
