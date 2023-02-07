@@ -28,7 +28,7 @@ class CustomCompany(Company):
 	def on_update(self):
 		NestedSet.on_update(self)
 		frappe.db.commit()
-		enqueue(self.update_enqueue,queue='short', is_async=True)
+		enqueue(self.update_enqueue,queue='long',timeout=10000, is_async=True)
 		
 	@frappe.whitelist()
 	def update_enqueue(self):
