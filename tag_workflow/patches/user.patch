@@ -8,7 +8,7 @@ index 6b3748f..fef6d5a 100644
   "field_order": [
 -  "enabled",
 -  "section_break_3",
-+  "user_type_detail",
++  "user_type_detail_tab",
    "email",
    "first_name",
    "middle_name",
@@ -176,7 +176,7 @@ index 6b3748f..fef6d5a 100644
 +   "fieldtype": "Column Break"
 +  },
 +  {
-+   "fieldname": "user_type_detail",
++   "fieldname": "user_type_detail_tab",
 +   "fieldtype": "Tab Break",
 +   "label": "Profile"
    }
