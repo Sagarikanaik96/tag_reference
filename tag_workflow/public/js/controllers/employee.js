@@ -7,6 +7,11 @@ frappe.ui.form.on("Employee", {
 		$('[class="btn btn-primary btn-sm primary-action"]').show();
 		$('.custom-actions.hidden-xs.hidden-md').show();
 		update_employees_data(frm);
+		frappe.db.get_value("Company", frm.doc.company, "jazzhr_api_key",function(r){
+            if(!r.jazzhr_api_key){
+                $("button.ellipsis:nth-child(1)").hide()
+            }
+        })
 		trigger_hide();
 		required_field();
 		employee_work_history(frm)
