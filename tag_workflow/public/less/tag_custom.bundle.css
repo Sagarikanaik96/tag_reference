@@ -2175,6 +2175,3 @@ span.comment-count {
     right: -230px;
   }
 }
-[data-page-route="Add Timesheet"] .form-grid .grid-body .data-row div:nth-child(11) .static-area{
-  display: none;
-}

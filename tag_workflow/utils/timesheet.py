@@ -16,6 +16,12 @@ timesheet_time= 'select to_time,from_time from `tabTimesheet Detail` where paren
 noShow='No Show'
 nonSatisfactory='Non Satisfactory'
 #----------------#
+def validate_time_logs(self):
+    for data in self.get("time_logs"):
+        self.validate_overlap(data)
+        self.set_project(data)
+        self.validate_project(data)
+
 @frappe.whitelist()
 def send_timesheet_for_approval(employee, docname, company, job_order):
     try:
@@ -704,7 +710,7 @@ def emp_status(i,data1,j):
         if i['dnr']==1:
             status='DNR'
         if i['no_show']==1:
-            status=noShow
+            return noShow
         if i['non_satisfactory']==1:
             status=nonSatisfactory
         return status

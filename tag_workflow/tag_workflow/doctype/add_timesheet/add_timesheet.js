@@ -1,7 +1,9 @@
 // Copyright (c) 2022, SourceFuse and contributors
 // For license information, please see license.txt
 window.draft_start_time='';
-window.draft_end_time=''
+window.draft_end_time='';
+window.draft_break_start_time='';
+window.draft_break_end_time='';
 frappe.ui.form.on('Add Timesheet', {
 	refresh: function(frm) {
 		if(frappe.boot.tag.tag_user_info.company_type=='Staffing'){
@@ -61,6 +63,10 @@ frappe.ui.form.on('Add Timesheet', {
 		$(document).on('click', '[data-fieldname="break_to_time"]', function(){
 			$('.datepicker').show()
 		});
+		window.draft_start_time='';
+		window.draft_end_time='';
+		window.draft_break_start_time='';
+		window.draft_break_end_time='';
 	},
 
 	job_order: function(frm){
@@ -190,7 +196,7 @@ function get_employee_data(frm){
 						"employee_name": data[d]['employee_name'],
 						"company": data[d]['company'],
 						"status": data[d]['status'],
-						"tip_amount": data[d]['tip_amount'],
+						"tip_amount": data[d]['tip'],
 						"from_time":data[d]['enter_time'],
 						"to_time":data[d]['exit_time'],
 						"break_from":data[d]['break_from'],
@@ -204,6 +210,7 @@ function get_employee_data(frm){
 				}
 				cur_frm.refresh_field("items");
                 setTimeout(status_field, 700);
+				sort_employees(frm);
 			}
 		}
 	});
@@ -330,6 +337,7 @@ function update_child_time(child, frm){
 	}else{
 		frappe.model.set_value(child.doctype, child.name, "hours", 0);
 		frappe.model.set_value(child.doctype, child.name, "amount", 0);
+		frappe.model.set_value(child.doctype, child.name, "tip_amount", 0);
 		frappe.model.set_value(child.doctype, child.name, "from_time", "00:00:00");
 		frappe.model.set_value(child.doctype, child.name, "to_time", "00:00:00");
 	}
@@ -356,8 +364,8 @@ function get_amount(frm, hours, breaks, child){
 	let total_hour = hours-breaks;
 	let job_order=frm.doc.job_order
 	let timesheet_date=frm.doc.date
-	let additional_rate=cur_frm.doc.additional_flat_rate
-	let per_hour_rate=cur_frm.doc.total_per_hour_rate
+	let additional_rate=frm.doc.additional_flat_rate
+	let per_hour_rate=frm.doc.total_per_hour_rate
 	let emp=child.employee
 	if(total_hour>0 && frm.doc.from_time && frm.doc.to_time){
 		frappe.model.set_value(child.doctype, child.name, "hours", Math.round(total_hour * 100) / 100);
@@ -402,8 +410,7 @@ function update_time(frm){
 			frappe.model.set_value(item[i].doctype, item[i].name, "to_time", "");
 		}
 		if(frm.doc.break_from_time && frm.doc.break_to_time){
-			frappe.model.set_value(item[i].doctype, item[i].name, "break_from", frm.doc.break_from_time);
-			frappe.model.set_value(item[i].doctype, item[i].name, "break_to", frm.doc.break_to_time);
+			set_break_time_values(frm, i, item);
 		}else{
 			frappe.model.set_value(item[i].doctype, item[i].name, "break_from", "");
 			frappe.model.set_value(item[i].doctype, item[i].name, "break_to", "");
@@ -411,17 +418,31 @@ function update_time(frm){
 	}
 	window.draft_start_time=frm.doc.from_time;
 	window.draft_end_time=frm.doc.to_time;
+	window.draft_break_start_time=frm.doc.break_from
+	window.draft_break_end_time=frm.doc.break_to
 }
 
 function set_time_values(frm, i, item){
 	if(frm.doc.from_time !== window.draft_start_time){
 		frappe.model.set_value(item[i].doctype, item[i].name, "from_time", frm.doc.from_time);
+		if(!item[i].to_time){
+			frappe.model.set_value(item[i].doctype, item[i].name, "to_time", frm.doc.to_time);
+		}
 	}
 	if(frm.doc.to_time !== window.draft_end_time){
 		frappe.model.set_value(item[i].doctype, item[i].name, "to_time", frm.doc.to_time);
 		if(!item[i].from_time){
 			frappe.model.set_value(item[i].doctype, item[i].name, "from_time", frm.doc.from_time);
 		}
+	}
+}
+
+function set_break_time_values(frm, i, item){
+	if(frm.doc.break_from_time !== window.draft_break_start_time){
+		frappe.model.set_value(item[i].doctype, item[i].name, "break_from", frm.doc.break_from_time);
+	}
+	if(frm.doc.break_to_time !== window.draft_break_end_time){
+		frappe.model.set_value(item[i].doctype, item[i].name, "break_to", frm.doc.break_to_time)
 	}
 }
 
@@ -622,6 +643,8 @@ function update_time_values(data,d,draft_ts){
 	if(draft_ts.length > 0){
 		window.draft_start_time=draft_ts[0]['start_time']
 		window.draft_end_time=draft_ts[0]['end_time']
+		window.draft_break_start_time=draft_ts[0]['break_from']
+		window.draft_break_end_time=draft_ts[0]['break_to']
 		cur_frm.set_value('from_time',draft_ts[0]['start_time'])
 		cur_frm.set_value('to_time',draft_ts[0]['end_time'])
 		cur_frm.set_value('break_from_time',draft_ts[0]['break_from'])

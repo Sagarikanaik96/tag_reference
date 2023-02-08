@@ -22,6 +22,7 @@ from frappe.desk.form import save
 from tag_workflow.utils.whitelisted import   savedocs
 from frappe.core.doctype.data_import import data_import
 from tag_workflow.utils.data_import import download_template
+from tag_workflow.utils.timesheet import validate_time_logs
 
 __version__ = '0.0.1'
 
@@ -39,6 +40,7 @@ NavbarSettings.validate_standard_navbar_items =validate_standard_navbar_items
 Lead.create_contact = create_contact
 Timesheet.update_cost = update_cost
 Timesheet.validate_mandatory_fields = validate_mandatory_fields
+Timesheet.validate_time_logs= validate_time_logs
 SalarySlip.calculate_total_for_salary_slip_based_on_timesheet = calculate_total_for_salary_slip_based_on_timesheet
 SalarySlip.set_time_sheet = set_time_sheet
 SalarySlip.validate = salary_slip_validate

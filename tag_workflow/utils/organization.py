@@ -102,6 +102,7 @@ def setup_data():
         import_sample_data()
         update_comp_series()
         change_emp_status()
+        draft_ts_time()
         make_commit()
     except Exception as e:
         print(e)

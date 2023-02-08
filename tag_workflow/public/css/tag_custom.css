@@ -1901,6 +1901,3 @@ span.comment-count {
 [data-page-route="staff_company_list"] .like-icon{
   display: block;
 }
-[data-page-route="Add Timesheet"] .form-grid .grid-body .data-row div:nth-child(11) .static-area{
-  display: none;
-}

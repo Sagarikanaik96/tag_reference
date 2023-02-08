@@ -594,7 +594,7 @@ function timer_value(frm) {
 		time_value(frm);
 		setTimeout(function() {
 			time_value(frm);
-			cur_frm.refresh();
+			frm.refresh();
 			view_button(frm);
 		}, 60000);
 	} else {
