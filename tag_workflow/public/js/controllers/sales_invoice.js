@@ -107,6 +107,7 @@ frappe.ui.form.on("Sales Invoice", {
 			frappe.model.set_value(item[i].doctype, item[i].name, "item_code", "")
 		}
 		update_payment(frm);
+		update_default_values(frm)
 	},
 	is_pos: function(frm){
 		if(frappe.user_roles.includes("System Manager")){
@@ -195,6 +196,76 @@ function update_payment(frm){
 	}
 }
 
+function update_default_values(frm){
+	frappe.db.get_value("Company",frm.doc.company,'abbr',(s)=>{
+		if(!frm.doc.debit_to){
+		frappe.db.get_value("Company",frm.doc.company,'default_receivable_account',(d)=>{
+			if(!d.default_receivable_account){
+				let account="1310 - Debtors - "+s.abbr
+				 frappe.call({
+										async: false,
+										"method": "frappe.client.set_value",
+										"args": {
+											"doctype": "Company",
+											"name": frm.doc.company,
+											"fieldname": "default_receivable_account",
+											"value":account
+										}
+									});
+									frm.set_value('debit_to',account)
+			}
+			
+		})
+		}
+		frm.doc.items.forEach(function(item){
+			if(!item.income_account){
+			frappe.db.get_value("Company",frm.doc.company,'default_income_account',(d)=>{
+			if(!d.default_income_account){
+				let account2="4110 - Sales - "+s.abbr
+				 frappe.call({
+										async: false,
+										"method": "frappe.client.set_value",
+										"args": {
+											"doctype": "Company",
+											"name": frm.doc.company,
+											"fieldname": "default_income_account",
+											"value":account2
+										}
+									});
+				
+						frm.set_value('income_account',account2)
+				   
+			}
+			})
+			}
+		})
+		frm.doc.items.forEach(function(item){
+			if(!item.cost_center){
+			frappe.db.get_value("Company",frm.doc.company,'cost_center',(d)=>{
+			cost_center_val_update(d,s,frm);
+		})
+			}
+		})
+		
+	})
+}
+
+function cost_center_val_update(d,s,frm) {
+	if(!d.cost_center) {
+		let accountc="Main - "+s.abbr;
+		frappe.call({
+			async: false,
+			"method": "frappe.client.set_value",
+			"args": {
+				"doctype": "Company",
+				"name": frm.doc.company,
+				"fieldname": "cost_center",
+				"value": accountc
+			}
+		});
+		frm.set_value('cost_center',accountc);
+	}
+}
 
 function go_joborder_list(frm){
 	frm.add_custom_button(__('Go To Job Order List'), function(){
