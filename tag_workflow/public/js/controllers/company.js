@@ -1313,9 +1313,14 @@ window.myFunction = (id) => {
 	$('#' + id).addClass('active-strip-button');
 	cur_frm.set_value('default_invoice_view', description);
 }
-function redirect_job_site() {
+function redirect_job_site(frm) {
 	$('[data-fieldname="job_site"]').on("click", (e) => {
+		let job_site_name  = e.target.title ? e.target.title : e.target.innerText
 		localStorage.setItem('need_reload',1)
+		if(job_site_name){
+			let data_link = $(`[data-name="${job_site_name.trim()}"]`).attr('href')
+			window.location.href = data_link
+		}
 	});
   }
 
