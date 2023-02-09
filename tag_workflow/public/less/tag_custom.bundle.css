@@ -7,8 +7,8 @@
 body {
   background: #f9fafa;
 }
-[data-route="Form/Company/Genpact Staffing"] .form-tabs-list ul li a{
-  margin:0px 13px !important;
+[data-route="Form/Company/Genpact Staffing"] .form-tabs-list ul li a {
+  margin: 0px 13px !important;
 }
 
 label {
@@ -16,7 +16,7 @@ label {
   font-size: 14px !important;
 }
 button:focus {
-    outline: transparent;
+  outline: transparent;
 }
 .widget.onboarding-widget-box {
   display: none;
@@ -36,10 +36,10 @@ input[type="radio"]:checked::before {
   box-shadow: 0 0 0 2px rgb(33 185 228 / 25%);
   transition: 0.5 ease-in-out;
 }
-.unread{
+.unread {
   background-color: #fff !important;
 }
-.notification-item:hover{
+.notification-item:hover {
   background-color: #cccccc3b !important;
 }
 .indicator-pill.green {
@@ -263,9 +263,16 @@ input:visited {
 .recent-item.notification-item .notification-body:before {
   display: none;
 }
-.notification-list-body .recent-item.notification-item {
+.notification-list-body .recent-item.notification-item.unread {
   background: #e8f8fc;
   margin: 10px 0;
+}
+.notification-list-body .recent-item.notification-item {
+  background: #fff;
+  margin: 10px 0;
+}
+.notification-list-body .recent-item.notification-item:hover {
+  background: #f5f5f6;
 }
 /* notification */
 
@@ -302,8 +309,8 @@ input::-webkit-credentials-auto-fill-button {
   left: 10rem;
   max-width: 86%;
   width: 100%;
-  transition: .5s ease-in-out;
-  -webkit-transition: .5s ease-in-out;
+  transition: 0.5s ease-in-out;
+  -webkit-transition: 0.5s ease-in-out;
 }
 
 .comment-box {
@@ -441,27 +448,27 @@ input::-webkit-credentials-auto-fill-button {
   max-width: 324px;
   width: 100%;
 }
-#page-User [data-fieldname="new_password"]{
+#page-User [data-fieldname="new_password"] {
   margin-bottom: 20px;
 }
 #page-User [data-fieldname="new_password"] #showPassword {
-  margin: 0 8px -2px 0 !important; 
+  margin: 0 8px -2px 0 !important;
 }
 
 #page-User [data-fieldname="old_password"] {
   margin-bottom: 20px;
 }
-#page-User [data-fieldname="old_password"] #oldPassword{
-  margin: 0 8px -2px 0 !important; 
+#page-User [data-fieldname="old_password"] #oldPassword {
+  margin: 0 8px -2px 0 !important;
 }
 /* Staff Company List table */
 
 /* Hiring table */
 [data-route="hiring-home"] .sub-menu,
 [data-route="staff-home"] .sub-menu {
-  top: 61px!important;
+  top: 61px !important;
   z-index: 99;
-   padding-top: 30px!important;
+  padding-top: 30px !important;
   transition: 0.5s ease !important;
 }
 /* [data-route="staff-home"] #page-staff-home .page-head {
@@ -469,8 +476,8 @@ input::-webkit-credentials-auto-fill-button {
 } */
 [data-route="hiring-home"] .page-head,
 [data-route="staff-home"] #page-staff-home .page-head,
-[data-route="tagadmin-page"] #page-tagadmin-page .page-head   {
-  display: none!important;
+[data-route="tagadmin-page"] #page-tagadmin-page .page-head {
+  display: none !important;
 }
 [data-route="staff-home"] .home-tab .tab-content {
   margin-top: 20px;
@@ -785,15 +792,15 @@ textarea.form-control {
   right: 10px;
 }
 [data-page-route="Job Order"] #div_rate,
-#div_extra{
+#div_extra {
   position: relative;
 }
 [data-page-route="Job Order"] #div_rate > input,
-#div_extra > input{
+#div_extra > input {
   padding-left: 18px;
 }
 [data-page-route="Job Order"] #div_rate:after,
-#div_extra:after{
+#div_extra:after {
   position: absolute;
   left: 3px;
   top: 56%;
@@ -803,9 +810,9 @@ textarea.form-control {
 [data-route="hiring-home"] #page-hiring-home .page-head {
   display: none;
 }
-[data-route="hiring-home"]  #page-hiring-home {
+[data-route="hiring-home"] #page-hiring-home {
   padding: 20px 0;
-  transition: .5s ease-in-out;
+  transition: 0.5s ease-in-out;
 }
 .notification-settings {
   display: none;
@@ -1032,7 +1039,7 @@ input.input-with-feedback.form-control,
   content: "$";
 }
 [data-page-route="Assign Employee"] input#emp_pay_rate,
-[data-page-route="Item"] input#title_rate{
+[data-page-route="Item"] input#title_rate {
   padding-left: 20px;
 }
 
@@ -1222,8 +1229,8 @@ select.input-with-feedback.form-control.ellipsis {
   .list-row-container
   .level-left
   .list-row-col:nth-child(4) {
-    flex: 1.6;
-  }
+  flex: 1.6;
+}
 
 .list-row .level-right,
 .list-row-head .level-right {
@@ -1360,7 +1367,7 @@ select.input-with-feedback.form-control.ellipsis {
   .form-grid
   .grid-body
   .data-row
-    div:nth-child(3) {
+  div:nth-child(3) {
   max-width: 13.5% !important;
   flex: 0 0 13.5% !important;
   height: auto;
@@ -1525,8 +1532,12 @@ select.input-with-feedback.form-control.ellipsis {
   height: 100px;
   display: inherit;
 }
-	.Accreditations-btn {
-  background: #f5e8c8; border-radius: 10px;border:none; padding: 2px 11px; margin-right: 3px;
+.Accreditations-btn {
+  background: #f5e8c8;
+  border-radius: 10px;
+  border: none;
+  padding: 2px 11px;
+  margin-right: 3px;
 }
 [data-page-route="List/Job Order/List"]
   .order-list-hiring
@@ -1561,16 +1572,16 @@ select.input-with-feedback.form-control.ellipsis {
 }
 .widget {
   padding: 15px !important;
-  box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
-   border: 1px solid #cccccc36 !important;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+  border: 1px solid #cccccc36 !important;
 }
 .widget.hiring_dashboard_table,
-#page-Workspaces .widget.spacer, 
-#page-Workspaces .layout-main-section  {
+#page-Workspaces .widget.spacer,
+#page-Workspaces .layout-main-section {
   padding: 0px !important;
   box-shadow: none !important;
-  border: none!important;
- }
+  border: none !important;
+}
 .widget.shortcut-widget-box .widget-title,
 .widget .widget-head .widget-title {
   font-size: 16px !important;
@@ -1578,41 +1589,60 @@ select.input-with-feedback.form-control.ellipsis {
 }
 [data-page-route="Add Timesheet"] .card-section .form-grid.error,
 [data-page-route="Assign Employee"] .form-grid.error {
-  border: 1px solid#EBEEF0!important;
+  border: 1px solid#EBEEF0 !important;
 }
 [data-page-route="tagadmin-page"] .layout-main-section .home {
-    padding-top: 25px;
-} 
+  padding-top: 25px;
+}
 [data-fieldtype="Table"] .form-grid .grid-heading-row .row-index,
 [data-fieldtype="Table"] .form-grid .grid-body .row-index,
-[data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-head span.list-liked-by-me, 
-[data-page-route="List/Timesheet/List"] .layout-main-section .frappe-list .list-row-container span.list-row-like,
+[data-page-route="List/Timesheet/List"]
+  .layout-main-section
+  .frappe-list
+  .list-row-head
+  span.list-liked-by-me,
+[data-page-route="List/Timesheet/List"]
+  .layout-main-section
+  .frappe-list
+  .list-row-container
+  span.list-row-like,
 [data-route="List/Timesheet/List"] #navbar-breadcrumbs li:nth-child(1),
-[data-page-route=Item] [title="Bill Rate"]:after,
+[data-page-route="Item"] [title="Bill Rate"]:after,
 [data-page-route="Timesheet"] [data-label="Create%20Salary%20Slip"],
-[data-page-route="Item"] [data-fieldtype="Table"] [data-fieldname="job_site"] .reqd:after,
-#page-staff_company_list .staff_list .clearfix  {
-  display:none;
+[data-page-route="Item"]
+  [data-fieldtype="Table"]
+  [data-fieldname="job_site"]
+  .reqd:after,
+#page-staff_company_list .staff_list .clearfix {
+  display: none;
 }
-#datepickers-container{
+#datepickers-container {
   z-index: 999999;
 }
-[data-page-route=Workspaces] .layout-main-section {
-   background: #f9fafa !important;
+[data-page-route="Workspaces"] .layout-main-section {
+  background: #f9fafa !important;
 }
-[data-page-route="Add Timesheet"] .form-grid .grid-heading-row .data-row .sortable-handle, [data-page-route="Add Timesheet"] .form-grid .grid-body .data-row .sortable-handle {
+[data-page-route="Add Timesheet"]
+  .form-grid
+  .grid-heading-row
+  .data-row
+  .sortable-handle,
+[data-page-route="Add Timesheet"]
+  .form-grid
+  .grid-body
+  .data-row
+  .sortable-handle {
   max-width: 3.5% !important;
   flex: 0 0 3.5% !important;
   height: auto;
 }
 
-
 /*------ Media query start ----*/
 @media (max-width: 1300px) {
   .col.layout-main-section-wrapper,
   .col-md-12.layout-main-section-wrapper {
-    left: 13rem!important ;
-    max-width: 80%!important;
+    left: 13rem !important ;
+    max-width: 80% !important;
   }
   .page-head .page-head-content {
     margin-top: 10px;
@@ -1805,57 +1835,56 @@ select.input-with-feedback.form-control.ellipsis {
 [data-fieldtype="Currency"] .ellipsis div {
   text-align: left !important;
 }
-#div_rate .control-input-wrapper input{
+#div_rate .control-input-wrapper input {
   padding-left: 21px;
 }
-#div_rate:after{
+#div_rate:after {
   left: 11px !important;
   top: 55% !important;
 }
 
-
 /*---Branch Banner On Slary Slip and Payroll Entry---*/
-.banner-container{
-  display:inline-block;
-  position:relative;
+.banner-container {
+  display: inline-block;
+  position: relative;
 }
-#close_banner{
-  position:absolute;
-  right:5px;
-  background:none;
-  border:none;
-  color:white;
+#close_banner {
+  position: absolute;
+  right: 5px;
+  background: none;
+  border: none;
+  color: white;
 }
-#close_banner > span{
-  font-size:25px;
+#close_banner > span {
+  font-size: 25px;
 }
-#sign_up{
-  position:absolute;
-  bottom:10px;
-  left:20px;
+#sign_up {
+  position: absolute;
+  bottom: 10px;
+  left: 20px;
   box-shadow: 0px 3px #888;
-    padding: 5px 15px;
-    border: white !important;
-  border-radius:6px !important;
+  padding: 5px 15px;
+  border: white !important;
+  border-radius: 6px !important;
 }
-#more_info{
-  position:absolute;
-  bottom:10px;
-  left:110px;
+#more_info {
+  position: absolute;
+  bottom: 10px;
+  left: 110px;
   box-shadow: 0px 3px #888;
-  padding:5px 15px;
+  padding: 5px 15px;
   border: white !important;
   border-radius: 6px !important;
 }
 
-.frappe-control.input-max-width[data-fieldname="branch_api_key_data"]{
-  padding-top:38px;
+.frappe-control.input-max-width[data-fieldname="branch_api_key_data"] {
+  padding-top: 38px;
 }
 
 .frappe-control.input-max-width[data-fieldname="quickbooks_company_id"],
 .frappe-control.input-max-width[data-fieldname="redirect_url"],
-.frappe-control.input-max-width[data-fieldname="military_veteran"]{
-  top:12px;
+.frappe-control.input-max-width[data-fieldname="military_veteran"] {
+  top: 12px;
 }
 
 @media (min-width: 768px) {
@@ -1912,20 +1941,20 @@ span.comment-count {
 }
 
 #page-query-report .datatable .dt-scrollable {
-  max-height:420px !important
+  max-height: 420px !important;
 }
-.pac-container{
+.pac-container {
   z-index: 9999999;
 }
 .certificate-btn {
   background: #f5e8c8;
-    border-radius: 10px;
-    margin-right: 3px;
+  border-radius: 10px;
+  margin-right: 3px;
 }
-.like-icon{
+.like-icon {
   display: none;
 }
-[data-page-route="staff_company_list"] .like-icon{
+[data-page-route="staff_company_list"] .like-icon {
   display: block;
 }
 .staff-certificate-btn {
@@ -1938,113 +1967,146 @@ span.comment-count {
 .col.grid-static-col.col-xs-1.d-flex.justify-content-center {
   pointer-events: none;
 }
-[data-page-route="User"] [title="assign_multiple_company"]>div>div>div>div>div>a{
+[data-page-route="User"]
+  [title="assign_multiple_company"]
+  > div
+  > div
+  > div
+  > div
+  > div
+  > a {
   display: none;
 }
 
-
-
-
 @media (max-width: 768px) {
   [data-route="#page-hiring-home"] .sub-menu,
-[data-route="staff-home"] .sub-menu {
-  top: 30px !important;
-}
+  [data-route="staff-home"] .sub-menu {
+    top: 30px !important;
+  }
   [data-page-route="Workspaces"] .hiring_dashboard_table table {
-    width:1000px;
+    width: 1000px;
   }
   .header-alignment {
     align-items: start !important;
   }
   .page-head {
     padding-bottom: 40px;
-}
-  .sub-menu {
-    top:105px !important;
   }
- .search-bar input::-webkit-input-placeholder {
-         opacity: 0;
-    }
+  .sub-menu {
+    top: 105px !important;
+  }
+  .search-bar input::-webkit-input-placeholder {
+    opacity: 0;
+  }
   .custom-location {
-  flex-wrap: wrap;
+    flex-wrap: wrap;
     justify-content: flex-start !important;
     flex-shrink: inherit;
-}
-.custom-location button {
-  margin-top: 10px;
-}
+  }
+  .custom-location button {
+    margin-top: 10px;
+  }
   #page-timesheet-approval #data_head .widget {
     padding: 0;
   }
   #page-timesheet-approval #data_head .widget table {
-      width: 650px;
+    width: 650px;
   }
-  [data-page-route="Add Timesheet"] [data-fieldtype="Table"] .form-grid .grid-heading-row,
-  [data-page-route="Add Timesheet"]  [data-fieldtype="Table"] .form-grid .grid-body .grid-row {
-    width: 1100px!important;
-}
-  [data-route="Form/Add Timesheet/Add Timesheet"] .layout-main-section-wrapper .layout-main-section .form-message p,
-  [data-route="timesheet-approval"] .layout-main-section-wrapper .layout-main-section .form-message p {
+  [data-page-route="Add Timesheet"]
+    [data-fieldtype="Table"]
+    .form-grid
+    .grid-heading-row,
+  [data-page-route="Add Timesheet"]
+    [data-fieldtype="Table"]
+    .form-grid
+    .grid-body
+    .grid-row {
+    width: 1100px !important;
+  }
+  [data-route="Form/Add Timesheet/Add Timesheet"]
+    .layout-main-section-wrapper
+    .layout-main-section
+    .form-message
+    p,
+  [data-route="timesheet-approval"]
+    .layout-main-section-wrapper
+    .layout-main-section
+    .form-message
+    p {
     font-size: 13px;
     margin: 15px;
     min-width: 85px;
-}
-  [data-page-route="List/Timesheet/List"] .frappe-card .list-row-container .level-left .list-row-col:nth-child(4),
-  [data-page-route="List/Timesheet/List"] .frappe-card header .level-left .list-row-col:nth-child(4) {
+  }
+  [data-page-route="List/Timesheet/List"]
+    .frappe-card
+    .list-row-container
+    .level-left
+    .list-row-col:nth-child(4),
+  [data-page-route="List/Timesheet/List"]
+    .frappe-card
+    header
+    .level-left
+    .list-row-col:nth-child(4) {
     flex: 1.4;
-}
+  }
   .flex-item .page-icon-group {
     display: flex !important;
   }
-  .add-btn .hidden-xs{
+  .add-btn .hidden-xs {
     display: inline-block !important;
   }
   .layout-main-section .frappe-list .list-row .indicator-pill {
     padding: 4px 4px;
-    height:auto;
+    height: auto;
   }
-  .btn.btn-sm  {
-  background-color: var(--fg-color);
-}
-   .hidden-xs{
+  .btn.btn-sm {
+    background-color: var(--fg-color);
+  }
+  .hidden-xs {
     display: block !important;
   }
-    .hide{
-     display: none !important;
-   }
+  .hide {
+    display: none !important;
+  }
   .layout-main-section .frappe-list .result {
     overflow: auto;
     min-height: auto;
   }
-   .layout-main-section .frappe-list .result .list-row-head,  
-   .layout-main-section .frappe-list .result .list-row-container {
+  .layout-main-section .frappe-list .result .list-row-head,
+  .layout-main-section .frappe-list .result .list-row-container {
     width: 1000px !important;
   }
   .list-row .select-like {
     padding: 15px 7px 15px 15px;
-}
-   .frappe-card .list-row-container .level-left .list-row-col:nth-child(4),
-    .frappe-card header .level-left .list-row-col:nth-child(4) {
+  }
+  .frappe-card .list-row-container .level-left .list-row-col:nth-child(4),
+  .frappe-card header .level-left .list-row-col:nth-child(4) {
     flex: 1.4;
-}
- 
-  .list-row-head .level-right, .list-row .level-right {
+  }
+
+  .list-row-head .level-right,
+  .list-row .level-right {
     flex: 0.2;
   }
- .form-grid .grid-heading-row .data-row .sortable-handle, 
- .form-grid .grid-body .data-row .sortable-handle {
-        padding: 10px 5px;
+  .form-grid .grid-heading-row .data-row .sortable-handle,
+  .form-grid .grid-body .data-row .sortable-handle {
+    padding: 10px 5px;
   }
-   .form-section.card-section {
+  .form-section.card-section {
     padding: 10px;
   }
   .social-icon {
-    justify-content:center;
+    justify-content: center;
   }
-  [data-page-route="List/Sales Invoice/List"] .frappe-card .frappe-list.list-subject {
+  [data-page-route="List/Sales Invoice/List"]
+    .frappe-card
+    .frappe-list.list-subject {
     flex-basis: 60px;
   }
-  [data-page-route="Employee"] .editable-form .layout-main-section-wrapper .layout-main-section {
+  [data-page-route="Employee"]
+    .editable-form
+    .layout-main-section-wrapper
+    .layout-main-section {
     margin-top: 40px;
   }
   [data-page-route="Employee"] .page-head .page-head-content div:nth-child(2) {
@@ -2052,7 +2114,7 @@ span.comment-count {
     margin: 15px 0px;
     display: contents;
     background: #fff;
-    float:left;
+    float: left;
   }
   [data-page-route="Employee"] .page-head .page-head-content div:nth-child(3) {
     margin: 5px 0px;
@@ -2075,8 +2137,16 @@ span.comment-count {
   #order {
     padding: 0;
   }
-  [data-route="Form/Add Timesheet/Add Timesheet"] .layout-main-section-wrapper .layout-main-section .form-message div,
-  [data-route="timesheet-approval"] .layout-main-section-wrapper .layout-main-section .form-message div  {
+  [data-route="Form/Add Timesheet/Add Timesheet"]
+    .layout-main-section-wrapper
+    .layout-main-section
+    .form-message
+    div,
+  [data-route="timesheet-approval"]
+    .layout-main-section-wrapper
+    .layout-main-section
+    .form-message
+    div {
     justify-content: flex-start;
   }
   [data-fieldname="update_employee_records"] button {
@@ -2096,7 +2166,7 @@ span.comment-count {
     max-width: 100%;
     width: 100%;
     padding: 0;
-  }   
+  }
   #page-Workspaces .page-title .title-area .title-text {
     margin-left: 0px;
   }
