@@ -2,9 +2,13 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Company Review', {
-	refresh: function() {
+	refresh: function(frm) {
 		staffing_review();
 		$('.form-footer').hide();
+        for(let i=0; i<=5; i++){
+            $('[data-rating='+i+']').off('click');
+        }
+        frm.disable_save();
 	}
 });
 

@@ -19691,7 +19691,7 @@
         "set_user_permissions": 0,
         "share": 0,
         "submit": 0,
-        "write": 0
+        "write": 1
     },
     {
         "amend": 0,
@@ -19716,7 +19716,7 @@
         "set_user_permissions": 0,
         "share": 0,
         "submit": 0,
-        "write": 0
+        "write": 1
     },
     {
         "amend": 0,

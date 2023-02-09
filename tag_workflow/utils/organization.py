@@ -93,6 +93,7 @@ def setup_data():
         update_password_field()
         update_user_permission()
         staffing_radius()
+        update_staffing_reviews()
         set_default_template()
         set_template_name()
         get_user_company_data()
@@ -783,6 +784,7 @@ def old_job_title_child_append(i, dicts_val, doc):
 
 def update_hiring_reviews():
     try:
+        update_review = "update_hiring_reviews"
         frappe.logger().debug("*------Hiring Company Reviews Update---------*\n")
         sql = '''select name from `tabHiring Company Review` where rating_hiring=0'''
         reviews_name=frappe.db.sql(sql,as_list=1)
@@ -794,8 +796,8 @@ def update_hiring_reviews():
                 frappe.db.sql(f'''UPDATE `tabHiring Company Review` set rating_hiring=rating*5 where name in {tuple(reviews_list)}''')
             frappe.db.commit()
     except Exception as e:
-        print('update_hiring_reviews Error', e, frappe.get_traceback())
-        frappe.log_error(e,'update_hiring_reviews Error')
+        print(update_review,' Error', e, frappe.get_traceback())
+        frappe.log_error(e,update_review,' Error')
 
 
 def import_sample_data():
@@ -1072,6 +1074,29 @@ def update_user_permission_for_user(user):
         print(e, frappe.get_traceback())
         frappe.log_error(e, 'update_user_permission in organization.py')
 
+def update_staffing_reviews():
+    try:
+        frappe.logger().debug("*------Staffing Company Reviews Update---------*\n")
+        print("*------Updating Staffing Company Reviews ---------*\n")
+        sql = '''select name from `tabCompany Review` where staffing_ratings=0'''
+        reviews_name=frappe.db.sql(sql,as_list=1)
+        reviews_list = [r[0] for r in reviews_name]
+        if len(reviews_list) > 0:
+            if len(reviews_list)==1:
+                frappe.db.sql(f'''UPDATE `tabCompany Review` set staffing_ratings=rating*5 where name in ("{reviews_list[0]}")''')
+            else:
+                frappe.db.sql(f'''UPDATE `tabCompany Review` set staffing_ratings=rating*5 where name in {tuple(reviews_list)}''')
+            frappe.db.commit()
+    except Exception as e:
+        print('update_hiring_reviews Error', e, frappe.get_traceback())
+        frappe.log_error(e,'update_staffing_ratings Error')
+    
+def update_staff_rating():
+    sql = """update `tabCompany` set average_rating = average_rating * 5 where average_rating<1"""
+    print("*------Updating Staffing Average Rating---------*\n")
+    frappe.db.sql(sql)
+    frappe.db.commit()
+
 @frappe.whitelist()
 def change_emp_status():
     try:
@@ -1087,6 +1112,7 @@ def change_emp_status():
     except Exception as e:
         print('change_emp_status Error', e, frappe.get_traceback())
         frappe.log_error(e,'change_emp_status Error')
+
 
 @frappe.whitelist()
 def draft_ts_time():

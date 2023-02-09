@@ -31,6 +31,11 @@ frappe.listview_settings["Hiring Company Review"] = {
 				</a>
 			</span>
 			</div>`
+        },
+        job_order(val,d,f){
+            return `<span class=" ellipsis2" title="" id="${val}-${f.name}">
+                        <a class="ellipsis" href="/app/job-order/${val}" data-filter="${d.fieldname},=,${val}" data-fieldname="${val}-${f.name}">${val}</a>
+                    </span>`;
         }
     }
 }

@@ -7,6 +7,9 @@
 body {
   background: #f9fafa;
 }
+[data-route="Form/Company/Genpact Staffing"] .form-tabs-list ul li a{
+  margin:0px 13px !important;
+}
 button:focus {
     outline: transparent;
 }
