@@ -35,6 +35,12 @@ input[type="radio"]:checked::before {
   box-shadow: 0 0 0 2px rgb(33 185 228 / 25%);
   transition: 0.5 ease-in-out;
 }
+.unread{
+  background-color: #fff !important;
+}
+.notification-item:hover{
+  background-color: #cccccc3b !important;
+}
 .indicator-pill.green {
   background: #e8fcf6;
   color: #414141;
