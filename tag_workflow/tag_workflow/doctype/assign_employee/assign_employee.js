@@ -623,11 +623,15 @@ function worker_notification(frm) {
 }
 
 function table_emp(frm, table, msg) {
+  let len = 0;
+  for(let i in table){
+    len = table[i].remove_employee==0 ? len+1 : len;
+  }
   if (frm.doc.tag_status == "Approved" && frm.doc.resume_required == 0) {
-    table.length > Number(frm.doc.claims_approved)
+    len > Number(frm.doc.claims_approved)
       ? msg.push(
           "Employee Details(<b>" +
-            table.length +
+            len +
             "</b>) value is more than No. Of Employees Approved(<b>" +
             frm.doc.claims_approved +
             "</b>) for the Job Order(<b>" +
@@ -636,14 +640,14 @@ function table_emp(frm, table, msg) {
         )
       : console.log("TAG");
   } else if (frm.doc.resume_required == 0) {
-    table.length > Number(frm.doc.claims_approved)
+    len > Number(frm.doc.claims_approved)
       ? msg.push("Please Assign " + frm.doc.claims_approved + " Employee(s)")
       : console.log("TAG");
   } else {
-    table.length > Number(frm.doc.no_of_employee_required)
+    len > Number(frm.doc.no_of_employee_required)
       ? msg.push(
           "Employee Details(<b>" +
-            table.length +
+            len +
             "</b>) value is more than No. Of Employees Required(<b>" +
             frm.doc.no_of_employee_required +
             "</b>) for the Job Order(<b>" +
