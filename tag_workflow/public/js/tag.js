@@ -43,7 +43,7 @@ $(document).ready(function(){
     }
 });
 
-let list_for_hiring= ()=>{
+function list_for_hiring(){
 	if(["Hiring", "Exclusive Hiring"].includes(frappe.boot.tag.tag_user_info.company_type)){
 		frappe.flags.ats.push('Company Review');
 	}
