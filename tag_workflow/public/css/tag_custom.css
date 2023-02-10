@@ -464,7 +464,7 @@ input::-webkit-credentials-auto-fill-button {
 [data-route="hiring-home"] .sub-menu,
 [data-route="staff-home"] .sub-menu {
   top: 61px !important;
-  padding-top: 30px !important;
+  padding-top: 50px !important;
   z-index: 99;
   transition: 0.5s ease !important;
   -webkit-transition: 0.5s ease !important;

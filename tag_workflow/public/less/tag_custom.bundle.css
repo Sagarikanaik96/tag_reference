@@ -468,7 +468,7 @@ input::-webkit-credentials-auto-fill-button {
 [data-route="staff-home"] .sub-menu {
   top: 61px !important;
   z-index: 99;
-  padding-top: 30px !important;
+  padding-top: 50px !important;
   transition: 0.5s ease !important;
 }
 /* [data-route="staff-home"] #page-staff-home .page-head {
