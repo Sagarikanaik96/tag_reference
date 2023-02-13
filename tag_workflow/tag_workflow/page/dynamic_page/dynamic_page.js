@@ -61,10 +61,10 @@ frappe.FaceRecognition = Class.extend({
 				setTimeout(function () {
 					hide(r, page)
 				}, 10);
-
 				let my_val = r.message[0];
 				let txt = "";
 				company_type = my_val.organization_type
+				let company_phone_no = check_phone_number(my_val.phone_no,r.message[0].organization_type)
 				let text = r.message[2];
 				for (let i in text) {
 					txt += text[i].full_name + "<br>";
@@ -123,6 +123,7 @@ frappe.FaceRecognition = Class.extend({
 								<div id="jobsite">
 									<div id="address"> ${jobsite_address}</div>
 								</div>
+								<p class="my-3 rating">${company_phone_no}</p>
 								${count_val >= 10 ? ` <p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${my_val.average_rating || 0} </span> <span> <a href="#" href="#" onclick="return theReviewsFunction('${rate}');"> <u> ${count} </u> </a> </span> </p>` : '<div></div>'}</div>
 							</div>
 							<div class="col-md-6 col-sm-12 order text-left text-md-right ">
@@ -547,6 +548,9 @@ function unblock_company() {
 			}
 		}
 	})
+}
+function check_phone_number(phone_no,company_type){
+	return company_type  == "Staffing" &&   phone_no ? phone_no : ""
 }
 function get_blocked_list(page) {
 	if (frappe.boot.tag.tag_user_info.company_type == 'Hiring' && frappe.boot.tag.tag_user_info.company != company) {
