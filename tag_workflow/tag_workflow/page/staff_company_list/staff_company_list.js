@@ -285,6 +285,7 @@ function trigger_direct_order(staff_name) {
 	let doc = frappe.model.get_new_doc("Job Order");
 	doc.company = frappe.boot.tag.tag_user_info.company;
 	doc.staff_company = staff_name;
+	doc.staff_company2 = staff_name;
 	doc.posting_date_time = frappe.datetime.now_date();
 	frappe.set_route("Form", doc.doctype, doc.name);
 }

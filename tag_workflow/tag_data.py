@@ -136,7 +136,7 @@ def update_job_order(user, company_type, sid, job_name, employee_filled, staffin
             if(len(claimed)==0):
                 job.db_set('staff_org_claimed',(str(claimed)+str(staffing_org)))
             else:
-                job.db_set('staff_org_claimed',(str(claimed)+", "+str(staffing_org)))
+                job.db_set('staff_org_claimed',(str(claimed)+"~"+str(staffing_org)))
             frappe.db.commit()
             sub = f'New Message regarding {job_name} from {hiringorg} is available'
             msg = f'Your Employees has been approved for Work Order {job_name}'
@@ -181,7 +181,7 @@ def receive_hiring_notification(user, company_type, hiring_org, job_order, staff
                 bid_receive.claim=staffing_org
                 chat_room_created(hiring_org,staffing_org,job_order)
             elif(staffing_org not in bid_receive.claim):
-                bid_receive.claim=str(bid_receive.claim)+str(",")+staffing_org
+                bid_receive.claim=str(bid_receive.claim)+str("~")+staffing_org
                 chat_room_created(hiring_org,staffing_org,job_order)
 
             bid_receive.save(ignore_permissions=True)
@@ -222,7 +222,7 @@ def check_partial_employee(job_order,staffing_org,emp_detail,no_of_worker_req,jo
 
         else:
             if(staffing_org not in job_order.claim):
-                job_order.claim=str(job_order.claim)+str(",")+staffing_org
+                job_order.claim=str(job_order.claim)+str("~")+staffing_org
                 chat_room_created(hiring_org,staffing_org,job_order.name)
 
         job_order.save(ignore_permissions=True)
@@ -305,12 +305,12 @@ def staff_email_notification(hiring_org=None,job_order=None,job_order_title=None
     except Exception as e:
         print(e, frappe.get_traceback())
 def staff_comp_for_dir_order(multiple_comp,staff_company,job_order):
-    if multiple_comp and len(multiple_comp)>0:
+    if multiple_comp and len(multiple_comp)>1:
         enqueue(save_job_order_value,job_order=job_order, staff_company=staff_company, now=True)
         return multiple_comp
     else:
         frappe.db.sql('''update `tabJob Order` set is_single_share = 1 where name = "{}"'''.format(job_order))
-        return (staff_company.strip()).split(',,')
+        return (staff_company.strip()).split('~')
     
 def staff_email_notification_cont(hiring_org=None,job_order=None,job_order_title=None,doc=None,subject=None):
     try:
@@ -1045,7 +1045,7 @@ def staff_own_job_order(job_order, emp_detail, doc_name,staffing_org):
         if(len(claimed)==0):
             frappe.db.set_value(jobOrder, job_order, "staff_org_claimed", (str(claimed)+str(staffing_org)))
         else:
-            frappe.db.set_value(jobOrder, job_order, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
+            frappe.db.set_value(jobOrder, job_order, "staff_org_claimed", (str(claimed)+"~"+str(staffing_org)))
         return 'success'
     except Exception as e:
         frappe.log_error(e, "Staff Job Order")
@@ -1171,7 +1171,7 @@ def hiring_auto_approve(hiring_type,job_order,employee_filled,staffing_org,doc_n
         if(len(claimed)==0):
             frappe.db.set_value(jobOrder, job_order, "staff_org_claimed", (str(claimed)+str(staffing_org)))
         else:
-            frappe.db.set_value(jobOrder, job_order, "staff_org_claimed", (str(claimed)+", "+str(staffing_org)))
+            frappe.db.set_value(jobOrder, job_order, "staff_org_claimed", (str(claimed)+"~"+str(staffing_org)))
 
         assign_emp_status_data=f'update `tabAssign Employee` set tag_status="Approved" where name="{doc_name}"'                       
         frappe.db.sql(assign_emp_status_data)

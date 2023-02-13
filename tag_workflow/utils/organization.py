@@ -1203,3 +1203,31 @@ def draft_ts_time():
     except Exception as e:
         print('draft_ts_time', e, frappe.get_traceback())
         frappe.log_error(e, 'draft_ts_time')
+        
+def update_claims():
+    sql = '''select name,staff_org_claimed,claim from `tabJob Order` where staff_org_claimed is not NULL  or claim is NOT  NULL'''
+    job_order_data = frappe.db.sql(sql,as_list=1)
+    for val in job_order_data:
+        if val[1]:
+            staff_org_updated = val[1].replace(",", "~")
+            frappe.db.sql('''update `tabJob Order` set staff_org_claimed = "{0}" where name = "{1}"'''.format(staff_org_updated,val[0]))
+            frappe.db.commit()
+        if val[2]:
+            claim_updated = val[2].replace(",","~")
+            frappe.db.sql('''update `tabJob Order` set claim = "{0}" where name = "{1}"'''.format(claim_updated,val[0]))
+            frappe.db.commit()
+    comp_with_comma_list = frappe.db.sql('''select name from `tabCompany` where name like "%,%"''',as_list =1)
+    for comp in comp_with_comma_list:
+        job_order_data = frappe.db.sql(sql,as_list=1)
+        comp_name = comp[0].replace(",","~")
+        for val in job_order_data:
+            if val[1]:
+                staff_org_updated = val[1].replace(comp_name, comp[0])
+                frappe.db.sql('''update `tabJob Order` set staff_org_claimed = "{0}" where name = "{1}"'''.format(staff_org_updated,val[0]))
+                frappe.db.commit()
+            if val[2]:
+                claim_updated = val[2].replace(comp_name,comp[0])
+                frappe.db.sql('''update `tabJob Order` set claim = "{0}" where name = "{1}"'''.format(claim_updated,val[0]))
+                frappe.db.commit()
+
+

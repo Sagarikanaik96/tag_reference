@@ -320,6 +320,7 @@ function new_order() {
 	let doc = frappe.model.get_new_doc("Job Order");
 	doc.company = frappe.boot.tag.tag_user_info.company;
 	doc.staff_company = b;
+	doc.staff_company2 = b;
 	doc.posting_date_time = frappe.datetime.now_date();
 	frappe.set_route("Form", doc.doctype, doc.name);
 }

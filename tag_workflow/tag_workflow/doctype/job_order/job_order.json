@@ -102,7 +102,8 @@
   "column_break_87",
   "repeat_staff_company",
   "repeat_old_worker",
-  "is_direct"
+  "is_direct",
+  "staff_company2"
  ],
  "fields": [
   {
@@ -696,14 +697,21 @@
    "fieldname": "worker_comp_code",
    "fieldtype": "Data",
    "label": "Workers' Comp Code"
+  },
+  {
+   "fieldname": "staff_company2",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Staff Company2"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-13 20:41:26.866334",
+ "modified": "2023-02-07 03:47:03.452181",
  "modified_by": "Administrator",
  "module": "Tag Workflow",
  "name": "Job Order",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -721,5 +729,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

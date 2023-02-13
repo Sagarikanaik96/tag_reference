@@ -41,7 +41,7 @@ def staffing_claim_joborder(job_order,hiring_org, staffing_org, doc_name,single_
 		else:
 			if(staffing_org not in bid_receive.claim):
 				bid_receive.bid=1+int(bid_receive.bid)
-				bid_receive.claim=str(bid_receive.claim)+str(",")+staffing_org
+				bid_receive.claim=str(bid_receive.claim)+str("~")+staffing_org
 				chat_room_created(hiring_org,staffing_org,job_order)
 
 		bid_receive.save(ignore_permissions=True)
@@ -85,7 +85,7 @@ def save_claims(my_data,doc_name):
 			if(len(claimed)==0):
 				value1 += (str(claimed)+str(i))
 			elif(str(i) not in claimed):
-				value1 += (str(claimed)+", "+str(i))
+				value1 += (str(claimed)+"~"+str(i))
 			sql=f'select name from `tabClaim Order` where job_order="{doc_name}" and staffing_organization="{i}"'
 			claim_order_name=frappe.db.sql(sql,as_dict=1)
 			doc=frappe.get_doc(claimOrder,claim_order_name[0].name)
@@ -221,7 +221,7 @@ def check_partial_claim(job_order,staffing_org,no_required,no_assigned,hiring_or
 			chat_room_created(hiring_org,staffing_org,job_order)
 
 		elif(staffing_org not in claimed):
-			value1 += (str(claimed)+", "+str(staffing_org))
+			value1 += (str(claimed)+"~"+str(staffing_org))
 			chat_room_created(hiring_org,staffing_org,job_order)
 		else:
 			value1 += str(claimed)
@@ -294,7 +294,7 @@ def claim_comp_assigned(claimed,doc_name,doc):
 	if(len(claimed)==0):
 		frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+str(doc.staffing_organization)))
 	elif(str(doc.staffing_organization) not in claimed):
-		frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+", "+str(doc.staffing_organization)))
+		frappe.db.set_value(jobOrder, doc_name, "staff_org_claimed", (str(claimed)+"~"+str(doc.staffing_organization)))
 
 @frappe.whitelist()
 def claim_field_readonly(docname):
@@ -406,14 +406,14 @@ def auto_claims_approves(my_data,doc_name,doc_claim):
 			if(len(claimed)==0):
 				value1 += (str(claimed)+str(i))
 			elif(str(i) not in claimed):
-				value1 += (str(claimed)+", "+str(i))
+				value1 += (str(claimed)+"~"+str(i))
 			else:
 				value1 += str(claimed)
 			value2=""
 			if(len(claims)==0):
 				value2 += (str(claims)+str(i))
 			elif(str(i) not in claims):
-				value2 += (str(claims)+", "+str(i))
+				value2 += (str(claims)+"~"+str(i))
 			else:
 				value2 += str(claims)
 			doc=frappe.get_doc(claimOrder,doc_claim)

@@ -64,6 +64,7 @@ async function repeat_joborder(name){
 			"select_job": r["select_job"],
 			"shovel": r["shovel"],
 			"staff_company": r["staff_company"],
+			"staff_company2":r["staff_company"],
 			"staff_org_claimed": r["staff_org_claimed"],
 			"worker_filled": r["worker_filled"],
 			"_assign": r["_assign"],

@@ -67,7 +67,7 @@ def job_order_name(username,company_type,company_name):
             l=[]
             for i in company_user_list:
                 get_claimed_comp = frappe.db.sql('''select claim from `tabJob Order` where name='{0}' '''.format(i),as_list=1)
-                value = get_claimed_comp[0][0].split(',')
+                value = get_claimed_comp[0][0].split('~')
                 for j in value:
                     l.append(i+"_"+j)
 

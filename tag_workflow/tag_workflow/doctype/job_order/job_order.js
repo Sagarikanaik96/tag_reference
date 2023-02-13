@@ -1696,13 +1696,14 @@ function repeat_hiring_dia(frm){
                     window.multiple_comp.push(direct);
                 }
                 else if(!existed_company.includes(direct)  && direct){
-                    let new_value=existed_company+','+direct
+                    let new_value=existed_company+', '+direct
                     cur_dialog.set_value('selected_companies',new_value)
                     window.multiple_comp.push(direct);
                 }
 
 			}},
-			{fieldname:"selected_companies",fieldtype:"Data",label:"Selected Companies",default:" ",read_only:1,hidden:1},]
+			{fieldname:"selected_companies",fieldtype:"Data",label:"Selected Companies",default:" ",read_only:1,hidden:1},
+		]
 	});
 
 	dialog.set_primary_action(__('Proceed'), function() {
@@ -1745,7 +1746,6 @@ function trigger_new_order(frm, direct, normal, company){
 	let doc = frm.doc;
 	let no_copy_list = ["name", "amended_from", "amendment_date", "cancel_reason"];
 	let newdoc = frappe.model.get_new_doc(doc.doctype, doc, "");
-	console.log(normal);
 	for(let key in doc){
 		// dont copy name and blank fields
 		let df = frappe.meta.get_docfield(doc.doctype, key);
@@ -1775,12 +1775,13 @@ function trigger_new_order(frm, direct, normal, company){
 	newdoc.is_repeat = 1;
 	newdoc.repeat_from = cur_frm.doc.name;
 	newdoc.repeat_from_company = cur_frm.doc.company;
-	newdoc.repeat_staff_company = company ? company : "";
+	newdoc.repeat_staff_company = window.multiple_comp.join("~").length>0? window.multiple_comp.join("~"): company;
 	newdoc.from_date = "";
 	newdoc.to_date = "";
 	newdoc.staff_org_claimed = "";
 	newdoc.order_status = "Upcoming";
 	newdoc.staff_company = company;
+	newdoc.staff_company2 = newdoc.repeat_staff_company
 	newdoc.repeat_old_worker = cur_frm.doc.no_of_workers;
 	newdoc.worker_filled = 0;
 	newdoc.bid = 0;
@@ -1791,7 +1792,6 @@ function trigger_new_order(frm, direct, normal, company){
 function get_company_list(){
 	let existed_comp
 	if(cur_dialog){
-		console.log("current_dialog",cur_dialog.get_value('company'))
 		existed_comp=cur_dialog.get_value('selected_companies')
 	}
 	let company = '\n';
@@ -1963,8 +1963,8 @@ function no_of_workers_changed(frm){
 function non_claims(){
 	let found = false;
 	let claim_comps= cur_frm.doc.claim;
-	if(claim_comps && claim_comps.includes(',')){
-		claim_comps= cur_frm.doc.claim.split(',')
+	if(claim_comps && claim_comps.includes('~')){
+		claim_comps= cur_frm.doc.claim.split('~')
 		for(let i in claim_comps){
 			if(frappe.boot.tag.tag_user_info.company_type == 'Staffing' && (frappe.boot.tag.tag_user_info.comps.includes(claim_comps[i]))){
 				cur_frm.toggle_display('section_break_html1', 0);

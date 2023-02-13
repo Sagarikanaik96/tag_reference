@@ -181,6 +181,5 @@ function update_address(data){
 function update_basic_value(data){
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "complete_address", document.getElementById("autocomplete-address").value);
     frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "zip", (data["postal_code"] ? data["postal_code"] : data["plus_code"]));
-    frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "suite_or_apartment_no", data.street_number);
 
 }

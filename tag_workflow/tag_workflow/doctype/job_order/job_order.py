@@ -31,9 +31,9 @@ class JobOrder(Document):
         self.check_assign()
 
     def check_assign(self):
-        if(self.is_repeat == 1 and self.repeat_staff_company and self.repeat_from and self.is_direct == 1 and self.repeat_staff_company == self.staff_company):
+        if(self.is_repeat == 1 and self.repeat_staff_company and self.repeat_from and self.is_direct == 1 and self.repeat_staff_company == self.staff_company2):
             selected_companies = self.repeat_staff_company.strip()
-            staff_selected_companies = selected_companies.split(',')
+            staff_selected_companies = selected_companies.split('~')
             frappe.db.set_value(ORD, self.name, "claim", selected_companies)
             frappe.db.set_value(ORD, self.name, "staff_org_claimed", selected_companies)
             frappe.db.set_value(ORD, self.name, "bid", len(staff_selected_companies))
@@ -45,7 +45,7 @@ class JobOrder(Document):
 
             frappe.db.set_value(ORD, self.name, "worker_filled", worker_filled)
             frappe.db.commit()
-            self.remaining_companies(self.staff_company, self.repeat_from, self.name, self.company, self.select_job)
+            self.remaining_companies(self.repeat_staff_company, self.repeat_from, self.name, self.company, self.select_job)
 
     def check_assign_doc(self, comp, worker_filled):
         if(frappe.db.exists(ASN, {"job_order": self.repeat_from, "company": comp, "tag_status": "Approved"})):
@@ -93,7 +93,7 @@ class JobOrder(Document):
 
     def check_claims(self,comp):
         if(frappe.db.exists(CLM, {"job_order": self.repeat_from, "staffing_organization": comp})):
-            frappe.db.set_value(ORD, self.name, "claim", ","+comp)
+            frappe.db.set_value(ORD, self.name, "claim", "~"+comp)
             old_claims = frappe.get_list(CLM, {"job_order": self.repeat_from, "staffing_organization": comp})
             for i in old_claims:
                 old_claim= frappe.get_doc(CLM, i)
@@ -128,8 +128,8 @@ class JobOrder(Document):
 
     def remaining_companies(self,staff_company,repeat_job_order_name,new_order,hiring_company,job_title):
         old_staff_companies=frappe.get_doc(ORD,repeat_job_order_name)
-        staff_selected_companies=old_staff_companies.staff_org_claimed.split(',')
-        new_selected_companies=staff_company.split(',')
+        staff_selected_companies=old_staff_companies.staff_org_claimed.split('~')
+        new_selected_companies=staff_company.split('~')
         if(len(staff_selected_companies)!=len(new_selected_companies)):
             comp_list=[c.strip() for c in staff_selected_companies]
             comp_list=tuple(comp_list)
@@ -204,7 +204,7 @@ def joborder_notification(organizaton,doc_name,company,job_title,posting_date,jo
 
 def is_send_mail_required(organizaton,doc_name,msg):
     try:
-        staffing = organizaton.split(',')
+        staffing = organizaton.split('~')
         staffing_list = []
         for name in staffing:
             sql = '''select user_id from `tabEmployee` where company = "{}" and user_id IS NOT NULL '''.format(name.strip())
@@ -275,6 +275,7 @@ def after_denied_joborder(staff_company,joborder_name,job_title,hiring_name):
         jb_ord = frappe.get_doc(ORD,joborder_name)
         jb_ord.is_single_share = 0
         jb_ord.staff_company = None
+        jb_ord.staff_company2 = None
         jb_ord.save(ignore_permissions = True)
         subject = jobOrder
         msg=f'{staff_company} unable to fulfill claim on your work order: {job_title}.'
@@ -594,7 +595,7 @@ def claim_data_list(job_order_name=None,exist_comp=None):
         sql = """ select staff_org_claimed from `tabJob Order` where name='{0}' """.format(job_order_name)
         companies = frappe.db.sql(sql, as_dict=1)
         company=companies[0].staff_org_claimed
-        data=company.split(",")
+        data=company.split("~")
         comp_data=[]
         if exist_comp:
             for c in data:
@@ -815,7 +816,7 @@ def check_increase_headcounts(no_of_workers_updated,name,company,select_job):
             joborder_email_template(subject,msg,share_user_list,link)
         else:
             sql = f'''select email from `tabUser` where organization_type="staffing" and enabled ="1"  and company in (select staffing_company from `tabStaffing Radius` where job_site="{old_headcounts[0][3]}" and radius != "None" and radius <= 25 and hiring_company="{company}")'''
-            if old_headcounts[0][1] and old_headcounts[0][4] and old_headcounts[0][1] in old_headcounts[0][4].split(','):
+            if old_headcounts[0][1] and old_headcounts[0][4] and old_headcounts[0][1] in old_headcounts[0][4].split('~'):
                 sql+=f''' or company="{old_headcounts[0][1]}"'''
             share_list = frappe.db.sql(sql, as_list = True)
             share_user_list = [user[0] for user in share_list]
