@@ -278,11 +278,18 @@ def request_signature(staff_user, staff_company, hiring_user, name):
         make_system_notification([hiring_user], msg, 'Contract', name, subject)
         site= frappe.utils.get_url().split('/')
         sitename=site[0]+'//'+site[2]
-        frappe.sendmail([hiring_user], subject=subject, delayed=False, reference_doctype='Contract', reference_name=name, template="digital_signature", args = dict(sitename=sitename, subject=subject, staff_user=staff_user, staff_company=staff_company, link = link))
+        frappe.enqueue("tag_workflow.utils.whitelisted.send_queued_mails",queue='long',timeout=4000,user=hiring_user,subject=subject, reference_name=name, args = dict(sitename=sitename, subject=subject, staff_user=staff_user, staff_company=staff_company, link = link))
         share_doc("Contract", name, hiring_user)
     except Exception as e:
         print(e)
         frappe.throw(frappe.get_traceback())
+
+
+@frappe.whitelist()
+def send_queued_mails(user,subject, reference_name, args):
+    user_doc=frappe.get_doc('User',user)
+    user_doc.send_welcome_mail_to_user()
+    frappe.sendmail(user, subject=subject, delayed=False, reference_doctype='Contract', reference_name=reference_name, template="digital_signature", args = args)
 
 #-------update lead--------#
 @frappe.whitelist(allow_guest=True)
