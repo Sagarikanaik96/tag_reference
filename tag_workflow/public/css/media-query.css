@@ -302,6 +302,10 @@
     .list-row-container {
     width: 800px;
   }
+  .hiring-home .search_field {
+    width: auto !important;
+    max-width: 100% !important;
+  }
 }
 
 @media (min-width: 768px) {

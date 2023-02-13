@@ -24,6 +24,7 @@ frappe.FaceRecognition = Class.extend({
 		this.start = 0
 		this.end = 20
 		this.filters = {'radius':25}
+		// this.filters = {'radius':localStorage.getItem("city")||localStorage.getItem("company_name")||localStorage.getItem("industry")?"":25}
 		this.options = []
 		this.data = null;
 		this.accreditation = [];
@@ -166,9 +167,37 @@ frappe.FaceRecognition = Class.extend({
 			}
 				
 		})
+
+		setTimeout(()=>{
+			
+			if (localStorage.getItem("city")) {
+				this.filters['city']=localStorage.getItem("city")
+		        document.getElementById('citys').value=localStorage.getItem("city")
+		        this.refresh()
+			}
+			else if(localStorage.getItem("company_name")){
+				this.filters['company']=localStorage.getItem("company_name")
+		        document.getElementById('companys').value=localStorage.getItem("company_name")
+		        this.refresh()
+			}
+			else{
+
+				this.filters['industry']=localStorage.getItem("industry")
+				if(localStorage.getItem("industry")){
+					document.getElementById('industrys').value=localStorage.getItem("industry")
+					let a = document.getElementById('industrys');
+					a.dispatchEvent(new Event("input")); 
+					document.querySelector('#awesomplete_list_2 > li').click();
+					a.dispatchEvent(new Event("submit"));
+				}
+		        this.refresh()
+			}
+			
+	   }, 200);
 	},
 	refresh: function () {
 		this.show_profile();
+		this.update_list()
 	},
 	get_industries: function () {
 		if (frappe.boot.tag.tag_user_info.company_type == "Hiring" ||frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ) {
@@ -331,7 +360,7 @@ frappe.realtime.on('refresh_data', () => {
 		document.getElementById('companys').value = '';
 		populate_filter();
 		$('#companys').change()
-		
+
 
 	}
 
@@ -339,6 +368,11 @@ frappe.realtime.on('refresh_data', () => {
 
 
 function populate_filter() {
+	localStorage.removeItem("city");
+	localStorage.removeItem("industry");
+	localStorage.removeItem("company_name")
+	
+	
 	if (localStorage.getItem('search')) {
 		const val = localStorage.getItem('search');
 		document.getElementById('companys').value = val;

@@ -603,17 +603,35 @@ textarea.form-control {
   margin-bottom: 15px;
 }
 .hiring-home .search-area {
-  max-width: 470px;
+  max-width: 300px;
+  padding-left: 18px;
   width: 100%;
-  border: 2px solid#79D5EE;
-  padding-left: 30px;
+  border: 1px solid#79D5EE;
   border-radius: 8px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.hiring-home .search_dropdown {
+  width: 140px;
+  background: none;
+  font-size: 12px;
+  color: #333C44;
+  border: 1px solid #79D5EE !important;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  height: 33.5px;
+  border-right: 0 !important;
+}
+select:focus-visible {
+  border: 1px solid#79D5EE !important;
+  outline: none;
 }
 .hiring-home .search_icon {
   position: absolute;
   top: 6px;
-  left: 10px;
+  right: 32%;
   z-index: 999;
+  cursor: pointer;
 }
 .hiring-home .search_field {
   width: 420px;

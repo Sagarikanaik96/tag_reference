@@ -1,27 +1,24 @@
-frappe.pages['hiring-home'].on_page_load = function(wrapper) {
-	let page = frappe.ui.make_app_page({
-		parent: wrapper,
-		title: '',
-		single_column: true
-	});
-	wrapper.HireHome = new frappe.HireHome(wrapper, page);
-	wrapper.HireHome.get_order_data();
-
+frappe.pages["hiring-home"].on_page_load = function(wrapper) {
+  let page = frappe.ui.make_app_page({
+    parent: wrapper,
+    title: "",
+    single_column: true,
+  });
+  wrapper.HireHome = new frappe.HireHome(wrapper, page);
+  wrapper.HireHome.get_order_data();
 }
 frappe.pages['hiring-home'].refresh = function(wrapper) {
 	reload_page()
 }
 frappe.HireHome = Class.extend({
-	init: function (wrapper, page) {
-		let me = this;
-		this.parent = wrapper;
-		this.page = this.parent.page;
-		me.setup(wrapper, page);
-	
-
-	},
-	setup: function (wrapper, page) {
-		this.body = $(`<style>
+  init: function(wrapper, page) {
+    let me = this;
+    this.parent = wrapper;
+    this.page = this.parent.page;
+    me.setup(wrapper, page);
+  },
+  setup: function(wrapper, page) {
+    this.body = $(`<style>
 		.home-tab .inner-search {
 			max-width: 470px;
 			width: 100%;
@@ -31,30 +28,51 @@ frappe.HireHome = Class.extend({
 			background: #fff;
 		}
 	
+		<style>
+		.home-tab .inner-search {
+		max-width: 470px;
+		width: 100%;
+		transition: .8s ease-in-out;
+		display: none;
+		position: absolute;
+		background: #fff;
+		}
 	</style>
 	<div class="row hiring-home">
 		<div class="col-xs-12 tittle">
-			<div class="widget-group-title"><h3>Discover Top-Rated Professionals</h3><p>We are here to help you with any project</p></div>
+			<div class="widget-group-title">
+				<h3>Discover Top-Rated Professionals</h3>
+				<p>We are here to help you with any project</p>
+			</div>
 			<div class="widget-group-control"></div>
 		</div>
-		<div class="frappe-control input-max-width search_field">
-			<div class="form-group">
-				<div class="control-input-wrapper">
-					<div class="control-input" style="display: block;">
-						<span class="search_icon">
-							<i class="fa fa-search" aria-hidden="true"></i>
-						</span>
-						<input class="form-control my-0 py-2 search-area" type="text" placeholder="Search by Staffing Company or Industry" aria-label="Search" oninput="update_list()" id="staff">
-						<div class="inner-search border shadow rounded mt-2 py-3" style="display: none;">
-							<div class="d-flex flex-wrap border-bottom">
-								<div class="col-md-6">
-									<label class="text-secondary"> Top search company </label>
-								</div>
-								<div class="col-md-6 text-right">
-									<a href="/app/staff_company_list" style="color: #21b9e4 !important;"> See All </a>
+		<div style="display:inline-flex">
+			<div class="container" style="display:inline-flex; align-items: center;">
+				<div style="color:pink"><select name="search_choice" id="search_choice" class="demo demo1 btn-xs mb-1 mt-1 search_dropdown" onchange=toogle_search_icon()>
+					<option value="company_name" style=" padding: 5px; color: #333C44;">Company Name</option>
+					<option value="industry" style=" padding: 5px; color: #333C44;">Industry</option>
+					<option value="city" style=" padding: 5px; color: #333C44;">City</option>
+				</select></div>
+				<div class="frappe-control input-max-width search_field" style="margin-left:0px">
+					<div class="form-group" style="margin-bottom: 0px">
+						<div class="control-input-wrapper">
+							<div class="control-input" style="display: block;">
+								<input class="form-control my-0 py-2 search-area" type="text" placeholder="Search" aria-label="Search" oninput="update_list()" id="staff">
+								<span class="search_icon">
+									<i class="fa fa-search" aria-hidden="true" onclick=toogle_search_icon()></i>
+								</span>
+								<div class="inner-search border shadow rounded mt-2 py-3" style="display: none;">
+									<div class="d-flex flex-wrap border-bottom">
+										<div class="col-md-6">
+											<label class="text-secondary placeholder_change"> Top search company </label>
+										</div>
+										<div class="col-md-6 text-right">
+											<a href="/app/staff_company_list" style="color: #21b9e4 !important;"> See All </a>
+										</div>
+									</div>
+									<div id="staffing_list"></div>
 								</div>
 							</div>
-							<div id="staffing_list"></div>
 						</div>
 					</div>
 				</div>
@@ -183,68 +201,130 @@ frappe.HireHome = Class.extend({
 	</div>
 	
 	<script>
+		function toogle_search_icon(){
+			$(".fa-remove").removeClass("fa-remove")
+			$(".fa").addClass("fa-search")
+			}
 		function update_list(){
 			$(".inner-search").css("display", "none");
 			let data = document.getElementById("staff").value;
+			if (data.length == 0)
+			{
+			$(".fa-remove").removeClass("fa-remove")
+			$(".fa").addClass("fa-search")
+			}
+			let search_choice_val = document.getElementById('search_choice').selectedOptions[0].value;
+			if(search_choice_val=="industry")
+			{
+			$(".placeholder_change").html("Top Search Industry")
+			}
+			if(search_choice_val=="city")
+			{
+			$(".placeholder_change").html("Top Search City")
+			}
+			if(search_choice_val=="company_name")
+			{
+			$(".placeholder_change").html("Top Search Company")
+			}
 			var ignoreClickOnMeElement = document.getElementById('staff');
-			document.addEventListener('click', function(event) {
+			    document.addEventListener('click', function(event) {
 				var isClickInsideElement = ignoreClickOnMeElement.contains(event.target);
 				if (!isClickInsideElement) {
 					$(".inner-search").css("display", "none");
 					document.getElementById("staff").value=""
 				}
-			});
-			frappe.call({
-				method: "tag_workflow.utils.whitelisted.search_staffing_by_hiring",
-				args: {"data": data},
-				callback: function(r){
+			    });
+			  frappe.call({
+					method: "tag_workflow.utils.whitelisted.search_staffing_by_hiring",
+					args: {"data": data,"search_choice_val":search_choice_val},
+					callback: function(r){
 					if(r && r.message.length){
-						let result = r.message || [];
-						let html="";
-						for(let d in result){
-							if(result[d] != "undefined"){
-								let link = result[d].split(' ').join('%');
-								html += "<div class='d-flex flex-wrap border-bottom' style='margin-top: 0.5rem;'><div class='col-md-12'><label class='text-secondary'><a onclick=dynamic_route('"+link+"')>"+result[d]+"</a></label></div></div>"
+					let result = r.message || [];
+					let html="";
+					$(".fa-search").removeClass("fa-search")
+					$(".fa").addClass("fa-remove")
+					var input = document.getElementById("staff");
+					$( "#staff" ).keyup(function() {
+					$( "#staff" ).keyup();
+					alert( "Handler for .keyup() called." );
+					});
+						input.addEventListener("keyup", function(event) {
+							if (event.keyCode === 13) {
+								if (result.length > 0 && data.length>0)
+								{	
+									if(document.getElementById('search_choice').selectedOptions[0].value=="city"){localStorage.setItem("city", document.getElementById('staff').value);window.location.href = "/app/staff_company_list";}
+									 else{
+										localStorage.setItem(document.getElementById('search_choice').selectedOptions[0].value, result[0]);
+										window.location.href = "/app/staff_company_list"
+									 }
+
+								}
 							}
-						}
-						$("#staffing_list").html(html);
-						$(".inner-search").css("display", "block");
+						});
+					for(let d in result){
+					if(result[d] != "undefined"){
+					document.getElementsByClassName("search_icon").innerHTML = "";
+					document.getElementsByClassName("search_icon").innerHTML = "<i class='fa fa-remove' aria-hidden='true'></i>";
+					let link = result[d].split(' ').join('%');
+					html += "<div class='d-flex flex-wrap border-bottom' style='margin-top: 0.5rem;'><div class='col-md-12' onclick=dynamic_route('"+link+"')><label class='text-secondary'><a onclick=dynamic_route('"+link+"')>"+result[d]+"</a></label></div></div>"
 					}
-				}
-			});
+					}
+					$("#staffing_list").html(html);
+					$(".inner-search").css("display", "block");
+					}
+					}
+			  });
 		}
-		function dynamic_route(name){
+
+			function dynamic_route(name){
+			if(document. getElementById('search_choice'). selectedOptions[0]. value == "company_name"){
 			name1= name.replace(/%/g, ' ');
 			localStorage.setItem("company", name1);
-			window.location.href = "/app/dynamic_page";						
-		}
-	</script>`).appendTo(this.page.main);
-		$(frappe.render_template('hiring_home', "")).appendTo(this.body);
-	},
-	get_order_data() {
-		let data;
-		frappe.call({
-			method:"tag_workflow.utils.whitelisted.get_order_data",
-			async:false,
-			callback: function(r){
-				data = r.message;
-
+			window.location.href = "/app/dynamic_page"; }
+			
+			else{
+				if(document. getElementById('search_choice'). selectedOptions[0].value=="industry"){
+					localStorage.setItem("industry", name.replace(/%/g, ' '));
+				}
+			    else{localStorage.setItem("city", name.replace(/%/g, ' '));}
+			window.location.href = "/app/staff_company_list"; 
+			} 
 			}
-		});
-		let body;
-		let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead id="Hiring_home_head"><tr><th>Job Title</th><th>Date & Time</th><th>Job Site</th><th>Company</th><th>Total Price</th><th style="text-align:center">Total Assigned/Required</th><th></th></tr></thead><tbody>`;
-		let html = ``;
-		for(let d in data){
-			html += `<tr><td>${data[d].select_job}</td><td>${data[d].date}</td><td>${data[d].job_site}</td><td>${data[d].company}</td><td>$ ${data[d].per_hour.toFixed(2)}</td><td style="text-align:center">${data[d].worker_filled}/${data[d].no_of_workers}</td><td><button class="btn btn-primary btn-xs primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${data[d].name}')">Order<span class="alt-underline"> Det</span>ails</button></td></tr>`;
-		}
-		if(html){
-			body = head + html + "</tbody></table>";
-		}else{
-			body = head + `<tr><td></td><td></td><td>No Data Found</td><td></td><td></td><td></td></tbody></table>`;
-		}
-		$("#data").html(body);
-	}
-
+			</script>`).appendTo(this.page.main);
+    $(frappe.render_template("hiring_home", "")).appendTo(this.body);
+  },
+  get_order_data() {
+    let data;
+    frappe.call({
+      method: "tag_workflow.utils.whitelisted.get_order_data",
+      async: false,
+      callback: function(r) {
+        data = r.message;
+      },
+    });
+    let body;
+    let head = `<table class="col-md-12 basic-table table-headers table table-hover"><thead id="Hiring_home_head"><tr><th>Job Title</th><th>Date & Time</th><th>Job Site</th><th>Company</th><th>Total Price</th><th style="text-align:center">Total Assigned/Required</th><th></th></tr></thead><tbody>`;
+    let html = ``;
+    for (let d in data) {
+      html += `<tr><td>${data[d].select_job}</td><td>${data[d].date}</td><td>${
+        data[d].job_site
+      }</td><td>${data[d].company}</td><td>$ ${data[d].per_hour.toFixed(
+        2
+      )}</td><td style="text-align:center">${data[d].worker_filled}/${
+        data[d].no_of_workers
+      }</td><td><button class="btn btn-primary btn-xs primary-action" data-label="Order Details" onclick="frappe.set_route('form', 'Job Order', '${
+        data[d].name
+      }')">Order<span class="alt-underline"> Det</span>ails</button></td></tr>`;
+    }
+    if (html) {
+      body = head + html + "</tbody></table>";
+    } else {
+      body =
+        head +
+        `<tr><td></td><td></td><td>No Data Found</td><td></td><td></td><td></td></tbody></table>`;
+    }
+    $("#data").html(body);
+  },
 });
 
 function reload_page(){
@@ -255,5 +335,5 @@ function reload_page(){
 	localStorage.setItem("refresh",0)
 }
 function redirect_doc(name) {
-	location.href = '/app/' + name
+  location.href = "/app/" + name;
 }
