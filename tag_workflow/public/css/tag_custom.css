@@ -1953,3 +1953,45 @@ span.comment-count {
 [data-page-route="staff_company_list"] .like-icon {
   display: block;
 }
+[data-page-route="Add Timesheet"] .form-grid .grid-body .data-row div:nth-child(11) .static-area{
+  display: none;
+}
+#company-integration_details .visible-section {
+  display: flex;
+  justify-content: end;
+  position: relative;
+}
+#company-integration_details .visible-section button.add-btn-custom-location {
+  position: absolute;
+  margin-top: 10px;
+}
+.enable_pill_branch{
+  margin-left: 36.4%;
+}
+.enable_pill_jazz{
+  margin-left: 35.4%;
+}
+.enable_pill_quick{
+  margin-left: 32.5%;
+}
+.enable_pill_staff{
+  margin-left: 25%;
+}
+.enable_pill_work{
+  margin-left: 32.4%;
+}
+.active_pill_branch{
+  margin-left: 36%;
+}
+.active_pill_jazz{
+  margin-left: 35%;
+}
+.active_pill_quick{
+  margin-left: 32.5%;
+}
+.active_pill_staff{
+  margin-left: 25%;
+}
+.active_pill_work{
+  margin-left: 32.8%;
+}

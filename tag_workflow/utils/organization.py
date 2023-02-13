@@ -102,6 +102,7 @@ def setup_data():
         update_hiring_reviews()
         import_sample_data()
         update_comp_series()
+        update_integration_enable_data()
         change_emp_status()
         draft_ts_time()
         make_commit()
@@ -1025,6 +1026,87 @@ def popultae_job_title():
     redis_con.set("popultae_job_title", "executed once")
 
 @frappe.whitelist()
+def update_integration_enable_data():
+        frappe.logger().debug("*------ Update Active and Enable field For Existing User -----------*\n")
+        print('*------updating old integration status------------*\n')
+        company_names = frappe.db.sql("""select name from `tabCompany` where  organization_type = 'Staffing' """,as_dict=1)
+        for c_name in company_names:
+            try:
+                company_data = frappe.get_doc('Company', c_name)
+                jazz_eanble_function(c_name, company_data)
+                
+                quick_enable_function(c_name, company_data)
+                
+                staff_enable_function(c_name, company_data)
+                
+                work_enable_function(c_name, company_data)
+                
+                branch_enable_function(c_name, company_data)
+
+            except Exception as e:
+                print('enable_active_integration_data_loading Error', e, frappe.get_traceback())
+                frappe.log_error(e,'Update Enable Active Integration Error')
+                continue
+        print('*------old integration status updated successfully------------*\n')
+
+@frappe.whitelist()
+def branch_enable_function(c_name, company_data):
+    try:
+        if company_data.branch_org_id_data or company_data.branch_api_key_data:
+            branch_sql = """ UPDATE `tabCompany` SET active_branch = "{0}", branch_enabled = "{1}" where name = "{2}" """.format(1, 1, c_name['name'])
+            frappe.db.sql(branch_sql)
+            frappe.db.commit()
+
+    except Exception as e:
+        print('Branch enable_active_integration_data_loading Error', e, frappe.get_traceback())
+        frappe.log_error(e,'Branch Enable Active Integration Error')
+
+@frappe.whitelist()
+def work_enable_function(c_name, company_data):
+    try:
+        if company_data.workbright_subdomain_data or company_data.workbright_api_key_data:
+            work_sql = """ UPDATE `tabCompany` SET active_work_bright = "{0}", enable_workbright = "{1}" where name = "{2}" """.format(1, 1, c_name['name'])
+            frappe.db.sql(work_sql)
+            frappe.db.commit()
+    except Exception as e:
+        print('Work enable_active_integration_data_loading Error', e, frappe.get_traceback())
+        frappe.log_error(e,'Work Enable Active Integration Error')
+
+@frappe.whitelist()
+def staff_enable_function(c_name, company_data):
+    try:
+        if company_data.office_code:
+            staff_sql = """ UPDATE `tabCompany` SET active_office_code = "{0}", staff_complete_enable = "{1}" where name = "{2}" """.format(1, 1, c_name['name'])
+            frappe.db.sql(staff_sql)
+            frappe.db.commit()
+    except Exception as e:
+        print('Staff enable_active_integration_data_loading Error', e, frappe.get_traceback())
+        frappe.log_error(e,'Staff Enable Active Integration Error')
+
+@frappe.whitelist()
+def quick_enable_function(c_name, company_data):
+    try:
+        if company_data.client_id_data or company_data.client_secret_data or company_data.quickbooks_company_id:
+            quick_sql = """ UPDATE `tabCompany` SET active_quick_book = "{0}", enable_quickbook = "{1}" where name = "{2}" """.format(1, 1, c_name['name'])
+            frappe.db.sql(quick_sql)
+            frappe.db.commit()
+    except Exception as e:
+        print('Quick enable_active_integration_data_loading Error', e, frappe.get_traceback())
+        frappe.log_error(e,'Quick Enable Active Integration Error')
+
+@frappe.whitelist()
+def jazz_eanble_function(c_name, company_data):
+    try:
+        if company_data.jazzhr_api_key:
+            jazz_sql = """ UPDATE `tabCompany` SET active_jazz = "{0}", enable_jazz_hr = "{1}" where name = "{2}" """.format(1, 1, c_name['name'])
+            frappe.db.sql(jazz_sql)
+            frappe.db.commit()
+    except Exception as e:
+        print('Jazz enable_active_integration_data_loading Error', e, frappe.get_traceback())
+        frappe.log_error(e,'Jazz Enable Active Integration Error')
+
+            
+@frappe.whitelist()      
 def update_user_permission():
     try:
         user_lst = frappe.db.sql("""select name from tabUser where name not in (select user_id from tabEmployee where user_id is not null)""",as_list=1)

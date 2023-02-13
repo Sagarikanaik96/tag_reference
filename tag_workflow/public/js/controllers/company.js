@@ -67,9 +67,31 @@ frappe.ui.form.on("Company", {
 		if (frappe.boot.tag.tag_user_info.company_type == 'Staffing' && frm.doc.branch_enabled == 0) {
 			frm.set_df_property('branch_integration', 'hidden', 1);
 		}
-		password_fields(frm);
+
+		if(frm.doc.enable_jazz_hr){
+			let fields  = { 'jazzhr_api_key': 'jazzhr_api_key_html'}
+			password_fields(frm,fields,false)
+		}
+
+		if(frm.doc.enable_quickbook){
+			let fields = { 'client_id': 'client_id_html', 'client_secret': 'client_secret_html'}
+			password_fields(frm,fields,false)
+		}
+
+		if(frm.doc.enable_workbright){
+			let fields = { 'workbright_subdomain': 'workbright_subdomain_html', 'workbright_api_key': 'workbright_api_key_html'}
+			password_fields(frm,fields,false)
+		}
+
+		if(frm.doc.branch_enabled){
+			let fields = { 'branch_org_id': 'branch_org_id_html', 'branch_api_key': 'branch_api_key_html' }
+			password_fields(frm,fields,false)
+		}
+
 		redirect_job_site()
 		public_profile_redirect(frm);
+		add_lable(frm)
+
 	},
 	update_employee_records: function (frm) {
 		if (cur_frm.is_dirty()) {
@@ -87,6 +109,8 @@ frappe.ui.form.on("Company", {
 			make_jazzhr_request(frm)
 		}
 	},
+	
+	
 
 	setup: function (frm) {
 		Array.from($('[data-fieldtype="Currency"]')).forEach(_field => {
@@ -176,6 +200,12 @@ frappe.ui.form.on("Company", {
 				}
 			}
 		}
+		add_all_buttons(frm)
+		$('[data-fieldname="branch_enabled"]').css({"visibility":"hidden"})
+		$('[data-fieldname="enable_jazz_hr"]').css({"visibility":"hidden"})
+		$('[data-fieldname="enable_quickbook"]').css({"visibility":"hidden"})
+		$('[data-fieldname="staff_complete_enable"]').css({"visibility":"hidden"})
+		$('[data-fieldname="enable_workbright"]').css({"visibility":"hidden"})
 	},
 	organization_type: function (frm) {
 		if (frm.doc.organization_type && frm.doc.organization_type == 'Exclusive Hiring') {
@@ -218,18 +248,24 @@ frappe.ui.form.on("Company", {
 			cur_frm.set_value("accounts_payable_phone_number", "");
 		}
 	},
-	after_save: function (frm) {
-		frappe.call({
+	after_save:async function (frm) {
+		await frappe.call({
 			method: "tag_workflow.controllers.master_controller.make_update_comp_perm",
 			args: { docname: frm.doc.name },
 		});
-		frappe.call({
+		await frappe.call({
 			'method': 'tag_workflow.utils.organization.initiate_background_job',
 			'args': {
 				'message': 'Company',
 				'staffing_company': frm.doc.name
 			}
 		});
+
+	await	check_enable_active(frm)
+	await	check_enable_active_staff(frm)
+	await	check_enable_active_quick(frm)
+	await	check_enable_active_work(frm)
+	await	check_enable_active_branch(frm)
 	},
 	validate: function (frm) {
 		mandatory_fields(frm);
@@ -430,6 +466,179 @@ frappe.ui.form.on("Company", {
 	}
 });
 
+function add_all_buttons(frm) {
+
+	jazz_connect_button(frm)
+	function jazz_connect_button(frm) {
+		let container=document.querySelector(`#company-integration_details > div:nth-child(3)`);
+		let btn=document.createElement("button");
+		btn.className=`btn btn-primary btn-xs primary-action add-btn-custom-location add-btn-jazz`;
+		btn.id=`add-btn-jazz`;
+		container.appendChild(btn);
+		if (frm.doc.enable_jazz_hr===1){
+			remove_btn_primary('jazz')
+		}
+		else{
+			add_btn_primary('jazz')
+		}
+		btn.onclick= ()=> {
+			if(btn.textContent==="Connect"){	
+			let enable_field_name = 'enable_jazz_hr'
+			let fields={'jazzhr_api_key': 'jazzhr_api_key_html'};
+			connect_integration(frm,enable_field_name,fields);
+			if (frm.doc.enable_jazz_hr===1){
+				remove_btn_primary('jazz')
+			}
+			}
+			else{
+				if (frm.doc.enable_jazz_hr===0){
+					add_btn_primary('jazz')
+				}
+				let enable_field_name = ['enable_jazz_hr','Jazz Hr']
+			let fields={'jazzhr_api_key': 'jazzhr_api_key_html'};
+			disconnect_integration(frm,enable_field_name,fields,'jazz');
+			}
+
+		}
+
+	}
+
+	quick_connect_button()
+	function quick_connect_button() {
+
+		let container=document.querySelector(`#company-integration_details > div:nth-child(5)`);
+		let btn=document.createElement("button");
+		btn.className=`btn btn-primary btn-xs primary-action add-btn-custom-location add-btn-quick`;
+		btn.id=`add-btn-quick`;
+		container.appendChild(btn);
+		if (frm.doc.enable_quickbook===1){
+			remove_btn_primary('quick')
+		}
+		else{
+			add_btn_primary('quick')
+		}
+		btn.onclick= ()=> {
+			if(btn.textContent==="Connect"){	
+				let enable_field_name = 'enable_quickbook'
+							let fields = { 'client_id': 'client_id_html', 'client_secret': 'client_secret_html'}
+						connect_integration(frm,enable_field_name,fields);
+			if (frm.doc.enable_quickbook===1){
+				remove_btn_primary('quick')
+			}
+			}
+			else{
+				if (frm.doc.enable_quickbook===0){
+					add_btn_primary('quick')
+				}
+				let enable_field_name = ['enable_quickbook','Quick Book']
+			let fields = { 'client_id': 'client_id_html', 'client_secret': 'client_secret_html'}
+			disconnect_integration(frm,enable_field_name,fields,'quick');
+			}
+		}
+	}
+
+	work_connect_button()
+	function work_connect_button() {
+
+		let container=document.querySelector(`#company-integration_details > div:nth-child(9)`);
+		let btn=document.createElement("button");
+		btn.className=`btn btn-primary btn-xs primary-action add-btn-custom-location add-btn-work`;
+		btn.id=`add-btn-work`;
+		container.appendChild(btn);
+		if (frm.doc.enable_workbright===1){
+			remove_btn_primary('work')
+		}
+		else{
+			add_btn_primary('work')
+		}
+		btn.onclick= ()=> {
+			if(btn.textContent==="Connect"){	
+				let enable_field_name = 'enable_workbright'
+				let fields = { 'workbright_subdomain': 'workbright_subdomain_html', 'workbright_api_key': 'workbright_api_key_html'}
+			connect_integration(frm,enable_field_name,fields);
+			if (frm.doc.enable_workbright===1){
+				remove_btn_primary('work')
+			}
+			}
+			else{
+				if (frm.doc.enable_workbright===0){
+					add_btn_primary('work')
+				}
+				let enable_field_name = ['enable_workbright','Workbright']
+				let fields = { 'workbright_subdomain': 'workbright_subdomain_html', 'workbright_api_key': 'workbright_api_key_html'}
+			disconnect_integration(frm,enable_field_name,fields,'work');
+			}
+		}
+	}
+
+	branch_connect_button()
+	function branch_connect_button() {
+
+		let container=document.querySelector(`#company-integration_details > div:nth-child(2)`);
+		let btn=document.createElement("button");
+		btn.className=`btn btn-primary btn-xs primary-action add-btn-custom-location add-btn-branch`;
+		btn.id=`add-btn-branch`;
+		container.appendChild(btn);
+		if (frm.doc.branch_enabled===1){
+			remove_btn_primary('branch')
+		}
+		else{
+			add_btn_primary('branch')
+		}
+		btn.onclick= ()=> {
+			if(btn.textContent==="Connect"){	
+				let enable_field_name = 'branch_enabled'
+				let fields = { 'branch_org_id': 'branch_org_id_html', 'branch_api_key': 'branch_api_key_html' }
+			connect_integration(frm,enable_field_name,fields);
+			if (frm.doc.branch_enabled===1){
+				remove_btn_primary('branch')
+			}
+			}
+			else{
+				if (frm.doc.branch_enabled===0){
+					add_btn_primary('branch')
+				}
+				let enable_field_name = ['branch_enabled','Branch']
+				let fields = { 'branch_org_id': 'branch_org_id_html', 'branch_api_key': 'branch_api_key_html' }
+			disconnect_integration(frm,enable_field_name,fields,'branch');
+			}
+		}
+	}
+
+	staff_connect_button()
+	function staff_connect_button() {
+
+		let container=document.querySelector(`#company-integration_details > div:nth-child(8)`);
+		let btn=document.createElement("button");
+		btn.className=`btn btn-primary btn-xs primary-action add-btn-custom-location add-btn-staff`;
+		btn.id=`add-btn-staff`;
+		container.appendChild(btn);
+		if (frm.doc.staff_complete_enable===1){
+			remove_btn_primary('staff')
+		}
+		else{
+			add_btn_primary('staff')
+		}
+		btn.onclick= ()=> {
+			if(btn.textContent==="Connect"){	
+				let enable_field_name = 'staff_complete_enable'
+			frm.set_value(enable_field_name,1);
+			if (frm.doc.staff_complete_enable===1){
+				remove_btn_primary('staff')
+			}
+			}
+			else{
+				if (frm.doc.staff_complete_enable===0){
+					add_btn_primary('staff')
+				}
+				let enable_field_name = ['staff_complete_enable','Staff Complete']
+				let fields = {}
+			disconnect_integration(frm,enable_field_name,fields,'staff');
+			}
+		}
+	}
+
+}
 
 /*---------hide details----------*/
 function hide_details() {
@@ -992,22 +1201,23 @@ function get_date_time() {
 	return date_time.toString();
 }
 
-function password_fields(frm) {
-	let fields = { 'jazzhr_api_key': 'jazzhr_api_key_html', 'client_id': 'client_id_html', 'client_secret': 'client_secret_html', 'workbright_subdomain': 'workbright_subdomain_html', 'workbright_api_key': 'workbright_api_key_html', 'branch_org_id': 'branch_org_id_html', 'branch_api_key': 'branch_api_key_html' }
+function password_fields(frm,fields,bool) {
+
 	for (let field in fields) {
 		let button_html = '';
 		if (frappe.boot.tag.tag_user_info.user_type == 'Staffing Admin') {
-			button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>`
-			if (!['branch_org_id', 'branch_api_key'].includes(field)) {
+			button_html=staff_admin_edit_buttons(bool,button_html,field);
+		} else if (frappe.boot.tag.tag_user_info.user_type == 'Staffing User') {
+
+			button_html=staffing_user_edit_buttons(field,button_html);
+		} else {
+			if (bool) {
+				button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;display:none">Decrypt</button>`
+				button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-edit_off" onclick="edit_pass(this.id, '${field}')" style="width: 45px;height: 25px;padding: 3px;float: right;display:none">Edit</button>`;
+			} else {
+				button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>`
 				button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-edit_off" onclick="edit_pass(this.id, '${field}')" style="width: 45px;height: 25px;padding: 3px;float: right;">Edit</button>`;
 			}
-		} else if (frappe.boot.tag.tag_user_info.user_type == 'Staffing User') {
-			if (['branch_org_id', 'branch_api_key'].includes(field)) {
-				button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>`
-			}
-		} else {
-			button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>`
-			button_html += `<button class="btn btn-default btn-more btn-sm" id="${field}-edit_off" onclick="edit_pass(this.id, '${field}')" style="width: 45px;height: 25px;padding: 3px;float: right;">Edit</button>`;
 		}
 		$('[data-fieldname="' + field + '_data"]').attr('readonly', 'readonly');
 		$('[data-fieldname="' + field + '_data"]').attr('type', 'password');
@@ -1040,6 +1250,29 @@ window.show_decrypt = (id, field) => {
 		$('#' + field + '-encrypt').text('Decrypt');
 		$('#' + field + '-encrypt').attr('id', field + '-decrypt');
 	}
+}
+
+function staffing_user_edit_buttons(field,button_html) {
+	if(['branch_org_id','branch_api_key'].includes(field)) {
+		button_html+=`<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>`;
+	}
+	return button_html;
+}
+
+function staff_admin_edit_buttons(bool,button_html,field) {
+	if(bool) {
+		button_html+=`<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;display:none">Decrypt</button>`;
+		if(!['branch_org_id','branch_api_key'].includes(field)) {
+			button_html+=`<button class="btn btn-default btn-more btn-sm" id="${field}-edit_off" onclick="edit_pass(this.id, '${field}')" style="width: 45px;height: 25px;padding: 3px;float: right;display:none;">Edit</button>`;
+		}
+	}
+	else {
+		button_html+=`<button class="btn btn-default btn-more btn-sm" id="${field}-decrypt" onclick="show_decrypt(this.id, '${field}')" style="width: 60px;height: 25px;padding: 3px;">Decrypt</button>`;
+		if(!['branch_org_id','branch_api_key'].includes(field)) {
+			button_html+=`<button class="btn btn-default btn-more btn-sm" id="${field}-edit_off" onclick="edit_pass(this.id, '${field}')" style="width: 45px;height: 25px;padding: 3px;float: right;">Edit</button>`;
+		}
+	}
+	return button_html;
 }
 
 function show_pass(fieldname) {
@@ -1335,6 +1568,32 @@ function public_profile_redirect(frm){
     }
 }	
 
+function connect_integration(frm,enable_field_name,fields) {
+	frm.set_value(enable_field_name,1);
+		password_fields(frm,fields,false);
+}
+
+function disconnect_integration(frm,enable_field_name,fields,type_name) {
+
+	let profile_html=`<span style="font-size:14px">Do you really want to disconnect ${enable_field_name[1]} integration? It will remove all the data related to this integration.</span>`;
+	let pop_up=new frappe.ui.Dialog({
+		title: __('Disconnect'),
+		fields: [{fieldname: "save_joborder",fieldtype: "HTML",options: profile_html},]
+	});
+	pop_up.show();
+	pop_up.$wrapper.find('.standard-actions>.btn-modal-primary').css({"background": "#DC3545!important;"})
+	pop_up.set_primary_action(__('Disconnect'),function() {
+		pop_up.hide();
+		frm.set_value(enable_field_name[0],0);
+		add_btn_primary(type_name)
+		password_fields(frm,fields,true);
+	});
+	pop_up.set_secondary_action_label(__('Cancel'));
+	pop_up.set_secondary_action(() => {
+		pop_up.hide();
+	});
+}
+
 /*------------------------------------*/		
 
 function update_invoice_view(frm){
@@ -1375,3 +1634,331 @@ frappe.ui.form.on("Job Titles", {
         })
     }
 })
+let Company= "Company"
+async function check_enable_active(frm){
+	let active_jazz ="active_jazz"
+	if(frm.doc.enable_jazz_hr == 1 && frm.doc.jazzhr_api_key_data.length>0){
+		console.log("JAZZ IF");
+	 	await frappe.db.set_value(Company, frm.doc.name, active_jazz, 1)
+	}
+	else{
+		console.log("JAZZ ELSE");
+		await frappe.db.set_value(Company, frm.doc.name, active_jazz, 0)
+	}
+	frm.refresh_field(active_jazz)
+
+}
+
+async function check_enable_active_quick(frm){
+	let active_quick_book= "active_quick_book"
+	if(frm.doc.enable_quickbook == 1 && ((frm.doc.enable && frm.doc.enable.length > 0) || (frm.doc.client_id_data && frm.doc.client_id_data.length > 0) || (frm.doc.client_secret_data && frm.doc.client_secret_data.length > 0) || (frm.doc.quickbooks_company_id && frm.doc.quickbooks_company_id.length>0))) {
+		console.log("QUICK IF");
+		await frappe.db.set_value(Company, frm.doc.name, active_quick_book, 1)
+	}
+	else{
+		console.log("QUICK ELSE");
+		await frappe.db.set_value(Company, frm.doc.name, active_quick_book, 0)
+	}
+	frm.refresh_field(active_quick_book)
+
+}
+
+async function check_enable_active_work(frm){
+	let active_work_bright= "active_work_bright"
+	if(frm.doc.enable_workbright == 1 && ((frm.doc.workbright_subdomain_data && frm.doc.workbright_subdomain_data.length > 0) || (frm.doc.workbright_api_key_data && frm.doc.workbright_api_key_data.length >0 ))) {
+		console.log("WORK IF");
+		await frappe.db.set_value(Company, frm.doc.name, active_work_bright, 1)
+	}else{
+		console.log("WORK ELSE");
+		await frappe.db.set_value(Company, frm.doc.name, active_work_bright, 0)
+	}
+	frm.refresh_field(active_work_bright)
+
+}
+
+async function check_enable_active_staff(frm){
+	let active_office_code= "active_office_code"
+	if(frm.doc.staff_complete_enable == 1 && (frm.doc.office_code && frm.doc.office_code.length>0)){
+		console.log("STAFF IF");
+		await frappe.db.set_value(Company, frm.doc.name, active_office_code, 1)
+    }
+	else{
+		console.log("STAFF ELSE");
+		await frappe.db.set_value(Company, frm.doc.name, active_office_code, 0)
+    }
+	frm.refresh_field(active_office_code)
+
+}
+
+async function check_enable_active_branch(frm){
+	let active_branch= "active_branch"
+	if(frm.doc.branch_enabled == 1 && ((frm.doc.branch_org_id_data && frm.doc.branch_org_id_data.length>0) || (frm.doc.branch_api_key_data&&frm.doc.branch_api_key_data.length>0))){
+		console.log("BRANCH IF");
+		await frappe.db.set_value(Company, frm.doc.name, active_branch, 1)
+    }
+	else{
+		console.log("BRANCH ELSE");
+		await frappe.db.set_value(Company, frm.doc.name, active_branch, 0)
+		
+    }
+	frm.refresh_field(active_branch)
+}
+
+
+let parent =document.getElementById('company-integration_details').children
+let beforeend = "beforeend"
+let active_pill_branch =`<div class=active_pill_branch><span class="indicator-pill whitespace-nowrap green"><span>Active</span></span></div>`
+let active_pill_jazz =`<div class=active_pill_jazz><span class="indicator-pill whitespace-nowrap green"><span>Active</span></span></div>`
+let active_pill_quick =`<div class=active_pill_quick><span class="indicator-pill whitespace-nowrap green"><span>Active</span></span></div>`
+let active_pill_staff =`<div class=active_pill_staff><span class="indicator-pill whitespace-nowrap green"><span>Active</span></span></div>`
+let active_pill_work =`<div class=active_pill_work><span class="indicator-pill whitespace-nowrap green"><span>Active</span></span></div>`
+let enable_pill_branch = `<div class=enable_pill_branch><span class="indicator-pill whitespace-nowrap blue"><span>Enabled</span></span></div>`
+let enable_pill_jazz = `<div class=enable_pill_jazz><span class="indicator-pill whitespace-nowrap blue"><span>Enabled</span></span></div>`
+let enable_pill_quick = `<div class=enable_pill_quick><span class="indicator-pill whitespace-nowrap blue"><span>Enabled</span></span></div>`
+let enable_pill_staff = `<div class=enable_pill_staff><span class="indicator-pill whitespace-nowrap blue"><span>Enabled</span></span></div>`
+let enable_pill_work = `<div class=enable_pill_work><span class="indicator-pill whitespace-nowrap blue"><span>Enabled</span></span></div>`	
+let blue ="blue"
+let green ="green"
+let activeText="Active"
+let enabledText="Enabled"
+let display_style= "flex"
+
+
+function add_lable(frm) {
+	jazz_pin_show(frm);	
+	quick_pin_show(frm);
+	work_pin_show(frm);
+	staff_pin_show(frm);
+	branch_pin_show(frm);
+}
+
+function branch_pin_show(frm) {
+	let branchFirstChild=parent[1].children;
+	branchFirstChild[0].style.display=display_style;
+	let branchChildren=parent[1].children[0].children[1];
+
+	if(frm.doc.branch_enabled==1&&(frm.doc.branch_org_id_data&&frm.doc.branch_org_id_data.length>0||(frm.doc.branch_api_key_data&&frm.doc.branch_api_key_data.length>0))) {
+		branch_make_active(branchChildren,branchFirstChild);
+	}
+	else if(frm.doc.branch_enabled==1&&frm.doc.active_branch==0) {
+		branch_make_enable(branchChildren,branchFirstChild);
+	}
+	else {
+		if(branchChildren) {
+			branchChildren.remove();
+		}
+	}
+}
+
+function branch_make_active(branchChildren,branchFirstChild) {
+	if(branchChildren==undefined) {
+		branchFirstChild[0].insertAdjacentHTML(beforeend,active_pill_branch);
+
+	}
+	else if(branchChildren.children[0].classList[2]&&[blue].includes(branchChildren.children[0].classList[2])) {
+		toogle_blue_to_green_pill(branchChildren);
+	}
+}
+
+function branch_make_enable(branchChildren,branchFirstChild) {
+	if(parent[1].children[0].children.length>1) {
+		branchChildren.remove();
+	}
+
+	if(branchChildren==undefined||branchChildren.children.length!=0) {
+		branchFirstChild[0].insertAdjacentHTML(beforeend,enable_pill_branch);
+	}
+
+	else if(branchChildren.children[0].classList[2]&&[green].includes(branchChildren.children[0].classList[2])) {
+		toogle_green_to_blue_pill(branchChildren);
+	}
+}
+
+function toogle_green_to_blue_pill(branchChildren) {
+	let s=branchChildren.children[0];
+
+	s.classList.remove(green);
+	s.classList.add(blue);
+	s.innerHTML=enabledText;
+}
+
+function staff_pin_show(frm) {
+	let staffingFirstChild=parent[7].children;
+	staffingFirstChild[0].style.display=display_style;
+	let staffingChildren=parent[7].children[0].children[1];
+	if(frm.doc.staff_complete_enable==1&&(frm.doc.office_code&&frm.doc.office_code.length>0)) {
+
+		staff_make_active(staffingChildren,staffingFirstChild);
+	}
+	else if(frm.doc.staff_complete_enable==1&&frm.doc.active_office_code==0) {
+		staff_make_enable(staffingChildren,staffingFirstChild);
+	}
+	else {
+		if(staffingChildren) {
+			staffingChildren.remove();
+		}
+	}
+}
+
+function staff_make_active(staffingChildren,staffingFirstChild) {
+	if(staffingChildren==undefined) {
+		staffingFirstChild[0].insertAdjacentHTML(beforeend,active_pill_staff);
+	}
+	else if(staffingChildren.children[0].classList[2]&&[blue].includes(staffingChildren.children[0].classList[2])) {
+		toogle_blue_to_green_pill(staffingChildren);
+	}
+}
+
+function staff_make_enable(staffingChildren,staffingFirstChild) {
+	if(parent[7].children[0].children.length>1) {
+		staffingChildren.remove();
+	}
+
+	if(staffingChildren==undefined||staffingChildren.children.length!=0) {
+		staffingFirstChild[0].insertAdjacentHTML(beforeend,enable_pill_staff);
+	}
+
+	else if(staffingChildren.children[0].classList[2]&&[green].includes(staffingChildren.children[0].classList[2])) {
+		toogle_green_to_blue_pill(staffingChildren);
+	}
+}
+
+function toogle_blue_to_green_pill(staffingChildren) {
+	let p=staffingChildren.children[0];
+
+	p.classList.remove(blue);
+	p.classList.add(green);
+	p.innerHTML=activeText;
+}
+
+function work_pin_show(frm) {
+	let workbrightFirstChild=parent[8].children;
+	workbrightFirstChild[0].style.display=display_style;
+	let workbrightChildren=parent[8].children[0].children[1];
+	if(frm.doc.enable_workbright==1&&((frm.doc.workbright_subdomain_data&&frm.doc.workbright_subdomain_data.length>0)||(frm.doc.workbright_api_key_data&&frm.doc.workbright_api_key_data.length>0))) {
+		work_make_active(workbrightChildren,workbrightFirstChild);
+
+	}
+	else if(frm.doc.enable_workbright==1&&frm.doc.active_work_bright==0) {
+		work_make_enable(workbrightChildren,workbrightFirstChild);
+	} else {
+		if(workbrightChildren) {
+			workbrightChildren.remove();
+		}
+	}
+}
+
+function work_make_enable(workbrightChildren,workbrightFirstChild) {
+	if(parent[8].children[0].children.length>1) {
+		workbrightChildren.remove();
+	}
+
+	if(workbrightChildren==undefined||workbrightChildren.children.length!=0) {
+		workbrightFirstChild[0].insertAdjacentHTML(beforeend,enable_pill_work);
+	}
+
+	else if(workbrightChildren.children[0].classList[2]&&[green].includes(workbrightChildren.children[0].classList[2])) {
+		toogle_green_to_blue_pill(workbrightChildren);
+	}
+}
+
+function work_make_active(workbrightChildren,workbrightFirstChild) {
+	if(workbrightChildren==undefined) {
+		workbrightFirstChild[0].insertAdjacentHTML(beforeend,active_pill_work);
+	}
+	else if(workbrightChildren.children[0].classList[2]&&[blue].includes(workbrightChildren.children[0].classList[2])) {
+		toogle_blue_to_green_pill(workbrightChildren);
+	}
+}
+
+function quick_pin_show(frm) {
+	let quickBookFirstChild=parent[4].children;
+	quickBookFirstChild[0].style.display=display_style;
+	let quickBookChildren=parent[4].children[0].children[1];
+	if(frm.doc.enable_quickbook==1&&((frm.doc.enable&&frm.doc.enable.length>0)||(frm.doc.client_id_data&&frm.doc.client_id_data.length>0)||(frm.doc.client_secret_data&&frm.doc.client_secret_data.length>0)||(frm.doc.quickbooks_company_id&&frm.doc.quickbooks_company_id.length>0))) {
+		quick_make_active(quickBookChildren,quickBookFirstChild);
+	}
+	else if(frm.doc.enable_quickbook==1&&frm.doc.active_quick_book==0) {
+		quick_make_enable(quickBookChildren,quickBookFirstChild);
+	}
+	else {
+		if(quickBookChildren) {
+			quickBookChildren.remove();
+		}
+	}
+}
+
+function quick_make_enable(quickBookChildren,quickBookFirstChild) {
+	if(parent[4].children[0].children.length>1) {
+		quickBookChildren.remove();
+	}
+
+	if(quickBookChildren==undefined||quickBookChildren.children.length!=0) {
+		quickBookFirstChild[0].insertAdjacentHTML(beforeend,enable_pill_quick);
+	}
+
+	else if(quickBookChildren.children[0].classList[2]&&[green].includes(quickBookChildren.children[0].classList[2])) {
+		toogle_green_to_blue_pill(quickBookChildren);
+	}
+}
+
+function quick_make_active(quickBookChildren,quickBookFirstChild) {
+	if(quickBookChildren==undefined) {
+		quickBookFirstChild[0].insertAdjacentHTML(beforeend,active_pill_quick);
+	}
+	else if(quickBookChildren.children[0].classList[2]&&[blue].includes(quickBookChildren.children[0].classList[2])) {
+		toogle_blue_to_green_pill(quickBookChildren);
+	}
+}
+
+function jazz_pin_show(frm) {
+	let jazzFirstChild=parent[2].children;
+	jazzFirstChild[0].style.display=display_style;
+	let jazzChildren=parent[2].children[0].children[1];
+
+	if(frm.doc.enable_jazz_hr==1&&(frm.doc.jazzhr_api_key_data&&frm.doc.jazzhr_api_key_data.length>0)) {
+		jazz_make_active(jazzChildren,jazzFirstChild);
+	}
+	else if(frm.doc.enable_jazz_hr==1&&frm.doc.active_jazz==0) {
+		jazz_make_enable(jazzChildren,jazzFirstChild);
+	}
+	else {
+		if(jazzChildren) {
+			jazzChildren.remove();
+		}
+	}
+}
+
+function jazz_make_enable(jazzChildren,jazzFirstChild) {
+	if(parent[2].children[0].children.length>1) {
+		jazzChildren.remove();
+	}
+
+	if(jazzChildren==undefined||jazzChildren.children.length!=0) {
+		jazzFirstChild[0].insertAdjacentHTML(beforeend,enable_pill_jazz);
+	}
+
+	else if(jazzChildren.children[0].classList[2]&&[green].includes(jazzChildren.children[0].classList[2])) {
+		toogle_green_to_blue_pill(jazzChildren);
+	}
+}
+
+function jazz_make_active(jazzChildren,jazzFirstChild) {
+	if(jazzChildren==undefined) {
+		jazzFirstChild[0].insertAdjacentHTML(beforeend,active_pill_jazz);
+
+	}
+	else if(jazzChildren.children[0].classList[2]&&[blue].includes(jazzChildren.children[0].classList[2])) {
+		toogle_blue_to_green_pill(jazzChildren);
+	}
+}
+
+function remove_btn_primary(type_name){
+	$(`#add-btn-${type_name}`).text('Disconnect')
+	$(`#add-btn-${type_name}`).removeClass('btn-primary')
+}
+
+function add_btn_primary(type_name){
+	$(`#add-btn-${type_name}`).text('Connect')
+	$(`#add-btn-${type_name}`).addClass('btn-primary')
+}
