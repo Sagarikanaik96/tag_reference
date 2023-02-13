@@ -1871,3 +1871,42 @@ def employee_status_change_job(user):
     except Exception:
         print("employee_status_change_job Error", frappe.get_traceback())
         frappe.log_error(frappe.get_traceback(), "employee_status_change_job Error")
+
+@frappe.whitelist()
+def update_all_comp_lat_lng():
+    try:
+        update_comp_lat_lng()
+        #frappe.enqueue("tag_workflow.tag_data.update_comp_lat_lng", queue='long', is_async=True)
+    except Exception as e:
+        frappe.msgprint(e)
+
+def update_comp_lat_lng(company=None):
+    try:
+        count = 0
+        print("*------lat lng company update--------------------------*\n")
+        if(company!=None):
+            my_data = frappe.db.sql(""" select name, state, city, zip from `tabCompany` where company_name = '{0}' """.format(company), as_dict=1)
+        else:
+            my_data = frappe.db.sql(""" select name, state, city, zip from `tabCompany` where (lat is null or lat ='' or lng is null or lng='') and city is not null and state is not null """, as_dict=1)
+        for d in my_data:
+            address = d.city + ", " + d.state + ", " + (d.zip if d.zip != 0 and d.zip is not None else "")
+            google_location_data_url = GOOGLE_API_URL + address
+            if(count % 80 == 0):
+                time.sleep(5)
+            google_response = requests.get(google_location_data_url)
+            location_data = google_response.json()
+            if(google_response.status_code == 200 and len(location_data)>0 and len(location_data['results'])>0):
+                lat, lng = emp_location_data(location_data)
+                frappe.db.sql('''update `tabCompany` set lat= '{0}', lng='{1}' where name='{2}' '''.format(lat,lng,d.name))
+                frappe.db.commit()
+            count += 1
+    except Exception as e:
+        frappe.log_error(e, "longitude latitude error")
+        print(e)
+
+@frappe.whitelist()
+def update_individual_company_lat_lng(company):
+    try:
+        update_comp_lat_lng(company)
+    except Exception as e:
+        frappe.error_log(e,'Employee Lat Lng error')

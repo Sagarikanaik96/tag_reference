@@ -165,14 +165,17 @@ def filter_location(radius,comp,data):
         staff_location = None
         address_sql = frappe.db.sql('''select suite_or_apartment_no, state, city, zip from tabCompany where name = "{0}"'''.format(comp[0][0]), as_list=True)
         address = " ".join(address_sql[0])
+        lat_lng_address=frappe.db.sql('''select lat, lng from `tabCompany` where name = "{0}"'''.format(comp[0][0]), as_list=True)
+        lat, lng = 0, 0
+        if lat_lng_address[0][0]!=None or lat_lng_address[0][0]!='':
+            lat=lat_lng_address[0][0]
+        if lat_lng_address[0][1]!=None or lat_lng_address[0][0]!='':
+            lng=lat_lng_address[0][1]
         if address:
-            location = get_custom_location(address)
+            location = tuple([float(lat), float(lng)])
             for d in data:
                 try:
-                    staff_add_sql = frappe.db.sql('''select suite_or_apartment_no, state, city, zip from tabCompany where name = "{0}"'''.format(d.name), as_list=True)
-                    staff_add = " ".join(staff_add_sql[0])
-                    staff_location = get_custom_location(staff_add)
-
+                    staff_location = get_staff_lat_lng(d.name)
                     rad = haversine(location, staff_location, unit='mi')
                     if rad<=radius:
                         filter_data.append(d)
@@ -181,6 +184,15 @@ def filter_location(radius,comp,data):
         return filter_data
     except Exception as e:
         print(e)
+
+def get_staff_lat_lng(name):
+    staff_add_sql = frappe.db.sql('''select lat,lng from tabCompany where name = "{0}"'''.format(name), as_list=True)
+    lat1, lng1 = 0, 0
+    if staff_add_sql[0][0]!=None or staff_add_sql[0][0]!='':
+        lat1=staff_add_sql[0][0]
+    if staff_add_sql[0][1]!=None or staff_add_sql[0][0]!='':
+        lng1=staff_add_sql[0][1]
+    return tuple([float(lat1), float(lng1)])
 
 def get_custom_location(address):
     lat, lng = get_lat_lng(address)
@@ -205,15 +217,13 @@ def hiring_data(filters,user_name,comp_id,start,end):
         """.format(user_comp[0][0],cond1,cond2,cond3)
         
         data = frappe.db.sql(sql, as_dict=True)
-        for d in data:
-            response = get_count(d.name)
-            d.update(dict(count=response['count'],blocked_count=response['blocked_count'],title=response['title'],rating = check_staffing_reviews(d.name)))
-            
-            
         if filters.get('radius',None) not in [None,""]:
             radius = filters.get('radius')
             data = filter_location(radius,user_comp,data)
-        
+        for d in data:
+            response = get_count(d.name)
+            d.update(dict(count=response['count'],blocked_count=response['blocked_count'],title=response['title'],rating = check_staffing_reviews(d.name)))
+                    
         if comp_id:
             data=frappe.db.sql(sql, as_list=True)
             company_name=data[int(comp_id)-1][0]
@@ -242,4 +252,3 @@ def get_count(company):
         return  result
     except Exception as e:
         print(e)
-
