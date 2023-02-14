@@ -1478,6 +1478,8 @@ function remove_row(message, emp_name, cdt, cdn) {
 }
 function check_mandatory_field(emp_id, emp_name) {
   cur_frm.doctype = "Assign Employee";
+  $('[data-label="Save"]').show();
+  console.log("check ", cur_frm.doctype);
   frappe.call({
     method: "tag_workflow.tag_data.check_mandatory_field",
     args: { emp_id: emp_id, check: 0, emp_name: emp_name },
