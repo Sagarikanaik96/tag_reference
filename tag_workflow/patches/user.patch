@@ -1,14 +1,14 @@
 diff --git a/frappe/core/doctype/user/user.json b/frappe/core/doctype/user/user.json
-index 6b3748f..0616c4c 100644
+index 6b3748f..9ae805d 100644
 --- a/frappe/core/doctype/user/user.json
 +++ b/frappe/core/doctype/user/user.json
-@@ -7,16 +7,15 @@
+@@ -7,17 +7,17 @@
   "doctype": "DocType",
   "engine": "InnoDB",
   "field_order": [
 -  "enabled",
 -  "section_break_3",
-+  "section_break_1",
++  "data_1",
    "email",
    "first_name",
    "middle_name",
@@ -18,11 +18,13 @@ index 6b3748f..0616c4c 100644
    "username",
    "column_break_11",
 +  "last_name",
-+  "enabled",
++  "mobile_no",
    "language",
++  "enabled",
    "time_zone",
    "send_welcome_email",
-@@ -33,14 +32,15 @@
+   "unsubscribed",
+@@ -33,14 +33,14 @@
    "banner_image",
    "desk_theme",
    "column_break_26",
@@ -32,7 +34,7 @@ index 6b3748f..0616c4c 100644
    "bio",
    "mute_sounds",
 -  "column_break_22",
-   "mobile_no",
+-  "mobile_no",
    "change_password",
 +  "old_password",
    "new_password",
@@ -181,7 +183,7 @@ index 6b3748f..0616c4c 100644
 +   "fieldtype": "Column Break"
 +  },
 +  {
-+   "fieldname": "section_break_1",
++   "fieldname": "data_1",
 +   "fieldtype": "Section Break"
    }
   ],
@@ -191,7 +193,7 @@ index 6b3748f..0616c4c 100644
    }
   ],
 - "modified": "2022-09-19 16:05:46.485242",
-+ "modified": "2023-02-09 02:46:34.200363",
++ "modified": "2023-02-14 03:06:23.721128",
   "modified_by": "Administrator",
   "module": "Core",
   "name": "User",

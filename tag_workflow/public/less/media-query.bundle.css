@@ -12,6 +12,14 @@
 }
 
 @media (max-width: 768px) {
+  [data-route="List/Payroll Period/List"]
+    .modal-dialog
+    .form-column
+    .frappe-control {
+    width: 100% !important;
+    padding: 0 !important;
+    float: none;
+  }
   #website-post-login {
     text-align: right !important;
   }

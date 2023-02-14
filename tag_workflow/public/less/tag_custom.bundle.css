@@ -264,7 +264,7 @@ input:visited {
   display: none;
 }
 .notification-list-body .recent-item.notification-item.unread {
-  background: #e8f8fc;
+  background: #e8f8fc !important;
   margin: 10px 0;
 }
 .notification-list-body .recent-item.notification-item {
@@ -615,8 +615,8 @@ textarea.form-control {
   width: 140px;
   background: none;
   font-size: 12px;
-  color: #333C44;
-  border: 1px solid #79D5EE !important;
+  color: #333c44;
+  border: 1px solid #79d5ee !important;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   height: 33.5px;
@@ -2272,7 +2272,12 @@ span.comment-count {
     right: -230px;
   }
 }
-[data-page-route="Add Timesheet"] .form-grid .grid-body .data-row div:nth-child(11) .static-area{
+[data-page-route="Add Timesheet"]
+  .form-grid
+  .grid-body
+  .data-row
+  div:nth-child(11)
+  .static-area {
   display: none;
 }
 
@@ -2285,33 +2290,33 @@ span.comment-count {
   position: absolute;
   margin-top: 10px;
 }
-.enable_pill_branch{
+.enable_pill_branch {
   margin-left: 36.4%;
 }
-.enable_pill_jazz{
+.enable_pill_jazz {
   margin-left: 35.4%;
 }
-.enable_pill_quick{
+.enable_pill_quick {
   margin-left: 32.5%;
 }
-.enable_pill_staff{
+.enable_pill_staff {
   margin-left: 25%;
 }
-.enable_pill_work{
+.enable_pill_work {
   margin-left: 32.4%;
 }
-.active_pill_branch{
+.active_pill_branch {
   margin-left: 36%;
 }
-.active_pill_jazz{
+.active_pill_jazz {
   margin-left: 35%;
 }
-.active_pill_quick{
+.active_pill_quick {
   margin-left: 32.5%;
 }
-.active_pill_staff{
+.active_pill_staff {
   margin-left: 25%;
 }
-.active_pill_work{
+.active_pill_work {
   margin-left: 32.8%;
 }
