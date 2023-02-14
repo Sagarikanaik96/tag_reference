@@ -2,7 +2,7 @@
 // // For license information, please see license.txt
 let condition = localStorage.getItem("exclusive_case");
 window.conf = 0;
-let note = '';
+let note = "";
 let company_branch = 0;
 frappe.ui.form.on("Assign Employee", {
   refresh: function (frm) {
@@ -35,7 +35,7 @@ frappe.ui.form.on("Assign Employee", {
       assigned_direct(frm);
     }
     staff_comp(frm);
-    update_claim_approve(frm)
+    update_claim_approve(frm);
     render_table(frm);
     approved_employee(frm);
     back_job_order_form(frm);
@@ -71,7 +71,7 @@ frappe.ui.form.on("Assign Employee", {
     }
     old_unknown_function(frm);
     render_tab(frm);
-    remove_cache_data()
+    remove_cache_data();
   },
 
   onload: function (frm) {
@@ -118,7 +118,7 @@ frappe.ui.form.on("Assign Employee", {
     cur_frm.refresh_fields();
     if (frm.doc.company && frm.doc.__islocal == 1) {
       set_pay_rate(frm);
-      check_class_code(frm)
+      check_class_code(frm);
       check_company_branch(frm);
     }
   },
@@ -140,26 +140,32 @@ frappe.ui.form.on("Assign Employee", {
           ) {
             make_hiring_notification(frm);
           } else {
-            worker_notification(frm)
+            worker_notification(frm);
             make_notification_approved(frm);
           }
         }
       },
     });
 
-    frappe.db.set_value('Assign Employee', frm.doc.name, "previous_worker", parseInt(frm.doc.employee_details.length))
+    frappe.db.set_value(
+      "Assign Employee",
+      frm.doc.name,
+      "previous_worker",
+      parseInt(frm.doc.employee_details.length)
+    );
     create_pay_rate(frm);
     update_workers_filled(frm);
-    create_staff_comp_code(frm)
+    create_staff_comp_code(frm);
     frappe.call({
-			method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.get_or_create_jobtitle",
-			args:{
-				'job_order':cur_frm.doc.job_order,
-				'staffing_company':frappe.boot.tag.tag_user_info.company,
-				"hiring_company":cur_frm.doc.hiring_organization,
-				"employee_pay_rate":cur_frm.doc.employee_pay_rate
-			}
-		})
+      method:
+        "tag_workflow.tag_workflow.doctype.claim_order.claim_order.get_or_create_jobtitle",
+      args: {
+        job_order: cur_frm.doc.job_order,
+        staffing_company: frappe.boot.tag.tag_user_info.company,
+        hiring_company: cur_frm.doc.hiring_organization,
+        employee_pay_rate: cur_frm.doc.employee_pay_rate,
+      },
+    });
   },
   validate: function (frm) {
     let emp_pay_rate = frm.doc.employee_pay_rate;
@@ -194,7 +200,7 @@ frappe.ui.form.on("Assign Employee", {
         filters: [["Company", "organization_type", "=", "Staffing"]],
       };
     });
-    staffing_company(frm)
+    staffing_company(frm);
   },
   view_contract: function () {
     let contracts =
@@ -218,17 +224,17 @@ frappe.ui.form.on("Assign Employee", {
     });
     frm.refresh_field("employee_details");
   },
-  staff_class_code:function(frm){
-    if(frm.doc.staff_class_code && frm.doc.staff_class_code.length>10){
-			frappe.msgprint({
-			message: __("Maximum Characters allowed for Class Code are 10."),
-			title: __("Error"),
-			indicator: "orange",
-			});
-			frm.set_value("staff_class_code",'');
-			frappe.validated = false        
-		}
-  }
+  staff_class_code: function (frm) {
+    if (frm.doc.staff_class_code && frm.doc.staff_class_code.length > 10) {
+      frappe.msgprint({
+        message: __("Maximum Characters allowed for Class Code are 10."),
+        title: __("Error"),
+        indicator: "orange",
+      });
+      frm.set_value("staff_class_code", "");
+      frappe.validated = false;
+    }
+  },
 });
 
 /*-----------hiring notification--------------*/
@@ -298,7 +304,7 @@ function make_hiring_notification(frm) {
   );
 }
 
-function check_job_title(frm){
+function check_job_title(frm) {
   frappe.call({
     method:
       "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.add_job_title",
@@ -411,9 +417,9 @@ frappe.ui.form.on("Assign Employee Details", {
   },
   employee: function (frm, cdt, cdn) {
     let child = locals[cdt][cdn];
-    
+
     if (child.employee) {
-      check_mandatory_field(child.employee,child.employee_name)
+      check_mandatory_field(child.employee, child.employee_name);
       frappe.call({
         method: "tag_workflow.tag_data.joborder_resume",
         args: { name: child.employee },
@@ -448,7 +454,13 @@ frappe.ui.form.on("Assign Employee Details", {
       if (child.__islocal != 1) {
         check_old_value(child);
       }
-      branch_wallet(frm.doc.company, child.employee, child.employee_name, cdt, cdn);
+      branch_wallet(
+        frm.doc.company,
+        child.employee,
+        child.employee_name,
+        cdt,
+        cdn
+      );
       frappe.model.set_value(cdt, cdn, "remove_employee", 0);
     }
   },
@@ -584,7 +596,7 @@ function staff_comp(frm) {
 }
 
 function worker_notification(frm) {
-  setTimeout(function() {
+  setTimeout(function () {
     if (
       frm.doc.tag_status == "Open" &&
       frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
@@ -611,21 +623,22 @@ function worker_notification(frm) {
                 " is " +
                 worker_required
             );
-            cur_frm.fields_dict["employee_details"].grid.cannot_add_rows = false;
+            cur_frm.fields_dict[
+              "employee_details"
+            ].grid.cannot_add_rows = false;
             frm.set_df_property("employee_details", "read_only", 0);
             cur_frm.fields_dict["employee_details"].refresh();
           }
         },
       });
     }
-}, 2000);
-  
+  }, 2000);
 }
 
 function table_emp(frm, table, msg) {
   let len = 0;
-  for(let i in table){
-    len = table[i].remove_employee==0 ? len+1 : len;
+  for (let i in table) {
+    len = table[i].remove_employee == 0 ? len + 1 : len;
   }
   if (frm.doc.tag_status == "Approved" && frm.doc.resume_required == 0) {
     len > Number(frm.doc.claims_approved)
@@ -798,8 +811,12 @@ function add_employee_row(frm) {
 }
 
 function staffing_company(frm) {
-  if (frm.doc.__islocal == 1 && frappe.boot.tag.tag_user_info.company_type == "Staffing" && frappe.boot.tag.tag_user_info.comps.length==1) {
-      frm.set_value('company', frappe.boot.tag.tag_user_info.company);
+  if (
+    frm.doc.__islocal == 1 &&
+    frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
+    frappe.boot.tag.tag_user_info.comps.length == 1
+  ) {
+    frm.set_value("company", frappe.boot.tag.tag_user_info.company);
   }
 }
 
@@ -903,7 +920,7 @@ function select_employees(frm) {
 }
 
 function pop_up() {
-  note='';
+  note = "";
   let head = `<div class="table-responsive employee_popup"><table class="col-md-12 my-2 basic-table table-headers table table-hover"><thead><tr><th><input type="checkbox" class="grid-row-check pull-left" onclick="select_all1()" id="all"></th><th>Employee ID</th><th>Employee Name</th><th>Resume</th><th></th></tr></thead><tbody>`;
   let html = ``;
 
@@ -927,14 +944,16 @@ function pop_up() {
 
   let notes_field = `<div class="px-3"><p class="mb-1"><label for="w3review">Invoice Notes:</label></p><textarea class="w-100" rows="3" label="Notes" id="_${assign_emp_id}_notes" class="head_count_tittle" maxlength="160" ></textarea><small>Character limit: 160</small> </div>`;
   body = body + notes_field;
-  let fields = [{ fieldname: "custom_notes", fieldtype: "HTML", options: body }];
+  let fields = [
+    { fieldname: "custom_notes", fieldtype: "HTML", options: body },
+  ];
   let dialog = new frappe.ui.Dialog({
     title: "Select Employees",
     fields: fields,
   });
   dialog.show();
   dialog.$wrapper.find(".modal-dialog").css("max-width", "575px");
-  populate_notes(dialog,'custom_notes')
+  populate_notes(dialog, "custom_notes");
   dialog.set_primary_action(__("Submit"), function () {
     update_table(dialog);
   });
@@ -954,7 +973,6 @@ window.select_all1 = function () {
   }
 };
 
-
 function update_table(dialog) {
   let data = [];
   for (let d in cur_frm.doc.employee_details) {
@@ -964,16 +982,17 @@ function update_table(dialog) {
       data.push(id1);
     }
   }
-  
+
   frappe.call({
     method: "tag_workflow.tag_data.approved_employee",
     args: {
       id: data,
       name: cur_frm.doc.name,
       job_order: cur_frm.doc.job_order,
-      assign_note:dialog.fields_dict['custom_notes'].disp_area.querySelector('textarea').value, 
-      company:cur_frm.doc.company
-      
+      assign_note:
+        dialog.fields_dict["custom_notes"].disp_area.querySelector("textarea")
+          .value,
+      company: cur_frm.doc.company,
     },
     callback: function (r) {
       if (r.message == "error") {
@@ -1014,7 +1033,7 @@ function confirm_message(frm) {
           let pop_up1;
           let msg1 = "";
           for (let i = 0; i <= r.message[0].length - 1; i++) {
-            if(r.message[0][i]["job_order"] != 1){
+            if (r.message[0][i]["job_order"] != 1) {
               let new_msg =
                 "Warning: " +
                 r.message[0][i]["employee"] +
@@ -1022,19 +1041,19 @@ function confirm_message(frm) {
                 r.message[0][i]["job_order"] +
                 " within this Job Order’s timeframe.";
               msg1 = msg1 + "<br>" + new_msg;
-            }else{
-              msg1 = ""
+            } else {
+              msg1 = "";
             }
           }
           let pay_msg = pay_rate_message(frm, r.message[1]);
-          set_popup(msg1,pop_up1,pay_msg,frm,resolve)
+          set_popup(msg1, pop_up1, pay_msg, frm, resolve);
         });
       }
     },
   });
 }
-function set_popup(msg1,pop_up1,pay_msg,frm,resolve){
-  if(msg1){
+function set_popup(msg1, pop_up1, pay_msg, frm, resolve) {
+  if (msg1) {
     pop_up1 = pay_msg == "" ? msg1 : msg1 + "<hr>" + pay_msg;
     let confirm_assign = new frappe.ui.Dialog({
       title: __("Warning"),
@@ -1060,7 +1079,7 @@ function set_popup(msg1,pop_up1,pay_msg,frm,resolve){
     });
     confirm_assign.show();
     confirm_assign.$wrapper.find(".modal-dialog").css("width", "450px");
-  }else{
+  } else {
     let resp = "frappe.validated = false";
     window.conf = 1;
     frm.save();
@@ -1130,9 +1149,9 @@ function set_payrate_field(frm) {
     (r) => {
       if (r.order_status == "Completed") {
         frm.set_df_property("employee_pay_rate", "read_only", 1);
-        frm.set_df_property('staff_class_code', 'read_only', 1);
-				frm.set_df_property('staff_class_code_rate', 'read_only', 1);
-      } else{
+        frm.set_df_property("staff_class_code", "read_only", 1);
+        frm.set_df_property("staff_class_code_rate", "read_only", 1);
+      } else {
         $('[data-fieldname = "employee_pay_rate"]').attr("id", "emp_pay_rate");
       }
     }
@@ -1284,168 +1303,200 @@ function pay_rate_message(frm, pay_rate_details) {
   return msg;
 }
 
-function update_value(frm,r){
+function update_value(frm, r) {
   frm.set_value("claims_approved", r.message[0].approved_no_of_workers);
   frm.set_value("company", r.message[0].staffing_organization);
-  frm.set_value('notes',r.message[0].notes);
+  frm.set_value("notes", r.message[0].notes);
 
   frm.set_query("company", function () {
     return {
-      filters: [
-        ["Company", "name", "=", r.message[0].staffing_organization],
-      ],
+      filters: [["Company", "name", "=", r.message[0].staffing_organization]],
     };
   });
   frm.set_df_property("claims_approved", "hidden", 0);
-  
 }
-function update_workers_filled(frm){
-  if(frm.doc.__islocal!=1){
+function update_workers_filled(frm) {
+  if (frm.doc.__islocal != 1) {
     frappe.call({
-      method:'tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.update_workers_filled',
-      args:
-      {
-        job_order_name:frm.doc.job_order
-      }
-    })
+      method:
+        "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.update_workers_filled",
+      args: {
+        job_order_name: frm.doc.job_order,
+      },
+    });
   }
 }
-function create_staff_comp_code(frm){
+function create_staff_comp_code(frm) {
   frappe.call({
-    method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.create_staff_comp_code",
-    args:{
-      "job_order":frm.doc.job_order,
-      "staff_class_code": frm.doc.staff_class_code?frm.doc.staff_class_code:'' ,
-      "staffing_company": frm.doc.company,
-      "staff_class_code_rate":frm.doc.staff_class_code_rate
-    }
-  })
-}
-function check_class_code(frm){
-	if(frm.doc.__islocal==1){
-		frappe.call({
-			method: "tag_workflow.tag_workflow.doctype.claim_order.claim_order.check_already_exist_class_code",
-			args:{
-				"job_order":frm.doc.job_order,
-				"staffing_company": frm.doc.company,
-			},
-			callback:function(r){
-				if(r.message[0]!='Exist'){
-					frm.set_value('staff_class_code',r.message[0]);
-					frm.set_value('staff_class_code_rate',r.message[1]);
-				}				
-			}
-		})
-	}
-}
-function hide_class_code_rate(frm){
-  if(frm.doc.__islocal==1 && frm.doc.resume_required==0){
-    frm.set_df_property('staff_class_code','hidden',1)
-    frm.set_df_property('staff_class_code_rate','hidden',1)
-  }
-}
-
-function add_notes_button(frm){
-  const role = frappe.boot.tag.tag_user_info.user_type;
-  if(frm.doc.tag_status=="Approved" && frm.doc.resume_required==1 && (role=='Hiring Admin'|| role=='Hiring User')){
-    frm.add_custom_button('Update Invoice Notes',()=>{
-      let d = new frappe.ui.Dialog({
-        title: 'Update Invoice Notes',
-        fields: [
-            {
-                label: 'Invoice Notes',
-                fieldname: 'modal_notes',
-                fieldtype: 'Small Text',
-                reqd:1,
-            },
-        ],
-        primary_action_label: 'Submit',
-        primary_action(values) {
-            frappe.call({
-              method:"tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.update_notes",
-              args:{
-                name:cur_frm.doc.name,
-                notes:values.modal_notes,
-                job_order: cur_frm.doc.job_order,
-                company:cur_frm.doc.company
-              }
-            })
-            d.hide();
-
-        }
-    })
-    d.show();
-    populate_notes(d,'modal_notes')
-    d.fields_dict['modal_notes'].$wrapper.find('textarea').attr('maxlength',160);
-
-    
-    })
-  }
-
-}
-frappe.realtime.on('sync_data',()=>{
-  setTimeout(()=>{
-    cur_frm.reload_doc();
-  },200)
-})
-
-function check_company_branch(frm){
-  frappe.db.get_value('Company', {'name': frm.doc.company}, ['branch_enabled', 'branch_org_id', 'branch_api_key'], (res)=>{
-    if(res.branch_enabled && res.branch_org_id && res.branch_api_key){
-      company_branch = 1;
-    }else{
-      company_branch = 0;
-    }
+    method:
+      "tag_workflow.tag_workflow.doctype.claim_order.claim_order.create_staff_comp_code",
+    args: {
+      job_order: frm.doc.job_order,
+      staff_class_code: frm.doc.staff_class_code
+        ? frm.doc.staff_class_code
+        : "",
+      staffing_company: frm.doc.company,
+      staff_class_code_rate: frm.doc.staff_class_code_rate,
+    },
   });
 }
+function check_class_code(frm) {
+  if (frm.doc.__islocal == 1) {
+    frappe.call({
+      method:
+        "tag_workflow.tag_workflow.doctype.claim_order.claim_order.check_already_exist_class_code",
+      args: {
+        job_order: frm.doc.job_order,
+        staffing_company: frm.doc.company,
+      },
+      callback: function (r) {
+        if (r.message[0] != "Exist") {
+          frm.set_value("staff_class_code", r.message[0]);
+          frm.set_value("staff_class_code_rate", r.message[1]);
+        }
+      },
+    });
+  }
+}
+function hide_class_code_rate(frm) {
+  if (frm.doc.__islocal == 1 && frm.doc.resume_required == 0) {
+    frm.set_df_property("staff_class_code", "hidden", 1);
+    frm.set_df_property("staff_class_code_rate", "hidden", 1);
+  }
+}
 
-function branch_wallet(company, emp_id, emp_name, cdt, cdn){
-  if(company_branch == 1){
+function add_notes_button(frm) {
+  const role = frappe.boot.tag.tag_user_info.user_type;
+  if (
+    frm.doc.tag_status == "Approved" &&
+    frm.doc.resume_required == 1 &&
+    (role == "Hiring Admin" || role == "Hiring User")
+  ) {
+    frm.add_custom_button("Update Invoice Notes", () => {
+      let d = new frappe.ui.Dialog({
+        title: "Update Invoice Notes",
+        fields: [
+          {
+            label: "Invoice Notes",
+            fieldname: "modal_notes",
+            fieldtype: "Small Text",
+            reqd: 1,
+          },
+        ],
+        primary_action_label: "Submit",
+        primary_action(values) {
+          frappe.call({
+            method:
+              "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.update_notes",
+            args: {
+              name: cur_frm.doc.name,
+              notes: values.modal_notes,
+              job_order: cur_frm.doc.job_order,
+              company: cur_frm.doc.company,
+            },
+          });
+          d.hide();
+        },
+      });
+      d.show();
+      populate_notes(d, "modal_notes");
+      d.fields_dict["modal_notes"].$wrapper
+        .find("textarea")
+        .attr("maxlength", 160);
+    });
+  }
+}
+frappe.realtime.on("sync_data", () => {
+  setTimeout(() => {
+    cur_frm.reload_doc();
+  }, 200);
+});
+
+function check_company_branch(frm) {
+  frappe.db.get_value(
+    "Company",
+    { name: frm.doc.company },
+    ["branch_enabled", "branch_org_id", "branch_api_key"],
+    (res) => {
+      if (res.branch_enabled && res.branch_org_id && res.branch_api_key) {
+        company_branch = 1;
+      } else {
+        company_branch = 0;
+      }
+    }
+  );
+}
+
+function branch_wallet(company, emp_id, emp_name, cdt, cdn) {
+  if (company_branch == 1) {
     frappe.call({
       method: "tag_workflow.utils.branch_integration.get_employee_data",
-      args:{
-        "emp_id": emp_id,
-        "company": company
+      args: {
+        emp_id: emp_id,
+        company: company,
       },
-      freeze:true,
-      callback: (res)=>{
-        if(res.message){
-          if(res.message.includes('Please') || res.message.includes('Branch')){
+      freeze: true,
+      callback: (res) => {
+        if (res.message) {
+          if (
+            res.message.includes("Please") ||
+            res.message.includes("Branch")
+          ) {
             remove_row(res.message, emp_name, cdt, cdn);
             frappe.msgprint(res.message);
             frappe.validated = false;
-          }else if(Number(res.message)){
-            frappe.db.set_value('Employee', emp_id, "account_number", res.message)
+          } else if (Number(res.message)) {
+            frappe.db.set_value(
+              "Employee",
+              emp_id,
+              "account_number",
+              res.message
+            );
           }
         }
-      }
+      },
     });
   }
 }
 
-function remove_row(message, emp_name, cdt, cdn){
-  if(message != 'Enable Branch for '+emp_name+'.'){
-    let fields = ['employee', 'employee_name', 'resume', 'pay_rate', 'remove_employee', 'job_category', 'company'];
-    for(let field in fields){
-      frappe.model.set_value(cdt, cdn, fields[field], '');
+function remove_row(message, emp_name, cdt, cdn) {
+  if (message != "Enable Branch for " + emp_name + ".") {
+    let fields = [
+      "employee",
+      "employee_name",
+      "resume",
+      "pay_rate",
+      "remove_employee",
+      "job_category",
+      "company",
+    ];
+    for (let field in fields) {
+      frappe.model.set_value(cdt, cdn, fields[field], "");
     }
-    cur_frm.refresh_field('employee_details');
+    cur_frm.refresh_field("employee_details");
   }
 }
-function check_mandatory_field(emp_id,emp_name){
+function check_mandatory_field(emp_id, emp_name) {
+  cur_frm.doctype = "Assign Employee";
   frappe.call({
-    method:"tag_workflow.tag_data.check_mandatory_field",
-    args:{emp_id: emp_id,check: 0,emp_name:emp_name},
-    callback: function(r){
-      let msg = r.message[1] + " is missing the below required fields. You will be unable to approve their timesheets unless these fields are populated.<br><br>"
-      if(r.message != "success"){
-        msg += r.message[0]
-        frappe.msgprint({message: __(msg), title: __("Warning"), indicator: "yellow",});
+    method: "tag_workflow.tag_data.check_mandatory_field",
+    args: { emp_id: emp_id, check: 0, emp_name: emp_name },
+    callback: function (r) {
+      let msg =
+        r.message[1] +
+        " is missing the below required fields. You will be unable to approve their timesheets unless these fields are populated.<br><br>";
+      if (r.message != "success") {
+        msg += r.message[0];
+        frappe.msgprint({
+          message: __(msg),
+          title: __("Warning"),
+          indicator: "yellow",
+        });
       }
-    }
+    },
   });
 }
-function update_claim_approve(frm){
+function update_claim_approve(frm) {
   if (
     frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
     frm.doc.resume_required == 0 &&
@@ -1461,50 +1512,55 @@ function update_claim_approve(frm){
       async: 0,
       callback: function (r) {
         if (r.message.length != 0) {
-          update_value(frm,r);
-
+          update_value(frm, r);
         }
       },
     });
   }
-
-}jQuery(document).on("click",".grid-remove-rows",function(){
+}
+jQuery(document).on("click", ".grid-remove-rows", function () {
   remove_cache_data();
 });
 
-function remove_cache_data(){
-  if (cur_frm.doc.company && cur_frm.doc.job_order){
-  frappe.call({
-    method:"tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.free_redis",
-    args:{company:cur_frm.doc.company,job_order:cur_frm.doc.job_order}
-   })
-  }
-}
-
-function populate_notes(dialog,field){
-  if(cur_frm.doc.notes){
-    if (field=="custom_notes")
-      dialog.fields_dict[field].disp_area.querySelector('textarea').value = cur_frm.doc.notes;
-    else{
-      dialog.fields_dict[field].value = cur_frm.doc.notes;
-      dialog.fields_dict[field].refresh()
-    }
-     
-}    
-}
-
-function add_notes(frm){
-  if (frm.is_new() && frappe.boot.tag.tag_user_info.company_type == "Staffing" && frm.doc.company && frm.doc.job_order){
+function remove_cache_data() {
+  if (cur_frm.doc.company && cur_frm.doc.job_order) {
     frappe.call({
-      method:"tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.add_notes",
-      args:{company:frm.doc.company,job_order:frm.doc.job_order},
-      callback:(r)=>{
-        if(r.message.length>0){
-          frm.set_value('notes',r.message[0]['notes'])
-          frm.refresh_field('notes')
-        }
-      }
-    })
+      method:
+        "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.free_redis",
+      args: { company: cur_frm.doc.company, job_order: cur_frm.doc.job_order },
+    });
   }
-  
+}
+
+function populate_notes(dialog, field) {
+  if (cur_frm.doc.notes) {
+    if (field == "custom_notes")
+      dialog.fields_dict[field].disp_area.querySelector("textarea").value =
+        cur_frm.doc.notes;
+    else {
+      dialog.fields_dict[field].value = cur_frm.doc.notes;
+      dialog.fields_dict[field].refresh();
+    }
+  }
+}
+
+function add_notes(frm) {
+  if (
+    frm.is_new() &&
+    frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
+    frm.doc.company &&
+    frm.doc.job_order
+  ) {
+    frappe.call({
+      method:
+        "tag_workflow.tag_workflow.doctype.assign_employee.assign_employee.add_notes",
+      args: { company: frm.doc.company, job_order: frm.doc.job_order },
+      callback: (r) => {
+        if (r.message.length > 0) {
+          frm.set_value("notes", r.message[0]["notes"]);
+          frm.refresh_field("notes");
+        }
+      },
+    });
+  }
 }
