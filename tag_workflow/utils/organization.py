@@ -434,6 +434,7 @@ def remove_field():
         if len(data)>0:
             frappe.db.sql('truncate table `tabCertificate and Endorsement`')
         frappe.db.sql('''ALTER TABLE tabCompany DROP IF EXISTS bulk_upload_resume, DROP IF EXISTS decrypt_org_id, DROP IF EXISTS decrypted_org_id, DROP IF EXISTS decrypt_api, DROP IF EXISTS decrypted_api''')
+        frappe.db.sql('''ALTER TABLE tabCompany MODIFY office_code BLOB''')
         frappe.db.commit()
     except Exception as e:
         print(e)
