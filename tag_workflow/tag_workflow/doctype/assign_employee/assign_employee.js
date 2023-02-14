@@ -1244,7 +1244,7 @@ function field_validation(frm, message) {
 
 function field_validation_contd(frm) {
   let message = "";
-  let sign = cur_frm.doc.e_signature_full_name;
+  let sign = frm.doc.e_signature_full_name;
   if (frm.doc.resume_required == 1) {
     if (sign === undefined || !sign) {
       message = message + "<br>E Signature Full Name";
@@ -1477,9 +1477,6 @@ function remove_row(message, emp_name, cdt, cdn) {
   }
 }
 function check_mandatory_field(emp_id, emp_name) {
-  cur_frm.doctype = "Assign Employee";
-  $('[data-label="Save"]').show();
-  console.log("check ", cur_frm.doctype);
   frappe.call({
     method: "tag_workflow.tag_data.check_mandatory_field",
     args: { emp_id: emp_id, check: 0, emp_name: emp_name },
