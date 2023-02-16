@@ -599,9 +599,10 @@ function add_button_submit(frm){
 	}
 }
 function submit_timesheet(frm){
+
 	frappe.call({
 		method: "tag_workflow.utils.timesheet.submit_staff_timesheet",
-		args: {"jo":frm.doc.job_order_detail, "timesheet_date":frm.doc.date_of_timesheet, "employee":frm.doc.employee,"timesheet":frm.doc.name},
+		args: {"jo":frm.doc.job_order_detail, "timesheet_date":frm.doc.date_of_timesheet, "employee":frm.doc.employee,"timesheet":frm.doc.name,"date":frm.doc.creation,"company":frm.doc.company,"dnr":frm.doc.dnr,"timesheet_name":frm.doc.name},
 		async: 1,
 		freeze: true,
 		freeze_message: "Please wait while we are updating timesheet status...",

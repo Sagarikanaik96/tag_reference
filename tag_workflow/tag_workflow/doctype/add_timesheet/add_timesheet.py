@@ -11,6 +11,7 @@ from frappe.share import add_docshare as add
 from tag_workflow.utils.timesheet import remove_job_title, unsatisfied_organization, do_not_return, no_show_org
 import ast
 import re
+from tag_workflow.utils.timesheet import notify_email_after_submit
 TM_FT = "%Y-%m-%d %H:%M:%S"
 jobOrder='Job Order'
 timesheet_time= 'select to_time,from_time from `tabTimesheet Detail` where parent= '
@@ -110,7 +111,7 @@ def update_timesheet(user, company_type, items, cur_selected, job_order, date, f
     except Exception as e:
         print(e, frappe.get_traceback())
         frappe.msgprint(e)
-
+        
 #--------------------------------------------------#
 def add_status(timesheet, status, employee, company, job_order):
     try:
@@ -175,6 +176,8 @@ def dnr_notification(time,staffing_user):
         message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>DNR</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>. There is time to substitute this employee for today’s work order {datetime.date.today()}'
         subject = 'DNR'
         make_system_notification(staffing_user, message, 'Timesheet', time['docname'], subject)
+        notify_email_after_submit(dnr_timesheet.job_order_detail, dnr_timesheet.employee, 1, "DNR", dnr_timesheet.company, dnr_timesheet.employee_name, dnr_timesheet.creation,dnr_timesheet.name)
+
     if(dnr_timesheet.non_satisfactory==1):
         message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>Non Satisfactory</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>.'
         subject = 'Non Satisfactory'
@@ -195,6 +198,7 @@ def staffing_own_timesheet(save,timesheet,company_type):
             timesheet_status_data=f'update `tabTimesheet` set docstatus="1",workflow_state="Approved",status="Submitted" where name="{timesheet.name}"'                       
             frappe.db.sql(timesheet_status_data)
             frappe.db.commit()
+
 
 
 @frappe.whitelist()

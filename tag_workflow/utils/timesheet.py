@@ -232,7 +232,23 @@ def get_timesheet_employee(doctype, txt, searchfield, start, page_len, filters):
 
     emps = frappe.db.sql(sql) + frappe.db.sql(res_sql)
     return emps
+@frappe.whitelist()
+def notify_email_after_submit(job_order, value, subject, company, employee_name, date,timesheet_name):
+    try:
+        sql = """ select user_id from `tabEmployee` where company = (select company from `tabEmployee` where name = '{0}') and user_id IS NOT NULL  """.format(employee)
+        user_list = frappe.db.sql(sql, as_dict=1)
+        if subject=='DNR':
+            message=dnr_notification_after_submit(job_order,value,employee_name,subject,date,company)  
+        users = []
+        for user in user_list:
+            users.append(user['user_id'])
 
+        if users:
+            make_system_notification(users, message,JOB, job_order, subject)
+            sendmail(users, message, subject, "Timesheet", timesheet_name)
+    except Exception as e:
+        frappe.log_error(e, "Timesheet Email Error")
+        frappe.throw(e)
 
 @frappe.whitelist()
 def notify_email(job_order, employee, value, subject, company, employee_name, date,employee_company,timesheet_name):
@@ -672,7 +688,7 @@ def removing_no_show(company,emp_doc,job_order):
         assign_doc.save(ignore_permissions=True)
     
 @frappe.whitelist()
-def submit_staff_timesheet(jo, timesheet_date, employee,timesheet):
+def submit_staff_timesheet(jo, timesheet_date, employee,timesheet,date,company,dnr,timesheet_name):
     timesheet_exist=[{'name':timesheet}]
     enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_timesheet_exist", now=True,jo=jo, timesheet_date=timesheet_date, employee=employee,timesheet=timesheet,timesheet_exist=timesheet_exist)
     t_time=frappe.db.sql(timesheet_time+"'"+timesheet+"'",as_dict=1)
@@ -680,8 +696,37 @@ def submit_staff_timesheet(jo, timesheet_date, employee,timesheet):
     timesheet_status_data=f'update `tabTimesheet` set docstatus="1",workflow_state="Approved",status="Submitted" where name="{timesheet}"'                       
     frappe.db.sql(timesheet_status_data)
     frappe.db.commit()
+    emp_doc=frappe.get_doc('Employee',employee)
+    if int(dnr)==1:
+        notify_email_after_submit(job_order=jo, value=1, subject="DNR", company=company, employee_name=emp_doc.employee, date=date,timesheet_name=timesheet_name)
+    
     enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_previous_timesheet", now=True,jo=jo, timesheet_date=timesheet_date, employee=employee,timesheet=timesheet,to_time=to_time,save=0)
     return "success"
+
+def dnr_notification_after_submit(job_order,value,employee_name,subject,date,company):
+    sql = ''' select from_date,job_start_time,to_date from `tabJob Order` where name='{}' '''.format(job_order)
+    data=frappe.db.sql(sql, as_dict=1)
+    start_date=data[0].from_date
+    end_date=data[0].to_date
+    today = datetime.date.today()
+    to_time=data[0].job_start_time
+    time_object = datetime.datetime.strptime(str(to_time), '%H:%M:%S').time()
+    time_diff=time_diff_in_seconds(str(datetime.datetime.now().time()),str(time_object))
+
+    if(today<=end_date and today-start_date==0 and (time_diff/60/60 < 2)):
+        if(int(value)):
+            message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>. There is time to substitute this employee for today’s work order {datetime.date.today()}'
+        else:
+            message = f'<b>{employee_name}</b> has been unmarked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
+        return message
+
+    else:
+        if(int(value)):
+            message = f'<b>{employee_name}</b> has been marked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>. There is time to substitute this employee for tomorrow’s work order {datetime.date.today()}'
+        else:
+            message = f'<b>{employee_name}</b> has been unmarked as <b>{subject}</b> for work order <b>{job_order}</b> on <b>{date}</b> with <b>{company}</b>.'
+        return message
+        
 def exist_data(open_exist,data1,timesheets_to_update):
     for i in open_exist:
         for j in range(len(data1)):
