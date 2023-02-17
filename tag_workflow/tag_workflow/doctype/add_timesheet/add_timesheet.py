@@ -118,10 +118,16 @@ def add_status(timesheet, status, employee, company, job_order):
         emp = frappe.get_doc("Employee", employee, ignore_permissions=True)
         if(status == "DNR"):
             timesheet.dnr = 1
+            timesheet.no_show=0
+            timesheet.non_satisfactory=0
+            timesheet.replaced=0
             do_not_return(emp, company, job_order)
             remove_job_title(emp,job_order)
         elif(status == "No Show"):
             timesheet.no_show = 1
+            timesheet.dnr = 0
+            timesheet.non_satisfactory = 0
+            timesheet.replaced = 0
             for item in timesheet.time_logs:
                 item.hours = 0
                 item.is_billable = 0
@@ -132,10 +138,16 @@ def add_status(timesheet, status, employee, company, job_order):
             remove_job_title(emp,job_order)
         elif(status == "Non Satisfactory"):
             timesheet.non_satisfactory = 1
+            timesheet.no_show = 0
+            timesheet.dnr = 0
+            timesheet.replaced = 0
             unsatisfied_organization(emp, company, job_order)
             remove_job_title(emp,job_order)
         elif(status == "Replaced"):
             timesheet.replaced = 1
+            timesheet.no_show = 0
+            timesheet.dnr = 0
+            timesheet.non_satisfactory = 0
             if item.hours <= 0:
                 item.billing_rate = 0
                 item.flat_rate = 0
