@@ -67,7 +67,7 @@ def setup_data():
         frappe.db.set_value(Global_defaults,Global_defaults,"hide_currency_symbol", "No")
         frappe.db.set_value(Global_defaults,Global_defaults,"disable_rounded_total", "1")
         frappe.db.set_value(Global_defaults,Global_defaults,"country", "United States")
-        popultae_job_title()
+        # popultae_job_title()
         update_organization_data()
         update_roles()
         update_tag_user_type()
@@ -267,8 +267,9 @@ def check_if_user_exists():
         for user in user_list:
             if(frappe.db.exists(EMP, {"user_id": user.name})):
                 company, date_of_joining = frappe.db.get_value(EMP, {"user_id": user.name}, ["company", "date_of_joining"])
-                sql = """ UPDATE `tabUser` SET company = "{0}", date_of_joining = "{1}" where name = "{2}" """.format(company, date_of_joining, user.name)
-                frappe.db.sql(sql)
+                if company and date_of_joining:
+                    sql = """ UPDATE `tabUser` SET company = "{0}", date_of_joining = "{1}" where name = "{2}" """.format(company, date_of_joining, user.name)
+                    frappe.db.sql(sql)
 
             if(user.company):
                 user_exclusive_perm(user.name, user.company, user.organization_type)
