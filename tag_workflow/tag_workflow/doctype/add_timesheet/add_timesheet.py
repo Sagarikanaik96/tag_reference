@@ -194,10 +194,13 @@ def dnr_notification(time,staffing_user):
         message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>Non Satisfactory</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>.'
         subject = 'Non Satisfactory'
         make_system_notification(staffing_user, message, 'Timesheet', time['docname'], subject)
+        notify_email_after_submit(dnr_timesheet.job_order_detail, dnr_timesheet.employee, 1, subject, dnr_timesheet.company, dnr_timesheet.employee_name, dnr_timesheet.creation,dnr_timesheet.name)
+
     if(dnr_timesheet.no_show==1):
         message = f'<b>{dnr_timesheet.employee_name}</b> has been marked as <b>No Show</b> for work order <b>{dnr_timesheet.job_order_detail}</b> on <b>{datetime.datetime.now()}</b> with <b>{dnr_timesheet.company}</b>.'
         subject = 'No Show'
         make_system_notification(staffing_user, message, 'Timesheet', time['docname'], subject)
+        notify_email_after_submit(dnr_timesheet.job_order_detail, dnr_timesheet.employee, 1, subject, dnr_timesheet.company, dnr_timesheet.employee_name, dnr_timesheet.creation,dnr_timesheet.name)
 
 def staffing_own_timesheet(save,timesheet,company_type):
     if(save!="1"):
@@ -569,11 +572,11 @@ def overall_overtime(jo, timesheet_date, employee,working_hours,from_time,timesh
     current_timesheet_overtime_hours=current_timesheet_overtime_hours+current_week_overtime
     return current_timesheet_overtime_hours,current_week_overtime
 def timesheet_send_for_approval(timesheets,timesheet_count):
+    staffing_user = []
     for time in timesheets:
         timesheet_count += 1
         sql = """ select parent from `tabHas Role` where role in ("Staffing Admin", "Staffing User") and parent in(select user_id from `tabEmployee` where user_id != '' and company = (select company from `tabEmployee` where name = '{0}')) """.format(time['employee'])
         user_list = frappe.db.sql(sql, as_dict=1)
-        staffing_user = []
 
         for user in user_list:
             if not frappe.db.exists("User Permission",{"user": user.parent,"allow": "Timesheet","apply_to_all_doctypes":1, "for_value": time['docname']}):
@@ -591,7 +594,7 @@ def timesheet_send_for_approval(timesheets,timesheet_count):
         dnr_notification(time,staffing_user)
         subject = 'Timesheet For Approval'
 
-        enqueue("tag_workflow.tag_workflow.utils.notification.sendmail", emails=staffing_user, msg=msg, subject=subject, doctype='Timesheet', docname=time['docname'])
+        enqueue("tag_workflow.utils.notification.sendmail", emails=staffing_user, message=msg, subject=subject, doctype='Timesheet', docname=time['docname'])
     if timesheet_count == 1:
             msg = f'{company} has submitted a timesheet for {employee_name} on {today} for {job_title} for approval.'
     make_system_notification(staffing_user, msg, 'Timesheet', time['docname'], subject)
