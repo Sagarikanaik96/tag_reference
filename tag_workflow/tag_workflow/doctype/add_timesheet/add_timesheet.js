@@ -42,16 +42,6 @@ frappe.ui.form.on('Add Timesheet', {
 			
 		}).addClass("btn-primary btn-submit");
 
-		let jo=localStorage.getItem("order")
-		let len_history = frappe.route_history.length;
-		if((frappe.route_history.length>=3 && (frappe.route_history[len_history-1][1]=='Add Timesheet') && frappe.boot.tag.tag_user_info.company_type!='Staffing' ) ||  frappe.boot.tag.tag_user_info.company_type=='Staffing' ){
-			if(localStorage){
-				frm.set_value("job_order", jo);
-			}
-		}
-		else{
-			frm.set_value("job_order", '');
-		}
 		setTimeout(()=>status_field(frm),1000);
 		setTimeout(()=>checking_selected_values(frm),2000);
 		if(frm.doc.job_order){
@@ -701,10 +691,22 @@ function checking_selected_values(frm){
 		let date=localStorage.getItem("date")
 		frm.set_value('job_order',jo);
 		frm.set_value('date',date);
-		localStorage.setItem("job_order", '');
         localStorage.setItem("date", '');
 	}
+	let jo=localStorage.getItem("order");
+	let len_history = frappe.route_history.length;
+	if((frappe.route_history.length>=3 && (frappe.route_history[len_history-1][1]=='Add Timesheet') && frappe.boot.tag.tag_user_info.company_type!='Staffing' ) ||  frappe.boot.tag.tag_user_info.company_type=='Staffing' ){
+		if(localStorage){
+			frm.set_value("job_order", jo);
+		}
+	}
+	else{
+		frm.set_value("job_order", '');
+	}
+	localStorage.setItem("job_order", '');
+    localStorage.setItem("date", '');
 }
+
 function check_break_time(frm){
 	let def_date = "01 Jan 2011 ";
 	if(frm.doc.from_time && frm.doc.to_time){

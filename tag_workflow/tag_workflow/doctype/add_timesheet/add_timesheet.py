@@ -152,6 +152,11 @@ def add_status(timesheet, status, employee, company, job_order):
                 item.billing_rate = 0
                 item.flat_rate = 0
                 item.billing_amount = 0
+        else:
+            timesheet.replaced = 0
+            timesheet.no_show = 0
+            timesheet.dnr = 0
+            timesheet.non_satisfactory = 0
         return timesheet
     except Exception:
         return timesheet
