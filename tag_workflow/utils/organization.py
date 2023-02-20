@@ -19,6 +19,7 @@ from tag_workflow.utils.notification import make_system_notification
 from frappe.share import add_docshare as add
 from tag_workflow.controllers.master_controller import check_employee
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
+from tag_workflow.tag_data import update_all_comp_lat_lng
 GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
 migrate_sch = 'Migrate/Scheduler'
 
@@ -105,12 +106,22 @@ def setup_data():
         update_integration_enable_data()
         change_emp_status()
         draft_ts_time()
+        update_comp_lat_lng()
         make_commit()
     except Exception as e:
         print(e)
         frappe.log_error(e, "Master")
         #frappe.db.rollback()
 
+
+#update company lat lng
+def update_comp_lat_lng():
+    try:
+        update_all_comp_lat_lng()
+    except Exception as e:
+        print(e)
+        frappe.log_error(e, "update_company_lat_lng")
+    
 #--------org_update----------#
 def update_organization_data():
     try:

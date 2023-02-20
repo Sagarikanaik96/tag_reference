@@ -64,6 +64,7 @@ def onboard_org(lead,contract_number):
 
         if not frappe.db.exists("User", email):
             user = make_user(exclusive, email, person_first_name,person_last_name, org_type, user_type, tag_user_type, phone)
+            msgprint(_("Welcome email sent"))
             is_user = 0
         enqueue("tag_workflow.controllers.master_controller.make_update_comp_perm", docname=exclusive)
         return is_company, is_user, company_doc, user

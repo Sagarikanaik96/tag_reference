@@ -1885,9 +1885,9 @@ def update_comp_lat_lng(company=None):
         count = 0
         print("*------lat lng company update--------------------------*\n")
         if(company!=None):
-            my_data = frappe.db.sql(""" select name, state, city, zip from `tabCompany` where company_name = '{0}' """.format(company), as_dict=1)
+            my_data = frappe.db.sql(''' select name, state, city, zip from `tabCompany` where company_name = "{0}" '''.format(company), as_dict=1)
         else:
-            my_data = frappe.db.sql(""" select name, state, city, zip from `tabCompany` where (lat is null or lat ='' or lng is null or lng='') and city is not null and state is not null """, as_dict=1)
+            my_data = frappe.db.sql(''' select name, state, city, zip from `tabCompany` where (lat is null or lat ="" or lng is null or lng="") and city is not null and state is not null ''', as_dict=1)
         for d in my_data:
             address = d.city + ", " + d.state + ", " + (d.zip if d.zip != 0 and d.zip is not None else "")
             google_location_data_url = GOOGLE_API_URL + address
@@ -1897,7 +1897,7 @@ def update_comp_lat_lng(company=None):
             location_data = google_response.json()
             if(google_response.status_code == 200 and len(location_data)>0 and len(location_data['results'])>0):
                 lat, lng = emp_location_data(location_data)
-                frappe.db.sql('''update `tabCompany` set lat= '{0}', lng='{1}' where name='{2}' '''.format(lat,lng,d.name))
+                frappe.db.sql('''update `tabCompany` set lat= "{0}", lng="{1}" where name="{2}" '''.format(lat,lng,d.name))
                 frappe.db.commit()
             count += 1
     except Exception as e:
