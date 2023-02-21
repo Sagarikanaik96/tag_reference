@@ -105,8 +105,8 @@ app_include_js = [
         '/assets/tag_workflow/js/tag_workflow_routing.js',
         'tag.bundle.js',
         "/assets/tag_workflow/js/data.js",
-        "/assets/tag_workflow/js/notification.js"
-        
+        "/assets/tag_workflow/js/notification.js",
+        "/assets/tag_workflow/js/sort_selector.js"        
 ]
 
 web_include_css = [

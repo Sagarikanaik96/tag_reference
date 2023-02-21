@@ -961,7 +961,7 @@ span.frappe-timestamp.mini {
 }
 
 .sort-selector {
-  display: none;
+  display: block;
 }
 
 [data-page-route="Company"] #drug_flat,
