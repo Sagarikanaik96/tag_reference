@@ -67,7 +67,7 @@ def setup_data():
         frappe.db.set_value(Global_defaults,Global_defaults,"hide_currency_symbol", "No")
         frappe.db.set_value(Global_defaults,Global_defaults,"disable_rounded_total", "1")
         frappe.db.set_value(Global_defaults,Global_defaults,"country", "United States")
-        # popultae_job_title()
+        popultae_job_title()
         update_organization_data()
         update_roles()
         update_tag_user_type()
@@ -859,141 +859,149 @@ def get_item_data(co, job_title):
         industry = job_title[0]["industry_type"]
         rate = job_title[0]["wages"]
         item_sql = """INSERT INTO `tabItem` 
-                (name,
-                docstatus,
-                owner,
-                naming_series,
-                item_code,
-                item_name,
-                item_group,
-                is_item_from_hub,
-                stock_uom,
-                disabled,
-                allow_alternative_item,
-                is_stock_item,
-                include_item_in_manufacturing,
-                opening_stock,
-                valuation_rate,
-                standard_rate,
-                is_fixed_asset,
-                auto_create_assets,
-                over_delivery_receipt_allowance,
-                over_billing_allowance,
-                description,
-                shelf_life_in_days,
-                default_material_request_type,
-                weight_per_unit,
-                has_batch_no,
-                create_new_batch,
-                has_expiry_date,
-                retain_sample,
-                sample_quantity,
-                has_serial_no,
-                has_variants,
-                variant_based_on,
-                is_purchase_item,
-                min_order_qty,
-                safety_stock,
-                lead_time_days,
-                last_purchase_rate,
-                is_customer_provided_item,
-                delivered_by_supplier,
-                country_of_origin,
-                is_sales_item,
-                grant_commission,
-                max_discount,
-                enable_deferred_revenue,
-                no_of_months,
-                enable_deferred_expense,
-                no_of_months_exp,
-                inspection_required_before_purchase,
-                inspection_required_before_delivery,
-                is_sub_contracted_item,
-                publish_in_hub,
-                synced_with_hub,
-                published_in_website,
-                total_projected_qty,
-                industry,
-                job_titless,
-                rate,
-                company,
-                is_nil_exempt,
-                is_non_gst,
-                descriptions,
-                job_titless_name) values ('{0}',
-                        '0',
-                        '{1}',
-                        'STO-ITEM-.YYYY.-',
-                        '{2}',
-                        '{3}',
-                        'All Item Groups',
-                        '0',
-                        'Nos',
-                        '0',
-                        '0',
-                        '1',
-                        '1',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '{4}',
-                        '0',
-                        'Purchase',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        'Item Attribute',
-                        '1',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        'United States',
-                        '1',
-                        '1',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '0',
-                        '{5}',
-                        '{6}',
-                        '{7}',
-                        '{8}',
-                        '0',
-                        '0',
-                        '{9}',
-                        '{10}'
-                        )""".format(
-                                    name,
-                                    co["staff_owner"],
-                                    name,
-                                    name,
-                                    job_title[0]["description"],
-                                    industry,
-                                    name,
-                                    rate,
-                                    co["staffing_organization"],
-                                    job_title[0]["description"],
-                                    name
+                    (name,
+                    docstatus,
+                    owner,
+                    naming_series,
+                    item_code,
+                    item_name,
+                    item_group,
+                    is_item_from_hub,
+                    stock_uom,
+                    disabled,
+                    allow_alternative_item,
+                    is_stock_item,
+                    include_item_in_manufacturing,
+                    opening_stock,
+                    valuation_rate,
+                    standard_rate,
+                    is_fixed_asset,
+                    auto_create_assets,
+                    over_delivery_receipt_allowance,
+                    over_billing_allowance,
+                    description,
+                    shelf_life_in_days,
+                    default_material_request_type,
+                    weight_per_unit,
+                    has_batch_no,
+                    create_new_batch,
+                    has_expiry_date,
+                    retain_sample,
+                    sample_quantity,
+                    has_serial_no,
+                    has_variants,
+                    variant_based_on,
+                    is_purchase_item,
+                    min_order_qty,
+                    safety_stock,
+                    lead_time_days,
+                    last_purchase_rate,
+                    is_customer_provided_item,
+                    delivered_by_supplier,
+                    country_of_origin,
+                    is_sales_item,
+                    grant_commission,
+                    max_discount,
+                    enable_deferred_revenue,
+                    no_of_months,
+                    enable_deferred_expense,
+                    no_of_months_exp,
+                    inspection_required_before_purchase,
+                    inspection_required_before_delivery,
+                    is_sub_contracted_item,
+                    publish_in_hub,
+                    synced_with_hub,
+                    published_in_website,
+                    total_projected_qty,
+                    industry,
+                    job_titless,
+                    rate,
+                    company,
+                    is_nil_exempt,
+                    is_non_gst,
+                    descriptions,
+                    job_titless_name) values ("{0}",
+                            "0",
+                            "{1}",
+                            "STO-ITEM-.YYYY.-",
+                            "{2}",
+                            "{3}",
+                            "All Item Groups",
+                            "0",
+                            "Nos",
+                            "0",
+                            "0",
+                            "1",
+                            "1",
+                         from frappe.utils.background_jobs import get_redis_conn
+    # redis_con = get_redis_conn()
+    # if redis_con.get("populate_job_title") and bool(redis_con.get("populate_job_title")):
+    #     frappe.log("populate_job_title is already executed!!!!")
+    #     return    "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "{4}",
+                            "0",
+                            "Purchase",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "Item Attribute",
+                            "1",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "United States",
+                            "1",
+                          from frappe.utils.background_jobs import get_redis_conn
+    # redis_con = get_redis_conn()
+    # if redis_con.get("populate_job_title") and bool(redis_con.get("populate_job_title")):
+    #     frappe.log("populate_job_title is already executed!!!!")
+    #     return   "1",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "0",
+                            "{5}",
+                            "{6}",
+                            "{7}",
+                            "{8}",
+                            "0",
+                            "0",
+                            "{9}",
+                            "{10}"
+                            )""".format(
+                                        name,
+                                        co["staff_owner"],
+                                        name,
+                                        name,
+                                        job_title[0]["description"],
+                                        industry,
+                                        name,
+                                        rate,
+                                        co["staffing_organization"],
+                                        job_title[0]["description"],
+                                        name
                                 )
         frappe.db.sql(item_sql)
         new_job_title_company(job_name=name, company=co["staffing_organization"],industry=industry,rate=rate, description=job_title[0]["description"])
@@ -1004,28 +1012,28 @@ def get_item_data(co, job_title):
 def popultae_job_title():
     from frappe.utils.background_jobs import get_redis_conn
     redis_con = get_redis_conn()
-    if redis_con.get("popultae_job_title"):
-        frappe.log("popultae_job_title is already executed!!!!")
+    if redis_con.get("populate_job_title"):
+        frappe.log("populate_job_title is already executed!!!!")
         return 
     claim_order = frappe.db.sql(""" select tjo.select_job as job_title, tco.staffing_organization, tjo.company as hiring_organization, tco.owner as staff_owner, tjo.category as industry_type, tjo.rate as wage  from `tabClaim Order` tco inner join `tabJob Order` tjo on tco.job_order = tjo.name group by tjo.select_job, tco.staffing_organization, tjo.company""", as_dict=1)
     for co in claim_order:  
-        job_title = frappe.db.sql(""" select wages, industry_type, description from `tabJob Titles` where job_titles like '{0}%' and parent = '{1}' """.format(co["job_title"], co["hiring_organization"]), as_dict=1)
+        job_title = frappe.db.sql(""" select wages, industry_type, description from `tabJob Titles` where job_titles like "{0}%" and parent = "{1}" """.format(co["job_title"], co["hiring_organization"]), as_dict=1)
         if job_title:
             name = get_item_data(co=co, job_title=job_title)
             pay_rates = frappe.db.sql(""" select tjo.name ,tjo.job_site, tjo.company as hiring_organization, tco.employee_pay_rate as wage from `tabClaim Order` tco 
             inner join `tabJob Order` tjo on tco.job_order = tjo.name
-            where tco.owner = '{0}' and tjo.select_job = '{1}'
+            where tco.owner = "{0}" and tjo.select_job = "{1}"
             """.format(co["staff_owner"],co["job_title"]), as_dict=1)
             for pr in pay_rates:
-                check_payrates = frappe.db.sql(""" select name from `tabPay Rates` where staffing_company='{0}' and parent='{1}' and(hiring_company='{2}' or job_site='{3}')""".format(co["staffing_organization"],name,pr["hiring_organization"],pr["job_site"]), as_list=1)
+                check_payrates = frappe.db.sql(""" select name from `tabPay Rates` where staffing_company="{0}" and parent="{1}" and(hiring_company="{2}" or job_site="{3}")""".format(co["staffing_organization"],name,pr["hiring_organization"],pr["job_site"]), as_list=1)
                 if not check_payrates:
                     insert_or_update_rates = "INSERT INTO `tabPay Rates` (name,owner,parent,parentfield,parenttype,staffing_company,hiring_company,job_site,job_pay_rate,job_order) values" + str(tuple([uuid4().hex[:10], co["staff_owner"], name, "pay_rate", "Item", co["staffing_organization"], pr["hiring_organization"], pr["job_site"],pr["wage"],pr['name']]))
                 else:
-                    insert_or_update_rates = """update `tabPay Rates` set job_pay_rate= '{0}' where staffing_company='{1}' and hiring_company='{2}' and job_site='{3}'
+                    insert_or_update_rates = """update `tabPay Rates` set job_pay_rate= "{0}" where staffing_company="{1}" and hiring_company="{2}" and job_site="{3}"
                     """.format(pr["wage"],co["staffing_organization"], pr["hiring_organization"], pr["job_site"])
                 frappe.db.sql(insert_or_update_rates)
                 frappe.db.commit()
-    redis_con.set("popultae_job_title", "executed once")
+    redis_con.set("populate_job_title", "Executed once")
 
 @frappe.whitelist()
 def update_integration_enable_data():
