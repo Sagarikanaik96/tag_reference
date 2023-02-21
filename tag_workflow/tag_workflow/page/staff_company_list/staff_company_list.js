@@ -112,8 +112,9 @@ frappe.FaceRecognition = Class.extend({
 				}
 			},
 			{
-				'parent': '#industry', 'name': 'industry', 'type': 'MultiSelect', 'class': 'input-xs', 'placeholder': 'Industry', 'options': this.options, 'handler': () => {
-					this.filters['industry'] = document.getElementById('industrys').value;
+				'parent': '#industry', 'name': 'industry', 'type': 'MultiSelectList', 'class': 'input-xs', 'placeholder': 'Industry', 'options': this.options, 'handler': () => {
+					let  industry_list = document.getElementsByClassName('selectable-item industry selected');
+					this.filters['industry'] = get_option_data(industry_list)
 					this.update_list()
 					this.refresh()
 				}
@@ -133,10 +134,10 @@ frappe.FaceRecognition = Class.extend({
 				}
 			},
 			{
-				'parent': '#accreditation', 'name': 'accreditation', 'type': 'MultiSelect','class': 'input-xs ', 'placeholder': 'Accreditations', 
+				'parent': '#accreditation', 'name': 'accreditation', 'type': 'MultiSelectList','class': 'input-xs ', 'placeholder': 'Accreditations', 
 				'options':this.accreditation, 'handler': () => {
-					this.filters['accreditation'] = document.getElementById('accreditations').value;
-					this.update_list()
+					let  accreditation_list = document.getElementsByClassName('selectable-item accreditation selected');
+					this.filters['accreditation'] = get_option_data(accreditation_list)
 					this.refresh()
 				}
 			},
@@ -258,6 +259,13 @@ async function sorted_favourite_companies(data, profile_html, company_type) {
 	return profile_html;
 }
 
+function get_option_data(data_list){
+	let data_lists = []
+	for(let data of data_list){
+		data_lists.push(data.dataset.value)
+	}
+	return data_lists.toString().replace("[]","") ?  data_lists.toString().replace("[]","") + "," : ''
+}
 function dynamic_route(name) {
 	let name1 = name.replace(/%/g, ' ');
 	localStorage.setItem("company", name1);
