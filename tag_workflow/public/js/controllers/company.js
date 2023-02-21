@@ -200,7 +200,14 @@ frappe.ui.form.on("Company", {
 				}
 			}
 		}
-		add_all_buttons(frm)
+
+
+		jazz_connect_button(frm)
+		quick_connect_button(frm)
+		work_connect_button(frm)
+		staff_connect_button(frm)
+		check_branch_connect_button(frm)
+
 		$('[data-fieldname="branch_enabled"]').css({"visibility":"hidden"})
 		$('[data-fieldname="enable_jazz_hr"]').css({"visibility":"hidden"})
 		$('[data-fieldname="enable_quickbook"]').css({"visibility":"hidden"})
@@ -261,11 +268,6 @@ frappe.ui.form.on("Company", {
 			}
 		});
 
-	await	check_enable_active(frm)
-	await	check_enable_active_staff(frm)
-	await	check_enable_active_quick(frm)
-	await	check_enable_active_work(frm)
-	await	check_enable_active_branch(frm)
 	},
 	validate: function (frm) {
 		mandatory_fields(frm);
@@ -363,7 +365,7 @@ frappe.ui.form.on("Company", {
 			show_addr(frm);
 		}
 	},
-	before_save: function (frm) {
+	before_save: async function (frm) {
 		cur_frm.doc.employees = [];
 		cur_frm.doc.enable_perpetual_inventory = 0;
 		const u_type = frappe.boot.tag.tag_user_info.user_type ? frappe.boot.tag.tag_user_info.user_type.toLowerCase() : null
@@ -375,6 +377,13 @@ frappe.ui.form.on("Company", {
 		if(frm.doc.staff_complete_enable==0){
 			frm.set_value('office_code', '');
 		}
+		frappe.dom.freeze()
+		await	check_enable_active(frm)
+		await	check_enable_active_staff(frm)
+		await	check_enable_active_quick(frm)
+		await	check_enable_active_work(frm)
+		await	check_enable_active_branch(frm)
+		frappe.dom.unfreeze()
 	},
 	phone_no: function (frm) {
 		set_field(frm, frm.doc.phone_no, "phone_no");
@@ -466,9 +475,7 @@ frappe.ui.form.on("Company", {
 	}
 });
 
-function add_all_buttons(frm) {
 
-	jazz_connect_button(frm)
 	function jazz_connect_button(frm) {
 		let container=document.querySelector(`#company-integration_details > div:nth-child(3)`);
 		let btn=document.createElement("button");
@@ -503,8 +510,7 @@ function add_all_buttons(frm) {
 
 	}
 
-	quick_connect_button()
-	function quick_connect_button() {
+	function quick_connect_button(frm) {
 
 		let container=document.querySelector(`#company-integration_details > div:nth-child(5)`);
 		let btn=document.createElement("button");
@@ -537,8 +543,7 @@ function add_all_buttons(frm) {
 		}
 	}
 
-	work_connect_button()
-	function work_connect_button() {
+	function work_connect_button(frm) {
 
 		let container=document.querySelector(`#company-integration_details > div:nth-child(9)`);
 		let btn=document.createElement("button");
@@ -571,8 +576,12 @@ function add_all_buttons(frm) {
 		}
 	}
 
-	branch_connect_button()
-	function branch_connect_button() {
+	function check_branch_connect_button(frm) {
+		if(frappe.boot.tag.tag_user_info.user_type == 'TAG Admin'){
+			branch_connect_button(frm)
+				}
+	}
+	function branch_connect_button(frm) {
 
 		let container=document.querySelector(`#company-integration_details > div:nth-child(2)`);
 		let btn=document.createElement("button");
@@ -605,8 +614,7 @@ function add_all_buttons(frm) {
 		}
 	}
 
-	staff_connect_button()
-	function staff_connect_button() {
+	function staff_connect_button(frm) {
 
 		let container=document.querySelector(`#company-integration_details > div:nth-child(8)`);
 		let btn=document.createElement("button");
@@ -638,7 +646,6 @@ function add_all_buttons(frm) {
 		}
 	}
 
-}
 
 /*---------hide details----------*/
 function hide_details() {
@@ -1636,72 +1643,62 @@ frappe.ui.form.on("Job Titles", {
 })
 let Company= "Company"
 async function check_enable_active(frm){
-	let active_jazz ="active_jazz"
 	if(frm.doc.enable_jazz_hr == 1 && frm.doc.jazzhr_api_key_data.length>0){
 		console.log("JAZZ IF");
-	 	await frappe.db.set_value(Company, frm.doc.name, active_jazz, 1)
+		frm.doc.active_jazz=1
 	}
 	else{
 		console.log("JAZZ ELSE");
-		await frappe.db.set_value(Company, frm.doc.name, active_jazz, 0)
+		frm.doc.active_jazz=0
 	}
-	frm.refresh_field(active_jazz)
 
 }
 
 async function check_enable_active_quick(frm){
-	let active_quick_book= "active_quick_book"
 	if(frm.doc.enable_quickbook == 1 && ((frm.doc.enable && frm.doc.enable.length > 0) || (frm.doc.client_id_data && frm.doc.client_id_data.length > 0) || (frm.doc.client_secret_data && frm.doc.client_secret_data.length > 0) || (frm.doc.quickbooks_company_id && frm.doc.quickbooks_company_id.length>0))) {
 		console.log("QUICK IF");
-		await frappe.db.set_value(Company, frm.doc.name, active_quick_book, 1)
+		frm.doc.active_quick_book=1
 	}
 	else{
 		console.log("QUICK ELSE");
-		await frappe.db.set_value(Company, frm.doc.name, active_quick_book, 0)
+		frm.doc.active_quick_book=0
 	}
-	frm.refresh_field(active_quick_book)
 
 }
 
 async function check_enable_active_work(frm){
-	let active_work_bright= "active_work_bright"
 	if(frm.doc.enable_workbright == 1 && ((frm.doc.workbright_subdomain_data && frm.doc.workbright_subdomain_data.length > 0) || (frm.doc.workbright_api_key_data && frm.doc.workbright_api_key_data.length >0 ))) {
 		console.log("WORK IF");
-		await frappe.db.set_value(Company, frm.doc.name, active_work_bright, 1)
+		frm.doc.active_work_bright=1
 	}else{
 		console.log("WORK ELSE");
-		await frappe.db.set_value(Company, frm.doc.name, active_work_bright, 0)
+		frm.doc.active_work_bright=0
 	}
-	frm.refresh_field(active_work_bright)
 
 }
 
 async function check_enable_active_staff(frm){
-	let active_office_code= "active_office_code"
 	if(frm.doc.staff_complete_enable == 1 && (frm.doc.office_code && frm.doc.office_code.length>0)){
 		console.log("STAFF IF");
-		await frappe.db.set_value(Company, frm.doc.name, active_office_code, 1)
+		frm.doc.active_office_code=1
     }
 	else{
 		console.log("STAFF ELSE");
-		await frappe.db.set_value(Company, frm.doc.name, active_office_code, 0)
+		frm.doc.active_office_code=0
     }
-	frm.refresh_field(active_office_code)
 
 }
 
 async function check_enable_active_branch(frm){
-	let active_branch= "active_branch"
 	if(frm.doc.branch_enabled == 1 && ((frm.doc.branch_org_id_data && frm.doc.branch_org_id_data.length>0) || (frm.doc.branch_api_key_data&&frm.doc.branch_api_key_data.length>0))){
 		console.log("BRANCH IF");
-		await frappe.db.set_value(Company, frm.doc.name, active_branch, 1)
+		frm.doc.active_branch=1
     }
 	else{
 		console.log("BRANCH ELSE");
-		await frappe.db.set_value(Company, frm.doc.name, active_branch, 0)
+		frm.doc.active_branch=0
 		
     }
-	frm.refresh_field(active_branch)
 }
 
 
