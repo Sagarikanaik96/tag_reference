@@ -1,20 +1,34 @@
 frappe.ui.form.off("Data Import", "show_import_warnings");
+frappe.ui.form.off("Data Import", "import_file");
+frappe.ui.form.off("Data Import", "start_import");
 frappe.ui.form.on("Data Import", {
-    before_save: function(frm){
-        if(frm.doc.__islocal==1){
-            if(frappe.session.user!='Administrator'){
-                cur_frm.set_value('user_company',frappe.boot.tag.tag_user_info.company)
-            }
-            else{
-                frappe.db.get_value("User", {organization_type: 'TAG'}, ["company"], function (res) {
-                    frm.set_value("user_company", res["company"])
-                })
-            }
-        }
-    },
-    refresh: function(frm){
+  before_save: function (frm) {
+    if (frm.doc.__islocal == 1) {
+      if (frappe.session.user != "Administrator") {
+        cur_frm.set_value(
+          "user_company",
+          frappe.boot.tag.tag_user_info.company
+        );
+      } else {
+        frappe.db.get_value(
+          "User",
+          { organization_type: "TAG" },
+          ["company"],
+          function (res) {
+            frm.set_value("user_company", res["company"]);
+          }
+        );
+      }
+    }
+  },
+  refresh: function (frm) {
+    $(".menu-btn-group").hide();
+    $('[data-label="Save"]').hide();
+    setTimeout(() => {
+      $('[data-label="Start%20Import"]').show();
+    }, 1500);
 
-        let html_employee = `<span>Note: Bold Indicates required field</span><br><br><li> <strong>First Name</strong>: Max 140 characters, Alphanumeric</li>
+    let html_employee = `<span>Note: Bold Indicates required field</span><br><br><li> <strong>First Name</strong>: Max 140 characters, Alphanumeric</li>
         <li><strong>Last Name</strong>: Max 140 characters, Alphanumeric</li>
         
         <li><strong>Email</strong>: Max 140 characters, Alphanumeric &amp; formatted as <span style="color:#0052CC">abc@xyz.com</span></li>
@@ -40,9 +54,9 @@ frappe.ui.form.on("Data Import", {
         <li>City : Max 255 characters, Alphanumeric</li>
         
         <li>State: Full spelling (ex: Florida)</li>
-        <li>Zip : 5 characters, Numeric</li>`
-        
-        let html_contact = `<span>Note: Bold Indicates required field</span><br><br>
+        <li>Zip : 5 characters, Numeric</li>`;
+
+    let html_contact = `<span>Note: Bold Indicates required field</span><br><br>
 
         <li><strong>Company Name</strong>: Max 140 characters, Alphanumeric and special characters</li>
         
@@ -60,194 +74,165 @@ frappe.ui.form.on("Data Import", {
         
         <li>Zip: 5 characters, Numeric</li>
         
-        <li>Is Primary: 0 for False, 1 for True</li>`
+        <li>Is Primary: 0 for False, 1 for True</li>`;
 
-        if(frm.doc.reference_doctype && frm.doc.reference_doctype=='Contact'){
-            frm.set_value("import_requirements",html_contact)
-            frm.get_field("import_requirements").$wrapper.html(html_contact);
-            frm.refresh_field("import_requirements")
-        }
-        
-        if(frm.doc.reference_doctype && frm.doc.reference_doctype=='Employee'){
-            frm.set_value("import_requirements",html_employee)
-            frm.get_field("import_requirements").$wrapper.html(html_employee);
-            frm.refresh_field("import_requirements")
-        }
+    if (frm.doc.reference_doctype && frm.doc.reference_doctype == "Contact") {
+      frm.get_field("import_requirements").$wrapper.html(html_contact);
+      frm.refresh_field("import_requirements");
+    }
 
-        uploaded_file_format(frm);
-        data_import_values(frm);
+    if (frm.doc.reference_doctype && frm.doc.reference_doctype == "Employee") {
+      frm.get_field("import_requirements").$wrapper.html(html_employee);
+      frm.refresh_field("import_requirements");
+    }
+    frm.trigger("update_primary_action");
+    uploaded_file_format(frm);
+    data_import_values(frm);
+  },
+  setup: function (frm) {
+    frm.set_query("reference_doctype", function () {
+      return {
+        query: "tag_workflow.utils.data_import.get_import_list",
+        filters: {
+          user_type: frappe.boot.tag.tag_user_info.company_type,
+        },
+      };
+    });
+  },
+  reference_doctype: function (frm) {
+    if (frm.doc.reference_doctype && frm.doc.reference_doctype == "Contact") {
+      frm.set_value("import_type", "Insert New Records");
+      frm.set_df_property("import_type", "read_only", 1);
+    } else {
+      frm.set_value("import_type", "");
+      frm.set_df_property("import_type", "read_only", 0);
+    }
+  },
+  import_type(frm) {
+    if (frm.doc.reference_doctype && frm.doc.import_type) {
+      frm.save();
+    }
+  },
+  start_import(frm) {
+    console.log(frm.doc.name);
+    frappe
+      .call({
+        method: "tag_workflow.utils.data_import.form_start_import",
+        args: { data_import: frm.doc.name },
+        btn: frm.page.btn_primary,
+      })
+      .then((r) => {
+        if (r.message === true) {
+          frm.disable_save();
+        }
+      });
+  },
+  import_file(frm) {
+    if (frm.doc.import_file) {
+      frm.add_custom_button(__("Validate"), function () {
+        $('[data-label="Save"]').hide();
+        frm.toggle_display("section_import_preview", frm.has_import_file());
+        frm.set_df_property("section_import_preview", "hidden", 0);
+        if (!frm.has_import_file()) {
+          frm.get_field("import_preview").$wrapper.empty();
+          return;
+        } else {
+          frm.trigger("update_primary_action");
+        }
+        // load import preview
+        frm.get_field("import_preview").$wrapper.empty();
+        $('<span class="text-muted">')
+          .html(__("Loading import file..."))
+          .appendTo(frm.get_field("import_preview").$wrapper);
+        frm
+          .call({
+            method: "get_preview_from_template",
+            args: {
+              data_import: frm.doc.name,
+              import_file: frm.doc.import_file,
+              google_sheets_url: frm.doc.google_sheets_url,
+            },
+            error_handlers: {
+              TimestampMismatchError() {
+                // ignore this error
+              },
+            },
+          })
+          .then((r) => {
+            let preview_data = r.message;
+            frm.events.show_import_preview(frm, preview_data);
+          });
+        frappe.call({
+          method: "tag_workflow.utils.importer.read_file",
+          args: {
+            file: frm.doc.import_file,
+            doctype: frm.doc.reference_doctype,
+            comps: frappe.boot.tag.tag_user_info.comps,
+            event:
+              frm.doc.import_type == "Update Existing Records"
+                ? "update"
+                : "insert",
+          },
+          callback: (res) => {
+            validation_check(res, frm);
+          },
+        });
+      });
+    }
+  },
+});
+function validation_check(res, frm) {
+  console.log("res", res);
+  if (res.message == "Wrong Columns") {
+    let html = `<div><p><b>Column Should be in Original Formate</b></p>`;
+    frm.set_df_property("validations_failed", "hidden", 0);
+    frm.set_df_property("check_failed", "options", html);
+  } else if (res.message && Object.keys(res.message).length > 0) {
+    let hieght = 300;
+    if (Object.keys(res.message).length < 5) {
+      hieght = 200;
+    }
+    let html = `<div class="overflow-auto" id = "Error_list" style = "height: ${hieght}px;">`;
+    for (let key in res.message) {
+      let error = res.message[key].join(", ");
+      let error_in_row = `<p><b>${key}</b>: ${error}</p>`;
+      html += error_in_row;
+    }
+    html += "</div>";
+    frm.set_df_property("validations_failed", "hidden", 0);
+    frm.set_df_property("check_failed", "options", html);
+  } else {
+    console.log("inside,else");
+    let html = `<div><p><b>File is validated successfully</b></p>`;
+    frm.set_df_property("validations_failed", "hidden", 0);
+    frm.set_df_property("check_failed", "options", html);
+    frm.save();
+    frm.trigger("update_primary_action");
+  }
+}
+function uploaded_file_format(frm) {
+  frm.get_field("import_file").df.options = {
+    restrictions: {
+      allowed_file_types: [".csv", ".xlsx", ".xls"],
     },
-    setup:function(frm){
-        frm.set_query("reference_doctype", function() {
-			return {
-				query: "tag_workflow.utils.data_import.get_import_list",
-				filters: {
-					user_type: frappe.boot.tag.tag_user_info.company_type,
-				},
-			};
-		});
-    },
-    reference_doctype:function(frm){
-        if(frm.doc.reference_doctype && frm.doc.reference_doctype=='Contact'){
-            frm.set_value('import_type','Insert New Records')
-            frm.set_df_property('import_type','read_only',1)
-        }
-        else{
-            frm.set_value('import_type','')
-            frm.set_df_property('import_type','read_only',0)
-        }
-    },
-    show_import_warnings(frm, preview_data) {
-		let warnings = JSON.parse(frm.doc.template_warnings || "[]");
-		warnings = warnings.concat(preview_data.warnings || []);
-        
-		// group warnings by row
-		let warnings_by_row = {};
-		let other_warnings = [];
-		for (let warning of warnings) {
-            if (warning.row) {
-                warnings_by_row[warning.row] = warnings_by_row[warning.row] || [];
-				warnings_by_row[warning.row].push(warning);
-			} else {
-                other_warnings.push(warning);
-			}
-		}
-        if(frm.doc.import_file){
-            other_warnings = reqd_fields_missing(frm.doc.reference_doctype, preview_data, other_warnings);
-        }
-        frm.toggle_display("import_warnings_section", warnings.length > 0 || other_warnings.length > 0);
-        if (warnings.length === 0 && other_warnings.length === 0 ) {
-            frm.get_field("import_warnings").$wrapper.html("");
-            return;
-        }
-        let html = show_import_warnings_contd(frm, preview_data, warnings_by_row, other_warnings);
-		frm.get_field("import_warnings").$wrapper.html(`
-			<div class="row">
-				<div class="col-sm-10 warnings">${html}</div>
-			</div>
-		`);
-	}
-})
-
-function show_import_warnings_contd(frm, preview_data, warnings_by_row, other_warnings){
-    let html = "";
-    let columns = preview_data.columns;
-    html += Object.keys(warnings_by_row)
-        .map((row_number) => {
-            let message = warnings_by_row[row_number]
-                .map((w) => {
-                    if (w.field) {
-                        let label =
-                            w.field.label +
-                            (w.field.parent !== frm.doc.reference_doctype
-                                ? ` (${w.field.parent})`
-                                : "");
-                        return `<li>${label}: ${w.message}</li>`;
-                    }
-                    return `<li>${w.message}</li>`;
-                })
-                .join("");
-            return `
-            <div class="warning" data-row="${row_number}">
-                <h5 class="text-uppercase">${__("Row {0}", [row_number])}</h5>
-                <div class="body"><ul>${message}</ul></div>
-            </div>
-        `;
-        })
-        .join("");
-
-    html += other_warnings
-        .map((warning) => {
-            let header = "";
-            if (warning.col) {
-                let column_number = `<span class="text-uppercase">${__("Column {0}", [
-                    warning.col,
-                ])}</span>`;
-                let column_header = columns[warning.col].header_title;
-                header = `${column_number} (${column_header})`;
-            }
-            return `
-                <div data-col="${warning.col}">
-                    <h5>${header}</h5>
-                    <div class="body">${warning.message}</div>
-                </div>
-            `;
-        })
-        .join("");
-    return html;
+  };
 }
-
-function uploaded_file_format(frm){
-    frm.get_field('import_file').df.options = {
-        restrictions: {
-        allowed_file_types: ['.csv','.xlsx','.xls']
-        }
-    };
-}
-function data_import_values(frm){
-    if(frm.doc.__islocal==1 && frappe.route_history.length>2 && frappe.boot.tag.tag_user_info.company_type=='Staffing'){
-        let histories=frappe.route_history.length
-        let get_old_reference=frappe.route_history[histories-3][1]
-        if(get_old_reference=='Contact'){
-            frm.set_value('reference_doctype','Contact')
-            frm.set_value('import_type','Insert New Records')
-            frm.set_df_property('import_type','read_only',1)
-            frm.set_df_property('reference_doctype','read_only',1)
-        }
-        else if(get_old_reference=='Employee'){
-            frm.set_value('reference_doctype','Employee')
-            frm.set_df_property('reference_doctype','read_only',1)
-        }
+function data_import_values(frm) {
+  if (
+    frm.doc.__islocal == 1 &&
+    frappe.route_history.length > 2 &&
+    frappe.boot.tag.tag_user_info.company_type == "Staffing"
+  ) {
+    let histories = frappe.route_history.length;
+    let get_old_reference = frappe.route_history[histories - 3][1];
+    if (get_old_reference == "Contact") {
+      frm.set_value("reference_doctype", "Contact");
+      frm.set_value("import_type", "Insert New Records");
+      frm.set_df_property("import_type", "read_only", 1);
+      frm.set_df_property("reference_doctype", "read_only", 1);
+    } else if (get_old_reference == "Employee") {
+      frm.set_value("reference_doctype", "Employee");
+      frm.set_df_property("reference_doctype", "read_only", 1);
     }
-}
-
-function reqd_fields_missing(doctype, preview_data, other_warnings){
-    let columns = preview_data.columns;
-    let res = missing_col(doctype, columns, other_warnings);
-    let mandatory_fields = res[0];
-    other_warnings = res[1];
-    if(mandatory_fields.length>0){
-        for(let col in columns){
-            if(!columns[col].df){
-                continue;
-            }
-            else{
-                other_warnings=reqd_row_missing(preview_data, col, columns, mandatory_fields, other_warnings);
-            }
-        }
-    }
-    return other_warnings;
-}
-
-function reqd_row_missing(preview_data, col, columns, mandatory_fields, other_warnings){
-    let missing_rows = '';
-    let row = preview_data.data;
-    if(mandatory_fields.includes(columns[col].df.label)){
-        for(let data in row){
-            missing_rows+=!row[data][col]?'<li>Row '+(parseInt(data)+1)+'</li>':'';
-        }
-        if(missing_rows!='')
-            other_warnings.push({'missing_col': 1, 'message': '<h5>Missing Required Field COLUMN '+col+' ('+columns[col].df.label+')</h5><ul>'+missing_rows+'</ul>'})
-    }
-    return other_warnings;
-}
-
-function missing_col(doctype, columns, other_warnings){
-    let mandatory_fields = [];
-    let column = [];
-    if(doctype == 'Employee'){
-        mandatory_fields = ['First Name', 'Last Name', 'Email', 'Company', 'Date of Birth', 'Status'];
-    }else if(doctype == 'Contact'){
-        mandatory_fields = ['Owner Company', 'Contact Name', 'Phone Number', 'Email'];
-    }
-    for(let col in columns){
-        if(columns[col].df && mandatory_fields.includes(columns[col].df.label)){
-            column.push(columns[col].df.label);
-        }
-    }
-    let difference = column != mandatory_fields && mandatory_fields.length>0 ? mandatory_fields.filter(x => !column.includes(x)) : [];
-    for(let col in difference){
-        other_warnings.push({'missing_col': 1, 'message': '<h5>Missing Required COLUMN: '+difference[col]+'</h5>'});
-    }
-    return [mandatory_fields, other_warnings];
+  }
 }

@@ -39,6 +39,7 @@ def start_import(data_import):
         i = Importer(data_import.reference_doctype, data_import=data_import)
         i.import_data()
     except Exception:
+        print(frappe.get_traceback())
         frappe.db.rollback()
         data_import.db_set("status", "Error")
         frappe.log_error(title=data_import.name)

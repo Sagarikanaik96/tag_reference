@@ -27,30 +27,36 @@ MAX_ROWS_IN_PREVIEW = 10
 INSERT = "Insert New Records"
 UPDATE = "Update Existing Records"
 DATA_IMPORT_LOG = "Data Import Log"
-
+JDO_Email = "JDoe@example.com"
+Template_error = "Template Error"
+DOB_FORMATE = "%Y-%m-%d"
 class Importer:
     def __init__(self, doctype, data_import=None, file_path=None, import_type=None, console=False):
-        self.doctype = doctype
-        self.console = console
-        self.sql = ''
-        emp_count = frappe.db.sql(""" select * from `tabSeries` where name = "HR-EMP-" """, as_dict=1)
-        if(emp_count):
-            self.emp_series = emp_count[0]['current'] + 1
-        else:
-            self.emp_series = 1
+        try:
+            self.doctype = doctype
+            self.console = console
+            self.sql = ''
+            emp_count = frappe.db.sql(""" select * from `tabSeries` where name = "HR-EMP-" """, as_dict=1)
+            if(emp_count):
+                self.emp_series = emp_count[0]['current'] + 1
+            else:
+                self.emp_series = 1
 
-        self.con_series = self.get_contact_series()
-        self.data_import = data_import
-        if not self.data_import:
-            self.data_import = frappe.get_doc(doctype="Data Import")
-            if import_type:
-                self.data_import.import_type = import_type
+            self.con_series = self.get_contact_series()
+            self.data_import = data_import
+            if not self.data_import:
+                self.data_import = frappe.get_doc(doctype="Data Import")
+                if import_type:
+                    self.data_import.import_type = import_type
 
-        self.template_options = frappe.parse_json(self.data_import.template_options or "{}")
-        self.import_type = self.data_import.import_type
+            self.template_options = frappe.parse_json(self.data_import.template_options or "{}")
+            self.import_type = self.data_import.import_type
 
-        self.import_file = ImportFile(doctype, file_path or self.data_import.google_sheets_url or self.data_import.import_file, self.template_options, self.import_type,)
-        self.name = "No Name"
+            self.import_file = ImportFile(doctype, file_path or self.data_import.google_sheets_url or self.data_import.import_file, self.template_options, self.import_type,)
+            self.name = "No Name"
+        except Exception as e:
+            print(e,"Importer Error")
+            print(frappe.get_traceback())
     
     def get_contact_series(self):
         con_count = frappe.db.sql(""" select * from `tabSeries` where name = "HR-CONTACT-" """, as_dict=1)
@@ -88,7 +94,7 @@ class Importer:
 
     def upload_record(self):
         try:
-            if self.doctype == "Employee":
+            if self.doctype == "Employee" and self.sql:
                 self.column = 'insert into `tabEmployee` (name, employee_name, first_name, last_name, email, company, status, date_of_birth, contact_number, employee_gender, sssn, military_veteran, street_address, suite_or_apartment_no, city, state, zip, lat, lng, naming_series, lft, rgt, creation) values ' + self.sql
                 frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-EMP-" """, self.emp_series)
                 frappe.db.sql(self.column[0:-1])
@@ -353,17 +359,12 @@ class Importer:
         try:
             keys = docs.keys()
             if (frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) == True and frappe.db.exists("Company", docs.company) and "first_name" in keys and "last_name" in keys and "email" in keys and "status" in keys):
-                if(docs.first_name and docs.last_name and docs.email and docs.status and docs.date_of_birth):
-                    self.name = "HR-EMP-"+str(self.emp_series)
-                    lat, lng = self.update_emp_lat_lng(docs)
-
-                    self.sql += str(tuple([self.name, (docs.first_name + " " + docs.last_name), docs.first_name, docs.last_name, docs.email, docs.company, docs.status, str(docs.date_of_birth), docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
-
-                    self.emp_series += 1
-                    time.sleep(0.1)
-                    return self.name, "Pass"
-                else:
-                    return self.name, "Failed"
+                self.name = "HR-EMP-"+str(self.emp_series)
+                lat, lng = self.update_emp_lat_lng(docs)
+                self.sql += str(tuple([self.name, (docs.first_name + " " + docs.last_name), docs.first_name, docs.last_name, docs.email, docs.company, docs.status, str(docs.date_of_birth), docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
+                self.emp_series += 1
+                time.sleep(0.1)
+                return self.name, "Pass"
             else:
                 return self.name, "Failed"
         except Exception as e:
@@ -582,7 +583,7 @@ class ImportFile:
             if all(v in INVALID_VALUES for v in row):
                 # empty row
                 continue
-            if self.doctype in ["Employee", "Contact"] and "JDoe@example.com" in row:
+            if self.doctype in ["Employee", "Contact"] and JDO_Email in row:
                 # sample record
                 continue
             if not header:
@@ -596,7 +597,7 @@ class ImportFile:
         self.data = data
 
         if len(data) < 1:
-            frappe.throw(_("Import template should contain a Header and atleast one row."), title=_("Template Error"),)
+            frappe.throw(_("Import template should contain a Header and atleast one row."), title=_(Template_error),)
 
     def get_data_for_import_preview(self):
         """Adds a serial number column as the first column"""
@@ -659,7 +660,6 @@ class ImportFile:
             parent_column_indexes = self.header.get_column_indexes(self.doctype)
             parent_row_values = first_row.get_values(parent_column_indexes)
             print(parent_row_values)
-
             data_without_first_row = data[1:]
             for row in data_without_first_row:
                 row_values = row.get_values(parent_column_indexes)
@@ -698,7 +698,7 @@ class ImportFile:
         return file_content, extn
 
     def read_content(self, content, extension):
-        error_title = _("Template Error")
+        error_title = _(Template_error)
         if extension not in ("csv", "xlsx", "xls"):
             frappe.throw(_("Import template should be of type .csv, .xlsx or .xls"), title=error_title)
 
@@ -970,7 +970,7 @@ class Column:
         def guess_date_format(d):
             if isinstance(d, (datetime, date)):
                 if self.df.fieldtype == "Date":
-                    return "%Y-%m-%d"
+                    return DOB_FORMATE
                 if self.df.fieldtype == "Datetime":
                     return "%Y-%m-%d %H:%M:%S"
             if isinstance(d, str):
@@ -1010,7 +1010,7 @@ class Column:
             # guess date format
             self.date_format = self.guess_date_format_for_column()
             if not self.date_format:
-                self.date_format = "%Y-%m-%d"
+                self.date_format = DOB_FORMATE
                 self.warnings.append({"col": self.column_number, "message": _("Date format could not be determined from the values in this column. Defaulting to yyyy-mm-dd."), "type": "info",})
 
         elif self.df.fieldtype == "Select":
@@ -1043,12 +1043,6 @@ class Column:
             for phone in values:
                 if not is_valid(phone):
                     self.warnings.append({"col": self.column_number, "message": ("The Mobile number is invalid")})
-
-        if self.df.name == "Employee-zip":
-            values = list(set([cstr(v) for v in self.column_values[1:] if v]))
-            for phone in values:
-                if not zip_valid(phone):
-                    self.warnings.append({"col": self.column_number, "message": ("The zip  is invalid")})
 
     def as_dict(self):
         d = frappe._dict()
@@ -1306,3 +1300,173 @@ def create_import_log(data_import, log_index, log_details):
 			"exception": log_details.get("exception"),
 		}
 	).db_insert()
+
+import frappe
+import os
+from frappe.utils.csvutils import read_csv_content
+from frappe.utils import validate_email_address
+import re
+
+reqd_emp = ["First Name","Last Name","Email","Company","Status","Date of Birth","Contact Number","Gender","SSN","Military Veteran","Street Address","Suite or Apartment No","City","State","Zip"]
+reqd_contact = ["ID","Contact Name","Phone Number","Email","Owner Company","Contact Address","City","Zip","Suite or Apartment No"]
+
+@frappe.whitelist()
+def read_file(file, doctype, comps, event):
+    try:
+        error_in_fields ={}
+        data = get_content(file)
+        if data:
+            update_required_emp(event)
+            for row_no, row in enumerate(data):
+                msg = check_return(row_no, row, event,doctype)
+                if msg == "Wrong Columns":
+                    return msg
+                elif msg == "Continue":
+                    continue
+                row_message = get_row_error(row,doctype, comps, event)
+                if len(row_message)>0:
+                    error_in_fields["Row "+str(row_no)]=row_message
+        return error_in_fields
+    except Exception as e:
+        print(e, frappe.get_traceback())
+def check_return(row_no, row, event,doctype):
+    if row_no == 0 and not check_columns(row, doctype):
+        return "Wrong Columns"
+    elif row_no==0:
+        return "Continue"
+    elif row_no == 1 and event=='insert' and row[0] == "John" and row[1]=="Doe" and row[2]==JDO_Email and row[3]=="Temporary Assistance Guru LLC":
+        return  "Continue"
+    elif row_no == 1 and event=='update' and row[1] == "John" and row[2]=="Doe" and row[3]==JDO_Email and row[4]=="Temporary Assistance Guru LLC":
+        return "Continue"
+    
+def get_row_error(row,doctype, comps, event):
+    if event == 'insert':
+        row_message = check_fields(row, doctype, comps)
+        return row_message
+    else:
+        row_message = check_fields(row[1:], doctype, comps)
+        return row_message
+def get_content(file):
+    if frappe.db.exists("File", {"file_url": file}):
+            file_doc = frappe.get_doc("File", {"file_url": file})
+            if file_doc:
+                parts = file_doc.get_extension()
+                extension = parts[1]
+                content = file_doc.get_content()
+                extension = extension.lstrip(".")
+            if not content:
+                frappe.throw(_("Invalid or corrupted content for import"))
+                return
+            if not extension:
+                extension = "csv"
+            data=read_content(content, extension)
+            return data
+def update_required_emp(event):
+    if event == 'update' and doctype == 'Employee':
+        reqd_emp.insert(0, 'ID')
+        
+def check_columns(row, doctype):
+    if(doctype == 'Employee' and row != reqd_emp) or (doctype == 'Contact' and row != reqd_contact):
+        return False
+    return True
+
+def check_fields(row, doctype, comps):
+    #{Row 1: ["Missing required..", "Email"]}
+    message=[]
+    if doctype == "Employee":
+        check_mandatory_fields(row,message,doctype)
+        check_email(row[2],message)
+        check_company(comps, row[3],message)
+        check_status(row[4],message)
+        check_dob(str(row[5]),message)
+        check_phone_number(str(row[6]),message)
+        check_gender(row[7],message)
+        check_ssn(row[8],message)
+        check_m_v(row[9],message)
+        check_state(row[13], message)
+        check_zip(row[14], message)
+    elif doctype == "Contact":
+        check_mandatory_fields(row, message,doctype)
+        check_phone_number(row[2],message)
+        check_email(row[3],message)
+        check_company(comps, row[4],message)
+        check_zip(row[7], message)
+        check_state(row[8],message)
+    return message
+
+def check_company(user_comp_list, company_in_row, message):
+    if company_in_row and company_in_row not in user_comp_list: message.append("Invalid Entry for Company")
+
+def check_status(status,message):
+    if status and status.lower() not in ["active", "inactive"]: message.append("Status")
+        
+def check_dob(dob, message):
+    date_formate = DOB_FORMATE
+    if dob:
+        try:
+            res = bool(datetime.strptime(dob, date_formate))
+        except ValueError:
+            res = False
+        if not res: message.append("Date of Birth is not a valid Date")
+
+def check_phone_number(phone,message):
+    if phone and not validate_phone_number(phone): message.append("Invalid Phone Number")
+
+def check_gender(gender, message):
+    if gender and gender.lower() not in ["male", "female"]: message.append("Gender")
+
+def check_email(email, message):
+    if email and not validate_email_address(email): message.append("Formate for Email is incorrect")
+
+def check_ssn(ssn, message):
+    if ssn and (len(ssn)!=9 or not ssn.isdigit()): message.append("Invalid <b>SSN</b>")
+
+def check_m_v(militrary_veteran, message):
+    if militrary_veteran and militrary_veteran not in ["0", "1"]: message.append("Invalid Entry for Military Veteran valid values are 0 or 1")
+
+def check_state(state, message):
+    state_list = {
+        'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA', 'Canal Zone': 'CZ',
+        'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'District of Columbia': 'DC', 'Florida': 'FL',
+        'Georgia': 'GA', 'Guam': 'GU', 'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL', 'Indiana': 'IN',
+        'Iowa': 'IA', 'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD',
+        'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO', 'Montana': 'MT',
+        'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC',
+        'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK', 'Oregon': 'OR', 'Pennsylvania': 'PA', 'Puerto Rico': 'PR', 'Rhode Island': 'RI',
+        'South Carolina': 'SC', 'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT',
+        'Virgin Islands': 'VI', 'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
+    }
+    if state and state not in state_list.keys() and state not in state_list.values():message.append('Invalid <b>State</b>')
+    
+def check_zip(zip, message):
+    pattern = r'^\d{5}(-\d{4})?$'
+    if zip and not re.match(pattern, str(zip)):message.append('Invalid <b>Zip</b>')
+
+def check_mandatory_fields(row, message,doctype):
+    fields_missing=[]
+    check_is_valid = 0
+    for i in range(len(row)):
+        if row[i] is None:
+            if doctype == 'Employee' and i in [0, 1, 2, 5]:
+                check_is_valid =1
+                fields_missing.append("<b>" + reqd_emp[i] + "</b>")
+            elif doctype == 'Contact' and  i in [1, 2, 3]:
+                check_is_valid =1
+                fields_missing.append(reqd_contact[i])
+
+    if check_is_valid:
+        message.append("Missing Required Fields: "+", ".join(fields_missing))
+
+def read_content(content, extension):
+    error_title = _(Template_error)
+    if extension not in ("csv", "xlsx", "xls"):
+        frappe.throw(_("Import template should be of type .csv, .xlsx or .xls"), title=error_title)
+
+    if extension == "csv":
+        data = read_csv_content(content)
+    elif extension == "xlsx":
+        data = read_xlsx_file_from_attached_file(fcontent=content)
+    elif extension == "xls":
+        data = read_xls_file_from_attached_file(content)
+
+    return data
