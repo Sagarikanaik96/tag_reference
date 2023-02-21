@@ -12,6 +12,11 @@ frappe.ui.form.on("Employee", {
                 $("button.ellipsis:nth-child(1)").hide()
             }
         })
+		$("#employee-timesheet_tab-tab").click(function(e) {
+			e.preventDefault();
+			frappe.route_options = {"employee": ["=", frm.doc.name],"employee_name": ["=", frm.doc.employee_name]};
+			frappe.set_route("List", "Timesheet");
+			});
 		trigger_hide();
 		required_field();
 		employee_work_history(frm)

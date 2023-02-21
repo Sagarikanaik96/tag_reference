@@ -10,7 +10,6 @@ frappe.listview_settings["Timesheet"] = {
     "to_date",
   ],
   right_column: "name",
-
   refresh: function () {
     $("#navbar-breadcrumbs > li > a").html("Timesheets");
     $(".custom-actions.hidden-xs.hidden-md").hide();
@@ -26,6 +25,12 @@ frappe.listview_settings["Timesheet"] = {
       cur_list.page.btn_primary[0].style.display = "none";
     }
     $('[data-original-title="Name"]').hide();
+    let emp_redirect_filters = window.location.href
+    if(emp_redirect_filters.includes('employee') && emp_redirect_filters.includes('employee_name')){
+      $('[data-fieldname="employee_name"]').css({'pointer-events':'none'})
+      $('.filter-selector').hide()
+      localStorage.setItem("employee_redirected",false)
+    }
   },
 
   formatters: {
@@ -56,7 +61,6 @@ frappe.listview_settings["Timesheet"] = {
       }
     }
   },
-
   onload: function (listview) {
     $('[data-fieldname="name"]').hide();
     jQuery(document).on("click", ".apply-filters", function () {
