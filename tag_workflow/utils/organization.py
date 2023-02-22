@@ -944,11 +944,7 @@ def get_item_data(co, job_title):
                             "0",
                             "1",
                             "1",
-                         from frappe.utils.background_jobs import get_redis_conn
-    # redis_con = get_redis_conn()
-    # if redis_con.get("populate_job_title") and bool(redis_con.get("populate_job_title")):
-    #     frappe.log("populate_job_title is already executed!!!!")
-    #     return    "0",
+                            "0",
                             "0",
                             "0",
                             "0",
@@ -976,11 +972,7 @@ def get_item_data(co, job_title):
                             "0",
                             "United States",
                             "1",
-                          from frappe.utils.background_jobs import get_redis_conn
-    # redis_con = get_redis_conn()
-    # if redis_con.get("populate_job_title") and bool(redis_con.get("populate_job_title")):
-    #     frappe.log("populate_job_title is already executed!!!!")
-    #     return   "1",
+                            "1",
                             "0",
                             "0",
                             "0",
