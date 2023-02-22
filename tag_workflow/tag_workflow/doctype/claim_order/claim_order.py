@@ -146,7 +146,7 @@ def modify_heads(doc_name):
 		job= frappe.get_doc(jobOrder, doc_name)
 		claim_data = None
 		if job.worker_filled== 0:
-			claim_data= """ select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers,notes from `tabClaim Order` where job_order="{0}" and staffing_organization not in (select company from `tabAssign Employee` where job_order="{0}" and tag_status="Approved") """.format(doc_name)
+			claim_data= no_worker_claim(doc_name)
 		else:
 			claim_data= """
 			select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers,notes from `tabClaim Order` where job_order="{0}" and approved_no_of_workers >=0 and staffing_organization in (select company from `tabAssign Employee` where job_order='{0}' and tag_status='Approved')
@@ -176,6 +176,18 @@ def modify_heads(doc_name):
 	except Exception as e:
 		print(e,frappe.get_traceback())
 		frappe.db.rollback()
+
+@frappe.whitelist()
+def no_worker_claim(doc_name):
+	assign_emp = frappe.get_all("Assign Employee", {"job_order": doc_name}, ["name"], pluck="name")
+	if len(assign_emp)>0:
+		return """
+		select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers,notes from `tabClaim Order` where job_order="{0}" and approved_no_of_workers >=0 and staffing_organization in (select company from `tabAssign Employee` where job_order='{0}' and tag_status='Approved')
+		UNION
+		select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers,notes from `tabClaim Order` where job_order="{0}" and approved_no_of_workers >=0 and staffing_organization  not in (select company from `tabAssign Employee` where job_order='{0}' and tag_status='Approved')
+		""".format(doc_name)		
+	else: 			
+		return """ select name,staffing_organization,no_of_workers_joborder,staff_claims_no,approved_no_of_workers,notes from `tabClaim Order` where job_order="{0}" and staffing_organization not in (select company from `tabAssign Employee` where job_order="{0}" and tag_status="Approved") """.format(doc_name)   	
 
 @frappe.whitelist()
 def save_modified_claims(my_data,doc_name,notes_dict):

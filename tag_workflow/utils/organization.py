@@ -1202,10 +1202,21 @@ def update_staffing_reviews():
         frappe.log_error(e,'update_staffing_ratings Error')
     
 def update_staff_rating():
-    sql = """update `tabCompany` set average_rating = average_rating * 5 where average_rating<=1"""
-    print("*------Updating Staffing Average Rating---------*\n")
-    frappe.db.sql(sql)
-    frappe.db.commit()
+    try:
+        hiring_company = frappe.get_all("Company", {"average_rating":["is", "set"], "organization_type":"Hiring"}, ["name"], pluck="name")
+        staffing_company = frappe.get_all("Company", {"average_rating":["is", "set"], "organization_type":"Staffing"}, ["name"], pluck="name")
+        for comp in hiring_company:
+            review = frappe.db.sql(f'''SELECT AVG(rating_hiring) from `tabHiring Company Review` where hiring_company="{comp}"''', as_list=1)
+            frappe.db.sql(f'''UPDATE tabCompany set average_rating="{round(review[0][0],1)}" where name="{comp}"''')
+            frappe.db.commit()
+
+        for comp in staffing_company:
+            review = frappe.db.sql(f'''SELECT AVG(staffing_ratings) from `tabCompany Review` where staffing_company="{comp}"''', as_list=1)
+            frappe.db.sql(f'''UPDATE tabCompany set average_rating="{round(review[0][0],1)}" where name="{comp}"''')
+            frappe.db.commit()
+    except Exception as e:
+        print(e, frappe.get_traceback())
+        frappe.log_error(e, "update_staff_rating error")
 
 @frappe.whitelist()
 def change_emp_status():

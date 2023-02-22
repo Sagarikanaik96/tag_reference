@@ -12,10 +12,10 @@ frappe.ui.form.on("Job Order", {
       });
     } else if (
       frm.doc.__islocal != 1 &&
-      cur_frm.doc.owner != frappe.session.user &&
+      frm.doc.owner != frappe.session.user &&
       frm.doc.worker_filled < frm.doc.no_of_workers
     ) {
-      if (cur_frm.is_dirty()) {
+      if (frm.is_dirty()) {
         frappe.msgprint({
           message: __("Please save the form before creating Quotation"),
           title: __("Save Job Order"),
@@ -52,7 +52,7 @@ frappe.ui.form.on("Job Order", {
       $(".menu-btn-group").hide();
     }
 
-    if (cur_frm.doc.__islocal == 1) {
+    if (frm.doc.__islocal == 1) {
       if (
         frappe.boot.tag.tag_user_info.company_type == "Hiring" ||
         frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring"
@@ -64,7 +64,7 @@ frappe.ui.form.on("Job Order", {
       frm.set_df_property("time_remaining_for_make_edits", "options", " ");
     }
     if (frappe.boot.tag.tag_user_info.company_type != "Staffing") {
-      fields_setup();
+      fields_setup(frm);
     }
   },
 
@@ -112,8 +112,8 @@ frappe.ui.form.on("Job Order", {
       };
     });
 
-    if (cur_frm.doc.__islocal == 1) {
-      fields_setup();
+    if (frm.doc.__islocal == 1) {
+      fields_setup(frm);
     }
 
     frm.set_query("select_days", function () {
@@ -152,9 +152,9 @@ frappe.ui.form.on("Job Order", {
     }
   },
   refresh: function (frm) {
-    date_pick();
-    setTimeout(add_id, 500);
-    if (cur_frm.doctype === "Job Order") {
+    date_pick(frm);
+    setTimeout(()=>add_id(frm), 500);
+    if (frm.doctype === "Job Order") {
       update_order_status(frm);
     }
     availability_single_day(frm);
@@ -199,7 +199,7 @@ frappe.ui.form.on("Job Order", {
       return false;
     });
     $('[data-fieldname="company"]').click(function () {
-      if (frm.doc.company && cur_frm.doctype == "Job Order") {
+      if (frm.doc.company && frm.doctype == "Job Order") {
         if (frm.doc.__islocal !== 1) {
           localStorage.setItem("company", frm.doc.company);
           window.location.href = "/app/dynamic_page";
@@ -207,7 +207,7 @@ frappe.ui.form.on("Job Order", {
       }
     });
 
-    if (cur_frm.doc.__islocal != 1) {
+    if (frm.doc.__islocal != 1) {
       localStorage.setItem("order", frm.doc.name);
     } else {
       frm.set_df_property("time_remaining_for_make_edits", "hidden", 1);
@@ -392,10 +392,10 @@ frappe.ui.form.on("Job Order", {
           freeze: true,
           freeze_message: "Please wait while order is claiming",
           args: {
-            hiring_org: cur_frm.doc.company,
-            job_order: cur_frm.doc.name,
-            no_of_workers_joborder: cur_frm.doc.no_of_workers,
-            e_signature_full_name: cur_frm.doc.e_signature_full_name,
+            hiring_org: frm.doc.company,
+            job_order: frm.doc.name,
+            no_of_workers_joborder: frm.doc.no_of_workers,
+            e_signature_full_name: frm.doc.e_signature_full_name,
             staff_company: frappe.boot.tag.tag_user_info.company,
             pay_rate: (frm.doc.per_hour + frm.doc.flat_rate).toFixed(2),
           },
@@ -422,10 +422,10 @@ frappe.ui.form.on("Job Order", {
       frappe.call({
         method: "tag_workflow.tag_data.staff_email_notification",
         args: {
-          hiring_org: cur_frm.doc.company,
-          job_order: cur_frm.doc.name,
-          job_order_title: cur_frm.doc.select_job,
-          staff_company: cur_frm.doc.staff_company,
+          hiring_org: frm.doc.company,
+          job_order: frm.doc.name,
+          job_order_title: frm.doc.select_job,
+          staff_company: frm.doc.staff_company,
           multiple_comp: window.multiple_comp,
         },
         callback: function (r) {
@@ -438,14 +438,14 @@ frappe.ui.form.on("Job Order", {
     no_of_workers_changed(frm);
   },
 
-  view_contract: function () {
+  view_contract: function (frm) {
     let contracts =
       "<div class='contract_div'><h3>Staffing/Vendor Contract</h3>This Staffing/Vendor Contract (“Contract”) is entered into by and between Staffing Company and Hiring Company as further described and as set forth below. By agreeing to the Temporary Assistance Guru, Inc. (“TAG”) End-User License Agreement, and using the TAG application service and website (the “Service”) Staffing Company and Hiring Company agree that they have a contractual relationship with each other and that the following terms apply to such relationship: <br> <ol> <li> The billing rate Hiring Company shall pay Staffing Company to hire each temporary worker provided by Staffing Company (the “Worker”) is the rate set forth by the TAG Service for the location and position sought to be filled, and this rate includes all wages, worker’s compensation premiums, unemployment insurance, payroll taxes, and all other employer burdens recruiting, administration, payroll funding, and liability insurance.</li><li> Hiring Company agrees not to directly hire and employ the Worker until the Worker has completed at least 720 work hours. Hiring Company agrees to pay Staffing Company an administrative placement fee of $3,000.00 if Hiring Company directly employs the Worker prior to completion of 720 work hours.</li> <li> Hiring Company acknowledges that it has complete care, custody, and control of workplaces and job sites. Hiring Company agrees to comply with all applicable laws, regulations, and ordinances relating to health and safety, and agrees to provide any site/task specific training and/or safety devices and protective equipment necessary or required by law. Hiring Company will not, without prior written consent of Staffing Company, entrust Staffing Company employees with the handling of cash, checks, credit cards, jewelry, equipment, tools, or other valuables.</li> <li> Hiring Company agrees that it will maintain a written safety program, a hazard communication program, and an accident investigation program. Hiring Company agrees that it will make first aid kits available to Workers, that proper lifting techniques are to be used, that fall protection is to be used, and that Hiring Company completes regular inspections on electrical cords and equipment. Hiring Company represents, warrants, and covenants that it handles and stores hazardous materials properly and in compliance with all applicable laws. </li> <li> Hiring Company agrees to post Occupational Safety and Health Act (“OSHA”) of 1970 information and other safety information, as required by law. Hiring Company agrees to log all accidents in its OSHA 300 logs. Hiring Company agrees to indemnify and hold harmless Staffing Company for all claims, damages, or penalties arising out of violations of the OSHA or any state law with respect to workplaces or equipment owned, leased, or supervised by Hiring Company and to which employees are assigned. </li> <li>  Hiring Company will not, without prior written consent of Staffing Company, utilize Workers to operate machinery, equipment, or vehicles. Hiring Company agrees to indemnify and save Staffing Company and Workers harmless from any and all claims and expenses (including litigation) for bodily injury or property damage or other loss as asserted by Hiring Company, its employees, agents, the owner of any such vehicles and/or equipment or contents thereof, or by members of the general public, or any other third party, arising out of the operation or use of said vehicles and/or equipment by Workers. </li> <li> Commencement of work by dispatched Workers, or Hiring Company’s signature on work ticket serves as confirmation of Hiring Company’s agreement to conditions of service listed in or referred to by this Contract. </li> <li> Hiring Company agrees not to place Workers in a supervisory position except for a Worker designated as a “lead,” and, in that position, Hiring Company agrees to supervise all Workers at all times. </li> <li> Billable time begins at the time Workers report to the workplace as designated by the Hiring Company. </li> <li> Jobs must be canceled a minimum of 24 hours prior to start time to avoid a minimum of four hours billing per Worker. </li> <li> Staffing Company guarantees that its Workers will satisfy Hiring Company, or the first two hours are free of charge. If Hiring Company is not satisfied with the Workers, Hiring Company is to call the designated phone number for the Staffing Company within the first two hours, and Staffing Company will replace them free of charge.</li> <li> Staffing Company agrees that it will comply with Hiring Company’s safety program rules. </li> <li> Overtime will be billed at one and one-half times the regular billing rate for all time worked over forty hours in a pay period and/or eight hours in a day as provided by state law. </li> <li> Invoices are due 30 days from receipt, unless other arrangements have been made and agreed to by each of the parties. </li> <li> Interest Rate: Any outstanding balance due to Staffing Company is subject to an interest rate of two percent (2%) per month, commencing on the 90th day after the date the balance was due, until the balance is paid in full by Hiring Company. </li> <li> Severability. If any provision of this Contract is held to be invalid and unenforceable, then the remainder of this Contract shall nevertheless remain in full force and effect. </li> <li> Attorney’s Fees. Hiring Company agrees to pay reasonable attorney’s fees and/or collection fees for any unpaid account balances or in any action incurred to enforce this Contract. </li> <li> Governing Law. This Contract is governed by the laws of the state of Florida, regardless of its conflicts of laws rules. </li> <li>  If Hiring Company utilizes a Staffing Company employee to work on a prevailing wage job, Hiring Company agrees to notify Staffing Company with the correct prevailing wage rate and correct job classification for duties Staffing Company employees will be performing. Failure to provide this information or providing incorrect information may result in the improper reporting of wages, resulting in fines or penalties being imposed upon Staffing Company. The Hiring Company agrees to reimburse Staffing Company for any and all fines, penalties, wages, lost revenue, administrative and/or supplemental charges incurred by Staffing Company.</li> <li> WORKERS' COMPENSATION COSTS: Staffing Company represents and warrants that it has a strong safety program, and it is Staffing Company’s highest priority to bring its Workers home safely every day. AFFORDABLE CARE ACT (ACA): Staffing Company represents and warrants that it is in compliance with all aspects of the ACA. </li> <li> Representatives. The Hiring Company and the Staffing Company each certifies that its authorized representative has read all of the terms and conditions of this Contract and understands and agrees to the same. </li> ";
 
-    if (cur_frm.doc.contract_add_on) {
+    if (frm.doc.contract_add_on) {
       frappe.db.get_value(
         "Company",
-        { name: cur_frm.doc.company },
+        { name: frm.doc.company },
         ["contract_addendums"],
         function () {
           let contract = new frappe.ui.Dialog({
@@ -457,7 +457,7 @@ frappe.ui.form.on("Job Order", {
                 options:
                   contracts +
                   "<li>" +
-                  cur_frm.doc.contract_add_on +
+                  frm.doc.contract_add_on +
                   "</li>  </ol>  </div>",
               },
             ],
@@ -509,14 +509,14 @@ frappe.ui.form.on("Job Order", {
     ) {
       decreasing_employee(frm);
     }
-    check_value(field, name, value);
+    check_value(frm, field, name, value);
   },
 
   rate: function (frm) {
     let field = "Rate";
     let name = "rate";
     let value = parseFloat(frm.doc.rate);
-    check_value(field, name, value);
+    check_value(frm, field, name, value);
     rate_calculation(frm);
   },
 
@@ -524,7 +524,7 @@ frappe.ui.form.on("Job Order", {
     let field = "Extra Price Increase";
     let name = "extra_price_increase";
     let value = frm.doc.extra_price_increase;
-    check_value(field, name, value);
+    check_value(frm, field, name, value);
     rate_calculation(frm);
   },
 
@@ -532,22 +532,22 @@ frappe.ui.form.on("Job Order", {
     let field = "Per Hour";
     let name = "per_hour";
     let value = frm.doc.per_hour;
-    check_value(field, name, value);
+    check_value(frm, field, name, value);
   },
 
   flat_rate: function (frm) {
     let field = "Flat Rate";
     let name = "flat_rate";
     let value = frm.doc.flat_rate;
-    check_value(field, name, value);
+    check_value(frm, field, name, value);
   },
 
   availability: function (frm) {
     if (frm.doc.availability == "Custom") {
-      cur_frm.set_value("select_days", "");
-      cur_frm.set_value("selected_days", undefined);
-      cur_frm.set_df_property("select_days", "reqd", 1);
-      cur_frm.set_df_property("select_days", "read_only", 0);
+      frm.set_value("select_days", "");
+      frm.set_value("selected_days", undefined);
+      frm.set_df_property("select_days", "reqd", 1);
+      frm.set_df_property("select_days", "read_only", 0);
     }
   },
 
@@ -558,15 +558,15 @@ frappe.ui.form.on("Job Order", {
       Company: frm.doc.company,
       "Select Job": frm.doc.select_job,
       Industry: frm.doc.category,
-      "Job Order Start Date": cur_frm.doc.from_date,
-      "Job Site": cur_frm.doc.job_site,
-      "No Of Workers": cur_frm.doc.no_of_workers,
-      Rate: cur_frm.doc.rate,
-      "Job Order End Date": cur_frm.doc.to_date,
-      "Job Duration": cur_frm.doc.job_order_duration,
-      "Estimated Hours Per Day": cur_frm.doc.estimated_hours_per_day,
-      "E-Signature Full Name": cur_frm.doc.e_signature_full_name,
-      Availability: cur_frm.doc.availability,
+      "Job Order Start Date": frm.doc.from_date,
+      "Job Site": frm.doc.job_site,
+      "No Of Workers": frm.doc.no_of_workers,
+      Rate: frm.doc.rate,
+      "Job Order End Date": frm.doc.to_date,
+      "Job Duration": frm.doc.job_order_duration,
+      "Estimated Hours Per Day": frm.doc.estimated_hours_per_day,
+      "E-Signature Full Name": frm.doc.e_signature_full_name,
+      Availability: frm.doc.availability,
     };
 
     let message = "<b>Please Fill Mandatory Fields:</b>";
@@ -638,7 +638,7 @@ frappe.ui.form.on("Job Order", {
       frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
       frm.doc.company
     ) {
-      fields_setup();
+      fields_setup(frm);
       staffing_create_job_order(frm);
     }
     sessionStorage.setItem("joborder_company", frm.doc.company);
@@ -899,15 +899,15 @@ function check_from_date(frm) {
       title: __("Error"),
       indicator: "orange",
     });
-    cur_frm.set_value("from_date", "");
+    frm.set_value("from_date", "");
   } else if (to_date && from_date && from_date > to_date) {
     frappe.msgprint({
       message: __("<b>End Date</b> Cannot be Less than Start Date"),
       title: __("Error"),
       indicator: "orange",
     });
-    cur_frm.set_value("from_date", "");
-    cur_frm.set_value("to_date", "");
+    frm.set_value("from_date", "");
+    frm.set_value("to_date", "");
   } else {
     job_order_duration(frm);
   }
@@ -922,37 +922,37 @@ function check_to_date(frm) {
       title: __("Error"),
       indicator: "orange",
     });
-    cur_frm.set_value("to_date", "");
+    frm.set_value("to_date", "");
   } else if (to_date && from_date && from_date > to_date) {
     frappe.msgprint({
       message: __("<b>End Date</b> Cannot be Less than Start Date"),
       title: __("Error"),
       indicator: "orange",
     });
-    cur_frm.set_value("to_date", "");
+    frm.set_value("to_date", "");
   } else {
     job_order_duration(frm);
   }
 }
 
-function check_value(field, name, value) {
+function check_value(frm, field, name, value) {
   if (value && value < 0) {
     frappe.msgprint({
       message: __("<b>" + field + "</b> Cannot be Less Than Zero"),
       title: __("Error"),
       indicator: "orange",
     });
-    cur_frm.set_value(
+    frm.set_value(
       name,
-      cur_frm.doc.repeat_old_worker && name == "no_of_workers"
-        ? cur_frm.doc.repeat_old_worker
+      frm.doc.repeat_old_worker && name == "no_of_workers"
+        ? frm.doc.repeat_old_worker
         : 0
     );
   }
 }
 
 function rate_hour_contract_change(frm) {
-  if (cur_frm.doc.no_of_workers < cur_frm.doc.worker_filled) {
+  if (frm.doc.no_of_workers < frm.doc.worker_filled) {
     frappe.msgprint({
       message: __("Workers Already Filled"),
       title: __("Error"),
@@ -995,7 +995,7 @@ function rate_calculation(frm) {
         total_per_hour = total_per_hour + parseFloat(y[1]);
       }
     } else {
-      cur_frm.set_value(optional_fields[i], "None");
+      frm.set_value(optional_fields[i], "None");
     }
   }
   frm.set_value("flat_rate", total_flat_rate);
@@ -1005,7 +1005,7 @@ function rate_calculation(frm) {
 function hide_employee_rating(frm) {
   let table = frm.doc.employee_rating || [];
   if (table.length == 0) {
-    cur_frm.toggle_display("employee_rating", 0);
+    frm.toggle_display("employee_rating", 0);
   }
 }
 
@@ -1013,7 +1013,7 @@ function hide_employee_rating(frm) {
 function make_invoice(frm) {
   let roles = frappe.user_roles;
   if (
-    cur_frm.doc.__islocal != 1 &&
+    frm.doc.__islocal != 1 &&
     roles.includes("Staffing Admin", "Staffing User") &&
     frappe.boot.tag.tag_user_info.company
   ) {
@@ -1027,13 +1027,13 @@ function make_invoice(frm) {
       "name",
       function (r) {
         if (r.name) {
-          if (cur_frm.doc.order_status != "Upcoming") {
+          if (frm.doc.order_status != "Upcoming") {
             frm
               .add_custom_button(__("Create Invoice"), function () {
                 frappe.model.open_mapped_doc({
                   method:
                     "tag_workflow.tag_workflow.doctype.job_order.job_order.make_invoice",
-                  frm: cur_frm,
+                  frm: frm,
                 });
               })
               .addClass("btn-primary");
@@ -1044,11 +1044,11 @@ function make_invoice(frm) {
   }
 }
 
-function fields_setup() {
-  if (cur_frm.doc.company) {
+function fields_setup(frm) {
+  if (frm.doc.company) {
     frappe.db.get_value(
       "Company",
-      { name: cur_frm.doc.company },
+      { name: frm.doc.company },
       [
         "drug_screen_rate",
         "hour_per_person_drug",
@@ -1061,8 +1061,8 @@ function fields_setup() {
         "contract_addendums",
       ],
       function (r) {
-        if (r.contract_addendums != "undefined" && cur_frm.doc.__islocal == 1) {
-          cur_frm.set_value("contract_add_on", r.contract_addendums);
+        if (r.contract_addendums != "undefined" && frm.doc.__islocal == 1) {
+          frm.set_value("contract_add_on", r.contract_addendums);
         }
         const org_optional_data = [
           r.drug_screen_rate,
@@ -1083,7 +1083,7 @@ function fields_setup() {
         ];
         let a = 0;
         for (let i = 0; i <= 3; i++) {
-          cur_frm.set_df_property(
+          frm.set_df_property(
             optional_field_data[i],
             "options",
             "None\n" +
@@ -1115,13 +1115,13 @@ function job_order_duration(frm) {
     let diff = Math.abs(to_date2 - from_date2);
     let days = diff / (1000 * 3600 * 24) + 1;
     if (days == 1) {
-      cur_frm.set_value("job_order_duration", days + " Day");
+      frm.set_value("job_order_duration", days + " Day");
       frm.set_df_property("availability", "hidden", 1);
       frm.set_df_property("availability", "reqd", 0);
       frm.set_df_property("select_days", "reqd", 0);
       frm.set_value("availability", "Everyday");
     } else {
-      cur_frm.set_value("job_order_duration", days + " Days");
+      frm.set_value("job_order_duration", days + " Days");
       frm.set_value("availability", "");
       frm.set_df_property("availability", "hidden", 0);
       frm.set_df_property("availability", "read_only", 0);
@@ -1179,7 +1179,7 @@ function claim_job_order_staffing(frm) {
 
 function show_claim_bar(frm) {
   if (
-    cur_frm.doctype == "Job Order" &&
+    frm.doctype == "Job Order" &&
     frm.doc.staff_org_claimed &&
     frm.doc.staff_org_claimed.includes(frappe.boot.tag.tag_user_info.company)
   ) {
@@ -1196,7 +1196,7 @@ function show_claim_bar(frm) {
       },
     });
   } else if (
-    cur_frm.doctype == "Job Order" &&
+    frm.doctype == "Job Order" &&
     frm.doc.claim &&
     frm.doc.claim.includes(frappe.boot.tag.tag_user_info.company) &&
     frm.doc.resumes_required == 0
@@ -1209,8 +1209,8 @@ function show_claim_bar(frm) {
       },
       callback: function (r) {
         if (r.message != "unsuccess") {
-          cur_frm.toggle_display("section_break_html2", 1);
-          cur_frm.set_df_property(
+          frm.toggle_display("section_break_html2", 1);
+          frm.set_df_property(
             "html_3",
             "options",
             "<h3>Your company has submitted a claim for this order.</h3>"
@@ -1220,7 +1220,7 @@ function show_claim_bar(frm) {
       },
     });
   } else if (
-    cur_frm.doctype == "Job Order" &&
+    frm.doctype == "Job Order" &&
     frm.doc.claim &&
     frm.doc.claim.includes(frappe.boot.tag.tag_user_info.company) &&
     frm.doc.resumes_required == 1
@@ -1234,8 +1234,8 @@ function show_claim_bar(frm) {
       callback: function (r) {
         if (r.message != "unsuccess") {
           frm.remove_custom_button("Assign Employee");
-          cur_frm.toggle_display("section_break_html2", 1);
-          cur_frm.set_df_property(
+          frm.toggle_display("section_break_html2", 1);
+          frm.set_df_property(
             "html_3",
             "options",
             "<h3>Your company has submitted a claim for this order.</h3>"
@@ -1257,7 +1257,7 @@ function assign_employees(frm) {
     frm.doc.__islocal != 1 &&
     frm.doc.worker_filled < frm.doc.no_of_workers
   ) {
-    if (cur_frm.is_dirty()) {
+    if (frm.is_dirty()) {
       frappe.msgprint({
         message: __("Please save the form before creating Quotation"),
         title: __("Save Job Order"),
@@ -1271,21 +1271,21 @@ function assign_employees(frm) {
 
 function view_button(frm) {
   if (
-    cur_frm.doctype == "Job Order" &&
+    frm.doctype == "Job Order" &&
     frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
     frm.doc.__islocal != 1
   ) {
-    cur_frm.dashboard.hide();
+    frm.dashboard.hide();
     if (frm.doc.claim) {
       frappe.call({
         method: "tag_workflow.tag_data.claim_order_company",
         args: {
           user_name: frappe.session.user,
-          claimed: cur_frm.doc.claim,
+          claimed: frm.doc.claim,
         },
         callback: function (r) {
           if (r.message != "unsuccess") {
-            view_buttons_staffing(cur_frm);
+            view_buttons_staffing(frm);
           }
         },
       });
@@ -1301,7 +1301,7 @@ function view_button(frm) {
 
 function view_buttons_hiring(frm) {
   hiring_buttons(frm);
-  if (cur_frm.doc.__islocal != 1) {
+  if (frm.doc.__islocal != 1) {
     let no_of_claims = 0;
     frappe.call({
       method:
@@ -1354,7 +1354,7 @@ function view_buttons_hiring(frm) {
       frappe.call({
         method: "tag_workflow.tag_data.timesheet_detail",
         args: {
-          job_order: cur_frm.doc.name,
+          job_order: frm.doc.name,
         },
         callback: function (r) {
           if (r.message == "success") {
@@ -1398,7 +1398,7 @@ function view_buttons_staffing(frm) {
   }
 
   if (
-    cur_frm.doctype == "Job Order" &&
+    frm.doctype == "Job Order" &&
     frm.doc.staff_org_claimed &&
     (frm.doc.order_status == "Completed" || frm.doc.order_status == "Ongoing")
   ) {
@@ -1436,7 +1436,7 @@ function view_buttons_staffing(frm) {
     frappe.call({
       method: "tag_workflow.tag_data.timesheet_detail",
       args: {
-        job_order: cur_frm.doc.name,
+        job_order: frm.doc.name,
       },
       callback: function (r) {
         if (r.message == "success1") {
@@ -1474,7 +1474,7 @@ function view_buttons_staffing(frm) {
 }
 
 function hiring_buttons(frm) {
-  if (cur_frm.doc.__islocal != 1) {
+  if (frm.doc.__islocal != 1) {
     frm.add_custom_button(
       __("Claims"),
       function claim1() {
@@ -1485,14 +1485,14 @@ function hiring_buttons(frm) {
     frappe.call({
       method: "tag_workflow.tag_data.assigned_employees",
       args: {
-        job_order: cur_frm.doc.name,
+        job_order: frm.doc.name,
       },
       callback: function (r) {
         if (r.message == "success1") {
           frm.add_custom_button(
             __("Assigned Employees"),
             function () {
-              approved_emp();
+              approved_emp(frm);
             },
             __("View")
           );
@@ -1508,7 +1508,7 @@ function hiring_buttons(frm) {
                 $("[data-fieldname = assigned_employees_hiring]").attr("id") ==
                 "approved_inactive"
               ) {
-                approved_emp();
+                approved_emp(frm);
               }
             });
           frm.set_df_property("assigned_employees_hiring", "options", data);
@@ -1623,7 +1623,7 @@ function staff_assigned_emp(frm) {
   frappe.call({
     method: "tag_workflow.tag_data.staff_assigned_employees",
     args: {
-      job_order: cur_frm.doc.name,
+      job_order: frm.doc.name,
       user_email: frappe.session.user_email,
       resume_required: frm.doc.resumes_required,
     },
@@ -1671,7 +1671,7 @@ function staff_assign_redirect(frm) {
 }
 
 function staff_claim_button(frm) {
-  if (cur_frm.doctype == "Job Order" && frm.doc.staff_org_claimed) {
+  if (frm.doctype == "Job Order" && frm.doc.staff_org_claimed) {
     frappe.call({
       method: "tag_workflow.tag_data.claim_order_company",
       args: {
@@ -1736,11 +1736,11 @@ function staff_claim_button(frm) {
   }
 }
 
-function approved_emp() {
+function approved_emp(frm) {
   frappe.call({
     method: "tag_workflow.tag_data.assigned_employee_data",
     args: {
-      job_order: cur_frm.doc.name,
+      job_order: frm.doc.name,
     },
     callback: function (rm) {
       let data = rm.message;
@@ -1812,14 +1812,14 @@ function approved_emp() {
   });
 }
 
-function assigned_emp() {
+function assigned_emp(frm) {
   frappe.call({
     method: "tag_workflow.tag_data.staffing_assigned_employee",
-    args: { job_order: cur_frm.doc.name },
+    args: { job_order: frm.doc.name },
     callback: function (rm) {
       let data = rm.message || [];
       let profile_html_data = "";
-      profile_html_data += job_profile_data(data);
+      profile_html_data += job_profile_data(frm, data);
       let dialog1 = new frappe.ui.Dialog({
         title: __("Assigned Employees"),
         fields: [
@@ -1845,12 +1845,12 @@ function assigned_emp() {
           frappe.db.get_value(
             "Assign Employee",
             {
-              job_order: cur_frm.doc.name,
+              job_order: frm.doc.name,
               company: frappe.boot.tag.tag_user_info.company,
             },
             ["name", "claims_approved"],
             function (rr) {
-              redirect_job(rr.name, cur_frm.doc.nam);
+              redirect_job(rr.name, frm.doc.nam);
             }
           );
         };
@@ -1957,8 +1957,8 @@ function deleting_data(frm) {
 
 function deny_job_order(frm) {
   if (
-    !cur_frm.doc.is_repeat &&
-    cur_frm.doc.is_single_share == 1 &&
+    !frm.doc.is_repeat &&
+    frm.doc.is_single_share == 1 &&
     frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
     frm.doc.order_status != "Completed" &&
     !frm.doc.claim
@@ -1977,8 +1977,8 @@ function deny_job_order(frm) {
         freeze_message:
           "<p><b>preparing notification for hiring orgs...</b></p>",
         callback: function () {
-          cur_frm.refresh();
-          cur_frm.reload_doc();
+          frm.refresh();
+          frm.reload_doc();
         },
       });
     });
@@ -1992,7 +1992,7 @@ function cancel_job_order_deatils(frm) {
     show_claim_bar(frm);
   }
 
-  if (cur_frm.doc.__islocal == 1) {
+  if (frm.doc.__islocal == 1) {
     cancel_joborder(frm);
   } else {
     timer_value(frm);
@@ -2020,7 +2020,7 @@ function staffing_company_remove(frm) {
 
 function claim_order_button(frm) {
   if (
-    cur_frm.doctype == "Job Order" &&
+    frm.doctype == "Job Order" &&
     frm.doc.__islocal != 1 &&
     frm.doc.no_of_workers != frm.doc.worker_filled
   ) {
@@ -2028,16 +2028,16 @@ function claim_order_button(frm) {
       method: "tag_workflow.tag_data.claim_order_company",
       args: {
         user_name: frappe.session.user,
-        claimed: cur_frm.doc.claim || "",
+        claimed: frm.doc.claim || "",
       },
       callback: function (r) {
         if (r.message == "unsuccess") {
           frappe.call({
             method: "tag_workflow.tag_data.approved_claims",
-            args: { workers: frm.doc.no_of_workers, jo: cur_frm.doc.name },
+            args: { workers: frm.doc.no_of_workers, jo: frm.doc.name },
             callback: function (s) {
               if (s.message == 1) {
-                cur_frm.add_custom_button(__("Claim Order"), function () {
+                frm.add_custom_button(__("Claim Order"), function () {
                   claim_job_order_staffing(frm);
                 });
               }
@@ -2138,7 +2138,7 @@ function change_is_single_share(frm) {
       name: frm.doc.name,
     },
     callback: function (resp) {
-      cur_frm.doc.is_single_share = resp.message;
+      frm.doc.is_single_share = resp.message;
     },
   });
 }
@@ -2220,7 +2220,7 @@ function check_claim_company(frm) {
 
 function set_exc_industry_company(frm) {
   if (sessionStorage.exc_joborder_company) {
-    cur_frm.set_value("company", sessionStorage.exc_joborder_company);
+    frm.set_value("company", sessionStorage.exc_joborder_company);
     if (frm.doc.category && frm.doc.company) {
       sessionStorage.setItem("exc_joborder_company", "");
 
@@ -2236,7 +2236,7 @@ function set_exc_industry_company(frm) {
 }
 function order_buttons(frm) {
   if (
-    cur_frm.doc.order_status != "Completed" &&
+    frm.doc.order_status != "Completed" &&
     frappe.boot.tag.tag_user_info.company_type == "Staffing"
   ) {
     if (frm.doc.resumes_required) {
@@ -2262,11 +2262,11 @@ function order_buttons(frm) {
 function repeat_order(frm) {
   let condition =
     frm.doc.__islocal != 1 &&
-    cur_frm.doc.order_status == "Completed" &&
+    frm.doc.order_status == "Completed" &&
     frappe.boot.tag.tag_user_info.company_type == "Hiring";
   if (condition) {
     frm.add_custom_button(__("Repeat Order"), function () {
-      if (cur_frm.doc.bid == 0) {
+      if (frm.doc.bid == 0) {
         let comp;
         trigger_new_order(frm, 0, 1, comp);
       } else {
@@ -2311,7 +2311,7 @@ function repeat_hiring_dia(frm) {
         label: "Select Company",
         hidden: 1,
         options: frappe.boot.tag.tag_user_info.comps.join("\n"),
-        default: cur_frm.doc.staff_company,
+        default: frm.doc.staff_company,
       },
       { fieldname: "direct_1", fieldtype: "Column Break" },
       {
@@ -2331,7 +2331,7 @@ function repeat_hiring_dia(frm) {
         fieldname: "company",
         fieldtype: "Select",
         label: "Select Company",
-        options: get_company_list(),
+        options: get_company_list(frm),
         onchange: function () {
           cur_dialog.set_df_property("selected_companies", "hidden", 0);
           let direct = cur_dialog.get_value("company");
@@ -2390,10 +2390,10 @@ function repeat_hiring_dia(frm) {
 function repeat_order_remaining_orgs(frm) {
   if (
     frm.doc.__islocal != 1 &&
-    cur_frm.doc.order_status == "Completed" &&
+    frm.doc.order_status == "Completed" &&
     (frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ||
       (frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
-        frappe.boot.tag.tag_user_info.exces.includes(cur_frm.doc.company)))
+        frappe.boot.tag.tag_user_info.exces.includes(frm.doc.company)))
   ) {
     trigger_exc_stf_odr(frm);
   }
@@ -2446,7 +2446,7 @@ function trigger_new_order(frm, direct, normal, company) {
 
   let user = frappe.session.user;
   newdoc.__islocal = 1;
-  newdoc.company = cur_frm.doc.company;
+  newdoc.company = frm.doc.company;
   newdoc.is_direct = direct;
   newdoc.docstatus = 0;
   newdoc.owner = user;
@@ -2454,8 +2454,8 @@ function trigger_new_order(frm, direct, normal, company) {
   newdoc.modified_by = user;
   newdoc.modified = "";
   newdoc.is_repeat = 1;
-  newdoc.repeat_from = cur_frm.doc.name;
-  newdoc.repeat_from_company = cur_frm.doc.company;
+  newdoc.repeat_from = frm.doc.name;
+  newdoc.repeat_from_company = frm.doc.company;
   newdoc.repeat_staff_company =
     window.multiple_comp.join("~").length > 0
       ? window.multiple_comp.join("~")
@@ -2466,14 +2466,14 @@ function trigger_new_order(frm, direct, normal, company) {
   newdoc.order_status = "Upcoming";
   newdoc.staff_company = company;
   newdoc.staff_company2 = newdoc.repeat_staff_company;
-  newdoc.repeat_old_worker = cur_frm.doc.no_of_workers;
+  newdoc.repeat_old_worker = frm.doc.no_of_workers;
   newdoc.worker_filled = 0;
   newdoc.bid = 0;
   newdoc.claim = "";
   frappe.set_route("form", newdoc.doctype, newdoc.name);
 }
 
-function get_company_list() {
+function get_company_list(frm) {
   let existed_comp;
   if (cur_dialog) {
     existed_comp = cur_dialog.get_value("selected_companies");
@@ -2482,7 +2482,7 @@ function get_company_list() {
   frappe.call({
     method:
       "tag_workflow.tag_workflow.doctype.job_order.job_order.claim_data_list",
-    args: { job_order_name: cur_frm.doc.name, exist_comp: existed_comp },
+    args: { job_order_name: frm.doc.name, exist_comp: existed_comp },
     async: 0,
     callback: function (r) {
       company += r.message;
@@ -2495,7 +2495,7 @@ function update_order_status(frm) {
   if (frm.doc.__islocal != 1) {
     frappe.call({
       method: "tag_workflow.tag_data.update_order_status",
-      args: { job_order_name: cur_frm.doc.name },
+      args: { job_order_name: frm.doc.name },
     });
   }
 }
@@ -2549,19 +2549,19 @@ function update_section(frm) {
       callback: function (r) {
         if (r.message) {
           if (r.message == "Complete") {
-            cur_frm.set_df_property(
+            frm.set_df_property(
               "html_3",
               "options",
               "<h3>Job Order Closed.</h3>"
             );
           } else if (r.message == "Approved") {
-            cur_frm.set_df_property(
+            frm.set_df_property(
               "html_3",
               "options",
               "<h3>Please submit an invoice to complete the order.</h3>"
             );
           } else if (r.message == "Approval Request") {
-            cur_frm.set_df_property(
+            frm.set_df_property(
               "html_3",
               "options",
               "<h3>Timesheet available for approval.</h3>"
@@ -2590,21 +2590,21 @@ function hiring_sections(frm) {
         if (r.message) {
           if (r.message == "Completed") {
             frm.toggle_display("hiring_section_break", 1);
-            cur_frm.set_df_property(
+            frm.set_df_property(
               "hiring_html",
               "options",
               "<h3>Job Order Closed</h3>"
             );
           } else if (r.message == "Invoice") {
             frm.toggle_display("hiring_section_break", 1);
-            cur_frm.set_df_property(
+            frm.set_df_property(
               "hiring_html",
               "options",
               "<h3>Please review invoice.</h3>"
             );
           } else if (r.message == "Timesheet") {
             frm.toggle_display("hiring_section_break", 1);
-            cur_frm.set_df_property(
+            frm.set_df_property(
               "hiring_html",
               "options",
               "<h3>Timesheets require review</h3>"
@@ -2626,7 +2626,7 @@ function hiring_review_box(frm) {
       function (r1) {
         if (r1.name) {
           frm.toggle_display("hiring_section_break", 1);
-          cur_frm.set_df_property(
+          frm.set_df_property(
             "hiring_html",
             "options",
             "<h3>Employees have been assigned. Please submit their timesheets.</h3>"
@@ -2634,7 +2634,7 @@ function hiring_review_box(frm) {
         } else {
           if (frm.doc.bid > 0) {
             frm.toggle_display("hiring_section_break", 1);
-            cur_frm.set_df_property(
+            frm.set_df_property(
               "hiring_html",
               "options",
               "<h3>Please review submitted claims.</h3>"
@@ -2644,8 +2644,8 @@ function hiring_review_box(frm) {
       }
     );
   } else if (frm.doc.bid > 0) {
-    cur_frm.toggle_display("hiring_section_break", 1);
-    cur_frm.set_df_property(
+    frm.toggle_display("hiring_section_break", 1);
+    frm.set_df_property(
       "hiring_html",
       "options",
       "<h3>Please review submitted claims.</h3>"
@@ -2653,12 +2653,12 @@ function hiring_review_box(frm) {
   }
 }
 
-function add_id() {
-  if (cur_frm.doc.order_status == "Completed") {
+function add_id(frm) {
+  if (frm.doc.order_status == "Completed") {
     $('[data-fieldname="rate"]').attr("id", "_rate");
-    non_claims();
+    non_claims(frm);
   }
-  if (cur_frm.doc.__islocal == 1) {
+  if (frm.doc.__islocal == 1) {
     $('[data-fieldname="rate"]').attr("id", "div_rate");
   }
 }
@@ -2685,17 +2685,17 @@ function no_of_workers_changed(frm) {
   }
 }
 
-function non_claims() {
+function non_claims(frm) {
   let found = false;
-  let claim_comps = cur_frm.doc.claim;
+  let claim_comps = frm.doc.claim;
   if (claim_comps && claim_comps.includes("~")) {
-    claim_comps = cur_frm.doc.claim.split("~");
+    claim_comps = frm.doc.claim.split("~");
     for (let i in claim_comps) {
       if (
         frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
         frappe.boot.tag.tag_user_info.comps.includes(claim_comps[i])
       ) {
-        cur_frm.toggle_display("section_break_html1", 0);
+        frm.toggle_display("section_break_html1", 0);
         found = true;
         break;
       }
@@ -2705,17 +2705,17 @@ function non_claims() {
       frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
       frappe.boot.tag.tag_user_info.comps.includes(claim_comps)
     ) {
-      cur_frm.toggle_display("section_break_html1", 0);
+      frm.toggle_display("section_break_html1", 0);
       found = true;
     }
   }
   if (
     !found &&
     frappe.boot.tag.tag_user_info.company_type == "Staffing" &&
-    cur_frm.doc.order_status == "Completed"
+    frm.doc.order_status == "Completed"
   ) {
-    cur_frm.toggle_display("section_break_html1", 1);
-    cur_frm.set_df_property(
+    frm.toggle_display("section_break_html1", 1);
+    frm.set_df_property(
       "html_2",
       "options",
       "<h3>This Job Order is closed and unclaimed by your company.</h3>"
@@ -2756,7 +2756,7 @@ function order_claimed_contd(result, frm) {
   ) {
     frm.remove_custom_button("Claim Order");
     frm.set_df_property("section_break_html1", "hidden", 0);
-    cur_frm.set_df_property(
+    frm.set_df_property(
       "html_2",
       "options",
       "<h3>This Job Order has reached its desired head count.</h3>"
@@ -2767,7 +2767,7 @@ function order_claimed_contd(result, frm) {
     !frm.doc.staff_org_claimed.includes(
       frappe.boot.tag.tag_user_info.company
     ) &&
-    frm.doc.no_of_workers > frm.doc.worker_filled &&
+    frm.doc.no_of_workers > total_approved_emp &&
     frm.doc.order_status != "Completed"
   ) {
     assigned_emp_comp(frm);
@@ -2930,18 +2930,18 @@ function availability_single_day(frm) {
   }
 }
 
-function date_pick() {
-  if (cur_frm.doc.is_repeat == 1 && cur_frm.doc.__islocal == 1) {
-    cur_frm.doc.from_date = frappe.datetime.now_date();
-    cur_frm.doc.to_date = frappe.datetime.now_date();
+function date_pick(frm) {
+  if (frm.doc.is_repeat == 1 && frm.doc.__islocal == 1) {
+    frm.doc.from_date = frappe.datetime.now_date();
+    frm.doc.to_date = frappe.datetime.now_date();
     refresh_field("from_date");
     refresh_field("to_date");
-    cur_frm.doc.from_date = "";
-    cur_frm.doc.to_date = "";
+    frm.doc.from_date = "";
+    frm.doc.to_date = "";
   }
 }
 function claim_bar_data_hide(frm) {
-  cur_frm.toggle_display("section_break_html2", 1);
+  frm.toggle_display("section_break_html2", 1);
   if (frm.doc.resumes_required == 1) {
     frm.remove_custom_button("Assign Employee");
     frm.remove_custom_button("Claim Order");
@@ -3023,7 +3023,7 @@ function assign_emp_hide_button(frm) {
   frm.add_custom_button(
     __("Assigned Employees"),
     function () {
-      assigned_emp();
+      assigned_emp(frm);
     },
     __("View")
   );
@@ -3034,7 +3034,7 @@ function assign_emp_hide_button(frm) {
       $("[data-fieldname = assigned_employees]").attr("id") ==
       "assigned_inactive"
     ) {
-      assigned_emp();
+      assigned_emp(frm);
     }
   });
   frm.set_df_property("assigned_employees", "options", data);
@@ -3061,21 +3061,21 @@ function reclaim_button(frm) {
 
 function single_share_job(frm) {
   if (frm.doc.__islocal != 1 && frm.doc.is_single_share == 0) {
-    cur_frm.set_df_property("staff_company", "hidden", 1);
+    frm.set_df_property("staff_company", "hidden", 1);
   }
   if (
     frm.doc.__islocal != 1 &&
     frappe.boot.tag.tag_user_info.company_type == "Staffing"
   ) {
     if (
-      cur_frm.doc.staff_company &&
-      !cur_frm.doc.staff_company.includes(frappe.boot.tag.tag_user_info.company)
+      frm.doc.staff_company &&
+      !frm.doc.staff_company.includes(frappe.boot.tag.tag_user_info.company)
     ) {
-      cur_frm.set_df_property("staff_company", "hidden", 1);
+      frm.set_df_property("staff_company", "hidden", 1);
     }
   }
 }
-function job_profile_data(data) {
+function job_profile_data(frm, data) {
   let profile_html = `<div class="table-responsive pb-2 pb-sm-0"><table style="width: 100%;"><th>Employee Name</th><th>Marked As</th><th>Actions</th><th></th>`;
   for (let p in data) {
     let marked_as = "";
@@ -3095,7 +3095,7 @@ function job_profile_data(data) {
 
     profile_html += `<tr><td>${data[p].employee}</td><td>${marked_as}</td>`;
 
-    if (marked_as != " Replaced" && cur_frm.doc.order_status != "Completed") {
+    if (marked_as != " Replaced" && frm.doc.order_status != "Completed") {
       profile_html += `
 				<td class="replace" data-fieldname="replace">
 					<button class="btn btn-primary btn-sm mt-2" onclick=redirect_job('${
@@ -3105,7 +3105,7 @@ function job_profile_data(data) {
 				<td class="remove_employee" data-fieldname="remove_employee">
 					<button class="btn btn-primary btn-sm mt-2" onclick=remove_job('${
             data[p].assign_name
-          }','${cur_frm.doc.name}','${data[p].employee_id}','${
+          }','${frm.doc.name}','${data[p].employee_id}','${
         data[p].removed
       }')>
 					${data[p].removed == "0" ? "Remove" : "Unremove"}
@@ -3155,25 +3155,25 @@ function check_emp_claims(frm) {
           frm.doc.worker_filled != r.message.reduce((a, b) => a + b, 0) &&
           frm.doc.no_of_workers < r.message.reduce((a, b) => a + b, 0)
         ) {
-          workers_claimed_change();
+          workers_claimed_change(frm);
         }
       }
     },
   });
 }
-function workers_claimed_change() {
-  let new_no = cur_frm.doc.no_of_workers;
-  cur_frm.set_value("no_of_workers", "");
+function workers_claimed_change(frm) {
+  let new_no = frm.doc.no_of_workers;
+  frm.set_value("no_of_workers", "");
   frappe.call({
     method:
       "tag_workflow.tag_workflow.doctype.job_order.job_order.workers_required_order_update",
     args: {
-      doc_name: cur_frm.doc.name,
+      doc_name: frm.doc.name,
     },
     callback: function (rm) {
       frappe.db.get_value(
         "Job Order",
-        { name: cur_frm.doc.name },
+        { name: frm.doc.name },
         [
           "company",
           "select_job",
@@ -3208,7 +3208,7 @@ function workers_claimed_change() {
                 fieldtype: "HTML",
                 options:
                   "<label>No. Of Workers Required:</label>" +
-                  cur_frm.doc.no_of_workers,
+                  frm.doc.no_of_workers,
               },
               { fieldname: "inputdata2", fieldtype: "Section Break" },
               {
@@ -3230,12 +3230,12 @@ function workers_claimed_change() {
                     "tag_workflow.tag_workflow.doctype.job_order.job_order.update_new_claims",
                   args: {
                     my_data: dict.dict,
-                    doc_name: cur_frm.doc.name,
+                    doc_name: frm.doc.name,
                   },
                   callback: function (r2) {
                     if (r2.message == 1) {
-                      cur_frm.set_value("no_of_workers", new_no);
-                      cur_frm.save();
+                      frm.set_value("no_of_workers", new_no);
+                      frm.save();
                       setTimeout(function () {
                         window.location.href =
                           "/app/job-order/" + listview.data[0].job_order;
@@ -3243,7 +3243,7 @@ function workers_claimed_change() {
                     } else if (r2.message == 0) {
                       setTimeout(function () {
                         window.location.href =
-                          "/app/job-order/" + cur_frm.doc.name;
+                          "/app/job-order/" + frm.doc.name;
                       }, 1000);
                     }
                   },
