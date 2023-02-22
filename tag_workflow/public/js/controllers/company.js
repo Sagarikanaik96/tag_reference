@@ -11,6 +11,12 @@ frappe.ui.form.on("Company", {
 		update_auth_url(frm);
 	},
 	refresh: function (frm) {
+		$(".carousel").carousel({
+			interval: false,
+		});
+		document.getElementById("pre-slide").addEventListener("click", activate_tab);
+		document.getElementById("next-slide").addEventListener("click", activate_tab);
+
 		$("#company-tab_break_63 > div.row.form-section.card-section.visible-section > div > div > form > div > div > div.form-grid-container > div > div.grid-heading-row > div:nth-child(2) > div").css("display", "none");
 		$("#company-tab_break_155 > div.row.form-section.card-section.visible-section > div > div > form > div > div > div.form-grid-container > div > div.grid-heading-row > div:nth-child(2) > div").css("display", "none");
 		$('[data-fieldname="industry_type"]').on("click", ()=>{
@@ -1957,4 +1963,17 @@ function remove_btn_primary(type_name){
 function add_btn_primary(type_name){
 	$(`#add-btn-${type_name}`).text('Connect')
 	$(`#add-btn-${type_name}`).addClass('btn-primary')
+}
+
+function activate_tab() {
+  let val = localStorage.getItem("slide_tab");
+  if (val == "0") {
+    $(".nav-link").removeClass("active");
+    $("#company-company_rating-tab").click();
+    localStorage.setItem("slide_tab", "1");
+  } else {
+    $(".nav-link").removeClass("active");
+    $("#company-info-tab").click();
+    localStorage.setItem("slide_tab", "0");
+  }
 }

@@ -12,6 +12,9 @@
 }
 
 @media (max-width: 768px) {
+  .company-carousel ul li {
+    padding: 0 5px 0 20px;
+  }
   [data-route="List/Payroll Period/List"]
     .modal-dialog
     .form-column

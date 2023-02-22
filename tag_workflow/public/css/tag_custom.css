@@ -1668,6 +1668,23 @@ select.input-with-feedback.form-control.ellipsis {
 #user-__details [data-fieldtype="Check"] {
   margin-bottom: 5px;
 }
+.company-carousel button {
+  border: none;
+  background: transparent;
+  width: auto;
+}
+.company-carousel ul li {
+  padding: 0 5px;
+}
+.company-carousel ul li:nth-child(1) {
+  padding-left: 25px;
+}
+.company-carousel .carousel-control-prev i,
+.company-carousel .carousel-control-next i {
+  color: #000000f5;
+  font-size: 20px;
+  padding: 0 10px;
+}
 
 /*------ Media query start ----*/
 @media (max-width: 1300px) {
