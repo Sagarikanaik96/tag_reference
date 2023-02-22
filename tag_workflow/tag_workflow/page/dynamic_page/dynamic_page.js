@@ -1,7 +1,7 @@
 let company = localStorage.getItem("company");
 let company_type = "";
-window.rating=[]
-frappe.pages["dynamic_page"].on_page_load = function (wrapper) {
+window.rating = [];
+frappe.pages["dynamic_page"].on_page_load = function(wrapper) {
   let page = frappe.ui.make_app_page({
     parent: wrapper,
     title: "Company",
@@ -41,23 +41,23 @@ function hide(r, page) {
 }
 
 frappe.FaceRecognition = Class.extend({
-  init: function (wrapper, page) {
+  init: function(wrapper, page) {
     let me = this;
     this.parent = wrapper;
     this.page = this.parent.page;
-    setTimeout(function () {
+    setTimeout(function() {
       me.setup(wrapper, page);
     }, 100);
   },
 
-  setup: function (wrapper, page) {
+  setup: function(wrapper, page) {
     let me = this;
     this.body = $("<div></div>").appendTo(this.page.main);
     $(frappe.render_template("dynamic_page", "")).appendTo(this.body);
     me.show_profile(wrapper, page);
   },
 
-  show_profile: function (_wrapper, page) {
+  show_profile: function(_wrapper, page) {
     frappe.call({
       method:
         "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_link1",
@@ -65,8 +65,8 @@ frappe.FaceRecognition = Class.extend({
         name: company || "",
         userid: frappe.user_info().email,
       },
-      callback: function (r) {
-        setTimeout(function () {
+      callback: function(r) {
+        setTimeout(function() {
           hide(r, page);
         }, 10);
         let my_val = r.message[0];
@@ -76,6 +76,15 @@ frappe.FaceRecognition = Class.extend({
           my_val.phone_no,
           r.message[0].organization_type
         );
+        let company_rating_list = [];
+        let sum = 0;
+        for (let i of r.message[1]) {
+          company_rating_list.push(i[0]);
+          sum += i[0];
+        }
+        let company_average_rating = company_rating_list.length
+          ? (sum / company_rating_list.length).toFixed(2)
+          : '0.00';
         let text = r.message[2];
         for (let i in text) {
           txt += text[i].full_name + "<br>";
@@ -93,7 +102,7 @@ frappe.FaceRecognition = Class.extend({
         for (let p in industry_list) {
           industry += industry_list[p] + "<br>";
         }
-        window.rating=r.message[1]
+        window.rating = r.message[1];
         let count = r.message[1].length;
         let rev = get_reviews(r);
 
@@ -133,9 +142,8 @@ frappe.FaceRecognition = Class.extend({
 								<p class="my-3 rating">${company_phone_no}</p>
 								${
                   count_val >= 10
-                    ? ` <p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${
-                        my_val.average_rating || 0
-                      } </span> <span> <a href="#" onclick="return theReviewsFunction();"> <u> ${count} </u> </a> </span> </p>`
+                    ? ` <p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${company_average_rating ||
+                        0} </span> <span> <a href="#" onclick="return theReviewsFunction();"> <u> ${count} </u> </a> </span> </p>`
                     : "<div></div>"
                 }</div>
 							</div>
@@ -247,22 +255,22 @@ function setHover() {
   $(".dropdown-menu")
     .find(".menuitem")
     .hover(
-      function (e) {
+      function(e) {
         $(this).css("background", "#e8f8fc");
         $(this).css("border-radius", "5px");
         $(this).css("cursor", "pointer");
       },
-      function (e) {
+      function(e) {
         $(this).css("background", "white");
         $(this).css("border-radius", "5px");
         $(this).css("cursor", "default");
       }
     );
   $(".demo").hover(
-    function () {
+    function() {
       $(this).css("border", " 1px solid #21B9E4");
     },
-    function () {
+    function() {
       $(this).css("border", "1px solid transparent");
     }
   );
@@ -367,7 +375,7 @@ function work_order_history() {
       comp_type: frappe.boot.tag.tag_user_info.company_type,
       user_id: frappe.user_info().email,
     },
-    callback: function (r) {
+    callback: function(r) {
       let body;
       let title1;
       if (r.message[1] === "exceed") {
@@ -399,7 +407,7 @@ function work_order_history_for_multi_companies(name2) {
       comp: name3,
       comp_type: frappe.boot.tag.tag_user_info.company_type,
     },
-    callback: function (r) {
+    callback: function(r) {
       my_pop_up(r.message);
     },
   });
@@ -463,8 +471,9 @@ function html_data(html, message) {
     if (message[2][d].total_billing_amount == null) {
       message[2][d].total_billing_amount = (0).toFixed(2);
     } else {
-      message[2][d].total_billing_amount =
-        message[2][d].total_billing_amount.toFixed(2);
+      message[2][d].total_billing_amount = message[2][
+        d
+      ].total_billing_amount.toFixed(2);
     }
     html += `<tr><td>${message[0][d].name}</td><td>${
       message[0][d].from_date
@@ -543,10 +552,10 @@ function block_company() {
       company_blocked: company,
       blocked_by: frappe.boot.tag.tag_user_info.company,
     },
-    callback: function (r) {
+    callback: function(r) {
       if (r.message == 1) {
         frappe.msgprint("The " + company + " is blocked successfully.");
-        setTimeout(function () {
+        setTimeout(function() {
           window.location.reload();
         }, 5000);
       }
@@ -555,7 +564,7 @@ function block_company() {
 }
 
 function theReviewsFunction() {
-  let rate = '';
+  let rate = "";
   for (let k in window.rating) {
     let stars = get_stars(window.rating[k][0]);
     if (window.rating[k][1]) {
@@ -568,17 +577,18 @@ function theReviewsFunction() {
         "<br>" +
         "<br>";
     } else {
-      rate +=
-        stars +
-        "<br>" +
-        window.rating[k][2] +
-        "<br>" +
-        "<br>";
+      rate += stars + "<br>" + window.rating[k][2] + "<br>" + "<br>";
     }
   }
   let pop_up = new frappe.ui.Dialog({
     title: __("Ratings & Reviews"),
-    fields: [{ fieldname: "rate", fieldtype: "HTML", options: `<div style = "overflow: auto;max-height:500px">${rate}</div>`}],
+    fields: [
+      {
+        fieldname: "rate",
+        fieldtype: "HTML",
+        options: `<div style = "overflow: auto;max-height:500px">${rate}</div>`,
+      },
+    ],
   });
   pop_up.show();
 }
@@ -592,10 +602,10 @@ function unblock_company() {
       company_blocked: company,
       blocked_by: frappe.boot.tag.tag_user_info.company,
     },
-    callback: function (r) {
+    callback: function(r) {
       if (r.message == 1) {
         frappe.msgprint("The " + company + " is unblocked successfully.");
-        setTimeout(function () {
+        setTimeout(function() {
           window.location.reload();
         }, 5000);
       }
@@ -617,7 +627,7 @@ function get_blocked_list(page) {
         company_blocked: company,
         blocked_by: frappe.boot.tag.tag_user_info.company,
       },
-      callback: function (r) {
+      callback: function(r) {
         if (frappe.boot.tag.tag_user_info.user_type == "Hiring Admin") {
           if (r.message == 1) {
             page
@@ -650,10 +660,11 @@ function create_accreditations(company_name, company_type) {
     method:
       "tag_workflow.tag_workflow.page.dynamic_page.dynamic_page.get_accreditations",
     args: { company: company_name },
-    callback: function (r) {
+    callback: function(r) {
       if (!r.message.length == 0 && company_type == "Staffing") {
-        document.getElementById("accreditations_container").innerHTML =
-          intitator_html;
+        document.getElementById(
+          "accreditations_container"
+        ).innerHTML = intitator_html;
         for (let val of r.message) {
           let btn = `<button type="button" class="Accreditations-btn btn" title="${val.attached_certificate}" onclick=create_popup(this.title)>${val.certificate_type}</button> `;
           document.getElementById("accreditations_btn_section").innerHTML =
@@ -675,17 +686,23 @@ function create_popup(link) {
   certificate_pop.show();
 }
 
-function get_stars(rating){
-  let stars = '';
+function get_stars(rating) {
+  let stars = "";
   let total_rating = rating;
-  let full_stars= total_rating % 1;
-  if (full_stars==0){
-    stars+='<i class="fa fa-star" style="color: #f3da35"></i>'.repeat(total_rating)
-  }else{
-    let half_stars=full_stars;
-    full_stars = total_rating-half_stars;
-    stars+='<i class="fa fa-star" style="color: #f3da35"></i>'.repeat(full_stars)
-    stars+='<i class="fa fa-star-half-full" style="color: #f3da35"></i>'.repeat(half_stars*2)
+  let full_stars = total_rating % 1;
+  if (full_stars == 0) {
+    stars += '<i class="fa fa-star" style="color: #f3da35"></i>'.repeat(
+      total_rating
+    );
+  } else {
+    let half_stars = full_stars;
+    full_stars = total_rating - half_stars;
+    stars += '<i class="fa fa-star" style="color: #f3da35"></i>'.repeat(
+      full_stars
+    );
+    stars += '<i class="fa fa-star-half-full" style="color: #f3da35"></i>'.repeat(
+      half_stars * 2
+    );
   }
   return stars;
 }
