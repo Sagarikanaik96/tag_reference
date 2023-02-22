@@ -391,7 +391,7 @@ function render_tab(frm) {
   }
 
   if (
-    (frm.doc.resume_required == 1 && emps < frm.doc.no_of_employee_required) ||
+    (frm.doc.resume_required == 1 && frm.doc.tag_status != "Approved") ||
     (frm.doc.resume_required == 0 &&
       items.length < frm.doc.claims_approved)
   ) {

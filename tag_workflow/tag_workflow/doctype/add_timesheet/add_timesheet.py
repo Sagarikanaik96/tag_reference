@@ -99,8 +99,8 @@ def update_timesheet(user, company_type, items, cur_selected, job_order, date, f
             for i in range(length_selected,-1,-1):
                 child_from, child_to, break_from, break_to = get_child_time(date, from_time, to_time, selected_items[i]['from_time'], selected_items[i]['to_time'])
                 is_ok = check_old_timesheet(child_from, child_to, selected_items[i]['employee'],selected_items[i]['timesheet_value'])
-                if(is_ok == 0):   
-                    added=1              
+                if(is_ok == 0 or selected_items[i]['status']=='No Show'):   
+                    added=1
                 else:
                     select_items.pop(i)
                     frappe.msgprint(_("Timesheet is already available for employee <b>{0}</b>(<b>{1}</b>) on the given datetime.").format(selected_items[i]["employee_name"],selected_items[i]['employee']))            

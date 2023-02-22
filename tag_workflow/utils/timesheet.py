@@ -233,7 +233,7 @@ def get_timesheet_employee(doctype, txt, searchfield, start, page_len, filters):
     emps = frappe.db.sql(sql) + frappe.db.sql(res_sql)
     return emps
 @frappe.whitelist()
-def notify_email_after_submit(job_order,employee, value, subject, company, employee_name, date,timesheet_name):
+def notify_email_after_submit(job_order,employee, value, subject, company, employee_name, date,timesheet_name, event=None):
     try:
         sql = """ select user_id from `tabEmployee` where company = (select company from `tabEmployee` where name = '{0}') and user_id IS NOT NULL  """.format(employee)
         user_list = frappe.db.sql(sql, as_dict=1)
@@ -246,7 +246,8 @@ def notify_email_after_submit(job_order,employee, value, subject, company, emplo
             users.append(user['user_id'])
 
         if users:
-            make_system_notification(users, message,JOB, job_order, subject)
+            if event:
+                make_system_notification(users, message,JOB, job_order, subject)
             sendmail(users, message, subject, "Timesheet", timesheet_name)
     except Exception as e:
         frappe.log_error(e, "Timesheet Email Error")
@@ -702,7 +703,7 @@ def submit_staff_timesheet(jo, timesheet_date, employee,timesheet,date,company,d
     frappe.db.commit()
     emp_doc=frappe.get_doc('Employee',employee)
     if int(dnr)==1:
-        notify_email_after_submit(job_order=jo,employee=emp_doc.employee, value=1, subject="DNR", company=company, employee_name=emp_doc.employee_name, date=date,timesheet_name=timesheet_name)
+        notify_email_after_submit(job_order=jo,employee=emp_doc.employee, value=1, subject="DNR", company=company, employee_name=emp_doc.employee_name, date=date,timesheet_name=timesheet_name, event='timesheet')
     
     enqueue("tag_workflow.tag_workflow.doctype.add_timesheet.add_timesheet.update_previous_timesheet", now=True,jo=jo, timesheet_date=timesheet_date, employee=employee,timesheet=timesheet,to_time=to_time,save=0)
     return "success"
