@@ -18,6 +18,8 @@ from frappe.core.doctype.version.version import get_diff
 from frappe.utils import validate_email_address,validate_phone_number
 import string,re
 import requests, time
+state_list = {'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California', 'CZ': 'Canal Zone', 'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'DC': 'District of Columbia', 'FL': 'Florida', 'GA': 'Georgia', 'GU': 'Guam', 'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa', 'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland', 'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri', 'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey', 'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio', 'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'PR': 'Puerto Rico', 'RI': 'Rhode Island', 'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont', 'VI': 'Virgin Islands', 'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'}
+
 
 tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL=f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
@@ -361,6 +363,8 @@ class Importer:
             if (frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) == True and frappe.db.exists("Company", docs.company) and "first_name" in keys and "last_name" in keys and "email" in keys and "status" in keys):
                 self.name = "HR-EMP-"+str(self.emp_series)
                 lat, lng = self.update_emp_lat_lng(docs)
+                if len(docs.state) == 2:
+                    docs.state = state_list.get(docs.state.upper())
                 self.sql += str(tuple([self.name, (docs.first_name + " " + docs.last_name), docs.first_name, docs.last_name, docs.email, docs.company, docs.status, str(docs.date_of_birth), docs.contact_number, docs.employee_gender, docs.sssn, docs.military_veteran, (docs.street_address or ''), (docs.suite_or_apartment_no or ''), (docs.city or ''), (docs.state or ''), (docs.zip or ''), lat, lng, 'HR-EMP-', self.emp_series+1, self.emp_series+2, frappe.utils.now()])) + ","
                 self.emp_series += 1
                 time.sleep(0.1)
@@ -1323,7 +1327,7 @@ def read_file(file, doctype, comps, event):
                     return msg
                 elif msg == "Continue":
                     continue
-                row_message = get_row_error(row,doctype, comps, event)
+                row_message = get_row_error(row,doctype, comps, event,data,row_no)
                 if len(row_message)>0:
                     error_in_fields["Row "+str(row_no)]=row_message
         return error_in_fields
@@ -1339,12 +1343,12 @@ def check_return(row_no, row, event,doctype):
     elif row_no == 1 and event=='update' and row[1] == "John" and row[2]=="Doe" and row[3]==JDO_Email and row[4]=="Temporary Assistance Guru LLC":
         return "Continue"
     
-def get_row_error(row,doctype, comps, event):
+def get_row_error(row,doctype, comps, event,data,row_no):
     if event == 'insert':
-        row_message = check_fields(row, doctype, comps)
+        row_message = check_fields(row, doctype, comps, data,row_no)
         return row_message
     else:
-        row_message = check_fields(row[1:], doctype, comps)
+        row_message = check_fields(row[1:], doctype, comps,data,row_no)
         return row_message
 def get_content(file):
     if frappe.db.exists("File", {"file_url": file}):
@@ -1370,11 +1374,12 @@ def check_columns(row, doctype):
         return False
     return True
 
-def check_fields(row, doctype, comps):
+def check_fields(row, doctype, comps,data,row_index):
     #{Row 1: ["Missing required..", "Email"]}
     message=[]
     if doctype == "Employee":
         check_mandatory_fields(row,message,doctype)
+        check_duplicate_row(data,message,row,row_index)
         check_email(row[2],message)
         check_company(comps, row[3],message)
         check_status(row[4],message)
@@ -1391,9 +1396,18 @@ def check_fields(row, doctype, comps):
         check_email(row[3],message)
         check_company(comps, row[4],message)
         check_zip(row[7], message)
-        check_state(row[8],message)
     return message
-
+def check_duplicate_row(data,message,row,row_index):
+    duplicate_row= []
+    for row_no, row_val in enumerate(data):
+        if(row_no ==0 or row_no == row_index):
+            continue
+        if(row[0]==row_val[0] and row[1] == row_val[1] and row[2]==row_val[2] and row[5]==row_val[5] and  row[8]==row_val[8]):
+            duplicate_row.append(str(row_no))
+    if duplicate_row:
+        error_rows = ', '.join(duplicate_row)
+        msg = "Duplicate row detected ",error_rows
+        message.append(msg)
 def check_company(user_comp_list, company_in_row, message):
     if company_in_row and company_in_row not in user_comp_list: message.append("Invalid Entry for Company")
 
@@ -1419,7 +1433,7 @@ def check_email(email, message):
     if email and not validate_email_address(email): message.append("Formate for Email is incorrect")
 
 def check_ssn(ssn, message):
-    if ssn and (len(ssn)!=9 or not ssn.isdigit()): message.append("Invalid <b>SSN</b>")
+    if ssn and (len(str(int(ssn)))!=9 or not str(int(ssn)).isdigit()): message.append("Invalid <b>SSN</b>")
 
 def check_m_v(militrary_veteran, message):
     if militrary_veteran and militrary_veteran not in ["0", "1"]: message.append("Invalid Entry for Military Veteran valid values are 0 or 1")
@@ -1440,7 +1454,7 @@ def check_state(state, message):
     
 def check_zip(zip, message):
     pattern = r'^\d{5}(-\d{4})?$'
-    if zip and not re.match(pattern, str(zip)):message.append('Invalid <b>Zip</b>')
+    if zip and not re.match(pattern, str(int(zip))):message.append('Invalid <b>Zip</b>')
 
 def check_mandatory_fields(row, message,doctype):
     fields_missing=[]
