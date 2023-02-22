@@ -322,6 +322,7 @@ def rating_no_show(rating_no_show,invoice_name):
         frappe.log_error(e, "Staffing Company Rating")
         frappe.throw(e)
 
+@frappe.whitelist()
 def staffing_company_rating(hiring_company,staffing_company,ratings,job_order):
     ratings = ast.literal_eval(ratings)
     doc = frappe.new_doc('Company Review')
@@ -329,6 +330,7 @@ def staffing_company_rating(hiring_company,staffing_company,ratings,job_order):
     doc.hiring_company=hiring_company
     doc.job_order=job_order
     doc.rating=ratings['Rating']
+    doc.staffing_ratings=ratings['Rating']*5
     if 'Comment' in ratings.keys():
         doc.comments=ratings['Comment']
     doc.save(ignore_permissions=True)

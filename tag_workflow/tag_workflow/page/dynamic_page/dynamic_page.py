@@ -12,13 +12,13 @@ def get_link1(name, userid):
       data = frappe.db.sql(sql, as_dict=True)
       for i in data:
          if i['staffing_company']== name:
-            review.append((i['rating'],i['comments'],i['hiring_company']))
+            review.append((i['staffing_ratings'],i['comments'],i['hiring_company']))
    elif company.organization_type == 'Hiring' or company.organization_type == 'Exclusive Hiring':
       sql= """select * from `tabHiring Company Review` order by creation desc"""
       data= frappe.db.sql(sql, as_dict=True)
       for i in data:
          if i['hiring_company']== name:
-            review.append((i['rating'],i['comments'],i['staffing_company']))
+            review.append((i['rating_hiring'],i['comments'],i['staffing_company']))
 
    users=[]
    sql1= f'select full_name, enabled from `tabUser` where company="{name}" and enabled=1'

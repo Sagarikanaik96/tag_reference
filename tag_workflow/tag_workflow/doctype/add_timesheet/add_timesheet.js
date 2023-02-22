@@ -731,7 +731,7 @@ function check_break_time(frm){
 			setTimeout(()=>{
 				frm.set_value('break_to_time','');
 			},1)
-			error_pop_up(frm, "Break End Time should be before Break Start Time.");
+			error_pop_up(frm, "Break End Time should be after Break Start Time.");
 			frappe.validated=false;
 		}
 	}

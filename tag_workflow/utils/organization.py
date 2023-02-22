@@ -1184,7 +1184,7 @@ def update_staffing_reviews():
         frappe.log_error(e,'update_staffing_ratings Error')
     
 def update_staff_rating():
-    sql = """update `tabCompany` set average_rating = average_rating * 5 where average_rating<1"""
+    sql = """update `tabCompany` set average_rating = average_rating * 5 where average_rating<=1"""
     print("*------Updating Staffing Average Rating---------*\n")
     frappe.db.sql(sql)
     frappe.db.commit()

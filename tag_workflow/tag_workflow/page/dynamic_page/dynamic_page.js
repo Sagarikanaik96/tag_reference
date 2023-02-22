@@ -1,5 +1,6 @@
 let company = localStorage.getItem("company");
 let company_type = "";
+window.rating=[]
 frappe.pages["dynamic_page"].on_page_load = function (wrapper) {
   let page = frappe.ui.make_app_page({
     parent: wrapper,
@@ -92,29 +93,8 @@ frappe.FaceRecognition = Class.extend({
         for (let p in industry_list) {
           industry += industry_list[p] + "<br>";
         }
-        let count = 0;
-        let rate = "";
-        for (let k in r.message[1]) {
-          count += 1;
-          if (r.message[1][k][1]) {
-            rate +=
-              "★".repeat(r.message[1][k][0]) +
-              "<br>" +
-              r.message[1][k][1] +
-              "<br>" +
-              r.message[1][k][2] +
-              "<br>" +
-              "<br>";
-          } else {
-            rate +=
-              "★".repeat(r.message[1][k][0]) +
-              "<br>" +
-              r.message[1][k][2] +
-              "<br>" +
-              "<br>";
-          }
-        }
-
+        window.rating=r.message[1]
+        let count = r.message[1].length;
         let rev = get_reviews(r);
 
         let arr1 = add_ress(my_val);
@@ -155,7 +135,7 @@ frappe.FaceRecognition = Class.extend({
                   count_val >= 10
                     ? ` <p class="my-3 rating"> <span class="text-warning"> ★ </span> <span> ${
                         my_val.average_rating || 0
-                      } </span> <span> <a href="#" href="#" onclick="return theReviewsFunction('${rate}');"> <u> ${count} </u> </a> </span> </p>`
+                      } </span> <span> <a href="#" onclick="return theReviewsFunction();"> <u> ${count} </u> </a> </span> </p>`
                     : "<div></div>"
                 }</div>
 							</div>
@@ -342,10 +322,11 @@ function viewFile(file1) {
 function get_reviews(r) {
   let rev = "";
   for (let k in r.message[1].slice(0, 10)) {
+    let stars = get_stars(r.message[1][k][0]);
     if (r.message[1][k][1]) {
       rev +=
         "<div class= 'my-3'>" +
-        "★".repeat(r.message[1][k][0]) +
+        stars +
         "<br>" +
         r.message[1][k][1] +
         "<br>" +
@@ -355,7 +336,7 @@ function get_reviews(r) {
     } else {
       rev +=
         "<div class= 'my-3'>" +
-        "★".repeat(r.message[1][k][0]) +
+        stars +
         "<br>" +
         r.message[1][k][2] +
         "<br>" +
@@ -573,11 +554,31 @@ function block_company() {
   });
 }
 
-function theReviewsFunction(rate) {
-  rate = `<div style = "overflow: auto;max-height:500px">${rate}</div>`;
+function theReviewsFunction() {
+  let rate = '';
+  for (let k in window.rating) {
+    let stars = get_stars(window.rating[k][0]);
+    if (window.rating[k][1]) {
+      rate +=
+        stars +
+        "<br>" +
+        window.rating[k][1] +
+        "<br>" +
+        window.rating[k][2] +
+        "<br>" +
+        "<br>";
+    } else {
+      rate +=
+        stars +
+        "<br>" +
+        window.rating[k][2] +
+        "<br>" +
+        "<br>";
+    }
+  }
   let pop_up = new frappe.ui.Dialog({
     title: __("Ratings & Reviews"),
-    fields: [{ fieldname: "rate", fieldtype: "HTML", options: rate }],
+    fields: [{ fieldname: "rate", fieldtype: "HTML", options: `<div style = "overflow: auto;max-height:500px">${rate}</div>`}],
   });
   pop_up.show();
 }
@@ -672,4 +673,19 @@ function create_popup(link) {
     fields: [{ fieldname: "html_37", fieldtype: "HTML", options: certificate }],
   });
   certificate_pop.show();
+}
+
+function get_stars(rating){
+  let stars = '';
+  let total_rating = rating;
+  let full_stars= total_rating % 1;
+  if (full_stars==0){
+    stars+='<i class="fa fa-star" style="color: #f3da35"></i>'.repeat(total_rating)
+  }else{
+    let half_stars=full_stars;
+    full_stars = total_rating-half_stars;
+    stars+='<i class="fa fa-star" style="color: #f3da35"></i>'.repeat(full_stars)
+    stars+='<i class="fa fa-star-half-full" style="color: #f3da35"></i>'.repeat(half_stars*2)
+  }
+  return stars;
 }
