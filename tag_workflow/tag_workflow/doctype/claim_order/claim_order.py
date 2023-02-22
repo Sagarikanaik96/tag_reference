@@ -1,18 +1,15 @@
 # Copyright (c) 2022, SourceFuse and contributors
 # For license information, please see license.txt
 
-
+import json
 import frappe
 from uuid import uuid4
 from frappe.model.document import Document
-from tag_workflow.utils.doctype_method import checkingjobtitle_name
-from tag_workflow.tag_data import chat_room_created,new_job_title_company
 from frappe.share import add_docshare as add
-from tag_workflow.utils.notification import sendmail, make_system_notification
+from tag_workflow.tag_data import chat_room_created
 from tag_workflow.tag_data import joborder_email_template
-import json
+from tag_workflow.utils.notification import sendmail, make_system_notification
 
-from tag_workflow.utils.organization import get_item_series_name
 
 site= frappe.utils.get_url().split('/')
 sitename=site[0]+'//'+site[2]
@@ -593,6 +590,21 @@ def add_job_title_company(parent,job_title, description, rate, industry):
 							""".format(uuid4().hex[:10],parent,job_title,description,rate,industry)
 		frappe.db.sql(create_new_job_title)
 		frappe.db.commit()
+
+
+def get_item_series_name(title):
+    split_value = title.split("-")
+    if len(split_value) == 1:
+        name = title + "-1"
+    else:
+        number = split_value[-1]
+        if number.isnumeric():
+            last_occurence = title.rfind("-")
+            name = title[0:last_occurence] + "-" + str(int(number)+1)
+        else:
+            name = title
+    return name
+
 
 @frappe.whitelist()
 def get_or_create_jobtitle(job_order,staffing_company,hiring_company,employee_pay_rate):

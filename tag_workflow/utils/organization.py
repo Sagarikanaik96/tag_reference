@@ -11,9 +11,7 @@ from pathlib import Path
 from tag_workflow.utils.trigger_session import share_company_with_user
 from tag_workflow.controllers.master_controller import make_update_comp_perm, user_exclusive_perm
 import googlemaps
-from tag_workflow.tag_data import new_job_title_company
-from tag_workflow.utils.doctype_method import checkingjobtitle_name
-from tag_workflow.tag_workflow.doctype.claim_order.claim_order import add_job_title_company, job_title_value
+from tag_workflow.tag_workflow.doctype.claim_order.claim_order import add_job_title_company, job_title_value, get_item_series_name
 from tag_workflow.utils.whitelisted import get_user_company_data
 from tag_workflow.utils.notification import make_system_notification
 from frappe.share import add_docshare as add
@@ -861,18 +859,7 @@ def update_comp_series():
         print(e, frappe.get_traceback())
         frappe.log_error(e, 'update_company_series')
 
-def get_item_series_name(title):
-    split_value = title.split("-")
-    if len(split_value) == 1:
-        name = title + "-1"
-    else:
-        number = split_value[-1]
-        if number.isnumeric():
-            last_occurence = title.rfind("-")
-            name = title[0:last_occurence] + "-" + str(int(number)+1)
-        else:
-            name = title
-    return name
+
 
 
 def get_item_data(co, job_title):
