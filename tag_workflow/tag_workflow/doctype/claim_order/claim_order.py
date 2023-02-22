@@ -12,6 +12,8 @@ from tag_workflow.utils.notification import sendmail, make_system_notification
 from tag_workflow.tag_data import joborder_email_template
 import json
 
+from tag_workflow.utils.organization import get_item_series_name
+
 site= frappe.utils.get_url().split('/')
 sitename=site[0]+'//'+site[2]
 
@@ -569,16 +571,32 @@ def check_and_create_pay_rates(name,staffing_company,hiring_company,job_site,rat
 	frappe.db.sql(insert_or_update_rates)
 	frappe.db.commit()
 
+def add_job_title_company(parent,job_title, description, rate, industry):
+	check_job_title = frappe.db.sql(""" select * from  `tabJob Titles` tjt  WHERE job_titles like "{0}%" and parent="{1}" and wages="{2}" and description="{3}" and industry_type="{4}" """.format(job_title,parent,rate,description,industry))
+	if not check_job_title:
+		create_new_job_title = """ INSERT INTO `tabJob Titles` 
+							(name,parent,parentfield,parenttype,
+							job_titles,description,wages,industry_type)
+							VALUES("{0}","{1}","job_titles","Company","{2}","{3}","{4}","{5}")
+							""".format(uuid4().hex[:10],parent,job_title,description,rate,industry)
+		frappe.db.sql(create_new_job_title)
+		frappe.db.commit()
+
 @frappe.whitelist()
 def get_or_create_jobtitle(job_order,staffing_company,hiring_company,employee_pay_rate):
 	get_job_order_data = frappe.db.sql("select select_job,job_site,rate,category,company from `tabJob Order` where name='{0}'".format(job_order),as_dict=1)
-	check_item_data = frappe.db.sql("select name from `tabItem` where name like '{0}%' and company='{1}'".format(get_job_order_data[0]['select_job'].split("-")[0],staffing_company),as_dict=1)
+	job_title_name = get_job_order_data[0]['select_job']
+	check_item_data = frappe.db.sql("select name from `tabItem` where name like '{0}%' and company='{1}'".format(job_title_name.split("-")[0],staffing_company),as_dict=1)
 	job_title = frappe.db.sql(""" select wages, industry_type, description from `tabJob Titles` where job_titles like '{0}%' and parent = '{1}'""".format(get_job_order_data[0]["select_job"],hiring_company), as_dict=1)
 	if job_title:
 		if check_item_data:
 			check_and_create_pay_rates(check_item_data[0]['name'],staffing_company,hiring_company, get_job_order_data[0]['job_site'], employee_pay_rate ,job_order)
 		else:
-			name = checkingjobtitle_name(get_job_order_data[0]['select_job'])
+			check_item_data_series = frappe.db.sql(""" select name, company from `tabItem` where name like "{0}%" ORDER BY length(name) DESC, name DESC LIMIT 1""".format(job_title_value(job_title_name)),as_dict=1)
+			name = job_title_name
+			if check_item_data_series:
+				name = get_item_series_name(check_item_data_series[0]["name"])
+			
 			item_sql = """INSERT INTO `tabItem` 
                     (name,
                     docstatus,
@@ -717,6 +735,6 @@ def get_or_create_jobtitle(job_order,staffing_company,hiring_company,employee_pa
 									name
 								)
 			frappe.db.sql(item_sql)
-			new_job_title_company(job_name=name, company=staffing_company,industry=get_job_order_data[0]['category'],rate=employee_pay_rate, description=job_title[0]["description"])
+			add_job_title_company(parent=staffing_company,job_title=name, description=job_title[0]["description"],rate=employee_pay_rate,industry=get_job_order_data[0]['category'])
 			frappe.db.commit()
 			check_and_create_pay_rates(name,staffing_company,hiring_company, get_job_order_data[0]['job_site'],employee_pay_rate,job_order)

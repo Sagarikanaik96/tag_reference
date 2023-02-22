@@ -13,7 +13,7 @@ from tag_workflow.controllers.master_controller import make_update_comp_perm, us
 import googlemaps
 from tag_workflow.tag_data import new_job_title_company
 from tag_workflow.utils.doctype_method import checkingjobtitle_name
-from tag_workflow.tag_workflow.doctype.claim_order.claim_order import job_title_value
+from tag_workflow.tag_workflow.doctype.claim_order.claim_order import add_job_title_company, job_title_value
 from tag_workflow.utils.whitelisted import get_user_company_data
 from tag_workflow.utils.notification import make_system_notification
 from frappe.share import add_docshare as add
@@ -68,7 +68,7 @@ def setup_data():
         frappe.db.set_value(Global_defaults,Global_defaults,"hide_currency_symbol", "No")
         frappe.db.set_value(Global_defaults,Global_defaults,"disable_rounded_total", "1")
         frappe.db.set_value(Global_defaults,Global_defaults,"country", "United States")
-        popultae_job_title()
+        populate_job_title()
         update_organization_data()
         update_roles()
         update_tag_user_type()
@@ -452,7 +452,7 @@ def remove_field():
         print(e)
 def update_old_job_sites():
     try:
-        sites=f'select name,company from `tabJob Site` where name not in (select `tabJob Site`.name from `tabJob Site` inner join `tabIndustry Types Job Titles` on `tabIndustry Types Job Titles`.parent=`tabJob Site`.name) and company!="";'
+        sites='select name,company from `tabJob Site` where name not in (select `tabJob Site`.name from `tabJob Site` inner join `tabIndustry Types Job Titles` on `tabIndustry Types Job Titles`.parent=`tabJob Site`.name) and company!="";'
         data=frappe.db.sql(sites,as_dict=1)
         if(len(data)>0):
             print("*------updating old job sites---------*\n")
@@ -774,7 +774,7 @@ def import_json(doctype, submit=False):
     
 def update_old_job_titles():
     try:
-        titles=f'select name from `tabItem` where company!="";'
+        titles='select name from `tabItem` where company!="";'
         data=frappe.db.sql(titles,as_dict=1)
         if(len(data)>0):
             print("*------updating old job titles---------*\n")
@@ -861,12 +861,29 @@ def update_comp_series():
         print(e, frappe.get_traceback())
         frappe.log_error(e, 'update_company_series')
 
+def get_item_series_name(title):
+    split_value = title.split("-")
+    if len(split_value) == 1:
+        name = title + "-1"
+    else:
+        number = split_value[-1]
+        if number.isnumeric():
+            last_occurence = title.rfind("-")
+            name = title[0:last_occurence] + "-" + str(int(number)+1)
+        else:
+            name = title
+    return name
+
+
 def get_item_data(co, job_title):
-    check_item_data = frappe.db.sql("select name from `tabItem` where name like '{0}%' and company='{1}'".format(job_title_value(co["job_title"]),co["staffing_organization"]),as_dict=1)
+    check_item_data = frappe.db.sql(""" select name, company from `tabItem` where name like "{0}%" and company="{1}" """.format(job_title_value(co["job_title"]),co["staffing_organization"]),as_dict=1)
     if check_item_data:
         name = check_item_data[0]["name"]
     else:
-        name = checkingjobtitle_name(job_titless=co["job_title"])
+        check_item_data_series = frappe.db.sql(""" select name, company from `tabItem` where name like "{0}%" ORDER BY length(name) DESC, name DESC LIMIT 1""".format(job_title_value(co["job_title"])),as_dict=1)
+        name = co["job_title"]
+        if check_item_data_series:
+            name = get_item_series_name(check_item_data_series[0]["name"])
         industry = job_title[0]["industry_type"]
         rate = job_title[0]["wages"]
         item_sql = """INSERT INTO `tabItem` 
@@ -1007,12 +1024,13 @@ def get_item_data(co, job_title):
                                         name
                                 )
         frappe.db.sql(item_sql)
-        new_job_title_company(job_name=name, company=co["staffing_organization"],industry=industry,rate=rate, description=job_title[0]["description"])
         frappe.db.commit()
+        add_job_title_company(parent=co["staffing_organization"], job_title=name, description=job_title[0]["description"], rate=rate, industry=industry)
+        
     return name
 
 
-def popultae_job_title():
+def populate_job_title():
     from frappe.utils.background_jobs import get_redis_conn
     redis_con = get_redis_conn()
     if redis_con.get("populate_job_title"):
