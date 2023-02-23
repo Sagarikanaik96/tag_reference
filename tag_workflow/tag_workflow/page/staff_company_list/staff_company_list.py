@@ -247,7 +247,7 @@ def get_count(company):
             'count':data[0]['count'] if len(data) else 0,
             'blocked_count': data1[0]['blocked_count'] if len(data1) else 0,
             'title':title if title else '',
-            'rating': rating if int(rating)>0 else ''
+            'rating': rating if float(rating)>0 else ''
         }
         return  result
     except Exception as e:

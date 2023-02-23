@@ -11,11 +11,18 @@ frappe.ui.form.on("Company", {
 		update_auth_url(frm);
 	},
 	refresh: function (frm) {
-		$(".carousel").carousel({
-			interval: false,
-		});
-		document.getElementById("pre-slide").addEventListener("click", activate_tab);
-		document.getElementById("next-slide").addEventListener("click", activate_tab);
+		if(frm.doc.__islocal==1){
+			$("#pre-slide").css("display", "none");
+			$("#next-slide").css("display", "none");
+		}else{
+			$("#pre-slide").css("display", "block");
+			$("#next-slide").css("display", "block");
+			$(".carousel").carousel({
+				interval: false,
+			});
+			document.getElementById("pre-slide").addEventListener("click", activate_tab);
+			document.getElementById("next-slide").addEventListener("click", activate_tab);
+		}
 
 		$("#company-tab_break_63 > div.row.form-section.card-section.visible-section > div > div > form > div > div > div.form-grid-container > div > div.grid-heading-row > div:nth-child(2) > div").css("display", "none");
 		$("#company-tab_break_155 > div.row.form-section.card-section.visible-section > div > div > form > div > div > div.form-grid-container > div > div.grid-heading-row > div:nth-child(2) > div").css("display", "none");

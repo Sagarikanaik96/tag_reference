@@ -83,8 +83,8 @@ frappe.FaceRecognition = Class.extend({
           sum += i[0];
         }
         let company_average_rating = company_rating_list.length
-          ? (sum / company_rating_list.length).toFixed(2)
-          : '0.00';
+          ? (sum / company_rating_list.length).toFixed(1)
+          : '0.0';
         let text = r.message[2];
         for (let i in text) {
           txt += text[i].full_name + "<br>";
