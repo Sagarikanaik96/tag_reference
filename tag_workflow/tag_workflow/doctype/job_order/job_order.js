@@ -260,6 +260,7 @@ frappe.ui.form.on("Job Order", {
 
   before_save: function (frm) {
     if (frm.doc.__islocal === 1) {
+      no_of_worker_repeat(frm);
       if (frm.doc.availability == "Custom") {
         set_custom_days(frm);
       }
@@ -3400,4 +3401,24 @@ function remove_href(doc_name, e) {
   Array.from($('[data-doctype="' + doc_name + '"]')).forEach((_field) => {
     _field.href = "#";
   });
+}
+
+function no_of_worker_repeat(frm){
+  if (frm.doc.__islocal==1 && frm.doc.resume_required==0 && frm.doc.is_repeat && frm.doc.no_of_workers){
+    frm.call({
+      method: "repeat_no_of_workers",
+      args:{
+        "job_order": frm.doc.repeat_from,
+        "staff_comp": frm.doc.staff_company2,
+        "no_of_worker": frm.doc.no_of_workers
+      },
+      async: 0,
+      callback: (res)=>{
+        if(res.message=="failed"){
+          frappe.msgprint("Number of workers cannot be less than number of approved workers.");
+          frappe.validated = false;
+        }
+      }
+    })
+  }
 }
