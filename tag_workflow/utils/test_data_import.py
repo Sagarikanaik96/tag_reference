@@ -46,7 +46,7 @@ class TestTagData(unittest.TestCase):
             "reference_doctype": "Employee",	
             "import_type": "Insert New Records"	
         }	
-        old_imported_employee = frappe.db.sql(f"select COUNT(*) from `tabEmployee` where email='test_data_import_employee@yopmail.com'")	
+        old_imported_employee = frappe.db.sql("select COUNT(*) from `tabEmployee` where email='test_data_import_employee@yopmail.com'")	
         import_doc = frappe.new_doc("Data Import")	
         import_doc.reference_doctype = import_data['reference_doctype']	
         import_doc.import_type = import_data['import_type']	
@@ -57,7 +57,7 @@ class TestTagData(unittest.TestCase):
         self.assertEquals(resp,True)	
         data_import_data = frappe.db.sql(f"select COUNT(*) from `tabData Import` where name='{doc_name}'")	
         self.assertEquals(data_import_data[0][0],1)	
-        new_imported_employee = frappe.db.sql(f"select COUNT(*) from `tabEmployee` where email='test_data_import_employee@yopmail.com'")	
+        new_imported_employee = frappe.db.sql("select COUNT(*) from `tabEmployee` where email='test_data_import_employee@yopmail.com'")	
         self.assertEquals(new_imported_employee[0][0],old_imported_employee[0][0]+1)	
 
 

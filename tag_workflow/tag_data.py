@@ -1422,7 +1422,7 @@ def lead_follow_up():
                 else:
                     recipients = []
                     recipients.append(i[2])
-                sub = f'Follow Up Reminder'
+                sub = 'Follow Up Reminder'
                 msg = f'Reminder to follow up with {i[4]} at {i[5]} on {i[1]}. Contact information and lead notes can be found in TAG.'
                 env_url = frappe.get_site_config().env_url
                 link = f'href="{env_url}/app/lead/{i[0]}"'

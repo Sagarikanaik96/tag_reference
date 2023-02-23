@@ -76,7 +76,7 @@ class TestTagData(unittest.TestCase):
         self.create_company()
         doc = frappe.get_doc("Company","My Test Company")
         create_salary_structure(doc,None)
-        count = frappe.db.sql(f'''select COUNT(*) from `tabSalary Component` where name="Basic Temp Pay_My Test Company"''')
+        count = frappe.db.sql('''select COUNT(*) from `tabSalary Component` where name="Basic Temp Pay_My Test Company"''')
         self.assertEquals(count[0][0],1)
 
 
