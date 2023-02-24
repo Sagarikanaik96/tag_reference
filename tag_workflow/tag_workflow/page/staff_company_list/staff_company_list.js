@@ -24,7 +24,6 @@ frappe.FaceRecognition = Class.extend({
 		this.start = 0
 		this.end = 20
 		this.filters = {'radius':25}
-		// this.filters = {'radius':localStorage.getItem("city")||localStorage.getItem("company_name")||localStorage.getItem("industry")?"":25}
 		this.options = []
 		this.data = null;
 		this.accreditation = [];
@@ -105,7 +104,7 @@ frappe.FaceRecognition = Class.extend({
 	add_fields: function () {
 		const field = [
 			{
-				'parent': '#company', 'name': 'company', 'type': 'Autocomplete', 'class': 'input-xs', 'placeholder': 'Company Name','options':this.staff_comps,'filter':1, 'handler': () => {
+				'parent': '#company', 'name': 'company', 'type': 'Data', 'class': 'input-xs', 'placeholder': 'Company Name','options':this.staff_comps,'filter':1, 'handler': () => {
 					this.filters['company'] = document.getElementById('companys').value;
 					this.update_list()
 					this.refresh()
@@ -182,15 +181,16 @@ frappe.FaceRecognition = Class.extend({
 		        this.refresh()
 			}
 			else{
-
-				this.filters['industry']=localStorage.getItem("industry")
+				
 				if(localStorage.getItem("industry")){
-					document.getElementById('industrys').value=localStorage.getItem("industry")
-					let a = document.getElementById('industrys');
-					a.dispatchEvent(new Event("input")); 
-					document.querySelector('#awesomplete_list_2 > li').click();
-					a.dispatchEvent(new Event("submit"));
-				}
+					document.querySelector('.input-xs > div').click();
+				setTimeout(()=>{
+					let li = document.querySelector('#industry > div > div > div.control-input-wrapper > div.control-input > div > ul > div ')
+					select_industry_default_filter(li);
+					this.filters['industry'] = localStorage.getItem("industry")
+					document.querySelector('.input-xs > div').click();
+				},300)
+			}
 		        this.refresh()
 			}
 			
@@ -233,6 +233,14 @@ frappe.FaceRecognition = Class.extend({
 
 })
 
+
+function select_industry_default_filter(li) {
+	for(let child of li.children) {
+		if(child.children[0].children[0].innerHTML==localStorage.getItem("industry")) {
+			child.click();
+		}
+	}
+}
 
 async function sorted_favourite_companies(data, profile_html, company_type) {
 	let title = data.title

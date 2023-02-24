@@ -67,7 +67,7 @@ frappe.HireHome = Class.extend({
 											<label class="text-secondary placeholder_change"> Top search company </label>
 										</div>
 										<div class="col-md-6 text-right">
-											<a href="/app/staff_company_list" style="color: #21b9e4 !important;"> See All </a>
+											<a style="color: #21b9e4 !important;" onclick=redirect_see_all()> See All</a>
 										</div>
 									</div>
 									<div id="staffing_list"></div>
@@ -201,6 +201,13 @@ frappe.HireHome = Class.extend({
 	</div>
 	
 	<script>
+		 function redirect_see_all(){
+			let data = document.getElementById("staff").value;
+			if((document.getElementById('search_choice').selectedOptions[0].value=="city") || (document.getElementById('search_choice').selectedOptions[0].value=="company_name")){localStorage.setItem(document.getElementById('search_choice').selectedOptions[0].value, document.getElementById('staff').value);window.location.href = "/app/staff_company_list";}
+			else{
+				window.location.href = "/app/staff_company_list"
+			}		 
+		 }
 		function toogle_search_icon(){
 			$(".fa-remove").removeClass("fa-remove")
 			$(".fa").addClass("fa-search")
@@ -252,7 +259,7 @@ frappe.HireHome = Class.extend({
 							if (event.keyCode === 13) {
 								if (result.length > 0 && data.length>0)
 								{	
-									if(document.getElementById('search_choice').selectedOptions[0].value=="city"){localStorage.setItem("city", document.getElementById('staff').value);window.location.href = "/app/staff_company_list";}
+									if((document.getElementById('search_choice').selectedOptions[0].value=="city") || (document.getElementById('search_choice').selectedOptions[0].value=="company_name")){localStorage.setItem(document.getElementById('search_choice').selectedOptions[0].value, document.getElementById('staff').value);window.location.href = "/app/staff_company_list";}
 									 else{
 										localStorage.setItem(document.getElementById('search_choice').selectedOptions[0].value, result[0]);
 										window.location.href = "/app/staff_company_list"
