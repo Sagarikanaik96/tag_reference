@@ -2342,3 +2342,12 @@ span.comment-count {
 .active_pill_work {
   margin-left: 32.8%;
 }
+
+[data-route="List/Job Order/List"]
+  .filter-section
+  .sort-selector-button
+  .dropdown-menu {
+  transform: translate3d(-76px, 0px, 0px) !important;
+  z-index: 9999999 !important;
+  height: 290px !important;
+}
