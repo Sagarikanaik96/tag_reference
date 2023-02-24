@@ -23,7 +23,6 @@ frappe.ui.form.on("Item", {
 			
 			$('div.row:nth-child(16) > div:nth-child(2) > div:nth-child(2) > form:nth-child(1) > div:nth-child(8) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)').attr('id', 'id_mvr_hour');
 		}
-		frm.trigger("set_options");
 		readonly_fields(frm)
 		$('.form-footer').hide();
 		cur_frm.clear_custom_buttons();
@@ -66,6 +65,7 @@ frappe.ui.form.on("Item", {
 		frm.fields_dict['pay_rate'].grid.wrapper.find('.grid-remove-rows').click(function() {
 			check_and_delete_pay_rates(frm)
 		})
+		check_user_type(cur_frm)
 	},
 	before_save: function(frm,cdt,cdn){
 		frm.set_value("job_titless_name", frm.doc.job_titless);
@@ -121,10 +121,14 @@ frappe.ui.form.on("Item", {
 			frappe.db.get_value("Item", {"name": frm.doc.name}, "company", (r) => {
 				if (r!=frm.doc.company){
 					frm.doc.job_site_table=[]
-			frm.refresh_field("job_site_table")
+					frm.refresh_field("job_site_table")
 				}
 			});
-			
+			check_user_type(frm)
+		}
+		if (frm.doc.__islocal && !cur_frm.doc.company){
+			$(".form-section:contains('Pay Rate')").hide();
+			$(".form-section:contains('Job Sites')").hide();
 		}
 		if(!frm.doc.company){
 			frm.set_value('company', '');
@@ -187,7 +191,7 @@ frappe.ui.form.on("Item", {
 					filters:[['Company', "organization_type", "in", ["Staffing"]]]
 				}
 		})
-		set_hiring_company();
+		set_hiring_company()
 	}
 });
 
@@ -198,6 +202,23 @@ frappe.ui.form.on('Job Sites', {
 		frm.refresh_field("job_site_table")
 	},
 })
+
+function check_user_type(cur_frm){
+	frappe.call({
+		"method": "tag_workflow.utils.doctype_method.check_company_type",
+		"args": {"company": cur_frm.doc.company},
+		"callback": function(r){
+			if(r.message[0]['organization_type'] === "Hiring" || r.message[0]['organization_type'] == "Exclusive Hiring"){
+				$(".form-section:contains('Job Sites')").show();
+				$(".form-section:contains('Pay Rate')").hide();
+			} else if (r.message[0]['organization_type'] === "Staffing"){
+				$(".form-section:contains('Job Sites')").hide();
+				$(".form-section:contains('Pay Rate')").show();
+			}
+		}
+	});
+}
+
 
 function set_job_site_disable_enable(cdt,cdn){
 	$("[data-fieldname=" + 'hiring_company' + "]").on('click', function (e) {

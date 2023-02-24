@@ -322,6 +322,11 @@ def checkingjobtitle_name(job_titless):
     return job_titless
 
 @frappe.whitelist()
+def check_company_type(company):
+    org_type = frappe.db.sql("SELECT organization_type  from tabCompany where LOWER(name) = LOWER('{0}')".format(company.lower()),as_dict=1)
+    return org_type
+
+@frappe.whitelist()
 def get_staffing_company_data():
     company_type = "Staffing"
     get_user = frappe.db.sql ("select role_profile_name from `tabUser` where name='{0}'".format(frappe.session.user),as_dict=1)
@@ -350,6 +355,7 @@ def get_hiring_company_data():
     blankdata=tuple(' ',)
     data = list(sql)
     data.insert(0,blankdata)
+    print(data,"data is >>>>>>>>>>>>>>>")
     return  data
 
 @frappe.whitelist()
