@@ -204,7 +204,7 @@ frappe.FaceRecognition = Class.extend({
 		if (frappe.boot.tag.tag_user_info.company_type == "Hiring" ||frappe.boot.tag.tag_user_info.company_type == "Exclusive Hiring" ) {
 			frappe.call({
 				method: 'tag_workflow.tag_workflow.page.staff_company_list.staff_company_list.get_industries',
-				args: { user: frappe.session.user },
+				args: { cur_user: frappe.session.user },
 				async: 0,
 				callback: (r) => {
 					if (r.message) {

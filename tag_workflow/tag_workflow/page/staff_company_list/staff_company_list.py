@@ -117,10 +117,17 @@ def checking_favourites_list(company_to_favourite,user_name):
       frappe.msgprint("Company favourites checking")
       return "False" 
 
+def check_user_type(user):
+    get_user_type = frappe.db.sql("select tag_user_type,owner from tabUser tu WHERE name='{0}'".format(user),as_dict=1)
+    if get_user_type[0]['tag_user_type'] == "Hiring User":
+        return get_user_type[0]['owner']
+    return user
+    
 
 @frappe.whitelist()
-def get_industries(user):
+def get_industries(cur_user):
     try:
+        user = check_user_type(cur_user)
         sql  = """ select distinct(industry_type) from `tabJob Titles` where parent in (select assign_multiple_company from `tabCompanies Assigned` where parent="{0}") """.format(user)
         industries = frappe.db.sql(sql, as_dict=True)
         accreditation = frappe.db.sql(""" select attribute from `tabCertificate and Endorsement` """,as_dict=1)
