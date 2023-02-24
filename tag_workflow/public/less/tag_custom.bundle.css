@@ -1010,9 +1010,14 @@ textarea.input-with-feedback.form-control,
 .attached-file.flex.justify-between.align-center,
 input#showPassword,
 input.input-with-feedback.form-control,
-.ace_content {
+.ace_content,
+.multiselect-list .form-control {
   border: 1px solid#21b7e170;
   background-color: white;
+}
+.multiselect-list .status-text {
+  top: 2px;
+  font-size: 14px;
 }
 [data-page-route="Item"] #id_mvr_hour:after {
   position: absolute;
@@ -1660,16 +1665,23 @@ select.input-with-feedback.form-control.ellipsis {
   width: auto;
 }
 .company-carousel ul li {
-  padding: 0 5px;
+  padding: 0 8px;
 }
 .company-carousel ul li:nth-child(1) {
-  padding-left: 25px;
+  padding-left: 44px !important;
 }
 .company-carousel .carousel-control-prev i,
 .company-carousel .carousel-control-next i {
   color: #000000f5;
   font-size: 20px;
   padding: 0 10px;
+}
+[data-route="Form/Company/maruti hiring"] .company-carousel ul li,
+[data-route="Form/Company/conduent exclusive"] .company-carousel ul li {
+  padding: 0 13px;
+}
+.company-carousel ul#form-tabs2 li:nth-child(1) {
+  padding-left: 30px !important;
 }
 
 /*------ Media query start ----*/

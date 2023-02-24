@@ -15,6 +15,9 @@
   .company-carousel ul li {
     padding: 0 5px 0 20px;
   }
+  .company-carousel ul li:nth-child(1) {
+    padding-left: 25px !important;
+  }
   [data-route="List/Payroll Period/List"]
     .modal-dialog
     .form-column
