@@ -5475,7 +5475,7 @@
    "insert_after": "employee_job_history",
    "is_system_generated": 0,
    "is_virtual": 0,
-   "label": "Timesheet Tab",
+   "label": "Timesheets",
    "length": 0,
    "mandatory_depends_on": null,
    "modified": "2023-02-16 01:47:41.028098",

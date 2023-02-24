@@ -1290,6 +1290,16 @@ def employee_work_history(employee_no):
                 my_data[i]['workflow_state']='Approval Request'
         return my_data 
 
+@frappe.whitelist()
+def employee_timesheets(employee_no):
+    sql=f'select name,date_of_timesheet,status,job_title,job_order_detail,total_hours, status_of_work_order from`tabTimesheet` where employee="{employee_no}" group by job_order_detail order by job_order_detail desc'
+    my_data=frappe.db.sql(sql,as_dict=True)
+    if(len(my_data)==0):
+        return 'No Record'
+    else:
+        return my_data 
+
+
 @frappe.whitelist(allow_guest=True)
 def get_update_password_user(key):
     try:

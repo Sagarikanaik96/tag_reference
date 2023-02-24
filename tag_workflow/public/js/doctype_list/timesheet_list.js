@@ -25,12 +25,6 @@ frappe.listview_settings["Timesheet"] = {
       cur_list.page.btn_primary[0].style.display = "none";
     }
     $('[data-original-title="Name"]').hide();
-    let emp_redirect_filters = window.location.href
-    if(emp_redirect_filters.includes('employee') && emp_redirect_filters.includes('employee_name')){
-      $('[data-fieldname="employee_name"]').css({'pointer-events':'none'})
-      $('.filter-selector').hide()
-      localStorage.setItem("employee_redirected",false)
-    }
   },
 
   formatters: {

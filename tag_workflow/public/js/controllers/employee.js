@@ -12,14 +12,10 @@ frappe.ui.form.on("Employee", {
                 $("button.ellipsis:nth-child(1)").hide()
             }
         })
-		$("#employee-timesheet_tab-tab").click(function(e) {
-			e.preventDefault();
-			frappe.route_options = {"employee": ["=", frm.doc.name],"employee_name": ["=", frm.doc.employee_name]};
-			frappe.set_route("List", "Timesheet");
-			});
 		trigger_hide();
 		required_field();
 		employee_work_history(frm)
+		employee_timesheets(frm)
 		download_document(frm)
 		cur_frm.dashboard.hide()
 		uploaded_file_format(frm);
@@ -904,3 +900,34 @@ function hide_pass(){
 		cur_frm.set_value('sssn', '•'.repeat(cur_frm.doc.sssn.length));
 	}
 }
+
+function employee_timesheets(frm){
+	frappe.call({
+		'method':'tag_workflow.tag_data.employee_timesheets',
+		'args':{
+			'employee_no':frm.doc.name,
+		},
+		'callback':function(r){
+			let profile_html = ``
+			if(r.message=='No Record'){
+				profile_html += `<span>No Timesheets Found<span>`
+			}
+			else{
+				let data = r.message;
+			profile_html = `<table class="col-md-12 basic-table table-headers table table-hover"><th>Date of Timesheet</th><th>Status</th><th>Job Title</th><th>Job Order</th><th>Total Hours</th><th>Status of Work Order</th>`;
+			for(let p in data){
+				profile_html += `<tr>
+					<td style="margin-right:20px;" ><a href="${window.location.origin}/app/timesheet/${data[p].name}">${data[p].date_of_timesheet}</a></td>
+					<td>${data[p].status}</td>					
+					<td>${data[p].job_title}</td>
+					<td>${data[p].job_order_detail}</td>
+					<td>${data[p].total_hours.toFixed(2)}</td>
+					<td>${data[p].status_of_work_order}</td>
+					</tr>`;
+			}
+			profile_html+=`</table>`
+			}
+			frm.set_df_property('timesheet_empty','options',profile_html)
+		}
+	})
+} 
