@@ -1260,3 +1260,6 @@ def update_claims():
                 frappe.db.commit()
 
 
+def update_state_for_export():
+    frappe.db.sql('''update `tabContact` set state = "Florida" where email_address  = "JDoe@example.com" and owner_company = "Temporary Assistance Guru LLC"''')
+    frappe.db.commit()

@@ -79,8 +79,8 @@ def check_staffing_reviews(company_name):
 
 	sql = """ select COUNT(*),average_rating from `tabCompany` where company_name="{}" """.format(company_name)
 	row_count = frappe.db.sql(sql)
-	avg_rate = 0
-	if sql_row_count[0][0]>=1:
+	avg_rate = 02
+	if sql_row_count[0][0]>=10:
 		avg_rate = str(float(row_count[0][1]))
 	return avg_rate
 

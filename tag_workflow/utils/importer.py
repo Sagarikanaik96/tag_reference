@@ -18,6 +18,7 @@ from frappe.core.doctype.version.version import get_diff
 from frappe.utils import validate_email_address,validate_phone_number
 import string,re
 import requests, time
+template_sample_company = "Temporary Assistance Guru LLC"
 state_list = {'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California', 'CZ': 'Canal Zone', 'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'DC': 'District of Columbia', 'FL': 'Florida', 'GA': 'Georgia', 'GU': 'Guam', 'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa', 'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland', 'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri', 'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey', 'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio', 'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'PR': 'Puerto Rico', 'RI': 'Rhode Island', 'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont', 'VI': 'Virgin Islands', 'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'}
 
 
@@ -101,7 +102,7 @@ class Importer:
                 frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-EMP-" """, self.emp_series)
                 frappe.db.sql(self.column[0:-1])
             elif self.doctype == "Contact":
-                self.column = 'insert into `tabContact` (name, first_name, phone_number, email_address, email_id, owner_company, company, contact_address, city, zip, suite_or_apartment_no) values ' + self.sql
+                self.column = 'insert into `tabContact` (name, first_name, phone_number, email_address, email_id, owner_company, company, contact_address, city, zip,state, suite_or_apartment_no) values ' + self.sql
                 frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-CONTACT-" """, self.con_series)
                 frappe.db.sql(self.column[0:-1])
             frappe.db.commit()
@@ -342,11 +343,12 @@ class Importer:
     def insert_record_contact(self, docs):
         try:
             if frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) and frappe.db.exists("Company", docs.company):
-                if (docs.first_name and docs.email_address and docs.owner_company and docs.phone_number):
+                if (docs.first_name and docs.email_address and docs.owner_company):
                     if not frappe.db.sql("SELECT company_name FROM `tabLead` WHERE (lead_owner = '{0}' or owner='{1}') and company_name='{2}'".format(frappe.session.user, frappe.session.user, docs.owner_company), as_list=True):
                         return self.name, "Failed"
                     self.name = "HR-CONTACT-" + str(self.con_series)
-                    self.sql += str(tuple([self.name, docs.first_name, docs.phone_number, docs.email_address,docs.email_address, (docs.owner_company or ""), (docs.company or ""), (docs.contact_address or ""), (docs.city or ""), (docs.zip or ""), (docs.suite_or_apartment_no or "")])) + ","
+                    docs.state = update_doc_state(docs.state)
+                    self.sql += str(tuple([self.name, docs.first_name, docs.phone_number, docs.email_address,docs.email_address, docs.owner_company , (docs.company or ""), (docs.contact_address or ""), (docs.city or ""), (docs.zip or ""),(docs.state or "") (docs.suite_or_apartment_no or "")])) + ","
                     self.con_series += 1
                     time.sleep(0.1)
                     return self.name, "Pass"
@@ -356,7 +358,12 @@ class Importer:
             frappe.log_error(e, "insert record for contact")
             return 'No Name', 'Failed'
 
-    
+    def update_doc_state(self,contact_state):
+        if len(contact_state) == 2:
+            return state_list.get(contact_state.upper())
+        else:
+            return contact_state
+        
     def insert_record(self, docs):
         try:
             keys = docs.keys()
@@ -1312,7 +1319,7 @@ from frappe.utils import validate_email_address
 import re
 
 reqd_emp = ["First Name","Last Name","Email","Company","Status","Date of Birth","Contact Number","Gender","SSN","Military Veteran","Street Address","Suite or Apartment No","City","State","Zip"]
-reqd_contact = ["ID","Contact Name","Phone Number","Email","Owner Company","Contact Address","City","Zip","Suite or Apartment No"]
+reqd_contact = ["Contact Name","Phone Number","Email","Owner Company","Contact Address","City","Zip","State","Suite or Apartment No"]
 
 @frappe.whitelist()
 def read_file(file, doctype, comps, event):
@@ -1338,9 +1345,11 @@ def check_return(row_no, row, event,doctype):
         return "Wrong Columns"
     elif row_no==0:
         return "Continue"
-    elif row_no == 1 and event=='insert' and row[0] == "John" and row[1]=="Doe" and row[2]==JDO_Email and row[3]=="Temporary Assistance Guru LLC":
+    elif row_no == 1 and event=='insert' and doctype =="Employee" and row[0] == "John" and row[1]=="Doe" and row[2]==JDO_Email and row[3]==template_sample_company:
         return  "Continue"
-    elif row_no == 1 and event=='update' and row[1] == "John" and row[2]=="Doe" and row[3]==JDO_Email and row[4]=="Temporary Assistance Guru LLC":
+    elif row_no ==1 and event =='insert' and doctype == "Contact" and row[0] == "John Doe" and row[2] == "JDoe@example.com" and row[3] == template_sample_company:
+        return "Continue"
+    elif row_no == 1 and event=='update' and row[1] == "John" and row[2]=="Doe" and row[3]==JDO_Email and row[4]==template_sample_company:
         return "Continue"
     
 def get_row_error(row,doctype, comps, event,data,row_no):
@@ -1392,10 +1401,12 @@ def check_fields(row, doctype, comps,data,row_index):
         check_zip(row[14], message)
     elif doctype == "Contact":
         check_mandatory_fields(row, message,doctype)
-        check_phone_number(row[2],message)
-        check_email(row[3],message)
-        check_company(comps, row[4],message)
-        check_zip(row[7], message)
+        check_phone_number(row[1],message)
+        check_email(row[2],message)
+        check_company(comps, row[3],message)
+        check_zip(row[6], message)
+        check_state(row[7], message)
+
     return message
 def check_duplicate_row(data,message,row,row_index):
     duplicate_row= []
@@ -1409,6 +1420,7 @@ def check_duplicate_row(data,message,row,row_index):
         msg = "Duplicate row detected ",error_rows
         message.append(msg)
 def check_company(user_comp_list, company_in_row, message):
+    print(company_in_row)
     if company_in_row and company_in_row not in user_comp_list: message.append("Invalid Entry for Company")
 
 def check_status(status,message):
@@ -1424,7 +1436,8 @@ def check_dob(dob, message):
         if not res: message.append("Date of Birth is not a valid Date")
 
 def check_phone_number(phone,message):
-    if phone and not validate_phone_number(phone): message.append("Invalid Phone Number")
+    print(phone,"phone_number")
+    if phone and phone!="None" and not validate_phone_number(phone): message.append("Invalid Phone Number")
 
 def check_gender(gender, message):
     if gender and gender.lower() not in ["male", "female"]: message.append("Gender")
@@ -1461,11 +1474,12 @@ def check_mandatory_fields(row, message,doctype):
     check_is_valid = 0
     for i in range(len(row)):
         if row[i] is None:
-            if doctype == 'Employee' and i in [0, 1, 2, 5]:
+            if doctype == 'Employee' and i in [0, 1, 2, 5,3]:
                 check_is_valid =1
                 fields_missing.append("<b>" + reqd_emp[i] + "</b>")
-            elif doctype == 'Contact' and  i in [1, 2, 3]:
+            elif doctype == 'Contact' and  i in [0,1,2,3]:
                 check_is_valid =1
+                print(reqd_contact)
                 fields_missing.append(reqd_contact[i])
 
     if check_is_valid:

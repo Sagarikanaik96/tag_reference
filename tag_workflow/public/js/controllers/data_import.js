@@ -178,6 +178,15 @@ frappe.ui.form.on("Data Import", {
           },
         });
       });
+    } else if (frm.doc.__islocal != 1) {
+      let check = $('[data-label="Start%20Import"]');
+      console.log(check.length);
+      if (check.length > 0) {
+        frm.set_df_property("section_import_preview", "hidden", 1);
+        frm.set_df_property("validations_failed", "hidden", 1);
+        frm.set_df_property("import_log_section", "hidden", 1);
+        $('[data-label="Start%20Import"]').hide();
+      }
     }
   },
 });
@@ -202,7 +211,6 @@ function validation_check(res, frm) {
     frm.set_df_property("validations_failed", "hidden", 0);
     frm.set_df_property("check_failed", "options", html);
   } else {
-    console.log("inside,else");
     let html = `<div><p><b>File is validated successfully</b></p>`;
     frm.set_df_property("validations_failed", "hidden", 0);
     frm.set_df_property("check_failed", "options", html);

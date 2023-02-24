@@ -1,5 +1,5 @@
 diff --git a/frappe/public/js/frappe/data_import/data_exporter.js b/frappe/public/js/frappe/data_import/data_exporter.js
-index ccf449b..eb44ffb 100644
+index ccf449b..a95ae1a 100644
 --- a/frappe/public/js/frappe/data_import/data_exporter.js
 +++ b/frappe/public/js/frappe/data_import/data_exporter.js
 @@ -1,5 +1,4 @@
@@ -64,17 +64,16 @@ index ccf449b..eb44ffb 100644
  						this.update_record_count_message();
  					},
 +					hidden:1
- 				},
- 				{
--					fieldtype: "HTML",
--					fieldname: "filter_area",
--					depends_on: (doc) => doc.export_records === "by_filter",
++				},
++				{
 +					fieldtype: 'HTML',
 +					fieldname: 'filter_area',
 +					depends_on: doc => doc.export_records === 'by_filter'
  				},
  				{
--					fieldtype: "Section Break",
+-					fieldtype: "HTML",
+-					fieldname: "filter_area",
+-					depends_on: (doc) => doc.export_records === "by_filter",
 +					fieldtype: 'Select',
 +					fieldname: 'file_type',
 +					label: __('File Type'),
@@ -82,11 +81,12 @@ index ccf449b..eb44ffb 100644
 +					default: 'CSV'
  				},
  				{
+-					fieldtype: "Section Break",
++					fieldtype: 'Section Break'
+ 				},
+ 				{
 -					fieldtype: "HTML",
 -					fieldname: "select_all_buttons",
-+					fieldtype: 'Section Break'
-+				},
-+				{
 +					fieldtype: 'HTML',
 +					fieldname: 'military_veteran',
 +					options:['Contact','Employee'].includes(this.doctype)?"":"** Please type only 0 and 1 are Military Veteran<br> ** For Gender,Options are: Male, Female,Decline to answer<br> ** For Status,Options Available are: Active,Inactive,Suspended,Left"
@@ -333,7 +333,7 @@ index ccf449b..eb44ffb 100644
  
  			this.update_primary_action(value);
  		});
-@@ -232,116 +250,355 @@ frappe.data_import.DataExporter = class DataExporter {
+@@ -232,116 +250,348 @@ frappe.data_import.DataExporter = class DataExporter {
  
  	update_primary_action(no_of_records) {
  		let $primary_action = this.dialog.get_primary_btn();
@@ -446,15 +446,8 @@ index ccf449b..eb44ffb 100644
 +	let doctype_fields = frappe.meta
 +		.get_docfields(doctype)
 +		.filter(exportable_fields);
-+	console.log('vlue of object',doctype_fields)
 +	if(doctype=='Contact'){
 +		out[doctype] = [
-+			{
-+				label: __('ID'),
-+				fieldname: 'name',
-+				fieldtype: 'Data',
-+				reqd: 1
-+			},
 +			{
 +				label: __("Contact Name"),
 +				fieldname: doctype_fields[0].fieldname,
@@ -479,7 +472,7 @@ index ccf449b..eb44ffb 100644
 +				fieldtype: 'Data',
 +				reqd: 1
 +			},
-+		].concat(doctype_fields.slice(31,35));
++		].concat(doctype_fields.slice(31,36));
 +	
 +	}
 +	else if(doctype=='Employee'){
