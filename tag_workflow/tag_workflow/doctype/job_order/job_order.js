@@ -3404,7 +3404,7 @@ function remove_href(doc_name, e) {
 }
 
 function no_of_worker_repeat(frm){
-  if (frm.doc.__islocal==1 && frm.doc.resume_required==0 && frm.doc.is_repeat && frm.doc.no_of_workers){
+  if (frm.doc.__islocal==1 && frm.doc.resumes_required==0 && frm.doc.is_repeat && frm.doc.no_of_workers){
     frm.call({
       method: "repeat_no_of_workers",
       args:{

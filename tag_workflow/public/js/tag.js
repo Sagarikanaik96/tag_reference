@@ -653,7 +653,7 @@ frappe.search.utils.get_doctypes = function (keywords) {
       frappe.session.user == "Administrator" ||
       frappe.boot.tag.tag_user_info.company_type == "TAG"
     ) {
-      label = check_error_label(target, type);
+      label = check_error_label(target, type, label);
     }
 
     return {
@@ -678,7 +678,7 @@ frappe.search.utils.get_doctypes = function (keywords) {
   });
   return out;
 };
-function check_error_label(target, type) {
+function check_error_label(target, type, label) {
   if (target == "Company Review") {
     if (type == "Report") {
       return "Staffing Ratings & Reviews Report";
@@ -696,6 +696,7 @@ function check_error_label(target, type) {
       return "Hiring Ratings & Reviews";
     }
   }
+  return label;
 }
 
 function check_list(me, item, level, keywords, out) {
@@ -713,7 +714,7 @@ function check_list(me, item, level, keywords, out) {
     if (!frappe.flags.ats.includes(item) && !check) {
       out.push({
         type: "New",
-        label: __("New {0}" + [me.bolden_match_part(__(item), keywords)]),
+        label: __("New {0}", [me.bolden_match_part(__(item), keywords)]),
         value: __("New {0}", [__(item)]),
         index: level + 0.015,
         match: item,

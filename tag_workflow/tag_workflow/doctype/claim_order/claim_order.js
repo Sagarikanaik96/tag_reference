@@ -376,7 +376,7 @@ function get_remaining_employee(name,frm,joborder) {
 }
 
 function mandatory_fn(frm) {
-	let l = { "Job Order": frm.doc.job_order, "Staffing Organization": frm.doc.staffing_organization, "E Signature": frm.doc.e_signature, "Agree To Contract": cur_frm.doc.agree_to_contract, "No. of Employees to Claim": cur_frm.doc.staff_claims_no, "Employee Pay Rate": frm.doc.employee_pay_rate};
+	let l = { "Job Order": frm.doc.job_order, "Staffing Organization": frm.doc.staffing_organization, "E Signature": frm.doc.e_signature, "Agree To Contract": frm.doc.agree_to_contract, "No. of Employees to Claim": frm.doc.staff_claims_no, "Employee Pay Rate": frm.doc.employee_pay_rate};
 
 	let message = "<b>Please Fill Mandatory Fields:</b>";
 	for (let k in l) {
