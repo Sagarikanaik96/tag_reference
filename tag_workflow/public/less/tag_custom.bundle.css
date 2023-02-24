@@ -1019,13 +1019,6 @@ input.input-with-feedback.form-control,
   top: 2px;
   font-size: 14px;
 }
-[data-page-route="Item"] #id_mvr_hour:after {
-  position: absolute;
-  left: 10px;
-  top: 56%;
-  font-size: 13px;
-  content: "$";
-}
 [data-page-route="Item"] input#id_mvr_hour {
   padding-left: 20px;
 }
