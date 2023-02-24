@@ -10,4 +10,5 @@ import './frappe/workspace.js'
 import './frappe/form/controls/link.js'
 import './frappe/form/controls/multiselect_list.js'
 import "./frappe/form/layout.js";
+import "./frappe/ui/sort_selector.js"
 

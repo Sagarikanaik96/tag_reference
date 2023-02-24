@@ -10,13 +10,22 @@ frappe.ui.SortSelector = class SortSelector {
 	constructor(opts) {
 		$.extend(this, opts);
 		this.labels = {};
+		this.columns = []
 		this.make();
 	}
 	make() {
+		
 		this.prepare_args();
 		this.parent.find(".sort-selector").remove();
-		this.wrapper = $(frappe.render_template("sort_selector", this.args)).appendTo(this.parent);
-		this.bind_events();
+		setTimeout(()=>{
+			this.columns = cur_list.columns
+			this.populate_args();
+			this.wrapper = $(frappe.render_template("sort_selector", this.args)).appendTo(this.parent);
+			this.bind_events();
+		},0)
+		
+		
+		
 	}
 	bind_events() {
 		let me = this;
@@ -160,6 +169,7 @@ frappe.ui.SortSelector = class SortSelector {
 				meta_sort_order: null,
 			};
 		}
+		
 		if (meta.sort_field && meta.sort_field.includes(",")) {
 			let parts = meta.sort_field.split(",")[0].split(" ");
 			return {
@@ -173,7 +183,7 @@ frappe.ui.SortSelector = class SortSelector {
 			};
 		}
 
-
+		
 	}
 	get_label(fieldname) {
 		if (fieldname === "idx") {
@@ -185,6 +195,25 @@ frappe.ui.SortSelector = class SortSelector {
 	get_sql_string() {
 		// build string like `tabTask`.`subject` desc
 		return "`tab" + this.doctype + "`.`" + this.sort_by + "` " + this.sort_order;
+	}
+
+	populate_args() {
+		let data = []
+		let list_data = []
+		for(let otpion of this.args.options){
+		  data.push(otpion['fieldname'])
+		}
+		this.columns.forEach((value, idx) => {
+			if (value["df"] && data.includes(value['df']['fieldname'])){
+				list_data.push({fieldname: value['df']['fieldname'],label: value['df']['label'],_index:idx})
+				if (idx == 0){
+					this.args.sort_by = value['df']['fieldname'] 
+					this.args.sort_by_label = value['df']['label']
+				}
+			}
+		})
+		this.args.options = list_data
+		
 	}
 };
 function add_missing_labels(_options,me) {
