@@ -104,6 +104,9 @@ frappe.ui.form.on("Company", {
 		redirect_job_site()
 		public_profile_redirect(frm);
 		add_lable(frm)
+		window.onpageshow = function (event) {
+			reload_company_setting_page(event)
+		};
 
 	},
 	update_employee_records: function (frm) {
@@ -522,6 +525,7 @@ frappe.ui.form.on("Company", {
 		}
 
 	}
+
 
 	function quick_connect_button(frm) {
 
@@ -1566,7 +1570,7 @@ window.myFunction = (id) => {
 	$('#' + id).addClass('active-strip-button');
 	cur_frm.set_value('default_invoice_view', description);
 }
-function redirect_job_site(frm) {
+function redirect_job_site() {
 	$('[data-fieldname="job_site"]').on("click", (e) => {
 		let job_site_name  = e.target.title ? e.target.title : e.target.innerText
 		if(job_site_name && job_site_name != "Job Site"){
@@ -1983,4 +1987,9 @@ function activate_tab() {
     $("#company-info-tab").click();
     localStorage.setItem("slide_tab", "0");
   }
+}
+function reload_company_setting_page(event){
+	if (event.persisted) {
+		window.location.reload();
+	}
 }
