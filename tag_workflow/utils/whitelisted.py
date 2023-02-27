@@ -10,6 +10,7 @@ from frappe import _, msgprint, throw, is_whitelisted
 from frappe.utils import cint, cstr, flt, now_datetime, getdate, nowdate
 from frappe.model.mapper import get_mapped_doc
 from erpnext.selling.doctype.quotation.quotation import _make_customer
+from tag_workflow.tag_workflow.page.staff_company_list.staff_company_list import check_user_type
 from tag_workflow.utils.notification import sendmail, make_system_notification, share_doc
 from frappe.desk.query_report import get_report_doc, generate_report_result,get_prepared_report_result
 from frappe.desk.desktop import Workspace
@@ -455,7 +456,7 @@ def search_staffing_by_hiring(data=None,search_choice_val='company_name'):
         if(data):
             key_val = {'company_name':'name','industry':'industry_type','city':'city'}
             key = key_val[search_choice_val]
-            user_name = frappe.session.user
+            user_name = check_user_type(frappe.session.user)
             sql = ''' select company from `tabUser` where email='{}' '''.format(user_name)
             user_comp = frappe.db.sql(sql, as_list=1)
             if search_choice_val=="company_name":

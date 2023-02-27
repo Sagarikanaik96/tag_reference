@@ -118,7 +118,7 @@ def checking_favourites_list(company_to_favourite,user_name):
       return "False" 
 
 def check_user_type(user):
-    get_user_type = frappe.db.sql("select tag_user_type,owner from tabUser tu WHERE name='{0}'".format(user),as_dict=1)
+    get_user_type = frappe.db.sql("select tag_user_type,owner from `tabUser` tu WHERE name='{0}'".format(user),as_dict=1)
     if get_user_type[0]['tag_user_type'] == "Hiring User":
         return get_user_type[0]['owner']
     return user
