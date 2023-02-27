@@ -97,12 +97,14 @@ class Importer:
 
     def upload_record(self):
         try:
+            print(self.sql)
             if self.doctype == "Employee" and self.sql:
                 self.column = 'insert into `tabEmployee` (name, employee_name, first_name, last_name, email, company, status, date_of_birth, contact_number, employee_gender, sssn, military_veteran, street_address, suite_or_apartment_no, city, state, zip, lat, lng, naming_series, lft, rgt, creation) values ' + self.sql
                 frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-EMP-" """, self.emp_series)
                 frappe.db.sql(self.column[0:-1])
             elif self.doctype == "Contact":
                 self.column = 'insert into `tabContact` (name, first_name, phone_number, email_address, email_id, owner_company, company, contact_address, city, zip,state, suite_or_apartment_no) values ' + self.sql
+                print(self.column)
                 frappe.db.sql(""" update `tabSeries` set current = %s where name = "HR-CONTACT-" """, self.con_series)
                 frappe.db.sql(self.column[0:-1])
             frappe.db.commit()
@@ -339,16 +341,20 @@ class Importer:
             return self.insert_record(doc)
         elif self.import_type == UPDATE:
             return self.update_record(doc)
+        
+    
     
     def insert_record_contact(self, docs):
         try:
+            print(docs,"docs"*10,frappe.has_permission(doctype="Company", ptype="read", doc=docs.company),frappe.db.exists("Company", docs.company))
             if frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) and frappe.db.exists("Company", docs.company):
                 if (docs.first_name and docs.email_address and docs.owner_company):
                     if not frappe.db.sql("SELECT company_name FROM `tabLead` WHERE (lead_owner = '{0}' or owner='{1}') and company_name='{2}'".format(frappe.session.user, frappe.session.user, docs.owner_company), as_list=True):
                         return self.name, "Failed"
                     self.name = "HR-CONTACT-" + str(self.con_series)
                     docs.state = update_doc_state(docs.state)
-                    self.sql += str(tuple([self.name, docs.first_name, docs.phone_number, docs.email_address,docs.email_address, docs.owner_company , (docs.company or ""), (docs.contact_address or ""), (docs.city or ""), (docs.zip or ""),(docs.state or "") (docs.suite_or_apartment_no or "")])) + ","
+                    self.sql += str(tuple([self.name, docs.first_name, docs.phone_number, docs.email_address,docs.email_address, docs.owner_company , (docs.company or ""), (docs.contact_address or ""), (docs.city or ""), (docs.zip or ""),(docs.state or ""), (docs.suite_or_apartment_no or "")])) + ","
+                    print(self.sql)
                     self.con_series += 1
                     time.sleep(0.1)
                     return self.name, "Pass"
@@ -358,11 +364,7 @@ class Importer:
             frappe.log_error(e, "insert record for contact")
             return 'No Name', 'Failed'
 
-    def update_doc_state(self,contact_state):
-        if len(contact_state) == 2:
-            return state_list.get(contact_state.upper())
-        else:
-            return contact_state
+
         
     def insert_record(self, docs):
         try:
@@ -1322,7 +1324,7 @@ reqd_emp = ["First Name","Last Name","Email","Company","Status","Date of Birth",
 reqd_contact = ["Contact Name","Phone Number","Email","Owner Company","Contact Address","City","Zip","State","Suite or Apartment No"]
 
 @frappe.whitelist()
-def read_file(file, doctype, comps, event):
+def read_file(file, doctype, comps, event,user_type):
     try:
         error_in_fields ={}
         data = get_content(file)
@@ -1334,9 +1336,9 @@ def read_file(file, doctype, comps, event):
                     return msg
                 elif msg == "Continue":
                     continue
-                row_message = get_row_error(row,doctype, comps, event,data,row_no)
+                row_message = get_row_error(row,doctype, comps, event,data,row_no,user_type)
                 if len(row_message)>0:
-                    error_in_fields["Row "+str(row_no)]=row_message
+                    error_in_fields["Row "+str(row_no+1)]=row_message
         return error_in_fields
     except Exception as e:
         print(e, frappe.get_traceback())
@@ -1352,12 +1354,12 @@ def check_return(row_no, row, event,doctype):
     elif row_no == 1 and event=='update' and row[1] == "John" and row[2]=="Doe" and row[3]==JDO_Email and row[4]==template_sample_company:
         return "Continue"
     
-def get_row_error(row,doctype, comps, event,data,row_no):
+def get_row_error(row,doctype, comps, event,data,row_no,user_type):
     if event == 'insert':
-        row_message = check_fields(row, doctype, comps, data,row_no)
+        row_message = check_fields(row, doctype, comps, data,row_no,user_type)
         return row_message
     else:
-        row_message = check_fields(row[1:], doctype, comps,data,row_no)
+        row_message = check_fields(row[1:], doctype, comps,data,row_no,user_type)
         return row_message
 def get_content(file):
     if frappe.db.exists("File", {"file_url": file}):
@@ -1383,16 +1385,16 @@ def check_columns(row, doctype):
         return False
     return True
 
-def check_fields(row, doctype, comps,data,row_index):
-    #{Row 1: ["Missing required..", "Email"]}
+def check_fields(row, doctype, comps,data,row_index,user_type):
     message=[]
     if doctype == "Employee":
         check_mandatory_fields(row,message,doctype)
         check_duplicate_row(data,message,row,row_index)
         check_email(row[2],message)
-        check_company(comps, row[3],message)
+        if frappe.session.user != "Administrator" and user_type == "TAG Admin":
+            check_company(comps, row[3],message)
         check_status(row[4],message)
-        check_dob(str(row[5]),message)
+        check_dob(row[5],message)
         check_phone_number(str(row[6]),message)
         check_gender(row[7],message)
         check_ssn(row[8],message)
@@ -1400,24 +1402,31 @@ def check_fields(row, doctype, comps,data,row_index):
         check_state(row[13], message)
         check_zip(row[14], message)
     elif doctype == "Contact":
+        check_lead_for_contact(message,row[3])
         check_mandatory_fields(row, message,doctype)
         check_phone_number(row[1],message)
         check_email(row[2],message)
-        check_company(comps, row[3],message)
+        if frappe.session.user != "Administrator" and user_type != "TAG Admin":
+            check_company(comps, row[3],message)
         check_zip(row[6], message)
         check_state(row[7], message)
 
     return message
+def check_lead_for_contact(message,company):
+    print(message)
+    if not frappe.db.sql("SELECT company_name FROM `tabLead` WHERE (lead_owner = '{0}' or owner='{1}') and company_name='{2}'".format(frappe.session.user, frappe.session.user, company), as_list=True):
+        return message.append("Create a <b>Lead</b> to import <b>Contact</b>")
+    
 def check_duplicate_row(data,message,row,row_index):
     duplicate_row= []
     for row_no, row_val in enumerate(data):
         if(row_no ==0 or row_no == row_index):
             continue
         if(row[0]==row_val[0] and row[1] == row_val[1] and row[2]==row_val[2] and row[5]==row_val[5] and  row[8]==row_val[8]):
-            duplicate_row.append(str(row_no))
+            duplicate_row.append(str(row_no +1))
     if duplicate_row:
         error_rows = ', '.join(duplicate_row)
-        msg = "Duplicate row detected ",error_rows
+        msg = "Duplicate row detected " + error_rows
         message.append(msg)
 def check_company(user_comp_list, company_in_row, message):
     print(company_in_row)
@@ -1428,15 +1437,23 @@ def check_status(status,message):
         
 def check_dob(dob, message):
     date_formate = DOB_FORMATE
-    if dob:
+    if type(dob) == float and dob:
+        dob =  datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(dob) - 2)
         try:
-            res = bool(datetime.strptime(dob, date_formate))
+            res = bool(datetime.strptime(str(dob).split(" ")[0], date_formate))
         except ValueError:
             res = False
         if not res: message.append("Date of Birth is not a valid Date")
+        
+    else:
+        if dob:
+            try:
+                res = bool(datetime.strptime(str(dob).split(" ")[0], date_formate))
+            except ValueError:
+                res = False
+            if not res: message.append("Date of Birth is not a valid Date")
 
 def check_phone_number(phone,message):
-    print(phone,"phone_number")
     if phone and phone!="None" and not validate_phone_number(phone): message.append("Invalid Phone Number")
 
 def check_gender(gender, message):
@@ -1473,7 +1490,7 @@ def check_mandatory_fields(row, message,doctype):
     fields_missing=[]
     check_is_valid = 0
     for i in range(len(row)):
-        if row[i] is None:
+        if row[i] is None or row[i] == "":
             if doctype == 'Employee' and i in [0, 1, 2, 5,3]:
                 check_is_valid =1
                 fields_missing.append("<b>" + reqd_emp[i] + "</b>")
@@ -1495,6 +1512,12 @@ def read_content(content, extension):
     elif extension == "xlsx":
         data = read_xlsx_file_from_attached_file(fcontent=content)
     elif extension == "xls":
+        print(content,"content")
         data = read_xls_file_from_attached_file(content)
 
     return data
+def update_doc_state(contact_state):
+        if len(contact_state) == 2:
+            return state_list.get(contact_state.upper())
+        else:
+            return contact_state

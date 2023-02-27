@@ -172,6 +172,7 @@ frappe.ui.form.on("Data Import", {
               frm.doc.import_type == "Update Existing Records"
                 ? "update"
                 : "insert",
+            user_type: frappe.boot.tag.tag_user_info.user_type,
           },
           callback: (res) => {
             validation_check(res, frm);
