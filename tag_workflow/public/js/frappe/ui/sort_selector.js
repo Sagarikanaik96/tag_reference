@@ -124,7 +124,9 @@ frappe.ui.SortSelector = class SortSelector {
 			// default options
 			let _options = [
 				{ fieldname: "modified" },
-				{ fieldname: "name" }
+				{ fieldname: "name" },
+-               { fieldname: "creation" },
+-               { fieldname: "idx" }
 			];
 
 			// title field
@@ -203,7 +205,9 @@ frappe.ui.SortSelector = class SortSelector {
 		for(let otpion of this.args.options){
 		  data.push(otpion['fieldname'])
 		}
+		let data_idx=0
 		this.columns.forEach((value, idx) => {
+			data_idx=idx
 			if (value["df"] && data.includes(value['df']['fieldname'])){
 				list_data.push({fieldname: value['df']['fieldname'],label: value['df']['label'],_index:idx})
 				if (idx == 0){
@@ -212,6 +216,14 @@ frappe.ui.SortSelector = class SortSelector {
 				}
 			}
 		})
+		let data_count=0
+		for(let single of data){
+			if(single && single.includes('modified')){
+				list_data.push({fieldname: this.args.options[data_count]['fieldname'],label: this.args.options[data_count]['label'],_index:data_idx+1})
+			}
+			data_count++
+		}
+		
 		this.args.options = list_data
 		
 	}
