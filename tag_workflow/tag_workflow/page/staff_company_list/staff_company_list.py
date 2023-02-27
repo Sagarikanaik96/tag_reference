@@ -4,6 +4,7 @@ import json
 from haversine import haversine, Unit
 from tag_workflow.utils.reportview import get_lat_lng,get_custom_location
 from tag_workflow.tag_workflow.doctype.company.company import check_staffing_reviews
+from tag_workflow.utils.whitelisted import check_user_type
 
 # this file for TG-2607
 @frappe.whitelist()
@@ -117,11 +118,7 @@ def checking_favourites_list(company_to_favourite,user_name):
       frappe.msgprint("Company favourites checking")
       return "False" 
 
-def check_user_type(user):
-    get_user_type = frappe.db.sql("select tag_user_type,owner from `tabUser` tu WHERE name='{0}'".format(user),as_dict=1)
-    if get_user_type[0]['tag_user_type'] == "Hiring User":
-        return get_user_type[0]['owner']
-    return user
+
     
 
 @frappe.whitelist()

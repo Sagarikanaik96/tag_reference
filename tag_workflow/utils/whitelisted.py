@@ -10,7 +10,6 @@ from frappe import _, msgprint, throw, is_whitelisted
 from frappe.utils import cint, cstr, flt, now_datetime, getdate, nowdate
 from frappe.model.mapper import get_mapped_doc
 from erpnext.selling.doctype.quotation.quotation import _make_customer
-from tag_workflow.tag_workflow.page.staff_company_list.staff_company_list import check_user_type
 from tag_workflow.utils.notification import sendmail, make_system_notification, share_doc
 from frappe.desk.query_report import get_report_doc, generate_report_result,get_prepared_report_result
 from frappe.desk.desktop import Workspace
@@ -449,6 +448,11 @@ def get_desktop_page(page):
         frappe.log_error("Workspace Missing")
         return {}
 
+def check_user_type(user):
+    get_user_type = frappe.db.sql("select tag_user_type,owner from `tabUser`  WHERE name='{0}'".format(user),as_dict=1)
+    if get_user_type[0]['tag_user_type'] == "Hiring User":
+        return get_user_type[0]['owner']
+    return user
 #----------------------#
 @frappe.whitelist()
 def search_staffing_by_hiring(data=None,search_choice_val='company_name'):
