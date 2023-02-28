@@ -896,11 +896,15 @@ def data_receive(data1,data):
     else:
         return int(data.no_of_workers)
 
+
 @frappe.whitelist()
 def repeat_no_of_workers(job_order,staff_comp,no_of_worker):
     try:
-        staff_comp = tuple(staff_comp.split("~"))
-        approved_worker = frappe.db.sql(f'''SELECT SUM(approved_no_of_workers) from `tabClaim Order` where job_order="{job_order}" and staffing_organization in {staff_comp}''', as_list=1)
+        staff=staff_comp.split('~')
+        if len(staff)>1:
+            approved_worker = frappe.db.sql(f'''SELECT SUM(approved_no_of_workers) from `tabClaim Order` where job_order="{job_order}" and staffing_organization in {tuple(staff)}''', as_list=1)
+        else:
+            approved_worker = frappe.db.sql(f'''SELECT SUM(approved_no_of_workers) from `tabClaim Order` where job_order="{job_order}" and staffing_organization in ("{staff[0]}")''', as_list=1)
         return "failed" if approved_worker[0][0] and approved_worker[0][0] > float(no_of_worker) else "success"
     except Exception as e:
         print(e, frappe.get_traceback())

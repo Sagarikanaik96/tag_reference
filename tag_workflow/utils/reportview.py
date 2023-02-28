@@ -15,7 +15,7 @@ tag_gmap_key = frappe.get_site_config().tag_gmap_key or ""
 GOOGLE_API_URL = f"https://maps.googleapis.com/maps/api/geocode/json?key={tag_gmap_key}&address="
 distance_value = {"5": 5, "10": 10, "25": 25, "50": 50, "100": 100}
 distance = ['5', '10', '25', '50', '100']
-JOB = "Job Order"
+JOB = 'Job Order'
 CUSTOM = 'Custom Address'
 get_table_columns=DatabaseQuery.get_table_columns
 @frappe.whitelist()
@@ -23,12 +23,12 @@ get_table_columns=DatabaseQuery.get_table_columns
 def get():
     try:
         args = get_form_params()
+        args = update_order_by(args)
         # If virtual doctype get data from controller het_list method
         radius = args.radius or ''
         order_status = args.order_status or ''
         custom_address = args.custom_address or ''
         filter_loc = filter_data(args)
-        
         if frappe.db.get_value("DocType", filters={"name": args.doctype}, fieldname="is_virtual"):
             controller = get_controller(args.doctype)
             data = compress(controller(args.doctype).get_list(args))
@@ -56,7 +56,27 @@ def get():
     except Exception as e:
         frappe.msgprint(e)
 
-
+def update_order_by(args):
+    if(args["doctype"] == JOB):
+            str_order =args["order_by"]
+            splitted_order_by = str_order.split(".")
+            order = splitted_order_by[1].split(" ")
+            print(order)
+            if order[0]== "`order_status`" and order[1] == "asc":
+                print("asc")
+                order[1] = "desc"
+                new_str = "`tabJob Order`."+(" ").join(order)
+                args["order_by"] = new_str
+                return args
+            elif order[0] == "`order_status`" and order[1] == "desc":
+                print("desc")
+                order[1] = "asc"
+                new_str = "`tabJob Order`."+(" ").join(order)
+                args["order_by"] = new_str
+                return args
+            else:
+                return args
+                
 def staffing_data(data, radius, page_length,filter_loc,custom_address):
     try:
         result = []
@@ -173,7 +193,7 @@ def get_loc(data):
 def get_location():
     try:
         args = {
-            'doctype': 'Job Order',
+            'doctype': JOB,
             'fields': [
                 '`tabJob Order`.`name`',
                 '`tabJob Order`.`job_site`',
@@ -485,7 +505,7 @@ class DatabaseQueryCustom:
 		unclaimed_noresume_by_comp=f'select name from `tabJob Order` where (claim not like "%{company_name}%" or claim is Null) and order_status!="Completed" and resumes_required=0'
 		my_unaval_claims=frappe.db.sql(unclaimed_noresume_by_comp,as_list=1)
 		for i in my_unaval_claims:
-			data=frappe.get_doc('Job Order',i[0])
+			data=frappe.get_doc(JOB,i[0])
 			claims=f'select sum(approved_no_of_workers) from `tabClaim Order` where job_order="{data.name}"'
 			data1=frappe.db.sql(claims,as_list=1)
 			if(data1[0][0]!=None):

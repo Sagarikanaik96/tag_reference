@@ -153,7 +153,7 @@ frappe.ui.form.on("Job Order", {
   },
   refresh: function (frm) {
     date_pick(frm);
-    setTimeout(()=>add_id(frm), 500);
+    setTimeout(() => add_id(frm), 500);
     if (frm.doctype === "Job Order") {
       update_order_status(frm);
     }
@@ -3106,9 +3106,7 @@ function job_profile_data(frm, data) {
 				<td class="remove_employee" data-fieldname="remove_employee">
 					<button class="btn btn-primary btn-sm mt-2" onclick=remove_job('${
             data[p].assign_name
-          }','${frm.doc.name}','${data[p].employee_id}','${
-        data[p].removed
-      }')>
+          }','${frm.doc.name}','${data[p].employee_id}','${data[p].removed}')>
 					${data[p].removed == "0" ? "Remove" : "Unremove"}
 					</button>
 				</td>`;
@@ -3243,8 +3241,7 @@ function workers_claimed_change(frm) {
                       }, 10000);
                     } else if (r2.message == 0) {
                       setTimeout(function () {
-                        window.location.href =
-                          "/app/job-order/" + frm.doc.name;
+                        window.location.href = "/app/job-order/" + frm.doc.name;
                       }, 1000);
                     }
                   },
@@ -3403,22 +3400,30 @@ function remove_href(doc_name, e) {
   });
 }
 
-function no_of_worker_repeat(frm){
-  if (frm.doc.__islocal==1 && frm.doc.resumes_required==0 && frm.doc.is_repeat && frm.doc.no_of_workers){
+function no_of_worker_repeat(frm) {
+  if (
+    frm.doc.__islocal == 1 &&
+    frm.doc.resumes_required == 0 &&
+    frm.doc.is_repeat &&
+    frm.doc.no_of_workers &&
+    frm.doc.is_direct
+  ) {
     frm.call({
       method: "repeat_no_of_workers",
-      args:{
-        "job_order": frm.doc.repeat_from,
-        "staff_comp": frm.doc.staff_company2,
-        "no_of_worker": frm.doc.no_of_workers
+      args: {
+        job_order: frm.doc.repeat_from,
+        staff_comp: frm.doc.staff_company2,
+        no_of_worker: frm.doc.no_of_workers,
       },
       async: 0,
-      callback: (res)=>{
-        if(res.message=="failed"){
-          frappe.msgprint("Number of workers cannot be less than number of approved workers.");
+      callback: (res) => {
+        if (res.message == "failed") {
+          frappe.msgprint(
+            "Number of workers cannot be less than number of approved workers."
+          );
           frappe.validated = false;
         }
-      }
-    })
+      },
+    });
   }
 }
