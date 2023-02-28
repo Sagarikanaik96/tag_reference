@@ -1391,7 +1391,7 @@ def check_fields(row, doctype, comps,data,row_index,user_type):
         check_mandatory_fields(row,message,doctype)
         check_duplicate_row(data,message,row,row_index)
         check_email(row[2],message)
-        if frappe.session.user != "Administrator" and user_type == "TAG Admin":
+        if frappe.session.user != "Administrator" and user_type != "TAG Admin":
             check_company(comps, row[3],message)
         check_status(row[4],message)
         check_dob(row[5],message)
@@ -1406,14 +1406,11 @@ def check_fields(row, doctype, comps,data,row_index,user_type):
         check_mandatory_fields(row, message,doctype)
         check_phone_number(row[1],message)
         check_email(row[2],message)
-        if frappe.session.user != "Administrator" and user_type != "TAG Admin":
-            check_company(comps, row[3],message)
         check_zip(row[6], message)
         check_state(row[7], message)
 
     return message
 def check_lead_for_contact(message,company):
-    print(message)
     if not frappe.db.sql("SELECT company_name FROM `tabLead` WHERE (lead_owner = '{0}' or owner='{1}') and company_name='{2}'".format(frappe.session.user, frappe.session.user, company), as_list=True):
         return message.append("Create a <b>Lead</b> to import <b>Contact</b>")
     

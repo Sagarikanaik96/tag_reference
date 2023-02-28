@@ -568,7 +568,7 @@ def create_task_and_notify_user(self):
         if self.holiday_list:
             dates = self.get_task_dates(activity, holiday_list)
             values["exp_start_date"] = dates[0]
-            values["exp_end_date":] = dates[1]
+            values["exp_end_date"] = dates[1]
 
         task = frappe.get_doc(values).insert(ignore_permissions=True)
         activity.db_set("task", task.name)
