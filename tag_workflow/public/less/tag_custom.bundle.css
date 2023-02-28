@@ -1911,6 +1911,34 @@ span.comment-count {
   > a {
   display: none;
 }
+[data-route="List/Job Site/List"] .layout-main-section .list-paging-area {
+  width: 100%;
+}
+[data-route="List/Job Site/List"] .layout-main-section .result header {
+  width: 100%;
+}
+[data-route="List/Job Site/List"]
+  .layout-main-section
+  .result
+  .list-row-container {
+  width: 32%;
+  float: left;
+  margin-right: 10px;
+}
+[data-route="List/Job Site/List"] .frappe-card .list-row-container .ellipsis {
+  display: contents;
+}
+[data-route="List/Job Site/List"] .frappe-card .list-row-container .list-row {
+  justify-content: start;
+  padding: 5px 0;
+}
+[data-route="List/Job Site/List"]
+  .frappe-card
+  .list-row-container
+  .like-action
+  .icon {
+  display: none;
+}
 
 /*------ Media query start ----*/
 @media (max-width: 1300px) {
@@ -1925,6 +1953,14 @@ span.comment-count {
 }
 
 @media (max-width: 768px) {
+  [data-route="List/Job Site/List"]
+    .layout-main-section
+    .result
+    .list-row-container {
+    width: 100% !important;
+    float: none;
+    margin-right: 0px;
+  }
   [data-page-route="List/Sales Invoice/List"]
     .frappe-card
     .frappe-list
@@ -2172,7 +2208,7 @@ span.comment-count {
   }
   .layout-main-section .frappe-list .result .list-row-head,
   .layout-main-section .frappe-list .result .list-row-container {
-    width: 1000px !important;
+    width: 1000px;
   }
   .list-row .select-like {
     padding: 15px 7px 15px 15px;

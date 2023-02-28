@@ -12,6 +12,9 @@
 }
 
 @media (max-width: 768px) {
+  [data-route="List/Job Site/List"] .layout-main-section .result header {
+    width: auto !important;
+  }
   .company-carousel ul li {
     padding: 0 5px 0 20px;
   }
@@ -148,7 +151,7 @@
   }
   .layout-main-section .frappe-list .result .list-row-head,
   .layout-main-section .frappe-list .result .list-row-container {
-    width: 1000px !important;
+    width: 1000px;
   }
   .list-row .select-like {
     padding: 15px 7px 15px 15px;
@@ -160,7 +163,7 @@
 
   .list-row-head .level-right,
   .list-row .level-right {
-    flex: 0.2;
+    flex: 0.4;
   }
   .form-grid .grid-heading-row .data-row .sortable-handle,
   .form-grid .grid-body .data-row .sortable-handle {
