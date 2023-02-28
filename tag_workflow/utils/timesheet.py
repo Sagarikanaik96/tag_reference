@@ -74,7 +74,7 @@ def get_timesheet_data(job_order, user, company_type,date,timesheets_to_update=N
             res_sql = """ select DISTINCT employee, employee_name from `tabReplaced Employee` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") """.format(job_order)
             rep_data = frappe.db.sql(res_sql, as_dict=1)
             rep_result = [{"employee": d['employee'], "employee_name": d["employee_name"], "enter_time": "", "exit_time": "", "total_hours": 0.00, "company": frappe.db.get_value("Employee", d['employee'], "company"), "status": "Replaced","timesheet_name":"","break_from":"","break_to":"","billing_amount":0.00,"tip":0.00,"overtime_hours":0.00,"overtime_rate":0.00} for d in rep_data]
-            removed_employees=""" select DISTINCT employee_id, employee_name from `tabRemoved Employee List` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") and order_status='Ongoing'""".format(job_order)
+            removed_employees=""" select DISTINCT employee_id, employee_name from `tabRemoved Employee List` where parent in(select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved") and order_status='Ongoing' and employee_id not in (select employee from `tabReplaced Employee` where parent in (select name from `tabAssign Employee` where job_order = '{0}' and tag_status = "Approved"))""".format(job_order)
             removed_emp=frappe.db.sql(removed_employees,as_dict=1)
             for d in removed_emp:
                 print(d['employee_id'],d['employee_name'])

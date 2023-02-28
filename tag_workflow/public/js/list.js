@@ -4,31 +4,81 @@ frappe.provide("views");
 /*------------------preparing data---------------*/
 frappe.views.BaseList.prototype.prepare_data = function (r) {
     let data = r.message || {};
-
-    if (data && this.doctype == "Job Order" && frappe.boot.tag.tag_user_info.company_type == "Staffing") {
-        this.order_length = data.order_length;
-        if ([5, 10, 25, 50, 100].includes(parseInt(cur_list.radius))) {
-            document.querySelector(`.btn-loc-rad[data-value="${cur_list.radius}"]`).classList.add('active');
-            localStorage.getItem(frappe.session.user + 'location') == 1 ? $('.btn-location').addClass('active') : $('.btn-location').removeClass('active');
+    // extract user_info for assignments
+    Object.assign(frappe.boot.user_info, data.user_info);
+    delete data.user_info;
+    if (data){
+        let me = this;
+        if(this.doctype == "Job Order" && frappe.boot.tag.tag_user_info.company_type == "Staffing"){
+            this.order_length = data.order_length;
+            this.job_order_data(me, data);
+        }else if(this.doctype == "Item"){
+            this.page_length = 500;
+            this.job_title_data(me, r);
+        }else{
+            data = !Array.isArray(data) ? frappe.utils.dict(data.keys, data.values) : data;
+            if (this.start === 0) {
+                this.data = data;
+            } else {
+                this.data = this.data.concat(data);
+            }
         }
-
-
-
+        this.data = this.data.uniqBy((d) => d.name);
     }
+}
 
+frappe.views.BaseList.prototype.job_order_data=(me,data)=>{
+    if ([5, 10, 25, 50, 100].includes(parseInt(cur_list.radius))) {
+        document.querySelector(`.btn-loc-rad[data-value="${cur_list.radius}"]`).classList.add('active');
+        localStorage.getItem(frappe.session.user + 'location') == 1 ? $('.btn-location').addClass('active') : $('.btn-location').removeClass('active');
+    }
     data = !Array.isArray(data) ? frappe.utils.dict(data.keys, data.values) : data;
-
-    if (this.start === 0) {
-        this.data = data;
+    if (me.start === 0) {
+        me.data = data;
     } else {
-        if (this.radius === "All" && this.len === 0) {
-            this.data = this.data.concat(data);
+        if (me.radius === "All" && me.len === 0) {
+            me.data = me.data.concat(data);
         } else {
-            this.data = data;
-            this.len = this.start;
+            me.data = data;
+            me.len = me.start;
         }
     }
+}
 
+frappe.views.BaseList.prototype.job_title_data=(me,r)=>{
+    let valuedata= [];
+    let unique = [];
+    for(let value of r.message.values){
+        value[15] = value[15].split("-")[0];
+        valuedata.push(value);
+    }
+    let data_dict = {keys:r.message.keys,values:valuedata};
+    let data = data_dict || {};
+    data = !Array.isArray(data) ?
+        frappe.utils.dict(data.keys, data.values) :
+        data;
+    if (me.start === 0) {
+        me.data = data;
+    } else {
+        me.data = me.data.concat(data);
+    }
+    if(frappe.flags.company=='True'){
+        me.data = data;
+    }
+    if(frappe.flags.tag_list=='True'){
+        me.data = me.data.filter((d) => !d.company);
+    }
+    if ((frappe.flags.my_list).length > 0) {
+        frappe.flags.my_list = me.data;
+        frappe.flags.my_list.forEach(element => {
+            if (!unique.includes(element['company'])) {
+                if(element['company']){
+                    unique.push(element['company']);
+                }
+            }
+        });
+        me.data = me.data.filter((d) => unique.includes(d.company));
+    }
 }
 
 
