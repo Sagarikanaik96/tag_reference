@@ -348,12 +348,13 @@ class Importer:
         try:
             print(docs,"docs"*10,frappe.has_permission(doctype="Company", ptype="read", doc=docs.company),frappe.db.exists("Company", docs.company))
             if frappe.has_permission(doctype="Company", ptype="read", doc=docs.company) and frappe.db.exists("Company", docs.company):
+                user_type = frappe.db.get_value("User",frappe.session.user,"role_profile_name")
                 if (docs.first_name and docs.email_address and docs.owner_company):
-                    if not frappe.db.sql("SELECT company_name FROM `tabLead` WHERE (lead_owner = '{0}' or owner='{1}') and company_name='{2}'".format(frappe.session.user, frappe.session.user, docs.owner_company), as_list=True):
+                    if frappe.session.user !="Administrator" and user_type != "Tag Admin" and not frappe.db.sql("SELECT company_name FROM `tabLead` WHERE (lead_owner = '{0}' or owner='{1}') and company_name='{2}'".format(frappe.session.user, frappe.session.user, docs.owner_company), as_list=True):
                         return self.name, "Failed"
                     self.name = "HR-CONTACT-" + str(self.con_series)
                     docs.state = update_doc_state(docs.state)
-                    self.sql += str(tuple([self.name, docs.first_name, docs.phone_number, docs.email_address,docs.email_address, docs.owner_company , (docs.company or ""), (docs.contact_address or ""), (docs.city or ""), (docs.zip or ""),(docs.state or ""), (docs.suite_or_apartment_no or "")])) + ","
+                    self.sql += create_sql(self.name,docs)
                     print(self.sql)
                     self.con_series += 1
                     time.sleep(0.1)
@@ -1356,10 +1357,10 @@ def check_return(row_no, row, event,doctype):
     
 def get_row_error(row,doctype, comps, event,data,row_no,user_type):
     if event == 'insert':
-        row_message = check_fields(row, doctype, comps, data,row_no,user_type)
+        row_message = check_fields(row, doctype, comps, data,row_no,user_type,event)
         return row_message
     else:
-        row_message = check_fields(row[1:], doctype, comps,data,row_no,user_type)
+        row_message = check_fields(row[1:], doctype, comps,data,row_no,user_type,event)
         return row_message
 def get_content(file):
     if frappe.db.exists("File", {"file_url": file}):
@@ -1385,12 +1386,14 @@ def check_columns(row, doctype):
         return False
     return True
 
-def check_fields(row, doctype, comps,data,row_index,user_type):
+def check_fields(row, doctype, comps,data,row_index,user_type,event):
     message=[]
     if doctype == "Employee":
         check_mandatory_fields(row,message,doctype)
-        check_duplicate_row(data,message,row,row_index)
+        check_duplicate_row(data,message,row,row_index,event)
         check_email(row[2],message)
+        if event == "insert":
+            check_db_exist(row,message,"Employee")
         if frappe.session.user != "Administrator" and user_type != "TAG Admin":
             check_company(comps, row[3],message)
         check_status(row[4],message)
@@ -1402,29 +1405,70 @@ def check_fields(row, doctype, comps,data,row_index,user_type):
         check_state(row[13], message)
         check_zip(row[14], message)
     elif doctype == "Contact":
-        check_lead_for_contact(message,row[3])
+        check_lead_for_contact(message,row[3],user_type)
         check_mandatory_fields(row, message,doctype)
         check_phone_number(row[1],message)
         check_email(row[2],message)
+        check_db_exist(row[2],message,"Contact")
         check_zip(row[6], message)
         check_state(row[7], message)
 
     return message
-def check_lead_for_contact(message,company):
-    if not frappe.db.sql("SELECT company_name FROM `tabLead` WHERE (lead_owner = '{0}' or owner='{1}') and company_name='{2}'".format(frappe.session.user, frappe.session.user, company), as_list=True):
+def check_lead_for_contact(message,company,user_type):
+    print(frappe.session.user,user_type)
+    print(user_type != "Tag Admin")
+    if frappe.session.user != "Administrator" and user_type != "TAG Admin" and not frappe.db.sql("SELECT company_name FROM `tabLead` WHERE (lead_owner = '{0}' or owner='{1}') and company_name='{2}'".format(frappe.session.user, frappe.session.user, company), as_list=True):
+        print("hello")
         return message.append("Create a <b>Lead</b> to import <b>Contact</b>")
-    
-def check_duplicate_row(data,message,row,row_index):
+  
+def check_db_exist(email,message, doctype):
+    if doctype == "Employee" and frappe.db.exists("Employee",{"email":email}):
+        message.append("Employee with this Email Already exist")
+    elif doctype == "Contact" and frappe.db.exists("Contact",{"email_id":email}):
+        message.append("Contact with this Email Already exist")
+          
+def check_duplicate_row(data,message,row,row_index,event):
     duplicate_row= []
+    duplicate_email =[]
+    duplicate_ssn =[]
     for row_no, row_val in enumerate(data):
-        if(row_no ==0 or row_no == row_index):
+        if row_no ==0 or row_no == row_index :
             continue
-        if(row[0]==row_val[0] and row[1] == row_val[1] and row[2]==row_val[2] and row[5]==row_val[5] and  row[8]==row_val[8]):
-            duplicate_row.append(str(row_no +1))
+        if row_no ==1:
+            check = check_example_row(event,row_val)
+            if check:
+                continue
+        duplicate_records(row,row_val,duplicate_row,duplicate_email,duplicate_ssn,row_no)  
     if duplicate_row:
         error_rows = ', '.join(duplicate_row)
         msg = "Duplicate row detected " + error_rows
         message.append(msg)
+    check_duplicate_email_and_ssn(message,duplicate_email,duplicate_ssn)
+
+def check_example_row(event,row):
+    if (event=='insert' and  row[0] == "John" and row[1]=="Doe" and row[2]==JDO_Email and row[3]==template_sample_company) or row_no == 1 and event=='update' and row[1] == "John" and row[2]=="Doe" and row[3]==JDO_Email and row[4]==template_sample_company:
+        return  1
+    
+def duplicate_records(row,row_val,duplicate_row,duplicate_email,duplicate_ssn,row_no):
+    if row[0]==row_val[0] and row[1] == row_val[1] and row[2]==row_val[2] and row[5]==row_val[5] and  row[8]==row_val[8]:
+        duplicate_row.append(str(row_no +1))
+    if row[2]==row_val[2]:
+        duplicate_email.append(str(row_no +1))
+    if row[8] and row[8] == row_val[8]:
+        duplicate_ssn.append(str(row_no + 1))
+
+def check_duplicate_email_and_ssn(message,duplicate_email,duplicate_ssn):
+    if duplicate_email:
+        duplicate_email_rows = ', '.join(duplicate_email)
+        msg = "Duplicate Email detected " + duplicate_email_rows
+        message.append(msg)
+    if duplicate_ssn:
+        duplicate_ssn_rows = ', '.join(duplicate_ssn)
+        msg = "Duplicate SSN detected " + duplicate_ssn_rows
+        message.append(msg)
+        
+        
+    
 def check_company(user_comp_list, company_in_row, message):
     print(company_in_row)
     if company_in_row and company_in_row not in user_comp_list: message.append("Invalid Entry for Company")
@@ -1498,7 +1542,9 @@ def check_mandatory_fields(row, message,doctype):
 
     if check_is_valid:
         message.append("Missing Required Fields: "+", ".join(fields_missing))
-
+def create_sql(name,docs):
+        return str(tuple([name, docs.first_name, docs.phone_number, docs.email_address,docs.email_address, docs.owner_company , (docs.company or ""), (docs.contact_address or ""), (docs.city or ""), (docs.zip or ""),(docs.state or ""), (docs.suite_or_apartment_no or "")])) + ","
+    
 def read_content(content, extension):
     error_title = _(Template_error)
     if extension not in ("csv", "xlsx", "xls"):
