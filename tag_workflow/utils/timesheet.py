@@ -534,7 +534,7 @@ def hiring_company_rating(hiring_company=None,staffing_company=None,ratings=None
             sql = ''' select rating_hiring from `tabHiring Company Review` where hiring_company = '{}' '''.format(hiring_company)
             average_rate = frappe.db.sql(sql, as_list=1)
             if average_rate[0][0]!=None:
-                rating=[float(i[0]*5) for i in average_rate]
+                rating=[float(i[0]) for i in average_rate]
                 doc=frappe.get_doc('Company',hiring_company)
                 avg_rating=round(sum(rating)/len(rating),1)
                 doc.average_rating=str(avg_rating)

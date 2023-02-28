@@ -454,18 +454,18 @@ function set_break_time_values(frm, i, item, event){
 			frappe.model.set_value(item[i].doctype, item[i].name, "break_from", frm.doc.break_from_time);
 			if(!item[i].break_to){
 				frappe.model.set_value(item[i].doctype, item[i].name, "break_to", frm.doc.break_to_time);
-				window.draft_break_end_time=frm.doc.break_to;
+				window.draft_break_end_time=frm.doc.break_to_time;
 			}
-			window.draft_break_start_time=frm.doc.break_from;
+			window.draft_break_start_time=frm.doc.break_from_time;
 		}
 	}else{
 		if(frm.doc.break_to_time !== window.draft_break_end_time){
 			frappe.model.set_value(item[i].doctype, item[i].name, "break_to", frm.doc.break_to_time);
 			if(!item[i].break_from){
 				frappe.model.set_value(item[i].doctype, item[i].name, "break_from", frm.doc.break_from_time);
-				window.draft_break_start_time=frm.doc.break_from;
+				window.draft_break_start_time=frm.doc.break_from_time;
 			}
-			window.draft_break_end_time=frm.doc.break_to;
+			window.draft_break_end_time=frm.doc.break_to_time;
 		}
 	}
 }

@@ -62,7 +62,10 @@ frappe.ui.form.on("Company", {
 		}
 
 		if (frm.doc.organization_type == 'Staffing') {
+			$("#form-tabs1 .nav-item").css("padding", "0 8px");
 			frm.set_df_property('job_title', 'hidden', 1);
+		}else{
+			$("#form-tabs1 .nav-item").css("padding", "0 13px");
 		}
 		set_map(frm);
 		hide_fields(frm);
