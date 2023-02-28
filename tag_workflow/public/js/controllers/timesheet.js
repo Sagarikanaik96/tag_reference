@@ -671,7 +671,7 @@ function update_hourly_data(r){
 function hide_action_button(frm){
 	if(frm.doc.__islocal!=1 && frappe.boot.tag.tag_user_info.company_type!='Staffing' && frm.doc.workflow_state=='Open' && frappe.boot.tag.tag_user_info.company_type!='TAG'){
 		$('.actions-btn-group').hide();
-		frm.add_custom_button(__('Approve Timesheet'), function() {
+		frm.add_custom_button(__('Send for Approval'), function() {
 			approve_timesheet(frm);
 		}).addClass("btn-primary");
 	}

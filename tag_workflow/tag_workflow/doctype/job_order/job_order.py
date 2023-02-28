@@ -42,8 +42,7 @@ class JobOrder(Document):
                 comp = comp.strip()
                 self.check_claims(comp)
                 worker_filled += self.check_assign_doc(comp, worker_filled)
-
-            frappe.db.set_value(ORD, self.name, "worker_filled", worker_filled)
+            frappe.db.set_value(ORD, self.name, "worker_filled", worker_filled if self.resumes_required==0 else 0)
             frappe.db.commit()
             self.remaining_companies(self.repeat_staff_company, self.repeat_from, self.name, self.company, self.select_job)
 
@@ -58,6 +57,8 @@ class JobOrder(Document):
             new_doc.job_order= self.name
             new_doc = self.check_employee_active(old_assign, new_doc)
             if(new_doc.employee_details):
+                for i in new_doc.employee_details:
+                    i.approved=0
                 meta = frappe.get_meta(ASN)
 
                 for field in meta.get_link_fields():
