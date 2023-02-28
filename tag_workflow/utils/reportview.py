@@ -76,6 +76,7 @@ def update_order_by(args):
                 return args
             else:
                 return args
+    return args
                 
 def staffing_data(data, radius, page_length,filter_loc,custom_address):
     try:
