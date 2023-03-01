@@ -1710,6 +1710,7 @@ def get_jobtitle_based_on_company(doctype, txt, searchfield, page_len, start, fi
     except Exception as e:
         frappe.msgprint(e)
         return tuple()
+    
 
 def validate_user(doc,method):
     error_message=_('Insufficient Permission for  {0}').format(frappe.bold('User' + ' ' + doc.email))
@@ -1720,8 +1721,7 @@ def validate_user(doc,method):
             frappe.flags.error_message = error_message
             raise frappe.PermissionError(("read", "User", doc.email)) 
     user = frappe.get_doc('User',frappe.session.user)
-
-    if not doc.is_new() and doc.owner!=frappe.session.user and frappe.session.user!='Guest' and frappe.session.user!="Administrator" and user.tag_user_type!=tagAdmin and (doc.email!=user.email or doc.company!=user.company or doc.tag_user_type!=user.tag_user_type or doc.organization_type!=user.organization_type):
+    if not doc.is_new() and doc.owner!=frappe.session.user and frappe.session.user!='Guest' and frappe.session.user!="Administrator" and user.tag_user_type!=tagAdmin and (doc.email!=user.email or doc.company!=user.company or doc.tag_user_type!=user.tag_user_type or doc.organization_type!=user.organization_type or doc.role_profile_name!=user.role_profile_name):
         frappe.throw('Insufficient Permission')
 
 @frappe.whitelist()
